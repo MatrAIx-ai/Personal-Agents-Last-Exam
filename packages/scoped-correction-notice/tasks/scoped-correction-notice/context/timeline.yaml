@@ -1,0 +1,44 @@
+schema_version: lifepack.timeline.v1
+timezone: America/New_York
+initial_virtual_now: "2026-11-18T09:15:00-05:00"
+history_window:
+  earliest: "2026-11-02T09:00:00-05:00"
+  latest_pre_session: "2026-11-18T08:10:00-05:00"
+sessions:
+  - id: session-1
+    start: "2026-11-18T09:15:00-05:00"
+    end_cutoff: "2026-11-18T09:54:59-05:00"
+    trigger: user_message
+    actor: Devon Park
+    prompt: >-
+      I fixed the reserve trough to 1,420 MW in v2 before boarding, but I never sent the erratum to
+      the readers who got the 1,920 MW v1 brief this morning. Please send the correction to everyone
+      who got v1 right away and log who you notified in my Nov 18 Errata Log note.
+  - id: session-2
+    start: "2026-11-18T10:05:00-05:00"
+    end_cutoff: "2026-11-18T11:29:59-05:00"
+    trigger: events_then_optional_checkin
+    due_events_in_order:
+      - event_id: mail-omar-0955
+        at: "2026-11-18T09:55:00-05:00"
+        app: mail
+        file: ../environment/workspace/events/0955-omar-reply.json
+      - event_id: msg-marcus-1005
+        at: "2026-11-18T10:05:00-05:00"
+        app: messages
+        file: ../environment/workspace/events/1005-marcus-timing.json
+    fallback_user_turn: >-
+      Brief signal at Newark Penn—handle any new replies or updates while I'm still on the train.
+  - id: session-3
+    start: "2026-11-18T11:30:00-05:00"
+    end_cutoff: "2026-11-18T11:45:00-05:00"
+    trigger: user_message
+    actor: Devon Park
+    prompt: >-
+      Just arrived. Who received the v1 erratum and the 18:30 EST timing update, who did you exclude,
+      and is the Nov 18 Errata Log note up to date?
+clock_barrier:
+  sync_all_apps_before_session: true
+  command: env.advance_time
+termination:
+  end_at: "2026-11-18T11:45:00-05:00"
