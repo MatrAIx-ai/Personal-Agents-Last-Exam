@@ -368,3 +368,51 @@ test('24-month evaluation dataset (eval-2025-2026.json) covers 2025-01-01 throug
   assert.equal(report.months_covered, 24);
   assert.equal(report.load_and_query_check.schema_valid, true);
 });
+
+test('historical fixture integrity invariants: eval reports never predate versions and deployments cite same-skill/version prior reports', () => {
+  const root = path.resolve(__dirname, '..');
+  const binding = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/binding.json'), 'utf8'));
+  const seedNames = ['minimal.json', 'seed-relaxed.json', 'eval-2025-2026.json', 'visual-blind-a.json', 'visual-blind-b.json'];
+
+  for (const name of seedNames) {
+    const data = JSON.parse(fs.readFileSync(path.join(root, 'fixtures', name), 'utf8'));
+    plugin.validateSeed({ binding }, data);
+
+    const versionByKey = new Map();
+    for (const s of data.skills) {
+      for (const v of s.versions) versionByKey.set(`${s.id}:${v.version_id}`, v);
+    }
+    const reportById = new Map();
+    for (const r of data.eval_reports) {
+      reportById.set(r.report_id, r);
+      const v = versionByKey.get(`${r.skill_id}:${r.version_id}`);
+      assert.ok(v, `${name}: report ${r.report_id} references unknown version`);
+      assert.ok(
+        Date.parse(r.ran_at) >= Date.parse(v.created_at),
+        `${name}: report ${r.report_id} ran_at (${r.ran_at}) < version created_at (${v.created_at})`
+      );
+    }
+    for (const dep of data.deployments) {
+      const target = versionByKey.get(`${dep.skill_id}:${dep.to_version_id}`);
+      assert.ok(target, `${name}: deployment ${dep.deployment_id} references unknown target version`);
+      assert.ok(Date.parse(dep.at) >= Date.parse(target.created_at), `${name}: deployment precedes target version`);
+      if (dep.eval_report_id) {
+        const rep = reportById.get(dep.eval_report_id);
+        assert.ok(rep, `${name}: deployment ${dep.deployment_id} references unknown report`);
+        assert.equal(rep.skill_id, dep.skill_id, `${name}: deployment ${dep.deployment_id} cites wrong skill report`);
+        assert.equal(rep.version_id, dep.to_version_id, `${name}: deployment ${dep.deployment_id} cites wrong version report`);
+        assert.ok(Date.parse(rep.ran_at) <= Date.parse(dep.at), `${name}: deployment ${dep.deployment_id} cites post-dated report`);
+      }
+    }
+  }
+
+  // Negative checks: validateSeed rejects report-before-version and cross-skill deployment citation
+  const baseEval = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/eval-2025-2026.json'), 'utf8'));
+  const badPreReport = structuredClone(baseEval);
+  badPreReport.eval_reports[0].ran_at = '2024-12-31T00:00:00-08:00';
+  assert.throws(() => plugin.validateSeed({ binding }, badPreReport), { code: 'invalid_seed' });
+
+  const badCrossDep = structuredClone(baseEval);
+  badCrossDep.deployments[0].eval_report_id = 'rep-monthly-2025-05'; // skill-expense-categorizer, not skill-inbox-triage
+  assert.throws(() => plugin.validateSeed({ binding }, badCrossDep), { code: 'invalid_seed' });
+});

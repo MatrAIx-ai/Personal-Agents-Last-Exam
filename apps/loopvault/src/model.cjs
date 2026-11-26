@@ -84,9 +84,16 @@ function validateSeed(ctx, data) {
       vIds.add(v.version_id);
     }
     if (!vIds.has(s.production_version_id)) fail('invalid_seed', `Invalid production_version_id on ${s.id}`);
+    const vMap = new Map(s.versions.map(v => [v.version_id, v]));
     for (const v of s.versions) {
-      if (v.parent_id !== null && !vIds.has(v.parent_id)) {
-        fail('invalid_seed', `Unknown parent_id ${v.parent_id} on ${s.id}`);
+      if (v.parent_id !== null) {
+        if (!vIds.has(v.parent_id)) {
+          fail('invalid_seed', `Unknown parent_id ${v.parent_id} on ${s.id}`);
+        }
+        const parent = vMap.get(v.parent_id);
+        if (Date.parse(v.created_at) < Date.parse(parent.created_at)) {
+          fail('invalid_seed', `Version ${s.id}:${v.version_id} created_at precedes parent ${v.parent_id}`);
+        }
       }
       // Verify acyclic lineage
       lineageChain(s, v.version_id);
@@ -98,12 +105,37 @@ function validateSeed(ctx, data) {
   if (p.min_holdout_pass_rate < 0 || p.min_holdout_pass_rate > 1) fail('invalid_seed', 'Invalid min_holdout_pass_rate');
   if (p.max_goodhart_gap < 0 || p.max_goodhart_gap > 1) fail('invalid_seed', 'Invalid max_goodhart_gap');
 
-  const repIds = new Set();
+  const repMap = new Map();
   for (const r of data.eval_reports) {
-    if (repIds.has(r.report_id)) fail('invalid_seed', 'Duplicate report_id: ' + r.report_id);
-    repIds.add(r.report_id);
+    if (repMap.has(r.report_id)) fail('invalid_seed', 'Duplicate report_id: ' + r.report_id);
+    repMap.set(r.report_id, r);
     const s = findSkill(data, r.skill_id);
-    findVersion(s, r.version_id);
+    const v = findVersion(s, r.version_id);
+    if (Date.parse(r.ran_at) < Date.parse(v.created_at)) {
+      fail('invalid_seed', `Eval report ${r.report_id} ran_at (${r.ran_at}) precedes ${r.skill_id}:${r.version_id} created_at (${v.created_at})`);
+    }
+  }
+
+  const depIds = new Set();
+  for (const dep of data.deployments || []) {
+    if (depIds.has(dep.deployment_id)) fail('invalid_seed', 'Duplicate deployment_id: ' + dep.deployment_id);
+    depIds.add(dep.deployment_id);
+    const s = findSkill(data, dep.skill_id);
+    findVersion(s, dep.from_version_id);
+    const target = findVersion(s, dep.to_version_id);
+    if (Date.parse(dep.at) < Date.parse(target.created_at)) {
+      fail('invalid_seed', `Deployment ${dep.deployment_id} timestamp precedes target version ${dep.skill_id}:${dep.to_version_id}`);
+    }
+    if (dep.eval_report_id !== null && dep.eval_report_id !== undefined) {
+      const rep = repMap.get(dep.eval_report_id);
+      if (!rep) fail('invalid_seed', `Deployment ${dep.deployment_id} cites unknown eval_report_id ${dep.eval_report_id}`);
+      if (rep.skill_id !== dep.skill_id || rep.version_id !== dep.to_version_id) {
+        fail('invalid_seed', `Deployment ${dep.deployment_id} (${dep.skill_id}:${dep.to_version_id}) cites mismatched eval report ${rep.report_id} (${rep.skill_id}:${rep.version_id})`);
+      }
+      if (Date.parse(rep.ran_at) > Date.parse(dep.at)) {
+        fail('invalid_seed', `Deployment ${dep.deployment_id} cites eval report ${rep.report_id} that ran after deployment`);
+      }
+    }
   }
 
   const alertIds = new Set();
