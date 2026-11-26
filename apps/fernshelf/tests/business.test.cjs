@@ -12,3 +12,4 @@ require('./fixtures.test.cjs');
 require('./log-shapes.test.cjs');
 require('./schema-inline.test.cjs');
 require('./coverage.test.cjs');
+require('./evidence.test.cjs');

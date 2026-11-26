@@ -83,6 +83,7 @@ npm run test:browser         # clicks in Chromium (tests/web-browser.cjs); needs
 npm run coverage:check       # evidence/coverage/report.* match the fixture (also part of npm test)
 npm run coverage:query       # the counted records read back through the App's tools on the public runtime
 npm run evidence:dependencies # Mail and items.read demonstrations with transcripts (evidence/dependencies/)
+npm run evidence:dependencies:check # regenerate both transcripts twice and compare with the committed files
 npm run evidence:capture     # workflow screenshot sequences in Chromium (evidence/gui/); needs the repository's Playwright
 ```
 
@@ -133,7 +134,7 @@ The wire message ID is `fernshelf-<notification ID>-<digest>`, where the digest 
 | `schemas/` | Generated seed (definitions inlined), events and state schemas; copies of the shared platform schemas and of Mail's wire schema |
 | `scripts/` | Contract and fixture builders, consistency checks, real-MCP and Mail-flow scripts; `coverage-report.cjs`, `dependency-evidence.cjs` and `capture-workflows.cjs` for the delivery evidence |
 | `evidence/` | Delivery evidence index (`README.md`), workflow screenshot sequences (`gui/`), dependency transcripts (`dependencies/`) and the dataset coverage report (`coverage/`); review material, not runtime assets |
-| `tests/` | Business tests (`business.test.cjs` loads them all, including `coverage.test.cjs`), App-only harness, verifier inputs (`cases.json`); `web-smoke.cjs` and `web-browser.cjs` for the page |
+| `tests/` | Business tests (`business.test.cjs` loads them all, including `coverage.test.cjs` and `evidence.test.cjs`, which check the committed delivery evidence), App-only harness, verifier inputs (`cases.json`); `web-smoke.cjs` and `web-browser.cjs` for the page |
 | `gui/` | `index.html`, `src/app.js` (the page's controller), `src/view.js` (reviewer renderer), `README.md` |
 | `web.registry.json` | One-App registry used to start the shared Web Host for this package |
 | `examples/` | `run.cjs` walkthrough and `scenario.json` (Dana's removal request) |

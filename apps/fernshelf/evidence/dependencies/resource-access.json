@@ -1,7 +1,7 @@
 {
   "schema": "fernshelf.dependency.resource-access.v1",
   "dependency": "Resource access registration for items.read (platform)",
-  "node": "v22.23.1",
+  "reproducible": "Byte for byte, on Node 18 and 22: the wall-clock times the Messaging router and Mail record (received_at, committed_at, processed_at, in UTC) are written as \"<wall-clock>\" and the Node version is not recorded; everything else (virtual-clock times, versions, request, event and record IDs, hashes, receipt contents) is exact. `node scripts/dependency-evidence.cjs --check` regenerates the transcript twice and compares both runs with this file.",
   "contract": "fernshelf.items.read returns the file object (filename, mime_type, base64, sha256, media) read by Core ctx.assets.read under the parent item; Core allows it only through runtime/registrations/fernshelf.json, which maps object type item to the read tool fernshelf.items.get, and applies the task policy on that tool.",
   "not_applicable": {
     "retry_duplicate": "reads change nothing, so a repeat is shown to return the same bytes",

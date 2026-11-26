@@ -10,7 +10,7 @@ Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4
 
 | Evidence | Command | Result |
 | --- | --- | --- |
-| App-only business tests | `cd apps/fernshelf && npm test` | 45 tests, 45 passed, 0 failed (about 10 s on each Node version at load average 2.5–4); the 45th keeps `evidence/coverage/report.*` equal to the fixture |
+| App-only business tests | `cd apps/fernshelf && npm test` | 46 tests, 46 passed, 0 failed (about 10 s on each Node version at load average 2.5–4); the last two keep `evidence/coverage/report.*` equal to the fixture and check that the committed dependency transcripts and sequence files hold no wall-clock time, Node version, file size or local path |
 | Walkthrough | `npm run example` | Iris joins an album made in the run through `album_match` and saves a photo through its link. Dana's request is honoured for Reunion 2026 only (Omar's photo `not_removable`). The result lists Kofi's earlier view and save. A later re-share returns one `removal_honored` warning |
 | Generated contracts | `npm run contracts:check` | `tools.json` and the seed, events and state schemas match `scripts/build-contracts.cjs`; the published seed schema has its definitions inlined (no `$ref`), and `tests/schema-inline.test.cjs` shows it means the same as the definitions form |
 | Reference fixture | `node scripts/build-reference-fixture.cjs --check` | `fixtures/reference.json`, `assets/*.png`, the catalogue and the dataset counts and sources match the builder, byte for byte on both Node versions |
@@ -27,11 +27,11 @@ Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Web page in a browser | `cd apps/fernshelf && npm run test:browser -- --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 145 checks passed, no JavaScript errors, 21 screenshots (see "Web page" below); 3–4 minutes at load average 1–3 |
 | Repository Web Host tests | `npm run test:web` | 4/4 passed |
 | Dataset coverage | `npm run coverage:check`; `npm run coverage:query` | the committed report matches the fixture, byte-identical on both Node versions (2,399 records, 252 distinct dates, 23 of 24 months); every counted record family is read back through the App's tools on the public runtime (11 of 11) |
-| Dependency demonstrations | `npm run evidence:dependencies` | 17 Mail checks and 9 resource-access checks passed; transcripts in `evidence/dependencies/` |
-| Workflow screenshot sequences | `npm run evidence:capture` (same needs as the browser test) | 57 frames in `evidence/gui/`, each step confirmed through MCP, no JavaScript errors, no raw ID or Agent wording in any frame |
+| Dependency demonstrations | `npm run evidence:dependencies`; `npm run evidence:dependencies:check` | 17 Mail checks and 9 resource-access checks passed; transcripts in `evidence/dependencies/`. The check regenerates both transcripts twice and found both runs byte-identical to each other and to the committed files on each Node version; wall-clock receipt times are written as `<wall-clock>` |
+| Workflow screenshot sequences | `npm run evidence:capture` (same needs as the browser test) | 57 frames in `evidence/gui/`, each step confirmed through MCP, no JavaScript errors, no raw ID or Agent wording in any frame; a second run, on Node 18, wrote `sequences.json` and `SEQUENCES.md` byte for byte |
 | Node 18 and Node 22 | every command in this table on v18.20.8 and on v22.23.1 | all passed on both (counts as above on each) |
-| Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 45/45; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
-| Fresh clone | `git clone` of the branch into an empty directory, then `npm test` in the package and `npm run app:verify -- --app apps/fernshelf` at the root (Node 22) | 45/45; verifier passed (44 checks) with the same package digest as the working checkout |
+| Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 46/46; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
+| Fresh clone | `git clone` of the branch into an empty directory, then `npm test` in the package and `npm run app:verify -- --app apps/fernshelf` at the root (Node 22) | 46/46; verifier passed (44 checks) with the same package digest as the working checkout |
 
 ## Web page
 
@@ -154,7 +154,7 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies | met | loader and verifier; `contracts:check`; contribution declarations derived and checked |
 | 1.3 Reproduce startup and tests from a clean public checkout | met | a fresh clone of the branch, an isolated package copy and the working checkout, on Node 18 and 22 (the fresh clone on 22) |
 | 1.4 Receiving Apps at pinned versions; contracts reused | met | Mail is optional; its 1.3.0 wire schema is reused byte for byte; no Mail state or code is copied |
-| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 45 tests |
+| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 46 tests |
 | 2.2 Create/read/update/cancel flows and history; failures preserve data | met | Harness: each refusal is decided before any change. Real Core: refusals, a rejected event and a batch |
 | 2.3 Data and media references, bytes and provenance | met (automated); human review pending | catalogue hashes, sizes, PNG dimensions, no duplicates; `contribution/dataset.json` names the hand-written, procedural (seed 20261122), history (seed 20250104) and drawn sources. Whether the stand-ins are adequate is a human call |
 | 2.4 Optional diagnostics | met | `package.test.cjs` |

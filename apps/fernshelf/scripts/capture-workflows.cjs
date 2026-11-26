@@ -5,7 +5,9 @@
 // After each step the result is confirmed through a separate Agent MCP connection to the same run
 // (record and version), and the sequence ends with a reload. Writes evidence/gui/*.png,
 // evidence/gui/sequences.json and evidence/gui/SEQUENCES.md (or --out DIR). Needs the repository's
-// pinned Playwright, like tests/web-browser.cjs; not part of `npm test`.
+// pinned Playwright, like tests/web-browser.cjs; not part of `npm test`. sequences.json and SEQUENCES.md
+// hold no wall-clock time, Node version or file size, so a re-run writes them byte for byte; the PNG
+// frames show the same content but their pixels can differ between runs.
 //   node scripts/capture-workflows.cjs [--runtime DIR] [--out DIR]
 const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), os = require('node:os'), zlib = require('node:zlib');
 const locate = require('./locate.cjs');
@@ -67,10 +69,14 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
   const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fernshelf-capture-'));
   const browser = await chromium.launch({headless: true});
   const frames = [], hosts = [], clients = [], errors = [];
-  const report = {schema: 'fernshelf.gui-sequences.v1', captured_at: new Date().toISOString(), node: process.version, browser: 'Chromium ' + browser.version(),
+  // Most items of the reference library are metadata only; the frames say so (see markdown()).
+  const seed = JSON.parse(fs.readFileSync(path.join(pkg, 'fixtures/reference.json'), 'utf8'));
+  const report = {schema: 'fernshelf.gui-sequences.v1', browser: 'Chromium ' + browser.version(),
     host: 'runtime/web/server.cjs (public runtime ' + JSON.parse(fs.readFileSync(path.join(runtime, 'package.json'), 'utf8')).version + ')',
     run: 'capture', profile: 'sandbox', account: 'fernshelf-maya (Maya Fenwick, synthetic)', clock: JSON.parse(fs.readFileSync(path.join(pkg, 'fixtures/clock.json'), 'utf8')).initial_time,
-    viewports: {desktop: DESKTOP, phone: PHONE}, time_zone: 'America/Los_Angeles', frames};
+    viewports: {desktop: DESKTOP, phone: PHONE}, time_zone: 'America/Los_Angeles',
+    library: {items: seed.items.length, items_with_image_file: seed.items.filter(i => i.file).length, active_items: seed.items.filter(i => i.state === 'active').length,
+      active_items_with_image_file: seed.items.filter(i => i.state === 'active' && i.file).length}, frames};
   try {
     const host = await start({app: 'fernshelf', registry, run: 'capture', stateDir, profile: 'sandbox'}); hosts.push(host);
     const open = async (role, run = 'capture') => { const c = new Client('fernshelf', role, run, stateDir, 'fernshelf-capture-check', {registry}); await c.initialize(); clients.push(c); return c; };
@@ -94,31 +100,43 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     const select = async (id, p = page) => { await p.locator('#records [data-record-id="' + id + '"]').first().click(); await p.locator('.detail[data-selected-id="' + id + '"]').waitFor(); await idle(p); };
     const detailButton = name => page.locator('.detail').getByRole('button', {name, exact: true});
     const RAW = /\b(?:it|al|ln|rr|ct|vw|ntf|pl|st|img)-[a-z]*\d[\w-]*|\bundefined\b|\bnull\b|\{"|\b[a-z]+_[a-z_]+\b/;
+    // Thumbnails load lazily, two at a time, once their tile is in view: wait until no tile in view is
+    // still waiting for its image (a tile whose item has a readable file and is neither shown nor refused).
+    const pendingImages = p => p.evaluate(() => [...document.querySelectorAll('.fs-media')].filter(b => typeof b.loadImage === 'function' && !b.classList.contains('loaded') && !b.dataset.refused &&
+      (r => r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth)(b.getBoundingClientRect())).length);
     const settle = async p => { await p.waitForTimeout(350);
-      for (let i = 0; i < 60 && /Loading image…|Checking who can see it…/.test(await p.evaluate(() => document.body.innerText)); i++) await p.waitForTimeout(200); await p.evaluate(() => Promise.all([...document.images].filter(i => !i.complete).map(i => new Promise(r => { i.onload = i.onerror = r; })))); };
+      for (let i = 0; i < 60 && /Loading image…|Checking who can see it…/.test(await p.evaluate(() => document.body.innerText)); i++) await p.waitForTimeout(200);
+      for (let i = 0; i < 100 && await pendingImages(p); i++) await p.waitForTimeout(200);
+      await p.evaluate(() => Promise.all([...document.images].filter(i => !i.complete).map(i => new Promise(r => { i.onload = i.onerror = r; })))); };
     // One frame: the screenshot, what was done, what was expected and seen, the MCP read that confirms it.
     // A desktop frame is the whole viewport or, to keep files small, the part of it the step is about:
-    // the open dialog, the photo panel or the list column. Phone frames are always the whole viewport.
+    // the open dialog, the photo panel, the list column, or (union: {label, selectors}) the smallest box
+    // around the listed elements. Phone frames are always the whole viewport.
     const REGIONS = {dialog: 'dialog[open]', panel: '.detail', list: 'section.collection'};
     const frame = async (workflow, slug, meta, p = page) => {
       const focus = meta.focus;
       let region = p === page ? (meta.region || 'viewport') : 'viewport';
       delete meta.region; delete meta.focus;
-      // Start from the top of the page, or bring the element the step is about into view and frame it.
-      if (focus) { await p.locator(focus).first().scrollIntoViewIfNeeded(); region = 'focus'; } else await p.evaluate(() => window.scrollTo(0, 0));
+      // Start from the top of the page, or bring the element the step is about into view and frame it,
+      // or keep the page where the step left it (keepScroll: the page itself scrolled to the panel).
+      const keepScroll = meta.keepScroll, union = meta.union; delete meta.keepScroll; delete meta.union;
+      if (focus) { await p.locator(focus).first().scrollIntoViewIfNeeded(); region = 'focus'; } else if (!keepScroll) await p.evaluate(() => window.scrollTo(0, 0));
       await settle(p);
       const text = await p.evaluate(() => document.body.innerText), raw = RAW.exec(text);
       assert.ok(!raw, slug + ': visible text has a raw ID, null or Agent wording: ' + (raw && text.slice(Math.max(0, raw.index - 60), raw.index + 60)));
       const n = frames.filter(f => f.workflow === workflow).length + 1, file = workflow.toLowerCase() + '-' + String(n).padStart(2, '0') + '-' + slug + '.png';
       let clip;
+      if (union) region = 'union';
       if (region !== 'viewport') {
-        const box = await p.locator(focus || REGIONS[region]).first().boundingBox(), vp = p.viewportSize();
+        const boxes = await Promise.all((union ? union.selectors : [focus || REGIONS[region]]).map(sel => p.locator(sel).first().boundingBox())), vp = p.viewportSize();
+        const box = {x: Math.min(...boxes.map(b => b.x)), y: Math.min(...boxes.map(b => b.y))};
+        box.width = Math.max(...boxes.map(b => b.x + b.width)) - box.x; box.height = Math.max(...boxes.map(b => b.y + b.height)) - box.y;
         const x = Math.max(0, Math.floor(box.x) - 8), y = Math.max(0, Math.floor(box.y) - 8);
         clip = {x, y, width: Math.min(vp.width, Math.ceil(box.x + box.width) + 8) - x, height: Math.min(vp.height, Math.ceil(box.y + box.height) + 8) - y};
       }
       const png = optimisePng(await p.screenshot(clip ? {clip} : {}));
       fs.writeFileSync(path.join(out, file), png);
-      frames.push({workflow, n, file, bytes: png.length, viewport: p === page ? 'desktop' : 'phone', region: focus ? 'element' : region, ...meta});
+      frames.push({workflow, n, file, viewport: p === page ? 'desktop' : 'phone', region: focus ? 'element' : union ? union.label : region, ...meta});
       console.log('frame ' + file + ' (' + png.length + ' bytes)');
     };
 
@@ -127,8 +145,13 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
 
     // W1: library, search, a photo with who can see it, storage (read-only).
     let r = await mcp.call('fernshelf.items.search', {archived: false});
-    await frame('W1', 'photos-grid', {stage: 'start', action: 'Open the access link printed by the Host.', expected: 'Photos grid by month, newest first, with the drawn stand-in images.',
-      observed: (await page.locator('#records .fs-tile').count()) + ' tiles shown; page title ' + JSON.stringify(await page.title()) + '.', mcp: {call: 'fernshelf.items.search {"archived":false}', result: r.total + ' rows (stacks collapsed; archived items are under Archive)', version: ver(r)},
+    // The page opens on the newest item, which may have no image file or caption. The first frame shows
+    // the newest photo that has both: the first such row of the same newest-first search.
+    const featured = r.rows.find(x => x.kind === 'photo' && x.has_file && x.caption);
+    await select(featured.id);
+    await frame('W1', 'photos-grid', {union: {label: 'grid and panel', selectors: ['section.collection h2', '.detail .fs-media', '.detail h2 + *']}, stage: 'start', action: 'Open the access link printed by the Host and click the newest photo that has an image file and a caption.', expected: 'Photos grid by month, newest first, with the drawn stand-in images and placeholder tiles; the photo panel shows the image and its caption.',
+      observed: (await page.locator('#records .fs-tile').count()) + ' tiles shown; page title ' + JSON.stringify(await page.title()) + '; panel ' + JSON.stringify(await page.locator('.detail h2').innerText()) + ' with ' + (await page.locator('.detail .fs-media.loaded img').count() ? 'its image' : 'no image') + '.',
+      mcp: {call: 'fernshelf.items.search {"archived":false}', result: r.total + ' rows (stacks collapsed; archived items are under Archive); the first row with an image file and a caption is ' + JSON.stringify(featured.caption), version: ver(r)},
       test: 'web-browser.cjs "Page opens from the access link and shows the photo grid with authorised thumbnails"'});
     await page.locator('.toolbar input[type=search]').fill('hall');
     await page.waitForTimeout(700); await idle(); await until('filtered', async () => (await page.locator('#records .fs-tile').count()) < 20);
@@ -276,15 +299,20 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     r = await until('role', async () => { const x = await album('al-reunion-2026'); return x.album.members.find(m => m.person_id === 'person-kofi').role === 'contributor' && x; }); await idle();
     await frame('W3', 'role-changed', {region: 'list', stage: 'outcome', action: 'Click Save.', expected: 'Kofi is listed as a contributor.', observed: JSON.stringify((await page.locator('.fs-person', {hasText: 'Kofi Darrow'}).first().innerText()).split('\n').join(' / ')) + '.',
       mcp: {call: 'fernshelf.albums.get {"id":"al-reunion-2026"}', result: 'Kofi contributor', version: ver(r)}, test: 'web-browser.cjs "Change role: Kofi is a contributor"'});
-    const savedBefore = (await mcp.call('fernshelf.items.search', {source: 'saved_from_share'})).total;
-    await page.locator('[data-contribution-id]').first().click();
+    const saved = (await mcp.call('fernshelf.items.search', {source: 'saved_from_share'})), savedBefore = saved.total, savedIds = new Set(saved.rows.map(x => x.id));
+    // A photo a member added that has a caption. Members' photos carry no image file in this library, so
+    // the dialog and the saved copy show the placeholder.
+    const shared = (await album('al-reunion-2026')).album.contributions.find(c => c.caption);
+    await page.locator('[data-contribution-id="' + shared.id + '"]').click();
     await until('who can see the contribution', async () => !/Checking who can see it/.test(await dialog.innerText()));
-    await frame('W3', 'contribution-dialog', {region: 'dialog', stage: 'intermediate', action: 'Click a photo Omar added.', expected: 'Its details, who added it, and Save to my library.', observed: 'Dialog "Shared by Omar Sandquist".',
+    await frame('W3', 'contribution-dialog', {region: 'dialog', stage: 'intermediate', action: 'Click the photo ' + JSON.stringify(shared.caption) + ' that a member added.', expected: 'Its details, who added it, and Save to my library; members\' photos have no image file here, so the placeholder is shown.',
+      observed: 'Dialog for ' + JSON.stringify(shared.caption) + ', ' + JSON.stringify((await dialog.innerText()).match(/Shared by [^\n]*/)?.[0] || 'shared photo') + '.',
       mcp: {call: 'fernshelf.items.search {"source":"saved_from_share"}', result: savedBefore + ' saved copies', version: ver(r)}, test: 'web-browser.cjs "Save to my library: albums.save_item"'});
     await dialog.getByRole('button', {name: 'Save to my library'}).click(); await dialog.waitFor({state: 'hidden'});
     r = await until('saved', async () => { const x = await mcp.call('fernshelf.items.search', {source: 'saved_from_share'}); return x.total === savedBefore + 1 && x; }); await idle();
-    await nav('Photos'); await select(r.rows[0].id);
-    await frame('W3', 'contribution-saved', {region: 'panel', stage: 'outcome', action: 'Click Save to my library, then open the copy in Photos.', expected: 'A copy in my library, source "saved from a shared album".', observed: 'Panel for the copy: ' + JSON.stringify(await page.locator('.detail h2').innerText()) + '.',
+    const copy = r.rows.find(x => !savedIds.has(x.id));
+    await nav('Photos'); await select(copy.id);
+    await frame('W3', 'contribution-saved', {region: 'panel', stage: 'outcome', action: 'Click Save to my library, then open the copy in Photos.', expected: 'A copy in my library with the member\'s caption, source "saved from a shared album"; like the shared photo, it has no image file.', observed: 'Panel for the copy: ' + JSON.stringify(await page.locator('.detail h2').innerText()) + '.',
       mcp: {call: 'fernshelf.items.search {"source":"saved_from_share"}', result: r.total + ' saved copies (+1)', version: ver(r)}, test: 'web-browser.cjs "Save to my library: albums.save_item"'});
     await nav('Albums'); await page.locator('[data-album-id="al-reunion-2026"]').click(); await idle();
     await page.locator('.fs-album-head').getByRole('button', {name: 'Delete album'}).click();
@@ -303,7 +331,7 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     await dialog.getByRole('button', {name: 'Delete album'}).click(); await dialog.waitFor({state: 'hidden'});
     r = await until('deleted', async () => { const x = await album(coast); return x.album.deleted_at && x; }); await idle();
     const listed = await page.locator('[data-album-id="' + coast + '"]').count();
-    await frame('W3', 'album-deleted', {region: 'list', stage: 'outcome', action: 'Click Delete album.', expected: 'The album is gone from Albums; its photos stay in the library; Iris no longer sees them.', observed: 'Albums view; the deleted album is ' + (listed ? 'still listed' : 'not listed') + '.',
+    await frame('W3', 'album-deleted', {union: {label: 'first two rows of albums', selectors: ['section.collection h2', '.fs-album-card >> nth=5']}, stage: 'outcome', action: 'Click Delete album.', expected: 'The album is gone from Albums; its photos stay in the library; Iris no longer sees them.', observed: 'Albums view; the deleted album is ' + (listed ? 'still listed' : 'not listed') + '.',
       mcp: {call: 'fernshelf.albums.get; fernshelf.exposure.get', result: 'deleted_at ' + r.album.deleted_at + '; ' + chosen[0] + ' visible_to ' + JSON.stringify((await mcp.call('fernshelf.exposure.get', {id: chosen[0]})).visible_to), version: ver(r)},
       test: 'w2-organising.test.cjs T07; edge-cases.test.cjs "albums.delete revokes only the links active at that time"'});
     assert.equal(listed, 0);
@@ -429,7 +457,7 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     await nav('Requests');
     await page.reload(); await idle(); await page.locator('[data-request-id="' + albumScoped.id + '"]').waitFor();
     r = await mcp.call('fernshelf.removals.list', {});
-    await frame('Reload', 'requests-after-reload', {stage: 'outcome', action: 'Reload the browser tab.', expected: 'The open view and every committed answer are read back.', observed: (await page.locator('[data-request-id]').count()) + ' request cards; the honoured and declined answers are shown.',
+    await frame('Reload', 'requests-after-reload', {region: 'list', stage: 'outcome', action: 'Reload the browser tab.', expected: 'The open view and every committed answer are read back.', observed: (await page.locator('[data-request-id]').count()) + ' request cards; the honoured and declined answers are shown.',
       mcp: {call: 'fernshelf.removals.list', result: r.removals.map(x => x.state).join(', '), version: ver(r)}, test: 'web-browser.cjs "Reload: committed caption and favourite are read back"'});
     await nav('Photos'); await select('it-2611-0943');
     await frame('Reload', 'caption-after-reload', {region: 'panel', stage: 'outcome', action: 'Open "Mum and me on the hall steps" after the reload.', expected: 'The caption saved in W2.', observed: 'Panel title ' + JSON.stringify(await page.locator('.detail h2').innerText()) + '.',
@@ -443,9 +471,9 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     await until('phone thumbnails', () => p.locator('#records .fs-tile img').count());
     await frame('Phone', 'photos', {stage: 'start', action: 'Open the page at 390 px.', expected: 'The grid and the whole navigation fit the width.', observed: 'No horizontal overflow: ' + (await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)) + '.',
       mcp: null, test: 'web-browser.cjs "390 px: Photos has no horizontal page overflow"'}, p);
-    const pid = await p.locator('#records .fs-tile').nth(3).getAttribute('data-record-id');
-    await p.locator('#records .fs-tile').nth(3).click(); await p.locator('.detail[data-selected-id="' + pid + '"]').waitFor(); await p.waitForTimeout(600);
-    await frame('Phone', 'photo-panel', {stage: 'outcome', action: 'Tap a photo.', expected: 'The page scrolls to its panel.', observed: 'Panel visible: ' + (await p.locator('.detail .fs-photo h2').isVisible()) + '.',
+    await p.locator('#records [data-record-id="' + featured.id + '"]').click(); await p.locator('.detail[data-selected-id="' + featured.id + '"]').waitFor(); await p.waitForTimeout(800);
+    await frame('Phone', 'photo-panel', {keepScroll: true, stage: 'outcome', action: 'Tap the photo ' + JSON.stringify(featured.caption) + '.', expected: 'The page scrolls to its panel, which shows the image.',
+      observed: 'Panel title in view: ' + (await p.locator('.detail .fs-photo h2').evaluate(h => { const b = h.getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight; })) + '.',
       mcp: null, test: 'web-browser.cjs "390 px: tapping a photo scrolls to its panel"'}, p);
     await nav('Albums', p); await p.locator('[data-album-id="al-reunion-2026"]').click(); await idle(p);
     await frame('Phone', 'album', {stage: 'outcome', action: 'Open Albums, then Reunion 2026.', expected: 'The album page fits the width.', observed: 'No horizontal overflow: ' + (await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)) + '.',
@@ -470,7 +498,6 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     report.passed = true;
   } finally {
     report.javascript_errors = errors;
-    report.total_bytes = frames.reduce((n, f) => n + f.bytes, 0);
     fs.writeFileSync(path.join(out, 'sequences.json'), JSON.stringify(report, null, 2) + '\n');
     fs.writeFileSync(path.join(out, 'SEQUENCES.md'), markdown(report));
     for (const c of clients) await c.close().catch(() => {});
@@ -478,7 +505,7 @@ function crc32(b) { let c = 0xffffffff; for (const x of b) c = CRC[(c ^ x) & 255
     for (const h of hosts) await h.close().catch(() => {});
     fs.rmSync(stateDir, {recursive: true, force: true});
   }
-  console.log(frames.length + ' frames, ' + report.total_bytes + ' bytes, in ' + out + (report.passed ? '' : ' (INCOMPLETE)'));
+  console.log(frames.length + ' frames in ' + out + (report.passed ? '' : ' (INCOMPLETE)'));
   if (!report.passed) process.exitCode = 1;
 })().catch(e => { console.error(e); process.exitCode = 1; });
 
@@ -488,7 +515,11 @@ function markdown(r) {
     'Captured by `node scripts/capture-workflows.cjs` (real controls in ' + r.browser + ', ' + r.host + ', run `' + r.run + '`, profile `' + r.profile + '`, account ' + r.account +
     ', clock ' + r.clock + ', browser time zone ' + r.time_zone + '). Desktop frames are ' + r.viewports.desktop.width + '×' + r.viewports.desktop.height + ', phone frames ' + r.viewports.phone.width + '×' + r.viewports.phone.height +
     '. After every step the script reads the record through a separate Agent MCP connection to the same run; that read and the version it answered are in the last columns. ' +
-    'Every frame was checked by the script for raw record IDs, `null` and Agent wording in the visible text. Node ' + r.node + '; ' + r.frames.length + ' frames, ' + r.total_bytes + ' bytes' + (r.passed ? '.' : '; the run did not finish.'), ''];
+    'Every frame was checked by the script for raw record IDs, `null` and Agent wording in the visible text. ' + r.frames.length + ' frames' + (r.passed ? '.' : '; the run did not finish.'), '',
+    'Placeholder tiles: ' + r.library.items_with_image_file + ' of the ' + r.library.items + ' items in the reference library (' + r.library.active_items_with_image_file + ' of the ' + r.library.active_items +
+    ' active ones) have an image file, a drawn stand-in image; the rest of the library, and every photo another member adds to a shared album, is metadata only, so the page shows it as a placeholder tile with its caption or place. ' +
+    'Frames about one photo use a photo with an image file and a caption, except W3 10–11 (a member\'s photo and its saved copy, which have no file) and W5 4 (an item in the trash, whose image the page does not read).', '',
+    'Reproducible: this file and `sequences.json` hold no wall-clock time, Node version or file size, and a re-run of the script writes them byte for byte; the frames show the same content, but their pixels can differ between runs.', ''];
   for (const wf of [...new Set(r.frames.map(f => f.workflow))]) {
     L.push('## ' + wf, '', '| # | Frame | Stage | Action | Expected | Observed | MCP confirmation | Version | Test or check |', '| ---: | --- | --- | --- | --- | --- | --- | --- | --- |');
     for (const f of r.frames.filter(x => x.workflow === wf)) {

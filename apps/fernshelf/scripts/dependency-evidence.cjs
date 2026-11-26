@@ -7,8 +7,10 @@
 //   2. Resource access: fernshelf.items.read -> Core ctx.assets.read under the parent item, allowed by
 //      runtime/registrations/fernshelf.json ({"item": "fernshelf.items.get"}).
 // Each runs in disposable copies (runtime, this package, Mail) and writes
-// evidence/dependencies/mail.json and evidence/dependencies/resource-access.json.
-//   node scripts/dependency-evidence.cjs [--runtime DIR] [--mail DIR] [--out DIR]
+// evidence/dependencies/mail.json and evidence/dependencies/resource-access.json. The transcripts are
+// reproducible byte for byte (see stable() below); --check runs both demonstrations twice and fails if
+// the two runs differ from each other or from the committed transcripts, and writes nothing.
+//   node scripts/dependency-evidence.cjs [--runtime DIR] [--mail DIR] [--out DIR] [--check]
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), crypto = require('node:crypto'), assert = require('node:assert/strict');
 const locate = require('./locate.cjs');
 const publisher = require('../src/publisher.cjs');
@@ -26,6 +28,31 @@ function recorder() {
     check(name, cond, detail) { assert.ok(cond, name + (detail !== undefined ? ': ' + JSON.stringify(detail).slice(0, 600) : '')); checks.push(name); }
   };
 }
+// The only values in a transcript that depend on when and where it is produced are the wall-clock times
+// the Messaging router and Mail stamp on receipts and records (received_at, committed_at, processed_at).
+// They are ISO times in UTC (toISOString), while every virtual-clock time carries its zone offset, so
+// stable() writes such a value under one of those keys as WALL_CLOCK; a virtual-clock time under the
+// same key (Mail's record received_at) and a missing time (null, as in the unknown-outcome receipt) stay. The Node version is not recorded. Everything else is exact: virtual-clock times, versions,
+// request, event and record IDs, hashes and receipt contents. runDependent() finds any value of the
+// kinds a run could leak (a UTC wall-clock time, a temporary or checkout path, a Node version), and
+// the script refuses to write a transcript that still has one.
+const WALL_CLOCK = '<wall-clock>', WALL_CLOCK_KEYS = new Set(['received_at', 'committed_at', 'processed_at']), UTC_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+const REPRODUCIBLE = 'Byte for byte, on Node 18 and 22: the wall-clock times the Messaging router and Mail record (received_at, committed_at, processed_at, in UTC) are written as "' + WALL_CLOCK +
+  '" and the Node version is not recorded; everything else (virtual-clock times, versions, request, event and record IDs, hashes, receipt contents) is exact. ' +
+  '`node scripts/dependency-evidence.cjs --check` regenerates the transcript twice and compares both runs with this file.';
+function stable(value, key) {
+  if (Array.isArray(value)) return value.map(v => stable(v));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, stable(v, k)]));
+  return WALL_CLOCK_KEYS.has(key) && typeof value === 'string' && UTC_TIME.test(value) ? WALL_CLOCK : value;
+}
+function runDependent(text) {
+  const leaks = [/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z/, /"node":/, /\bv\d+\.\d+\.\d+\b/, /fernshelf-(?:deps|res|capture)-\w/];
+  for (const dir of [os.tmpdir(), pkgDir].filter(d => d.length > 4)) leaks.push(new RegExp(dir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const re of leaks) { const m = re.exec(text); if (m) return text.slice(Math.max(0, m.index - 80), m.index + m[0].length + 20); }
+  return null;
+}
+const transcript = report => { const text = JSON.stringify(stable(report), null, 2) + '\n', leak = runDependent(text); assert.ok(!leak, 'run-dependent value in transcript: ' + leak); return text; };
+
 // The parts of a snapshot that a reader needs to compare states, not the whole state.
 const versionOf = s => ({epoch: s.version.epoch, revision: s.version.revision});
 
@@ -210,7 +237,7 @@ async function mailDemo() {
       T.check('A receiver with a different contract is refused as incompatible_contract; neither App changes', r.result.status === 'rejected' && r.result.code === 'incompatible_contract' &&
         JSON.stringify(mAfter) === JSON.stringify(mBefore) && JSON.stringify(fAfter) === JSON.stringify(fBefore));
     }
-    return {schema: 'fernshelf.dependency.mail.v1', dependency: 'Mail notices (optional, send-only)', node: process.version,
+    return {schema: 'fernshelf.dependency.mail.v1', dependency: 'Mail notices (optional, send-only)', reproducible: REPRODUCIBLE,
       revisions: {fernshelf: fsManifest.version, mail: mailManifest.version, runtime: json(path.join(runtime, 'package.json')).version, messaging_router: '1.2.0'},
       contract, meanings: {
         local_commit: 'Fernshelf committed the notification and its wire message in its own state when the event was applied.',
@@ -305,7 +332,7 @@ async function resourceDemo() {
       T.check(label + ': items.read is not_available, other reads work, nothing changes', r.status === 'not_available' && other.status === 'ok' &&
         JSON.stringify(rafter.snapshot.data) === JSON.stringify(rs.snapshot.data));
     }
-    return {schema: 'fernshelf.dependency.resource-access.v1', dependency: 'Resource access registration for items.read (platform)', node: process.version,
+    return {schema: 'fernshelf.dependency.resource-access.v1', dependency: 'Resource access registration for items.read (platform)', reproducible: REPRODUCIBLE,
       contract: 'fernshelf.items.read returns the file object (filename, mime_type, base64, sha256, media) read by Core ctx.assets.read under the parent item; Core allows it only through runtime/registrations/fernshelf.json, which maps object type item to the read tool fernshelf.items.get, and applies the task policy on that tool.',
       not_applicable: {retry_duplicate: 'reads change nothing, so a repeat is shown to return the same bytes', unknown_outcome: 'no write and no other App is involved'},
       passed: true, checks: T.checks, transcript: T.steps};
@@ -317,14 +344,24 @@ async function resourceDemo() {
 
 if (require.main === module) {
   (async () => {
-    const out = locate.option('out') || path.join(pkgDir, 'evidence/dependencies');
-    fs.mkdirSync(out, {recursive: true});
+    const out = locate.option('out') || path.join(pkgDir, 'evidence/dependencies'), check = process.argv.includes('--check');
+    if (!check) fs.mkdirSync(out, {recursive: true});
+    let differs = 0;
     for (const [name, demo] of [['mail', mailDemo], ['resource-access', resourceDemo]]) {
-      const report = await demo();
-      fs.writeFileSync(path.join(out, name + '.json'), JSON.stringify(report, null, 2) + '\n');
+      const file = path.join(out, name + '.json'), report = await demo(), text = transcript(report);
       for (const c of report.checks) console.log('ok - ' + name + ': ' + c);
-      console.log('PASS: ' + report.checks.length + ' ' + name + ' checks; transcript ' + path.join(out, name + '.json'));
+      console.log('PASS: ' + report.checks.length + ' ' + name + ' checks');
+      if (!check) { fs.writeFileSync(file, text); console.log('wrote ' + file); continue; }
+      const again = transcript(await demo()), committed = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
+      const same = text === again, current = text === committed;
+      console.log((same ? 'ok - ' : 'FAIL - ') + name + ': two runs give the same transcript');
+      console.log((current ? 'ok - ' : 'FAIL - ') + name + ': the transcript equals ' + path.relative(process.cwd(), file));
+      if (!same || !current) differs++;
+    }
+    if (check) {
+      if (differs) { console.error('Transcripts differ; run node scripts/dependency-evidence.cjs and review the change.'); process.exitCode = 1; }
+      else console.log('PASS: both transcripts are reproducible and equal the committed files');
     }
   })().catch(e => { console.error(e); process.exitCode = 1; });
 }
-module.exports = {mailDemo, resourceDemo};
+module.exports = {mailDemo, resourceDemo, stable, runDependent, WALL_CLOCK};
