@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**205 open non-draft proposals · 0 awaiting initial review · 10 drafts.**
+**205 open non-draft proposals · 0 awaiting initial review · 13 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -148,10 +148,13 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**107 proposals.**
+**110 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-26 18:06:33 | [#271](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/271) · Resolve a damaged matching set without choosing the shopper's fallback<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/271/files) | Shopping &amp; groceries | A larger credit and an expiring offer do not choose Noor's fallback. Her matching-set history requires keeping the claim open until she selects a remedy, then acting on her narrow refund approval. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
+| 2026-11-26 18:06:29 | [#270](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/270) · Keep a patient's own choices intact through appointment-note revisions<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/270/files) | Health &amp; care | Ellis approves a note's layout before choosing only two tracking fields. The agent must preserve that limited choice across later edits rather than turn its own earlier advice into the patient's commitment. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
+| 2026-11-26 18:05:53 | [#269](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/269) · Adapt an archive grant after a maker withdraws public-use permission<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/269/files) | Work &amp; business<br>Also: Learning &amp; research | Mara's workshop-only scope and separate worksheet permission let the agent finish a fundable learning package after a maker withdraws public use, without treating an appealing video idea as her decision. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 01:51:20 | [#267](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/267) · Guard overnight AI skill rollouts under Goodhart traps, mid-flight budget freezes, and multi-hop regressions<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/267/files) | Work &amp; business<br>Also: Learning &amp; research | Facing Maya’s 96%-dev rollout push, a mid-flight budget freeze, and an alert, the agent must combine telemetry PNGs, her compliance email, and multi-hop lineage rather than obeying surface dev scores. | Draft | Awaiting review |  | [shangliy](https://github.com/shangliy) |  |
 | 2026-11-25 23:00:33 | [#263](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/263) · Hand a new house-sitter the cat's current dose, not the guide's<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/263/files) | Home &amp; utilities | "Send the guide" would give a new sitter four times the cat's current dose and an old door code. The right handoff joins the vet's change, the codes note and Marco's own limits. | Design review | Review requested<br>@Yeechin-is-here |  | [jpli02](https://github.com/jpli02) |  |
 | 2026-11-25 22:58:27 | [#262](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/262) · Defer a postponed jury date as a caregiving hardship without exposing Mom's diagnosis<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/262/files) | Public service &amp; law<br>Also: Health &amp; care | Dani asks to "postpone again", but she already used her one postponement. Only a caregiving deferral, backed by the letter that omits Mom's diagnosis, can work, and it gets one try. | Design review | Commented |  | [jpli02](https://github.com/jpli02) |  |
