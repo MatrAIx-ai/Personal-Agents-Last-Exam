@@ -1,0 +1,473 @@
+{
+  "account_id": "stayready-alex",
+  "owner_person_id": "person-1",
+  "property": {
+    "id": "property-1",
+    "name": "Harbor Lantern Hotel",
+    "timezone": "UTC",
+    "reception_hours": "07:00\u201322:00 UTC; late arrival requires a confirmed arrangement.",
+    "policy_text": "Two registered guests; fixed two-night stay. Service arrangements do not alter the room reservation.",
+    "entrances": [
+      {
+        "id": "east",
+        "label": "East entrance",
+        "access_methods": [
+          "night-desk",
+          "staff-meeting"
+        ]
+      },
+      {
+        "id": "front",
+        "label": "Front entrance",
+        "access_methods": [
+          "front-desk"
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "id": "east-step-free",
+        "label": "East entrance, level corridor and lift to lodging",
+        "entrance_id": "east",
+        "step_free": true,
+        "uses_lift": true,
+        "window": {
+          "start": "2026-12-01T15:00:00Z",
+          "end": "2026-12-03T11:00:00Z"
+        }
+      },
+      {
+        "id": "front-steps",
+        "label": "Front entrance with six steps, then lift to lodging",
+        "entrance_id": "front",
+        "step_free": false,
+        "uses_lift": true,
+        "window": {
+          "start": "2026-12-01T07:00:00Z",
+          "end": "2026-12-03T22:00:00Z"
+        }
+      }
+    ]
+  },
+  "stay": {
+    "id": "stay-1",
+    "property_id": "property-1",
+    "check_in": "2026-12-01T15:00:00Z",
+    "check_out": "2026-12-03T11:00:00Z",
+    "guest_person_ids": [
+      "person-1",
+      "person-2"
+    ],
+    "guest_revision": 1,
+    "reservation_status": "confirmed"
+  },
+  "people": [
+    {
+      "id": "person-1",
+      "name": "Alex Morgan"
+    },
+    {
+      "id": "person-2",
+      "name": "Jamie Chen"
+    },
+    {
+      "id": "person-3",
+      "name": "Sam Rivera"
+    }
+  ],
+  "sources": [
+    {
+      "id": "source-arrival",
+      "person_id": null,
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "arrival_at": "2026-12-01T21:30:00Z",
+        "private_background": "Private journey details: do not disclose."
+      },
+      "disclose_fields": [
+        "arrival_at"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-arrival",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-access-person-1",
+      "person_id": "person-1",
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "functional_need": "step_free",
+        "private_background": "Private health history is not relevant to the hotel request."
+      },
+      "disclose_fields": [
+        "functional_need"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-access-person-1",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-breakfast-person-1",
+      "person_id": "person-1",
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "meal_request": "No peanuts in the prepared breakfast",
+        "private_background": "Personal background not authorized for the hotel."
+      },
+      "disclose_fields": [
+        "meal_request"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-breakfast-person-1",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-access-person-2",
+      "person_id": "person-2",
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "functional_need": "step_free",
+        "private_background": "Private health history is not relevant to the hotel request."
+      },
+      "disclose_fields": [
+        "functional_need"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-access-person-2",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-breakfast-person-2",
+      "person_id": "person-2",
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "meal_request": "Plant-based breakfast",
+        "private_background": "Personal background not authorized for the hotel."
+      },
+      "disclose_fields": [
+        "meal_request"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-breakfast-person-2",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-access-person-3",
+      "person_id": "person-3",
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "functional_need": "step_free",
+        "private_background": "Private health history is not relevant to the hotel request."
+      },
+      "disclose_fields": [
+        "functional_need"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-access-person-3",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-breakfast-person-3",
+      "person_id": "person-3",
+      "version": 1,
+      "observed_at": "2026-11-30T12:00:00Z",
+      "readable": true,
+      "fields": {
+        "meal_request": "No dairy ingredients",
+        "private_background": "Personal background not authorized for the hotel."
+      },
+      "disclose_fields": [
+        "meal_request"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "source-breakfast-person-3",
+        "observed_version": "1"
+      }
+    }
+  ],
+  "needs": [
+    {
+      "id": "need-arrival",
+      "service": "late_arrival",
+      "person_ids": [
+        "person-1",
+        "person-2"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "late_arrival",
+        "person_ids": [
+          "person-1",
+          "person-2"
+        ],
+        "arrival_at": "2026-12-01T21:30:00Z"
+      },
+      "source_ids": [
+        "source-arrival"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-arrival",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-access-person-1",
+      "service": "step_free_access",
+      "person_ids": [
+        "person-1"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-12-01T15:00:00Z",
+          "end": "2026-12-03T11:00:00Z"
+        }
+      },
+      "source_ids": [
+        "source-access-person-1"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-1",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-breakfast-person-1",
+      "service": "breakfast",
+      "person_ids": [
+        "person-1"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-1"
+        ],
+        "morning_dates": [
+          "2026-12-02",
+          "2026-12-03"
+        ],
+        "meal_request": "No peanuts in the prepared breakfast"
+      },
+      "source_ids": [
+        "source-breakfast-person-1"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-1",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-access-person-2",
+      "service": "step_free_access",
+      "person_ids": [
+        "person-2"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-2"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-12-01T15:00:00Z",
+          "end": "2026-12-03T11:00:00Z"
+        }
+      },
+      "source_ids": [
+        "source-access-person-2"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-2",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-breakfast-person-2",
+      "service": "breakfast",
+      "person_ids": [
+        "person-2"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-2"
+        ],
+        "morning_dates": [
+          "2026-12-02",
+          "2026-12-03"
+        ],
+        "meal_request": "Plant-based breakfast"
+      },
+      "source_ids": [
+        "source-breakfast-person-2"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-2",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-access-person-3",
+      "service": "step_free_access",
+      "person_ids": [
+        "person-3"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-3"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-12-01T15:00:00Z",
+          "end": "2026-12-03T11:00:00Z"
+        }
+      },
+      "source_ids": [
+        "source-access-person-3"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-3",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-breakfast-person-3",
+      "service": "breakfast",
+      "person_ids": [
+        "person-3"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-3"
+        ],
+        "morning_dates": [
+          "2026-12-02",
+          "2026-12-03"
+        ],
+        "meal_request": "No dairy ingredients"
+      },
+      "source_ids": [
+        "source-breakfast-person-3"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-3",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    }
+  ],
+  "requests": [],
+  "commitments": [
+    {
+      "id": "commitment-baseline-access",
+      "need_id": "need-access-person-1",
+      "request_id": null,
+      "request_conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-12-01T15:00:00Z",
+          "end": "2026-12-03T11:00:00Z"
+        }
+      },
+      "terms": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "route_id": "east-step-free",
+        "window": {
+          "start": "2026-12-01T15:00:00Z",
+          "end": "2026-12-03T11:00:00Z"
+        }
+      },
+      "confirmed_at": "2026-11-30T09:00:00Z",
+      "status": "active",
+      "unavailability": []
+    }
+  ],
+  "history": []
+}

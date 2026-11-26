@@ -1,0 +1,65 @@
+{
+  "id": "F1",
+  "title": "Overnight arrival and named step-free access",
+  "initial_time": "2026-12-01T17:59:00Z",
+  "seed": "seed.json",
+  "events": "events.json",
+  "bootstrap_trace": "bootstrap-trace.json",
+  "histories": 2,
+  "event_inputs": 6,
+  "no_action_pass": false,
+  "goal": "The after-midnight arrival is explicitly covered and both travelers have named active step-free routes; the room reservation stays confirmed.",
+  "representative_failure": "Editing arrival or observing that a lift exists creates neither a later entrance arrangement nor the missing traveler-specific route promise.",
+  "executions": {
+    "reference": [
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "save",
+        "need_id": "need-arrival",
+        "conditions": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_at": "2026-12-02T00:20:00Z"
+        }
+      },
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "submit",
+        "need_id": "need-arrival",
+        "action": "change"
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "submit",
+        "need_id": "need-access-person-2",
+        "action": "arrange"
+      }
+    ],
+    "no_action": [],
+    "incorrect": [
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "save",
+        "need_id": "need-arrival",
+        "conditions": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_at": "2026-12-02T00:20:00Z"
+        }
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "inspect"
+      }
+    ]
+  },
+  "scope": "App-only business calls and static events. Core receipt/epoch/policy claims require the separate real MCP report."
+}

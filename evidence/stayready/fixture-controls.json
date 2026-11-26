@@ -1,0 +1,222 @@
+{
+  "schema": "stayready.fixture-control-results.v1",
+  "passed": true,
+  "app_version": "0.1.0",
+  "node": "v22.23.5",
+  "mode": "App-only public plugin business calls; this harness does not implement or claim Core transport idempotency, epochs, permissions or persistence.",
+  "core_evidence": "tests/mcp-flow.cjs and the real MCP report cover Core reset/receipt/policy/session boundaries. Browser evidence is separate.",
+  "fixtures": [
+    {
+      "id": "F1",
+      "histories": 2,
+      "event_inputs": 6,
+      "replay": {
+        "same_business_hash": true,
+        "hash": "8edc2642f06780159b3fbbbd10818b367883f6b6a0903b9e8525e73af0b0df81",
+        "unchanged_static_events": true
+      },
+      "executions": {
+        "reference": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "8edc2642f06780159b3fbbbd10818b367883f6b6a0903b9e8525e73af0b0df81"
+        },
+        "no_action": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "confirmed entrance window covers the delayed after-midnight arrival",
+            "named step-free route confirmed for person-2"
+          ],
+          "state_sha256": "2617cd420224dfea6705a54122ae5047ceb27e6370f932adfa93387b11ddfb30"
+        },
+        "incorrect": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "confirmed entrance window covers the delayed after-midnight arrival",
+            "named step-free route confirmed for person-2"
+          ],
+          "state_sha256": "01aa5c435b92e4b4047efd08919e10c10991898d4aed51721e35904e9244cb95"
+        }
+      }
+    },
+    {
+      "id": "F2",
+      "histories": 2,
+      "event_inputs": 6,
+      "replay": {
+        "same_business_hash": true,
+        "hash": "9d1c849992fe76c04d35d23de0a2c5fa855ea6b183d2129da283de11d9fbfc0f",
+        "unchanged_static_events": true
+      },
+      "executions": {
+        "reference": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "9d1c849992fe76c04d35d23de0a2c5fa855ea6b183d2129da283de11d9fbfc0f"
+        },
+        "no_action": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "current companion is person-3",
+            "former companion breakfast cancelled",
+            "new companion breakfast confirmed",
+            "former companion access cancelled",
+            "new companion access confirmed",
+            "both new companion breakfast mornings are covered"
+          ],
+          "state_sha256": "e9b05afec385f09006a5d65589864966e9ebca6457334dbdd2633f945d0ff889"
+        },
+        "incorrect": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "former companion breakfast cancelled",
+            "former companion access cancelled",
+            "new companion access confirmed"
+          ],
+          "state_sha256": "76e57f5112abf6d00e7eb9198fa4ffbe85f971bd8724e212931ace3132fdbce6"
+        }
+      }
+    },
+    {
+      "id": "F3",
+      "histories": 2,
+      "event_inputs": 6,
+      "replay": {
+        "same_business_hash": true,
+        "hash": "75bb87b382e11f1adf31aed78dc8885cf5d90bfdf1ce84b1c7d563437ca60e5d",
+        "unchanged_static_events": true
+      },
+      "executions": {
+        "reference": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "75bb87b382e11f1adf31aed78dc8885cf5d90bfdf1ce84b1c7d563437ca60e5d"
+        },
+        "no_action": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "a55c210adb1b2371ef95b2b6dadbb417cc36718cbd25fd0d98292f51d2bf1c00"
+        },
+        "incorrect": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "no unnecessary new external request or disclosure"
+          ],
+          "state_sha256": "18e7c479e705970e193b4e2ab7ae0a421a1f91801b27f15270aa7a3a35f5e01e"
+        }
+      }
+    },
+    {
+      "id": "F4",
+      "histories": 2,
+      "event_inputs": 6,
+      "replay": {
+        "same_business_hash": true,
+        "hash": "a8843e4caae7f97960f5e5a451080d9bf1c7b87cf0b0d7ba38f173e2fe45f13c",
+        "unchanged_static_events": true
+      },
+      "executions": {
+        "reference": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "a8843e4caae7f97960f5e5a451080d9bf1c7b87cf0b0d7ba38f173e2fe45f13c"
+        },
+        "no_action": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "breakfast receipt then clarification then refusal observed",
+            "cancellation refusal is explicit"
+          ],
+          "state_sha256": "310f1391a8f694a927119ce228e79dde76422435c386c793ccbf4fcbe6eb85d3"
+        },
+        "incorrect": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "breakfast receipt then clarification then refusal observed"
+          ],
+          "state_sha256": "f468263d1588993d7f5c9f1224706845c17106893d11d371ebe3217a2f7ddab6"
+        }
+      }
+    },
+    {
+      "id": "F5",
+      "histories": 2,
+      "event_inputs": 6,
+      "replay": {
+        "same_business_hash": true,
+        "hash": "22e63ed47a6f0ab3da51a2e63f1b782542b71bc17ce3420a461c190986e1bf57",
+        "unchanged_static_events": true
+      },
+      "executions": {
+        "reference": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "22e63ed47a6f0ab3da51a2e63f1b782542b71bc17ce3420a461c190986e1bf57"
+        },
+        "no_action": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "unavailable access explicitly cancelled by hotel"
+          ],
+          "state_sha256": "d330d562e57dbc0f4763cdeeb76123b49e0d9e42af3c705afc80da384e7a9080"
+        },
+        "incorrect": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "unavailable access explicitly cancelled by hotel"
+          ],
+          "state_sha256": "34bada45677cd50487dca69df0aeb4a0b3a499f2c046fe7d0f7eca6ccf14b2a9"
+        }
+      }
+    },
+    {
+      "id": "F6",
+      "histories": 2,
+      "event_inputs": 6,
+      "replay": {
+        "same_business_hash": true,
+        "hash": "64c9ee80b5545eabd1b7aad589b1df3f646e42f67e7193b6b44116fc2235ad9c",
+        "unchanged_static_events": true
+      },
+      "executions": {
+        "reference": {
+          "goal_pass": true,
+          "expected_goal_pass": true,
+          "failed_checks": [],
+          "state_sha256": "64c9ee80b5545eabd1b7aad589b1df3f646e42f67e7193b6b44116fc2235ad9c"
+        },
+        "no_action": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "one later matching arrival promise exists"
+          ],
+          "state_sha256": "cf9ce3c77bf844976f01fe8203a3a445b56af255f73b9037b0d5b9277fa18253"
+        },
+        "incorrect": {
+          "goal_pass": false,
+          "expected_goal_pass": false,
+          "failed_checks": [
+            "one later matching arrival promise exists"
+          ],
+          "state_sha256": "4a41c2e7aeecc4876e9502bc8d1e2b04943fa43425b1fd8ccadad76f4217a2f5"
+        }
+      }
+    }
+  ]
+}

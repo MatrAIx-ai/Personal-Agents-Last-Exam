@@ -1,0 +1,906 @@
+[
+  {
+    "name": "stayready.inspect",
+    "description": "Inspect this stay, readable sources, service needs, actual requests and hotel commitments. No overall readiness verdict.",
+    "read_only": true,
+    "scope": "account",
+    "resource_target": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "stayready"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "view": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "view"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stayready.need.save",
+    "description": "Save or clear one service need using trusted readable sources; does not cancel or invalidate hotel commitments.",
+    "read_only": false,
+    "scope": "account",
+    "resource_target": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "need_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "late_arrival"
+                    },
+                    "arrival_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "arrival_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "step_free_access"
+                    },
+                    "functional_need": {
+                      "const": "step_free"
+                    },
+                    "window": {
+                      "type": "object",
+                      "properties": {
+                        "start": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "end": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "start",
+                        "end"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "functional_need",
+                    "window"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "breakfast"
+                    },
+                    "morning_dates": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 2,
+                      "uniqueItems": true
+                    },
+                    "meal_request": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "morning_dates",
+                    "meal_request"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "minItems": 0,
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "need_id",
+        "conditions",
+        "source_ids",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "stayready"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "need_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "need_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stayready.people.replace",
+    "description": "Replace one companion in the fixed two-guest service context. Does not change the legal reservation or cancel old services.",
+    "read_only": false,
+    "scope": "account",
+    "resource_target": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "old_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "new_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "old_person_id",
+        "new_person_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "stayready"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "guest_person_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "guest_person_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stayready.request.preview",
+    "description": "Preview the exact hotel action and permitted disclosed fields. Does not submit, store state, or allocate IDs.",
+    "read_only": true,
+    "scope": "account",
+    "resource_target": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "need_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "action": {
+          "enum": [
+            "arrange",
+            "change",
+            "cancel"
+          ]
+        },
+        "predecessor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "need_id",
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "stayready"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "preview_token": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "need_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "action": {
+              "enum": [
+                "arrange",
+                "change",
+                "cancel"
+              ]
+            },
+            "predecessor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "request_conditions": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "late_arrival"
+                    },
+                    "arrival_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "arrival_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "step_free_access"
+                    },
+                    "functional_need": {
+                      "const": "step_free"
+                    },
+                    "window": {
+                      "type": "object",
+                      "properties": {
+                        "start": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "end": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "start",
+                        "end"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "functional_need",
+                    "window"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "breakfast"
+                    },
+                    "morning_dates": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 2,
+                      "uniqueItems": true
+                    },
+                    "meal_request": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "morning_dates",
+                    "meal_request"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "disclosures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 4000
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "field",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 20
+            },
+            "source_versions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "grant_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "version",
+                  "grant_version"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "property_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "person_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+              },
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "preview_token",
+            "need_id",
+            "action",
+            "predecessor_id",
+            "request_conditions",
+            "disclosures",
+            "source_versions",
+            "property_id",
+            "person_ids"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stayready.request.submit",
+    "description": "Submit exactly the current preview after rechecking relevant records and disclosure grants. Any prior pending attempt is superseded atomically.",
+    "read_only": false,
+    "scope": "account",
+    "resource_target": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "need_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "action": {
+          "enum": [
+            "arrange",
+            "change",
+            "cancel"
+          ]
+        },
+        "predecessor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "preview_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "need_id",
+        "action",
+        "preview_token",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "stayready"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "hotel_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hotel_request_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stayready.request.withdraw",
+    "description": "Withdraw a pending hotel request. Confirmed services require a separate provider-confirmed cancellation.",
+    "read_only": false,
+    "scope": "account",
+    "resource_target": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hotel_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "hotel_request_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "stayready"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "hotel_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hotel_request_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

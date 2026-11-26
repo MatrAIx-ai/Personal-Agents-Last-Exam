@@ -1,0 +1,228 @@
+{
+  "bootstrap": [
+    {
+      "event_id": "baseline-reply-1",
+      "at": "2026-12-01T17:05:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-arrival",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "late_arrival",
+            "person_ids": [
+              "person-1",
+              "person-2"
+            ],
+            "arrival_at": "2026-12-01T21:30:00Z"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T17:00:00Z",
+            "until": "2026-12-01T17:05:00Z"
+          }
+        },
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_window": {
+            "start": "2026-12-01T21:00:00Z",
+            "end": "2026-12-01T22:00:00Z"
+          },
+          "entrance_id": "east",
+          "access_method_id": "night-desk"
+        }
+      }
+    },
+    {
+      "event_id": "baseline-reply-2",
+      "at": "2026-12-01T17:15:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-breakfast-person-2",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-2"
+            ],
+            "morning_dates": [
+              "2026-12-02",
+              "2026-12-03"
+            ],
+            "meal_request": "Plant-based breakfast"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T17:10:00Z",
+            "until": "2026-12-01T17:15:00Z"
+          }
+        },
+        "outcome": "declined"
+      }
+    }
+  ],
+  "run": [
+    {
+      "event_id": "f1-source",
+      "at": "2026-12-01T18:00:00Z",
+      "operation": "stayready.source_updated",
+      "payload": {
+        "source_id": "source-arrival",
+        "expected_source_version": 1,
+        "source_version": 2,
+        "arrival_at": "2026-12-02T00:20:00Z"
+      }
+    },
+    {
+      "event_id": "f1-received",
+      "at": "2026-12-01T18:05:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-arrival",
+          "action": "change",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "late_arrival",
+            "person_ids": [
+              "person-1",
+              "person-2"
+            ],
+            "arrival_at": "2026-12-02T00:20:00Z"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:05:00Z"
+          },
+          "predecessor": {
+            "commitment_terms": {
+              "stay_id": "stay-1",
+              "service": "late_arrival",
+              "person_ids": [
+                "person-1",
+                "person-2"
+              ],
+              "arrival_window": {
+                "start": "2026-12-01T21:00:00Z",
+                "end": "2026-12-01T22:00:00Z"
+              },
+              "entrance_id": "east",
+              "access_method_id": "night-desk"
+            },
+            "confirmed_in": {
+              "from": "2026-12-01T17:00:00Z",
+              "until": "2026-12-01T17:20:00Z"
+            }
+          }
+        },
+        "outcome": "acknowledged"
+      }
+    },
+    {
+      "event_id": "f1-confirmed",
+      "at": "2026-12-01T18:10:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-arrival",
+          "action": "change",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "late_arrival",
+            "person_ids": [
+              "person-1",
+              "person-2"
+            ],
+            "arrival_at": "2026-12-02T00:20:00Z"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:05:00Z"
+          },
+          "predecessor": {
+            "commitment_terms": {
+              "stay_id": "stay-1",
+              "service": "late_arrival",
+              "person_ids": [
+                "person-1",
+                "person-2"
+              ],
+              "arrival_window": {
+                "start": "2026-12-01T21:00:00Z",
+                "end": "2026-12-01T22:00:00Z"
+              },
+              "entrance_id": "east",
+              "access_method_id": "night-desk"
+            },
+            "confirmed_in": {
+              "from": "2026-12-01T17:00:00Z",
+              "until": "2026-12-01T17:20:00Z"
+            }
+          }
+        },
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_window": {
+            "start": "2026-12-02T00:00:00Z",
+            "end": "2026-12-02T01:00:00Z"
+          },
+          "entrance_id": "east",
+          "access_method_id": "night-desk"
+        }
+      }
+    },
+    {
+      "event_id": "f1-access",
+      "at": "2026-12-01T18:12:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-access-person-2",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "step_free_access",
+            "person_ids": [
+              "person-2"
+            ],
+            "functional_need": "step_free",
+            "window": {
+              "start": "2026-12-01T15:00:00Z",
+              "end": "2026-12-03T11:00:00Z"
+            }
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:12:00Z"
+          }
+        },
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "step_free_access",
+          "person_ids": [
+            "person-2"
+          ],
+          "route_id": "east-step-free",
+          "window": {
+            "start": "2026-12-01T15:00:00Z",
+            "end": "2026-12-03T11:00:00Z"
+          }
+        }
+      }
+    }
+  ]
+}

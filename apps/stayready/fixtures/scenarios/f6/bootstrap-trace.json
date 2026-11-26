@@ -1,0 +1,255 @@
+[
+  {
+    "at": "2026-12-01T17:00:00Z",
+    "name": "stayready.request.preview",
+    "args": {
+      "need_id": "need-arrival",
+      "action": "arrange"
+    },
+    "result": {
+      "preview": {
+        "preview_token": "9519a763d10d9383733213514d45b69dc42c2c764c86ffaca660d8c88cabc2c2",
+        "need_id": "need-arrival",
+        "action": "arrange",
+        "predecessor_id": null,
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_at": "2026-12-01T21:30:00Z"
+        },
+        "disclosures": [
+          {
+            "source_id": "source-arrival",
+            "field": "arrival_at",
+            "value": "2026-12-01T21:30:00Z"
+          }
+        ],
+        "source_versions": [
+          {
+            "source_id": "source-arrival",
+            "version": 1,
+            "grant_version": 1
+          }
+        ],
+        "property_id": "property-1",
+        "person_ids": [
+          "person-1",
+          "person-2"
+        ]
+      }
+    },
+    "state_sha256": "36f36a7fbd9f264c85d7a23d939e88b8189aa150b87d78def0d8fd8740229f4a"
+  },
+  {
+    "at": "2026-12-01T17:00:00Z",
+    "name": "stayready.request.submit",
+    "args": {
+      "need_id": "need-arrival",
+      "action": "arrange",
+      "preview_token": "9519a763d10d9383733213514d45b69dc42c2c764c86ffaca660d8c88cabc2c2"
+    },
+    "result": {
+      "hotel_request_id": "hotel-request-1"
+    },
+    "state_sha256": "ae0c2da17a320bd87a1e7aa5945f19e292571cbacad0113945235faa04a0c755"
+  },
+  {
+    "at": "2026-12-01T17:05:00Z",
+    "event": {
+      "event_id": "baseline-reply-1",
+      "at": "2026-12-01T17:05:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-arrival",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "late_arrival",
+            "person_ids": [
+              "person-1",
+              "person-2"
+            ],
+            "arrival_at": "2026-12-01T21:30:00Z"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T17:00:00Z",
+            "until": "2026-12-01T17:05:00Z"
+          }
+        },
+        "outcome": "declined"
+      }
+    },
+    "outcome": {
+      "id": "history-2",
+      "kind": "hotel_event",
+      "at": "2026-12-01T17:05:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "declined",
+      "event_id": "baseline-reply-1",
+      "fingerprint": "fbbbfec71e28b2b38ac9723273703dbb4c698a613d088373ef160518a4c98e05",
+      "selector": {
+        "need_id": "need-arrival",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_at": "2026-12-01T21:30:00Z"
+        },
+        "submitted_in": {
+          "from": "2026-12-01T17:00:00Z",
+          "until": "2026-12-01T17:05:00Z"
+        }
+      },
+      "target_id": "hotel-request-1",
+      "details": {}
+    },
+    "state_sha256": "2dfe6da990106642e47511dca18cdb303ce9ca1fbdb81c2495dbaa234fb89768"
+  },
+  {
+    "at": "2026-12-01T17:10:00Z",
+    "name": "stayready.request.preview",
+    "args": {
+      "need_id": "need-breakfast-person-1",
+      "action": "arrange"
+    },
+    "result": {
+      "preview": {
+        "preview_token": "adbe7ef13172c34e603de6f4348b6e24236e1b18de6ce588175b7fe63e9781eb",
+        "need_id": "need-breakfast-person-1",
+        "action": "arrange",
+        "predecessor_id": null,
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-1"
+          ],
+          "morning_dates": [
+            "2026-12-02",
+            "2026-12-03"
+          ],
+          "meal_request": "No peanuts in the prepared breakfast"
+        },
+        "disclosures": [
+          {
+            "source_id": "source-breakfast-person-1",
+            "field": "meal_request",
+            "value": "No peanuts in the prepared breakfast"
+          }
+        ],
+        "source_versions": [
+          {
+            "source_id": "source-breakfast-person-1",
+            "version": 1,
+            "grant_version": 1
+          }
+        ],
+        "property_id": "property-1",
+        "person_ids": [
+          "person-1"
+        ]
+      }
+    },
+    "state_sha256": "2dfe6da990106642e47511dca18cdb303ce9ca1fbdb81c2495dbaa234fb89768"
+  },
+  {
+    "at": "2026-12-01T17:10:00Z",
+    "name": "stayready.request.submit",
+    "args": {
+      "need_id": "need-breakfast-person-1",
+      "action": "arrange",
+      "preview_token": "adbe7ef13172c34e603de6f4348b6e24236e1b18de6ce588175b7fe63e9781eb"
+    },
+    "result": {
+      "hotel_request_id": "hotel-request-2"
+    },
+    "state_sha256": "17825200a94309769471eaacfcc49e657a254c1cb9e68c0e5fc8455c86b089ec"
+  },
+  {
+    "at": "2026-12-01T17:15:00Z",
+    "event": {
+      "event_id": "baseline-reply-2",
+      "at": "2026-12-01T17:15:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-breakfast-person-1",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-1"
+            ],
+            "morning_dates": [
+              "2026-12-02",
+              "2026-12-03"
+            ],
+            "meal_request": "No peanuts in the prepared breakfast"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T17:10:00Z",
+            "until": "2026-12-01T17:15:00Z"
+          }
+        },
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-1"
+          ],
+          "morning_dates": [
+            "2026-12-02",
+            "2026-12-03"
+          ],
+          "meal_request": "No peanuts in the prepared breakfast"
+        }
+      }
+    },
+    "outcome": {
+      "id": "history-4",
+      "kind": "hotel_event",
+      "at": "2026-12-01T17:15:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "confirmed",
+      "event_id": "baseline-reply-2",
+      "fingerprint": "cfd7155c4cccb89f65ce800855d9b5e023ccad9d56f7980377fecf19a5dc4ca8",
+      "selector": {
+        "need_id": "need-breakfast-person-1",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-1"
+          ],
+          "morning_dates": [
+            "2026-12-02",
+            "2026-12-03"
+          ],
+          "meal_request": "No peanuts in the prepared breakfast"
+        },
+        "submitted_in": {
+          "from": "2026-12-01T17:10:00Z",
+          "until": "2026-12-01T17:15:00Z"
+        }
+      },
+      "target_id": "hotel-request-2",
+      "details": {
+        "commitment_id": "commitment-1",
+        "superseded_commitment_id": null
+      }
+    },
+    "state_sha256": "37355cfb6b48bbe0fb70b0ae13fad7e2ca4cf24256f312e17bb03c3ac9b3e4c8"
+  }
+]

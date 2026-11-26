@@ -1,0 +1,69 @@
+{
+  "id": "F2",
+  "title": "Companion substitution and provider-confirmed cancellation",
+  "initial_time": "2026-12-01T17:59:00Z",
+  "seed": "seed.json",
+  "events": "events.json",
+  "bootstrap_trace": "bootstrap-trace.json",
+  "histories": 2,
+  "event_inputs": 6,
+  "no_action_pass": false,
+  "goal": "The current companion is person-3, their two breakfast mornings and access are confirmed, and both old person-2 services are explicitly cancelled.",
+  "representative_failure": "A replacement and one new breakfast request do not cancel the old services or confirm access for the new traveler.",
+  "executions": {
+    "reference": [
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "call",
+        "name": "stayready.people.replace",
+        "args": {
+          "old_person_id": "person-2",
+          "new_person_id": "person-3"
+        }
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "submit",
+        "need_id": "need-breakfast-person-2",
+        "action": "cancel"
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "submit",
+        "need_id": "need-access-person-2",
+        "action": "cancel"
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "submit",
+        "need_id": "need-breakfast-person-3",
+        "action": "arrange"
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "submit",
+        "need_id": "need-access-person-3",
+        "action": "arrange"
+      }
+    ],
+    "no_action": [],
+    "incorrect": [
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "call",
+        "name": "stayready.people.replace",
+        "args": {
+          "old_person_id": "person-2",
+          "new_person_id": "person-3"
+        }
+      },
+      {
+        "at": "2026-12-01T18:02:00Z",
+        "op": "submit",
+        "need_id": "need-breakfast-person-3",
+        "action": "arrange"
+      }
+    ]
+  },
+  "scope": "App-only business calls and static events. Core receipt/epoch/policy claims require the separate real MCP report."
+}
