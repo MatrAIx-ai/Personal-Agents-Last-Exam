@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "app_id": "cadence",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:cadence (environment PR #15, @ZichenYuan)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "classes.cancelled_by_studio",
+    "classes.schedule_changed",
+    "classes.capacity_changed",
+    "waitlist.promoted",
+    "plan.renewed",
+    "plan.trial_ending",
+    "account.session_expired",
+    "account.session_restored",
+    "user.confirmed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app (pale.web) plus reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One member account per instance; no social features, instructor marketplace or real payments.",
+    "Notices to Mail are built and published by the host-run publisher after a commit; the App never observes delivery outcomes and records no notice status.",
+    "Cadence is the source of truth for its own reservations only; overlaps with other commitments are the agent's check through Calendar's tools.",
+    "Nothing fires when the clock moves: waitlist promotions, renewals, reminders and studio changes are events the task applies through Infra."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
