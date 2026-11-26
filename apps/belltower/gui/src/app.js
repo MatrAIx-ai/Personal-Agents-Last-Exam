@@ -186,11 +186,13 @@ async function load(ui){
   if(ui.has(TOOL.clippings))out.clippings=(await ui.call(TOOL.clippings,state.clipState?{state:state.clipState}:{})).clippings;
   if(ui.has(TOOL.notifications)){const r=await ui.call(TOOL.notifications,notificationArgs());out.notifications=r.notifications;out.notificationCursor=r.next_cursor;}
   if(ui.has(TOOL.reading)){const r=await ui.call(TOOL.reading,{limit:100});out.marks=r.marks;out.markCursor=r.next_cursor;}
-  // Headlines for clippings and read marks: the News list when it is complete, otherwise the newest 100 items.
-  const filtered=Object.values(state.filters).some(Boolean)||searchText();
-  for(const item of filtered?(await ui.call(TOOL.items,{limit:100})).items:ui.records)out.headlines.set(item.id,item.headline);
-  for(const id of new Set([...out.clippings.map(c=>c.item_id),...out.marks.map(m=>m.item_id)]))
-    if(!out.headlines.has(id))out.headlines.set(id,(await ui.call(TOOL.item,{id})).item.headline);
+  // Headlines for clippings and read marks: from the News list when it is unfiltered, then from
+  // pages of all items, newest first, until each is known (a long history needs a few pages).
+  const filtered=Object.values(state.filters).some(Boolean)||searchText(),need=new Set([...out.clippings.map(c=>c.item_id),...out.marks.map(m=>m.item_id)]);
+  if(!filtered)for(const item of ui.records)out.headlines.set(item.id,item.headline);
+  const missing=()=>[...need].some(id=>!out.headlines.has(id));
+  for(let cursor=null,first=true;missing()&&(first||cursor);first=false){const r=await ui.call(TOOL.items,{limit:100,...(cursor?{cursor}:{})});for(const item of r.items)out.headlines.set(item.id,item.headline);cursor=r.next_cursor;}
+  for(const id of need)if(!out.headlines.has(id))out.headlines.set(id,(await ui.call(TOOL.item,{id})).item.headline);
   clockYear=out.preferences?.next_digest_at?yearOf(out.preferences.next_digest_at):null;
   return out;
 }

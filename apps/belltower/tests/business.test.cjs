@@ -1297,6 +1297,29 @@ test('the web pages are declared, cover every tool and render text only', () => 
   assert.equal([...controller.matchAll(/markRead\(/g)].length, 2, 'the write is defined once and called from the button only');
 });
 
+test('the full-window dataset is valid at its clock, declared, and counted by its coverage report', () => {
+  // datasets/full-window is the evaluation dataset (2025-01-01 to 2026-12-31); fixtures/minimal.json
+  // stays the smoke fixture. `node dev/dataset.cjs --check` rebuilds it from its seed, and
+  // tests/dataset.integration.cjs loads it through the public runtime.
+  const dir = path.join(__dirname, '../datasets/full-window'), bytes = fs.readFileSync(path.join(dir, 'seed.json')), seed = JSON.parse(bytes);
+  const clock = JSON.parse(fs.readFileSync(path.join(dir, 'clock.json'), 'utf8')).initial_time, declared = JSON.parse(fs.readFileSync(path.join(dir, 'dataset.json'), 'utf8'));
+  const app = fixture({ seed, now: clock });                                   // seed schema and seed rules
+  const { compile } = require('./schema-validator.cjs');
+  assert.ok(compile(require('../schemas/dataset.schema.json'), path.join(__dirname, '../schemas'))(declared), 'dataset.json matches the dataset contract');
+  assert.deepEqual([declared.dataset_id, declared.sources.map(s => s.kind), declared.expected_counts], ['belltower-full-window', ['synthetic'], { records: plugin.objects(seed).length, assets: 0 }]);
+  assert.ok(declared.transformations[0].includes(require('node:crypto').createHash('sha256').update(bytes).digest('hex')), 'dataset.json names the SHA-256 of seed.json');
+  assert.ok(bytes.length < 1.6 * 1024 * 1024, 'one env.load_seed request stays well inside the 2 MiB MCP message limit');
+  // The coverage report is current: a fresh count over these files gives the committed report.
+  const coverage = require('../dev/coverage.cjs').count().json;
+  assert.deepEqual(coverage, JSON.parse(fs.readFileSync(path.join(dir, 'coverage.json'), 'utf8')));
+  assert.ok(coverage.global.actions_only.distinct_dates >= 300 && coverage.global.actions_only.earliest === '2025-01-01' && coverage.global.actions_only.latest === '2026-12-31');
+  assert.deepEqual(coverage.invalid_or_missing_dates, []);
+  // Reads at the clock: nothing received after it, and the first month as the report counts it.
+  assert.equal(app.call('items.list', { start: clock }).items.length, 0);
+  const jan = app.call('items.list', { start: at('2025-01-01', '00:00'), end: at('2025-02-01', '00:00'), limit: 100 }).items;
+  assert.deepEqual([jan.filter(i => i.matched_revisions.includes(1)).length], [coverage.monthly[0].publications]);
+});
+
 test('the package runs on its own: no import or file path leaves its folder', () => {
   const root = path.resolve(__dirname, '..'), files = [];
   const walk = dir => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const f = path.join(dir, e.name); if (e.isDirectory()) walk(f); else if (/\.(cjs|js|mjs)$/.test(e.name)) files.push(f); } };
