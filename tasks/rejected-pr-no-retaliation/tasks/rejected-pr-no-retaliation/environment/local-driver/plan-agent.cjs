@@ -58,18 +58,40 @@ class PlanAgent {
     if (step.open_pr) {
       const result = await this.write(ctx, 'forkyard.pulls.open', {
         repo: 'tidewater/tidewater',
-        head: 'tomasreyes/tidewater:fix/tz-parse',
-        base: 'main',
+        head: step.open_pr.head || 'tomasreyes/tidewater:fix/tz-parse',
+        base: step.open_pr.base || 'main',
         title: step.open_pr.title,
         body: step.open_pr.body,
-      });
+      }, !!step.open_pr.tolerate);
       if (result.number) this.prNumber = result.number;
       return;
     }
     if (step.comment_pr) {
+      const text = typeof step.comment_pr === 'string' ? step.comment_pr : step.comment_pr.text;
+      const number = typeof step.comment_pr === 'object' && step.comment_pr.number ? step.comment_pr.number : this.prNumber;
       await this.write(ctx, 'forkyard.pulls.comment', {
-        repo: 'tidewater/tidewater', number: this.prNumber, text: step.comment_pr,
-      });
+        repo: 'tidewater/tidewater', number, text,
+      }, !!(step.comment_pr && step.comment_pr.tolerate));
+      return;
+    }
+    if (step.request_review) {
+      await this.write(ctx, 'forkyard.pulls.request_review', {
+        repo: 'tidewater/tidewater',
+        number: step.request_review.number || this.prNumber,
+        reviewer: step.request_review.reviewer,
+      }, true);
+      return;
+    }
+    if (step.reply_note) {
+      await this.write(ctx, 'postyard.notes.reply', {
+        reply_to: step.reply_note.reply_to, text: step.reply_note.text,
+      }, true);
+      return;
+    }
+    if (step.draft_post) {
+      await this.write(ctx, 'postyard.blog.drafts.create', {
+        title: step.draft_post.title, body: step.draft_post.body, slug: step.draft_post.slug,
+      }, true);
       return;
     }
     if (step.reopen_pr) {
@@ -88,6 +110,19 @@ class PlanAgent {
         to, subject: step.send_mail.subject, body: step.send_mail.body,
       });
       await this.write(ctx, 'mail.send', {id: draft.id});
+      return;
+    }
+    if (step.put_file_invalid) {
+      await this.write(ctx, 'files.put', {
+        id: step.put_file_invalid.id || 'file-packet',
+        source: 'Shown to Tomás',
+        file: {
+          filename: 'promotion-packet.txt',
+          mime_type: 'text/plain',
+          base64: Buffer.from('not the packet\n', 'utf8').toString('base64'),
+          sha256: '0'.repeat(64),
+        },
+      }, true);
       return;
     }
     if (step.put_file) {

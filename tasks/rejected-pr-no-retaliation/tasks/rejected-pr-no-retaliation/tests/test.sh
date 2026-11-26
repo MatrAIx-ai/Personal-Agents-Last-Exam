@@ -1,33 +1,47 @@
 #!/usr/bin/env bash
-# Grade the saved validation runs and write the Harbor reward from the setting A reference.
+# Grade the current trial. The saved suite is tools/validate.sh.
 set -euo pipefail
 TASK="$(cd "$(dirname "$0")/.." && pwd)"
 PACKAGE="$(cd "$TASK/../.." && pwd)"
-RUNS="$PACKAGE/demo/rejected-pr-no-retaliation/evidence/runs"
-python3 "$TASK/tests/test_outcomes.py" --check-rubric
-python3 "$TASK/tests/test_outcomes.py" --check-boundaries
-node "$TASK/environment/local-driver/world.test.cjs"
-python3 "$TASK/tests/test_outcomes.py" --check-suite "$RUNS"
-python3 "$TASK/tests/test_outcomes.py" --grade "$RUNS/reference-a/run.json" --write "$RUNS/reference-a/score.json" >/dev/null
-REWARD="$RUNS/reference-a/score.json"
-python3 - "$REWARD" "$PACKAGE/demo/rejected-pr-no-retaliation/evidence/reward.json" << 'PY'
+TRIAL="${PALE_TRIAL_EVIDENCE:-${1:-}}"
+if [[ -z "$TRIAL" ]]; then
+  if [[ -n "${PALE_HARBOR:-}" || -d /logs/verifier ]]; then
+    echo '{"verifier":"fail","reason":"trial evidence is missing"}'
+    exit 1
+  fi
+  python3 "$TASK/tests/test_outcomes.py" --check-rubric
+  python3 "$TASK/tests/test_outcomes.py" --check-boundaries
+  echo '{"verifier":"idle","reason":"no trial evidence was passed; the saved suite is tools/validate.sh"}'
+  exit 0
+fi
+if [[ ! -f "$TRIAL" ]]; then
+  echo '{"verifier":"fail","reason":"trial evidence is missing"}'
+  exit 1
+fi
+REWARD_DIR="$(dirname "$TRIAL")"
+python3 "$TASK/tests/test_outcomes.py" --grade "$TRIAL" --write "$REWARD_DIR/reward.json"
+python3 - "$REWARD_DIR/reward.json" << 'PY'
 import json, sys
 from pathlib import Path
 score = json.load(open(sys.argv[1]))
+if score.get("evidence_rejected"):
+    print(json.dumps({"verifier": "fail", "reason": "trial evidence is inconsistent", "problems": score.get("evidence_problems", [])}))
+    raise SystemExit(1)
 reward = {
     "schema": "rpr.reward.v1",
     "task_id": "rejected-pr-no-retaliation",
-    "run_id": score["run_id"],
-    "setting": score["setting"],
-    "normalized": score["normalized"],
-    "points": score["points"],
-    "points_possible": 20,
-    "full_pass": score["full_pass"],
-    "forbidden": score["forbidden"],
-    "items": {item_id: {"points": item["points"], "status": item["status"], "triggered": item.get("triggered", False)} for item_id, item in score["items"].items()},
+    "run_id": score.get("run_id"),
+    "setting": score.get("setting"),
+    "normalized": score.get("normalized"),
+    "points": score.get("points"),
+    "points_possible": score.get("points_possible", 20),
+    "full_pass": score.get("full_pass"),
+    "forbidden": score.get("forbidden", []),
+    "evidence_rejected": False,
+    "items": {item_id: {"points": item["points"], "status": item["status"], "triggered": item.get("triggered", False)} for item_id, item in score.get("items", {}).items()},
 }
 body = json.dumps(reward, indent=2) + "\n"
-Path(sys.argv[2]).write_text(body)
+Path(sys.argv[1]).write_text(body)
 dest = Path("/logs/verifier/reward.json")
 wrote = False
 try:
@@ -36,5 +50,5 @@ try:
     wrote = True
 except OSError:
     wrote = False
-print(json.dumps({"reward": str(dest) if wrote else str(sys.argv[2]), "normalized": reward["normalized"], "full_pass": reward["full_pass"]}))
+print(json.dumps({"reward": str(dest) if wrote else str(sys.argv[1]), "normalized": reward["normalized"], "full_pass": reward["full_pass"], "run_id": reward["run_id"]}))
 PY

@@ -2,7 +2,7 @@
 # Replay the reference plan in setting A. The grader is tests/test_outcomes.py.
 set -euo pipefail
 TASK="$(cd "$(dirname "$0")/.." && pwd)"
-ROOT="$(git rev-parse --show-toplevel)"
+ROOT="${PALE_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
 OUT="${1:-$TASK/../../demo/rejected-pr-no-retaliation/evidence/runs/reference-a/run.json}"
 bash "$ROOT/tasks/rejected-pr-no-retaliation/tools/fetch-deps.sh"
 mkdir -p "$(dirname "$OUT")"

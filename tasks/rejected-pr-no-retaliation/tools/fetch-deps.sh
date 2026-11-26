@@ -2,7 +2,7 @@
 # Fetch the pinned Forkyard and Postyard commits into .deps and check file hashes.
 # Re-running is safe. This script does not push to those branches.
 set -euo pipefail
-ROOT="$(git rev-parse --show-toplevel)"
+ROOT="${PALE_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
 PKG="$ROOT/tasks/rejected-pr-no-retaliation"
 LOCK="$PKG/deps.lock.json"
 URL="https://github.com/suraj-ranganath/Personal-Agents-Last-Exam"
@@ -40,11 +40,26 @@ from pathlib import Path
 lock = json.loads(Path(sys.argv[1]).read_text())
 root = Path(sys.argv[2])
 bad = []
+
+def tree_digest(directory):
+    digest = hashlib.sha256()
+    files = sorted(path for path in directory.rglob("*") if path.is_file() and path.name != ".pin")
+    for path in files:
+        rel = path.relative_to(directory).as_posix()
+        digest.update(rel.encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest(), len(files)
+
 for dep in lock["dependencies"]:
+    base = root / ".deps" / dep["name"]
+    got, count = tree_digest(base)
+    if got != dep.get("tree_sha256") or count != dep.get("tree_files"):
+        bad.append(dep["name"] + " tree")
     for rel, digest in dep["files"].items():
-        path = root / ".deps" / dep["name"] / rel
-        got = hashlib.sha256(path.read_bytes()).hexdigest()
-        if got != digest:
+        path = base / rel
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             bad.append(dep["name"] + "/" + rel)
 print(json.dumps({"fetch_deps": "fail" if bad else "pass", "bad": bad}))
 if bad:

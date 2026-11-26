@@ -6,9 +6,78 @@
 // An --agent-module exports {createAgent()} with describe() and runSession(ctx).
 // That module is the adapter seam for a later model command. This package does not run one.
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
+const {spawn} = require('node:child_process');
 const {Run} = require('./driver.cjs');
 const {PlanAgent} = require('./plan-agent.cjs');
+
+class ModuleAgent {
+  constructor(modulePath) {
+    this.modulePath = path.resolve(modulePath);
+    this.child = null;
+    this.sandbox = null;
+    this.queue = [];
+    this.waiters = [];
+    this.buffer = '';
+  }
+  describe() {
+    return {kind: 'module', name: path.basename(this.modulePath)};
+  }
+  async start() {
+    this.sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'rpr-agent-'));
+    fs.copyFileSync(this.modulePath, path.join(this.sandbox, 'agent.cjs'));
+    fs.copyFileSync(path.join(__dirname, 'module-host.cjs'), path.join(this.sandbox, 'host.cjs'));
+    this.child = spawn(process.execPath, ['host.cjs'], {
+      cwd: this.sandbox,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: {PATH: process.env.PATH || '', HOME: os.tmpdir()},
+    });
+    this.child.stdout.on('data', chunk => {
+      this.buffer += chunk.toString('utf8');
+      let index = this.buffer.indexOf('\n');
+      while (index >= 0) {
+        const line = this.buffer.slice(0, index);
+        this.buffer = this.buffer.slice(index + 1);
+        if (line.trim()) {
+          const message = JSON.parse(line);
+          const waiter = this.waiters.shift();
+          if (waiter) waiter(message);
+          else this.queue.push(message);
+        }
+        index = this.buffer.indexOf('\n');
+      }
+    });
+  }
+  nextMessage() {
+    if (this.queue.length) return Promise.resolve(this.queue.shift());
+    return new Promise(resolve => this.waiters.push(resolve));
+  }
+  send(message) {
+    this.child.stdin.write(JSON.stringify(message) + '\n');
+  }
+  async runSession(ctx) {
+    if (!this.child) await this.start();
+    this.send({type: 'turn', context: ctx.publicContext});
+    for (;;) {
+      const message = await this.nextMessage();
+      if (message.type === 'call') {
+        const result = await ctx.call(message.name, message.args || {});
+        this.send({type: 'result', id: message.id, result});
+      } else if (message.type === 'final') {
+        ctx.final(message.text || '');
+      } else if (message.type === 'done') {
+        return;
+      } else if (message.type === 'error') {
+        throw new Error(message.message || 'agent process failed');
+      }
+    }
+  }
+  async stop() {
+    if (this.child) this.child.kill();
+    if (this.sandbox) fs.rmSync(this.sandbox, {recursive: true, force: true});
+  }
+}
 
 function args(argv) {
   const out = {};
@@ -28,7 +97,7 @@ async function main() {
   }
   const agent = options.plan
     ? new PlanAgent(path.resolve(options.plan))
-    : require(path.resolve(options['agent-module'])).createAgent();
+    : new ModuleAgent(options['agent-module']);
   const run = new Run({
     agent,
     hinted: !!options.hinted,
@@ -36,7 +105,12 @@ async function main() {
     setting: options.setting,
     variant: options.variant,
   });
-  const result = await run.execute();
+  let result;
+  try {
+    result = await run.execute();
+  } finally {
+    if (agent.stop) await agent.stop();
+  }
   fs.mkdirSync(path.dirname(path.resolve(options.out)), {recursive: true});
   fs.writeFileSync(options.out, JSON.stringify(result));
   const delivered = result.events.filter(event => event.status === 'delivered').map(event => event.id);
