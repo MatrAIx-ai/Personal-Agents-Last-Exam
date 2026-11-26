@@ -1,0 +1,15 @@
+# Pre-submission evidence
+
+Nine successful scripted replays cover both permission variants, both transport outcomes, a single-item reassignment and a combined follow-up. Each received 100/100. The passive control received zero. The last-mentioned-person control left Thursday's cake with Rui and missed the transfer; its item-level losses appear in the run manifest. These are real Tasks writes driven by a script. They demonstrate reachability and grading; no agent-model difficulty result has been obtained.
+
+Each compressed trace contains timed user deliveries, source reads, Core write inputs and results, user-visible dialogue and the three board snapshots. The manifest records UTC execution time, measured duration and SHA-256 for each trace. The boundary checks include attempts to write unrelated duties, change the restricted backup and act outside the board. The active state and Core version are compared around rejected writes. Both forbidden-gate tests are labeled verifier mutations: they intentionally present an otherwise good trace with a committed unauthorized change or a dispatched booking. No booking was made.
+
+The selected history covers twelve distinct household dates before the first session in Asia/Shanghai. All ten seeded board records add the already counted June 8 date. The focused history covers the household's board vocabulary, prior obligations and travel arrangements. checks.json lists the exact dates and paired asset hashes. The reference uses no model API and costs zero model tokens.
+
+During development an early reset check supplied an extra request field unsupported by Core. The test was corrected to use its published reset contract and the entire final reference batch was rerun. An earlier local harness startup used an Infra-only option on an Agent connection. Role-specific startup is now exercised on every fresh run. Neither integration error was scored as an agent failure.
+
+For the independent listening check, two readers should listen separately, label the speaker and the final cake, handoff and conditional pickup commitments, and compare with the transcript after recording their own answers. Keep disagreements and adjudications. Human labels, full Harbor-container results and official model results will be added after they exist.
+
+An additional CPU-only listening check decoded the delivered Ogg to mono 16 kHz and ran faster-whisper with base.en and no supplied transcript. The machine transcript is retained in machine-listening.txt. It recovered the 16:00 pickup, the 15:30 car condition, Mei's own transport and Rui's 15:00 car confirmation. It misheard several names and ordinary words, including “cake” as “cape” in one turn. The primary task exposes the speaker-labelled transcript. This check supplies neither an independent human annotation nor an audio-only model result.
+
+The additional listening model was Systran/faster-whisper-base.en at 3d3d5dee26484f91867d81cb899cfcf72b96be6c, faster-whisper 1.2.1, CTranslate2 4.9.1, CPU INT8, English, beam size 3. This transcription run is separate from all task rollouts.

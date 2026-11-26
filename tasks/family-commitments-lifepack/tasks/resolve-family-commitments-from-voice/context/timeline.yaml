@@ -1,0 +1,40 @@
+{
+  "schema": "family-runner/1",
+  "timezone": "Asia/Shanghai",
+  "start": "2026-06-10T18:00:00+08:00",
+  "steps": [
+    {
+      "id": "permissions",
+      "time": "2026-06-10T18:00:00+08:00",
+      "session": 1
+    },
+    {
+      "id": "backup",
+      "time": "2026-06-10T18:05:00+08:00",
+      "session": 1
+    },
+    {
+      "id": "discussion",
+      "time": "2026-06-11T19:00:00+08:00",
+      "session": 2
+    },
+    {
+      "id": "withdrawal",
+      "time": "2026-06-12T09:00:00+08:00",
+      "session": 3
+    },
+    {
+      "id": "transport-reply",
+      "time": "2026-06-12T09:10:00+08:00",
+      "session": 3
+    },
+    {
+      "id": "close",
+      "time": "2026-06-12T09:15:00+08:00",
+      "session": 3
+    }
+  ],
+  "ordering": "Advance Tasks clock; release eligible records and user event; inject hint on discussion and withdrawal; allow board actions. Capture before advancing.",
+  "reply_condition": "answered path and a targeted transport question delivered to Rui before reply time; otherwise silence",
+  "stop": "Friday 09:15 closing response and snapshot"
+}
