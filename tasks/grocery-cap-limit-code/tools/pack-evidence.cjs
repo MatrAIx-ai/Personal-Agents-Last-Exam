@@ -33,8 +33,36 @@ for (const name of names) {
   for (const file of present) copyFile(path.join(from, file), path.join(dest, file));
   const log = path.join(source, name + '.log');
   if (fs.existsSync(log)) copyFile(log, path.join(dest, 'runner.log'));
-  const reward = present.includes('reward.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8')) : null;
+  let reward = null;
+  if (present.includes('reward.json')) {
+    try {
+      reward = JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8'));
+    } catch (error) {
+      throw new Error(name + ' reward is not valid JSON');
+    }
+  }
   const want = expected[name];
+  if (reward && reward.official_score !== false) {
+    const statePath = path.join(dest, 'state.json');
+    const runPath = path.join(dest, 'run.json');
+    if (!fs.existsSync(statePath) || !fs.existsSync(runPath)) throw new Error(name + ' scored artifact missing');
+    let stateDoc;
+    let runDoc;
+    try {
+      stateDoc = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+    } catch (error) {
+      throw new Error(name + ' state is not valid JSON');
+    }
+    try {
+      runDoc = JSON.parse(fs.readFileSync(runPath, 'utf8'));
+    } catch (error) {
+      throw new Error(name + ' run is not valid JSON');
+    }
+    const apps = stateDoc && stateDoc.apps;
+    const ready = stateDoc && stateDoc.schema === 'grocery-cap-limit-code.run.v1' && apps && runDoc && runDoc.run_id;
+    const appsReady = ready && ['freshcart', 'keelcard', 'mail', 'webstub'].every(app => apps[app] && typeof apps[app] === 'object');
+    if (!appsReady) throw new Error(name + ' state is incomplete');
+  }
   const status = !reward ? 'incomplete' : (reward.official_score === false ? 'ineligible' : 'scored');
   if (want && !reward) throw new Error(name + ' reward missing');
   if (!want && status === 'scored') throw new Error('unexpected run ' + name);

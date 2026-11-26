@@ -324,11 +324,10 @@ async function runScenario(options) {
     async openSession(session) {
       ctx.currentSession = session.id;
       await deliverDue(session.start);
-      const first = timeline.sessions[0] && timeline.sessions[0].id;
-      if (hint && session.id === first) sayLine({ at: session.start, role: 'system', text: hint, session: session.id });
+      if (hint) sayLine({ at: session.start, role: 'system', text: hint, session: session.id });
       if (session.opening) sayLine({ at: session.start, role: 'user', text: session.opening, session: session.id });
       const messages = transcript.filter(row => row.session === session.id && Date.parse(row.at) <= Date.parse(clock));
-      return { id: session.id, hint: session.id === first ? (hint || null) : null, messages };
+      return { id: session.id, hint: hint || null, messages };
     },
     async closeSession(session) { await deliverDue(session.end); },
     currentSession: null
