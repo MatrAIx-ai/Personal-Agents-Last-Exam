@@ -1,0 +1,208 @@
+{
+  "data": {
+    "account_id": "mail-maya",
+    "owner_person_id": "person-maya",
+    "address": "maya.main@example.com",
+    "messages": [
+      {
+        "id": "materials",
+        "thread_id": "design-review",
+        "account_id": "mail-maya",
+        "from": "alex.rivera@example.com",
+        "to": [
+          "maya.main@example.com"
+        ],
+        "subject": "Task 素材包 · 新的评审材料",
+        "body": "这是 Task 自己提供的 JSON 附件。它与邮件记录一起经过校验，并通过 MCP 读取。",
+        "received_at": "2026-11-12T08:30:00-08:00",
+        "folder": "inbox",
+        "read": false,
+        "attachments": [
+          "task-mail-materials"
+        ]
+      },
+      {
+        "id": "confirmation",
+        "thread_id": "design-review",
+        "account_id": "mail-maya",
+        "from": "alex.rivera@example.com",
+        "to": [
+          "maya.main@example.com"
+        ],
+        "subject": "设计评审 · 周一 10:00",
+        "body": "原定 11 月 16 日 10:00–11:00，太平洋时间。请查看你个人日历上的这场评审。",
+        "received_at": "2026-11-12T09:00:00-08:00",
+        "folder": "inbox",
+        "read": true,
+        "attachments": [],
+        "event_ref": {
+          "app_id": "calendar",
+          "account_id": "calendar-maya",
+          "object_id": "evt-review"
+        }
+      }
+    ]
+  },
+  "binding": {
+    "people": [
+      {
+        "person_id": "person-maya",
+        "name": "Maya Chen"
+      },
+      {
+        "person_id": "person-alex",
+        "name": "Alex Rivera"
+      }
+    ],
+    "accounts": [
+      {
+        "app_id": "mail",
+        "account_id": "mail-maya",
+        "owner_person_id": "person-maya"
+      },
+      {
+        "app_id": "calendar",
+        "account_id": "calendar-maya",
+        "owner_person_id": "person-maya"
+      }
+    ],
+    "objects": {
+      "calendar": [
+        "evt-review",
+        "evt-lunch",
+        "evt-busy"
+      ]
+    }
+  },
+  "policies": {
+    "scenario": {
+      "allow": [
+        "mail.search",
+        "mail.get"
+      ],
+      "constraints": {}
+    },
+    "sandbox": {
+      "allow": [
+        "mail.search",
+        "mail.get",
+        "mail.draft.create",
+        "mail.draft.update",
+        "mail.send",
+        "mail.flags.update",
+        "mail.move",
+        "mail.trash"
+      ],
+      "constraints": {}
+    }
+  },
+  "bundle": {
+    "dataset": {
+      "schema_version": "pale.dataset.v1",
+      "dataset_id": "mail-task-materials",
+      "version": "1.0.0",
+      "description": "Task 自带素材示例：只替换本 App，不修改 App 代码。",
+      "record_source_ids": [
+        "authored"
+      ],
+      "sources": [
+        {
+          "source_id": "authored",
+          "kind": "synthetic",
+          "description": "手工编写的合成记录；无外部采集。",
+          "uri": null,
+          "license": "MIT",
+          "usage": "permitted",
+          "collection": null,
+          "generation": {
+            "method": "manual",
+            "tool": "PALE fixture authoring",
+            "tool_version": "1.1.0",
+            "seed": null,
+            "parameters": {}
+          }
+        }
+      ],
+      "transformations": [
+        "手工编写演示数据与 JSON 附件；按统一 schema 打包。"
+      ],
+      "expected_counts": {
+        "records": 2,
+        "assets": 1
+      },
+      "quality_policy": {
+        "duplicate_records": "reject",
+        "duplicate_assets": "reject",
+        "missing_assets": "allow_declared"
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": "自动检查不替代真实性、变化丰富度与来源许可的人工审核。"
+      }
+    },
+    "catalog": {
+      "schema_version": "pale.asset-catalog.v1",
+      "catalog_id": "mail-assets",
+      "app_id": "mail",
+      "dataset_ref": "dataset.json",
+      "assets": [
+        {
+          "schema_version": "pale.asset-descriptor.v1",
+          "asset_id": "task-mail-materials",
+          "scope": {
+            "level": "task",
+            "app_id": "mail",
+            "task_id": "mail-example"
+          },
+          "roles": [
+            "content.attachment"
+          ],
+          "subjects": [
+            {
+              "app_id": "mail",
+              "account_id": "mail-maya",
+              "object_type": "message",
+              "object_id": "materials"
+            }
+          ],
+          "mime_type": "application/json",
+          "availability": {
+            "status": "ready"
+          },
+          "storage": {
+            "adapter": "storage.file",
+            "path": "assets/task-mail-materials.json",
+            "packaging": "bundled"
+          },
+          "provenance": {
+            "dataset_id": "mail-task-materials",
+            "source_ids": [
+              "authored"
+            ]
+          },
+          "publication": "public",
+          "access": {
+            "audience": [
+              "agent"
+            ],
+            "rule": "parent_object"
+          },
+          "presentation": {
+            "alt_text": "task-mail-materials.json"
+          },
+          "media": {},
+          "extensions": [],
+          "integrity": {
+            "bytes": 160,
+            "sha256": "7aef497fbf4ca36f8e1cd92e718b7521eab99d79232b246b52ace5420769718e"
+          }
+        }
+      ],
+      "extensions": []
+    },
+    "blobs": {
+      "task-mail-materials": "ewogICJ0aXRsZSI6ICJUYXNrLXByb3ZpZGVkIG1hdGVyaWFscyIsCiAgImFwcCI6ICJtYWlsIiwKICAiYWdlbmRhIjogWwogICAgIuajgOafpei1hOaWmSIsCiAgICAi56Gu6K6k5Y+C5LiO5Lq6IiwKICAgICLmoLjlr7nml6XljoYiCiAgXSwKICAic3ludGhldGljIjogdHJ1ZQp9Cg=="
+    }
+  }
+}

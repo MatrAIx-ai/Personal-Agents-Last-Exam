@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "mail",
+  "version": "1.3.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:mail"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "mail.deliver",
+    "mail.receive_notification",
+    "mail.receive_attachments"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer bridge",
+    "real_delivery": false
+  },
+  "limitations": [
+    "No SMTP or IMAP",
+    "One account per App instance",
+    "Local asset bundles: at most 64 assets / 1 MiB decoded bytes; no live streams."
+  ],
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

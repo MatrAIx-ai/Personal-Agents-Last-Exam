@@ -1,0 +1,80 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "calendar-minimal",
+  "version": "1.0.0",
+  "description": "PALE calendar 最小合成验证数据；不代表正式评测任务。",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "手工编写的合成记录；无外部采集。",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "media",
+      "kind": "synthetic",
+      "description": "复用本项目已交付的合成媒体；早期生成参数未完整保存，本版保留原字节与哈希。",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "existing project synthetic fixture",
+        "tool": "legacy fixture pipeline",
+        "tool_version": "unknown",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "ui-generated",
+      "kind": "synthetic",
+      "description": "Programmatically drawn reference App icon; no external image source.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic pixel drawing",
+        "tool": "Python stdlib PNG encoder",
+        "tool_version": "1",
+        "seed": 0,
+        "parameters": {
+          "width": 64,
+          "height": 64,
+          "app": "calendar"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "统一时间戳和账户 ID；记录与素材分开声明。"
+  ],
+  "expected_counts": {
+    "records": 2,
+    "assets": 2
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "自动检查不替代真实性、变化丰富度与来源许可的人工审核。"
+  }
+}

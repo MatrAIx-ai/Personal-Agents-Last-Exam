@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "registry": "examples/registry.mail.json",
+  "publishers": [
+    {
+      "app_id": "delivery",
+      "account_id": "delivery-maya",
+      "owner_person_id": "person-maya",
+      "package_root": "examples/workflows/delivery-to-mail/delivery",
+      "contribution_ref": "contribution/contribution.json",
+      "allowed_recipients": [
+        {
+          "app_id": "mail",
+          "account_id": "mail-maya",
+          "channel": "channel.email"
+        },
+        {
+          "app_id": "mail",
+          "account_id": "mail-maya",
+          "channel": "channel.email.attachments"
+        }
+      ]
+    }
+  ],
+  "authentication": {
+    "mode": "trusted-stdio"
+  }
+}
