@@ -55,7 +55,10 @@ async function main() {
     // `focus` scrolls the element the step is about into view before the screenshot.
     // `on` is the page to capture (another App's page for a dependency's visible result); version and time are Counterline's.
     async function step(name, action, expected, check, focus, on = page) {
-      if (focus) await on.locator(focus).last().scrollIntoViewIfNeeded();
+      // A refresh re-renders the page, so the element can be replaced while scrolling; the locator re-resolves on retry.
+      for (let i = 0; focus && i < 3; i++) {
+        try { await on.locator(focus).last().scrollIntoViewIfNeeded(); break; } catch (e) { if (i === 2 || !/not attached/.test(e.message)) throw e; await on.waitForTimeout(250); }
+      }
       const s = await snap(), observed = check ? await check(s.snapshot.data) : null;
       const file = `${String(++n).padStart(2, '0')}-${name}.jpg`;
       await on.screenshot({path: path.join(OUT, seq.id, file), type: 'jpeg', quality: 70});
