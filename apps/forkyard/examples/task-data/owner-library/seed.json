@@ -1843,7 +1843,7 @@
         },
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\n",
           "binary": false
         }
       ],
@@ -1867,11 +1867,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Matt Davis from Stinson Beach, entry 1: 3.4 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Matt Davis (\\d+(?:\\.\\d+)?) miles, entry 1\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 3.4) return 3.4;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 1,
+      "changed_lines": 5,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -1888,11 +1888,11 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 1: 800 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 1 && trail === 'Matt Davis') return feetToMeters(800);\n  return null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 1,
+      "changed_lines": 4,
       "paths": [
         "src/units.js"
       ]
@@ -1909,7 +1909,7 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 1.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 1.\n3.4 miles, 800 feet of gain.\nAt 19 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
@@ -1931,7 +1931,7 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 1.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 1.\n3.4 miles, 800 feet of gain.\nAt 19 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
@@ -1952,11 +1952,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 2.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 2.\n2.2 miles, 1100 feet of gain.\nAt 26 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -1973,11 +1973,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 3.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 3.\n5.0 miles, 600 feet of gain.\nAt 33 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -1994,11 +1994,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Steep Ravine from Pantoll, entry 2: 2.2 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Steep Ravine (\\d+(?:\\.\\d+)?) miles, entry 2\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 2.2) return 2.2;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2015,7 +2015,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 2: 1100 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 2 && trail === 'Steep Ravine') return feetToMeters(1100);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2036,11 +2036,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 4.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 4.\n8.6 miles, 900 feet of gain.\nAt 40 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2058,11 +2058,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 4.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 4.\n8.6 miles, 900 feet of gain.\nAt 40 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2079,11 +2079,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 5.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 5.\n4.1 miles, 500 feet of gain.\nAt 47 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2100,11 +2100,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCataract from Alpine Lake, entry 6.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 6.\n2.8 miles, 1200 feet of gain.\nAt 14 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2121,11 +2121,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Coast Trail from Muir Beach, entry 3: 5.0 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Coast Trail (\\d+(?:\\.\\d+)?) miles, entry 3\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 5.0) return 5.0;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2142,7 +2142,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 3: 600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 3 && trail === 'Coast Trail') return feetToMeters(600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2163,7 +2163,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 4: 900 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 4 && trail === 'Bolinas Ridge') return feetToMeters(900);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2184,7 +2184,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n1. Matt Davis (Stinson Beach): 3.4 miles, 800 feet of gain.\n",
+          "content": "# Changelog\n\n1. Matt Davis (Stinson Beach): 3.4 miles, 800 feet of gain. At 19 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
@@ -2205,11 +2205,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 7.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 7.\n4.7 miles, 1500 feet of gain.\nAt 21 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2227,11 +2227,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 7.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 7.\n4.7 miles, 1500 feet of gain.\nAt 21 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2248,11 +2248,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 8.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 8.\n3.1 miles, 700 feet of gain.\nAt 28 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2269,11 +2269,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Bolinas Ridge from Bolinas, entry 4: 8.6 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Bolinas Ridge (\\d+(?:\\.\\d+)?) miles, entry 4\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 8.6) return 8.6;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2290,7 +2290,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 5: 500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 5 && trail === 'Redwood Creek') return feetToMeters(500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2311,7 +2311,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 6: 1200 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 6 && trail === 'Cataract') return feetToMeters(1200);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2332,7 +2332,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n2. Steep Ravine (Pantoll): 2.2 miles, 1100 feet of gain.\n",
+          "content": "# Changelog\n\n2. Steep Ravine (Pantoll): 2.2 miles, 1100 feet of gain. At 26 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
@@ -2353,11 +2353,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 9.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 9.\n5.5 miles, 850 feet of gain.\nAt 35 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2375,11 +2375,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 9.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 9.\n5.5 miles, 850 feet of gain.\nAt 35 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2396,11 +2396,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 10.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 10.\n6.2 miles, 1600 feet of gain.\nAt 42 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2417,7 +2417,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 7: 1500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 7 && trail === 'Willow Camp') return feetToMeters(1500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2438,7 +2438,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Old Springs entry 8: 700 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 8 && trail === 'Old Springs') return feetToMeters(700);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2459,7 +2459,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n3. Coast Trail (Muir Beach): 5.0 miles, 600 feet of gain.\n",
+          "content": "# Changelog\n\n3. Coast Trail (Muir Beach): 5.0 miles, 600 feet of gain. At 33 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
@@ -2480,11 +2480,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 11.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 11.\n2.9 miles, 950 feet of gain.\nAt 49 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2502,11 +2502,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 11.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 11.\n2.9 miles, 950 feet of gain.\nAt 49 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2523,11 +2523,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 12.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 12.\n3.6 miles, 750 feet of gain.\nAt 16 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2544,7 +2544,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Miwok entry 9: 850 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 9 && trail === 'Miwok') return feetToMeters(850);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2565,7 +2565,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Sierra Trail entry 10: 1600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 10 && trail === 'Sierra Trail') return feetToMeters(1600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2586,7 +2586,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n4. Bolinas Ridge (Bolinas): 8.6 miles, 900 feet of gain.\n",
+          "content": "# Changelog\n\n4. Bolinas Ridge (Bolinas): 8.6 miles, 900 feet of gain. At 40 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
@@ -2607,11 +2607,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 13.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 13.\n4.4 miles, 650 feet of gain.\nAt 23 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2628,11 +2628,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 14.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 14.\n5.8 miles, 1300 feet of gain.\nAt 30 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2650,11 +2650,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 14.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 14.\n5.8 miles, 1300 feet of gain.\nAt 30 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2671,11 +2671,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 15.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 15.\n2.5 miles, 400 feet of gain.\nAt 37 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2692,11 +2692,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Redwood Creek from Muir Woods, entry 5: 4.1 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Redwood Creek (\\d+(?:\\.\\d+)?) miles, entry 5\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 4.1) return 4.1;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2713,7 +2713,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bootjack entry 11: 950 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 11 && trail === 'Bootjack') return feetToMeters(950);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2734,7 +2734,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Fern Creek entry 12: 750 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 12 && trail === 'Fern Creek') return feetToMeters(750);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2755,7 +2755,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n5. Redwood Creek (Muir Woods): 4.1 miles, 500 feet of gain.\n",
+          "content": "# Changelog\n\n5. Redwood Creek (Muir Woods): 4.1 miles, 500 feet of gain. At 47 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
@@ -2776,11 +2776,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 16.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 16.\n7.1 miles, 1400 feet of gain.\nAt 44 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2797,11 +2797,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 17.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 17.\n3.4 miles, 800 feet of gain.\nAt 51 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2819,11 +2819,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 17.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 17.\n3.4 miles, 800 feet of gain.\nAt 51 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2840,11 +2840,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Cataract from Alpine Lake, entry 6: 2.8 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Cataract (\\d+(?:\\.\\d+)?) miles, entry 6\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 2.8) return 2.8;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2861,7 +2861,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dias Ridge entry 13: 650 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 13 && trail === 'Dias Ridge') return feetToMeters(650);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2882,11 +2882,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 18.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 18.\n2.2 miles, 1100 feet of gain.\nAt 18 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2903,11 +2903,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 19.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 19.\n5.0 miles, 600 feet of gain.\nAt 25 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2925,11 +2925,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 19.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 19.\n5.0 miles, 600 feet of gain.\nAt 25 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -2946,11 +2946,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Willow Camp from Stinson Beach, entry 7: 4.7 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Willow Camp (\\d+(?:\\.\\d+)?) miles, entry 7\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 4.7) return 4.7;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2967,7 +2967,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Hill 88 entry 14: 1300 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 14 && trail === 'Hill 88') return feetToMeters(1300);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -2988,11 +2988,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 20.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 20.\n8.6 miles, 900 feet of gain.\nAt 32 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3009,11 +3009,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 21.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 21.\n4.1 miles, 500 feet of gain.\nAt 39 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3030,11 +3030,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Old Springs from Tennessee Valley, entry 8: 3.1 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Old Springs (\\d+(?:\\.\\d+)?) miles, entry 8\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 3.1) return 3.1;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3051,7 +3051,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Rodeo Valley entry 15: 400 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 15 && trail === 'Rodeo Valley') return feetToMeters(400);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3072,7 +3072,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dipsea entry 16: 1400 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 16 && trail === 'Dipsea') return feetToMeters(1400);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3093,7 +3093,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n6. Cataract (Alpine Lake): 2.8 miles, 1200 feet of gain.\n",
+          "content": "# Changelog\n\n6. Cataract (Alpine Lake): 2.8 miles, 1200 feet of gain. At 14 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
@@ -3114,11 +3114,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCataract from Alpine Lake, entry 22.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 22.\n2.8 miles, 1200 feet of gain.\nAt 46 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3135,11 +3135,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 23.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 23.\n4.7 miles, 1500 feet of gain.\nAt 13 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3156,11 +3156,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 24.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 24.\n3.1 miles, 700 feet of gain.\nAt 20 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3178,11 +3178,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 24.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 24.\n3.1 miles, 700 feet of gain.\nAt 20 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3199,7 +3199,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 17: 800 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 17 && trail === 'Matt Davis') return feetToMeters(800);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3220,7 +3220,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 18: 1100 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 18 && trail === 'Steep Ravine') return feetToMeters(1100);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3241,7 +3241,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n7. Willow Camp (Stinson Beach): 4.7 miles, 1500 feet of gain.\n",
+          "content": "# Changelog\n\n7. Willow Camp (Stinson Beach): 4.7 miles, 1500 feet of gain. At 21 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
@@ -3262,11 +3262,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 25.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 25.\n5.5 miles, 850 feet of gain.\nAt 27 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3283,11 +3283,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 26.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 26.\n6.2 miles, 1600 feet of gain.\nAt 34 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3305,11 +3305,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 26.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 26.\n6.2 miles, 1600 feet of gain.\nAt 34 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3326,7 +3326,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 19: 600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 19 && trail === 'Coast Trail') return feetToMeters(600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3347,7 +3347,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 20: 900 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 20 && trail === 'Bolinas Ridge') return feetToMeters(900);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3368,7 +3368,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n8. Old Springs (Tennessee Valley): 3.1 miles, 700 feet of gain.\n",
+          "content": "# Changelog\n\n8. Old Springs (Tennessee Valley): 3.1 miles, 700 feet of gain. At 28 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
@@ -3389,11 +3389,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 27.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 27.\n2.9 miles, 950 feet of gain.\nAt 41 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3410,11 +3410,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 28.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 28.\n3.6 miles, 750 feet of gain.\nAt 48 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3432,11 +3432,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 28.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 28.\n3.6 miles, 750 feet of gain.\nAt 48 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3453,7 +3453,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 21: 500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 21 && trail === 'Redwood Creek') return feetToMeters(500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3474,7 +3474,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 22: 1200 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 22 && trail === 'Cataract') return feetToMeters(1200);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3495,7 +3495,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n9. Miwok (Rodeo Lagoon): 5.5 miles, 850 feet of gain.\n",
+          "content": "# Changelog\n\n9. Miwok (Rodeo Lagoon): 5.5 miles, 850 feet of gain. At 35 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
@@ -3516,11 +3516,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 29.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 29.\n4.4 miles, 650 feet of gain.\nAt 15 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3537,11 +3537,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 30.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 30.\n5.8 miles, 1300 feet of gain.\nAt 22 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3558,11 +3558,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Miwok from Rodeo Lagoon, entry 9: 5.5 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Miwok (\\d+(?:\\.\\d+)?) miles, entry 9\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 5.5) return 5.5;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3579,11 +3579,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 31.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 31.\n2.5 miles, 400 feet of gain.\nAt 29 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3601,11 +3601,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 31.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 31.\n2.5 miles, 400 feet of gain.\nAt 29 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3622,7 +3622,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 23: 1500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 23 && trail === 'Willow Camp') return feetToMeters(1500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3643,7 +3643,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n10. Sierra Trail (Mount Tamalpais): 6.2 miles, 1600 feet of gain.\n",
+          "content": "# Changelog\n\n10. Sierra Trail (Mount Tamalpais): 6.2 miles, 1600 feet of gain. At 42 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
@@ -3664,11 +3664,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 32.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 32.\n7.1 miles, 1400 feet of gain.\nAt 36 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3685,11 +3685,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 33.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 33.\n3.4 miles, 800 feet of gain.\nAt 43 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3706,11 +3706,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Sierra Trail from Mount Tamalpais, entry 10: 6.2 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Sierra Trail (\\d+(?:\\.\\d+)?) miles, entry 10\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 6.2) return 6.2;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3727,11 +3727,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 34.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 34.\n2.2 miles, 1100 feet of gain.\nAt 50 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3749,11 +3749,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 34.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 34.\n2.2 miles, 1100 feet of gain.\nAt 50 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3770,7 +3770,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Old Springs entry 24: 700 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 24 && trail === 'Old Springs') return feetToMeters(700);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3791,11 +3791,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 35.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 35.\n5.0 miles, 600 feet of gain.\nAt 17 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3812,11 +3812,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 36.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 36.\n8.6 miles, 900 feet of gain.\nAt 24 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3833,11 +3833,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Bootjack from Mountain Home, entry 11: 2.9 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Bootjack (\\d+(?:\\.\\d+)?) miles, entry 11\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 2.9) return 2.9;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3854,11 +3854,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 37.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 37.\n4.1 miles, 500 feet of gain.\nAt 31 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3876,11 +3876,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 37.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 37.\n4.1 miles, 500 feet of gain.\nAt 31 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3897,7 +3897,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Miwok entry 25: 850 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 25 && trail === 'Miwok') return feetToMeters(850);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -3918,11 +3918,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCataract from Alpine Lake, entry 38.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 38.\n2.8 miles, 1200 feet of gain.\nAt 38 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3939,11 +3939,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 39.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 39.\n4.7 miles, 1500 feet of gain.\nAt 45 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -3960,11 +3960,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Fern Creek from Muir Woods, entry 12: 3.6 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Fern Creek (\\d+(?:\\.\\d+)?) miles, entry 12\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 3.6) return 3.6;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3981,7 +3981,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Sierra Trail entry 26: 1600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 26 && trail === 'Sierra Trail') return feetToMeters(1600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4002,11 +4002,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 40.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 40.\n3.1 miles, 700 feet of gain.\nAt 12 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4024,11 +4024,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 40.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 40.\n3.1 miles, 700 feet of gain.\nAt 12 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4045,7 +4045,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bootjack entry 27: 950 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 27 && trail === 'Bootjack') return feetToMeters(950);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4066,7 +4066,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n11. Bootjack (Mountain Home): 2.9 miles, 950 feet of gain.\n",
+          "content": "# Changelog\n\n11. Bootjack (Mountain Home): 2.9 miles, 950 feet of gain. At 49 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
@@ -4087,11 +4087,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 41.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 41.\n5.5 miles, 850 feet of gain.\nAt 19 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4108,11 +4108,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 42.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 42.\n6.2 miles, 1600 feet of gain.\nAt 26 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4129,11 +4129,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Dias Ridge from Muir Beach, entry 13: 4.4 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Dias Ridge (\\d+(?:\\.\\d+)?) miles, entry 13\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 4.4) return 4.4;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4150,7 +4150,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Fern Creek entry 28: 750 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 28 && trail === 'Fern Creek') return feetToMeters(750);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4171,11 +4171,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 43.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 43.\n2.9 miles, 950 feet of gain.\nAt 33 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4193,11 +4193,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 43.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 43.\n2.9 miles, 950 feet of gain.\nAt 33 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4214,7 +4214,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n12. Fern Creek (Muir Woods): 3.6 miles, 750 feet of gain.\n",
+          "content": "# Changelog\n\n12. Fern Creek (Muir Woods): 3.6 miles, 750 feet of gain. At 16 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
@@ -4235,11 +4235,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 44.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 44.\n3.6 miles, 750 feet of gain.\nAt 40 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4256,7 +4256,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dias Ridge entry 29: 650 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 29 && trail === 'Dias Ridge') return feetToMeters(650);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4277,11 +4277,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 45.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 45.\n4.4 miles, 650 feet of gain.\nAt 47 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4299,11 +4299,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 45.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 45.\n4.4 miles, 650 feet of gain.\nAt 47 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4320,7 +4320,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n13. Dias Ridge (Muir Beach): 4.4 miles, 650 feet of gain.\n",
+          "content": "# Changelog\n\n13. Dias Ridge (Muir Beach): 4.4 miles, 650 feet of gain. At 23 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
@@ -4341,11 +4341,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 46.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 46.\n5.8 miles, 1300 feet of gain.\nAt 14 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4362,7 +4362,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Hill 88 entry 30: 1300 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 30 && trail === 'Hill 88') return feetToMeters(1300);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4383,7 +4383,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Rodeo Valley entry 31: 400 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 31 && trail === 'Rodeo Valley') return feetToMeters(400);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4404,7 +4404,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n14. Hill 88 (Marin Headlands): 5.8 miles, 1300 feet of gain.\n",
+          "content": "# Changelog\n\n14. Hill 88 (Marin Headlands): 5.8 miles, 1300 feet of gain. At 30 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
@@ -4425,11 +4425,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 47.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 47.\n2.5 miles, 400 feet of gain.\nAt 21 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4446,11 +4446,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 48.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 48.\n7.1 miles, 1400 feet of gain.\nAt 28 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4467,11 +4467,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Hill 88 from Marin Headlands, entry 14: 5.8 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Hill 88 (\\d+(?:\\.\\d+)?) miles, entry 14\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 5.8) return 5.8;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4488,7 +4488,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dipsea entry 32: 1400 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 32 && trail === 'Dipsea') return feetToMeters(1400);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4509,7 +4509,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 33: 800 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 33 && trail === 'Matt Davis') return feetToMeters(800);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4530,11 +4530,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 49.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 49.\n3.4 miles, 800 feet of gain.\nAt 35 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4552,11 +4552,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 49.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 49.\n3.4 miles, 800 feet of gain.\nAt 35 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4573,11 +4573,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 50.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 50.\n2.2 miles, 1100 feet of gain.\nAt 42 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4594,11 +4594,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 51.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 51.\n5.0 miles, 600 feet of gain.\nAt 49 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4615,11 +4615,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Rodeo Valley from Fort Cronkhite, entry 15: 2.5 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Rodeo Valley (\\d+(?:\\.\\d+)?) miles, entry 15\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 2.5) return 2.5;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4636,7 +4636,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 34: 1100 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 34 && trail === 'Steep Ravine') return feetToMeters(1100);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4657,11 +4657,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 52.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 52.\n8.6 miles, 900 feet of gain.\nAt 16 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4679,11 +4679,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 52.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 52.\n8.6 miles, 900 feet of gain.\nAt 16 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4700,11 +4700,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 53.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 53.\n4.1 miles, 500 feet of gain.\nAt 23 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4721,11 +4721,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCataract from Alpine Lake, entry 54.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 54.\n2.8 miles, 1200 feet of gain.\nAt 30 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4742,11 +4742,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Dipsea from Mill Valley, entry 16: 7.1 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Dipsea (\\d+(?:\\.\\d+)?) miles, entry 16\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 7.1) return 7.1;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4763,7 +4763,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 35: 600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 35 && trail === 'Coast Trail') return feetToMeters(600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4784,11 +4784,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 55.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 55.\n4.7 miles, 1500 feet of gain.\nAt 37 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4806,11 +4806,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 55.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 55.\n4.7 miles, 1500 feet of gain.\nAt 37 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4827,11 +4827,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 56.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 56.\n3.1 miles, 700 feet of gain.\nAt 44 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4848,11 +4848,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Matt Davis from Stinson Beach, entry 17: 3.4 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Matt Davis (\\d+(?:\\.\\d+)?) miles, entry 17\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 3.4) return 3.4;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4869,7 +4869,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 36: 900 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 36 && trail === 'Bolinas Ridge') return feetToMeters(900);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4890,7 +4890,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 37: 500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 37 && trail === 'Redwood Creek') return feetToMeters(500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -4911,7 +4911,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n15. Rodeo Valley (Fort Cronkhite): 2.5 miles, 400 feet of gain.\n",
+          "content": "# Changelog\n\n15. Rodeo Valley (Fort Cronkhite): 2.5 miles, 400 feet of gain. At 37 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
@@ -4932,11 +4932,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 57.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 57.\n5.5 miles, 850 feet of gain.\nAt 51 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4954,11 +4954,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 57.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 57.\n5.5 miles, 850 feet of gain.\nAt 51 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4975,11 +4975,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 58.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 58.\n6.2 miles, 1600 feet of gain.\nAt 18 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -4996,11 +4996,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Steep Ravine from Pantoll, entry 18: 2.2 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Steep Ravine (\\d+(?:\\.\\d+)?) miles, entry 18\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 2.2) return 2.2;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5017,7 +5017,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 38: 1200 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 38 && trail === 'Cataract') return feetToMeters(1200);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5038,7 +5038,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 39: 1500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 39 && trail === 'Willow Camp') return feetToMeters(1500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5059,7 +5059,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n16. Dipsea (Mill Valley): 7.1 miles, 1400 feet of gain.\n",
+          "content": "# Changelog\n\n16. Dipsea (Mill Valley): 7.1 miles, 1400 feet of gain. At 44 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
@@ -5080,11 +5080,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 59.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 59.\n2.9 miles, 950 feet of gain.\nAt 25 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5102,11 +5102,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 59.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 59.\n2.9 miles, 950 feet of gain.\nAt 25 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5123,11 +5123,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 60.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 60.\n3.6 miles, 750 feet of gain.\nAt 32 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5144,7 +5144,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Old Springs entry 40: 700 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 40 && trail === 'Old Springs') return feetToMeters(700);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5165,7 +5165,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Miwok entry 41: 850 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 41 && trail === 'Miwok') return feetToMeters(850);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5186,7 +5186,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n17. Matt Davis (Stinson Beach): 3.4 miles, 800 feet of gain.\n",
+          "content": "# Changelog\n\n17. Matt Davis (Stinson Beach): 3.4 miles, 800 feet of gain. At 51 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
@@ -5207,11 +5207,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 61.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 61.\n4.4 miles, 650 feet of gain.\nAt 39 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5229,11 +5229,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 61.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 61.\n4.4 miles, 650 feet of gain.\nAt 39 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5250,11 +5250,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 62.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 62.\n5.8 miles, 1300 feet of gain.\nAt 46 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5271,7 +5271,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Sierra Trail entry 42: 1600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 42 && trail === 'Sierra Trail') return feetToMeters(1600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5292,7 +5292,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bootjack entry 43: 950 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 43 && trail === 'Bootjack') return feetToMeters(950);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5313,7 +5313,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n18. Steep Ravine (Pantoll): 2.2 miles, 1100 feet of gain.\n",
+          "content": "# Changelog\n\n18. Steep Ravine (Pantoll): 2.2 miles, 1100 feet of gain. At 18 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
@@ -5334,11 +5334,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 63.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 63.\n2.5 miles, 400 feet of gain.\nAt 13 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5355,11 +5355,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 64.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 64.\n7.1 miles, 1400 feet of gain.\nAt 20 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5377,11 +5377,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 64.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 64.\n7.1 miles, 1400 feet of gain.\nAt 20 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5398,11 +5398,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Coast Trail from Muir Beach, entry 19: 5.0 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Coast Trail (\\d+(?:\\.\\d+)?) miles, entry 19\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 5.0) return 5.0;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5419,7 +5419,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Fern Creek entry 44: 750 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 44 && trail === 'Fern Creek') return feetToMeters(750);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5440,7 +5440,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dias Ridge entry 45: 650 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 45 && trail === 'Dias Ridge') return feetToMeters(650);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5461,7 +5461,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n19. Coast Trail (Muir Beach): 5.0 miles, 600 feet of gain.\n",
+          "content": "# Changelog\n\n19. Coast Trail (Muir Beach): 5.0 miles, 600 feet of gain. At 25 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
@@ -5482,11 +5482,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 65.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 65.\n3.4 miles, 800 feet of gain.\nAt 27 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5503,11 +5503,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 66.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 66.\n2.2 miles, 1100 feet of gain.\nAt 34 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5525,11 +5525,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 66.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 66.\n2.2 miles, 1100 feet of gain.\nAt 34 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5546,11 +5546,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Bolinas Ridge from Bolinas, entry 20: 8.6 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Bolinas Ridge (\\d+(?:\\.\\d+)?) miles, entry 20\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 8.6) return 8.6;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5567,7 +5567,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Hill 88 entry 46: 1300 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 46 && trail === 'Hill 88') return feetToMeters(1300);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5588,11 +5588,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 67.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 67.\n5.0 miles, 600 feet of gain.\nAt 41 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5609,11 +5609,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 68.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 68.\n8.6 miles, 900 feet of gain.\nAt 48 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5631,11 +5631,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 68.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 68.\n8.6 miles, 900 feet of gain.\nAt 48 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5652,11 +5652,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Redwood Creek from Muir Woods, entry 21: 4.1 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Redwood Creek (\\d+(?:\\.\\d+)?) miles, entry 21\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 4.1) return 4.1;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5673,7 +5673,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Rodeo Valley entry 47: 400 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 47 && trail === 'Rodeo Valley') return feetToMeters(400);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5694,11 +5694,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 69.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 69.\n4.1 miles, 500 feet of gain.\nAt 15 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5715,11 +5715,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nCataract from Alpine Lake, entry 70.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 70.\n2.8 miles, 1200 feet of gain.\nAt 22 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5736,11 +5736,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Cataract from Alpine Lake, entry 22: 2.8 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Cataract (\\d+(?:\\.\\d+)?) miles, entry 22\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 2.8) return 2.8;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5757,7 +5757,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dipsea entry 48: 1400 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 48 && trail === 'Dipsea') return feetToMeters(1400);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5778,7 +5778,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 49: 800 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 49 && trail === 'Matt Davis') return feetToMeters(800);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5799,7 +5799,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n20. Bolinas Ridge (Bolinas): 8.6 miles, 900 feet of gain.\n",
+          "content": "# Changelog\n\n20. Bolinas Ridge (Bolinas): 8.6 miles, 900 feet of gain. At 32 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
@@ -5820,11 +5820,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 71.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 71.\n4.7 miles, 1500 feet of gain.\nAt 29 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5841,11 +5841,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 72.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 72.\n3.1 miles, 700 feet of gain.\nAt 36 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5862,11 +5862,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 73.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 73.\n5.5 miles, 850 feet of gain.\nAt 43 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5884,11 +5884,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 73.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 73.\n5.5 miles, 850 feet of gain.\nAt 43 minutes, two deer in the brush, with standing water in the ruts.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5905,7 +5905,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 50: 1100 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 50 && trail === 'Steep Ravine') return feetToMeters(1100);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5926,7 +5926,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 51: 600 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 51 && trail === 'Coast Trail') return feetToMeters(600);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -5947,7 +5947,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n21. Redwood Creek (Muir Woods): 4.1 miles, 500 feet of gain.\n",
+          "content": "# Changelog\n\n21. Redwood Creek (Muir Woods): 4.1 miles, 500 feet of gain. At 39 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
@@ -5968,11 +5968,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 74.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 74.\n6.2 miles, 1600 feet of gain.\nAt 50 minutes, fresh boot prints, with leaves packed on the stairs.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -5989,11 +5989,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 75.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 75.\n2.9 miles, 950 feet of gain.\nAt 17 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6011,11 +6011,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nBootjack from Mountain Home, entry 75.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 75.\n2.9 miles, 950 feet of gain.\nAt 17 minutes, a fallen bay laurel, with dry dust on the fire road.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6032,7 +6032,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 52: 900 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 52 && trail === 'Bolinas Ridge') return feetToMeters(900);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -6053,7 +6053,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 53: 500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 53 && trail === 'Redwood Creek') return feetToMeters(500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -6074,7 +6074,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n22. Cataract (Alpine Lake): 2.8 miles, 1200 feet of gain.\n",
+          "content": "# Changelog\n\n22. Cataract (Alpine Lake): 2.8 miles, 1200 feet of gain. At 46 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
@@ -6095,11 +6095,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 76.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 76.\n3.6 miles, 750 feet of gain.\nAt 24 minutes, creek noise below the trail, with wind at the overlook.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6116,11 +6116,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 77.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 77.\n4.4 miles, 650 feet of gain.\nAt 31 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6138,11 +6138,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 77.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 77.\n4.4 miles, 650 feet of gain.\nAt 31 minutes, salt on the wind, with a closed gate at the trailhead.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6159,7 +6159,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 54: 1200 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 54 && trail === 'Cataract') return feetToMeters(1200);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -6180,7 +6180,7 @@
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 55: 1500 feet of gain\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 55 && trail === 'Willow Camp') return feetToMeters(1500);\n  return null;\n}\n",
           "binary": false
         }
       ],
@@ -6201,7 +6201,7 @@
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# Changelog\n\n23. Willow Camp (Stinson Beach): 4.7 miles, 1500 feet of gain.\n",
+          "content": "# Changelog\n\n23. Willow Camp (Stinson Beach): 4.7 miles, 1500 feet of gain. At 13 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
@@ -6222,11 +6222,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 78.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 78.\n5.8 miles, 1300 feet of gain.\nAt 38 minutes, an empty bench, with shade on the upper steps.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6243,11 +6243,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 79.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 79.\n2.5 miles, 400 feet of gain.\nAt 45 minutes, fog in the trees, with clear air and hard dirt.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6264,11 +6264,11 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Willow Camp from Stinson Beach, entry 23: 4.7 miles\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^Willow Camp (\\d+(?:\\.\\d+)?) miles, entry 23\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === 4.7) return 4.7;\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -6285,11 +6285,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 80.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 80.\n7.1 miles, 1400 feet of gain.\nAt 12 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -6307,11 +6307,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# Field notes\n\nDipsea from Mill Valley, entry 80.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 80.\n7.1 miles, 1400 feet of gain.\nAt 12 minutes, a raven on the gate, with mud after the first bridge.\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 6,
       "paths": [
         "docs/notes.md"
       ]
@@ -7214,7 +7214,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 19 minutes, two deer in the brush, with standing water in the ruts.",
           "at": "2025-01-11T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7225,7 +7225,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 1,
       "title": "Matt Davis notes 1",
-      "body": "Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 19 minutes, two deer in the brush, with standing water in the ruts.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-1",
@@ -7252,7 +7252,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 4 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 4 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. At 40 minutes, creek noise below the trail, with wind at the overlook.",
           "at": "2025-02-01T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7263,7 +7263,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 2,
       "title": "Bolinas Ridge notes 4",
-      "body": "Adds entry 4 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 4 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. At 40 minutes, creek noise below the trail, with wind at the overlook.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-2",
@@ -7290,7 +7290,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 7 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 7 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. At 21 minutes, fog in the trees, with clear air and hard dirt.",
           "at": "2025-02-22T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7301,7 +7301,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 3,
       "title": "Willow Camp notes 7",
-      "body": "Adds entry 7 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 7 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. At 21 minutes, fog in the trees, with clear air and hard dirt.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-3",
@@ -7328,7 +7328,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 9 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 9 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. At 35 minutes, two deer in the brush, with standing water in the ruts.",
           "at": "2025-03-15T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7339,7 +7339,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 4,
       "title": "Miwok notes 9",
-      "body": "Adds entry 9 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 9 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. At 35 minutes, two deer in the brush, with standing water in the ruts.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-4",
@@ -7366,7 +7366,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 11 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 11 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 49 minutes, a fallen bay laurel, with dry dust on the fire road.",
           "at": "2025-04-05T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7377,7 +7377,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 5,
       "title": "Bootjack notes 11",
-      "body": "Adds entry 11 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 11 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 49 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-5",
@@ -7404,7 +7404,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 14 for Hill 88 from Marin Headlands: 5.8 miles and 1300 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 14 for Hill 88 from Marin Headlands: 5.8 miles and 1300 feet of gain. At 30 minutes, an empty bench, with shade on the upper steps.",
           "at": "2025-04-26T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7415,7 +7415,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 6,
       "title": "Hill 88 notes 14",
-      "body": "Adds entry 14 for Hill 88 from Marin Headlands: 5.8 miles and 1300 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 14 for Hill 88 from Marin Headlands: 5.8 miles and 1300 feet of gain. At 30 minutes, an empty bench, with shade on the upper steps.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-6",
@@ -7442,7 +7442,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 17 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 17 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 51 minutes, two deer in the brush, with standing water in the ruts.",
           "at": "2025-05-17T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7453,7 +7453,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 7,
       "title": "Matt Davis notes 17",
-      "body": "Adds entry 17 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 17 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 51 minutes, two deer in the brush, with standing water in the ruts.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-7",
@@ -7480,7 +7480,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 19 for Coast Trail from Muir Beach: 5.0 miles and 600 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 19 for Coast Trail from Muir Beach: 5.0 miles and 600 feet of gain. At 25 minutes, a fallen bay laurel, with dry dust on the fire road.",
           "at": "2025-06-07T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7491,7 +7491,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 8,
       "title": "Coast Trail notes 19",
-      "body": "Adds entry 19 for Coast Trail from Muir Beach: 5.0 miles and 600 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 19 for Coast Trail from Muir Beach: 5.0 miles and 600 feet of gain. At 25 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-8",
@@ -7518,7 +7518,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 24 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 24 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. At 20 minutes, a raven on the gate, with mud after the first bridge.",
           "at": "2025-07-19T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7529,7 +7529,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 9,
       "title": "Old Springs notes 24",
-      "body": "Adds entry 24 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 24 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. At 20 minutes, a raven on the gate, with mud after the first bridge.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-9",
@@ -7556,7 +7556,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 26 for Sierra Trail from Mount Tamalpais: 6.2 miles and 1600 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 26 for Sierra Trail from Mount Tamalpais: 6.2 miles and 1600 feet of gain. At 34 minutes, fresh boot prints, with leaves packed on the stairs.",
           "at": "2025-08-09T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7567,7 +7567,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 10,
       "title": "Sierra Trail notes 26",
-      "body": "Adds entry 26 for Sierra Trail from Mount Tamalpais: 6.2 miles and 1600 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 26 for Sierra Trail from Mount Tamalpais: 6.2 miles and 1600 feet of gain. At 34 minutes, fresh boot prints, with leaves packed on the stairs.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-10",
@@ -7594,7 +7594,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 28 for Fern Creek from Muir Woods: 3.6 miles and 750 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 28 for Fern Creek from Muir Woods: 3.6 miles and 750 feet of gain. At 48 minutes, creek noise below the trail, with wind at the overlook.",
           "at": "2025-08-30T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7605,7 +7605,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 11,
       "title": "Fern Creek notes 28",
-      "body": "Adds entry 28 for Fern Creek from Muir Woods: 3.6 miles and 750 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 28 for Fern Creek from Muir Woods: 3.6 miles and 750 feet of gain. At 48 minutes, creek noise below the trail, with wind at the overlook.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-11",
@@ -7632,7 +7632,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 31 for Rodeo Valley from Fort Cronkhite: 2.5 miles and 400 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 31 for Rodeo Valley from Fort Cronkhite: 2.5 miles and 400 feet of gain. At 29 minutes, fog in the trees, with clear air and hard dirt.",
           "at": "2025-09-20T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7643,7 +7643,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 12,
       "title": "Rodeo Valley notes 31",
-      "body": "Adds entry 31 for Rodeo Valley from Fort Cronkhite: 2.5 miles and 400 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 31 for Rodeo Valley from Fort Cronkhite: 2.5 miles and 400 feet of gain. At 29 minutes, fog in the trees, with clear air and hard dirt.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-12",
@@ -7670,7 +7670,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 34 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 34 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. At 50 minutes, fresh boot prints, with leaves packed on the stairs.",
           "at": "2025-10-11T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7681,7 +7681,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 13,
       "title": "Steep Ravine notes 34",
-      "body": "Adds entry 34 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 34 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. At 50 minutes, fresh boot prints, with leaves packed on the stairs.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-13",
@@ -7708,7 +7708,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 37 for Redwood Creek from Muir Woods: 4.1 miles and 500 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 37 for Redwood Creek from Muir Woods: 4.1 miles and 500 feet of gain. At 31 minutes, salt on the wind, with a closed gate at the trailhead.",
           "at": "2025-11-01T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7719,7 +7719,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 14,
       "title": "Redwood Creek notes 37",
-      "body": "Adds entry 37 for Redwood Creek from Muir Woods: 4.1 miles and 500 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 37 for Redwood Creek from Muir Woods: 4.1 miles and 500 feet of gain. At 31 minutes, salt on the wind, with a closed gate at the trailhead.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-14",
@@ -7746,7 +7746,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 40 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 40 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. At 12 minutes, a raven on the gate, with mud after the first bridge.",
           "at": "2025-11-22T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7757,7 +7757,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 15,
       "title": "Old Springs notes 40",
-      "body": "Adds entry 40 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 40 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. At 12 minutes, a raven on the gate, with mud after the first bridge.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-15",
@@ -7784,7 +7784,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 43 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 43 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 33 minutes, a fallen bay laurel, with dry dust on the fire road.",
           "at": "2025-12-13T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7795,7 +7795,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 16,
       "title": "Bootjack notes 43",
-      "body": "Adds entry 43 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 43 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 33 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-16",
@@ -7822,7 +7822,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 45 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 45 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. At 47 minutes, salt on the wind, with a closed gate at the trailhead.",
           "at": "2026-01-03T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7833,7 +7833,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 17,
       "title": "Dias Ridge notes 45",
-      "body": "Adds entry 45 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 45 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. At 47 minutes, salt on the wind, with a closed gate at the trailhead.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-17",
@@ -7860,7 +7860,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 49 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 49 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 35 minutes, two deer in the brush, with standing water in the ruts.",
           "at": "2026-02-14T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7871,7 +7871,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 18,
       "title": "Matt Davis notes 49",
-      "body": "Adds entry 49 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 49 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 35 minutes, two deer in the brush, with standing water in the ruts.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-18",
@@ -7898,7 +7898,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 52 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 52 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. At 16 minutes, creek noise below the trail, with wind at the overlook.",
           "at": "2026-03-07T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -7909,7 +7909,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 19,
       "title": "Bolinas Ridge notes 52",
-      "body": "Adds entry 52 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 52 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. At 16 minutes, creek noise below the trail, with wind at the overlook.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-19",
@@ -7936,7 +7936,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 55 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 55 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. At 37 minutes, fog in the trees, with clear air and hard dirt.",
           "at": "2026-03-28T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7947,7 +7947,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 20,
       "title": "Willow Camp notes 55",
-      "body": "Adds entry 55 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 55 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. At 37 minutes, fog in the trees, with clear air and hard dirt.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-20",
@@ -7974,7 +7974,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 57 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 57 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. At 51 minutes, two deer in the brush, with standing water in the ruts.",
           "at": "2026-04-18T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -7985,7 +7985,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 21,
       "title": "Miwok notes 57",
-      "body": "Adds entry 57 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 57 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. At 51 minutes, two deer in the brush, with standing water in the ruts.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-21",
@@ -8012,7 +8012,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 59 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 59 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 25 minutes, a fallen bay laurel, with dry dust on the fire road.",
           "at": "2026-05-09T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8023,7 +8023,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 22,
       "title": "Bootjack notes 59",
-      "body": "Adds entry 59 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 59 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 25 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-22",
@@ -8050,7 +8050,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 61 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 61 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. At 39 minutes, salt on the wind, with a closed gate at the trailhead.",
           "at": "2026-05-30T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8061,7 +8061,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 23,
       "title": "Dias Ridge notes 61",
-      "body": "Adds entry 61 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 61 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. At 39 minutes, salt on the wind, with a closed gate at the trailhead.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-23",
@@ -8088,7 +8088,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 64 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 64 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. At 20 minutes, a raven on the gate, with mud after the first bridge.",
           "at": "2026-06-20T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8099,7 +8099,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 24,
       "title": "Dipsea notes 64",
-      "body": "Adds entry 64 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 64 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. At 20 minutes, a raven on the gate, with mud after the first bridge.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-24",
@@ -8126,7 +8126,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 66 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 66 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. At 34 minutes, fresh boot prints, with leaves packed on the stairs.",
           "at": "2026-07-11T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8137,7 +8137,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 25,
       "title": "Steep Ravine notes 66",
-      "body": "Adds entry 66 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 66 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. At 34 minutes, fresh boot prints, with leaves packed on the stairs.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-25",
@@ -8164,7 +8164,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 68 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 68 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. At 48 minutes, creek noise below the trail, with wind at the overlook.",
           "at": "2026-08-01T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8175,7 +8175,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 26,
       "title": "Bolinas Ridge notes 68",
-      "body": "Adds entry 68 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 68 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. At 48 minutes, creek noise below the trail, with wind at the overlook.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-26",
@@ -8202,7 +8202,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 73 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 73 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. At 43 minutes, two deer in the brush, with standing water in the ruts.",
           "at": "2026-09-12T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8213,7 +8213,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 27,
       "title": "Miwok notes 73",
-      "body": "Adds entry 73 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 73 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. At 43 minutes, two deer in the brush, with standing water in the ruts.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-27",
@@ -8240,7 +8240,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 75 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 75 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 17 minutes, a fallen bay laurel, with dry dust on the fire road.",
           "at": "2026-10-03T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8251,7 +8251,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 28,
       "title": "Bootjack notes 75",
-      "body": "Adds entry 75 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 75 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. At 17 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-28",
@@ -8278,7 +8278,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 77 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 77 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. At 31 minutes, salt on the wind, with a closed gate at the trailhead.",
           "at": "2026-10-24T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
@@ -8289,7 +8289,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 29,
       "title": "Dias Ridge notes 77",
-      "body": "Adds entry 77 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 77 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. At 31 minutes, salt on the wind, with a closed gate at the trailhead.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-29",
@@ -8316,7 +8316,7 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds entry 80 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
+          "body": "Adds entry 80 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. At 12 minutes, a raven on the gate, with mud after the first bridge.",
           "at": "2026-11-14T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
@@ -8327,7 +8327,7 @@
       "repo": "tomasreyes/fieldbook",
       "number": 30,
       "title": "Dipsea notes 80",
-      "body": "Adds entry 80 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
+      "body": "Adds entry 80 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. At 12 minutes, a raven on the gate, with mud after the first bridge.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-30",
@@ -8348,7 +8348,7 @@
       "number": 1,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet.",
+      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet. At 19 minutes, two deer in the brush, with standing water in the ruts.",
       "created_at": "2025-01-12T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8360,7 +8360,7 @@
       "number": 2,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet.",
+      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet. At 40 minutes, creek noise below the trail, with wind at the overlook.",
       "created_at": "2025-02-02T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8372,7 +8372,7 @@
       "number": 3,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Willow Camp from Stinson Beach, 4.7 miles and 1500 feet.",
+      "body": "The diff matches the pull request: Willow Camp from Stinson Beach, 4.7 miles and 1500 feet. At 21 minutes, fog in the trees, with clear air and hard dirt.",
       "created_at": "2025-02-23T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8384,7 +8384,7 @@
       "number": 4,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Miwok entry is in this head: 5.5 miles and 850 feet, and it says the second switchback was dry. I would like the title to name Rodeo Lagoon as well.",
+      "body": "The Miwok entry is in this head: 5.5 miles, 850 feet, and \"At 35 minutes, two deer in the brush, with standing water in the ruts.\" I would like the title to name Rodeo Lagoon as well.",
       "created_at": "2025-03-16T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8408,7 +8408,7 @@
       "number": 5,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Bootjack from Mountain Home, 2.9 miles and 950 feet.",
+      "body": "The diff matches the pull request: Bootjack from Mountain Home, 2.9 miles and 950 feet. At 49 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "created_at": "2025-04-06T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8420,7 +8420,7 @@
       "number": 6,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Hill 88 from Marin Headlands, 5.8 miles and 1300 feet.",
+      "body": "The diff matches the pull request: Hill 88 from Marin Headlands, 5.8 miles and 1300 feet. At 30 minutes, an empty bench, with shade on the upper steps.",
       "created_at": "2025-04-27T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8432,7 +8432,7 @@
       "number": 7,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet.",
+      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet. At 51 minutes, two deer in the brush, with standing water in the ruts.",
       "created_at": "2025-05-18T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8444,7 +8444,7 @@
       "number": 8,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Coast Trail entry is in this head: 5.0 miles and 600 feet, and it says the second switchback was dry. I would like the title to name Muir Beach as well.",
+      "body": "The Coast Trail entry is in this head: 5.0 miles, 600 feet, and \"At 25 minutes, a fallen bay laurel, with dry dust on the fire road.\" I would like the title to name Muir Beach as well.",
       "created_at": "2025-06-08T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8468,7 +8468,7 @@
       "number": 9,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Old Springs from Tennessee Valley, 3.1 miles and 700 feet.",
+      "body": "The diff matches the pull request: Old Springs from Tennessee Valley, 3.1 miles and 700 feet. At 20 minutes, a raven on the gate, with mud after the first bridge.",
       "created_at": "2025-07-20T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8480,7 +8480,7 @@
       "number": 10,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Sierra Trail from Mount Tamalpais, 6.2 miles and 1600 feet.",
+      "body": "The diff matches the pull request: Sierra Trail from Mount Tamalpais, 6.2 miles and 1600 feet. At 34 minutes, fresh boot prints, with leaves packed on the stairs.",
       "created_at": "2025-08-10T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8492,7 +8492,7 @@
       "number": 11,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Fern Creek from Muir Woods, 3.6 miles and 750 feet.",
+      "body": "The diff matches the pull request: Fern Creek from Muir Woods, 3.6 miles and 750 feet. At 48 minutes, creek noise below the trail, with wind at the overlook.",
       "created_at": "2025-08-31T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8504,7 +8504,7 @@
       "number": 12,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Rodeo Valley entry is in this head: 2.5 miles and 400 feet, and it says the second switchback was dry. I would like the title to name Fort Cronkhite as well.",
+      "body": "The Rodeo Valley entry is in this head: 2.5 miles, 400 feet, and \"At 29 minutes, fog in the trees, with clear air and hard dirt.\" I would like the title to name Fort Cronkhite as well.",
       "created_at": "2025-09-21T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8528,7 +8528,7 @@
       "number": 13,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Steep Ravine from Pantoll, 2.2 miles and 1100 feet.",
+      "body": "The diff matches the pull request: Steep Ravine from Pantoll, 2.2 miles and 1100 feet. At 50 minutes, fresh boot prints, with leaves packed on the stairs.",
       "created_at": "2025-10-12T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8540,7 +8540,7 @@
       "number": 14,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Redwood Creek from Muir Woods, 4.1 miles and 500 feet.",
+      "body": "The diff matches the pull request: Redwood Creek from Muir Woods, 4.1 miles and 500 feet. At 31 minutes, salt on the wind, with a closed gate at the trailhead.",
       "created_at": "2025-11-02T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8552,7 +8552,7 @@
       "number": 15,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Old Springs from Tennessee Valley, 3.1 miles and 700 feet.",
+      "body": "The diff matches the pull request: Old Springs from Tennessee Valley, 3.1 miles and 700 feet. At 12 minutes, a raven on the gate, with mud after the first bridge.",
       "created_at": "2025-11-23T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8564,7 +8564,7 @@
       "number": 16,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Bootjack entry is in this head: 2.9 miles and 950 feet, and it says the second switchback was dry. I would like the title to name Mountain Home as well.",
+      "body": "The Bootjack entry is in this head: 2.9 miles, 950 feet, and \"At 33 minutes, a fallen bay laurel, with dry dust on the fire road.\" I would like the title to name Mountain Home as well.",
       "created_at": "2025-12-14T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8588,7 +8588,7 @@
       "number": 17,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet.",
+      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet. At 47 minutes, salt on the wind, with a closed gate at the trailhead.",
       "created_at": "2026-01-04T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8600,7 +8600,7 @@
       "number": 18,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet.",
+      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet. At 35 minutes, two deer in the brush, with standing water in the ruts.",
       "created_at": "2026-02-15T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8612,7 +8612,7 @@
       "number": 19,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet.",
+      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet. At 16 minutes, creek noise below the trail, with wind at the overlook.",
       "created_at": "2026-03-08T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8624,7 +8624,7 @@
       "number": 20,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Willow Camp entry is in this head: 4.7 miles and 1500 feet, and it says the second switchback was dry. I would like the title to name Stinson Beach as well.",
+      "body": "The Willow Camp entry is in this head: 4.7 miles, 1500 feet, and \"At 37 minutes, fog in the trees, with clear air and hard dirt.\" I would like the title to name Stinson Beach as well.",
       "created_at": "2026-03-29T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8648,7 +8648,7 @@
       "number": 21,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Miwok from Rodeo Lagoon, 5.5 miles and 850 feet.",
+      "body": "The diff matches the pull request: Miwok from Rodeo Lagoon, 5.5 miles and 850 feet. At 51 minutes, two deer in the brush, with standing water in the ruts.",
       "created_at": "2026-04-19T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8660,7 +8660,7 @@
       "number": 22,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Bootjack from Mountain Home, 2.9 miles and 950 feet.",
+      "body": "The diff matches the pull request: Bootjack from Mountain Home, 2.9 miles and 950 feet. At 25 minutes, a fallen bay laurel, with dry dust on the fire road.",
       "created_at": "2026-05-10T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8672,7 +8672,7 @@
       "number": 23,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet.",
+      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet. At 39 minutes, salt on the wind, with a closed gate at the trailhead.",
       "created_at": "2026-05-31T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8684,7 +8684,7 @@
       "number": 24,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Dipsea entry is in this head: 7.1 miles and 1400 feet, and it says the second switchback was dry. I would like the title to name Mill Valley as well.",
+      "body": "The Dipsea entry is in this head: 7.1 miles, 1400 feet, and \"At 20 minutes, a raven on the gate, with mud after the first bridge.\" I would like the title to name Mill Valley as well.",
       "created_at": "2026-06-21T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8708,7 +8708,7 @@
       "number": 25,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Steep Ravine from Pantoll, 2.2 miles and 1100 feet.",
+      "body": "The diff matches the pull request: Steep Ravine from Pantoll, 2.2 miles and 1100 feet. At 34 minutes, fresh boot prints, with leaves packed on the stairs.",
       "created_at": "2026-07-12T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8720,7 +8720,7 @@
       "number": 26,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet.",
+      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet. At 48 minutes, creek noise below the trail, with wind at the overlook.",
       "created_at": "2026-08-02T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8732,7 +8732,7 @@
       "number": 27,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Miwok from Rodeo Lagoon, 5.5 miles and 850 feet.",
+      "body": "The diff matches the pull request: Miwok from Rodeo Lagoon, 5.5 miles and 850 feet. At 43 minutes, two deer in the brush, with standing water in the ruts.",
       "created_at": "2026-09-13T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8744,7 +8744,7 @@
       "number": 28,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "The Bootjack entry is in this head: 2.9 miles and 950 feet, and it says the second switchback was dry. I would like the title to name Mountain Home as well.",
+      "body": "The Bootjack entry is in this head: 2.9 miles, 950 feet, and \"At 17 minutes, a fallen bay laurel, with dry dust on the fire road.\" I would like the title to name Mountain Home as well.",
       "created_at": "2026-10-04T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8768,7 +8768,7 @@
       "number": 29,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet.",
+      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet. At 31 minutes, salt on the wind, with a closed gate at the trailhead.",
       "created_at": "2026-10-25T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8780,7 +8780,7 @@
       "number": 30,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "The diff matches the pull request: Dipsea from Mill Valley, 7.1 miles and 1400 feet.",
+      "body": "The diff matches the pull request: Dipsea from Mill Valley, 7.1 miles and 1400 feet. At 12 minutes, a raven on the gate, with mud after the first bridge.",
       "created_at": "2026-11-15T20:15:00-08:00",
       "event_id": null,
       "request_id": null,

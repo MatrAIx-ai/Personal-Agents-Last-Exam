@@ -835,18 +835,26 @@ function fieldbook(data) {
     const row = trails[n % trails.length];
     return {name: row[0], place: row[1], miles: row[2], feet: row[3], n};
   }
+  const sights = ['a raven on the gate', 'two deer in the brush', 'fresh boot prints', 'a fallen bay laurel', 'creek noise below the trail', 'salt on the wind', 'an empty bench', 'fog in the trees'];
+  const conditions = ['mud after the first bridge', 'dry dust on the fire road', 'shade on the upper steps', 'standing water in the ruts', 'wind at the overlook', 'clear air and hard dirt', 'leaves packed on the stairs', 'a closed gate at the trailhead'];
+  function observation(n) {
+    const minute = (n * 7) % 40 + 12;
+    const sight = sights[n % sights.length];
+    const condition = conditions[(n * 3) % conditions.length];
+    return 'At ' + minute + ' minutes, ' + sight + ', with ' + condition + '.';
+  }
   function content(file, n) {
     if (n === 0) {
-      if (file === 'src/units.js') return "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n";
+      if (file === 'src/units.js') return "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\n";
       if (file === 'src/fieldbook.js') return "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n";
       if (file === 'docs/notes.md') return '# Field notes\n\nHiking logs for Tomas Reyes. Elevation is in feet.\n';
       return '# Changelog\n\nFieldbook starts here.\n';
     }
     const item = trail(n);
-    if (file === 'src/units.js') return "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// " + item.name + ' entry ' + n + ': ' + item.feet + ' feet of gain\n';
-    if (file === 'src/fieldbook.js') return "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// " + item.name + ' from ' + item.place + ', entry ' + n + ': ' + item.miles + ' miles\n';
-    if (file === 'docs/notes.md') return '# Field notes\n\n' + item.name + ' from ' + item.place + ', entry ' + n + '.\n' + item.miles + ' miles, ' + item.feet + ' feet of gain.\nThe second switchback was dry and the creek was clear.\n';
-    return '# Changelog\n\n' + n + '. ' + item.name + ' (' + item.place + '): ' + item.miles + ' miles, ' + item.feet + ' feet of gain.\n';
+    if (file === 'src/units.js') return "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === " + n + " && trail === '" + item.name + "') return feetToMeters(" + item.feet + ");\n  return null;\n}\n";
+    if (file === 'src/fieldbook.js') return "'use strict';\nexport function parseMiles(line) {\n  const text = String(line);\n  const labeled = /^" + item.name + " (\\d+(?:\\.\\d+)?) miles, entry " + n + "\\b/.exec(text);\n  if (labeled && Number(labeled[1]) === " + item.miles + ") return " + item.miles + ";\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(text);\n  return match ? Number(match[1]) : null;\n}\n";
+    if (file === 'docs/notes.md') return '# Field notes\n\n' + item.name + ' from ' + item.place + ', entry ' + n + '.\n' + item.miles + ' miles, ' + item.feet + ' feet of gain.\n' + observation(n) + '\n';
+    return '# Changelog\n\n' + n + '. ' + item.name + ' (' + item.place + '): ' + item.miles + ' miles, ' + item.feet + ' feet of gain. ' + observation(n) + '\n';
   }
   function commitMessage(file, n) {
     const item = trail(n);
@@ -902,16 +910,17 @@ function fieldbook(data) {
       const mergeDay = new Date(ms + (changes ? 3 : 2) * 86400000);
       const mergedAt = laIso(mergeDay.getUTCFullYear(), mergeDay.getUTCMonth() + 1, mergeDay.getUTCDate(), 18, 40);
       const title = item.name + ' notes ' + noteN;
-      const body = 'Adds entry ' + noteN + ' for ' + item.name + ' from ' + item.place + ': ' + item.miles + ' miles and ' + item.feet + ' feet of gain. The note says the second switchback was dry.';
+      const seen = observation(noteN);
+      const body = 'Adds entry ' + noteN + ' for ' + item.name + ' from ' + item.place + ': ' + item.miles + ' miles and ' + item.feet + ' feet of gain. ' + seen;
       data.pulls.push(pullRecord({repo, number: pullNo, title, body, state: 'merged', head_repo: repo, head_branch: branch,
         head_sha: side, base_branch: 'main', base_sha: tip, author_account_id: author, created_at: opened, updated_at: mergedAt, merged_at: mergedAt,
         reviewers: ['fy-tomasreyes'], paths: [file]}));
       if (changes) {
-        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'changes_requested', body: 'The ' + item.name + ' entry is in this head: ' + item.miles + ' miles and ' + item.feet + ' feet, and it says the second switchback was dry. I would like the title to name ' + item.place + ' as well.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'changes_requested', body: 'The ' + item.name + ' entry is in this head: ' + item.miles + ' miles, ' + item.feet + ' feet, and "' + seen + '" I would like the title to name ' + item.place + ' as well.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
         const again = new Date(ms + 2 * 86400000);
         data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'Approving this head as written. ' + item.place + ' is already in the note, so this commit can merge without a follow-up.', created_at: laIso(again.getUTCFullYear(), again.getUTCMonth() + 1, again.getUTCDate(), 21, 5), event_id: null, request_id: null, summary_comment_id: null});
       } else {
-        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'The diff matches the pull request: ' + item.name + ' from ' + item.place + ', ' + item.miles + ' miles and ' + item.feet + ' feet.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'The diff matches the pull request: ' + item.name + ' from ' + item.place + ', ' + item.miles + ' miles and ' + item.feet + ' feet. ' + seen, created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
       }
       const merge = sha('e');
       addCommit(data, {sha: merge, repo, parents: [tip, side], author_account_id: 'fy-tomasreyes', message: 'Merge pull request #' + pullNo + ' from ' + branch, committed_at: mergedAt, files: [{path: file, content: tree[file], binary: false}]});
