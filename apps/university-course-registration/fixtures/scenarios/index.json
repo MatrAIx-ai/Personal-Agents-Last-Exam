@@ -1,0 +1,90 @@
+{
+  "description": "Scenario seeds for University Course Registration. Each file is a complete seed: load it with env.load_seed as data, together with fixtures/binding.json, fixtures/policies.json and the scenario's virtual_now, and without a bundle. All records are synthetic.",
+  "generator": {
+    "script": "dev/generate-fixtures.cjs",
+    "version": "1.0.0",
+    "seed": 20270111
+  },
+  "catalog": {
+    "courses": 21,
+    "sections": 34
+  },
+  "scenarios": [
+    {
+      "id": "eligibility",
+      "file": "eligibility.json",
+      "account_id": "ucr-tomas",
+      "student_id": "stu-tomas",
+      "virtual_now": "2027-01-18T09:00:00-05:00",
+      "covers": [
+        "eligibility"
+      ],
+      "summary": "What the student may take, and why not: missing prerequisites (including a course he is only enrolled in this term), a course whose own registration window has closed, labs tied to one lecture, a required lab that is full, and sections that would overlap his timetable.",
+      "records": 57
+    },
+    {
+      "id": "capacity",
+      "file": "capacity.json",
+      "account_id": "ucr-ife",
+      "student_id": "stu-ife",
+      "virtual_now": "2027-01-11T09:00:00-05:00",
+      "covers": [
+        "capacity",
+        "offers"
+      ],
+      "summary": "Full sections, bundles that are only partly free and queues with competitors: a lecture with seats whose labs are all full, a last seat, a full section with an open alternative, and the student second in a three-entry queue and first in another.",
+      "records": 65
+    },
+    {
+      "id": "credits",
+      "file": "credits.json",
+      "account_id": "ucr-mei",
+      "student_id": "stu-mei",
+      "virtual_now": "2027-01-11T09:00:00-05:00",
+      "covers": [
+        "credits",
+        "swaps"
+      ],
+      "summary": "Thirteen of fifteen credits in use: a three-credit course does not fit, a two-credit course does, and a swap is judged on the credits after the old bundle is replaced. The student is first in a queue but blocked by the limit, with an eligible competitor behind her; her pending lab swap adds no credits and is not blocked.",
+      "records": 63
+    },
+    {
+      "id": "offers",
+      "file": "offers.json",
+      "account_id": "ucr-noor",
+      "student_id": "stu-noor",
+      "virtual_now": "2027-01-12T08:00:00-05:00",
+      "covers": [
+        "offers"
+      ],
+      "summary": "A seat offer that expires in ninety minutes. A competitor left CS240 the day before (evt-0007); the student was offered the bundle and has not answered, and another competitor waits behind her. She is second in the PSYC100 queue. She is first in the ECON101 queue and a seat there has been free for days (evt-0003), but that entry is blocked: ECON101 overlaps her MATH221 lecture.",
+      "records": 66
+    },
+    {
+      "id": "swaps",
+      "file": "swaps.json",
+      "account_id": "ucr-tomas",
+      "student_id": "stu-tomas",
+      "virtual_now": "2027-01-13T12:00:00-05:00",
+      "covers": [
+        "swaps",
+        "offers"
+      ],
+      "summary": "Changing sections without losing a place. The student holds PHYS150 with the Thursday lab and has a pending swap to the Wednesday lab, for which a seat is on offer until the next morning; two competitors wait behind him for the same lab. One of his lectures can be swapped at once, another only by waiting, and one cross-course swap would create a conflict.",
+      "records": 65
+    },
+    {
+      "id": "timetable",
+      "file": "timetable.json",
+      "account_id": "ucr-ife",
+      "student_id": "stu-ife",
+      "virtual_now": "2027-01-14T09:00:00-05:00",
+      "covers": [
+        "timetable changes",
+        "swaps"
+      ],
+      "summary": "A timetable broken by the university, not by the student. Her BIOL120 lab was moved onto her STAT210 lecture the afternoon before (evt-0031); both enrollments stand and the overlap is attributed to the event. The other lecture/lab pair of BIOL120 has seats, one replacement for STAT210 is clean and another would only trade the conflict for a new one. A section she does not hold also moved.",
+      "records": 60
+    }
+  ]
+}

@@ -1,0 +1,1064 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "University Course Registration: account, catalog and run records",
+  "description": "One document is both the loadable seed and the live App data. Generated from dev/contracts.cjs.",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "university": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "timezone"
+      ],
+      "additionalProperties": false
+    },
+    "term": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "registration": {
+          "type": "object",
+          "properties": {
+            "opens_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "withdraw_deadline": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "opens_at",
+            "closes_at",
+            "withdraw_deadline"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "registration"
+      ],
+      "additionalProperties": false
+    },
+    "enrollment_policy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "offer_window_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 43200
+        },
+        "queue": {
+          "type": "object",
+          "properties": {
+            "order": {
+              "const": "join_sequence"
+            },
+            "bundle": {
+              "const": "all_sections_or_none"
+            },
+            "skipped_entries": {
+              "const": "keep_position_without_hold"
+            },
+            "join": {
+              "const": "only_when_target_bundle_is_unavailable"
+            }
+          },
+          "required": [
+            "order",
+            "bundle",
+            "skipped_entries",
+            "join"
+          ],
+          "additionalProperties": false
+        },
+        "expiry": {
+          "type": "object",
+          "properties": {
+            "boundary": {
+              "const": "invalid_at_or_after_expires_at"
+            },
+            "hold_release": {
+              "const": "on_offers_expire_event"
+            }
+          },
+          "required": [
+            "boundary",
+            "hold_release"
+          ],
+          "additionalProperties": false
+        },
+        "swaps": {
+          "type": "object",
+          "properties": {
+            "max_pending_per_enrollment": {
+              "const": 1
+            },
+            "original": {
+              "const": "kept_until_replacement_commits"
+            }
+          },
+          "required": [
+            "max_pending_per_enrollment",
+            "original"
+          ],
+          "additionalProperties": false
+        },
+        "conflicts": {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "no_new_conflicts"
+            }
+          },
+          "required": [
+            "rule"
+          ],
+          "additionalProperties": false
+        },
+        "access": {
+          "type": "object",
+          "properties": {
+            "records": {
+              "const": "own_account_only"
+            },
+            "other_students": {
+              "const": "section_totals_only"
+            },
+            "academic_record": {
+              "const": "read_only"
+            },
+            "rule_exceptions": {
+              "const": "none"
+            },
+            "management": {
+              "const": "infra_only"
+            }
+          },
+          "required": [
+            "records",
+            "other_students",
+            "academic_record",
+            "rule_exceptions",
+            "management"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "offer_window_minutes",
+        "queue",
+        "expiry",
+        "swaps",
+        "conflicts",
+        "access"
+      ],
+      "additionalProperties": false
+    },
+    "student": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "program": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "credit_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "completed_courses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 20,
+                "pattern": "^[A-Z][A-Z0-9-]*$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "credits": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30
+              },
+              "term": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "grade": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10
+              }
+            },
+            "required": [
+              "code",
+              "title",
+              "credits",
+              "term",
+              "grade"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "program",
+        "credit_limit",
+        "completed_courses"
+      ],
+      "additionalProperties": false
+    },
+    "courses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 20,
+            "pattern": "^[A-Z][A-Z0-9-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "department": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "credits": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "prerequisite_codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 20,
+              "pattern": "^[A-Z][A-Z0-9-]*$"
+            },
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "requires_lab": {
+            "type": "boolean"
+          },
+          "registration_window": {
+            "type": "object",
+            "properties": {
+              "opens_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closes_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "opens_at",
+              "closes_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "department",
+          "credits",
+          "prerequisite_codes",
+          "requires_lab"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "course_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "kind": {
+            "enum": [
+              "lecture",
+              "lab"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "base_enrolled": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "linked_lecture_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "meetings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "days": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "MON",
+                      "TUE",
+                      "WED",
+                      "THU",
+                      "FRI",
+                      "SAT",
+                      "SUN"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 7,
+                  "uniqueItems": true
+                },
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                }
+              },
+              "required": [
+                "days",
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "meetings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "days": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "MON",
+                            "TUE",
+                            "WED",
+                            "THU",
+                            "FRI",
+                            "SAT",
+                            "SUN"
+                          ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 7,
+                        "uniqueItems": true
+                      },
+                      "start": {
+                        "type": "string",
+                        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                      },
+                      "end": {
+                        "type": "string",
+                        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                      }
+                    },
+                    "required": [
+                      "days",
+                      "start",
+                      "end"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 10
+                },
+                "replaced_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "event_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "version",
+                "meetings",
+                "replaced_at",
+                "event_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "kind",
+          "label",
+          "capacity",
+          "base_enrolled",
+          "meetings",
+          "version",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "enrollments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "occupant_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "course_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "section_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "status": {
+            "enum": [
+              "enrolled",
+              "withdrawn",
+              "swapped_out"
+            ]
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "occupant_ref",
+          "course_id",
+          "section_ids",
+          "status",
+          "enrolled_at",
+          "ended_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "waitlist_entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "occupant_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "course_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "section_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "swap_from_enrollment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "offered",
+              "fulfilled",
+              "left",
+              "declined",
+              "expired",
+              "cancelled"
+            ]
+          },
+          "joined_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "blocked_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "occupant_ref",
+          "course_id",
+          "section_ids",
+          "swap_from_enrollment_id",
+          "status",
+          "joined_at",
+          "ended_at",
+          "end_reason",
+          "blocked_reason"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "offers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "entry_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "held_section_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "live",
+              "accepted",
+              "declined",
+              "expired",
+              "cancelled"
+            ]
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "entry_id",
+          "held_section_ids",
+          "issued_at",
+          "expires_at",
+          "status",
+          "resolved_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kind": {
+            "enum": [
+              "offer_issued",
+              "offer_expired",
+              "section_rescheduled",
+              "swap_cancelled"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "refs": {
+            "type": "object",
+            "properties": {
+              "event_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "course_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "section_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "enrollment_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "entry_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "offer_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "from_version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "to_version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "at",
+          "kind",
+          "text",
+          "refs"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "enum": [
+              "enrollment.enroll",
+              "enrollment.withdraw",
+              "enrollment.swap",
+              "waitlist.join",
+              "waitlist.leave",
+              "offer.accept",
+              "offer.decline"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "refs": {
+            "type": "object",
+            "properties": {
+              "course_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "enrollment_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "replaced_enrollment_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "entry_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "offer_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "section_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "minItems": 1,
+                "maxItems": 2,
+                "uniqueItems": true
+              },
+              "cancelled_entry_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "maxItems": 50,
+                "uniqueItems": true
+              },
+              "existing": {
+                "type": "boolean"
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "at",
+          "action",
+          "request_id",
+          "refs"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "counters": {
+      "type": "object",
+      "properties": {
+        "next_seq": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "next_seq"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "university",
+    "term",
+    "enrollment_policy",
+    "student",
+    "courses",
+    "sections",
+    "enrollments",
+    "waitlist_entries",
+    "offers",
+    "notices",
+    "receipts",
+    "counters"
+  ],
+  "additionalProperties": false
+}
