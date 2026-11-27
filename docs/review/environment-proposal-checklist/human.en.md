@@ -50,6 +50,8 @@ Template: “The construction plan defines the scope, deliverables, quality chec
 - [ ] H4.2 The planned checks are strong enough for acceptance at merge: actual receiver records/files and caller-visible business results, plus relevant failure/retry outcomes. Supplied message examples were compared with the receiver contract, or the compatibility gap is recorded. Delivery acknowledgement is not automatically a business decision or sender rollback. Promised evaluator records have a feasible path through App history, Core audit and supplied Agent execution records, with explicit correlation and counting rules. Missing fields in Core audit alone do not imply a required Core change. (D4.2, D8.1, D8.2, D8.3)
 - [ ] H4.3 The scope boundary leaves out the right things for a first version; reference-host limits are distinguished from required future adapters. (D2.3)
 
+When judging H4.2, use [the evidence contract](../../submission-evidence.md): plan GUI reference/comparison and workflow/error sequences where required, real dependency demonstrations alongside business/MCP tests, and Environment data covering 2025-01-01 through 2026-12-31. Where old website data are inaccessible, plan real November 2026 data plus synthetic completion, with provenance and monthly/source coverage. No per-App 300-date minimum applies. Check the plan here and completed evidence at implementation review. (D3.1, D6.2, D8.2, D8.3)
+
 **H5 · Are the data, assets and run-time dependencies safe to use?**
 
 Template: §4 License and external dependencies: the license for code and assets, what is hosted instead of redistributed, and how run-time services are replayed or controlled.
