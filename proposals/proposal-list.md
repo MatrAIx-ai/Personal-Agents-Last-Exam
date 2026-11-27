@@ -8,14 +8,14 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**221 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
+**222 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 8 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 4 |
-| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 5 |
+| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 6 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 20 |
 | Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 9 |
 
@@ -151,10 +151,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**121 proposals.**
+**122 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-27 15:49:06 | [#286](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/286) · Elect a 1-month retainer bridge PO before an MSA auto-renewal cutoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/286/files) | Work &amp; business<br>Also: Money &amp; insurance | Offline before an MSA auto-renewal cutoff, Victor's agent must elect a 1-month bridge PO, decline an underpriced fixed-fee add-on and undisclosed subcontracting, and defer exclusivity without leaking a rival offer. | Design review | Review requested<br>@TianyuCodings |  | [muyupan](https://github.com/muyupan) |  |
 | 2026-11-27 15:45:46 | [#285](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/285) · Submit a lease holdover notice before a 60-day cutoff despite an informal waiver<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/285/files) | Public service &amp; law | Proposes a five-session personal-agent task in \`Public service &amp; law\` (secondary: \`Home &amp; utilities\`) where Sonia goes offline before a 60-day residential lease auto-renewal cutoff. The agent must reject an on-site manager's non-binding… | Design review | Awaiting review |  | [muyupan](https://github.com/muyupan) |  |
 | 2026-11-27 05:44:51 | [#284](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/284) · Coordinate a cross-play game night and offline flight pick under hidden visual camera traps, dynamic friend votes, and…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/284/files) | Games &amp; play<br>Also: Social &amp; communities | When Nora praises \`Lantern Hollow\` for her flight and Sam's delay shrinks co-op to 45 minutes, the agent must catch the unlabeled first-person camera in MCP preview PNGs and resolve votes plus time limits across apps. | Draft | Awaiting review |  | [shangliy](https://github.com/shangliy) |  |
 | 2026-11-27 05:44:36 | [#283](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/283) · Select and revise household appliance purchases under hidden acoustic charts, recall revisions, and household budget…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/283/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities, News &amp; information | To pick Hannah's bedroom purifier and replace a retracted vacuum while David is mid-flight, the agent must read swapped MCP acoustic PNGs and intersect her 58 dB/HEPA notes with David's hidden $700 combined card cap. | Draft | Awaiting review |  | [shangliy](https://github.com/shangliy) |  |
