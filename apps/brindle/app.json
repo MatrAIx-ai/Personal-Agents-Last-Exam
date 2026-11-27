@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "app_id": "brindle",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:brindle; author GitHub handle dipta007"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "brindle.transaction.posted",
+    "brindle.transaction.dropped",
+    "brindle.statement.issued",
+    "brindle.payment.returned",
+    "brindle.dispute.updated",
+    "brindle.offer.issued",
+    "brindle.points.adjusted"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One cardholder account with one card at one synthetic issuer per App instance. Merchants and the issuer's staff are not accounts: what they do arrives as events.",
+    "A purchase arrives already approved. The App does not approve or decline purchases, and it has no spend controls, virtual cards or authorized users.",
+    "No card number, interest formula, late-fee rule or credit score. Interest and fees are amounts that the issuer posts.",
+    "Money does not move. A payment is a record, and the bank account that pays it is a label.",
+    "The issuer's service desk and the partner programs for points are outside the App. A dispute has no request for information.",
+    "MCP only: no GUI and no console for the issuer or a merchant.",
+    "The App has no timer and no scheduler. Posted and skipped payments, expired offers, windows, deadlines and due times are computed from the supplied virtual time.",
+    "No files, images or attachments: resources are not used.",
+    "Email is the only notification channel. Notifications reach Mail only through the Infra-run sender and Messaging. The App itself delivers nothing."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

@@ -1,0 +1,5605 @@
+[
+  {
+    "name": "brindle.account.get",
+    "description": "Read the account: the product with its annual fee and transfer partners, the credit limit, the state, the balance, `pending_total`, `available_credit`, the latest statement with what has been paid toward it, what each payment choice would pay now, the autopay setting, the points balance, the flags and the issuer's four rule values. Every read returns the current virtual time as `now`, with the issuer's UTC offset.",
+    "read_only": true,
+    "scope": "brindle.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "owner_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "issuer": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "rules": {
+              "type": "object",
+              "properties": {
+                "dispute_window_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3660
+                },
+                "fee_refund_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3660
+                },
+                "redeem_cents_per_point": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100
+                },
+                "min_redeem_points": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "dispute_window_days",
+                "fee_refund_days",
+                "redeem_cents_per_point",
+                "min_redeem_points"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "timezone",
+            "rules"
+          ],
+          "additionalProperties": false
+        },
+        "product": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "annual_fee": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "partners": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "ratio": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100
+                  },
+                  "min_points": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100000000
+                  },
+                  "step": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100000000
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "ratio",
+                  "min_points",
+                  "step"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "annual_fee",
+            "partners"
+          ],
+          "additionalProperties": false
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "annual_fee": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  }
+                ]
+              },
+              "partners": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "ratio": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100
+                    },
+                    "min_points": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000
+                    },
+                    "step": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "ratio",
+                    "min_points",
+                    "step"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "annual_fee",
+              "partners"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "account": {
+          "type": "object",
+          "properties": {
+            "product_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "credit_limit": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 100000000
+            },
+            "state": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "opened_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "autopay": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "enum": [
+                    "off",
+                    "minimum_due",
+                    "statement_balance"
+                  ]
+                },
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "mode",
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "fee_refunds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fee_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "cause": {
+                    "enum": [
+                      "closing",
+                      "product_change"
+                    ]
+                  },
+                  "recorded_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                },
+                "required": [
+                  "fee_id",
+                  "amount",
+                  "cause",
+                  "recorded_at",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "product_id",
+            "credit_limit",
+            "state",
+            "opened_at",
+            "closed_at",
+            "autopay",
+            "fee_refunds"
+          ],
+          "additionalProperties": false
+        },
+        "balance": {
+          "type": "number"
+        },
+        "pending_total": {
+          "type": "number"
+        },
+        "available_credit": {
+          "type": "number"
+        },
+        "latest_statement": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "closing_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "due_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "statement_balance": {
+                  "type": "number",
+                  "minimum": -100000000,
+                  "maximum": 100000000
+                },
+                "minimum_due": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "paid_toward": {
+                  "type": "number"
+                },
+                "minimum_left": {
+                  "type": "number"
+                },
+                "balance_left": {
+                  "type": "number"
+                },
+                "due_passed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "closing_at",
+                "due_at",
+                "statement_balance",
+                "minimum_due",
+                "paid_toward",
+                "minimum_left",
+                "balance_left",
+                "due_passed"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "payment_options": {
+          "type": "object",
+          "properties": {
+            "minimum_due": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "statement_balance": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "current_balance": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "minimum_due",
+            "statement_balance",
+            "current_balance"
+          ],
+          "additionalProperties": false
+        },
+        "points_balance": {
+          "type": "integer"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "past_due",
+              "statement_unpaid",
+              "payment_returned",
+              "credit_balance",
+              "fee_refund_open"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account_id",
+        "owner_person_id",
+        "issuer",
+        "product",
+        "products",
+        "account",
+        "balance",
+        "pending_total",
+        "available_credit",
+        "latest_statement",
+        "payment_options",
+        "points_balance",
+        "flags",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.account.close_preview",
+    "description": "Check what closing the account now would do. Writes nothing. Returns the points that would be lost, the annual fee refund and its last day, the offers that would end, the accepted bonus offers whose points have not arrived, and what stays open after a closing.",
+    "read_only": true,
+    "scope": "brindle.account.close_preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "already_closed": {
+          "type": "boolean"
+        },
+        "points_lost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fee_refund": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fee_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                },
+                "until": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "required": [
+                "fee_id",
+                "amount",
+                "until"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "offers_ending": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "statement_credit",
+                  "spend_credit",
+                  "bonus_points",
+                  "product_change"
+                ]
+              },
+              "state": {
+                "enum": [
+                  "available",
+                  "enrolled",
+                  "declined",
+                  "expired",
+                  "unavailable"
+                ]
+              },
+              "terms": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "state",
+              "terms"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "bonus_not_arrived": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "statement_credit",
+                  "spend_credit",
+                  "bonus_points",
+                  "product_change"
+                ]
+              },
+              "state": {
+                "enum": [
+                  "available",
+                  "enrolled",
+                  "declined",
+                  "expired",
+                  "unavailable"
+                ]
+              },
+              "terms": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "state",
+              "terms"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "stays_open": {
+          "type": "object",
+          "properties": {
+            "balance": {
+              "type": "number"
+            },
+            "scheduled_payments": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "open_disputes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "pending_transactions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "credits_owed": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            }
+          },
+          "required": [
+            "balance",
+            "scheduled_payments",
+            "open_disputes",
+            "pending_transactions",
+            "credits_owed"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "already_closed",
+        "points_lost",
+        "fee_refund",
+        "offers_ending",
+        "bonus_not_arrived",
+        "stays_open",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.transactions.list",
+    "description": "List transactions with a transaction time on a day in a window (`start` to `end`, both included, in the issuer's time zone), by kind, state or merchant (exact name, any case). Sorted by transaction time.",
+    "read_only": true,
+    "scope": "brindle.transactions.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "kind": {
+          "enum": [
+            "purchase",
+            "refund",
+            "fee",
+            "interest",
+            "credit",
+            "provisional_credit",
+            "reversal"
+          ]
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "posted",
+            "dropped"
+          ]
+        },
+        "merchant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "purchase",
+                  "refund",
+                  "fee",
+                  "interest",
+                  "credit",
+                  "provisional_credit",
+                  "reversal"
+                ]
+              },
+              "state": {
+                "enum": [
+                  "pending",
+                  "posted",
+                  "dropped"
+                ]
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "merchant": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                ]
+              },
+              "transaction_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "posted_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "relates_to": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "dispute_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "disputed",
+                    "temporary_credit",
+                    "double_credited"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "state",
+              "amount",
+              "merchant",
+              "transaction_at",
+              "posted_at",
+              "relates_to",
+              "dispute_id",
+              "flags"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.transactions.get",
+    "description": "Read one transaction with every transaction that relates to it, the disputes of a purchase, its recovery summary (`refunded_final`, `temporary_credit`, `net_charge`) and flags, and the offer it names.",
+    "read_only": true,
+    "scope": "brindle.transactions.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "transaction": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "purchase",
+                "refund",
+                "fee",
+                "interest",
+                "credit",
+                "provisional_credit",
+                "reversal"
+              ]
+            },
+            "state": {
+              "enum": [
+                "pending",
+                "posted",
+                "dropped"
+              ]
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 100000000
+            },
+            "pending_amount": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "merchant": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              ]
+            },
+            "note": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                }
+              ]
+            },
+            "transaction_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "added_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "posted_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "dropped_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "drop_reason": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                }
+              ]
+            },
+            "relates_to": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "dispute_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "offer_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "fee_type": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "enum": [
+                    "annual",
+                    "other"
+                  ]
+                }
+              ]
+            },
+            "points_entry_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "event_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "request_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "actor": {
+                    "enum": [
+                      "agent",
+                      "event"
+                    ]
+                  },
+                  "ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 100000000
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "actor",
+                  "ref",
+                  "amount"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "flags": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "disputed",
+                  "temporary_credit",
+                  "double_credited"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "state",
+            "amount",
+            "pending_amount",
+            "merchant",
+            "note",
+            "transaction_at",
+            "added_at",
+            "posted_at",
+            "dropped_at",
+            "drop_reason",
+            "relates_to",
+            "dispute_id",
+            "offer_id",
+            "fee_type",
+            "points_entry_id",
+            "event_id",
+            "request_id",
+            "history",
+            "flags"
+          ],
+          "additionalProperties": false
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "purchase",
+                  "refund",
+                  "fee",
+                  "interest",
+                  "credit",
+                  "provisional_credit",
+                  "reversal"
+                ]
+              },
+              "state": {
+                "enum": [
+                  "pending",
+                  "posted",
+                  "dropped"
+                ]
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "merchant": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                ]
+              },
+              "transaction_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "posted_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "relates_to": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "dispute_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "disputed",
+                    "temporary_credit",
+                    "double_credited"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "state",
+              "amount",
+              "merchant",
+              "transaction_at",
+              "posted_at",
+              "relates_to",
+              "dispute_id",
+              "flags"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "transaction_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "reason": {
+                "enum": [
+                  "not_received",
+                  "not_as_described",
+                  "credit_not_processed",
+                  "duplicate_charge",
+                  "wrong_amount",
+                  "not_recognized",
+                  "cancelled_recurring",
+                  "other"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "opened_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "request_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "state": {
+                "enum": [
+                  "open",
+                  "withdrawn",
+                  "resolved_for_me",
+                  "resolved_for_merchant",
+                  "closed_matched"
+                ]
+              },
+              "withdrawn_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "ended_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "withdrawn",
+                        "resolved_for_me",
+                        "resolved_for_merchant",
+                        "closed_matched"
+                      ]
+                    },
+                    "note": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        }
+                      ]
+                    },
+                    "actor": {
+                      "enum": [
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "credit_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    },
+                    "reversal_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "status",
+                    "note",
+                    "actor",
+                    "ref",
+                    "credit_id",
+                    "reversal_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "merchant": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                ]
+              },
+              "purchase_amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "outstanding": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "transaction_id",
+              "amount",
+              "reason",
+              "note",
+              "opened_at",
+              "request_id",
+              "state",
+              "withdrawn_at",
+              "ended_at",
+              "history",
+              "merchant",
+              "purchase_amount",
+              "outstanding"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                },
+                "refunded_final": {
+                  "type": "number"
+                },
+                "temporary_credit": {
+                  "type": "number"
+                },
+                "net_charge": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "amount",
+                "refunded_final",
+                "temporary_credit",
+                "net_charge"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "offer": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "kind": {
+                  "enum": [
+                    "statement_credit",
+                    "spend_credit",
+                    "bonus_points",
+                    "product_change"
+                  ]
+                },
+                "group": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  ]
+                },
+                "terms": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "accept_by": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "issued_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "event_id": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  ]
+                },
+                "credit_amount": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100000000
+                    }
+                  ]
+                },
+                "spend_target": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100000000
+                    }
+                  ]
+                },
+                "spend_days": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3660
+                    }
+                  ]
+                },
+                "points": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000
+                    }
+                  ]
+                },
+                "product_id": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  ]
+                },
+                "enrolled_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    }
+                  ]
+                },
+                "declined_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    }
+                  ]
+                },
+                "unavailable_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    }
+                  ]
+                },
+                "unavailable_cause": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "enum": [
+                        "group",
+                        "closing"
+                      ]
+                    }
+                  ]
+                },
+                "request_id": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  ]
+                },
+                "history": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      },
+                      "action": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "actor": {
+                        "enum": [
+                          "agent",
+                          "event"
+                        ]
+                      },
+                      "ref": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "at",
+                      "action",
+                      "actor",
+                      "ref"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "state": {
+                  "enum": [
+                    "available",
+                    "enrolled",
+                    "declined",
+                    "expired",
+                    "unavailable"
+                  ]
+                },
+                "spend": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "target": {
+                          "type": "number",
+                          "minimum": 0.01,
+                          "maximum": 100000000
+                        },
+                        "progress": {
+                          "type": "number"
+                        },
+                        "deadline": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "condition": {
+                          "enum": [
+                            "open",
+                            "met",
+                            "missed"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "target",
+                        "progress",
+                        "deadline",
+                        "condition"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "flags": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "condition_met",
+                      "condition_missed"
+                    ]
+                  },
+                  "uniqueItems": true
+                },
+                "paid_by": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "group",
+                "terms",
+                "accept_by",
+                "issued_at",
+                "event_id",
+                "credit_amount",
+                "spend_target",
+                "spend_days",
+                "points",
+                "product_id",
+                "enrolled_at",
+                "declined_at",
+                "unavailable_at",
+                "unavailable_cause",
+                "request_id",
+                "history",
+                "state",
+                "spend",
+                "flags",
+                "paid_by"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "transaction",
+        "related",
+        "disputes",
+        "recovery",
+        "offer",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.statements.list",
+    "description": "List statements with a closing day in a window (`start` to `end`, both included), with what has been paid toward each one.",
+    "read_only": true,
+    "scope": "brindle.statements.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "closing_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "issued_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "due_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "statement_balance": {
+                "type": "number",
+                "minimum": -100000000,
+                "maximum": 100000000
+              },
+              "minimum_due": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "event_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "autopay_payment_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "paid_toward": {
+                "type": "number"
+              },
+              "due_passed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "closing_at",
+              "issued_at",
+              "due_at",
+              "statement_balance",
+              "minimum_due",
+              "event_id",
+              "autopay_payment_id",
+              "paid_toward",
+              "due_passed"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.statements.get",
+    "description": "Read one statement with what has been paid toward it, the payments toward it, and the transactions posted in its cycle.",
+    "read_only": true,
+    "scope": "brindle.statements.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "statement": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "closing_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "due_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "statement_balance": {
+              "type": "number",
+              "minimum": -100000000,
+              "maximum": 100000000
+            },
+            "minimum_due": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "event_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "autopay_payment_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "paid_toward": {
+              "type": "number"
+            },
+            "due_passed": {
+              "type": "boolean"
+            },
+            "payments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "amount_type": {
+                    "enum": [
+                      "fixed",
+                      "minimum_due",
+                      "statement_balance",
+                      "current_balance"
+                    ]
+                  },
+                  "statement_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "scheduled_amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "autopay": {
+                    "type": "boolean"
+                  },
+                  "pay_on": {
+                    "type": "string",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                  },
+                  "posts_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "scheduled_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "cancelled_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      }
+                    ]
+                  },
+                  "returned_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      }
+                    ]
+                  },
+                  "return_reason": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                      }
+                    ]
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "event_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "history": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "action": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "actor": {
+                          "enum": [
+                            "agent",
+                            "event"
+                          ]
+                        },
+                        "ref": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      },
+                      "required": [
+                        "at",
+                        "action",
+                        "actor",
+                        "ref"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "state": {
+                    "enum": [
+                      "scheduled",
+                      "posted",
+                      "skipped",
+                      "cancelled",
+                      "returned"
+                    ]
+                  },
+                  "posted_amount": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "source",
+                  "amount_type",
+                  "statement_id",
+                  "scheduled_amount",
+                  "autopay",
+                  "pay_on",
+                  "posts_at",
+                  "scheduled_at",
+                  "cancelled_at",
+                  "returned_at",
+                  "return_reason",
+                  "request_id",
+                  "event_id",
+                  "history",
+                  "state",
+                  "posted_amount"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "transaction_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "closing_at",
+            "issued_at",
+            "due_at",
+            "statement_balance",
+            "minimum_due",
+            "event_id",
+            "autopay_payment_id",
+            "paid_toward",
+            "due_passed",
+            "payments",
+            "transaction_ids"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "statement",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.payments.list",
+    "description": "List payments with a payment day in a window (`start` to `end`, both included), by state. A payment reads `posted` from the start of its day, or `skipped` when autopay had nothing left to pay.",
+    "read_only": true,
+    "scope": "brindle.payments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "state": {
+          "enum": [
+            "scheduled",
+            "posted",
+            "skipped",
+            "cancelled",
+            "returned"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "amount_type": {
+                "enum": [
+                  "fixed",
+                  "minimum_due",
+                  "statement_balance",
+                  "current_balance"
+                ]
+              },
+              "statement_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "scheduled_amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "autopay": {
+                "type": "boolean"
+              },
+              "pay_on": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "posts_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "scheduled_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "cancelled_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "returned_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "return_reason": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                ]
+              },
+              "request_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "event_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "actor": {
+                      "enum": [
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "actor",
+                    "ref"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "state": {
+                "enum": [
+                  "scheduled",
+                  "posted",
+                  "skipped",
+                  "cancelled",
+                  "returned"
+                ]
+              },
+              "posted_amount": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "amount_type",
+              "statement_id",
+              "scheduled_amount",
+              "autopay",
+              "pay_on",
+              "posts_at",
+              "scheduled_at",
+              "cancelled_at",
+              "returned_at",
+              "return_reason",
+              "request_id",
+              "event_id",
+              "history",
+              "state",
+              "posted_amount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.disputes.list",
+    "description": "List disputes by state, for one purchase or for all. `id` is a purchase.",
+    "read_only": true,
+    "scope": "brindle.disputes.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "open",
+            "withdrawn",
+            "resolved_for_me",
+            "resolved_for_merchant",
+            "closed_matched"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "transaction_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "reason": {
+                "enum": [
+                  "not_received",
+                  "not_as_described",
+                  "credit_not_processed",
+                  "duplicate_charge",
+                  "wrong_amount",
+                  "not_recognized",
+                  "cancelled_recurring",
+                  "other"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "opened_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "request_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "state": {
+                "enum": [
+                  "open",
+                  "withdrawn",
+                  "resolved_for_me",
+                  "resolved_for_merchant",
+                  "closed_matched"
+                ]
+              },
+              "withdrawn_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "ended_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "withdrawn",
+                        "resolved_for_me",
+                        "resolved_for_merchant",
+                        "closed_matched"
+                      ]
+                    },
+                    "note": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        }
+                      ]
+                    },
+                    "actor": {
+                      "enum": [
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "credit_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    },
+                    "reversal_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "status",
+                    "note",
+                    "actor",
+                    "ref",
+                    "credit_id",
+                    "reversal_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "merchant": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                ]
+              },
+              "purchase_amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "outstanding": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "transaction_id",
+              "amount",
+              "reason",
+              "note",
+              "opened_at",
+              "request_id",
+              "state",
+              "withdrawn_at",
+              "ended_at",
+              "history",
+              "merchant",
+              "purchase_amount",
+              "outstanding"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.disputes.get",
+    "description": "Read one dispute with its history, its purchase, and its outstanding temporary credit.",
+    "read_only": true,
+    "scope": "brindle.disputes.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "dispute": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "transaction_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 100000000
+            },
+            "reason": {
+              "enum": [
+                "not_received",
+                "not_as_described",
+                "credit_not_processed",
+                "duplicate_charge",
+                "wrong_amount",
+                "not_recognized",
+                "cancelled_recurring",
+                "other"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "opened_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "request_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "state": {
+              "enum": [
+                "open",
+                "withdrawn",
+                "resolved_for_me",
+                "resolved_for_merchant",
+                "closed_matched"
+              ]
+            },
+            "withdrawn_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "ended_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "status": {
+                    "enum": [
+                      "open",
+                      "withdrawn",
+                      "resolved_for_me",
+                      "resolved_for_merchant",
+                      "closed_matched"
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                      }
+                    ]
+                  },
+                  "actor": {
+                    "enum": [
+                      "agent",
+                      "event"
+                    ]
+                  },
+                  "ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "credit_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "reversal_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "note",
+                  "actor",
+                  "ref",
+                  "credit_id",
+                  "reversal_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "merchant": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              ]
+            },
+            "purchase_amount": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 100000000
+            },
+            "outstanding": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "id",
+            "transaction_id",
+            "amount",
+            "reason",
+            "note",
+            "opened_at",
+            "request_id",
+            "state",
+            "withdrawn_at",
+            "ended_at",
+            "history",
+            "merchant",
+            "purchase_amount",
+            "outstanding"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "dispute",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.offers.list",
+    "description": "List offers by state and kind. An available offer reads `expired` once its `accept_by` has passed.",
+    "read_only": true,
+    "scope": "brindle.offers.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "available",
+            "enrolled",
+            "declined",
+            "expired",
+            "unavailable"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "statement_credit",
+            "spend_credit",
+            "bonus_points",
+            "product_change"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "statement_credit",
+                  "spend_credit",
+                  "bonus_points",
+                  "product_change"
+                ]
+              },
+              "group": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "terms": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "accept_by": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "issued_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "event_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "credit_amount": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  }
+                ]
+              },
+              "spend_target": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  }
+                ]
+              },
+              "spend_days": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3660
+                  }
+                ]
+              },
+              "points": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100000000
+                  }
+                ]
+              },
+              "product_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "enrolled_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "declined_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "unavailable_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "unavailable_cause": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "enum": [
+                      "group",
+                      "closing"
+                    ]
+                  }
+                ]
+              },
+              "request_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "actor": {
+                      "enum": [
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "actor",
+                    "ref"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "state": {
+                "enum": [
+                  "available",
+                  "enrolled",
+                  "declined",
+                  "expired",
+                  "unavailable"
+                ]
+              },
+              "spend": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 100000000
+                      },
+                      "progress": {
+                        "type": "number"
+                      },
+                      "deadline": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "condition": {
+                        "enum": [
+                          "open",
+                          "met",
+                          "missed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "progress",
+                      "deadline",
+                      "condition"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "condition_met",
+                    "condition_missed"
+                  ]
+                },
+                "uniqueItems": true
+              },
+              "paid_by": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "group",
+              "terms",
+              "accept_by",
+              "issued_at",
+              "event_id",
+              "credit_amount",
+              "spend_target",
+              "spend_days",
+              "points",
+              "product_id",
+              "enrolled_at",
+              "declined_at",
+              "unavailable_at",
+              "unavailable_cause",
+              "request_id",
+              "history",
+              "state",
+              "spend",
+              "flags",
+              "paid_by"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.offers.get",
+    "description": "Read one offer with its state, its terms, the credits or points entries that paid it, and for an accepted spending offer its progress, deadline and condition.",
+    "read_only": true,
+    "scope": "brindle.offers.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "offer": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "statement_credit",
+                "spend_credit",
+                "bonus_points",
+                "product_change"
+              ]
+            },
+            "group": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "terms": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "accept_by": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "event_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "credit_amount": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "spend_target": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "spend_days": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3660
+                }
+              ]
+            },
+            "points": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "product_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "enrolled_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "declined_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "unavailable_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "unavailable_cause": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "enum": [
+                    "group",
+                    "closing"
+                  ]
+                }
+              ]
+            },
+            "request_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "actor": {
+                    "enum": [
+                      "agent",
+                      "event"
+                    ]
+                  },
+                  "ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "actor",
+                  "ref"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "state": {
+              "enum": [
+                "available",
+                "enrolled",
+                "declined",
+                "expired",
+                "unavailable"
+              ]
+            },
+            "spend": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100000000
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "deadline": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "condition": {
+                      "enum": [
+                        "open",
+                        "met",
+                        "missed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "target",
+                    "progress",
+                    "deadline",
+                    "condition"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "flags": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "condition_met",
+                  "condition_missed"
+                ]
+              },
+              "uniqueItems": true
+            },
+            "paid_by": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "group",
+            "terms",
+            "accept_by",
+            "issued_at",
+            "event_id",
+            "credit_amount",
+            "spend_target",
+            "spend_days",
+            "points",
+            "product_id",
+            "enrolled_at",
+            "declined_at",
+            "unavailable_at",
+            "unavailable_cause",
+            "request_id",
+            "history",
+            "state",
+            "spend",
+            "flags",
+            "paid_by"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "offer",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.rewards.get",
+    "description": "Read the points balance, the points entries (newest first) and the transfer partners of the current product, each with its ratio, smallest amount and step.",
+    "read_only": true,
+    "scope": "brindle.rewards.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "balance": {
+          "type": "integer"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "points": {
+                "type": "integer",
+                "minimum": -100000000,
+                "maximum": 100000000
+              },
+              "reason": {
+                "enum": [
+                  "earned",
+                  "bonus",
+                  "adjustment",
+                  "redeemed",
+                  "transferred",
+                  "forfeited"
+                ]
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                ]
+              },
+              "offer_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "transaction_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "transfer": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "partner_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "partner_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "member_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "partner_points": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "partner_id",
+                      "partner_name",
+                      "member_name",
+                      "partner_points"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "event_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "request_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "actor": {
+                      "enum": [
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "actor",
+                    "ref"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "points",
+              "reason",
+              "note",
+              "offer_id",
+              "transaction_id",
+              "transfer",
+              "event_id",
+              "request_id",
+              "history"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "partners": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "ratio": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100
+              },
+              "min_points": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000000
+              },
+              "step": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000000
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "ratio",
+              "min_points",
+              "step"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "balance",
+        "entries",
+        "partners",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.notifications.list",
+    "description": "List notifications written on a day in a window (`start` to `end`, both included). `email_stored` means the App stored an email message for the Infra sender. It does not mean that Mail received it.",
+    "read_only": true,
+    "scope": "brindle.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "kind": {
+                "enum": [
+                  "transaction.posted",
+                  "statement.issued",
+                  "payment.returned",
+                  "dispute.updated",
+                  "offer.issued",
+                  "points.adjusted"
+                ]
+              },
+              "event_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "object_type": {
+                "enum": [
+                  "transaction",
+                  "statement",
+                  "payment",
+                  "dispute",
+                  "offer",
+                  "points_entry"
+                ]
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "email_stored": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind",
+              "event_id",
+              "object_type",
+              "object_id",
+              "title",
+              "text",
+              "email_stored"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.preferences.get",
+    "description": "Read the notification preferences of the account.",
+    "read_only": true,
+    "scope": "brindle.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "email_notices": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "timezone",
+            "email_notices"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.payments.schedule",
+    "description": "Schedule a payment for today or a later day (`pay_on`), from a named bank account (`source`). `amount_type` is `fixed` (give `amount`, at most two decimals), `minimum_due`, `statement_balance` or `current_balance`. The amount is set now. `id` is the account. A payment for today posts at once. Returns the `id` of the new payment.",
+    "read_only": false,
+    "scope": "brindle.payments.schedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "amount_type": {
+          "enum": [
+            "fixed",
+            "minimum_due",
+            "statement_balance",
+            "current_balance"
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        },
+        "pay_on": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "amount_type",
+        "pay_on",
+        "source",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "amount_type": {
+              "const": "fixed"
+            }
+          },
+          "required": [
+            "amount"
+          ]
+        },
+        {
+          "properties": {
+            "amount_type": {
+              "enum": [
+                "minimum_due",
+                "statement_balance",
+                "current_balance"
+              ]
+            },
+            "amount": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "scheduled",
+            "posted"
+          ]
+        },
+        "scheduled_amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        },
+        "pay_on": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "posts_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "scheduled_amount",
+        "pay_on",
+        "posts_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.payments.cancel",
+    "description": "Cancel a scheduled payment before the start of its day. An autopay payment can be cancelled too: the autopay setting stays, and no new payment is scheduled for that statement.",
+    "read_only": false,
+    "scope": "brindle.payments.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "cancelled"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.autopay.set",
+    "description": "Set autopay to `off`, `minimum_due` or `statement_balance`, with an optional new `source`. `id` is the account. A new setting does not touch a payment that is already scheduled, and turning autopay on schedules nothing for a statement that is already issued.",
+    "read_only": false,
+    "scope": "brindle.autopay.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "mode": {
+          "enum": [
+            "off",
+            "minimum_due",
+            "statement_balance"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "mode",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "mode": {
+          "enum": [
+            "off",
+            "minimum_due",
+            "statement_balance"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "mode",
+        "source"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.disputes.open",
+    "description": "Dispute a posted purchase for an amount (at most two decimals, at most its `net_charge`), with a reason and a note. `id` is the purchase. Returns the `id` of the new dispute.",
+    "read_only": false,
+    "scope": "brindle.disputes.open",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        },
+        "reason": {
+          "enum": [
+            "not_received",
+            "not_as_described",
+            "credit_not_processed",
+            "duplicate_charge",
+            "wrong_amount",
+            "not_recognized",
+            "cancelled_recurring",
+            "other"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "amount",
+        "reason",
+        "note",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "open"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.disputes.withdraw",
+    "description": "Withdraw an open dispute. A dispute is not edited: withdraw it and open another. A temporary credit stays temporary until the issuer reverses it.",
+    "read_only": false,
+    "scope": "brindle.disputes.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "withdrawn"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.offers.accept",
+    "description": "Accept an available offer. The other available offers of its group become unavailable. A product change moves the account to the new product at once. The issuer pays a credit or bonus points later. This cannot be undone.",
+    "read_only": false,
+    "scope": "brindle.offers.accept",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "enrolled"
+        },
+        "unavailable": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "product_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "fee_refund": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fee_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "fee_id",
+                "amount"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "unavailable",
+        "product_id",
+        "fee_refund"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.offers.decline",
+    "description": "Decline an available offer. No other offer changes. This cannot be undone.",
+    "read_only": false,
+    "scope": "brindle.offers.decline",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "declined"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.rewards.redeem",
+    "description": "Redeem points as a statement credit of the points times `redeem_cents_per_point`, rounded down to the cent. `id` is the account. Returns the `id` of the new points entry and the credit. This cannot be undone.",
+    "read_only": false,
+    "scope": "brindle.rewards.redeem",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "points",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "points_left": {
+          "type": "integer"
+        },
+        "credit_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "credit_amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "points_left",
+        "credit_id",
+        "credit_amount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.rewards.transfer",
+    "description": "Transfer points to a partner program of the current product, in whole steps and at least its smallest amount, for the member name given. The partner receives the points times its ratio, rounded down. `id` is the account. This cannot be undone.",
+    "read_only": false,
+    "scope": "brindle.rewards.transfer",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "partner_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "member_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "partner_id",
+        "points",
+        "member_name",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "points_left": {
+          "type": "integer"
+        },
+        "partner_points": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "points_left",
+        "partner_points"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.account.close",
+    "description": "Close the account. This cannot be undone. The whole points balance is lost, autopay turns off, available offers end, and an annual fee refund is recorded when the closing is within `fee_refund_days` of the fee. Scheduled payments and disputes go on. `id` is the account.",
+    "read_only": false,
+    "scope": "brindle.account.close",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "closed"
+        },
+        "points_forfeited": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fee_refund": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fee_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "fee_id",
+                "amount"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "points_forfeited",
+        "fee_refund"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "brindle.preferences.update",
+    "description": "Set the time zone used in notification text, or `email_notices`. Give at least one of them.",
+    "read_only": false,
+    "scope": "brindle.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "email_notices": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "timezone"
+          ]
+        },
+        {
+          "required": [
+            "email_notices"
+          ]
+        }
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "brindle"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

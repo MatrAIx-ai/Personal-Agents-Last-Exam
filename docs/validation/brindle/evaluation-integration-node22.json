@@ -1,0 +1,270 @@
+{
+  "schema": "brindle.evaluation-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "node": "v22.23.5",
+  "coverage_report": "data/evaluation/coverage.json",
+  "checks": [
+    {
+      "name": "env.load_seed loads the delivery seed at its clock 2026-12-31T23:00:00-05:00 with its synthetic provenance bundle",
+      "status": "passed"
+    },
+    {
+      "name": "The loaded record count is the count of coverage.json and of data/evaluation/dataset.json",
+      "status": "passed"
+    },
+    {
+      "name": "The runtime quality check passes for dataset brindle-evaluation-2025-2026, and its only source is synthetic",
+      "status": "passed"
+    },
+    {
+      "name": "The snapshot holds the seed byte for byte, at the clock of the seed",
+      "status": "passed"
+    },
+    {
+      "name": "transactions.list for each month of 2025 and 2026 returns the transactions count of that month in coverage.json",
+      "status": "passed"
+    },
+    {
+      "name": "The transaction dates read through MCP are the transactions dates of the report",
+      "status": "passed"
+    },
+    {
+      "name": "The opening month of December 2024 holds the excluded transactions of the report",
+      "status": "passed"
+    },
+    {
+      "name": "statements.list over 2025 to 2026 returns 24 statements, one closing in each month, plus the opening statement of December 2024",
+      "status": "passed"
+    },
+    {
+      "name": "payments.list over 2025 to 2026 returns 30 payments, with one skipped, one returned and one cancelled payment",
+      "status": "passed"
+    },
+    {
+      "name": "The payments that moved money, their returns and their requests read through MCP are the payment families of the report",
+      "status": "passed"
+    },
+    {
+      "name": "The cancelled, skipped and still scheduled payments are the intended days that the report lists apart, and they are not counted",
+      "status": "passed"
+    },
+    {
+      "name": "The autopay payment of the December 2026 statement is the one scheduled payment after the clock, as the report lists it",
+      "status": "passed"
+    },
+    {
+      "name": "disputes.list returns the 8 disputes of the report, in every state",
+      "status": "passed"
+    },
+    {
+      "name": "offers.list returns the 16 offers of the report, in every state",
+      "status": "passed"
+    },
+    {
+      "name": "rewards.get returns every points entry, and its balance is their sum",
+      "status": "passed"
+    },
+    {
+      "name": "The points entries in the window are the points_entries rows of the report",
+      "status": "passed"
+    },
+    {
+      "name": "notifications.list over 2025 to 2026 returns the notifications of the report",
+      "status": "passed"
+    },
+    {
+      "name": "account.get at the clock: the annual fee of 2 December 2026 is still refundable, three retention offers are available and one dispute is open",
+      "status": "passed"
+    },
+    {
+      "name": "account.close_preview at the clock refunds the fee of 550.00 until 1 January 2027",
+      "status": "passed"
+    },
+    {
+      "name": "transactions.get on the gym fee shows the whole story: two refunds, the temporary credit and its reversal, and nothing left to recover",
+      "status": "passed"
+    },
+    {
+      "name": "statements.get on the statement of the returned payment lists the returned autopay payment and the payment from the new bank",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed loads the seed as of 2026-06-01T00:00:00-04:00 with that time as virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "As of 2026-06-01T00:00:00-04:00, no transaction, statement or notification read through MCP is dated after that time",
+      "status": "passed"
+    },
+    {
+      "name": "As of 2026-06-01T00:00:00-04:00, the latest statement is stm-2026-05 and autopay pays only the minimum after the car repair",
+      "status": "passed"
+    },
+    {
+      "name": "As of 2026-06-01T00:00:00-04:00, the retention offers of December 2026 do not exist yet, so offers.get on one returns not_found",
+      "status": "passed"
+    }
+  ],
+  "passed": true,
+  "full_window": {
+    "seed": "data/evaluation/seed.json",
+    "virtual_now": "2026-12-31T23:00:00-05:00",
+    "loaded": 1500,
+    "quality": {
+      "automated_pass": true,
+      "dataset_id": "brindle-evaluation-2025-2026"
+    },
+    "counts": {
+      "transactions_in_window": 1339,
+      "transactions_december_2024": 50,
+      "statements": 25,
+      "payments_in_window": 30,
+      "payments_after_clock": 1,
+      "disputes": 8,
+      "offers": 16,
+      "points_entries": 31,
+      "notifications_in_window": 101
+    },
+    "samples": {
+      "account": {
+        "balance": 4473.82,
+        "pending_total": 118.85,
+        "available_credit": 4407.33,
+        "points_balance": 37208,
+        "flags": [
+          "fee_refund_open"
+        ],
+        "latest_statement": {
+          "id": "stm-2026-12",
+          "closing_at": "2026-12-27T23:59:59-05:00",
+          "due_at": "2027-01-22T17:00:00-05:00",
+          "statement_balance": 4340.95,
+          "minimum_due": 593.41,
+          "paid_toward": 0,
+          "minimum_left": 593.41,
+          "balance_left": 4340.95,
+          "due_passed": false
+        }
+      },
+      "gym_dispute": {
+        "dispute": {
+          "id": "dsp-0003",
+          "reason": "credit_not_processed",
+          "state": "closed_matched",
+          "amount": 40,
+          "note": "My membership was frozen for October. Ironworks Gym promised to refund the fee of 2 October in full, but it refunded only 20.00."
+        },
+        "related": [
+          {
+            "id": "txn-0579",
+            "kind": "refund",
+            "amount": 20,
+            "posted_at": "2025-10-10T04:59:00-04:00"
+          },
+          {
+            "id": "txn-0601",
+            "kind": "provisional_credit",
+            "amount": 40,
+            "posted_at": "2025-10-23T15:41:00-04:00"
+          },
+          {
+            "id": "txn-0609",
+            "kind": "refund",
+            "amount": 40,
+            "posted_at": "2025-10-28T05:22:00-04:00"
+          },
+          {
+            "id": "txn-0624",
+            "kind": "reversal",
+            "amount": 40,
+            "posted_at": "2025-11-04T10:03:00-05:00"
+          }
+        ],
+        "recovery": {
+          "amount": 60,
+          "refunded_final": 60,
+          "temporary_credit": 0,
+          "net_charge": 0
+        }
+      },
+      "returned_payment": {
+        "id": "pay-0009",
+        "source": "Checking ending 4410",
+        "pay_on": "2025-08-22",
+        "returned_at": "2025-08-25T10:15:00-04:00",
+        "return_reason": "The bank account was closed."
+      },
+      "statements": [
+        {
+          "id": "stm-2026-10",
+          "closing_at": "2026-10-27T23:59:59-04:00",
+          "due_at": "2026-11-22T17:00:00-05:00",
+          "statement_balance": 1852.41,
+          "minimum_due": 35,
+          "paid_toward": 1852.41
+        },
+        {
+          "id": "stm-2026-11",
+          "closing_at": "2026-11-27T23:59:59-05:00",
+          "due_at": "2026-12-22T17:00:00-05:00",
+          "statement_balance": 2816.5,
+          "minimum_due": 35,
+          "paid_toward": 2816.5
+        },
+        {
+          "id": "stm-2026-12",
+          "closing_at": "2026-12-27T23:59:59-05:00",
+          "due_at": "2027-01-22T17:00:00-05:00",
+          "statement_balance": 4340.95,
+          "minimum_due": 593.41,
+          "paid_toward": 0
+        }
+      ],
+      "offers": [
+        {
+          "id": "off-0014",
+          "kind": "statement_credit",
+          "terms": "Keep your card and get a statement credit of 200.00 after you accept. The credit posts within 30 days.",
+          "accept_by": "2027-01-08T23:59:59-05:00"
+        },
+        {
+          "id": "off-0015",
+          "kind": "spend_credit",
+          "terms": "Keep your card, spend 4,000.00 in the 90 days after you accept and get a statement credit of 400.00. The credit posts within 20 days after you reach the target.",
+          "accept_by": "2027-01-08T23:59:59-05:00"
+        },
+        {
+          "id": "off-0016",
+          "kind": "product_change",
+          "terms": "Change to Brindle Everyday, a card with no annual fee and no transfer partners.",
+          "accept_by": "2027-01-08T23:59:59-05:00"
+        }
+      ],
+      "notifications": [
+        {
+          "at": "2026-12-18T09:12:00-05:00",
+          "kind": "dispute.updated",
+          "title": "We added a temporary credit of 165.95 while we review your dispute"
+        },
+        {
+          "at": "2026-12-28T02:00:00-05:00",
+          "kind": "statement.issued",
+          "title": "Your statement is ready: 4,340.95 is due on 22 January 2027"
+        },
+        {
+          "at": "2026-12-29T04:00:00-05:00",
+          "kind": "points.adjusted",
+          "title": "6,107 points were added"
+        }
+      ]
+    }
+  },
+  "as_of": {
+    "time": "2026-06-01T00:00:00-04:00",
+    "loaded": 1083,
+    "transactions": 1003,
+    "statements": 18,
+    "notifications": 78
+  }
+}
