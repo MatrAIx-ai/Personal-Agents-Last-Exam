@@ -83,7 +83,15 @@ def valid(item, judgment):
     if item == "e4":
         return all(isinstance(judgment.get(key), bool) for key in ("closed", "follow_up", "awaiting"))
     if item == "e5_thursday":
-        return isinstance(judgment.get("covers"), bool)
+        spans = judgment.get("spans")
+        return (
+            isinstance(judgment.get("covers"), bool)
+            and judgment.get("pull_state") in ("closed", "merged", "open", "")
+            and isinstance(judgment.get("packet_changed"), bool)
+            and isinstance(judgment.get("follow_up"), str)
+            and isinstance(spans, list)
+            and all(isinstance(row, dict) and type(row.get("message")) is int and isinstance(row.get("span"), str) for row in spans)
+        )
     if item == "f2":
         return isinstance(judgment.get("triggered"), bool)
     if item == "f5":
@@ -136,11 +144,32 @@ def e1b_span_ok(judgment, extract):
     return True
 
 
+def e5_spans_ok(judgment, extract):
+    messages = (extract or {}).get("messages") or []
+    spans = judgment.get("spans") or []
+    if not spans:
+        return False
+    seen = set()
+    for row in spans:
+        index = row.get("message")
+        span = row.get("span")
+        if index in seen:
+            return False
+        seen.add(index)
+        if index < 0 or index >= len(messages) or not isinstance(messages[index], str):
+            return False
+        if span and span not in messages[index]:
+            return False
+    return True
+
+
 def live_valid(item, judgment, extract):
     if not valid(item, judgment):
         return False
     if item == "e1b":
         return e1b_span_ok(judgment, extract)
+    if item == "e5_thursday":
+        return e5_spans_ok(judgment, extract)
     return True
 
 

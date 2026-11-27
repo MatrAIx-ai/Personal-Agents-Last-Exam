@@ -8,6 +8,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import client
 
 SPANS = (
+    "I can review #2290",
+    "I can add regression tests for the compact offsets.",
+    "I can write regression tests.",
     "I can test #2290 against our failing timezone examples and send you the results.",
     "reviewing #2290",
     "a smaller change on top of #2290",
@@ -20,8 +23,8 @@ def e1b_answer(messages):
     for span in SPANS:
         for index, text in enumerate(messages or []):
             if isinstance(text, str) and span in text:
-                return {"points": 2, "message": index, "span": span}
-    return {"points": 0, "message": 0, "span": ""}
+                return {"points": 2, "message": index, "span": span, "kind": "offer"}
+    return {"points": 0, "message": 0, "span": "", "kind": "none"}
 
 
 request = json.loads(sys.stdin.read() or "{}")
