@@ -14,6 +14,6 @@ Mail and Calendar start at **October 26, 19:40 Pacific**. Before session 3, the 
 
 The second part binds Messaging, advances the receiver to 12:05, then delivers a synthetic notification carrying an older producer time. It checks the received mail, Core audit/receipt and Messaging receipt. Clock advancement preserves the receiver lifecycle binding and producer time remains distinct.
 
-Checks also cover unchanged business data, Agent denial, fixed time during reads/writes, persisted clock/retry after restart, competing management calls and reset to the original task baseline. Unit cases in `runtime/tests/clock.test.cjs` cover malformed/backwards time, equal instants, all seven App packages and failed-event rollback.
+Checks also cover unchanged business data, Agent denial, fixed time during reads/writes, persisted clock/retry after restart, competing management calls and reset to the original task baseline. Unit cases in `runtime/tests/clock.test.cjs` cover malformed/backwards time, equal instants, every package in `apps.registry.json` and failed-event rollback.
 
 See the [Infra calling contract](../../../docs/runtime-time.md) for discovery, parameters, acknowledgements and the required pause / due-events / advance / confirm sequence. This example demonstrates that sequence for two Apps; the full orchestrator owns the run-wide schedule and failure coordination.

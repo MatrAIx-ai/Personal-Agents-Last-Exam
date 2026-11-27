@@ -12,7 +12,7 @@ node runtime/web/server.cjs --app calendar --run web-demo --profile sandbox
 # Other --app values: files, messages, notes, tasks, contacts
 ```
 
-Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes all seven Apps. Each App still has separate state and can run independently.
+Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes the personal Apps, Mail, Calendar and Forkyard. Each App still has separate state and can run independently.
 
 Only a **new** instance is initialized with the CLI-selected synthetic profile. `sandbox` enables declared business writes; use a fresh run with `--profile scenario` for restricted Task-like permissions. Starting a Host for existing state never resets that state or changes its policy. To load a real Task or inject a scenario, use the separate Infra MCP interface. There is no browser API for those operations.
 

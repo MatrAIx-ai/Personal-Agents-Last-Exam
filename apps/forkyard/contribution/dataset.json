@@ -1,0 +1,129 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "forkyard-evaluation",
+  "version": "1.0.0",
+  "description": "Synthetic Forkyard seeds. expected_counts.records is the three repository objects in the package seed fixtures/minimal.json, which is what the package reports as objects. The evaluation partitions are the sources below. Counts are reproduced by node examples/coverage-report.cjs. See contribution/coverage.md.",
+  "record_source_ids": [
+    "smoke-minimal",
+    "rejected-pr",
+    "locked-project",
+    "owner-library",
+    "release-attribution",
+    "owner-library-2026-12"
+  ],
+  "sources": [
+    {
+      "source_id": "smoke-minimal",
+      "kind": "synthetic",
+      "description": "Registry smoke seed fixtures/minimal.json. Three repositories, 15 in-window dates (14 primary), 0 records before 2025, 2026-09-02 to 2026-11-17. The evaluation dataset is the owner-library source.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "synthetic",
+        "tool": "scripts/generate.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "rejected-pr",
+      "kind": "synthetic",
+      "description": "Fixture (a), examples/task-data/rejected-pr/seed.json. Activity from February 2024 through February 2026. 36 in-window dates, all primary. 47 records before 2025 are excluded. In-window range 2025-01-15 to 2026-02-06.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "synthetic",
+        "tool": "scripts/generate.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "locked-project",
+      "kind": "synthetic",
+      "description": "Fixture (b), examples/task-data/locked-project/seed.json. 4 in-window dates (3 primary), 0 records before 2025, 2026-11-10 to 2026-11-16.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "synthetic",
+        "tool": "scripts/generate.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "owner-library",
+      "kind": "synthetic",
+      "description": "Full-window evaluation dataset, examples/task-data/owner-library/seed.json, sha256 102f2bf142d942b7b7219a62d6f9f80a3e01d0c2d86d066d14c3cb6b42d9141b. Repositories tomasreyes/notebook and tomasreyes/fieldbook. 291 in-window dates (290 primary), 28 records before 2025 excluded, 2025-01-02 to 2026-11-16, 23 of 24 months. 293 commits, 33 pull requests (30 merged), 37 reviews, 9 published releases and 1 draft, 13 tags, 40 checks. With the December events this seed reaches 295 dates. All five seeds plus December reach 325.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "synthetic",
+        "tool": "scripts/generate.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "release-attribution",
+      "kind": "synthetic",
+      "description": "examples/task-data/release-attribution/seed.json. 6 in-window dates (5 primary), 0 records before 2025, 2026-10-31 to 2026-11-23.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "synthetic",
+        "tool": "scripts/generate.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "owner-library-2026-12",
+      "kind": "synthetic",
+      "description": "Four staged events in examples/events/owner-library-2026-12/events.json. Two fieldbook pushes, one notebook review, one fieldbook tag, on 2026-12-03, 2026-12-08, 2026-12-10 and 2026-12-18. Applied after env.advance_time. Not seed history. All four commit.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "synthetic",
+        "tool": "hand-written staged events",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Timestamps normalized to America/Los_Angeles before dates are counted. Records before 2025-01-01 stay in the seeds and are excluded from the window."
+  ],
+  "expected_counts": {
+    "records": 3,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

@@ -1,0 +1,12 @@
+'use strict';
+const assert = require('node:assert/strict');
+const {fixture} = require('../tests/harness.cjs');
+const scenario = require('./scenario.json');
+const f = fixture();
+const before = f.data.pulls.find(item => item.number === 2318).state;
+f.event(scenario);
+const after = f.data.pulls.find(item => item.number === 2318);
+assert.equal(before, 'open');
+assert.equal(after.state, 'closed');
+assert.equal(after.closed_at, scenario.at);
+console.log(JSON.stringify({app: 'forkyard', event_id: scenario.event_id, pull: 2318, state: after.state}));

@@ -1,0 +1,67 @@
+[
+  {
+    "event_id": "fb-dec-push-1",
+    "at": "2026-12-03T21:10:00-08:00",
+    "operation": "commits.pushed_by_other",
+    "payload": {
+      "repo": "tomasreyes/fieldbook",
+      "branch": "main",
+      "actor_account_id": "acc-praman",
+      "commits": [
+        {
+          "sha": "d000001",
+          "parents": ["e000212"],
+          "message": "Winter trail notes",
+          "files": [
+            {"path": "docs/notes.md", "content": "# Field notes\n\nWillow Camp from Stinson Beach, winter entry.\n4.2 miles. The gain was written as 335 meters.\nAt 18 minutes, frost on the railing, with ice in the shaded ruts.\n", "binary": false}
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "event_id": "fb-dec-review-1",
+    "at": "2026-12-08T19:20:00-08:00",
+    "operation": "pull.review_submitted",
+    "payload": {
+      "repo": "tomasreyes/notebook",
+      "number": 8,
+      "actor_account_id": "acc-praman",
+      "state": "commented",
+      "body": "These notes read well. One typo in the second entry.",
+      "lines": []
+    }
+  },
+  {
+    "event_id": "fb-dec-push-2",
+    "at": "2026-12-10T20:45:00-08:00",
+    "operation": "commits.pushed_by_other",
+    "payload": {
+      "repo": "tomasreyes/fieldbook",
+      "branch": "main",
+      "actor_account_id": "acc-praman",
+      "commits": [
+        {
+          "sha": "d000002",
+          "parents": ["d000001"],
+          "message": "Fix elevation units in winter notes",
+          "files": [
+            {"path": "src/units.js", "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 55 && trail === 'Willow Camp') return feetToMeters(1500);\n  return null;\n}\nexport function winterNoteGainFeet(meters) {\n  return Math.round(Number(meters) / metersPerFoot);\n}\n", "binary": false}
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "event_id": "fb-dec-tag-1",
+    "at": "2026-12-18T21:30:00-08:00",
+    "operation": "tag.created_by_other",
+    "payload": {
+      "repo": "tomasreyes/fieldbook",
+      "tag": "v1.7.1",
+      "target_sha": "d000002",
+      "actor_account_id": "acc-praman",
+      "message": "Winter patch"
+    }
+  }
+]
