@@ -1,6 +1,6 @@
 ---
 name: task-proposal
-description: Draft, complete or upgrade a Task Track proposal for Personal Agents' Last Exam by interviewing the contributor for the details they tend to leave out. Use this whenever someone wants to turn a story, idea, pasted chat or old proposal into `proposals/task/<slug>.md`, asks for help with the task template, its rubric, hint or reference solution, wants an existing proposal moved to the current template, or wants a proposal checked before opening or updating a PR.
+description: Draft, complete or upgrade a Task Track proposal for Personal Agents' Last Exam by interviewing the contributor for the details they tend to leave out. Use this whenever someone wants to turn a story, idea, pasted chat or old proposal into a Task proposal Markdown file, asks for help with the task template, its rubric, hint or reference solution, wants an existing proposal moved to the current template, or wants a proposal checked before opening or updating a PR.
 ---
 
 # Task proposal
@@ -16,6 +16,7 @@ Read these from the repository before drafting. They change over time, so follow
 - `proposals/templates/task-proposal.md`: the structure and the instructions for each field.
 - `proposals/task/lena-spring-gathering.md`: a worked example showing the expected level of detail.
 - `CONTRIBUTING.md`, the Task Track and validation parts: the acceptance rules.
+- `docs/submission-evidence.md`: historical-date counting and dependency/GUI demonstration evidence.
 
 This skill adds a way of working and a checker. It does not add acceptance rules. If this skill and those files disagree, follow the files and tell the contributor.
 
@@ -47,6 +48,8 @@ How much to write yourself depends on what you were given:
 - **An existing design you should preserve:** when upgrading, keep the author's wording, items and weights wherever they fit the current template, and move content to the field where it now belongs. Where the old design does not fit, write `TBD` with your suggestion next to it instead of silently replacing it. `references/section-guide.md` has a section on upgrading.
 
 Where you do not know something, write `TBD` followed by what is needed to resolve it.
+
+Recommend history on at least 300 distinct dates, but do not require it. Help the contributor select history appropriate to the personalization challenge and environment dependencies; explain shorter histories and report actual coverage. Reuse versioned Environment data where useful. Record sources, time zone and first-session cutoff; deduplicate across selected sources. Preserve the external-platform date lower bounds and unrestricted older text-only personal history. The Environment coverage window does not cap Task session/event dates. Plan realistic context and reproducible counts without filler, plus real dependency/GUI evidence under `docs/submission-evidence.md`; completed evidence follows implementation.
 
 Write the proposal in English. Talk to the contributor in the language they use.
 

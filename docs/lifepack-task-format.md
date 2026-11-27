@@ -90,7 +90,7 @@ Use stable lowercase task IDs with hyphens. The same ID links `tasks/<task-id>/`
 | `tests/test.sh` and scoring code | Execute the verifier, emit the Harbor reward and retain item-level scores, gate results and supporting evidence. |
 | `demo/<task-id>/story.md` | Optional human review narrative: background, story, personalization insight and a reference to the approved proposal. It is not agent context or an executable scenario. |
 | `demo/<task-id>/evidence/` | Run manifest, complete run artifacts and failure analysis. Include reference, unhinted, hinted and grader-validation runs. |
-| `demo/<task-id>/screen_shots/` | Optional screenshots linked to task/run IDs and timestamps. Multimodal inputs belong in `context/assets/`. |
+| `demo/<task-id>/screen_shots/` | Screenshots linked to task/run IDs and timestamps; optional outside applicable GUI demonstration requirements in the [evidence contract](submission-evidence.md). Multimodal inputs belong in `context/assets/`. |
 
 Structured payloads must identify the schema or adapter version that consumes them. This specification fixes file responsibilities and required information; App schemas, sensor encodings and agent checkpoint internals belong to their versioned implementations.
 
@@ -103,6 +103,8 @@ Before starting or resuming a session, process due events, synchronize every par
 A checkpoint must align App state, agent state, the simulated clock, event cursor, user-harness state, permissions and pending deliveries. `workspace/meta.json` identifies the matching snapshots and versions. The loader must reject incompatible or incomplete restores and avoid repeating committed actions. A portable memory seed does not by itself claim exact checkpoint replay. Record how the same task context is provided across supported agent models, including any adapter-specific differences. Reset restores the declared starting point for each independent rollout.
 
 For tasks involving external platforms, the first simulated session starts **on or after 2026-01-01**. User interactions with external platforms date **on or after 2025-01-01**. Earlier text-only personal history and user–agent conversations remain allowed. These are the [Task Track timeline rules](../proposals/templates/task-proposal.md#6-construction-plan-and-effort).
+
+History on **at least 300 distinct dates is strongly recommended, not mandatory**, across a Task's selected sources. Focused tasks and tasks with few environment dependencies may use shorter histories; explain the scope and report actual coverage. Reuse versioned Environment data where useful and expose only permitted history preceding the first session. Put source references, reproducible counting steps and the report in `demo/<task-id>/evidence/`, mapping records to `context/user/` and `environment/workspace/`. Follow the [Task history guidance](submission-evidence.md#4-task-history-depth). The Environment dataset window does not cap Task sessions or scenario events; this guidance changes neither App schemas nor the LifePack loader contract.
 
 ## Who can read what
 
@@ -166,8 +168,10 @@ The current model roster, minimum rollout count, score thresholds and hinted-val
 
 1. Resolve every dependency and artifact from a clean setup; verify hashes and the pinned Harbor configuration. Document actual setup, reset, run and score commands for the selected adapter.
 2. Demonstrate initial-state reset and, when applicable, checkpoint consistency, cross-App outcomes, session/event ordering and visibility isolation.
+   Use real pinned dependencies for every claimed integration and inspect their actual records/files/receipts, including relevant failures and retries. For GUI workflows, link reference/implementation comparisons and ordered action/result screenshots to real browser steps and MCP tests under the [evidence contract](submission-evidence.md). Existing accepted App evidence can be linked at its pinned revision; the Task still demonstrates its own combined workflow.
 3. Run the reference solution through the declared interfaces and verifier. It must earn a full score; doing nothing must fail. Exercise representative incorrect/partial outcomes and at least one declared valid alternative.
 4. Submit the policy-required model rollouts, separate hinted runs, complete evidence and failure analysis. Demonstrate the claimed Harbor integration, not only a custom offline replay.
 5. Link the package version and evidence from the **same approved proposal PR**. Maintainers validate and accept the implementation before merge through the [contribution lifecycle](review/proposal-lifecycle.md).
+6. Reproduce the selected history coverage, verify time-zone/cutoff handling, realism and actual loading, and retain source hashes and the report. Explain shorter histories when appropriate; fewer than 300 dates alone is not a rejection criterion.
 
 Future schema changes must use an explicit format version and migration notes. Existing releases and their evaluation evidence remain reproducible.

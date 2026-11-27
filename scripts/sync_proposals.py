@@ -19,9 +19,9 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 try:
-    from .review_identity import can_self_review
+    from .review_identity import can_self_review, is_automated_reviewer
 except ImportError:
-    from review_identity import can_self_review
+    from review_identity import can_self_review, is_automated_reviewer
 
 INDEX_PATH = "proposals/proposal-list.md"
 INDEX_BRANCH = "proposal-index"
@@ -215,6 +215,8 @@ def review_state(reviews, pr):
     latest = {}
     commented = False
     for review in sorted(reviews, key=lambda x: (x.get("submitted_at") or "", x.get("id", 0))):
+        if is_automated_reviewer(review.get("user")):
+            continue
         state = review.get("state", "").upper()
         user = (review.get("user") or {}).get("login")
         if not user or user == (pr.get("user") or {}).get("login"):
@@ -229,7 +231,7 @@ def review_state(reviews, pr):
         return f"Changes requested ({changes})", True
     if approvals:
         return f"Approved ({approvals})", False
-    if pr.get("requested_reviewers") or pr.get("requested_teams"):
+    if any(not is_automated_reviewer(u) for u in pr.get("requested_reviewers", [])) or pr.get("requested_teams"):
         return "Review requested", False
     return ("Commented" if commented else "Awaiting review"), False
 
@@ -276,11 +278,72 @@ def proposal_text(api, pr, kind):
         return "", path, "Proposal must be a UTF-8 text file of at most 200 KB"
 
 
-def cache_key(pr):
-    # updated_at moves with commits, comments, reviews, labels and edits; the
-    # head SHA pins the proposal file. Without both, never reuse a result.
+REVIEW_QUERY = """query ProposalReviews($ids: [ID!]!) {
+  nodes(ids: $ids) {
+    ... on PullRequest {
+      id number
+      reviews(first: 100) {
+        nodes { databaseId state submittedAt updatedAt author { login __typename } }
+        pageInfo { hasNextPage }
+      }
+    }
+  }
+}"""
+
+
+def open_review_snapshots(api, pulls):
+    """Read reviews in batches without executing a fork's review-event workflow.
+
+    Read even when updated_at is unchanged: edits/dismissals must invalidate the
+    displayed review state independently of the proposal metadata cache.
+    """
+    selected = [p for p in pulls if p.get("state") == "open" and p.get("node_id")]
+    snapshots = {}
+    for offset in range(0, len(selected), 50):
+        batch = selected[offset:offset + 50]
+        for attempt in range(3):
+            try:
+                # This fixed GraphQL document is read-only despite HTTP POST.
+                result = api.request("/graphql", "POST", {
+                    "query": REVIEW_QUERY, "variables": {"ids": [p["node_id"] for p in batch]}})
+                break
+            except APIError as error:
+                if error.status not in {0, 500, 502, 503, 504} or attempt == 2:
+                    raise
+                time.sleep(2 ** attempt)
+        nodes = (result.get("data") or {}).get("nodes")
+        if result.get("errors") or not isinstance(nodes, list) or len(nodes) != len(batch):
+            raise ValueError("Incomplete GitHub review snapshot; refusing to publish stale review state")
+        for pr, node in zip(batch, nodes):
+            if (not node or node.get("id") != pr["node_id"] or node.get("number") != pr["number"]
+                    or not isinstance(node.get("reviews"), dict)):
+                raise ValueError("GitHub review snapshot did not match the requested PR")
+            connection = node["reviews"]
+            if connection["pageInfo"]["hasNextPage"]:
+                # Never silently truncate heavily reviewed proposals.
+                reviews = list(api.pages(f"/repos/{api.repository}/pulls/{pr['number']}/reviews"))
+            else:
+                reviews = [{"id": r.get("databaseId") or 0, "state": r["state"],
+                    "submitted_at": r.get("submittedAt"), "updated_at": r.get("updatedAt"),
+                    "user": {"login": (r.get("author") or {}).get("login"),
+                             "type": (r.get("author") or {}).get("__typename", "")}}
+                    for r in connection["nodes"]]
+            snapshots[pr["number"]] = reviews
+    return snapshots
+
+
+def cache_key(pr, reviews=None):
+    # Metadata and review activity have independent cache identities. The head
+    # SHA pins proposal contents; a fresh review snapshot detects dismissals.
     head, updated = (pr.get("head") or {}).get("sha"), pr.get("updated_at")
-    return [updated, head] if head and updated else None
+    if not head or not updated:
+        return None
+    key = [updated, head]
+    if reviews is not None:
+        rows = sorted((r.get("id") or 0, r.get("state") or "", r.get("submitted_at") or "", r.get("updated_at") or "",
+                       (r.get("user") or {}).get("login") or "") for r in reviews)
+        key.append(hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest())
+    return key
 
 
 def collect(api, domain_names, branch, cache=None, now=None):
@@ -288,14 +351,18 @@ def collect(api, domain_names, branch, cache=None, now=None):
     records = []
     now = time.time() if now is None else now
     rules = json.loads(Path(__file__).resolve().parents[1].joinpath(".github/review-policy.json").read_text())
-    for summary in api.pages(f"/repos/{api.repository}/pulls", state="all", base=branch, sort="created", direction="desc"):
+    pulls = [p for p in api.pages(f"/repos/{api.repository}/pulls", state="all", base=branch,
+                                sort="created", direction="desc") if track(p)]
+    review_snapshots = open_review_snapshots(api, pulls)
+    for summary in pulls:
         kind = track(summary)
         if kind is None:
             continue
         # The list response already contains these PR fields. Avoid one extra
         # API request per proposal on every index refresh.
         pr = summary
-        key = cache_key(pr)
+        reviews = review_snapshots.get(pr["number"])
+        key = cache_key(pr, reviews)
         entry = (cache or {}).get(str(pr["number"]))
         if (key and isinstance(entry, dict) and entry.get("key") == key and isinstance(entry.get("record"), dict)
                 and (pr.get("state") == "closed" or now - entry.get("fetched", 0) < OPEN_REFRESH_SECONDS)):
@@ -317,7 +384,9 @@ def collect(api, domain_names, branch, cache=None, now=None):
             synopsis = "; ".join(x for x in [synopsis, *connections] if x)
         title = (field(text, "Reference app or website / URL") if kind == "environment" else field(text, "Short task title"))
         title = title or (named[3] if named else pr.get("title", ""))
-        review, changes = review_state(list(api.pages(f"/repos/{api.repository}/pulls/{pr['number']}/reviews")), pr)
+        if reviews is None:
+            reviews = list(api.pages(f"/repos/{api.repository}/pulls/{pr['number']}/reviews"))
+        review, changes = review_state(reviews, pr)
         if review == "Awaiting review" and can_self_review(pr["user"]["login"], pr["user"].get("id"), rules):
             review = "Owner review; no external reviewer required"
         lifecycle = {}
@@ -415,7 +484,7 @@ def render(records, repository):
         lines += ["", "No proposals submitted yet." if not rows else "", ""]
     lines += ["## How updates work", "",
               "- Submit Environment files to `proposals/environment/<slug>.md` and Task files to `proposals/task/<slug>.md` in your PR branch. Keep one proposal file per PR and preserve the template's field labels.",
-              "- PR and review events refresh the list, with a scheduled backup every 15 minutes. Domains and summaries come from the proposal file. Missing metadata is flagged for the author to correct in the same PR.",
+              "- PR lifecycle and routing updates refresh the list. A trusted default-branch poll reads current reviews every 5 minutes, subject to GitHub scheduling delays; fork workflow approval is not needed for review synchronization. Domains and summaries come from the proposal file. Missing metadata is flagged for correction in the same PR.",
               "- Review results and maintainer stage labels are synchronized separately. Only a merged PR is Accepted. Closing without merging is Closed; plan approval keeps the PR open.",
               "- Environment v1 is due 14 calendar days after the first plan approval. Submission is subject to review; it is not acceptance. Only a maintainer can record a deadline extension with a reason.",
               "", f"[How to submit and track a proposal]({root}/blob/main/proposals/README.md)", ""]
@@ -426,7 +495,7 @@ def cache_fingerprint():
     # Any change to this script, the review policy or the domain list invalidates cached records.
     root = Path(__file__).resolve().parents[1]
     digest = hashlib.sha256()
-    for path in (Path(__file__).resolve(), root / ".github/review-policy.json", root / "README.md"):
+    for path in (Path(__file__).resolve(), root / "scripts/review_identity.py", root / ".github/review-policy.json", root / "README.md"):
         digest.update(path.read_bytes())
     return digest.hexdigest()
 

@@ -141,6 +141,7 @@ Guide: “Keep privileged management separate. A reviewer console is not automat
 
 - **What to check:** Agent-facing operations are listed with their mode (MCP, API or GUI) and their read or write effect.
 - **Look at:** §3 Operations and access.
+- **Evidence focus:** When GUI is promised, §4 must plan original-product reference screenshots, corresponding implemented views and ordered workflow/error sequences linked to real browser actions, persisted state and MCP tests. Review the plan at this stage; do not request completed screenshots. See `docs/submission-evidence.md`.
 - **✓ Approve:** Each operation is named as a verb on an object, with its mode and its read or write effect.
 - **◐ Partial approve:** Operations are listed; modes or effects are missing for some.
 - **? Human judge:** The choice between GUI and MCP changes what tasks can test and needs a person.
@@ -253,6 +254,7 @@ Guide: “A schema accepting a MIME string does not establish runtime support or
 
 - **What to check:** Media formats, sizes and counts are stated and fit the reference profile, or the gap is flagged.
 - **Look at:** §3 Shared data and dependencies; §4 Data and image collection; Synthetic data and assets.
+- **Evidence focus:** Plan Environment evaluation data across 2025-01-01 through 2026-12-31, with date fields, working loading/retrieval and monthly/source coverage evidence. If earlier website data cannot be retrieved, identify real November 2026 source data and synthetic completion of missing periods, with real/synthetic provenance. Distinguish small smoke fixtures from the full delivery dataset. There is no per-App 300-date threshold; inspect realism at delivery under `docs/submission-evidence.md`.
 - **✓ Approve:** Formats, sizes and counts are given and fit the reference profile (PDF, UTF-8 text, ICS, PNG/JPEG, MP3/WAV, MP4, JSON; at most 64 assets and at most 1 MiB of decoded bytes per App bundle), or an extension is flagged as a platform dependency with an owner and validation plan. These are reference-profile limits, not project-wide dataset limits.
 - **◐ Partial approve:** Formats are named; sizes or counts are missing.
 - **? Human judge:** A format outside the profile may be needed: a platform decision.
@@ -321,6 +323,7 @@ Guide: “An independent reviewer needs observable acceptance criteria rather th
 
 - **What to check:** The Validation and reset row plans business tests, reset checks and integration checks that look at the receiving App and the actual result the caller needs.
 - **Look at:** §4 Validation and reset; App integrations.
+- **Evidence focus:** Cover each integration claimed for delivery, including optional integrations delivered in v1 and separate Agent tool reads. Plan a real pinned-dependency demonstration linking the initiating GUI/MCP action to source use and actual target records, recipient, immutable file version/bytes and receipt. Keep business/MCP tests; fakes or screenshots alone cannot prove integration.
 - **✓ Approve:** Business tests, reset checks and public-runtime integration checks are named. Each integration checks the receiving App's records/files or receipt, distinguishes delivery acknowledgement from a business decision, and defines sender/receiver outcomes on relevant rejection, retry or unknown acknowledgement paths. The plan does not assume automatic sender rollback.
 - **◐ Partial approve:** Integration checks rely on sender success, assume an unverified business result in a delivery receipt, or leave failure/commit boundaries unclear. Identify the needed interface or platform decision.
 - **? Human judge:** Which runtime capabilities are needed is a platform decision.
@@ -331,6 +334,7 @@ Guide: “An independent reviewer needs observable acceptance criteria rather th
 
 - **What to check:** Each deliverable has an observable pass condition that an independent reviewer can check.
 - **Look at:** §4 Deliverable / quality check column.
+- **Evidence focus:** The evidence index must connect planned GUI reference/implementation comparisons and ordered demonstrations, dependency results and applicable history-count reports to reproducible tests and human checks. Missing evidence planning is a clarification; completed delivery artifacts are not a proposal prerequisite.
 - **✓ Approve:** Every deliverable has a pass condition someone else can observe, and the points that need human review are named. For promised evaluation records, identify the source and join: App revisions/state, Core outcome evidence and supplied tool calls/arguments/results. Plan checks of required content and failure coverage; optional diagnostic logs alone do not establish that coverage.
 - **◐ Partial approve:** Some deliverables have no pass condition.
 - **? Human judge:** Acceptance depends on subjective quality, such as how realistic the assets look.

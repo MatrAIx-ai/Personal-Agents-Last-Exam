@@ -14,6 +14,8 @@ One PR carries the proposal, implementation and validation through to final acce
 
 An assigned reviewer must be a repository collaborator and appear in the Track roster in [review-policy.json](../../.github/review-policy.json). GitHub review-request history preserves the assignment after a review is submitted. Maintainers with Write, Maintain or Admin access can also approve plans. Except for DavidZWZ's owner-managed changes above, PR authors and declared coauthors cannot approve their own plans or accept their own implementations.
 
+Lifecycle commands are processed from PR conversation comments and do not depend on a fork workflow being approved. GitHub reviews update natively; the proposal index polls their current state from trusted default-branch code every 5 minutes, subject to scheduling delays. No review-event relay is required. A GitHub approval, review edit or dismissal alone does not grant or revoke recorded plan approval; use the lifecycle commands for that decision.
+
 ## Commands
 
 Post one command per new conversation comment, outside code fences or quotations. Editing an old comment does not execute it again. Correct a rejected command by posting a new comment.
