@@ -5,6 +5,7 @@ This module does not make or send App actions or manufacture controller receipts
 """
 from copy import deepcopy
 from route_replay import replay, stamp, require
+from facility_timeline import traversal_conflict
 
 CLOSE='2026-11-21T09:00:00+08:00'
 S5='2026-11-21T16:45:00+08:00'
@@ -22,26 +23,11 @@ class EvidenceConflict(ValueError):
 
 
 def _verify_traversal(itinerary, snapshot, as_of):
-    """Replay completed facility intervals using pinned Hopline past-state semantics.
-
-    The pinned facilityAt selects the last recorded eligible history row,
-    not the row with largest effective timestamp. Test the entry and every
-    effective boundary inside the half-open traversal interval. This is a
-    retrospective evidence check, not a finding about earlier agent knowledge.
-    """
-    facilities={f['facility_id']:f for f in snapshot['seed']['facilities']}
-    for edge in itinerary['edges']:
-        fid=edge.get('facility_id')
-        if not fid: continue
-        entry,exit_=stamp(edge['enter_at']),stamp(edge['exit_at'])
-        require(exit_<=as_of and fid in facilities, 'incomplete traversal evidence')
-        history=[h for h in facilities[fid]['history'] if stamp(h['recorded_at'])<=as_of]
-        require(all(h['status'] in ('in_service','restored','out_of_service') for h in history), 'unknown facility status')
-        boundaries=sorted({entry}|{stamp(h['since']) for h in history if entry<stamp(h['since'])<exit_})
-        for t in boundaries:
-            h=next((h for h in reversed(history) if stamp(h['since'])<=t),None)
-            if h is not None and h['status']=='out_of_service':
-                raise EvidenceConflict(f'facility {fid} unavailable at traversal; status_seq={h["seq"]}')
+    """Reconcile completed traversal with the authoritative evidence cutoff."""
+    conflict = traversal_conflict(itinerary, snapshot, as_of)
+    if conflict is not None:
+        fid, seq = conflict
+        raise EvidenceConflict(f'facility {fid} unavailable at traversal; status_seq={seq}')
 
 
 def certify(events, preserved):
