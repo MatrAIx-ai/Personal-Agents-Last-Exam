@@ -1,0 +1,2572 @@
+[
+  {
+    "name": "curbline.places.search",
+    "description": "Search the run's places by name, place ID or airport code, optionally by kind.",
+    "read_only": true,
+    "scope": "curbline.places.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "kind": {
+          "enum": [
+            "address",
+            "hotel",
+            "venue",
+            "airport_terminal"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/place"
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "places"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.places.get",
+    "description": "Get one place with its zone, time zone and airport code.",
+    "read_only": true,
+    "scope": "curbline.places.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "place_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "place": {
+          "$ref": "schemas/seed.schema.json#/$defs/place"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "place"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.rides.quote",
+    "description": "Price a scheduled ride at the run's virtual time. Returns the fare breakdown, availability, a quote token valid for 10 virtual minutes, warnings, and up to three alternatives when no vehicle fits. Stores nothing.",
+    "read_only": true,
+    "scope": "curbline.rides.quote",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pickup_place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "dropoff_place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "pickup_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "option": {
+          "enum": [
+            "standard",
+            "xl",
+            "comfort",
+            "wheelchair_accessible"
+          ]
+        },
+        "passengers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "bags": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "child_seats": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "flight": {
+          "$ref": "schemas/seed.schema.json#/$defs/flight_key"
+        },
+        "pickup_buffer_min": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 90
+        }
+      },
+      "required": [
+        "pickup_place_id",
+        "dropoff_place_id",
+        "pickup_at",
+        "option",
+        "passengers",
+        "bags"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "quote": {
+          "type": "object",
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "code": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "no_vehicle_for_requirements"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pickup_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "option": {
+              "enum": [
+                "standard",
+                "xl",
+                "comfort",
+                "wheelchair_accessible"
+              ]
+            },
+            "fare_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "breakdown": {
+              "type": "object"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 10
+            },
+            "alternatives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "option": {
+                    "enum": [
+                      "standard",
+                      "xl",
+                      "comfort",
+                      "wheelchair_accessible"
+                    ]
+                  },
+                  "pickup_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fare_cents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  }
+                },
+                "required": [
+                  "option",
+                  "pickup_at",
+                  "fare_cents"
+                ],
+                "additionalProperties": true
+              },
+              "maxItems": 3
+            },
+            "expires_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "distance_km": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "duration_min": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 600
+            },
+            "band": {
+              "enum": [
+                "night",
+                "offpeak",
+                "peak"
+              ]
+            },
+            "fare_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "quote_token": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "available",
+            "code",
+            "pickup_at",
+            "option",
+            "fare_cents",
+            "breakdown",
+            "warnings",
+            "alternatives",
+            "expires_at",
+            "distance_km",
+            "duration_min",
+            "band",
+            "fare_version",
+            "quote_token"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "quote"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.payment_methods.list",
+    "description": "List the account's masked payment methods and their profiles (personal or business).",
+    "read_only": true,
+    "scope": "curbline.payment_methods.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "payment_method_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "last4": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "profile": {
+                "enum": [
+                  "personal",
+                  "business"
+                ]
+              }
+            },
+            "required": [
+              "payment_method_id",
+              "brand",
+              "last4",
+              "label",
+              "profile"
+            ],
+            "additionalProperties": true
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payment_methods"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.list",
+    "description": "List bookings, optionally by status or pickup time range, with overlap flags.",
+    "read_only": true,
+    "scope": "curbline.bookings.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "scheduled",
+            "driver_assigned",
+            "driver_arrived",
+            "on_trip",
+            "needs_attention",
+            "completed",
+            "cancelled",
+            "rider_no_show",
+            "lapsed"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bookings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "booking_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "status": {
+                "enum": [
+                  "scheduled",
+                  "driver_assigned",
+                  "driver_arrived",
+                  "on_trip",
+                  "needs_attention",
+                  "completed",
+                  "cancelled",
+                  "rider_no_show",
+                  "lapsed"
+                ]
+              },
+              "pickup_place_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "dropoff_place_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "pickup_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "option": {
+                "enum": [
+                  "standard",
+                  "xl",
+                  "comfort",
+                  "wheelchair_accessible"
+                ]
+              },
+              "rider_person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "fare_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000
+              },
+              "overlaps_with": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 100
+              }
+            },
+            "required": [
+              "booking_id",
+              "status",
+              "pickup_place_id",
+              "dropoff_place_id",
+              "pickup_at",
+              "option",
+              "rider_person_id",
+              "fare_cents",
+              "overlaps_with"
+            ],
+            "additionalProperties": true
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "bookings"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.get",
+    "description": "One booking with its history, fare, flight, driver and vehicle, and policy times derived at the virtual time (free cancellation, current fee, lapse, free wait, tip and expense windows).",
+    "read_only": true,
+    "scope": "curbline.bookings.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "booking_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "driver_assigned",
+                "driver_arrived",
+                "on_trip",
+                "needs_attention",
+                "completed",
+                "cancelled",
+                "rider_no_show",
+                "lapsed"
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "maxItems": 500
+            },
+            "policy": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "booking_id",
+            "status",
+            "history",
+            "policy"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "booking"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.preview_change",
+    "description": "Price a change to a scheduled or needs_attention booking. Returns the new fare, the difference and a change token bound to the booking's revision (10 virtual minutes), or alternatives when no vehicle fits.",
+    "read_only": true,
+    "scope": "curbline.bookings.preview_change",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "changes": {
+          "type": "object",
+          "properties": {
+            "pickup_place_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "dropoff_place_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "pickup_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "option": {
+              "enum": [
+                "standard",
+                "xl",
+                "comfort",
+                "wheelchair_accessible"
+              ]
+            },
+            "passengers": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "bags": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "child_seats": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "flight": {
+              "anyOf": [
+                {
+                  "$ref": "schemas/seed.schema.json#/$defs/flight_key"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pickup_buffer_min": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 90
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "booking_id",
+        "changes"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "enum": [
+                "no_vehicle_for_requirements"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pickup_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "option": {
+          "enum": [
+            "standard",
+            "xl",
+            "comfort",
+            "wheelchair_accessible"
+          ]
+        },
+        "fare_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "breakdown": {
+          "type": "object"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "maxItems": 10
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option": {
+                "enum": [
+                  "standard",
+                  "xl",
+                  "comfort",
+                  "wheelchair_accessible"
+                ]
+              },
+              "pickup_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "fare_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000
+              }
+            },
+            "required": [
+              "option",
+              "pickup_at",
+              "fare_cents"
+            ],
+            "additionalProperties": true
+          },
+          "maxItems": 3
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fare_difference_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "change_token": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "booking_id",
+        "available",
+        "code",
+        "pickup_at",
+        "option",
+        "fare_cents",
+        "breakdown",
+        "warnings",
+        "alternatives",
+        "expires_at",
+        "fare_difference_cents",
+        "change_token"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.preview_cancel",
+    "description": "The fee if the booking were cancelled now, and the free-cancellation time.",
+    "read_only": true,
+    "scope": "curbline.bookings.preview_cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "booking_status": {
+          "enum": [
+            "scheduled",
+            "driver_assigned",
+            "driver_arrived",
+            "on_trip",
+            "needs_attention",
+            "completed",
+            "cancelled",
+            "rider_no_show",
+            "lapsed"
+          ]
+        },
+        "cancellable": {
+          "type": "boolean"
+        },
+        "fee_cents": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "free_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "booking_id",
+        "booking_status",
+        "cancellable",
+        "fee_cents",
+        "free_until",
+        "reason"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.shares.list",
+    "description": "Trip shares with their status derived at the virtual time.",
+    "read_only": true,
+    "scope": "curbline.shares.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "shares": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/share"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "shares"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.receipts.get",
+    "description": "Receipt for a booking from the payment ledger: holds, charges, refunds pending versus refunded, and the expense profile.",
+    "read_only": true,
+    "scope": "curbline.receipts.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "receipt": {
+          "type": "object",
+          "properties": {
+            "booking_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "schemas/seed.schema.json#/$defs/ledger_entry"
+              },
+              "maxItems": 100
+            },
+            "charged_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "refund_pending_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "refunded_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "net_cents": {
+              "type": "integer",
+              "minimum": -10000000,
+              "maximum": 10000000
+            }
+          },
+          "required": [
+            "booking_id",
+            "entries",
+            "charged_cents",
+            "refund_pending_cents",
+            "refunded_cents",
+            "net_cents"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "receipt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.support.list",
+    "description": "Support cases and their outcomes.",
+    "read_only": true,
+    "scope": "curbline.support.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/support_case"
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "cases"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.notifications.list",
+    "description": "Notifications Curbline recorded, per recipient, with their delivery status.",
+    "read_only": true,
+    "scope": "curbline.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "status": {
+          "enum": [
+            "pending_delivery",
+            "no_recipient_channel",
+            "delivered",
+            "delivery_failed"
+          ]
+        },
+        "recipient_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/notification"
+          },
+          "maxItems": 20000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "notifications"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.create",
+    "description": "Book a ride from a quote token with a payment method; optionally for another rider from the run binding. Authorizes a hold for the fare. A token may be reused; each use books again and overlaps are flagged.",
+    "read_only": false,
+    "scope": "curbline.bookings.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "quote_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "payment_method_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "rider_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "external_trip_ref": {
+          "$ref": "schemas/seed.schema.json#/$defs/external_ref"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "quote_token",
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "booking_status": {
+          "enum": [
+            "scheduled",
+            "driver_assigned",
+            "driver_arrived",
+            "on_trip",
+            "needs_attention",
+            "completed",
+            "cancelled",
+            "rider_no_show",
+            "lapsed"
+          ]
+        },
+        "pickup_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fare_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "hold_entry_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "overlaps_with": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 100
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "booking_status",
+        "pickup_at",
+        "fare_cents",
+        "hold_entry_id",
+        "overlaps_with",
+        "warnings"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.update",
+    "description": "Apply a previewed change with its change token. Releases the old hold and authorizes a new one.",
+    "read_only": false,
+    "scope": "curbline.bookings.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "change_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "change_token",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "booking_status": {
+          "enum": [
+            "scheduled",
+            "driver_assigned",
+            "driver_arrived",
+            "on_trip",
+            "needs_attention",
+            "completed",
+            "cancelled",
+            "rider_no_show",
+            "lapsed"
+          ]
+        },
+        "pickup_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fare_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "hold_entry_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "overlaps_with": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 100
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "booking_status",
+        "pickup_at",
+        "fare_cents",
+        "hold_entry_id",
+        "overlaps_with",
+        "warnings"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.cancel",
+    "description": "Cancel a booking under the published fee rules. Releases the hold; any fee is a separate charge.",
+    "read_only": false,
+    "scope": "curbline.bookings.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "booking_status": {
+          "enum": [
+            "scheduled",
+            "driver_assigned",
+            "driver_arrived",
+            "on_trip",
+            "needs_attention",
+            "completed",
+            "cancelled",
+            "rider_no_show",
+            "lapsed"
+          ]
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "charge_entry_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 5
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "booking_status",
+        "fee_cents",
+        "charge_entry_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.set_flight",
+    "description": "Link a flight (tracked) to a scheduled or needs_attention airport pickup, or unlink it with null.",
+    "read_only": false,
+    "scope": "curbline.bookings.set_flight",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "flight": {
+          "anyOf": [
+            {
+              "$ref": "schemas/seed.schema.json#/$defs/flight_key"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pickup_buffer_min": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 90
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "flight",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "flight": {
+          "anyOf": [
+            {
+              "$ref": "schemas/seed.schema.json#/$defs/flight_key"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "flight_tracking": {
+          "type": "boolean"
+        },
+        "pickup_buffer_min": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 90
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "flight",
+        "flight_tracking",
+        "pickup_buffer_min",
+        "warnings"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.bookings.confirm_adjustment",
+    "description": "Accept the proposed pickup time of a booking held for a large flight shift.",
+    "read_only": false,
+    "scope": "curbline.bookings.confirm_adjustment",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "booking_status": {
+          "enum": [
+            "scheduled",
+            "driver_assigned",
+            "driver_arrived",
+            "on_trip",
+            "needs_attention",
+            "completed",
+            "cancelled",
+            "rider_no_show",
+            "lapsed"
+          ]
+        },
+        "pickup_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "booking_status",
+        "pickup_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.shares.create",
+    "description": "Share a ride's status with a person from the run binding until a time. Scope status omits the vehicle and ETA.",
+    "read_only": false,
+    "scope": "curbline.shares.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "scope": {
+          "enum": [
+            "status",
+            "status_and_eta"
+          ]
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "person_id",
+        "scope",
+        "until",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "share_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "share_status": {
+          "enum": [
+            "active"
+          ]
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "share_id",
+        "share_status",
+        "until"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.shares.revoke",
+    "description": "Stop an active share.",
+    "read_only": false,
+    "scope": "curbline.shares.revoke",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "share_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "share_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "share_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "share_status": {
+          "enum": [
+            "revoked"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "share_id",
+        "share_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.trips.tip",
+    "description": "Tip the driver within 72 hours of a completed ride.",
+    "read_only": false,
+    "scope": "curbline.trips.tip",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "amount_cents",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "entry_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "entry_id",
+        "amount_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.trips.set_expense",
+    "description": "Set the expense profile and memo of a completed ride within 30 days.",
+    "read_only": false,
+    "scope": "curbline.trips.set_expense",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "profile": {
+          "enum": [
+            "personal",
+            "business"
+          ]
+        },
+        "memo": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "profile",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expense": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "enum": [
+                "personal",
+                "business"
+              ]
+            },
+            "memo": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "profile",
+            "memo"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id",
+        "expense"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "curbline.support.open",
+    "description": "Open a support case for a ride: fare_review, wait_fee_review, lost_item or driver_no_show.",
+    "read_only": false,
+    "scope": "curbline.support.open",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "enum": [
+            "fare_review",
+            "wait_fee_review",
+            "lost_item",
+            "driver_no_show"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "booking_id",
+        "reason",
+        "note",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "curbline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_status": {
+          "enum": [
+            "submitted"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id",
+        "case_status"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

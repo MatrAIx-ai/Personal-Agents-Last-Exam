@@ -1,0 +1,68 @@
+{
+  "virtual_now": "2026-12-03T19:00:00-05:00",
+  "events": [
+    {
+      "event_id": "ev-care-1",
+      "at": "2026-12-05T10:40:00-05:00",
+      "operation": "dispatch.driver_assigned",
+      "payload": {
+        "booking_id": "bk-40",
+        "driver": {
+          "driver_id": "dr-6",
+          "first_name": "Wei"
+        },
+        "vehicle": {
+          "vehicle_id": "vh-6",
+          "make_model": "Wheelchair van",
+          "color": "red",
+          "plate": "ASH 4485"
+        },
+        "eta": "2026-12-05T10:58:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-care-2",
+      "at": "2026-12-05T10:50:00-05:00",
+      "operation": "dispatch.eta_updated",
+      "payload": {
+        "booking_id": "bk-40",
+        "eta": "2026-12-05T11:02:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-care-3",
+      "at": "2026-12-05T11:02:00-05:00",
+      "operation": "dispatch.driver_arrived",
+      "payload": {
+        "booking_id": "bk-40",
+        "arrived_at": "2026-12-05T11:02:00-05:00",
+        "pickup_point": "Ashford General, main entrance"
+      }
+    },
+    {
+      "event_id": "ev-care-4",
+      "at": "2026-12-05T11:20:00-05:00",
+      "operation": "trip.started",
+      "payload": {
+        "booking_id": "bk-40",
+        "started_at": "2026-12-05T11:20:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-care-5",
+      "at": "2026-12-05T11:31:00-05:00",
+      "operation": "trip.completed",
+      "payload": {
+        "booking_id": "bk-40",
+        "started_at": "2026-12-05T11:20:00-05:00",
+        "completed_at": "2026-12-05T11:31:00-05:00",
+        "distance_km": 3,
+        "duration_min": 11,
+        "tolls_cents": 0
+      }
+    }
+  ],
+  "expect": {
+    "bk-40": "completed"
+  }
+}

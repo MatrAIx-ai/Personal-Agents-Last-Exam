@@ -1,0 +1,154 @@
+{
+  "virtual_now": "2026-12-03T19:00:00-05:00",
+  "events": [
+    {
+      "event_id": "ev-hh-1",
+      "at": "2026-12-04T07:12:00-05:00",
+      "operation": "dispatch.driver_assigned",
+      "payload": {
+        "selector": {
+          "rider_person_id": "person-jon",
+          "pickup_from": "2026-12-04T07:00:00-05:00",
+          "pickup_to": "2026-12-04T08:00:00-05:00"
+        },
+        "driver": {
+          "driver_id": "dr-2",
+          "first_name": "Marco"
+        },
+        "vehicle": {
+          "vehicle_id": "vh-2",
+          "make_model": "Compact SUV",
+          "color": "white",
+          "plate": "ASH 4417"
+        },
+        "eta": "2026-12-04T07:29:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-hh-2",
+      "at": "2026-12-04T07:29:00-05:00",
+      "operation": "dispatch.driver_arrived",
+      "payload": {
+        "booking_id": "bk-113",
+        "arrived_at": "2026-12-04T07:29:00-05:00",
+        "pickup_point": "14 Linden Court"
+      }
+    },
+    {
+      "event_id": "ev-hh-3",
+      "at": "2026-12-04T07:33:00-05:00",
+      "operation": "trip.started",
+      "payload": {
+        "booking_id": "bk-113",
+        "started_at": "2026-12-04T07:33:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-hh-4",
+      "at": "2026-12-04T08:31:00-05:00",
+      "operation": "trip.completed",
+      "payload": {
+        "booking_id": "bk-113",
+        "started_at": "2026-12-04T07:33:00-05:00",
+        "completed_at": "2026-12-04T08:31:00-05:00",
+        "distance_km": 33,
+        "duration_min": 58,
+        "tolls_cents": 350
+      }
+    },
+    {
+      "event_id": "ev-hh-5",
+      "at": "2026-12-05T09:00:00-05:00",
+      "operation": "flight.status_changed",
+      "payload": {
+        "flight": {
+          "carrier": "NB",
+          "number": "442",
+          "local_date": "2026-12-05"
+        },
+        "status": "delayed",
+        "scheduled_arrival": "2026-12-05T14:10:00-05:00",
+        "estimated_arrival": "2026-12-05T15:25:00-05:00",
+        "arrival_place_id": "pl-bfa-term-a"
+      }
+    },
+    {
+      "event_id": "ev-hh-6",
+      "at": "2026-12-05T15:18:00-05:00",
+      "operation": "flight.status_changed",
+      "payload": {
+        "flight": {
+          "carrier": "NB",
+          "number": "442",
+          "local_date": "2026-12-05"
+        },
+        "status": "landed",
+        "scheduled_arrival": "2026-12-05T14:10:00-05:00",
+        "estimated_arrival": "2026-12-05T15:18:00-05:00",
+        "arrival_place_id": "pl-bfa-term-a",
+        "landed_at": "2026-12-05T15:18:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-hh-7",
+      "at": "2026-12-05T15:20:00-05:00",
+      "operation": "dispatch.driver_assigned",
+      "payload": {
+        "selector": {
+          "flight": {
+            "carrier": "NB",
+            "number": "442",
+            "local_date": "2026-12-05"
+          }
+        },
+        "driver": {
+          "driver_id": "dr-1",
+          "first_name": "Ines"
+        },
+        "vehicle": {
+          "vehicle_id": "vh-1",
+          "make_model": "Hybrid sedan",
+          "color": "grey",
+          "plate": "ASH 4400"
+        },
+        "eta": "2026-12-05T15:44:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-hh-8",
+      "at": "2026-12-05T15:44:00-05:00",
+      "operation": "dispatch.driver_arrived",
+      "payload": {
+        "booking_id": "bk-114",
+        "arrived_at": "2026-12-05T15:44:00-05:00",
+        "pickup_point": "BFA Terminal A, door 3"
+      }
+    },
+    {
+      "event_id": "ev-hh-9",
+      "at": "2026-12-05T16:25:00-05:00",
+      "operation": "trip.started",
+      "payload": {
+        "booking_id": "bk-114",
+        "started_at": "2026-12-05T16:25:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-hh-10",
+      "at": "2026-12-05T17:20:00-05:00",
+      "operation": "trip.completed",
+      "payload": {
+        "booking_id": "bk-114",
+        "started_at": "2026-12-05T16:25:00-05:00",
+        "completed_at": "2026-12-05T17:20:00-05:00",
+        "distance_km": 33,
+        "duration_min": 55,
+        "tolls_cents": 0
+      }
+    }
+  ],
+  "expect": {
+    "bk-113": "completed",
+    "bk-114": "completed"
+  }
+}

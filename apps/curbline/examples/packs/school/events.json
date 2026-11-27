@@ -1,0 +1,87 @@
+{
+  "virtual_now": "2026-12-03T19:00:00-05:00",
+  "events": [
+    {
+      "event_id": "ev-sc-1",
+      "at": "2026-12-04T07:20:00-05:00",
+      "operation": "dispatch.driver_assigned",
+      "payload": {
+        "booking_id": "bk-30",
+        "driver": {
+          "driver_id": "dr-4",
+          "first_name": "Tomas"
+        },
+        "vehicle": {
+          "vehicle_id": "vh-4",
+          "make_model": "Sedan",
+          "color": "blue",
+          "plate": "ASH 4451"
+        },
+        "eta": "2026-12-04T07:44:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-sc-2",
+      "at": "2026-12-04T07:31:00-05:00",
+      "operation": "dispatch.driver_cancelled",
+      "payload": {
+        "booking_id": "bk-30",
+        "reason": "vehicle_issue",
+        "reassign": true
+      }
+    },
+    {
+      "event_id": "ev-sc-3",
+      "at": "2026-12-04T07:33:00-05:00",
+      "operation": "dispatch.driver_assigned",
+      "payload": {
+        "booking_id": "bk-30",
+        "driver": {
+          "driver_id": "dr-9",
+          "first_name": "Ravi"
+        },
+        "vehicle": {
+          "vehicle_id": "vh-9",
+          "make_model": "Sedan",
+          "color": "black",
+          "plate": "ASH 4536"
+        },
+        "eta": "2026-12-04T07:49:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-sc-4",
+      "at": "2026-12-04T07:49:00-05:00",
+      "operation": "dispatch.driver_arrived",
+      "payload": {
+        "booking_id": "bk-30",
+        "arrived_at": "2026-12-04T07:49:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-sc-5",
+      "at": "2026-12-04T07:51:00-05:00",
+      "operation": "trip.started",
+      "payload": {
+        "booking_id": "bk-30",
+        "started_at": "2026-12-04T07:51:00-05:00"
+      }
+    },
+    {
+      "event_id": "ev-sc-6",
+      "at": "2026-12-04T08:00:00-05:00",
+      "operation": "trip.completed",
+      "payload": {
+        "booking_id": "bk-30",
+        "started_at": "2026-12-04T07:51:00-05:00",
+        "completed_at": "2026-12-04T08:00:00-05:00",
+        "distance_km": 3,
+        "duration_min": 9,
+        "tolls_cents": 0
+      }
+    }
+  ],
+  "expect": {
+    "bk-30": "completed"
+  }
+}
