@@ -63,25 +63,27 @@ The script replays only the steps strictly before that time. So the seed holds n
 
 ## Coverage
 
-The report counts the plan's seven record kinds, each on one date field, in `America/New_York`:
+The report counts only what happened, in `America/New_York`. Each family has one date field. A payment is split into its acts: the request, the posting of money and a return, each at its own time.
 
-| Kind | Date field |
+| Family | Date field |
 | --- | --- |
 | Transactions | `transactions[].transaction_at` |
 | Statements | `statements[].closing_at` |
-| Payments | `payments[].pay_on` (for every state; a cancelled payment counts on the day it was planned for) |
+| Payment requests | `payments[].history[].at` of `payments.schedule`, `autopay.scheduled` and `payments.cancel` |
+| Payment postings | `payments[].posts_at` of a payment that moved money (`posted`, or `returned` after it posted) |
+| Payment returns | `payments[].returned_at` |
 | Disputes | `disputes[].opened_at` |
 | Offers | `offers[].issued_at` |
 | Points entries | `points_entries[].at` |
 | Notifications | `notifications[].at` |
 
-Excluded, with reasons: the opening history of December 2024 (before the window) and the autopay payment of 22 January 2027 (scheduled after the clock). Due times (statement due times, payment posting times and offer deadlines) are listed apart and never counted. Activity rows are not counted, because each repeats an act that a counted record already dates.
+A cancelled payment (`pay-0014`, planned for 27 October 2025), the skipped autopay payment (`pay-0007`, 22 July 2025) and the autopay payment still scheduled for 22 January 2027 (`pay-0031`) moved no money. They add no posting. Their planned day (`pay_on`) is listed apart in the report and never counted. Their request and cancel acts count on the days they happened. Excluded, with reasons: the opening history of December 2024 (before the window). Due times (statement due times and offer deadlines) are listed apart and never counted. A hotel hold that was later released counts on the day the hold was placed, because the hold did happen. Activity rows are not counted, because each repeats an act that a counted record already dates.
 
 ## Counts
 
 - 1,500 App records: 25 statements (24 in the window and the opening one), 1,389 transactions, 31 payments, 8 disputes, 16 offers and 31 points entries. Also 103 notifications and 1,949 activity rows. The manifest has 1,220 stories, made by 1,813 steps (1,778 events and 35 writes).
 - Transactions: 1,356 purchases (4 hotel holds dropped and 2 bills pending at the clock), 12 refunds, 7 temporary credits, 3 reversals, 5 credits (3 offer payouts and 2 redemptions), 3 fees (2 annual and 1 returned-payment fee) and 3 interest charges.
-- 1,548 rows are counted, on **666 distinct dates** of the 730 days, from 1 January 2025 to 31 December 2026. Every month has records. The longest span with no record is 2 days. 55 rows are excluded, each with its reason.
+- 1,579 rows are counted, on **666 distinct dates** of the 730 days, from 1 January 2025 to 31 December 2026. The payment rows are 32 requests, 28 postings and 1 return. Every month has records. The longest span with no record is 2 days. 54 rows are excluded, each with its reason.
 - Real: 0. Mixed: 0. Synthetic: all.
 - `seed.json` is 1,324,198 bytes. The `env.load_seed` request line is about 1.27 MiB.
 

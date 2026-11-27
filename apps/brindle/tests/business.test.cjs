@@ -1658,6 +1658,22 @@ test('PKG diagnostics on, off and broken give the same data', () => {
     }
   });
 
+  test('T21f [Data] the coverage report counts a payment only for its acts: a cancelled or skipped payment adds no posting, and its intended day is listed apart', () => {
+    const coverage = require('../dev/coverage.cjs'), r = coverage.report(), seed = evaluation('seed.json'), clock = evaluation('clock.json').initial_time;
+    const counted = kind => coverage.count(seed, clock).counted.filter(x => x.kind === kind).map(x => [x.day, x.id]);
+    const postings = counted('payment_postings');
+    assert.ok(postings.some(([day, id]) => day === '2025-10-27' && id === 'pay-0013'), 'control: the payment that posted on 27 October 2025 counts');
+    assert.ok(!postings.some(([, id]) => id === 'pay-0014' || id === 'pay-0007'), 'the cancelled pay-0014 and the skipped pay-0007 add no posting');
+    assert.ok(!r.actual.dates['2025-10-27'].includes('pay-0014'), 'the cancelled payment does not count on its pay_on');
+    assert.deepEqual(counted('payment_requests').filter(([, id]) => id.startsWith('pay-0014 ')), [['2025-10-24', 'pay-0014 payments.schedule'], ['2025-10-24', 'pay-0014 payments.cancel']]);
+    assert.deepEqual(r.scheduled.kinds.find(k => k.kind === 'payment_intended_days').listed,
+      [{id: 'pay-0007', value: '2025-07-22', state: 'skipped'}, {id: 'pay-0014', value: '2025-10-27', state: 'cancelled'}, {id: 'pay-0031', value: '2027-01-22', state: 'scheduled'}]);
+    assert.ok(!r.actual.kinds.some(k => k.date_field.startsWith('payments[].pay_on')), 'no counted family uses pay_on');
+    const planted = structuredClone(seed), p = planted.payments.find(x => x.id === 'pay-0013');
+    Object.assign(p, {stored_state: 'cancelled', cancelled_at: '2025-10-26T09:00:00-04:00'});
+    assert.ok(!coverage.count(planted, clock).counted.some(x => x.kind === 'payment_postings' && x.id === 'pay-0013'), 'a payment marked cancelled stops counting');
+  });
+
   test('T21e [Data] load and query: tests/evaluation.integration.cjs loads the delivery seed with env.load_seed on the real runtime and reads the counts of the coverage report through MCP',
     ...withRuntime('tests/evaluation.integration.cjs'));
 }

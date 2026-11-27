@@ -21,7 +21,7 @@ node apps/brindle/dev/check-fixture.cjs --evaluation
 node apps/brindle/tests/evaluation.integration.cjs --runtime runtime
 ```
 
-The business tests carry the plan's names `T01` to `T21`. A letter after the number marks one more test for that number, for example `T07b`. Five `PKG` tests check the package itself. That is 55 tests. On Node 18 and 22, 52 pass and 3 are skipped. With `PALE_RUNTIME_ROOT=runtime`, all 55 pass. The real MCP script passes 118 of 118 checks, the Mail script passes 54 of 54, and the evaluation data script passes 23 of 23. The three scripts take `--report FILE` to write their checks as JSON.
+The business tests carry the plan's names `T01` to `T21`. A letter after the number marks one more test for that number, for example `T07b`. Five `PKG` tests check the package itself. That is 56 tests. On Node 18 and 22, 53 pass and 3 are skipped. With `PALE_RUNTIME_ROOT=runtime`, all 56 pass. The real MCP script passes 118 of 118 checks, the Mail script passes 54 of 54, and the evaluation data script passes 25 of 25. The three scripts take `--report FILE` to write their checks as JSON.
 
 With only this App folder, run `node --test tests/business.test.cjs` and `node examples/run.cjs` from inside it. The tests that need the public runtime are skipped there: `T19i` runs `tests/mail.integration.cjs`, `T20` runs `tests/mcp.integration.cjs`, and `T21e` runs `tests/evaluation.integration.cjs`. Set `PALE_RUNTIME_ROOT` to the public `runtime/` directory to run them. `T19i` also needs the public checkout that holds this package as `apps/brindle` and Mail as `examples/apps/mail`, so in a copy outside the checkout it stays skipped. A script that cannot run prints `SKIP` with the reason and exits with code 77, and its test is then reported as skipped, not as passed. `service.cjs` uses that runtime; it does not embed a second server.
 
@@ -61,7 +61,7 @@ Core owns commit receipts and audit; the App owns business history. The state ha
 - `dev/generate-dataset.cjs` builds the stories with a seeded PRNG and replays every step in time order through the App's own hooks. `--check` compares with the committed files, the size limit of an `env.load_seed` request and the time of the replay.
 - `dev/check-evaluation.cjs` holds the 14 committed story rules (for example: a refund names a purchase of the same merchant and is never above what is still owed; a temporary credit equals the disputed amount; a credit or bonus names an accepted offer and has its amount). `T21d` plants a contradiction for each rule and checks that it is caught.
 - `dev/select-evaluation-seed.cjs --as-of TIME` writes a seed with only the history before that time, each record in its state at that time. It refuses a seed that holds a later timestamp, except the due times of a schedule. At the clock it gives the delivered seed byte for byte.
-- `dev/coverage.cjs` counts the dates of the seed in `America/New_York` and writes [`coverage.md`](data/evaluation/coverage.md) and `coverage.json`: one date field for each record kind, monthly counts, gaps, exclusions and file hashes. The date of a payment is `pay_on`, for every payment state, and a payment whose `pay_on` is after the clock is listed apart. The December 2024 opening history is excluded with its reason.
+- `dev/coverage.cjs` counts the dates of the seed in `America/New_York` and writes [`coverage.md`](data/evaluation/coverage.md) and `coverage.json`: one date field for each family, monthly counts, gaps, exclusions and file hashes. A payment counts only for its acts: its request and any cancel, its posting of money and a return, each at its own time. The planned day of a cancelled, skipped or still scheduled payment is listed apart and never counted. The December 2024 opening history is excluded with its reason.
 - `dev/check-fixture.cjs --evaluation` runs the consistency script on the delivered seed and on the 24 month-start seeds, and the story rules on the delivered seed.
 - `tests/evaluation.integration.cjs` loads the dataset with `env.load_seed` on the real runtime and reads it back through MCP.
 
@@ -187,7 +187,7 @@ Each control that returns an error is checked before and after: the data, the ac
 | All | The seed rules, and no seed rule that makes a valid write fail | `T19d`, `T19e` |
 | Mail | Example messages pass Mail's wire schema, and `ntf-0058` is the plan's example message | `T19g`, `T19h` |
 | Mail | A notification is a received message in the bound Mail account with a committed receipt; an identical retry keeps one inbox record; without a grant Mail has no record | `T19i` |
-| Data | The delivery dataset of 2025 to 2026: month-start seeds load and pass the consistency script and the story rules, the generator, coverage report and selector reproduce, and a seed loads and is read through MCP | `T21` to `T21e` |
+| Data | The delivery dataset of 2025 to 2026: month-start seeds load and pass the consistency script and the story rules, the generator, coverage report and selector reproduce, a seed loads and is read through MCP, and the coverage count adds no posting for a cancelled or skipped payment | `T21` to `T21f` |
 
 ## Remaining manual review
 

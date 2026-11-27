@@ -1,6 +1,6 @@
 {
   "schema": "brindle.evaluation-coverage.v1",
-  "scope": "Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only the seven record kinds count, each on one date field. Due times are listed apart. Activity rows are not counted, because each repeats an act that a counted record already dates.",
+  "scope": "Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only the acts of nine record families count, each on one date field. A payment counts only for its request, its posting of money and a return, each at its own time. Due times and the intended days of payments that moved no money are listed apart. Activity rows are not counted, because each repeats an act that a counted record already dates.",
   "reproduce": "node apps/brindle/dev/coverage.cjs",
   "reproduce_note": "Run it from the repository root. With --check it compares with the committed report.",
   "timezone": "America/New_York",
@@ -10,7 +10,7 @@
   },
   "clock": "2026-12-31T23:00:00-05:00",
   "clock_day": "2026-12-31",
-  "date_rule": "A timestamp counts on its calendar day in America/New_York after normalizing its UTC offset. A date-only field (payments[].pay_on) is a day in America/New_York. A missing or invalid date is excluded and listed.",
+  "date_rule": "A timestamp counts on its calendar day in America/New_York after normalizing its UTC offset. A date-only field is a day in America/New_York. A missing or invalid date is excluded and listed.",
   "files": {
     "apps/brindle/data/evaluation/seed.json": {
       "bytes": 1324198,
@@ -42,7 +42,7 @@
     ],
     "real": 0,
     "mixed": 0,
-    "synthetic": 1548,
+    "synthetic": 1579,
     "note": "Counts are of the counted rows. Every record is synthetic: Brindle models no real issuer or website, so there is no real source to collect or to anchor."
   },
   "app_records": {
@@ -58,10 +58,10 @@
     }
   },
   "actual": {
-    "total_rows": 1603,
-    "counted_rows": 1548,
+    "total_rows": 1633,
+    "counted_rows": 1579,
     "global": {
-      "records": 1548,
+      "records": 1579,
       "distinct_dates": 666,
       "earliest": "2025-01-01",
       "latest": "2026-12-31"
@@ -88,14 +88,34 @@
         "excluded": 1
       },
       {
-        "kind": "payments",
-        "date_field": "payments[].pay_on",
-        "rows": 31,
-        "records": 30,
-        "distinct_dates": 29,
+        "kind": "payment_requests",
+        "date_field": "payments[].history[].at (payments.schedule, autopay.scheduled, payments.cancel)",
+        "rows": 32,
+        "records": 32,
+        "distinct_dates": 30,
+        "earliest": "2025-01-14",
+        "latest": "2026-12-28",
+        "excluded": 0
+      },
+      {
+        "kind": "payment_postings",
+        "date_field": "payments[].posts_at (posted or later returned, money moved)",
+        "rows": 28,
+        "records": 28,
+        "distinct_dates": 28,
         "earliest": "2025-01-16",
         "latest": "2026-12-22",
-        "excluded": 1
+        "excluded": 0
+      },
+      {
+        "kind": "payment_returns",
+        "date_field": "payments[].returned_at",
+        "rows": 1,
+        "records": 1,
+        "distinct_dates": 1,
+        "earliest": "2025-08-25",
+        "latest": "2025-08-25",
+        "excluded": 0
       },
       {
         "kind": "disputes",
@@ -141,12 +161,14 @@
     "monthly": [
       {
         "month": "2025-01",
-        "records": 59,
+        "records": 61,
         "distinct_dates": 27,
         "by_kind": {
           "transactions": 54,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 2,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -155,7 +177,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 2,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -164,12 +188,14 @@
       },
       {
         "month": "2025-02",
-        "records": 51,
+        "records": 52,
         "distinct_dates": 25,
         "by_kind": {
           "transactions": 44,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -178,7 +204,9 @@
         "dates_by_kind": {
           "transactions": 23,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -187,12 +215,14 @@
       },
       {
         "month": "2025-03",
-        "records": 78,
+        "records": 79,
         "distinct_dates": 29,
         "by_kind": {
           "transactions": 65,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 2,
           "points_entries": 2,
@@ -201,7 +231,9 @@
         "dates_by_kind": {
           "transactions": 28,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 2,
@@ -210,12 +242,14 @@
       },
       {
         "month": "2025-04",
-        "records": 54,
+        "records": 55,
         "distinct_dates": 26,
         "by_kind": {
           "transactions": 48,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -224,7 +258,9 @@
         "dates_by_kind": {
           "transactions": 25,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -233,12 +269,14 @@
       },
       {
         "month": "2025-05",
-        "records": 67,
+        "records": 68,
         "distinct_dates": 29,
         "by_kind": {
           "transactions": 57,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 1,
@@ -247,7 +285,9 @@
         "dates_by_kind": {
           "transactions": 28,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 1,
@@ -256,12 +296,14 @@
       },
       {
         "month": "2025-06",
-        "records": 65,
+        "records": 66,
         "distinct_dates": 27,
         "by_kind": {
           "transactions": 58,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 2,
@@ -270,7 +312,9 @@
         "dates_by_kind": {
           "transactions": 26,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 2,
@@ -279,12 +323,14 @@
       },
       {
         "month": "2025-07",
-        "records": 79,
+        "records": 80,
         "distinct_dates": 28,
         "by_kind": {
           "transactions": 72,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -293,7 +339,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -302,12 +350,14 @@
       },
       {
         "month": "2025-08",
-        "records": 66,
+        "records": 69,
         "distinct_dates": 27,
         "by_kind": {
           "transactions": 54,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 1,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -316,7 +366,9 @@
         "dates_by_kind": {
           "transactions": 26,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 1,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -325,12 +377,14 @@
       },
       {
         "month": "2025-09",
-        "records": 67,
+        "records": 68,
         "distinct_dates": 26,
         "by_kind": {
           "transactions": 60,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -339,7 +393,9 @@
         "dates_by_kind": {
           "transactions": 24,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -348,12 +404,14 @@
       },
       {
         "month": "2025-10",
-        "records": 68,
+        "records": 71,
         "distinct_dates": 31,
         "by_kind": {
           "transactions": 56,
           "statements": 1,
-          "payments": 3,
+          "payment_requests": 4,
+          "payment_postings": 2,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 0,
           "points_entries": 1,
@@ -362,7 +420,9 @@
         "dates_by_kind": {
           "transactions": 30,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 0,
           "points_entries": 1,
@@ -371,12 +431,14 @@
       },
       {
         "month": "2025-11",
-        "records": 66,
+        "records": 67,
         "distinct_dates": 29,
         "by_kind": {
           "transactions": 58,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 2,
@@ -385,7 +447,9 @@
         "dates_by_kind": {
           "transactions": 28,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 2,
@@ -394,12 +458,14 @@
       },
       {
         "month": "2025-12",
-        "records": 69,
+        "records": 70,
         "distinct_dates": 28,
         "by_kind": {
           "transactions": 55,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 3,
           "points_entries": 1,
@@ -408,7 +474,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 1,
@@ -417,12 +485,14 @@
       },
       {
         "month": "2026-01",
-        "records": 65,
+        "records": 66,
         "distinct_dates": 30,
         "by_kind": {
           "transactions": 58,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 0,
           "points_entries": 1,
@@ -431,7 +501,9 @@
         "dates_by_kind": {
           "transactions": 29,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 0,
           "points_entries": 1,
@@ -440,12 +512,14 @@
       },
       {
         "month": "2026-02",
-        "records": 65,
+        "records": 66,
         "distinct_dates": 27,
         "by_kind": {
           "transactions": 54,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 0,
@@ -454,7 +528,9 @@
         "dates_by_kind": {
           "transactions": 25,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 0,
@@ -463,12 +539,14 @@
       },
       {
         "month": "2026-03",
-        "records": 70,
+        "records": 71,
         "distinct_dates": 28,
         "by_kind": {
           "transactions": 58,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 0,
           "points_entries": 2,
@@ -477,7 +555,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 0,
           "points_entries": 2,
@@ -486,12 +566,14 @@
       },
       {
         "month": "2026-04",
-        "records": 58,
+        "records": 59,
         "distinct_dates": 25,
         "by_kind": {
           "transactions": 51,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -500,7 +582,9 @@
         "dates_by_kind": {
           "transactions": 23,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 1,
@@ -509,12 +593,14 @@
       },
       {
         "month": "2026-05",
-        "records": 60,
+        "records": 62,
         "distinct_dates": 27,
         "by_kind": {
           "transactions": 52,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -523,7 +609,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -532,12 +620,14 @@
       },
       {
         "month": "2026-06",
-        "records": 60,
+        "records": 62,
         "distinct_dates": 28,
         "by_kind": {
           "transactions": 49,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 2,
@@ -546,7 +636,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 2,
+          "payment_requests": 2,
+          "payment_postings": 2,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 2,
@@ -555,12 +647,14 @@
       },
       {
         "month": "2026-07",
-        "records": 70,
+        "records": 71,
         "distinct_dates": 30,
         "by_kind": {
           "transactions": 65,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -569,7 +663,9 @@
         "dates_by_kind": {
           "transactions": 29,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -578,12 +674,14 @@
       },
       {
         "month": "2026-08",
-        "records": 56,
+        "records": 57,
         "distinct_dates": 27,
         "by_kind": {
           "transactions": 50,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 2,
@@ -592,7 +690,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 2,
@@ -601,12 +701,14 @@
       },
       {
         "month": "2026-09",
-        "records": 56,
+        "records": 57,
         "distinct_dates": 26,
         "by_kind": {
           "transactions": 47,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 2,
@@ -615,7 +717,9 @@
         "dates_by_kind": {
           "transactions": 24,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 1,
           "points_entries": 2,
@@ -624,12 +728,14 @@
       },
       {
         "month": "2026-10",
-        "records": 57,
+        "records": 58,
         "distinct_dates": 29,
         "by_kind": {
           "transactions": 52,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -638,7 +744,9 @@
         "dates_by_kind": {
           "transactions": 29,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -647,12 +755,14 @@
       },
       {
         "month": "2026-11",
-        "records": 60,
+        "records": 61,
         "distinct_dates": 28,
         "by_kind": {
           "transactions": 54,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -661,7 +771,9 @@
         "dates_by_kind": {
           "transactions": 28,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 0,
           "offers": 0,
           "points_entries": 1,
@@ -670,12 +782,14 @@
       },
       {
         "month": "2026-12",
-        "records": 82,
+        "records": 83,
         "distinct_dates": 29,
         "by_kind": {
           "transactions": 68,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 3,
           "points_entries": 1,
@@ -684,7 +798,9 @@
         "dates_by_kind": {
           "transactions": 27,
           "statements": 1,
-          "payments": 1,
+          "payment_requests": 1,
+          "payment_postings": 1,
+          "payment_returns": 0,
           "disputes": 1,
           "offers": 1,
           "points_entries": 1,
@@ -1061,12 +1177,6 @@
         "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
       },
       {
-        "kind": "payments",
-        "id": "pay-0031",
-        "value": "2027-01-22",
-        "reason": "scheduled after the clock: the payment has not happened yet"
-      },
-      {
         "kind": "points_entries",
         "id": "pts-0001",
         "value": "2024-12-29T04:00:00-05:00",
@@ -1129,7 +1239,8 @@
         "txn-0072"
       ],
       "2025-01-14": [
-        "txn-0073"
+        "txn-0073",
+        "pay-0001 payments.schedule"
       ],
       "2025-01-15": [
         "txn-0074",
@@ -1182,6 +1293,7 @@
         "txn-0095",
         "txn-0096",
         "txn-0097",
+        "pay-0002 autopay.scheduled",
         "ntf-0003"
       ],
       "2025-01-29": [
@@ -1298,6 +1410,7 @@
         "stm-2025-02"
       ],
       "2025-02-28": [
+        "pay-0003 autopay.scheduled",
         "ntf-0007"
       ],
       "2025-03-01": [
@@ -1417,6 +1530,7 @@
       ],
       "2025-03-28": [
         "txn-0205",
+        "pay-0004 autopay.scheduled",
         "ntf-0011"
       ],
       "2025-03-29": [
@@ -1531,6 +1645,7 @@
       "2025-04-28": [
         "txn-0257",
         "txn-0258",
+        "pay-0005 autopay.scheduled",
         "ntf-0015"
       ],
       "2025-04-29": [
@@ -1655,6 +1770,7 @@
       ],
       "2025-05-28": [
         "txn-0314",
+        "pay-0006 autopay.scheduled",
         "ntf-0020"
       ],
       "2025-05-29": [
@@ -1774,6 +1890,7 @@
         "txn-0370",
         "txn-0371",
         "txn-0372",
+        "pay-0007 autopay.scheduled",
         "ntf-0023"
       ],
       "2025-06-29": [
@@ -1810,6 +1927,7 @@
       ],
       "2025-07-08": [
         "txn-0389",
+        "pay-0008 payments.schedule",
         "pay-0008"
       ],
       "2025-07-09": [
@@ -1877,8 +1995,7 @@
         "txn-0424",
         "txn-0425",
         "txn-0426",
-        "txn-0427",
-        "pay-0007"
+        "txn-0427"
       ],
       "2025-07-23": [
         "txn-0428",
@@ -1899,6 +2016,7 @@
       ],
       "2025-07-28": [
         "txn-0436",
+        "pay-0009 autopay.scheduled",
         "ntf-0026"
       ],
       "2025-07-29": [
@@ -2006,6 +2124,7 @@
         "txn-0489"
       ],
       "2025-08-25": [
+        "pay-0009",
         "ntf-0029"
       ],
       "2025-08-26": [
@@ -2018,11 +2137,13 @@
         "txn-0493",
         "txn-0494",
         "stm-2025-08",
+        "pay-0010 payments.schedule",
         "pay-0010",
         "ntf-0031"
       ],
       "2025-08-28": [
         "txn-0495",
+        "pay-0011 autopay.scheduled",
         "ntf-0032",
         "ntf-0033"
       ],
@@ -2148,6 +2269,7 @@
         "stm-2025-09"
       ],
       "2025-09-28": [
+        "pay-0012 autopay.scheduled",
         "ntf-0036"
       ],
       "2025-09-29": [
@@ -2253,7 +2375,10 @@
       ],
       "2025-10-24": [
         "txn-0603",
-        "txn-0604"
+        "txn-0604",
+        "pay-0013 payments.schedule",
+        "pay-0014 payments.schedule",
+        "pay-0014 payments.cancel"
       ],
       "2025-10-25": [
         "txn-0605",
@@ -2266,12 +2391,12 @@
         "txn-0608",
         "txn-0609",
         "stm-2025-10",
-        "pay-0013",
-        "pay-0014"
+        "pay-0013"
       ],
       "2025-10-28": [
         "txn-0610",
         "txn-0611",
+        "pay-0015 autopay.scheduled",
         "ntf-0041",
         "ntf-0042"
       ],
@@ -2406,6 +2531,7 @@
         "stm-2025-11"
       ],
       "2025-11-28": [
+        "pay-0016 autopay.scheduled",
         "ntf-0046"
       ],
       "2025-11-29": [
@@ -2524,6 +2650,7 @@
       ],
       "2025-12-28": [
         "txn-0725",
+        "pay-0017 autopay.scheduled",
         "ntf-0053"
       ],
       "2025-12-29": [
@@ -2647,6 +2774,7 @@
         "stm-2026-01"
       ],
       "2026-01-28": [
+        "pay-0018 autopay.scheduled",
         "ntf-0056"
       ],
       "2026-01-29": [
@@ -2780,6 +2908,7 @@
         "txn-0840",
         "txn-0841",
         "txn-0842",
+        "pay-0019 autopay.scheduled",
         "ntf-0063",
         "ntf-0064"
       ],
@@ -2897,6 +3026,7 @@
       ],
       "2026-03-28": [
         "txn-0897",
+        "pay-0020 autopay.scheduled",
         "ntf-0069"
       ],
       "2026-03-29": [
@@ -3004,6 +3134,7 @@
         "txn-0944",
         "txn-0945",
         "txn-0946",
+        "pay-0021 autopay.scheduled",
         "ntf-0073"
       ],
       "2026-04-29": [
@@ -3101,7 +3232,8 @@
       "2026-05-25": [
         "txn-0991",
         "txn-0992",
-        "txn-0993"
+        "txn-0993",
+        "pay-0022 payments.schedule"
       ],
       "2026-05-26": [
         "txn-0994",
@@ -3118,6 +3250,7 @@
       ],
       "2026-05-28": [
         "txn-1000",
+        "pay-0023 autopay.scheduled",
         "ntf-0077"
       ],
       "2026-05-29": [
@@ -3216,7 +3349,8 @@
         "pay-0023"
       ],
       "2026-06-23": [
-        "txn-1043"
+        "txn-1043",
+        "pay-0024 payments.schedule"
       ],
       "2026-06-24": [
         "txn-1044",
@@ -3238,6 +3372,7 @@
       ],
       "2026-06-28": [
         "txn-1051",
+        "pay-0025 autopay.scheduled",
         "ntf-0082"
       ],
       "2026-06-29": [
@@ -3359,6 +3494,7 @@
         "txn-1107",
         "txn-1108",
         "txn-1109",
+        "pay-0026 autopay.scheduled",
         "ntf-0084"
       ],
       "2026-07-29": [
@@ -3471,6 +3607,7 @@
       ],
       "2026-08-28": [
         "txn-1160",
+        "pay-0027 autopay.scheduled",
         "ntf-0086"
       ],
       "2026-08-29": [
@@ -3584,6 +3721,7 @@
         "stm-2026-09"
       ],
       "2026-09-28": [
+        "pay-0028 autopay.scheduled",
         "ntf-0090"
       ],
       "2026-09-29": [
@@ -3695,6 +3833,7 @@
       "2026-10-28": [
         "txn-1259",
         "txn-1260",
+        "pay-0029 autopay.scheduled",
         "ntf-0092"
       ],
       "2026-10-29": [
@@ -3816,6 +3955,7 @@
       "2026-11-28": [
         "txn-1316",
         "txn-1317",
+        "pay-0030 autopay.scheduled",
         "ntf-0095"
       ],
       "2026-11-29": [
@@ -3951,6 +4091,7 @@
         "stm-2026-12"
       ],
       "2026-12-28": [
+        "pay-0031 autopay.scheduled",
         "ntf-0102"
       ],
       "2026-12-29": [
@@ -3969,7 +4110,7 @@
     }
   },
   "scheduled": {
-    "note": "Not counted. A statement due time, the posting time of a payment and an offer deadline are due times of a schedule. Rows after the clock are future rows.",
+    "note": "Not counted. A statement due time and an offer deadline are due times of a schedule. The intended day (pay_on) of a cancelled, skipped or still scheduled payment is a plan, not an act: no money moved on it. Rows after the clock are future rows.",
     "kinds": [
       {
         "kind": "statement_due_times",
@@ -3983,13 +4124,30 @@
         ]
       },
       {
-        "kind": "payment_post_times",
-        "date_field": "payments[].posts_at",
-        "rows": 31,
+        "kind": "payment_intended_days",
+        "date_field": "payments[].pay_on (cancelled, skipped or still scheduled: no money moved)",
+        "rows": 3,
         "after_clock": [
           {
             "id": "pay-0031",
-            "value": "2027-01-22T00:00:00-05:00"
+            "value": "2027-01-22"
+          }
+        ],
+        "listed": [
+          {
+            "id": "pay-0007",
+            "value": "2025-07-22",
+            "state": "skipped"
+          },
+          {
+            "id": "pay-0014",
+            "value": "2025-10-27",
+            "state": "cancelled"
+          },
+          {
+            "id": "pay-0031",
+            "value": "2027-01-22",
+            "state": "scheduled"
           }
         ]
       },

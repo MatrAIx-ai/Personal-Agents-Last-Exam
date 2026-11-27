@@ -85,10 +85,17 @@ async function fullWindow(t, report) {
   equal('statements.list over 2025 to 2026 returns 24 statements, one closing in each month, plus the opening statement of December 2024',
     [statements.length, distinct(statements.map(s => s.closing_at.slice(0, 7))).length, kind('statements').records, allStatements.length], [24, 24, 24, 25]);
   const payments = (await t.get('payments.list', {start: FIRST, end: LAST})).items, future = (await t.get('payments.list', {start: '2027-01-01'})).items;
-  equal('payments.list over 2025 to 2026 returns the payments of the report, with one skipped, one returned and one cancelled payment',
-    [payments.length, tally(payments.map(p => p.state))], [kind('payments').records, {posted: payments.length - 3, skipped: 1, returned: 1, cancelled: 1}]);
-  equal('The autopay payment of the December 2026 statement is the one scheduled row after the clock, as the report lists it',
-    future.map(p => [p.id, p.state, p.autopay, p.pay_on]), coverage.actual.exclusions.filter(x => x.kind === 'payments').map(x => [x.id, 'scheduled', true, x.value]));
+  const all = [...payments, ...future], moved = all.filter(p => p.state === 'posted' || p.state === 'returned'), intended = coverage.scheduled.kinds.find(k => k.kind === 'payment_intended_days');
+  const REQUESTS = ['payments.schedule', 'autopay.scheduled', 'payments.cancel'], requests = all.flatMap(p => p.history.filter(h => REQUESTS.includes(h.action)).map(h => dayOf(h.at)));
+  equal('payments.list over 2025 to 2026 returns 30 payments, with one skipped, one returned and one cancelled payment',
+    [payments.length, tally(payments.map(p => p.state))], [30, {posted: 27, skipped: 1, returned: 1, cancelled: 1}]);
+  equal('The payments that moved money, their returns and their requests read through MCP are the payment families of the report',
+    [moved.length, distinct(moved.map(p => dayOf(p.posts_at))).length, all.filter(p => p.state === 'returned').length, requests.length, distinct(requests).length],
+    [kind('payment_postings').records, kind('payment_postings').distinct_dates, kind('payment_returns').records, kind('payment_requests').records, kind('payment_requests').distinct_dates]);
+  equal('The cancelled, skipped and still scheduled payments are the intended days that the report lists apart, and they are not counted',
+    all.filter(p => !moved.includes(p)).map(p => [p.id, p.state, p.pay_on]).sort(), intended.listed.map(x => [x.id, x.state, x.value]).sort());
+  equal('The autopay payment of the December 2026 statement is the one scheduled payment after the clock, as the report lists it',
+    future.map(p => [p.id, p.state, p.autopay, p.pay_on]), intended.after_clock.map(x => [x.id, 'scheduled', true, x.value]));
   const disputes = (await t.get('disputes.list')).items;
   equal('disputes.list returns the 8 disputes of the report, in every state', [disputes.length, kind('disputes').records, tally(disputes.map(d => d.state))],
     [8, 8, {resolved_for_me: 3, withdrawn: 2, closed_matched: 1, resolved_for_merchant: 1, open: 1}]);

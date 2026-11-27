@@ -22,33 +22,38 @@ function dayOf(value) {
   return /^\d{4}-\d{2}-\d{2}T.*(Z|[+-]\d{2}:\d{2})$/.test(value) && Number.isFinite(instant) ? time.localDay(instant, ZONE) : null;
 }
 
-// The seven record kinds of the plan, each with one authoritative date field. Only these count toward coverage.
+// What happened, each family on one date field. Only these count toward coverage.
+// A payment counts only for its acts: the request, the posting of money and a return. `rows` gets the state of each payment at the clock.
+const REQUESTS = new Set(['payments.schedule', 'autopay.scheduled', 'payments.cancel']);
 const ACTUAL = [
   {kind: 'transactions', field: 'transactions[].transaction_at', rows: data => data.transactions.map(x => [x.id, x.transaction_at])},
   {kind: 'statements', field: 'statements[].closing_at', rows: data => data.statements.map(x => [x.id, x.closing_at])},
-  {kind: 'payments', field: 'payments[].pay_on', rows: data => data.payments.map(x => [x.id, x.pay_on])},
+  {kind: 'payment_requests', field: 'payments[].history[].at (payments.schedule, autopay.scheduled, payments.cancel)',
+    rows: data => data.payments.flatMap(x => x.history.filter(h => REQUESTS.has(h.action)).map(h => [x.id + ' ' + h.action, h.at]))},
+  {kind: 'payment_postings', field: 'payments[].posts_at (posted or later returned, money moved)',
+    rows: (data, state) => data.payments.filter(x => ['posted', 'returned'].includes(state(x))).map(x => [x.id, x.posts_at])},
+  {kind: 'payment_returns', field: 'payments[].returned_at', rows: (data, state) => data.payments.filter(x => state(x) === 'returned').map(x => [x.id, x.returned_at])},
   {kind: 'disputes', field: 'disputes[].opened_at', rows: data => data.disputes.map(x => [x.id, x.opened_at])},
   {kind: 'offers', field: 'offers[].issued_at', rows: data => data.offers.map(x => [x.id, x.issued_at])},
   {kind: 'points_entries', field: 'points_entries[].at', rows: data => data.points_entries.map(x => [x.id, x.at])},
   {kind: 'notifications', field: 'notifications[].at', rows: data => data.notifications.map(x => [x.id, x.at])}
 ];
-// Due times that a record names. They are schedules, not acts, so they are listed apart and never counted.
+// Due times and intended days. They are schedules, not acts, so they are listed apart and never counted.
 const SCHEDULED = [
   {kind: 'statement_due_times', field: 'statements[].due_at', rows: data => data.statements.map(x => [x.id, x.due_at])},
-  {kind: 'payment_post_times', field: 'payments[].posts_at', rows: data => data.payments.map(x => [x.id, x.posts_at])},
+  {kind: 'payment_intended_days', field: 'payments[].pay_on (cancelled, skipped or still scheduled: no money moved)',
+    rows: (data, state) => data.payments.filter(x => !['posted', 'returned'].includes(state(x))).map(x => [x.id, x.pay_on, state(x)])},
   {kind: 'offer_deadlines', field: 'offers[].accept_by', rows: data => data.offers.map(x => [x.id, x.accept_by])}
 ];
+const stateAt = (data, clock) => { const amounts = views.postedAmounts(data), now = Date.parse(clock); return p => views.paymentState(p, amounts, now); };
 
 function count(data, clock) {
-  const rows = [], exclusions = [], clockDay = dayOf(clock), amounts = views.postedAmounts(data), now = Date.parse(clock);
-  for (const kind of ACTUAL) for (const [id, value] of kind.rows(data)) {
+  const rows = [], exclusions = [], clockDay = dayOf(clock), state = stateAt(data, clock);
+  for (const kind of ACTUAL) for (const [id, value] of kind.rows(data, state)) {
     const day = dayOf(value);
     let reason = day === null ? 'invalid or missing date' : null;
     if (!reason && day < FIRST) reason = 'before ' + FIRST + ': the opening month of the account (opened 2 December 2024)';
-    if (!reason && day > clockDay) {
-      const p = kind.kind === 'payments' && data.payments.find(x => x.id === id);
-      reason = p && views.paymentState(p, amounts, now) === 'scheduled' ? 'scheduled after the clock: the payment has not happened yet' : 'after the clock ' + clock;
-    }
+    if (!reason && day > clockDay) reason = 'after the clock ' + clock;
     if (!reason && day > LAST) reason = 'after ' + LAST;
     rows.push({kind: kind.kind, id, day, value});
     if (reason) exclusions.push({kind: kind.kind, id, value, reason});
@@ -96,9 +101,10 @@ function report() {
   const texts = {'seed.json': read('seed.json'), 'clock.json': read('clock.json'), 'dataset.json': read('dataset.json')}, manifest = JSON.parse(read('manifest.json'));
   const data = JSON.parse(texts['seed.json']), clock = JSON.parse(texts['clock.json']).initial_time, dataset = JSON.parse(texts['dataset.json']);
   const actual = count(data, clock);
-  const scheduled = SCHEDULED.map(kind => {
-    const rows = kind.rows(data).map(([id, value]) => ({id, value, day: dayOf(value)}));
-    return {kind: kind.kind, date_field: kind.field, rows: rows.length, after_clock: rows.filter(x => Date.parse(x.value) > Date.parse(clock)).map(x => ({id: x.id, value: x.value}))};
+  const state = stateAt(data, clock), scheduled = SCHEDULED.map(kind => {
+    const rows = kind.rows(data, state).map(([id, value, st]) => ({id, value, day: dayOf(value), ...(st ? {state: st} : {})}));
+    const out = {kind: kind.kind, date_field: kind.field, rows: rows.length, after_clock: rows.filter(x => /T/.test(x.value) ? Date.parse(x.value) > Date.parse(clock) : x.day > dayOf(clock)).map(x => ({id: x.id, value: x.value}))};
+    return kind.kind === 'payment_intended_days' ? {...out, listed: rows.map(({id, value, state: st}) => ({id, value, state: st}))} : out;
   });
   // Every counted row has the class of its sources: synthetic, real (collected or reused), or mixed.
   const kinds = new Set(dataset.record_source_ids.map(id => (dataset.sources.find(s => s.source_id === id) || {kind: 'unspecified'}).kind));
@@ -107,11 +113,11 @@ function report() {
   const countedDays = [...new Set(actual.counted.map(x => x.day))].sort();
   return {
     schema: 'brindle.evaluation-coverage.v1',
-    scope: 'Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only the seven record kinds count, each on one date field. Due times are listed apart. Activity rows are not counted, because each repeats an act that a counted record already dates.',
+    scope: 'Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only the acts of nine record families count, each on one date field. A payment counts only for its request, its posting of money and a return, each at its own time. Due times and the intended days of payments that moved no money are listed apart. Activity rows are not counted, because each repeats an act that a counted record already dates.',
     reproduce: 'node apps/brindle/dev/coverage.cjs',
     reproduce_note: 'Run it from the repository root. With --check it compares with the committed report.',
     timezone: ZONE, window: {first: FIRST, last: LAST}, clock, clock_day: dayOf(clock),
-    date_rule: 'A timestamp counts on its calendar day in ' + ZONE + ' after normalizing its UTC offset. A date-only field (payments[].pay_on) is a day in ' + ZONE + '. A missing or invalid date is excluded and listed.',
+    date_rule: 'A timestamp counts on its calendar day in ' + ZONE + ' after normalizing its UTC offset. A date-only field is a day in ' + ZONE + '. A missing or invalid date is excluded and listed.',
     files: Object.fromEntries(Object.entries(texts).map(([name, value]) => ['apps/brindle/data/evaluation/' + name, {bytes: Buffer.byteLength(value), sha256: sha256(value)}])),
     generator: {tool: manifest.generator, version: manifest.generator_version, prng: manifest.prng, prng_seed: manifest.prng_seed, stories: manifest.counts.stories},
     provenance: {dataset_id: dataset.dataset_id, source_ids: dataset.record_source_ids, source_kinds: [...kinds].sort(), ...share,
@@ -120,11 +126,11 @@ function report() {
     not_counted: {activity: {field: 'activity[].at', rows: data.activity.length, reason: 'Each activity row repeats a write, an event or an effect that a counted record already dates.'}},
     actual: {total_rows: actual.rows.length, counted_rows: n, global: actual.global, kinds: actual.kinds, monthly: actual.monthly, gaps: gaps(countedDays),
       exclusions: actual.exclusions, dates: actual.dates},
-    scheduled: {note: 'Not counted. A statement due time, the posting time of a payment and an offer deadline are due times of a schedule. Rows after the clock are future rows.', kinds: scheduled}
+    scheduled: {note: 'Not counted. A statement due time and an offer deadline are due times of a schedule. The intended day (pay_on) of a cancelled, skipped or still scheduled payment is a plan, not an act: no money moved on it. Rows after the clock are future rows.', kinds: scheduled}
   };
 }
 
-const SHORT = {transactions: 'txn', statements: 'stm', payments: 'pay', disputes: 'dsp', offers: 'off', points_entries: 'pts', notifications: 'ntf'};
+const SHORT = {transactions: 'txn', statements: 'stm', payment_requests: 'preq', payment_postings: 'ppost', payment_returns: 'pret', disputes: 'dsp', offers: 'off', points_entries: 'pts', notifications: 'ntf'};
 function markdown(r) {
   const a = r.actual, lines = [];
   const table = (head, rows) => { lines.push('| ' + head.join(' | ') + ' |', '|' + head.map(() => ' --- ').join('|') + '|'); rows.forEach(row => lines.push('| ' + row.join(' | ') + ' |')); lines.push(''); };
@@ -150,6 +156,10 @@ function markdown(r) {
   lines.push('## Due times (not counted)', '', r.scheduled.note, '');
   table(['Kind', 'Date field', 'Rows', 'After the clock'], r.scheduled.kinds.map(k => ['`' + k.kind + '`', '`' + k.date_field + '`', k.rows,
     k.after_clock.map(x => '`' + x.id + '` ' + x.value).join(', ') || 'none']));
+  for (const k of r.scheduled.kinds.filter(x => x.listed)) {
+    lines.push('Intended days of payments that moved no money (`' + k.kind + '`):', '');
+    table(['Payment', 'State', '`pay_on`'], k.listed.map(x => ['`' + x.id + '`', x.state, x.value]));
+  }
   lines.push('The JSON report also lists the record IDs behind each counted date (`actual.dates`).', '');
   return lines.join('\n');
 }
@@ -165,4 +175,4 @@ function main() {
     ' counted rows (' + r.actual.global.earliest + ' to ' + r.actual.global.latest + '), ' + r.actual.exclusions.length + ' excluded, ' + r.actual.gaps.months_without_records.length + ' months with no record.');
 }
 if (require.main === module) main();
-module.exports = {report, dayOf, ACTUAL, SCHEDULED};
+module.exports = {report, count, dayOf, ACTUAL, SCHEDULED};
