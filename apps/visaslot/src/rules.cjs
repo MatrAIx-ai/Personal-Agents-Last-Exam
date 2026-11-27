@@ -33,10 +33,11 @@ function competence(stays) {
     rule:tied.length > 1 ? 'tie_first_entry' : 'most_nights'};
 }
 
-// Names match when they have the same letters-only tokens, ignoring case, accents, order and punctuation:
-// "ZHAO Mingyu", "Mingyu Zhao" and "ZHAO, MINGYU" match; "ZHOU Mingyu" does not.
-const tokens = name => String(name).normalize('NFKD').replace(/[̀-ͯ]/g, '').toUpperCase()
-  .split(/[^A-Z]+/).filter(Boolean).sort().join(' ');
+// Names match when they have the same letter tokens, ignoring case, accents, order and punctuation:
+// "ZHAO Mingyu", "Mingyu Zhao" and "ZHAO, MINGYU" match; "ZHOU Mingyu" does not. Any script's letters count,
+// so "ĐANG Minh" and "ANG Minh" differ (Đ has no accent to strip, so it is not "D" either).
+const tokens = name => String(name).normalize('NFKD').replace(/\p{M}/gu, '').toUpperCase()
+  .split(/[^\p{L}]+/u).filter(Boolean).sort().join(' ');
 const sameName = (a, b) => tokens(a) !== '' && tokens(a) === tokens(b);
 
 // Document facts that must hold for any registered file: real dates, a signature that lapses

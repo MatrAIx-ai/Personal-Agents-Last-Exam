@@ -515,3 +515,13 @@ test('a seed is accepted whatever its object key order, including a held appoint
   const f = filed(); f.event(held());
   for (const keys of KEY_ORDERS) { const g = fixture(); g.load(reorder(f.data, keys)); assert.deepEqual(g.data, reorder(f.data, keys)); }
 });
+
+test('a passport name with non-ASCII letters keeps them when compared', () => {
+  const {sameName} = require('../src/rules.cjs');
+  assert.equal(sameName('ĐANG Minh', 'ANG Minh'), false);
+  assert.equal(sameName('ĐANG Minh', 'DANG Minh'), false);
+  assert.equal(sameName('ĐANG Minh', 'Minh Đặng'), true); // accents and case still ignored
+  assert.equal(sameName('MÜLLER Jörg', 'Jorg Muller'), true);
+  assert.equal(sameName('ZHAO Mingyu', 'ZHAO, MINGYU'), true);
+  assert.equal(sameName('ZHAO Mingyu', 'ZHOU Mingyu'), false);
+});
