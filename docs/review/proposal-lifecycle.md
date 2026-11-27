@@ -7,12 +7,14 @@ One PR carries the proposal, implementation and validation through to final acce
 ## Reviewer workflow
 
 1. Review the proposal in **Files changed**. Submit comments or **Request changes**, and let the author revise it in the same PR.
-2. When the plan is sound, post `/approve-plan <commit-sha>` as a new PR conversation comment. Use the full current 40-character commit SHA from the PR's **Commits** tab. This binds approval to the exact proposal you reviewed and prevents a delayed command from approving a different commit.
+2. When the plan is sound, post `/approve-plan <commit-sha>` as a new PR conversation comment. Use the full current 40-character commit SHA from the PR's **Commits** tab. This records the exact proposal you reviewed. If processing is delayed, the reviewed commit must still be an ancestor of the current head and the proposal file must be identical; changed proposals require a new review. Final implementation acceptance always requires the current head SHA.
 3. The bot records the reviewer, approval time, approved commit and proposal content, then adds `plan-approved`. The PR stays open. GitHub's **Approve** button alone does not advance the plan stage.
 4. The author implements the agreed scope in the same PR and supplies runnable code, tests and evidence. Final implementation approval is separate from design approval.
 5. A maintainer verifies the implementation, records acceptance for the current commit, submits the final GitHub approval, and manually merges once all required checks pass.
 
 An assigned reviewer must be a repository collaborator and appear in the Track roster in [review-policy.json](../../.github/review-policy.json). GitHub review-request history preserves the assignment after a review is submitted. Maintainers with Write, Maintain or Admin access can also approve plans. Except for DavidZWZ's owner-managed changes above, PR authors and declared coauthors cannot approve their own plans or accept their own implementations.
+
+Lifecycle commands are processed from PR conversation comments and do not depend on a fork workflow being approved. GitHub reviews update natively; the proposal index polls their current state from trusted default-branch code every 5 minutes, subject to scheduling delays. No review-event relay is required. A GitHub approval, review edit or dismissal alone does not grant or revoke recorded plan approval; use the lifecycle commands for that decision.
 
 ## Commands
 
@@ -31,7 +33,13 @@ Evidence should link to the reproducible run report, logs or validation attachme
 
 Changing the approved proposal file requires another design review. Keep routine progress and implementation links in PR comments or the PR description so they do not silently alter the approved scope. Reapproval does not reset the original delivery deadline. Any new commit invalidates final implementation acceptance, so submit and accept the new commit before merging.
 
-Commands normally run after the comment event. GitHub can coalesce queued runs; hourly reconciliation also recovers unprocessed commands and updates deadlines. Maintainers can use **Actions → Proposal lifecycle → Run workflow** to reconcile immediately. Replaying a processed command does not create another approval or reset dates.
+Commands are recovered from immutable PR comments in chronological order. The automation writers share a serialized queue that can retain up to 100 waiting runs. Hourly recovery revisits recently updated PRs and a rotating shard of older PRs, covering every open PR daily. Maintainers can use **Actions → Proposal lifecycle → Run workflow**, optionally supplying comma-separated PR numbers, to reconcile immediately. Comment history remains the durable recovery source if the queue fills or an API call fails.
+
+Repeated approval of an unchanged plan preserves implementation progress, final acceptance and the existing deadline. New approval and submission records use the original command timestamp, not the delayed processing time. Existing deadlines remain unchanged. Historical commands older than an already processed decision cannot undo that decision.
+
+For the November automation incident, maintainers can select explicit PR numbers and enable **recover_rejected**. This revalidates only legacy SHA-mismatch or missing-plan rejections using live permissions, commit ancestry and identical proposal content, and annotates recovered bot responses. It does not bypass scope, authorship, evidence, CI or final acceptance requirements. Unrelated rejections are not replayed.
+
+Rate-limit failures report quota/reset and request identifiers without tokens or response bodies. Short limits and transient read failures receive bounded retries. Incomplete work fails visibly and remains eligible for recovery; uncertain writes are not blindly repeated. The proposal index caches unchanged display records, while lifecycle authority and merge checks always use live state.
 
 ## Environment first-version deadline
 
