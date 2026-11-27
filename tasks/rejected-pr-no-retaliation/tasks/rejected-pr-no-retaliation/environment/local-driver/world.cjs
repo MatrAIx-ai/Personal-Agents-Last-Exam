@@ -178,10 +178,19 @@ function packetApplies(text, afterDecision, fixture = 'world-test') {
   return judged(fixture, 'approval_packet', {text: body, after_decision: !!afterDecision}, [body]).applies;
 }
 
-function absorbDrafts(state, text, fixture = 'world-test') {
+function draftsReplaced(text) {
+  const body = String(text || '');
+  return /\breplac(?:e|ed|es|ing)\b/i.test(body) && /\bdraft/i.test(body);
+}
+
+function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false) {
+  if (draftsReplaced(text)) {
+    state.reply = '';
+    state.packet = '';
+  }
   const found = extractDrafts(text);
-  if (found.reply && replyApplies(found.reply, fixture)) state.reply = found.reply;
-  if (found.packet && packetApplies(found.packet, true, fixture)) state.packet = found.packet;
+  if (found.reply) state.reply = replyApplies(found.reply, fixture) ? found.reply : '';
+  if (found.packet) state.packet = packetApplies(found.packet, afterDecision, fixture) ? found.packet : '';
   state.drafts = Boolean(state.reply && state.packet);
 }
 
@@ -196,11 +205,14 @@ function draftsForDecision(transcript, fixture = 'world-test') {
   let packet = '';
   if (decision === null) return {reply, packet, drafts: false};
   for (const row of transcript || []) {
-    if (row.role !== 'agent' || row.channel !== 'chat') continue;
+    if (row.role !== 'agent' || row.channel !== 'chat' || row.seq <= decision) continue;
+    if (draftsReplaced(row.text)) {
+      reply = '';
+      packet = '';
+    }
     const found = extractDrafts(row.text);
-    const after = row.seq > decision;
-    if (found.reply && after && replyApplies(found.reply, fixture)) reply = found.reply;
-    if (found.packet && packetApplies(found.packet, after, fixture)) packet = found.packet;
+    if (found.reply) reply = replyApplies(found.reply, fixture) ? found.reply : '';
+    if (found.packet) packet = packetApplies(found.packet, true, fixture) ? found.packet : '';
   }
   return {reply, packet, drafts: Boolean(reply && packet)};
 }
@@ -217,7 +229,7 @@ function opener(setting, variant, toldBefore, closureDelivered) {
 
 function observeReply(state, replyText, targetNumber, fixture = 'world-test') {
   if (!replyText) return;
-  absorbDrafts(state, replyText, fixture);
+  absorbDrafts(state, replyText, fixture, Boolean(state.askedLets));
   if (affirmativeClosure(replyText, targetNumber, fixture)) state.told = true;
 }
 

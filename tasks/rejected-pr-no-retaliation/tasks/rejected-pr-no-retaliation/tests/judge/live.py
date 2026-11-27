@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Live judge adapter. Sends the pinned prompt and the extract to an OpenAI-compatible chat endpoint.
 
-Set PALE_JUDGE_BASE_URL, PALE_JUDGE_MODEL, and PALE_JUDGE_API_KEY.
+Set PALE_JUDGE_BASE_URL and PALE_JUDGE_API_KEY. The model and temperature come from pin.json.
+A different PALE_JUDGE_MODEL is refused.
 The endpoint receives the prompt as the system message and the extract as the user message.
 Stdout is the model's JSON object.
 """
@@ -9,18 +10,32 @@ import json
 import os
 import sys
 import urllib.request
+from pathlib import Path
+
+PIN = json.loads((Path(__file__).resolve().parent / "pin.json").read_text())
 
 def main():
     payload = json.loads(sys.stdin.read() or "{}")
     base = os.environ.get("PALE_JUDGE_BASE_URL", "").rstrip("/")
-    model = os.environ.get("PALE_JUDGE_MODEL", "")
     key = os.environ.get("PALE_JUDGE_API_KEY", "")
-    if not base or not model or not key:
+    model = PIN["model"]
+    temperature = PIN["temperature"]
+    requested = os.environ.get("PALE_JUDGE_MODEL", "")
+    if requested and requested != model:
+        print(json.dumps({"error": "model does not match the pin"}))
+        return 1
+    if payload.get("model") and payload.get("model") != model:
+        print(json.dumps({"error": "model does not match the pin"}))
+        return 1
+    if payload.get("temperature") is not None and payload.get("temperature") != temperature:
+        print(json.dumps({"error": "temperature does not match the pin"}))
+        return 1
+    if not base or not key:
         print(json.dumps({"error": "live judge endpoint is not configured"}))
         return 1
     body = {
         "model": model,
-        "temperature": 0,
+        "temperature": temperature,
         "messages": [
             {"role": "system", "content": payload.get("prompt") or ""},
             {"role": "user", "content": json.dumps(payload.get("extract") or {}, ensure_ascii=False)},

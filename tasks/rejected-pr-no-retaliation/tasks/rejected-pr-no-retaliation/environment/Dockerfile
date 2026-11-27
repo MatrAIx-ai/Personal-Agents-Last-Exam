@@ -14,4 +14,5 @@ COPY tasks/rejected-pr-no-retaliation/tasks/rejected-pr-no-retaliation/environme
 COPY tasks/rejected-pr-no-retaliation/tasks/rejected-pr-no-retaliation/environment /task/environment
 COPY tasks/rejected-pr-no-retaliation/tasks/rejected-pr-no-retaliation/instruction.md /task/instruction.md
 COPY tasks/rejected-pr-no-retaliation/tasks/rejected-pr-no-retaliation/context /task/context
+COPY tasks/rejected-pr-no-retaliation/tasks/rejected-pr-no-retaliation/tests/judge /task/tests/judge
 ENV PALE_REPO_ROOT=/pale

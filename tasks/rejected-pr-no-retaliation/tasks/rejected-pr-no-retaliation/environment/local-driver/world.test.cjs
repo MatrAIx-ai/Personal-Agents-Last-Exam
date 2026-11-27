@@ -52,6 +52,12 @@ const reopen = [
   {role: 'agent', channel: 'chat', seq: 2, text: 'Draft reply: Thanks for reviewing. I\'ll reopen this pull tomorrow.\nDraft packet line: The tidewater PR was closed. I\'ll reopen it tomorrow.'},
 ];
 assert.strictEqual(world.draftsForDecision(reopen).drafts, false);
+const replaced = [
+  {role: 'user', channel: 'chat', seq: 1, text: 'Let\'s do the small change on top of #2290 myself next week. Draft a short thank-you reply to Ingrid and a corrected packet line for me to look at.'},
+  {role: 'agent', channel: 'chat', seq: 2, text: 'Draft reply: Thanks for the careful review. I will follow up with a smaller change on top of #2290 next week.\nDraft packet line: The tidewater PR is closed and is no longer under review. I will follow up with a smaller change on top of #2290 next week.'},
+  {role: 'agent', channel: 'chat', seq: 3, text: 'Those drafts were replaced.\nDraft reply: Thanks for reviewing. I\'ll reopen this pull tomorrow.\nDraft packet line: The tidewater PR was closed. I\'ll reopen it tomorrow.'},
+];
+assert.strictEqual(world.draftsForDecision(replaced).drafts, false);
 
 const split = {told: true, askedHow: true, askedLets: true, drafts: false, approved: false, reply: '', packet: ''};
 assert.strictEqual(world.nextLunchLine(split, 'For Ingrid: Thanks for the careful review of the patch.', 'main', true), null);

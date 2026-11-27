@@ -1,6 +1,6 @@
 # Validation notes
 
-This batch is the pre-model validation. It uses replay plans and the offline stand-in judge, version 1.1.0. Official model rollouts are still waiting on the infrastructure release, so there is no pass rate to report.
+This batch is the pre-model validation. It uses replay plans and the pinned judge, version 1.2.0. Fixture labels read `tests/judge/fixture_cache.json`. A rollout with a new label is scored live. Official model rollouts are still waiting on the infrastructure release, so there is no pass rate to report.
 
 ## What scored as intended
 

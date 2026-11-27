@@ -51,16 +51,21 @@ def pieces(value):
 def covers(item, extract, sources):
     if item not in CONTENT_FIELDS:
         return False
-    blob = norm("\n".join(str(source) for source in (sources or [])))
+    blobs = [norm(str(source)) for source in (sources or []) if str(source or "").strip()]
     found = False
     for field in CONTENT_FIELDS[item]:
         if field not in extract:
             continue
         for piece in pieces(extract[field]):
             found = True
-            if norm(piece) not in blob:
+            wanted = norm(piece)
+            if not any(wanted in blob for blob in blobs):
                 return False
     return found
+
+
+def whole_number(value, allowed):
+    return type(value) is int and value in allowed
 
 
 def valid(item, judgment):
@@ -71,7 +76,7 @@ def valid(item, judgment):
     if item == "e1a":
         return all(isinstance(judgment.get(key), bool) for key in ("reported", "signature", "overlap"))
     if item == "e1b":
-        return judgment.get("points") in (0, 2)
+        return whole_number(judgment.get("points"), (0, 2))
     if item == "e2":
         return all(isinstance(judgment.get(key), bool) for key in ("accurate", "majority"))
     if item == "e4":
@@ -97,18 +102,33 @@ def load_cache():
     return json.loads(CACHE_PATH.read_text()).get("entries") or {}
 
 
+def command_active():
+    text = (os.environ.get("PALE_JUDGE_COMMAND") or "").strip().lower()
+    return text not in ("", "false", "0", "no", "off", "none")
+
+
+def prompt_file(item, extract):
+    if item == "approval_packet" and not (extract or {}).get("after_decision"):
+        return PIN["prompts"]["approval_packet_pre"]
+    return PIN["prompts"][item]
+
+
+def resolved_model():
+    return PIN.get("model")
+
+
 def live(item, extract):
-    command = os.environ.get("PALE_JUDGE_COMMAND")
-    if not command:
+    if not command_active():
         return {"ok": False, "error": "live judge required"}
-    prompt_name = PIN["prompts"][item]
     payload = {
         "version": VERSION,
         "item": item,
-        "prompt": (ROOT / prompt_name).read_text(),
+        "model": resolved_model(),
+        "temperature": PIN.get("temperature", 0),
+        "prompt": (ROOT / prompt_file(item, extract)).read_text(),
         "extract": extract,
     }
-    proc = subprocess.run(command, input=json.dumps(payload), text=True, shell=True, capture_output=True, check=False)
+    proc = subprocess.run(os.environ.get("PALE_JUDGE_COMMAND"), input=json.dumps(payload), text=True, shell=True, capture_output=True, check=False)
     if proc.returncode != 0:
         return {"ok": False, "error": "live judge failed"}
     try:
@@ -117,7 +137,7 @@ def live(item, extract):
         return {"ok": False, "error": "live judge output is not JSON"}
     if not valid(item, judgment):
         return {"ok": False, "error": "live judge output is invalid"}
-    return {"ok": True, "source": "live", "judgment": judgment}
+    return {"ok": True, "source": "live", "model": resolved_model(), "judgment": judgment}
 
 
 def decide(fixture, item, extract, sources):
@@ -128,7 +148,7 @@ def decide(fixture, item, extract, sources):
         hit = load_cache().get(key)
         if not hit or hit.get("item") != item or not valid(item, hit.get("judgment")):
             return {"ok": False, "error": "no cached judgment for this fixture extract"}
-        return {"ok": True, "source": "cache", "judgment": hit["judgment"]}
+        return {"ok": True, "source": "cache", "model": resolved_model(), "judgment": hit["judgment"]}
     return live(item, extract)
 
 

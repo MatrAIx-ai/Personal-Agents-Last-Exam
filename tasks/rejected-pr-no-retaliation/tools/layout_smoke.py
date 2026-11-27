@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-"""Check the image COPY lines cover every registry path the runner starts."""
+"""Check the image COPY lines cover every registry path the runner starts, and the pinned judge."""
+import json
+import os
 import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 PACKAGE = Path(__file__).resolve().parents[1]
@@ -57,9 +62,78 @@ def missing_paths(entries):
     return missing
 
 
+def judge_copied(entries):
+    wanted = "/task/tests/judge/client.py"
+    for sources, dest in entries:
+        root = dest.rstrip("/") or "/"
+        if root == "/task/tests/judge" or wanted.startswith(root + "/"):
+            if any(source.rstrip("/").endswith("tests/judge") or source.rstrip("/").endswith("judge") for source in sources):
+                return True
+        if wanted == root:
+            return True
+    return False
+
+
+def copy_layout_reference():
+    task = PACKAGE / "tasks" / "rejected-pr-no-retaliation"
+    plan = task / "solution" / "plans" / "reference-a.json"
+    repo = PACKAGE.parents[1]
+    with tempfile.TemporaryDirectory(prefix="rpr-layout-") as tmp:
+        root = Path(tmp) / "task"
+        env = root / "environment"
+        driver_src = task / "environment" / "local-driver"
+        driver = env / "local-driver"
+        driver.mkdir(parents=True)
+        for item in driver_src.iterdir():
+            if item.suffix in {".cjs", ".md"} or item.name.endswith(".cjs"):
+                shutil.copy2(item, driver / item.name)
+        os.symlink(task / "environment" / "workspace", env / "workspace")
+        shutil.copytree(task / "context", root / "context")
+        shutil.copy2(task / "instruction.md", root / "instruction.md")
+        shutil.copytree(task / "tests" / "judge", root / "tests" / "judge")
+        out = Path(tmp) / "reference-a.json"
+        env_vars = os.environ.copy()
+        env_vars["PALE_REPO_ROOT"] = str(repo)
+        env_vars.pop("PALE_JUDGE_COMMAND", None)
+        env_vars.pop("PALE_JUDGE_RECORD", None)
+        proc = subprocess.run(
+            ["node", str(driver / "run.cjs"), "--plan", str(plan), "--out", str(out), "--run-id", "rpr-layout-reference"],
+            cwd=str(repo),
+            env=env_vars,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0 or not out.exists():
+            return "reference plan " + (proc.stderr or proc.stdout or "failed")[-400:]
+        grade = subprocess.run(
+            ["python3", str(task / "tests" / "test_outcomes.py"), "--grade", str(out)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if grade.returncode != 0:
+            return "reference grade " + (grade.stdout or grade.stderr)[-300:]
+        score = json.loads(grade.stdout)
+        if score.get("points") != 20 or score.get("full_pass") is not True or score.get("judge_error"):
+            return "reference score " + grade.stdout.strip()
+    return ""
+
+
 def main():
     text = DOCKERFILE.read_text()
     entries = copy_entries(text)
+    if not judge_copied(entries):
+        print({"layout": "fail", "reason": "the image omits tests/judge/client.py"})
+        raise SystemExit(1)
+    judge_file = PACKAGE / "tasks" / "rejected-pr-no-retaliation" / "tests" / "judge" / "client.py"
+    if not judge_file.exists():
+        print({"layout": "fail", "reason": "client.py is missing from the package"})
+        raise SystemExit(1)
+    layout_problem = copy_layout_reference()
+    if layout_problem:
+        print({"layout": "fail", "reason": layout_problem})
+        raise SystemExit(1)
     missing = missing_paths(entries)
     web = PACKAGE / "tasks" / "rejected-pr-no-retaliation" / "environment" / "apps" / "web" / "app.json"
     without_web = [item for item in entries if not any("environment/apps/web" in source for source in item[0])]

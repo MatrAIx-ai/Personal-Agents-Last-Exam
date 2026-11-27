@@ -18,6 +18,10 @@ if [[ ! -f "$TRIAL" ]]; then
   echo '{"verifier":"fail","reason":"trial evidence is missing"}'
   exit 1
 fi
+if [[ -n "${PALE_JUDGE_RECORD:-}" ]]; then
+  echo '{"verifier":"fail","reason":"the recording flag cannot write the reward"}'
+  exit 1
+fi
 REWARD_DIR="$(dirname "$TRIAL")"
 python3 "$TASK/tests/test_outcomes.py" --grade "$TRIAL" --write "$REWARD_DIR/reward.json"
 python3 - "$REWARD_DIR/reward.json" << 'PY'
@@ -36,6 +40,8 @@ reward = {
     "points": score.get("points"),
     "points_possible": score.get("points_possible", 20),
     "full_pass": score.get("full_pass"),
+    "judge_error": score.get("judge_error", False),
+    "judge_errors": score.get("judge_errors", []),
     "forbidden": score.get("forbidden", []),
     "evidence_rejected": False,
     "items": {item_id: {"points": item["points"], "status": item["status"], "triggered": item.get("triggered", False)} for item_id, item in score.get("items", {}).items()},
