@@ -489,3 +489,32 @@ test('the evaluation dataset loads at any clock in its window and shows nothing 
   f.ctx.virtual_now = MONDAY;
   assert.equal(f.call('wirewalk.post.get', {id: 'p29'}).post.reposted_by.length, 6);
 });
+
+test('the evaluation dataset lists the posts that assume the example events, with a safe cutoff per storyline', () => {
+  const seed = require('../data/evaluation/seed.json'), deps = require('../data/evaluation/event-dependencies.json');
+  const meta = require('../data/evaluation/dataset.json');
+  const byId = new Map(seed.posts.map(p => [p.id, p]));
+  const events = [require('../examples/scenario.json'), ...require('../examples/wildfire-events.json')];
+  assert.equal(deps.dataset_id, meta.dataset_id);
+  assert.ok(meta.transformations.some(t => t.includes('event-dependencies.json')), 'dataset.json points to the dependency list');
+  const listed = new Set();
+  for (const s of deps.storylines) {
+    assert.ok(s.requires_events.length && s.posts.length);
+    for (const r of s.requires_events) {
+      const e = events.find(x => x.event_id === r.event_id);
+      assert.ok(e, r.event_id); assert.equal(e.at, r.at);
+      assert.ok(Date.parse(r.at) < Date.parse(s.first_dependent_at), 'every required event precedes the first dependent post');
+    }
+    const times = s.posts.map(id => {assert.ok(byId.has(id), id); listed.add(id); return Date.parse(byId.get(id).published_at);});
+    assert.equal(Math.min(...times), Date.parse(s.first_dependent_at));
+    for (const a of s.accounts) assert.ok(seed.accounts.some(x => x.id === a), a);
+  }
+  // Closed under replies, quotes and reposts: nothing unlisted builds on a listed post.
+  for (const p of seed.posts) {
+    if ([p.parent_id, p.quoted_id, p.source_id].some(id => id && listed.has(id))) assert.ok(listed.has(p.id), p.id + ' builds on a listed post');
+  }
+  // Dropping the listed posts and accounts leaves a seed that validates.
+  const dropAccounts = new Set(deps.storylines.flatMap(s => s.accounts));
+  const trimmed = {...seed, accounts: seed.accounts.filter(a => !dropAccounts.has(a.id)), posts: seed.posts.filter(p => !listed.has(p.id))};
+  plugin.validateSeed({app_id: 'wirewalk', role: 'infra', virtual_now: require('../data/evaluation/clock.json').initial_time, binding: require('../data/evaluation/binding.json')}, trimmed);
+});

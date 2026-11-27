@@ -1002,6 +1002,39 @@ const seed = {account_id: fixture.account_id, owner_person_id: fixture.owner_per
   for (const e of EVENTS) {data = plugin.applyEvent({...ctx, virtual_now: e.at}, data, structuredClone(e)); plugin.validateSeed(ctx, data);}
 }
 
+
+// ---------- storylines that only the example events complete ----------
+// Posts after the storyline weekend that continue a story as if the seven example events had been
+// applied. A Task that omits a storyline's events must end before its first dependent post or drop
+// the listed posts and accounts. Classification reads the generated posts and draws no random
+// numbers, so it does not change seed.json.
+const DEPENDENT_STORYLINES = [
+  {storyline: 'Green Line 11:40 pm eastbound cancellation on Oct. 10, 2026', events: ['rail-reply-01'],
+    pattern: /11:40 pm (eastbound|trains)|sick call|standby operator|canceled train|cancellation/i, accounts: []},
+  {storyline: 'Cinder Fork Fire evacuation order, warnings and aftermath', events: ['fire-repost-1510', 'fire-quote-1510', 'fire-order-1620', 'fire-warning-1805', 'fire-order-repeat-1805', 'fire-update-2015'],
+    pattern: /Cinder Fork|PH-[12]\b|LV-[123]\b|evacuat|burn[- ]area|recovery center|fire-affected|warnings? (is |are )?lifted|homes? lost|lost homes|Oct\. 11 warning/i, accounts: ['cinder-fork-recovery']},
+];
+function dependencies() {
+  const after = p => Date.parse(p.published_at) >= STORY_TO;
+  const textOf = p => [p.text || '', ...(p.links || []).flatMap(l => [l.title || '', l.description || ''])].join(' ');
+  const out = [], claimed = new Set();
+  for (const s of DEPENDENT_STORYLINES) {
+    const ids = new Set();
+    for (const p of [...posts].sort((a, b) => Date.parse(a.published_at) - Date.parse(b.published_at))) {
+      if (!after(p)) continue;
+      const linked = [p.parent_id, p.quoted_id, p.source_id].some(id => id && ids.has(id));
+      if (linked || s.accounts.includes(p.author_id) || (p.kind !== 'repost' && s.pattern.test(textOf(p)))) ids.add(p.id);
+    }
+    const list = posts.filter(p => ids.has(p.id)).sort((a, b) => Date.parse(a.published_at) - Date.parse(b.published_at) || a.id.localeCompare(b.id));
+    for (const p of list) claimed.add(p.id);
+    out.push({storyline: s.storyline,
+      requires_events: s.events.map(id => {const e = EVENTS.find(x => x.event_id === id); if (!e) throw Error('Unknown event ' + id);
+        return {event_id: id, file: e === EVENTS[0] ? 'examples/scenario.json' : 'examples/wildfire-events.json', post_id: e.payload.id ?? e.payload.post_id, at: e.at};}),
+      first_dependent_at: list[0].published_at, posts: list.map(p => p.id), accounts: s.accounts});
+  }
+  return out;
+}
+
 // One record per line keeps the file reviewable in a diff and compact enough for one env.load_seed call.
 function lines(value) {
   const parts = Object.entries(value).map(([k, v]) => Array.isArray(v) && v.length && typeof v[0] === 'object'
@@ -1030,7 +1063,8 @@ write('dataset.json', {
       parameters: {window: ['2025-01-01', '2026-12-31'], time_zone: 'America/Los_Angeles', clock: CLOCK,
         outputs: {'seed.json': {bytes: Buffer.byteLength(seedText), sha256: crypto.createHash('sha256').update(seedText).digest('hex')}}}},
   }],
-  transformations: ['Fixture accounts, posts and the bookmark are copied verbatim; the event posts in examples/scenario.json and examples/wildfire-events.json are not included and still apply as post.publish events.',
+  transformations: ['Posts after Oct. 12, 2026 that continue the Green Line cancellation or the Cinder Fork Fire assume the seven example events were applied. event-dependencies.json lists them by storyline with the events each requires and its first_dependent_at; a Task that omits those events must end before that time or drop the listed posts and accounts. An as-of selection alone does not make the dataset consistent with a different event history.',
+    'Fixture accounts, posts and the bookmark are copied verbatim; the event posts in examples/scenario.json and examples/wildfire-events.json are not included and still apply as post.publish events.',
     'Generated posts skip Oct. 10-12, 2026, the authored storyline weekend, and build earlier and later story arcs around it.',
     'The board image\'s pixels are a deterministic rendering of its alt-text lines; tests decode the PNG and compare.'],
   expected_counts: {records: all.length, assets: 1},
@@ -1039,5 +1073,11 @@ const catalog = load('contribution/assets.catalog.json');
 catalog.catalog_id = 'wirewalk-assets-evaluation';
 catalog.assets[0].provenance.dataset_id = DATASET_ID;
 write('assets.catalog.json', catalog);
-console.log({accounts: accounts.length, posts: all.length, generated_posts: posts.length, bookmarks: bookmarks.length,
+const storylines = dependencies();
+write('event-dependencies.json', {
+  schema: 'wirewalk.event-dependencies.v1', dataset_id: DATASET_ID, version: DATASET_VERSION, applies_to: 'seed.json',
+  rule: 'Each storyline below continues, after Oct. 12, 2026, as if its required example events had been applied with post.publish. A Task that omits any of a storyline\'s required events must either end its history and run before that storyline\'s first_dependent_at, or drop the listed posts and accounts from the seed it loads. Selecting the dataset as of an earlier clock does not by itself make it consistent with a different event history.',
+  storylines,
+});
+console.log({dependent_posts: storylines.map(s => s.posts.length), first_dependent_at: storylines.map(s => s.first_dependent_at), accounts: accounts.length, posts: all.length, generated_posts: posts.length, bookmarks: bookmarks.length,
   bytes: Buffer.byteLength(seedText), compact_bytes: Buffer.byteLength(JSON.stringify(seed))});

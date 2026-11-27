@@ -149,7 +149,7 @@ Expected answers and alert decisions for a real task belong in that task's evalu
 
 - **Contents.** `seed.json` (version 1.0.0, about 0.5 MB) holds the public history of the fictional Corvale area feed and reader Priya Raman's bookmarks: 23 accounts, 1,864 posts (1,515 original, 194 replies, 38 quotes, 117 reposts) and 127 bookmarks.
   - It contains the 14 fixture accounts, the 37 fixture posts and Priya's fixture bookmark verbatim.
-  - `binding.json`, `policies.json`, `clock.json`, `dataset.json` and `assets.catalog.json` sit beside it. `dataset.json` records the sources, the post count and the seed's sha256. The catalog binds the board image to Priya under this dataset's ID.
+  - `binding.json`, `policies.json`, `clock.json`, `dataset.json`, `assets.catalog.json` and `event-dependencies.json` sit beside it. `dataset.json` records the sources, the post count and the seed's sha256. The catalog binds the board image to Priya under this dataset's ID.
 - **Story arcs** lead into and out of the fixture weekend:
   - the transit board's Saturday late-service pilot, from the September 2025 proposal through the Sept. 12, 2026 move to 11:40 pm and the report on the Oct. 10 cancellation;
   - the county's named evacuation zones from May 2025, red flag warnings and an August 2025 warning for LV-3, then the Cinder Fork Fire's containment and recovery after Oct. 12;
@@ -157,6 +157,7 @@ Expected answers and alert decisions for a real task belong in that task's evalu
   - the music hall's weekly lineups, including the Oct. 10 show.
 - **The storyline weekend.** Generated posts skip Saturday to Monday, Oct. 10-12, 2026, so the authored storylines read the same at any clock.
   - The seven event posts (`p19`, `p22`-`p27`) are not in the seed. A scenario applies them with `post.publish` exactly as on the minimal fixture, and `tests/business.test.cjs` applies all seven to this seed.
+  - **The dataset assumes those events.** Two storylines continue after Oct. 12 as if the events had been applied: the Green Line 11:40 pm cancellation (8 posts, from Oct. 13 07:10 PDT, requiring `rail-reply-01`) and the Cinder Fork Fire evacuation order and its aftermath (49 posts and the `cinder-fork-recovery` account, from Oct. 13 09:00 PDT, requiring the six wildfire events). `data/evaluation/event-dependencies.json` lists every such post with the events it needs and the storyline's `first_dependent_at`. A Task that omits a storyline's events must end its history and run before that time, or drop the listed posts and accounts; the remaining seed still validates (tested). Choosing an earlier clock alone does not make the dataset fit a different event history.
   - Later generated posts are written for a run in which those events happened.
 - **Clock.** The dataset clock is the fixture clock, 21:10 Pacific on Saturday, Oct. 10, 2026.
   - Priya's bookmarks end there; the last is the fixture's `p01`, saved at 15:05.
