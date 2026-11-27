@@ -1,0 +1,52 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "civicdesk-dana",
+  "version": "1.0.0",
+  "description": "Synthetic public-comment portal for one member (Dana Reyes): three fictional federal agencies, 36 proposed rules (dockets) whose comment periods are spread over 2025-01-01 to 2026-12-31 with extensions and corrections, their notices and supporting documents as UTF-8 text with a few text-based PDFs, the member's posted comments on closed dockets and one comment awaiting posting. The target docket OCDD-2026-0031 (wearable sensor data retention) closes end of day Eastern on 2026-12-04; OCDD-2026-0027 (wearable cybersecurity labeling) is the similar docket that closes later. Coverage is reported in evidence/coverage.json.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Authored agencies, rules and notice text plus computed periods, documents and comment history; scripts/generate-fixture.cjs is the sole source and also writes the document files. Public notices were read only to mirror the structure of a rulemaking notice (summary, dates, addresses, supplementary information); no agency content, data or media was copied.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/civicdesk/scripts/generate-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": "20261130",
+        "parameters": {
+          "member": "Dana Reyes",
+          "target_docket": "OCDD-2026-0031",
+          "clock": "2026-11-30T18:00:00-08:00",
+          "coverage_window": "2025-01-01/2026-12-31",
+          "coverage_report": "evidence/coverage.json",
+          "time_zone": "America/Los_Angeles",
+          "agency_time_zones": "America/New_York, America/Chicago, America/Denver"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Comment periods computed per docket in the agency's time zone and closed at 23:59 local; documents rendered from the notice text; IDs, dates and references checked by validateSeed."
+  ],
+  "expected_counts": {
+    "records": 96,
+    "assets": 54
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace a human read-through of realism and variation; recorded here before submission."
+  }
+}

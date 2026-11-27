@@ -1,0 +1,206 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "civicdesk",
+  "app_version": "1.0.0",
+  "package_sha256": "dc38d0b0b14ea6048decb47414f189c0ec3ac192c7ccf0fb9b99d414e62b05b0",
+  "node": "v24.16.0",
+  "verified_at": "2026-11-26T08:33:51.132Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.dockets.search",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.dockets.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.dockets.documents",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.comments.validate",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.comments.receipt",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.comments.status",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.comments.list_mine",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.comments.draft",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for civicdesk.comments.submit",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "✔ standalone seed: reads describe the fixture and change nothing (29.344667ms)\n✔ validateSeed rejects dangling documents, reversed periods, mismatched hashes and duplicate IDs (3.382292ms)\n✔ validate and draft report problems without submitting; a named draft needs a name (9.02175ms)\n✔ submit: the acknowledgment gate, the receipt, idempotent resubmission, and the duplicate and closed-period refusals (15.151417ms)\n✔ events: an extension moves the closing, a correction leaves comments unchanged, status and notice records (17.576667ms)\n✔ periods close by the clock in the agency's time zone, not by an event (5.246ms)\n✔ notices: each kind builds a valid, deterministic Mail wire message from public views only (5.778542ms)\n✔ optional diagnostics cannot change business results (7.252083ms)\n✔ generated contract files match scripts/contracts.cjs (1.251958ms)\n✔ reviewer renderer escapes untrusted content (0.263042ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 161.360625\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"app\": \"civicdesk\",\n  \"applied\": 9,\n  \"before\": {\n    \"target_closes\": \"2026-12-04T23:59:00-05:00\",\n    \"comments\": [\n      [\n        \"cmt-h001\",\n        \"posted\"\n      ],\n      [\n        \"cmt-h002\",\n        \"posted\"\n      ],\n      [\n        \"cmt-h003\",\n        \"received\"\n      ]\n    ]\n  },\n  \"after\": {\n    \"target_closes\": \"2026-12-18T23:59:00-05:00\",\n    \"target_extended_from\": \"2026-12-04T23:59:00-05:00\",\n    \"target_corrections\": 1,\n    \"comments\": [\n      [\n        \"cmt-h001\",\n        \"posted\",\n        1\n      ],\n      [\n        \"cmt-h002\",\n        \"posted\",\n        1\n      ],\n      [\n        \"cmt-h003\",\n        \"posted\",\n        2\n      ]\n    ]\n  }\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}
