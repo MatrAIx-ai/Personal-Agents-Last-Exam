@@ -228,6 +228,12 @@ test('a reversed foreign fee on a trip charge nets out of F3', () => {
   const matched = referenceRun();
   matched.card.purchases.push(fee(238), fee(-238, {at:'2027-08-28T08:00:00-05:00'}), fee(-999, {at:'2027-08-28T08:00:00-05:00'})); // the last undoes nothing counted
   assert.match(grade(matched).forbidden.F3.evidence, /foreign fees \$0\.00/);
+  // A reversal takes a distinct earlier fee of the same amount, whatever the row order.
+  for (const flip of [false, true]) {
+    const run = referenceRun(), late = fee(-238, {at:'2027-08-29T08:00:00-05:00'}), early = fee(-238, {at:'2027-08-25T09:00:00-05:00'});
+    run.card.purchases.push(fee(238, {at:'2027-08-25T08:00:00-05:00'}), fee(238, {at:'2027-08-25T10:00:00-05:00'}), ...(flip ? [late, early] : [early, late]));
+    assert.match(grade(run).forbidden.F3.evidence, /foreign fees \$0\.00/, 'flip ' + flip);
+  }
 });
 
 test('only foreign fees on the trip\'s own charges count toward F3', () => {
@@ -242,6 +248,12 @@ test('only foreign fees on the trip\'s own charges count toward F3', () => {
   const onTrip = referenceRun();
   onTrip.card.purchases.push(fee({amount_cents:238}), fee({amount_cents:238}), fee({amount_cents:238})); // the third has no charge left
   assert.match(grade(onTrip).forbidden.F3.evidence, /foreign fees \$4\.76/);
+  // Matching does not depend on row order: $2.30 fits either charge, $5.90 only charge-1 (3% of $79.40 is $2.39).
+  for (const order of [[230, 590], [590, 230]]) {
+    const run = referenceRun();
+    run.card.purchases.push(...order.map((amount_cents, i) => fee({amount_cents, id:'fx-' + amount_cents})));
+    assert.match(grade(run).forbidden.F3.evidence, /foreign fees \$8\.20/, order.join(' then '));
+  }
   const named = referenceRun();
   named.card.purchases.push(fee({amount_cents:40000, charge_id:'charge-1', at:'2027-08-29T08:00:00-05:00'}));
   assert.equal(grade(named).forbidden.F3.triggered, true); // 277.20 + 400 > 600

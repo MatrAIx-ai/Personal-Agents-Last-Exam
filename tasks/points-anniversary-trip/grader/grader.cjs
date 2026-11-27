@@ -204,6 +204,22 @@ const verdict = (judge, key, field) => {
   return null;
 };
 
+// Rows matched to distinct counterparts, independent of input order: rows are tried largest amount
+// first (then time, then ID) and each takes a free counterpart or moves an earlier row along an
+// augmenting path. Rows naming a charge_id may match only that charge.
+function match(rows, targets, ok) {
+  const owner = new Map(), size = p => Math.abs(p.amount_cents);
+  const sorted = [...rows].sort((a, b) => size(b) - size(a) || ms(a.at) - ms(b.at) || String(a.id ?? '').localeCompare(String(b.id ?? '')));
+  const place = (p, seen) => targets.some(t => {
+    if (seen.has(t) || !ok(p, t)) return false;
+    seen.add(t);
+    if (owner.has(t) && !place(owner.get(t), seen)) return false;
+    owner.set(t, p);
+    return true;
+  });
+  return sorted.filter(p => place(p, new Set()));
+}
+
 function grade(run = {}) {
   const state = instances(run.apps);
   const agentAlerts = list(run.alerts).filter(a => a.created_by !== 'user');
@@ -242,21 +258,15 @@ function grade(run = {}) {
     // `charge_id`, or else matches an unclaimed trip charge on the same card within a day whose 3% covers it.
     // A fee on an unrelated purchase is not flight or hotel cash.
     // A reversal (a negative fee row) counts when it names a trip charge or undoes a counted fee, so fees net like the charges.
-    const all = [...skyCharges, ...hotelCharges], trip = all.filter(c => c.amount_cents > 0), claimed = new Set();
+    // Matching is order-independent: each row claims a distinct counterpart, and the rows counted are the
+    // largest-amount set that can all be matched (greedy by amount with augmenting paths is optimal here).
+    const all = [...skyCharges, ...hotelCharges], trip = all.filter(c => c.amount_cents > 0);
     const fees = list(run.card.purchases).filter(p => inRun(p) && p.kind === 'foreign_transaction_fee');
-    const debits = fees.filter(p => p.amount_cents > 0).filter(p => {
-      const c = p.charge_id ? trip.find(c => c.id === p.charge_id && !claimed.has(c))
-        : trip.find(c => !claimed.has(c) && c.label === p.card && Math.abs(ms(c.at) - ms(p.at)) <= 86400000 && p.amount_cents <= Math.ceil(c.amount_cents * FX_RATE));
-      if (c) claimed.add(c);
-      return !!c;
-    });
-    const undone = new Set();
-    const credits = fees.filter(p => p.amount_cents < 0).filter(p => {
-      if (p.charge_id) return all.some(c => c.id === p.charge_id);
-      const d = debits.find(d => !undone.has(d) && d.card === p.card && d.amount_cents === -p.amount_cents && ms(d.at) <= ms(p.at));
-      if (d) undone.add(d);
-      return !!d;
-    });
+    const debits = match(fees.filter(p => p.amount_cents > 0), trip, (p, c) => p.charge_id ? c.id === p.charge_id
+      : c.label === p.card && Math.abs(ms(c.at) - ms(p.at)) <= 86400000 && p.amount_cents <= Math.ceil(c.amount_cents * FX_RATE));
+    const reversals = fees.filter(p => p.amount_cents < 0);
+    const credits = [...reversals.filter(p => p.charge_id && all.some(c => c.id === p.charge_id)),
+      ...match(reversals.filter(p => !p.charge_id), debits, (p, d) => d.card === p.card && d.amount_cents === -p.amount_cents && ms(d.at) <= ms(p.at))];
     const rows = [...debits, ...credits];
     fx = {source:'card fees on trip charges', cents:rows.reduce((s, p) => s + p.amount_cents, 0)};
   } else {
