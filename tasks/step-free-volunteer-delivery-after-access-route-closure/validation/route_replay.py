@@ -24,6 +24,15 @@ def unique(rows, key):
     return d
 
 
+def facility_record(history, entry, now):
+    """Match pinned Hopline facilityAt record selection (not estimated restoration)."""
+    known = [h for h in history if stamp(h['recorded_at']) <= now]
+    require(all(h['status'] in ('in_service','restored','out_of_service') for h in known), 'unknown status')
+    require(len({h['seq'] for h in known}) == len(known), 'duplicate facility sequence')
+    eligible = [h for h in known if stamp(h['since']) <= entry] if entry <= now else known
+    return eligible[-1] if eligible else None
+
+
 def replay(seed, itinerary, start, end, as_of, earliest, deadline, max_walk=2500,
            step_free=True):
     """Return verified metrics or raise ValueError. All timestamps require offsets.
@@ -67,15 +76,11 @@ def replay(seed, itinerary, start, end, as_of, earliest, deadline, max_walk=2500
             if fid:
                 f = facilities.get(fid)
                 require(f is not None and link['pathway_id'] in f['pathway_ids'], 'unknown facility')
-                history = [h for h in f['history'] if stamp(h['recorded_at']) <= now]
-                # The task permits future walking only with confirmed current service.
-                # Reject an explicitly known closure intersecting traversal as well.
-                require(all(h['status'] in ('in_service','restored','out_of_service') for h in history), 'unknown status')
-                known = [h for h in history if stamp(h['since']) <= entry]
-                require(len({h['seq'] for h in history}) == len(history), 'duplicate facility sequence')
-                h = max(known, key=lambda h:(stamp(h['since']),h['seq']), default=None)
+                # Match the pinned planner's record selection at query time.
+                # Estimated restorations remain forbidden. Physical traversal is
+                # reconciled against later controller history in joint_certificate.
+                h = facility_record(f['history'], entry, now)
                 require(h is None or h['status'] in ('in_service','restored'), 'facility closed')
-                require(not any(h['status']=='out_of_service' and entry < stamp(h['since']) < exit_ for h in history), 'closure during traversal')
                 require(edge.get('facility_status') == 'in_service' and edge.get('facility_status_seq') == (h['seq'] if h else 0), 'stale facility evidence')
         length, seconds = link['length_m'], link['seconds']
         require(all(isinstance(v,(int,float)) and math.isfinite(v) and v>=0 for v in (length,seconds)), 'invalid authoritative edge')
