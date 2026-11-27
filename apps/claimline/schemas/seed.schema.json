@@ -1,0 +1,1329 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "employee_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "company_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "trips": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/trip"
+      }
+    },
+    "charges": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/charge"
+      }
+    },
+    "receipt_sources": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/source"
+      }
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/receipt"
+      }
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/line"
+      }
+    },
+    "reports": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/report"
+      }
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/request"
+      }
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/policy"
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/review"
+      }
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/payment"
+      }
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/notice"
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "employee_name",
+    "company_name",
+    "next_id",
+    "trips",
+    "charges",
+    "receipt_sources",
+    "receipts",
+    "lines",
+    "reports",
+    "requests",
+    "policies",
+    "reviews",
+    "payments",
+    "notices"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "version": {
+      "type": "object",
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "epoch",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "file_ref": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "const": "files"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "app_id",
+        "id",
+        "number",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "part": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "enum": [
+            "airfare",
+            "hotel",
+            "ground_transport",
+            "meals",
+            "conference",
+            "parking",
+            "toll",
+            "rail",
+            "personal",
+            "other"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "personal": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "category",
+        "label",
+        "date",
+        "amount_cents",
+        "personal"
+      ],
+      "additionalProperties": false
+    },
+    "trip": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "start_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "end_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "cost_center": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "purpose",
+        "start_date",
+        "end_date",
+        "cost_center",
+        "source_ref",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "charge_history": {
+      "type": "object",
+      "properties": {
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "settled",
+            "refunded"
+          ]
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "refund_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "source_revision",
+        "status",
+        "amount_cents",
+        "refund_cents",
+        "at",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "charge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "lineage_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "merchant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "refund_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "settled",
+            "refunded"
+          ]
+        },
+        "payment_type": {
+          "enum": [
+            "company_card",
+            "personal_card",
+            "cash"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/charge_history"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "lineage_id",
+        "source_revision",
+        "merchant",
+        "date",
+        "amount_cents",
+        "refund_cents",
+        "status",
+        "payment_type",
+        "source_ref",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "merchant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "voided"
+          ]
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "available_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/part"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "source_id",
+        "source_revision",
+        "merchant",
+        "date",
+        "amount_cents",
+        "status",
+        "available_at",
+        "available_until",
+        "source_ref",
+        "asset_id",
+        "sha256",
+        "byte_length",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "file_ref": {
+          "anyOf": [
+            {
+              "$ref": "seed.schema.json#/$defs/file_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "source_record_id",
+        "source_id",
+        "source_revision",
+        "sha256",
+        "asset_id",
+        "byte_length",
+        "registered_at",
+        "file_ref"
+      ],
+      "additionalProperties": false
+    },
+    "line": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "charge_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "charge_revision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "merchant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "category": {
+          "enum": [
+            "airfare",
+            "hotel",
+            "ground_transport",
+            "meals",
+            "conference",
+            "parking",
+            "toll",
+            "rail",
+            "personal",
+            "other"
+          ]
+        },
+        "payment_type": {
+          "enum": [
+            "company_card",
+            "personal_card",
+            "cash"
+          ]
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "purpose_source_ref": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "attendees": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "cost_center": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "itemizations": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/part"
+          }
+        },
+        "personal": {
+          "type": "boolean"
+        },
+        "explanation": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "id",
+        "report_id",
+        "charge_id",
+        "charge_revision",
+        "receipt_id",
+        "merchant",
+        "date",
+        "amount_cents",
+        "category",
+        "payment_type",
+        "purpose",
+        "purpose_source_ref",
+        "attendees",
+        "cost_center",
+        "itemizations",
+        "personal",
+        "explanation",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "totals": {
+      "type": "object",
+      "properties": {
+        "gross_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "company_paid_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "employee_claim_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "personal_liability_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "gross_cents",
+        "company_paid_cents",
+        "employee_claim_cents",
+        "personal_liability_cents"
+      ],
+      "additionalProperties": false
+    },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "first_submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trip": {
+          "$ref": "seed.schema.json#/$defs/trip"
+        },
+        "policy_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/line"
+          }
+        },
+        "totals": {
+          "$ref": "seed.schema.json#/$defs/totals"
+        }
+      },
+      "required": [
+        "revision",
+        "submitted_at",
+        "first_submitted_at",
+        "trip",
+        "policy_ids",
+        "lines",
+        "totals"
+      ],
+      "additionalProperties": false
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "trip_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "submitted",
+            "returned",
+            "approved",
+            "partially_approved",
+            "rejected",
+            "discarded"
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "line_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/snapshot"
+          }
+        },
+        "first_submitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "amend_by": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "trip_id",
+        "name",
+        "status",
+        "revision",
+        "line_ids",
+        "snapshots",
+        "first_submitted_at",
+        "amend_by"
+      ],
+      "additionalProperties": false
+    },
+    "reply": {
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "at",
+        "text",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recipient": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "status": {
+          "enum": [
+            "open",
+            "answered",
+            "cancelled"
+          ]
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "replies": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/reply"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "report_id",
+        "recipient",
+        "question",
+        "status",
+        "at",
+        "replies"
+      ],
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "policy_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "effective_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "receipt_required_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "meal_limit_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "submit_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "id",
+        "policy_id",
+        "revision",
+        "published_at",
+        "effective_from",
+        "effective_until",
+        "timezone",
+        "receipt_required_cents",
+        "meal_limit_cents",
+        "submit_days",
+        "source_ref",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "approval_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9000000000000
+      }
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "decision": {
+          "enum": [
+            "returned",
+            "approved",
+            "partially_approved",
+            "rejected"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "approved_line_amounts": {
+          "$ref": "seed.schema.json#/$defs/approval_map"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id",
+        "report_id",
+        "report_revision",
+        "decision",
+        "reason",
+        "approved_line_amounts",
+        "at",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "payment_history": {
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "scheduled",
+            "paid",
+            "failed"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "at",
+        "status",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "status": {
+          "enum": [
+            "scheduled",
+            "paid",
+            "failed"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/payment_history"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "report_id",
+        "report_revision",
+        "amount_cents",
+        "status",
+        "source_ref",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "notice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "id",
+        "report_id",
+        "report_revision",
+        "kind",
+        "at",
+        "title",
+        "body"
+      ],
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "properties": {
+        "line_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "severity": {
+          "const": "error"
+        }
+      },
+      "required": [
+        "line_id",
+        "code",
+        "message",
+        "severity"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "report_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "totals": {
+          "$ref": "seed.schema.json#/$defs/totals"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/finding"
+          }
+        },
+        "can_submit": {
+          "type": "boolean"
+        },
+        "policy_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "required": [
+        "report_id",
+        "report_revision",
+        "totals",
+        "findings",
+        "can_submit",
+        "policy_ids"
+      ],
+      "additionalProperties": false
+    },
+    "payment_summary": {
+      "type": "object",
+      "properties": {
+        "approved_employee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "paid_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "scheduled_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "outstanding_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "unreserved_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "approved_employee_cents",
+        "paid_cents",
+        "scheduled_cents",
+        "outstanding_cents",
+        "unreserved_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

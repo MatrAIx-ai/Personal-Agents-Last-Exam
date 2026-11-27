@@ -1,0 +1,1984 @@
+[
+  {
+    "name": "claimline.workspace.get",
+    "description": "Read the employee workspace and visible business records.",
+    "scope": "claimline.workspace.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "workspace": {
+          "$ref": "schemas/seed.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "workspace"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.trips.list",
+    "description": "List trip context.",
+    "scope": "claimline.trips.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "trips": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/trip"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "trips"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.trips.create",
+    "description": "Create sourced trip context.",
+    "scope": "claimline.trips.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "start_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "end_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "cost_center": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "name",
+        "purpose",
+        "start_date",
+        "end_date",
+        "cost_center",
+        "source_ref",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "trip": {
+          "$ref": "schemas/seed.schema.json#/$defs/trip"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "trip"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.trips.update",
+    "description": "Edit unfrozen trip context.",
+    "scope": "claimline.trips.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "purpose": {
+              "type": "string",
+              "maxLength": 4000
+            },
+            "start_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "end_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "cost_center": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "expected_version": {
+              "$ref": "schemas/seed.schema.json#/$defs/version"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "trip": {
+          "$ref": "schemas/seed.schema.json#/$defs/trip"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "trip"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.charges.list",
+    "description": "Read pending/settled/refunded card lineage.",
+    "scope": "claimline.charges.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "charges": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/charge"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "charges"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.receipts.list",
+    "description": "List available merchant originals and saved versions.",
+    "scope": "claimline.receipts.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/source"
+          }
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/receipt"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "sources",
+        "receipts"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.receipts.download",
+    "description": "Download an available original with its source/hash.",
+    "scope": "claimline.receipts.download",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "source": {
+          "$ref": "schemas/seed.schema.json#/$defs/source"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "source",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.receipts.read",
+    "description": "Read saved original bytes even after merchant expiry.",
+    "scope": "claimline.receipts.read",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "receipt": {
+          "$ref": "schemas/seed.schema.json#/$defs/receipt"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "receipt",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.receipts.register",
+    "description": "Save an obtained original; preserve its hash and optional Files version.",
+    "scope": "claimline.receipts.register",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "file_ref": {
+          "anyOf": [
+            {
+              "$ref": "schemas/seed.schema.json#/$defs/file_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "source_record_id",
+        "file",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "receipt": {
+          "$ref": "schemas/seed.schema.json#/$defs/receipt"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "receipt"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.matches.preview",
+    "description": "Suggest exact merchant/date/amount matches without changing associations.",
+    "scope": "claimline.matches.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "receipt_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "line_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "charge_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "merchant": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              }
+            },
+            "required": [
+              "line_id",
+              "charge_id",
+              "merchant",
+              "date",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "source": {
+          "$ref": "schemas/seed.schema.json#/$defs/source"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "receipt_id",
+        "candidates",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.matches.confirm",
+    "description": "Explicitly confirm an evidence association.",
+    "scope": "claimline.matches.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "line_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "line_id",
+        "receipt_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "line": {
+          "$ref": "schemas/seed.schema.json#/$defs/line"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "line"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.matches.separate",
+    "description": "Explicitly separate an evidence association.",
+    "scope": "claimline.matches.separate",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "line_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "line_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "line": {
+          "$ref": "schemas/seed.schema.json#/$defs/line"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "line"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.lines.create",
+    "description": "Create an expense linked to a draft report.",
+    "scope": "claimline.lines.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "charge_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "merchant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "category": {
+          "enum": [
+            "airfare",
+            "hotel",
+            "ground_transport",
+            "meals",
+            "conference",
+            "parking",
+            "toll",
+            "rail",
+            "personal",
+            "other"
+          ]
+        },
+        "payment_type": {
+          "enum": [
+            "company_card",
+            "personal_card",
+            "cash"
+          ]
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "purpose_source_ref": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "attendees": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "personal": {
+          "type": "boolean"
+        },
+        "explanation": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "report_id",
+        "merchant",
+        "date",
+        "amount_cents",
+        "category",
+        "payment_type",
+        "purpose",
+        "purpose_source_ref",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "line": {
+          "$ref": "schemas/seed.schema.json#/$defs/line"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "line"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.lines.update",
+    "description": "Edit an expense in a draft or returned report.",
+    "scope": "claimline.lines.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "merchant": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "amount_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "category": {
+              "enum": [
+                "airfare",
+                "hotel",
+                "ground_transport",
+                "meals",
+                "conference",
+                "parking",
+                "toll",
+                "rail",
+                "personal",
+                "other"
+              ]
+            },
+            "payment_type": {
+              "enum": [
+                "company_card",
+                "personal_card",
+                "cash"
+              ]
+            },
+            "purpose": {
+              "type": "string",
+              "maxLength": 4000
+            },
+            "purpose_source_ref": {
+              "type": "string",
+              "maxLength": 4000
+            },
+            "attendees": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "personal": {
+              "type": "boolean"
+            },
+            "explanation": {
+              "type": "string",
+              "maxLength": 4000
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "expected_version": {
+              "$ref": "schemas/seed.schema.json#/$defs/version"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "line": {
+          "$ref": "schemas/seed.schema.json#/$defs/line"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "line"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.lines.itemize",
+    "description": "Split hotel/tax/personal items while preserving the original total.",
+    "scope": "claimline.lines.itemize",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/part"
+          }
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "items",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "line": {
+          "$ref": "schemas/seed.schema.json#/$defs/line"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "line"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.requests.create",
+    "description": "Record an employee or merchant clarification request.",
+    "scope": "claimline.requests.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recipient": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "recipient",
+        "question",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "request": {
+          "$ref": "schemas/seed.schema.json#/$defs/request"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.requests.cancel",
+    "description": "Cancel an outstanding request without deleting its history.",
+    "scope": "claimline.requests.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "request": {
+          "$ref": "schemas/seed.schema.json#/$defs/request"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.policy.get",
+    "description": "Read published policy versions and effective dates.",
+    "scope": "claimline.policy.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/policy"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "policies"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.reports.list",
+    "description": "List employee reports.",
+    "scope": "claimline.reports.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/report"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reports"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.reports.get",
+    "description": "Read a report, findings, frozen revisions, review and payment totals.",
+    "scope": "claimline.reports.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "report": {
+          "$ref": "schemas/seed.schema.json#/$defs/report"
+        },
+        "preview": {
+          "$ref": "schemas/seed.schema.json#/$defs/preview"
+        },
+        "payment": {
+          "$ref": "schemas/seed.schema.json#/$defs/payment_summary"
+        },
+        "reviews": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/review"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report",
+        "preview",
+        "payment",
+        "reviews"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.reports.create",
+    "description": "Create a draft report for a trip.",
+    "scope": "claimline.reports.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "trip_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "trip_id",
+        "name",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "report": {
+          "$ref": "schemas/seed.schema.json#/$defs/report"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.reports.preview",
+    "description": "Read policy findings and company/employee/personal totals.",
+    "scope": "claimline.reports.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "preview": {
+          "$ref": "schemas/seed.schema.json#/$defs/preview"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.reports.submit",
+    "description": "Submit a report under its lifecycle rules.",
+    "scope": "claimline.reports.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "report": {
+          "$ref": "schemas/seed.schema.json#/$defs/report"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.reports.withdraw",
+    "description": "Withdraw a report under its lifecycle rules.",
+    "scope": "claimline.reports.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "report": {
+          "$ref": "schemas/seed.schema.json#/$defs/report"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.reports.discard",
+    "description": "Discard a report under its lifecycle rules.",
+    "scope": "claimline.reports.discard",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "report": {
+          "$ref": "schemas/seed.schema.json#/$defs/report"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "claimline.reports.export",
+    "description": "Export a frozen report revision as original JSON bytes.",
+    "scope": "claimline.reports.export",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.payments.list",
+    "description": "Read actual payment histories and approved/paid/outstanding amounts.",
+    "scope": "claimline.payments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/payment"
+          }
+        },
+        "reviews": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/review"
+          }
+        },
+        "summaries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "report_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "approved_employee_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "paid_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "scheduled_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "outstanding_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "unreserved_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              }
+            },
+            "required": [
+              "report_id",
+              "approved_employee_cents",
+              "paid_cents",
+              "scheduled_cents",
+              "outstanding_cents",
+              "unreserved_cents"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payments",
+        "reviews",
+        "summaries"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "claimline.notices.list",
+    "description": "Read source-owned stable Mail notification envelopes for Infra routing.",
+    "scope": "claimline.notices.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "notice": {
+                "$ref": "schemas/seed.schema.json#/$defs/notice"
+              },
+              "message": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "notice",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notices"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  }
+]

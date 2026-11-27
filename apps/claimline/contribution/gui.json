@@ -1,0 +1,72 @@
+{
+  "schema_version": "pale.gui.v1",
+  "status": "declared",
+  "surface_id": "claimline-reviewer",
+  "audience": [
+    "reviewer"
+  ],
+  "state_connection": {
+    "app_ids": [
+      "claimline"
+    ],
+    "adapter": "pale.mcp_bridge",
+    "authoritative_state": "app_runtime"
+  },
+  "routes": [
+    {
+      "route_id": "reports",
+      "path": "/#reports",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "expenses",
+      "path": "/#expenses",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "receipts",
+      "path": "/#receipts",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "payments",
+      "path": "/#payments",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "policy",
+      "path": "/#policy",
+      "asset_bindings": []
+    }
+  ],
+  "content_policy": {
+    "untrusted_html": "text_only",
+    "svg": "disabled",
+    "remote_fetch": "disabled",
+    "remote_allowlist": [],
+    "missing_asset_behavior": "placeholder"
+  },
+  "observation": {
+    "mechanism": "screen_observation",
+    "payload_policy": "visible_surface_only"
+  },
+  "extensions": [
+    {
+      "namespace": "pale.web",
+      "version": "1",
+      "required": false,
+      "data": {
+        "page": "gui/index.html",
+        "controller": "gui/src/app.js",
+        "stylesheet": "gui/src/style.css",
+        "audience": [
+          "agent",
+          "user"
+        ],
+        "host": "runtime/web/server.cjs",
+        "transport": "agent-mcp-bridge",
+        "status": "implemented"
+      }
+    }
+  ]
+}
