@@ -1,0 +1,67 @@
+{
+  "schema_version": "pale.gui.v1",
+  "status": "declared",
+  "surface_id": "cadence-reviewer",
+  "audience": [
+    "reviewer"
+  ],
+  "state_connection": {
+    "app_ids": [
+      "cadence"
+    ],
+    "adapter": "pale.mcp_bridge",
+    "authoritative_state": "app_runtime"
+  },
+  "routes": [
+    {
+      "route_id": "search",
+      "path": "/",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "reservations",
+      "path": "/#page=reservations",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "waitlist",
+      "path": "/#page=waitlist",
+      "asset_bindings": []
+    },
+    {
+      "route_id": "plan",
+      "path": "/#page=plan",
+      "asset_bindings": []
+    }
+  ],
+  "content_policy": {
+    "untrusted_html": "text_only",
+    "svg": "disabled",
+    "remote_fetch": "disabled",
+    "remote_allowlist": [],
+    "missing_asset_behavior": "placeholder"
+  },
+  "observation": {
+    "mechanism": "screen_observation",
+    "payload_policy": "visible_surface_only"
+  },
+  "extensions": [
+    {
+      "namespace": "pale.web",
+      "version": "1",
+      "required": false,
+      "data": {
+        "page": "gui/index.html",
+        "controller": "gui/src/app.js",
+        "audience": [
+          "agent",
+          "user"
+        ],
+        "host": "runtime/web/server.cjs",
+        "transport": "agent-mcp-bridge",
+        "status": "implemented"
+      }
+    }
+  ],
+  "renderer_ref": "gui/src/view.js"
+}

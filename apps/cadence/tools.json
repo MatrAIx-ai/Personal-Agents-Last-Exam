@@ -1,0 +1,5099 @@
+[
+  {
+    "name": "cadence.account.get",
+    "description": "Read the member on file, the plan summary, credits, trial status, upcoming reservation and waitlist counts, and the confirmation setting. Returns signed_out while the session is expired, like every other operation.",
+    "read_only": true,
+    "scope": "cadence.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account": {
+          "type": "object",
+          "properties": {
+            "member": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "email": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "home_neighborhood": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "name",
+                "email",
+                "home_neighborhood"
+              ],
+              "additionalProperties": false
+            },
+            "plan": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "plan_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "kind": {
+                  "enum": [
+                    "trial",
+                    "credits"
+                  ]
+                },
+                "credits_per_period": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 500
+                },
+                "period_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 366
+                },
+                "price_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "premium_allowed": {
+                  "type": "boolean"
+                },
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "maxItems": 10
+                },
+                "status": {
+                  "enum": [
+                    "trial",
+                    "active",
+                    "cancel_at_period_end",
+                    "cancelled"
+                  ]
+                },
+                "credits_remaining": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 500
+                },
+                "period_start": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "renewal_date": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "trial_end": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "trial_days_left": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 366
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pending_change": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "enum": [
+                            "change",
+                            "cancel"
+                          ]
+                        },
+                        "plan_id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "effective_on": {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        "requested_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "action",
+                        "plan_id",
+                        "effective_on",
+                        "requested_at"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "payment_method": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "payment_method_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "brand": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "last4": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 4
+                        },
+                        "status": {
+                          "enum": [
+                            "ok",
+                            "declined"
+                          ]
+                        },
+                        "is_default": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "payment_method_id",
+                        "brand",
+                        "last4",
+                        "status",
+                        "is_default"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "trial_reminder_sent_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "renews_to": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "plan_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "price_cents": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100000000
+                        }
+                      },
+                      "required": [
+                        "plan_id",
+                        "name",
+                        "price_cents"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "plan_id",
+                "name",
+                "kind",
+                "credits_per_period",
+                "period_days",
+                "price_cents",
+                "premium_allowed",
+                "rules",
+                "status",
+                "credits_remaining",
+                "period_start",
+                "renewal_date",
+                "trial_end",
+                "trial_days_left",
+                "pending_change",
+                "payment_method",
+                "trial_reminder_sent_at",
+                "renews_to"
+              ],
+              "additionalProperties": false
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "credits_remaining": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 500
+                },
+                "upcoming_reservations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                },
+                "waitlist_entries": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                },
+                "trial_days_left": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 366
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "signed_out": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "credits_remaining",
+                "upcoming_reservations",
+                "waitlist_entries",
+                "trial_days_left",
+                "signed_out"
+              ],
+              "additionalProperties": false
+            },
+            "settings": {
+              "type": "object",
+              "properties": {
+                "require_user_confirmation": {
+                  "type": "boolean"
+                },
+                "preview_ttl_minutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1440
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                "booking_horizon_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 90
+                },
+                "late_cancel_hours": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 72
+                },
+                "late_cancel_fee_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "checkin_opens_minutes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 240
+                }
+              },
+              "required": [
+                "require_user_confirmation",
+                "preview_ttl_minutes",
+                "timezone",
+                "booking_horizon_days",
+                "late_cancel_hours",
+                "late_cancel_fee_cents",
+                "checkin_opens_minutes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "member",
+            "plan",
+            "summary",
+            "settings"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.plan.get",
+    "description": "Read the plan: type, credits, free-trial status and end date, trial rules, renewal date, what renews, any scheduled change, the masked payment method and the receipts on file.",
+    "read_only": true,
+    "scope": "cadence.plan.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "plan_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "kind": {
+              "enum": [
+                "trial",
+                "credits"
+              ]
+            },
+            "credits_per_period": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "period_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 366
+            },
+            "price_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "premium_allowed": {
+              "type": "boolean"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "maxItems": 10
+            },
+            "status": {
+              "enum": [
+                "trial",
+                "active",
+                "cancel_at_period_end",
+                "cancelled"
+              ]
+            },
+            "credits_remaining": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "period_start": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "renewal_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "trial_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "trial_days_left": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 366
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pending_change": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "enum": [
+                        "change",
+                        "cancel"
+                      ]
+                    },
+                    "plan_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "effective_on": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    "requested_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "action",
+                    "plan_id",
+                    "effective_on",
+                    "requested_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "payment_method": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "payment_method_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "brand": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "last4": {
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 4
+                    },
+                    "status": {
+                      "enum": [
+                        "ok",
+                        "declined"
+                      ]
+                    },
+                    "is_default": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "payment_method_id",
+                    "brand",
+                    "last4",
+                    "status",
+                    "is_default"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "trial_reminder_sent_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renews_to": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "plan_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "price_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    }
+                  },
+                  "required": [
+                    "plan_id",
+                    "name",
+                    "price_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "plan_id",
+            "name",
+            "kind",
+            "credits_per_period",
+            "period_days",
+            "price_cents",
+            "premium_allowed",
+            "rules",
+            "status",
+            "credits_remaining",
+            "period_start",
+            "renewal_date",
+            "trial_end",
+            "trial_days_left",
+            "pending_change",
+            "payment_method",
+            "trial_reminder_sent_at",
+            "renews_to"
+          ],
+          "additionalProperties": false
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "receipt_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "kind": {
+                "enum": [
+                  "renewal",
+                  "late_fee",
+                  "plan_change",
+                  "trial_start"
+                ]
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "payment_method_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "receipt_id",
+              "at",
+              "kind",
+              "amount_cents",
+              "description",
+              "payment_method_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plan",
+        "receipts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.payment_methods.list",
+    "description": "List payment methods on file, masked, with their status (ok or declined).",
+    "read_only": true,
+    "scope": "cadence.payment_methods.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "payment_method_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "last4": {
+                "type": "string",
+                "minLength": 4,
+                "maxLength": 4
+              },
+              "status": {
+                "enum": [
+                  "ok",
+                  "declined"
+                ]
+              },
+              "is_default": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "payment_method_id",
+              "brand",
+              "last4",
+              "status",
+              "is_default"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payment_methods"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.classes.search",
+    "description": "Browse upcoming classes by type, studio, neighborhood, day, time window and text. Each class carries its price under the member's plan (included, a credit cost, or not available with the reason), spots left, rating and whether the member already holds a reservation or waitlist place. Full classes are listed when include_full is true.",
+    "read_only": true,
+    "scope": "cadence.classes.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "type": {
+          "enum": [
+            "yoga",
+            "pilates",
+            "hiit",
+            "strength",
+            "cycling",
+            "barre",
+            "boxing",
+            "dance",
+            "sauna",
+            "meditation",
+            "run_club"
+          ]
+        },
+        "studio_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "neighborhood": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time_of_day": {
+          "enum": [
+            "morning",
+            "afternoon",
+            "evening"
+          ]
+        },
+        "included_only": {
+          "type": "boolean"
+        },
+        "include_full": {
+          "type": "boolean"
+        },
+        "include_premium": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "class_instance_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "studio_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "room": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "type": {
+                "enum": [
+                  "yoga",
+                  "pilates",
+                  "hiit",
+                  "strength",
+                  "cycling",
+                  "barre",
+                  "boxing",
+                  "dance",
+                  "sauna",
+                  "meditation",
+                  "run_club"
+                ]
+              },
+              "instructor_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500
+              },
+              "external_bookings": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 500
+              },
+              "premium": {
+                "type": "boolean"
+              },
+              "credit_cost": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50
+              },
+              "rating": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "review_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "status": {
+                "enum": [
+                  "scheduled",
+                  "cancelled"
+                ]
+              },
+              "cancellation_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "time_changed_from": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "studio": {
+                "type": "object",
+                "properties": {
+                  "studio_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "neighborhood": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "distance_km": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "rating": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "review_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  "rating_label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "image_asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "studio_id",
+                  "name",
+                  "neighborhood",
+                  "distance_km",
+                  "rating",
+                  "review_count",
+                  "rating_label",
+                  "image_asset_id"
+                ],
+                "additionalProperties": false
+              },
+              "instructor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "instructor_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      }
+                    },
+                    "required": [
+                      "instructor_id",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "price": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "included",
+                      "credits",
+                      "not_available"
+                    ]
+                  },
+                  "credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "premium_excluded",
+                          "repeat_visit",
+                          "plan_cancelled"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "credits",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              "spots_left": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 500
+              },
+              "rating_label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "cancel_by": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "my_reservation_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "my_waitlist_entry_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "visited_studio": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "class_instance_id",
+              "studio_id",
+              "room",
+              "title",
+              "type",
+              "instructor_id",
+              "start",
+              "end",
+              "capacity",
+              "external_bookings",
+              "premium",
+              "credit_cost",
+              "rating",
+              "review_count",
+              "status",
+              "cancellation_reason",
+              "time_changed_from",
+              "created_at",
+              "updated_at",
+              "history",
+              "studio",
+              "instructor",
+              "price",
+              "spots_left",
+              "rating_label",
+              "cancel_by",
+              "my_reservation_id",
+              "my_waitlist_entry_id",
+              "visited_studio"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "classes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.classes.get",
+    "description": "Read one class instance with its studio, instructor, price under the plan, spots left, cancellation deadline and the member's reservation or waitlist place on it.",
+    "read_only": true,
+    "scope": "cadence.classes.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "class": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "class_instance_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "studio_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "room": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "type": {
+              "enum": [
+                "yoga",
+                "pilates",
+                "hiit",
+                "strength",
+                "cycling",
+                "barre",
+                "boxing",
+                "dance",
+                "sauna",
+                "meditation",
+                "run_club"
+              ]
+            },
+            "instructor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "external_bookings": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "premium": {
+              "type": "boolean"
+            },
+            "credit_cost": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "review_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "cancelled"
+              ]
+            },
+            "cancellation_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "time_changed_from": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "studio": {
+              "type": "object",
+              "properties": {
+                "studio_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "neighborhood": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "distance_km": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "rating": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 5
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "review_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                },
+                "rating_label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "image_asset_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "studio_id",
+                "name",
+                "neighborhood",
+                "distance_km",
+                "rating",
+                "review_count",
+                "rating_label",
+                "image_asset_id"
+              ],
+              "additionalProperties": false
+            },
+            "instructor": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "instructor_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "instructor_id",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "price": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "included",
+                    "credits",
+                    "not_available"
+                  ]
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "premium_excluded",
+                        "repeat_visit",
+                        "plan_cancelled"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "credits",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "spots_left": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "rating_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "cancel_by": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "my_reservation_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "my_waitlist_entry_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "visited_studio": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "class_instance_id",
+            "studio_id",
+            "room",
+            "title",
+            "type",
+            "instructor_id",
+            "start",
+            "end",
+            "capacity",
+            "external_bookings",
+            "premium",
+            "credit_cost",
+            "rating",
+            "review_count",
+            "status",
+            "cancellation_reason",
+            "time_changed_from",
+            "created_at",
+            "updated_at",
+            "history",
+            "studio",
+            "instructor",
+            "price",
+            "spots_left",
+            "rating_label",
+            "cancel_by",
+            "my_reservation_id",
+            "my_waitlist_entry_id",
+            "visited_studio"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "class"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.studios.get",
+    "description": "Read one studio: location, distance, ratings, amenities, instructors, whether the member has visited, and its upcoming classes priced under the plan.",
+    "read_only": true,
+    "scope": "cadence.studios.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "studio": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "studio_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "neighborhood": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "address": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "distance_km": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "review_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "amenities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "maxItems": 12
+            },
+            "rooms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "minItems": 1,
+              "maxItems": 10
+            },
+            "image_asset_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 600
+            },
+            "rating_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "visited": {
+              "type": "boolean"
+            },
+            "upcoming": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "class_instance_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "studio_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "room": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "type": {
+                    "enum": [
+                      "yoga",
+                      "pilates",
+                      "hiit",
+                      "strength",
+                      "cycling",
+                      "barre",
+                      "boxing",
+                      "dance",
+                      "sauna",
+                      "meditation",
+                      "run_club"
+                    ]
+                  },
+                  "instructor_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 500
+                  },
+                  "external_bookings": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 500
+                  },
+                  "premium": {
+                    "type": "boolean"
+                  },
+                  "credit_cost": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50
+                  },
+                  "rating": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "review_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  "status": {
+                    "enum": [
+                      "scheduled",
+                      "cancelled"
+                    ]
+                  },
+                  "cancellation_reason": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "time_changed_from": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "history": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "action": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "detail": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 0,
+                              "maxLength": 1000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "at",
+                        "action"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 1000
+                  },
+                  "studio": {
+                    "type": "object",
+                    "properties": {
+                      "studio_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "neighborhood": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "distance_km": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "rating": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 5
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "review_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000
+                      },
+                      "rating_label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "image_asset_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "studio_id",
+                      "name",
+                      "neighborhood",
+                      "distance_km",
+                      "rating",
+                      "review_count",
+                      "rating_label",
+                      "image_asset_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "instructor": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "instructor_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          }
+                        },
+                        "required": [
+                          "instructor_id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "price": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "included",
+                          "credits",
+                          "not_available"
+                        ]
+                      },
+                      "credits": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 50
+                      },
+                      "reason": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "premium_excluded",
+                              "repeat_visit",
+                              "plan_cancelled"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "credits",
+                      "reason"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "spots_left": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 500
+                  },
+                  "rating_label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "cancel_by": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "my_reservation_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "my_waitlist_entry_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "visited_studio": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "class_instance_id",
+                  "studio_id",
+                  "room",
+                  "title",
+                  "type",
+                  "instructor_id",
+                  "start",
+                  "end",
+                  "capacity",
+                  "external_bookings",
+                  "premium",
+                  "credit_cost",
+                  "rating",
+                  "review_count",
+                  "status",
+                  "cancellation_reason",
+                  "time_changed_from",
+                  "created_at",
+                  "updated_at",
+                  "history",
+                  "studio",
+                  "instructor",
+                  "price",
+                  "spots_left",
+                  "rating_label",
+                  "cancel_by",
+                  "my_reservation_id",
+                  "my_waitlist_entry_id",
+                  "visited_studio"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 500
+            },
+            "instructors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "instructor_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "studio_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "specialties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "maxItems": 6
+                  }
+                },
+                "required": [
+                  "instructor_id",
+                  "name",
+                  "studio_id",
+                  "specialties"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            }
+          },
+          "required": [
+            "id",
+            "studio_id",
+            "name",
+            "neighborhood",
+            "address",
+            "distance_km",
+            "rating",
+            "review_count",
+            "amenities",
+            "rooms",
+            "image_asset_id",
+            "description",
+            "rating_label",
+            "visited",
+            "upcoming",
+            "instructors"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "studio"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.studios.image",
+    "description": "Read the bytes of a studio's image (PNG) by studio ID. A studio without an image returns no_image.",
+    "read_only": true,
+    "scope": "cadence.studios.image",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "studio_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "file": {
+          "type": "object",
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+            },
+            "mime_type": {
+              "enum": [
+                "image/png"
+              ]
+            },
+            "base64": {
+              "type": "string",
+              "maxLength": 1398104
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "filename",
+            "mime_type",
+            "base64",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "studio_id",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.list",
+    "description": "List reservations with class and studio details. Upcoming booked reservations flag an overlap with another reservation as conflict; a reservation whose class time was moved is marked time_changed.",
+    "read_only": true,
+    "scope": "cadence.reservations.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "all",
+            "upcoming",
+            "past",
+            "booked",
+            "attended",
+            "cancelled"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "reservation_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "class_instance_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "status": {
+                "enum": [
+                  "booked",
+                  "attended",
+                  "no_show",
+                  "cancelled",
+                  "late_cancelled",
+                  "cancelled_by_studio",
+                  "rescheduled"
+                ]
+              },
+              "price": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "included",
+                      "credits",
+                      "not_available"
+                    ]
+                  },
+                  "credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "premium_excluded",
+                          "repeat_visit",
+                          "plan_cancelled"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "credits",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              "credits_charged": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50
+              },
+              "fee_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "time_changed": {
+                "type": "boolean"
+              },
+              "booked_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "checked_in_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "rating": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "review": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "replaced_by": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "replaces": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cancellation_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "class": {
+                "type": "object",
+                "properties": {
+                  "class_instance_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "type": {
+                    "enum": [
+                      "yoga",
+                      "pilates",
+                      "hiit",
+                      "strength",
+                      "cycling",
+                      "barre",
+                      "boxing",
+                      "dance",
+                      "sauna",
+                      "meditation",
+                      "run_club"
+                    ]
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "scheduled",
+                      "cancelled"
+                    ]
+                  },
+                  "studio_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "studio_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "neighborhood": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "instructor_name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "class_instance_id",
+                  "title",
+                  "type",
+                  "start",
+                  "end",
+                  "status",
+                  "studio_id",
+                  "studio_name",
+                  "neighborhood",
+                  "instructor_name"
+                ],
+                "additionalProperties": false
+              },
+              "conflict": {
+                "type": "boolean"
+              },
+              "conflict_with": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cancel_by": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "would_be_late": {
+                "type": "boolean"
+              },
+              "can_check_in": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "reservation_id",
+              "class_instance_id",
+              "status",
+              "price",
+              "credits_charged",
+              "fee_cents",
+              "time_changed",
+              "booked_at",
+              "updated_at",
+              "checked_in_at",
+              "rating",
+              "review",
+              "replaced_by",
+              "replaces",
+              "cancellation_reason",
+              "history",
+              "class",
+              "conflict",
+              "conflict_with",
+              "cancel_by",
+              "would_be_late",
+              "can_check_in"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.get",
+    "description": "Read one reservation with its history, cancellation deadline and whether cancelling now would be late.",
+    "read_only": true,
+    "scope": "cadence.reservations.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reservation_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "class_instance_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "booked",
+                "attended",
+                "no_show",
+                "cancelled",
+                "late_cancelled",
+                "cancelled_by_studio",
+                "rescheduled"
+              ]
+            },
+            "price": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "included",
+                    "credits",
+                    "not_available"
+                  ]
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "premium_excluded",
+                        "repeat_visit",
+                        "plan_cancelled"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "credits",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "credits_charged": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "fee_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "time_changed": {
+              "type": "boolean"
+            },
+            "booked_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "checked_in_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "review": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "replaced_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "replaces": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "class": {
+              "type": "object",
+              "properties": {
+                "class_instance_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "type": {
+                  "enum": [
+                    "yoga",
+                    "pilates",
+                    "hiit",
+                    "strength",
+                    "cycling",
+                    "barre",
+                    "boxing",
+                    "dance",
+                    "sauna",
+                    "meditation",
+                    "run_club"
+                  ]
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "enum": [
+                    "scheduled",
+                    "cancelled"
+                  ]
+                },
+                "studio_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "studio_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "neighborhood": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "instructor_name": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "class_instance_id",
+                "title",
+                "type",
+                "start",
+                "end",
+                "status",
+                "studio_id",
+                "studio_name",
+                "neighborhood",
+                "instructor_name"
+              ],
+              "additionalProperties": false
+            },
+            "conflict": {
+              "type": "boolean"
+            },
+            "conflict_with": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancel_by": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "would_be_late": {
+              "type": "boolean"
+            },
+            "can_check_in": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "reservation_id",
+            "class_instance_id",
+            "status",
+            "price",
+            "credits_charged",
+            "fee_cents",
+            "time_changed",
+            "booked_at",
+            "updated_at",
+            "checked_in_at",
+            "rating",
+            "review",
+            "replaced_by",
+            "replaces",
+            "cancellation_reason",
+            "history",
+            "class",
+            "conflict",
+            "conflict_with",
+            "cancel_by",
+            "would_be_late",
+            "can_check_in"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.waitlist.list",
+    "description": "List waitlist entries with their position, status and any open offer.",
+    "read_only": true,
+    "scope": "cadence.waitlist.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "waitlist_entry_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "class_instance_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "status": {
+                "enum": [
+                  "waiting",
+                  "offered",
+                  "booked",
+                  "declined",
+                  "expired",
+                  "left"
+                ]
+              },
+              "offer": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "offer_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "offered_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "offer_expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "approved": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "offer_id",
+                      "offered_at",
+                      "offer_expires_at",
+                      "approved"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reservation_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "class": {
+                "type": "object",
+                "properties": {
+                  "class_instance_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "type": {
+                    "enum": [
+                      "yoga",
+                      "pilates",
+                      "hiit",
+                      "strength",
+                      "cycling",
+                      "barre",
+                      "boxing",
+                      "dance",
+                      "sauna",
+                      "meditation",
+                      "run_club"
+                    ]
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "scheduled",
+                      "cancelled"
+                    ]
+                  },
+                  "studio_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "studio_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "neighborhood": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "instructor_name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "class_instance_id",
+                  "title",
+                  "type",
+                  "start",
+                  "end",
+                  "status",
+                  "studio_id",
+                  "studio_name",
+                  "neighborhood",
+                  "instructor_name"
+                ],
+                "additionalProperties": false
+              },
+              "position": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 500
+              }
+            },
+            "required": [
+              "id",
+              "waitlist_entry_id",
+              "class_instance_id",
+              "status",
+              "offer",
+              "reservation_id",
+              "created_at",
+              "updated_at",
+              "history",
+              "class",
+              "position"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.preview",
+    "description": "Prepare a booking: the price under the plan, the cancellation deadline and an expiry. Errors: class_full (join the waitlist instead), overlap (names the conflicting reservation), not_included (with the reason), insufficient_credits, outside_horizon, invalid_state. Nothing is booked.",
+    "read_only": false,
+    "scope": "cadence.reservations.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "class_instance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "class_instance_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "class_instance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "price": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "included",
+                "credits",
+                "not_available"
+              ]
+            },
+            "credits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "premium_excluded",
+                    "repeat_visit",
+                    "plan_cancelled"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "credits",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "cancel_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "spots_left": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approval_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "class_instance_id",
+        "price",
+        "cancel_by",
+        "spots_left",
+        "expires_at",
+        "approval_required"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.confirm",
+    "description": "Book the class prepared by reservations.preview (id is the preview ID) and charge credits under the plan, or record that it was included. Errors: preview_stale with the current price when the preview expired or the class changed (and a waitlist hint when it is now full), approval_required while user confirmation is required and not yet given.",
+    "read_only": false,
+    "scope": "cadence.reservations.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "class_instance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "price": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "included",
+                "credits",
+                "not_available"
+              ]
+            },
+            "credits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "premium_excluded",
+                    "repeat_visit",
+                    "plan_cancelled"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "credits",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "credits_charged": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "cancel_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outcome": {
+          "const": "booked"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "preview_id",
+        "class_instance_id",
+        "price",
+        "credits_charged",
+        "cancel_by",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.cancel_preview",
+    "description": "Prepare a cancellation (id is the reservation ID): whether it is inside the free window, the late fee or forfeited credits otherwise, and an expiry. A cancellation inside the window needs no preview.",
+    "read_only": false,
+    "scope": "cadence.reservations.cancel_preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "late": {
+          "type": "boolean"
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "credits_returned": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "cancel_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approval_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "reservation_id",
+        "late",
+        "fee_cents",
+        "credits_returned",
+        "cancel_by",
+        "expires_at",
+        "approval_required"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.cancel",
+    "description": "Cancel a booked reservation (id is the reservation ID). Inside the free window credits are returned at once. After the deadline the call must name a live cancel preview in preview_id, the late fee is charged to the payment method or the credits are forfeited, and user confirmation applies when required.",
+    "read_only": false,
+    "scope": "cadence.reservations.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "enum": [
+            "cancelled",
+            "late_cancelled"
+          ]
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "credits_returned": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome",
+        "fee_cents",
+        "credits_returned"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.reschedule",
+    "description": "Move a booked reservation (id is the reservation ID) to another scheduled instance at the same studio with the same price under the plan. Errors: class_full, overlap, not_included, price_changed, outside_horizon.",
+    "read_only": false,
+    "scope": "cadence.reservations.reschedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "class_instance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "class_instance_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "replaces": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "class_instance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "booked"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "replaces",
+        "class_instance_id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.checkin",
+    "description": "Check in to a booked class (id is the reservation ID) from checkin_opens_minutes before the start until its end. Error: checkin_window.",
+    "read_only": false,
+    "scope": "cadence.reservations.checkin",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "attended"
+        },
+        "checked_in_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome",
+        "checked_in_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.reservations.rate",
+    "description": "Rate an attended class (id is the reservation ID) from 1 to 5 with an optional review, once the class has ended. Errors: not_attended, too_early, already_rated.",
+    "read_only": false,
+    "scope": "cadence.reservations.rate",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "rating": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "review": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "rating",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "rated"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.waitlist.join",
+    "description": "Join the waitlist of a full class. The same price and overlap checks as a booking apply. Errors: not_full, overlap, not_included, insufficient_credits, invalid_state.",
+    "read_only": false,
+    "scope": "cadence.waitlist.join",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "class_instance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "class_instance_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "waiting"
+        },
+        "position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome",
+        "position"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.waitlist.leave",
+    "description": "Leave the waitlist (id is the waitlist entry ID).",
+    "read_only": false,
+    "scope": "cadence.waitlist.leave",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "left"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.waitlist.accept",
+    "description": "Accept an open offer (id is the waitlist entry ID) and book the class under the plan. Errors: offer_expired, class_full, overlap, insufficient_credits, approval_required when credits are charged and user confirmation is required.",
+    "read_only": false,
+    "scope": "cadence.waitlist.accept",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "booked"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "reservation_id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.waitlist.decline",
+    "description": "Decline an open offer (id is the waitlist entry ID).",
+    "read_only": false,
+    "scope": "cadence.waitlist.decline",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "declined"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.plan.preview",
+    "description": "Prepare a plan change (action change with plan_id) or a cancellation (action cancel): the effective date, the charge and credit difference, and an expiry. Changes take effect at the next renewal; a trial can only be cancelled at its end, and the preview shows that date. Errors: change_pending, payment_declined, same_plan, unknown_plan, invalid_state.",
+    "read_only": false,
+    "scope": "cadence.plan.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "enum": [
+            "change",
+            "cancel"
+          ]
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "action",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "action": {
+          "enum": [
+            "change",
+            "cancel"
+          ]
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effective_on": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "charge_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "credit_change": {
+          "type": "integer",
+          "minimum": -500,
+          "maximum": 500
+        },
+        "note": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approval_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "action",
+        "plan_id",
+        "effective_on",
+        "charge_cents",
+        "credit_change",
+        "note",
+        "expires_at",
+        "approval_required"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.plan.change",
+    "description": "Schedule the plan change prepared by plan.preview (id is the preview ID) for its effective date. Errors: preview_stale, change_pending, approval_required.",
+    "read_only": false,
+    "scope": "cadence.plan.change",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "effective_on": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "outcome": {
+          "const": "scheduled"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "preview_id",
+        "plan_id",
+        "effective_on",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "cadence.plan.cancel",
+    "description": "Cancel the plan as prepared by plan.preview (id is the preview ID): the account keeps its access until the effective date and does not renew. Errors: preview_stale, change_pending, approval_required.",
+    "read_only": false,
+    "scope": "cadence.plan.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "cadence"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "effective_on": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "outcome": {
+          "const": "cancel_at_period_end"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "preview_id",
+        "effective_on",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "cadence-amara",
+  "version": "1.0.0",
+  "description": "Synthetic studio class marketplace for one member (Amara Bello): twenty fictional studios with instructors, ratings and script-drawn PNG marks, two weeks of scheduled classes from December 7, 2026 priced under three plan types (trial, 8 credits, 20 credits), the member's 8 Credits history from January 2025 to July 2026 with monthly receipts and attended classes, her win-back trial from December 6, 2026 with three included bookings and one waitlist place. Coverage over 2025-01-01 to 2026-12-31 is reported in evidence/coverage.json.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Authored studios, plans and narrative plus computed schedules, history and receipts; scripts/generate-fixture.cjs is the sole source and also draws the studio images. Public help pages of the reference product were read only to mirror interaction patterns; no content, data or media was copied.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/cadence/scripts/generate-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": "20261206",
+        "parameters": {
+          "member": "Amara Bello",
+          "membership": "2025-01-10/2026-07-09 on 8 Credits",
+          "trial": "2026-12-06/2026-12-13",
+          "schedule_window": "2026-12-07/2026-12-20",
+          "clock": "2026-12-06T18:00:00-05:00",
+          "coverage_window": "2025-01-01/2026-12-31",
+          "coverage_report": "evidence/coverage.json",
+          "time_zone": "America/New_York"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Schedules computed per studio with one class per room and start time; capacities never below bookings; the member's history and receipts computed month by month; IDs, dates and references checked by validateSeed."
+  ],
+  "expected_counts": {
+    "records": 551,
+    "assets": 18
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace a human read-through of realism and variation; recorded here before submission."
+  }
+}

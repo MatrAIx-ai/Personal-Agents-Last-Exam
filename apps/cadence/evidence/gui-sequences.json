@@ -1,0 +1,273 @@
+{
+  "schema": "pale.gui-sequences.v1",
+  "app_id": "cadence",
+  "captured_at": "2026-11-26T08:17:09.626Z",
+  "node": "v24.16.0",
+  "browser": "Chrome/158.0.8127.37",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "hosts": [
+    {
+      "run": "capture-sandbox",
+      "profile": "sandbox",
+      "url": "http://127.0.0.1:51145"
+    },
+    {
+      "run": "capture-scenario",
+      "profile": "scenario",
+      "url": "http://127.0.0.1:51150"
+    }
+  ],
+  "passed": true,
+  "steps": [
+    {
+      "id": "01-classes",
+      "file": "screenshots/01-classes.png",
+      "workflow": "booking",
+      "state": "start",
+      "description": "Two weeks of classes priced under the trial: included, credit cost or not on the plan; spots left and ratings",
+      "control": null,
+      "checks": [
+        {
+          "label": "Trial banner and included tags shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "02-class",
+      "file": "screenshots/02-class.png",
+      "workflow": "booking",
+      "state": "intermediate",
+      "description": "Class page: studio, instructor, price under the plan, spots, cancellation deadline, whether the studio was visited",
+      "control": "Class row",
+      "checks": []
+    },
+    {
+      "id": "03-book-preview",
+      "file": "screenshots/03-book-preview.png",
+      "workflow": "booking",
+      "state": "intermediate",
+      "description": "Booking preview: included in the trial, free cancellation deadline, expiry; nothing booked yet",
+      "control": "Book this class",
+      "checks": [
+        {
+          "label": "MCP state: one live booking preview, no new reservation",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "04-booked",
+      "file": "screenshots/04-booked.png",
+      "workflow": "booking",
+      "state": "result",
+      "description": "Reservation page after the confirm: included, cancel-free deadline, history",
+      "control": "Confirm booking",
+      "checks": [
+        {
+          "label": "MCP state: reservation booked on ci-7752 at no cost",
+          "passed": true
+        },
+        {
+          "label": "MCP state: preview consumed",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "05-premium-not-included",
+      "file": "screenshots/05-premium-not-included.png",
+      "workflow": "booking",
+      "state": "error",
+      "description": "A premium class is not available on the trial; the page says why and offers no booking control",
+      "control": null,
+      "checks": [
+        {
+          "label": "No Book control",
+          "passed": true
+        },
+        {
+          "label": "Reason shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "06-repeat-visit",
+      "file": "screenshots/06-repeat-visit.png",
+      "workflow": "booking",
+      "state": "error",
+      "description": "A second class at a studio already booked this trial is not included (first visit at each studio only)",
+      "control": null,
+      "checks": [
+        {
+          "label": "Repeat-visit reason shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "07-overlap-refused",
+      "file": "screenshots/07-overlap-refused.png",
+      "workflow": "booking",
+      "state": "error",
+      "description": "After booking Wednesday HIIT 45, a boxing class that overlaps it is refused with both times and the conflicting reservation; nothing is stored",
+      "control": "Book this class",
+      "checks": [
+        {
+          "label": "overlap message names the reservation",
+          "passed": true
+        },
+        {
+          "label": "MCP state: no preview stored",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "08-full-class-waitlisted",
+      "file": "screenshots/08-full-class-waitlisted.png",
+      "workflow": "booking",
+      "state": "intermediate",
+      "description": "A full class: the member already holds a waitlist place on it",
+      "control": null,
+      "checks": [
+        {
+          "label": "Waitlist place shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "09-reservations",
+      "file": "screenshots/09-reservations.png",
+      "workflow": "reservations",
+      "state": "start",
+      "description": "Upcoming reservations with status, price and overlap flags; past and cancelled below",
+      "control": null,
+      "checks": []
+    },
+    {
+      "id": "10-cancelled-free",
+      "file": "screenshots/10-cancelled-free.png",
+      "workflow": "reservations",
+      "state": "result",
+      "description": "Cancellation inside the free window: no charge, status cancelled",
+      "control": "Cancel → Confirm cancellation",
+      "checks": [
+        {
+          "label": "MCP state: reservation cancelled",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "11-late-cancel-preview",
+      "file": "screenshots/11-late-cancel-preview.png",
+      "workflow": "reservations",
+      "state": "intermediate",
+      "description": "Infra advanced the clock to Thursday morning: the free window for Strength 60 has closed, so the cancellation shows the $15.00 late fee before anything happens",
+      "control": "Cancel (late) → Prepare late cancellation",
+      "checks": [
+        {
+          "label": "Clock advanced through Infra",
+          "passed": true
+        },
+        {
+          "label": "Fee shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "12-late-cancelled",
+      "file": "screenshots/12-late-cancelled.png",
+      "workflow": "reservations",
+      "state": "result",
+      "description": "Late cancellation recorded with the fee on a receipt",
+      "control": "Confirm late cancellation",
+      "checks": [
+        {
+          "label": "MCP state: rsv-2041 late_cancelled with a $15.00 fee",
+          "passed": true
+        },
+        {
+          "label": "MCP state: late fee receipt",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "13-waitlist",
+      "file": "screenshots/13-waitlist.png",
+      "workflow": "waitlist",
+      "state": "start",
+      "description": "Waitlist entry on the full Saturday class: waiting, with the leave control; accept and decline appear once an offer arrives",
+      "control": null,
+      "checks": [
+        {
+          "label": "Leave control present",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "14-plan",
+      "file": "screenshots/14-plan.png",
+      "workflow": "plan",
+      "state": "start",
+      "description": "Plan page: trial status and end date, what renews, payment method on file, rules",
+      "control": null,
+      "checks": []
+    },
+    {
+      "id": "15-plan-change-preview",
+      "file": "screenshots/15-plan-change-preview.png",
+      "workflow": "plan",
+      "state": "intermediate",
+      "description": "Plan change preview: 8 Credits from the trial end, the charge and credit difference; nothing changed yet",
+      "control": "Preview plan change",
+      "checks": [
+        {
+          "label": "Effective at the trial end",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "16-plan-change-scheduled",
+      "file": "screenshots/16-plan-change-scheduled.png",
+      "workflow": "plan",
+      "state": "result",
+      "description": "The change is scheduled for the renewal date and shown on the plan page",
+      "control": "Confirm plan change",
+      "checks": [
+        {
+          "label": "MCP state: pending change to 8 Credits",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "17-scenario-plan-withheld",
+      "file": "screenshots/17-scenario-plan-withheld.png",
+      "workflow": "plan",
+      "state": "error",
+      "description": "Under the scenario policy the plan preview is prepared but the change is withheld: the tool is absent from discovery, not hidden by the page",
+      "control": "Preview plan change (scenario profile)",
+      "checks": [
+        {
+          "label": "Withheld notice shown",
+          "passed": true
+        },
+        {
+          "label": "No confirm control",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}
