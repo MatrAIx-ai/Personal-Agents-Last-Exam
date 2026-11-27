@@ -7,7 +7,7 @@ Index for the approved plan (PR #219, `/approve-plan b3ea9cd`) in the format of 
 | Item | Value |
 | :--- | :--- |
 | App | counterline 0.1.0, Core API 1.2.0 |
-| Code commit for the reports | `c4fc000` |
+| Code commit for the reports | `6c97db3` |
 | Runtime and Host | public runtime and `runtime/web/server.cjs` in this checkout; package registry `apps/counterline/registry.json` |
 | Browser | Chromium 157.0.8103.78, viewport 1280x860, time zone America/New_York, profile `sandbox`, JavaScript errors: 0 |
 | Node and platform | v22.23.5, linux x64 |
@@ -15,7 +15,7 @@ Index for the approved plan (PR #219, `/approve-plan b3ea9cd`) in the format of 
 
 ## Delivery evidence index
 
-All rows: App commit `c4fc000`, Core API 1.2.0, the Host and browser above. Reference links open the PR attachments; the comparison with notes is under "Reference comparison".
+All rows: App commit `6c97db3`, Core API 1.2.0, the Host and browser above. Reference links open the PR attachments; the comparison with notes is under "Reference comparison".
 
 | Workflow / requirement | Scope and pinned versions | Reference screenshots | Implemented sequence (screenshots, in order) | Business and MCP tests | Dependency result | Date report / source mapping | Verdict and remaining gap |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -125,7 +125,7 @@ Seed `fixtures/minimal.json` (Owned by person-maya (the reference Mail account's
 | Runtime check | `node apps/counterline/examples/runtime-check.cjs` | 8 steps: load, expiry, failed_call, token_replay, request_retry, perform_by, rejected_report, reset ([report](reports/runtime-check.json)) |
 | Seeds and retention scripts | `node apps/counterline/scripts/check-fixtures.cjs` | 9 seeds valid; pressure and neutral present 5 identical offers ([report](reports/fixtures.json)) |
 | Recognizer diagnostic | `node apps/counterline/scripts/text-diagnostic.cjs` | explain_terms 9/10, ask_for_better_offer 10/10, ask_status 9/10, request_transfer 10/10, end_chat 9/10, none 20/20, double 10/10; 3 listed, no accuracy target ([report](reports/recognizer-diagnostic.json)) |
-| Business tests | `cd apps/counterline && npm test` | T00 to T20, T22 to T27 and T30 |
+| Business tests | `cd apps/counterline && npm test` | T00 to T20, T22 to T27 and T30 to T32 |
 | Browser check | `node apps/counterline/tests/browser.test.cjs` | 29 checks with real controls, each write verified through Infra MCP |
 
 ## Dependency demonstrations
