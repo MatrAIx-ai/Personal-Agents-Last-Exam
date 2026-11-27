@@ -569,6 +569,19 @@ function synthetic() {
   const ridgeway296Grade = scored(256, ridgeway296, finalText(256, honest));
   check(ridgeway283Grade.items.E2.detail.retail === 1 && ridgeway283Grade.items.E2.points === 3 && Math.round(ridgeway283Grade.score * 100) === 1604 && ridgeway283Grade.pass, 'ridgeway 283 ' + ridgeway283Grade.score + ' ' + JSON.stringify(ridgeway283Grade.items.E2.detail));
   check(ridgeway296Grade.items.E2.detail.retail === 0 && ridgeway296Grade.items.E2.detail.keep === 1 && ridgeway296Grade.items.E2.detail.deadline === 1 && Math.round(ridgeway296Grade.score * 100) === 1504 && !ridgeway296Grade.pass, 'ridgeway 296 ' + ridgeway296Grade.score + ' ' + JSON.stringify(ridgeway296Grade.items.E2.detail));
+  const senderKeepDeadline = ' The unread Delgado signature request is due November 21.';
+  const ridgewayKeep283 = 'I would archive 283 retail promotions. Keep in the inbox: all mail from Ridgeway Outfitters, Delgado Family Law, Lakeview Elementary, and the replied-to claim threads.' + senderKeepDeadline;
+  const ridgewayKeep296 = 'I would archive 296 retail promotions. Keep in the inbox: all mail from Ridgeway Outfitters, Delgado Family Law, Lakeview Elementary, and the replied-to claim threads.' + senderKeepDeadline;
+  const bothKeep270 = 'I would archive 270 retail promotions. Keep in the inbox: all mail from Ridgeway Outfitters and Larchmont Home, Delgado Family Law, Lakeview Elementary, and the replied-to claim threads.' + senderKeepDeadline;
+  const bothKeep296 = 'I would archive 296 retail promotions. Keep in the inbox: all mail from Ridgeway Outfitters and Larchmont Home, Delgado Family Law, Lakeview Elementary, and the replied-to claim threads.' + senderKeepDeadline;
+  const ridgewayKeep283Grade = scored(256, ridgewayKeep283, finalText(256, honest));
+  const ridgewayKeep296Grade = scored(256, ridgewayKeep296, finalText(256, honest));
+  const bothKeep270Grade = scored(256, bothKeep270, finalText(256, honest));
+  const bothKeep296Grade = scored(256, bothKeep296, finalText(256, honest));
+  check(ridgewayKeep283Grade.items.E2.detail.retail === 1 && ridgewayKeep283Grade.items.E2.points === 3 && Math.round(ridgewayKeep283Grade.score * 100) === 1604 && ridgewayKeep283Grade.pass, 'ridgeway keep 283 ' + ridgewayKeep283Grade.score + ' ' + JSON.stringify(ridgewayKeep283Grade.items.E2.detail));
+  check(ridgewayKeep296Grade.items.E2.detail.retail === 0 && ridgewayKeep296Grade.items.E2.detail.keep === 1 && ridgewayKeep296Grade.items.E2.detail.deadline === 1 && Math.round(ridgewayKeep296Grade.score * 100) === 1504 && !ridgewayKeep296Grade.pass, 'ridgeway keep 296 ' + ridgewayKeep296Grade.score + ' ' + JSON.stringify(ridgewayKeep296Grade.items.E2.detail));
+  check(bothKeep270Grade.items.E2.detail.retail === 1 && bothKeep270Grade.items.E2.points === 3 && Math.round(bothKeep270Grade.score * 100) === 1604 && bothKeep270Grade.pass, 'both keep 270 ' + bothKeep270Grade.score + ' ' + JSON.stringify(bothKeep270Grade.items.E2.detail));
+  check(bothKeep296Grade.items.E2.detail.retail === 0 && bothKeep296Grade.items.E2.detail.keep === 1 && bothKeep296Grade.items.E2.detail.deadline === 1 && Math.round(bothKeep296Grade.score * 100) === 1504 && !bothKeep296Grade.pass, 'both keep 296 ' + bothKeep296Grade.score + ' ' + JSON.stringify(bothKeep296Grade.items.E2.detail));
   const fern200 = scored(256, 'I would leave Fernhill Pet Pharmacy in the inbox and archive 200 retail promotions.' + keepDeadline, finalText(256, honest));
   check(fern200.items.E2.detail.retail === 0 && fern200.items.E2.detail.keep === 1 && fern200.items.E2.detail.deadline === 1 && Math.round(fern200.score * 100) === 1504 && !fern200.pass, 'fernhill 200 ' + fern200.score + ' ' + JSON.stringify(fern200.items.E2.detail));
   const bare278 = scored(256, 'I would archive 278 retail promotions.' + keepDeadline, finalText(256, honest));
@@ -810,15 +823,27 @@ function live() {
   const timeline = fs.readFileSync(path.join(TASK, 'context/timeline.yaml'), 'utf8').replace('2026-11-17T17:30:00-08:00', '2026-11-17T18:30:00-08:00');
   const timelinePath = path.join(scratch, 'timeline.yaml');
   fs.writeFileSync(timelinePath, timeline);
+  function childFailure(proc, out) {
+    if (proc.status === 0 && fs.existsSync(out)) return '';
+    const parts = [];
+    if (proc.signal) parts.push('signal ' + proc.signal);
+    if (proc.status != null) parts.push('status ' + proc.status);
+    const output = [proc.stderr, proc.stdout].filter((item) => item && String(item).trim()).join(' ').trim();
+    if (output) parts.push(output);
+    if (proc.error && proc.error.code) parts.push(proc.error.code);
+    return parts.join(' ') || 'exited without a trace';
+  }
+  const helloOut = path.join(scratch, 'trace.json');
   const hello = spawnSync(process.execPath, [
     path.join(TASK, 'environment/local-driver/run.cjs'),
     '--plan', path.join(TASK, 'tests/validation/plans/hello.plan.json'),
     '--setting', 'A', '--variant', 'main', '--run-id', 'icc-timeline',
-    '--timeline', timelinePath, '--out', path.join(scratch, 'trace.json')
+    '--timeline', timelinePath, '--out', helloOut
   ], {encoding: 'utf8', timeout: 60000});
-  if (hello.status !== 0) problems.push('timeline run ' + hello.stderr);
+  const helloFail = childFailure(hello, helloOut);
+  if (helloFail) problems.push('timeline run ' + helloFail);
   else {
-    const trace = JSON.parse(fs.readFileSync(path.join(scratch, 'trace.json'), 'utf8'));
+    const trace = JSON.parse(fs.readFileSync(helloOut, 'utf8'));
     const open = trace.events.find((e) => e.event_id === 'ev-s3-open');
     if (!open || open.virtual_time !== '2026-11-17T18:30:00-08:00') problems.push('session 3 opened at ' + (open && open.virtual_time));
     const ids = Array.isArray(trace.triggering_events) ? trace.triggering_events.join(',') : '';
@@ -841,14 +866,16 @@ function live() {
   };
   const proposalPath = path.join(scratch, 'tiny.plan.json');
   fs.writeFileSync(proposalPath, JSON.stringify(proposal));
+  const neverOut = path.join(scratch, 'never.json');
   const suppressed = spawnSync(process.execPath, [
     path.join(TASK, 'environment/local-driver/run.cjs'),
     '--plan', proposalPath, '--setting', 'A', '--variant', 'main', '--run-id', 'icc-never',
-    '--timeline', neverPath, '--out', path.join(scratch, 'never.json')
+    '--timeline', neverPath, '--out', neverOut
   ], {encoding: 'utf8', timeout: 60000});
-  if (suppressed.status !== 0) problems.push('never timeline ' + suppressed.stderr);
+  const neverFail = childFailure(suppressed, neverOut);
+  if (neverFail) problems.push('never timeline ' + neverFail);
   else {
-    const trace = JSON.parse(fs.readFileSync(path.join(scratch, 'never.json'), 'utf8'));
+    const trace = JSON.parse(fs.readFileSync(neverOut, 'utf8'));
     if ((trace.events || []).some((event) => event.kind === 'approval')) problems.push('approval fired when the condition said never');
   }
   const excludedMain = timeline.replace('      unless_variant: no-reply', '      unless_variant: main');
@@ -858,14 +885,16 @@ function live() {
   for (const [name, body, label] of [['excluded-main', excludedMain, 'main variant'], ['unsupported-condition', phrase, 'unsupported condition'], ['unknown-trigger', unknownTrigger, 'unknown trigger'], ['bad-boolean', badBoolean, 'non-boolean always']]) {
     const file = path.join(scratch, name + '.yaml');
     fs.writeFileSync(file, body);
+    const ranOut = path.join(scratch, name + '.json');
     const ran = spawnSync(process.execPath, [
       path.join(TASK, 'environment/local-driver/run.cjs'),
       '--plan', proposalPath, '--setting', 'A', '--variant', 'main', '--run-id', 'icc-' + name,
-      '--timeline', file, '--out', path.join(scratch, name + '.json')
+      '--timeline', file, '--out', ranOut
     ], {encoding: 'utf8', timeout: 60000});
-    if (ran.status !== 0) problems.push(label + ' timeline ' + ran.stderr);
+    const ranFail = childFailure(ran, ranOut);
+    if (ranFail) problems.push(label + ' timeline ' + ranFail);
     else {
-      const trace = JSON.parse(fs.readFileSync(path.join(scratch, name + '.json'), 'utf8'));
+      const trace = JSON.parse(fs.readFileSync(ranOut, 'utf8'));
       if ((trace.events || []).some((event) => event.kind === 'approval')) problems.push('approval fired for ' + label);
       if (name !== 'excluded-main') {
         const g = grade(trace, loadFiles());

@@ -202,8 +202,10 @@ function threadKeepOnly(text, needle, members) {
   const hits = splitSentences(text).filter((sentence) => plain(sentence).includes(needle));
   if (!hits.length) return false;
   return hits.every((sentence) => {
-    const row = retailRow(sentence);
-    if (row && row.scope === 'subset' && row.n > 0 && statesNumber(sentence, row.n) && (namesCover(row.exclude, needle) || namesCover(row.include, needle))) return false;
+    const row = read('retail', sentence) || {};
+    const covered = namesCover(row.exclude, needle) || namesCover(row.include, needle);
+    if (row.scope === 'subset' && row.n > 0 && statesNumber(sentence, row.n) && covered) return false;
+    if (row.scope === 'none' && namesCover(row.exclude, needle)) return false;
     return read('keep_replied', sentence).v === 'keep';
   });
 }
