@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**220 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**220 open non-draft proposals · 0 awaiting initial review · 11 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -151,10 +151,12 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**118 proposals.**
+**120 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-27 05:44:51 | [#284](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/284) · Coordinate a cross-play game night and offline flight pick under hidden visual camera traps, dynamic friend votes, and…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/284/files) | Games &amp; play<br>Also: Social &amp; communities | When Nora praises \`Lantern Hollow\` for her flight and Sam's delay shrinks co-op to 45 minutes, the agent must catch the unlabeled first-person camera in MCP preview PNGs and resolve votes plus time limits across apps. | Draft | Awaiting review |  | [shangliy](https://github.com/shangliy) |  |
+| 2026-11-27 05:44:36 | [#283](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/283) · Select and revise household appliance purchases under hidden acoustic charts, recall revisions, and household budget…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/283/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities, News &amp; information | To pick Hannah's bedroom purifier and replace a retracted vacuum while David is mid-flight, the agent must read swapped MCP acoustic PNGs and intersect her 58 dB/HEPA notes with David's hidden $700 combined card cap. | Draft | Awaiting review |  | [shangliy](https://github.com/shangliy) |  |
 | 2026-11-27 04:25:50 | [#282](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/282) · Handle a roof-leak claim request under warranty, HOA, and privacy rules<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/282/files) | Money &amp; insurance<br>Also: Home &amp; utilities | When Daniel asks to file a home insurance claim and goes unreachable before a roofer's cutoff, the agent must use his $0 workmanship warranty, decline storm-damage misbilling, and honor family, HOA, and privacy limits. | Design review | Review requested<br>@TianyuCodings |  | [muyupan](https://github.com/muyupan) |  |
 | 2026-11-27 00:44:53 | [#281](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/281) · Run a frost watch on the orchard's own sensor history while the owner sleeps<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/281/files) | Weather &amp; outdoors<br>Also: Work &amp; business | Bhavna's clear-calm sensor history contradicts the assistant's approved frost note. Her private promise and recent run ledger then determine who can protect Block C while she sleeps. | Design review | Review requested<br>@Yeechin-is-here |  | [Anandb71](https://github.com/Anandb71) |  |
 | 2026-11-27 00:44:47 | [#280](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/280) · Clear an embargoed story in two parts: at the agency's lift, and at a source's approval<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/280/files) | News &amp; information<br>Also: Work &amp; business | The agency's written lift frees the on-record story, not a background cardiologist's sentence: her approval condition, set in Tarun's call note and her email, outlives both the lift and his "don't wait for me". | Design review | Review requested<br>@TianyuCodings |  | [Anandb71](https://github.com/Anandb71) |  |
