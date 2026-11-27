@@ -1,0 +1,4677 @@
+{
+  "schema": "plateway.gui-sequences.v2",
+  "runs": [
+    "plateway-web",
+    "plateway-web-restricted"
+  ],
+  "account": "plateway-p-1",
+  "sequences": [
+    {
+      "id": "01-browse",
+      "title": "Browse and search restaurants",
+      "workflow": "Browse and search",
+      "scope": "Required (W1)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Open the page on a fresh run (fixture loaded, Wednesday 18 November 2026, 12:00 in New York)",
+          "expected": "The restaurants that deliver to Home, each with its status, delivery fee, estimate and rating; the list says how many deliver there",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the delivery note: “5 restaurants deliver to Home.”",
+          "observed": {
+            "restaurants_delivering_to_home": [
+              "r-1",
+              "r-5",
+              "r-2",
+              "r-4",
+              "r-3"
+            ],
+            "cart_lines": 0,
+            "orders": 52
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.restaurants.search",
+              "arguments": {
+                "address_id": "a-1"
+              },
+              "result_summary": [
+                "r-1 open",
+                "r-5 open",
+                "r-2 closed",
+                "r-4 open",
+                "r-3 open"
+              ]
+            }
+          ],
+          "acceptance_check": "The list says how many restaurants deliver to the chosen address",
+          "screenshot": "01-browse/01-start.png"
+        },
+        {
+          "step": 2,
+          "action": "Type \"curry\" in the search box",
+          "expected": "Exactly the restaurants the App returns for \"curry\" (by restaurant, dish or cuisine name)",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the only listed restaurant: “Basil Row”",
+          "observed": {
+            "shown": [
+              "r-1"
+            ]
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.restaurants.search",
+              "arguments": {
+                "address_id": "a-1",
+                "text": "curry"
+              },
+              "result_summary": [
+                "r-1"
+              ]
+            }
+          ],
+          "acceptance_check": "Text search shows exactly the restaurants the App returns for \"curry\"",
+          "screenshot": "01-browse/02-search.png"
+        },
+        {
+          "step": 3,
+          "action": "Clear the search and choose the cuisine Mexican",
+          "expected": "Only Masa Verde",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the only listed restaurant: “Masa Verde”",
+          "observed": {
+            "shown": [
+              "r-4"
+            ]
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": "The cuisine filter narrows the list to Masa Verde",
+          "screenshot": "01-browse/03-cuisine.png"
+        },
+        {
+          "step": 4,
+          "action": "Clear the cuisine and switch the delivery address to Office",
+          "expected": "Only the restaurants that deliver to Office, and the list says how many",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the delivery note: “4 restaurants deliver to Office.”",
+          "observed": {
+            "shown": [
+              "r-1",
+              "r-2",
+              "r-4",
+              "r-6"
+            ]
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.restaurants.search",
+              "arguments": {
+                "address_id": "a-2"
+              },
+              "result_summary": [
+                "r-1",
+                "r-2",
+                "r-4",
+                "r-6"
+              ]
+            }
+          ],
+          "acceptance_check": "Switching to the Office address lists only the restaurants that deliver there and says so",
+          "screenshot": "01-browse/04-office.png"
+        }
+      ]
+    },
+    {
+      "id": "02-restaurant-dish",
+      "title": "Restaurant, menu and a dish with options",
+      "workflow": "Restaurant, menu and dish with options",
+      "scope": "Required (W1)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Open Lantern Noodle House",
+          "expected": "Closed now, opens today at 5:00 PM, delivery can be scheduled; weekly hours; menu with allergens and a sold-out dish",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the status line: “Closed now · opens today at 5:00 PM · you can schedule”",
+          "observed": {
+            "restaurant": "r-2",
+            "sold_out": [
+              "Garlic Bok Choy"
+            ]
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.restaurants.get",
+              "arguments": {
+                "restaurant_id": "r-2"
+              },
+              "result_summary": "closed"
+            }
+          ],
+          "acceptance_check": "A closed restaurant says when it opens, that delivery can be scheduled, and shows its weekly hours",
+          "screenshot": "02-restaurant-dish/01-closed-restaurant.png"
+        },
+        {
+          "step": 2,
+          "action": "Open Basil Row",
+          "expected": "Open now, closes at 9:00 PM; its menu with prices and allergens",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the status line: “Open now · closes at 9:00 PM”",
+          "observed": {
+            "restaurant": "r-1"
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.restaurants.get",
+              "arguments": {
+                "restaurant_id": "r-1"
+              },
+              "result_summary": "open"
+            }
+          ],
+          "acceptance_check": "An open restaurant says when it closes",
+          "screenshot": "02-restaurant-dish/02-open-restaurant.png"
+        },
+        {
+          "step": 3,
+          "action": "Open Pad Thai",
+          "expected": "Its option groups with their limits (Spice level: choose 1), quantity and an optional receipt label",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the dish's option groups: “Spice level · choose 1”",
+          "observed": {
+            "item": "mi-1",
+            "groups": [
+              "Spice level",
+              "Add protein"
+            ]
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.menu_items.get",
+              "arguments": {
+                "item_id": "mi-1"
+              },
+              "result_summary": [
+                "Spice level (required, 1-1)",
+                "Add protein (optional, up to 2)"
+              ]
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "02-restaurant-dish/03-dish-options.png"
+        },
+        {
+          "step": 4,
+          "action": "Press Add to cart without choosing a spice level",
+          "expected": "The rule “Choose 1 for Spice level.” is shown and nothing is written",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the refusal: “Choose 1 for Spice level.”",
+          "observed": {
+            "cart_lines": 0,
+            "version_unchanged": true
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": "Adding without the required option shows the rule and writes nothing",
+          "screenshot": "02-restaurant-dish/04-required-option-missing.png"
+        },
+        {
+          "step": 5,
+          "action": "Choose a spice level and an extra, quantity 2, label “For Sam”, then Add to cart",
+          "expected": "“Added Pad Thai”; the cart holds that line with its options, quantity and label",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the confirmation: “Added Pad Thai”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-28",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "For Sam"
+              }
+            ]
+          },
+          "version": "1.1",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-1",
+                "option_ids": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "For Sam",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 0
+                },
+                "request_id": "web-evidence-0001"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-28",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-28",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "For Sam",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 2990
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 1
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Add to cart commits the dish with its options, quantity and label",
+          "screenshot": "02-restaurant-dish/05-added.png"
+        }
+      ]
+    },
+    {
+      "id": "03-cart",
+      "title": "Edit the cart",
+      "workflow": "Cart edit",
+      "scope": "Required (W1)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Open Cart",
+          "expected": "The line with its options and label, − and + buttons, Edit and Remove, and the checkout form",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the line's quantity: “2”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-28",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "For Sam"
+              }
+            ]
+          },
+          "version": "1.1",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "03-cart/01-cart.png"
+        },
+        {
+          "step": 2,
+          "action": "Press + on Pad Thai",
+          "expected": "Quantity 3 in the App and on the page",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the line's quantity: “3”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-28",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 3,
+                "label": "For Sam"
+              }
+            ]
+          },
+          "version": "1.2",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.update_item",
+              "arguments": {
+                "line_id": "ol-28",
+                "quantity": 3,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 1
+                },
+                "request_id": "web-evidence-0002"
+              },
+              "http": 200,
+              "result": {
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-28",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 3,
+                      "label": "For Sam",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 4485,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 4485
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 2
+                }
+              }
+            }
+          ],
+          "acceptance_check": "The + button raises the quantity in the App",
+          "screenshot": "03-cart/02-plus.png"
+        },
+        {
+          "step": 3,
+          "action": "Edit the line and enter a 41-character label, then Save",
+          "expected": "Refused in the form (“Labels are limited to 40 characters.”); nothing is written",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the refusal: “Labels are limited to 40 characters.”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-28",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 3,
+                "label": "For Sam"
+              }
+            ],
+            "version_unchanged": true
+          },
+          "version": "1.2",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": "A 41-character label is refused in the form and nothing is written",
+          "screenshot": "03-cart/03-label-too-long.png"
+        },
+        {
+          "step": 4,
+          "action": "Set quantity 2 and the label “No peanuts, please”, then Save",
+          "expected": "“Updated Pad Thai”; the App holds quantity 2 and the new label",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the line's label: “No peanuts, please”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-28",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "No peanuts, please"
+              }
+            ]
+          },
+          "version": "1.3",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.update_item",
+              "arguments": {
+                "line_id": "ol-28",
+                "option_ids": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "No peanuts, please",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 2
+                },
+                "request_id": "web-evidence-0003"
+              },
+              "http": 200,
+              "result": {
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-28",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 2990
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 3
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Editing a cart line changes its quantity and label in the App",
+          "screenshot": "03-cart/04-edited.png"
+        },
+        {
+          "step": 5,
+          "action": "Press Remove",
+          "expected": "“Removed Pad Thai” with Undo; the cart is empty in the App",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the confirmation with Undo: “Removed Pad Thai”",
+          "observed": {
+            "cart": []
+          },
+          "version": "1.4",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.remove_item",
+              "arguments": {
+                "line_id": "ol-28",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 3
+                },
+                "request_id": "web-evidence-0004"
+              },
+              "http": 200,
+              "result": {
+                "cart": {
+                  "restaurant_id": null,
+                  "lines": [],
+                  "subtotal_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 4
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Removing the line empties the cart in the App",
+          "screenshot": "03-cart/05-removed.png"
+        },
+        {
+          "step": 6,
+          "action": "Press Undo",
+          "expected": "The same dish, options, quantity and label are back in the cart (as a new line)",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the restored line's label: “No peanuts, please”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-29",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "No peanuts, please"
+              }
+            ]
+          },
+          "version": "1.5",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-1",
+                "option_ids": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "No peanuts, please",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 4
+                },
+                "request_id": "web-evidence-0005"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-29",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-29",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 2990
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 5
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Undo puts the removed line back with its options, quantity and label",
+          "screenshot": "03-cart/06-undo.png"
+        },
+        {
+          "step": 7,
+          "action": "A second Agent MCP client adds 1 × Tom Yum Soup with plateway.cart.add_item; then press Refresh",
+          "expected": "Before Refresh the page still shows one line; after Refresh both lines",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the line written through MCP: “1”",
+          "observed": {
+            "page_before_refresh": "1 line",
+            "cart": [
+              {
+                "id": "ol-29",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "No peanuts, please"
+              },
+              {
+                "id": "ol-30",
+                "item": "mi-3",
+                "options": [],
+                "quantity": 1,
+                "label": null
+              }
+            ]
+          },
+          "version": "1.6",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-3",
+                "option_ids": [],
+                "quantity": 1,
+                "request_id": "evidence-main-1",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 5
+                }
+              },
+              "result": {
+                "line_id": "ol-30",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-29",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "available": true
+                    },
+                    {
+                      "id": "ol-30",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 3885
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 6
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "03-cart/07-independent-update.png"
+        },
+        {
+          "step": 8,
+          "action": "Reload the browser page and open Cart",
+          "expected": "The same two lines after the reload",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the second line after the reload: “1”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-29",
+                "item": "mi-1",
+                "options": [
+                  "op-2",
+                  "op-5"
+                ],
+                "quantity": 2,
+                "label": "No peanuts, please"
+              },
+              {
+                "id": "ol-30",
+                "item": "mi-3",
+                "options": [],
+                "quantity": 1,
+                "label": null
+              }
+            ]
+          },
+          "version": "1.6",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "03-cart/08-reload.png"
+        },
+        {
+          "step": 9,
+          "action": "Open Elote at Masa Verde while the cart holds Basil Row dishes",
+          "expected": "The page says a cart holds one restaurant's dishes and offers Clear cart in place of Add; nothing is written",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the one-restaurant notice: “a cart holds one restaurant”",
+          "observed": {
+            "cart_restaurant": "r-1",
+            "cart_lines": 2,
+            "version_unchanged": true
+          },
+          "version": "1.6",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": "A dish from another restaurant than the cart’s shows the conflict and Clear cart in place of Add as soon as it opens, writing nothing",
+          "screenshot": "03-cart/09-other-restaurant.png"
+        }
+      ]
+    },
+    {
+      "id": "04-checkout-asap",
+      "title": "Check out as soon as possible",
+      "workflow": "Checkout, as soon as possible and scheduled",
+      "scope": "Required (W1)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Home, card •••• 4242, as soon as possible, tip $2.00; press Preview total",
+          "expected": "Address, card and time; every line, delivery fee, service fee, tax, tip and total, as the App's own preview computes them; nothing is stored",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the previewed total: “$51.61”",
+          "observed": {
+            "total": "$51.61",
+            "version_unchanged": true
+          },
+          "version": "1.6",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 200
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-29",
+                    "item_id": "mi-1",
+                    "name": "Pad Thai",
+                    "options": [
+                      {
+                        "id": "op-2",
+                        "name": "Medium",
+                        "price_delta_cents": 0
+                      },
+                      {
+                        "id": "op-5",
+                        "name": "Chicken",
+                        "price_delta_cents": 200
+                      }
+                    ],
+                    "quantity": 2,
+                    "label": "No peanuts, please",
+                    "unit_price_cents": 1495,
+                    "subtotal_cents": 2990,
+                    "tax_cents": 239
+                  },
+                  {
+                    "id": "ol-30",
+                    "item_id": "mi-3",
+                    "name": "Tom Yum Soup",
+                    "options": [],
+                    "quantity": 1,
+                    "label": null,
+                    "unit_price_cents": 895,
+                    "subtotal_cents": 895,
+                    "tax_cents": 72
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 466,
+                  "small_order_cents": 0
+                },
+                "subtotal_cents": 3885,
+                "tax_cents": 311,
+                "tip_cents": 200,
+                "total_cents": 5161,
+                "mode": "asap",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-18T12:35:00-05:00",
+                "delivery_at": null,
+                "release_at": null,
+                "token": "260531ac0d33d909ca3fa717895f0bb4ac312b205b156684e2291b097ecc363f",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 6
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 200
+              },
+              "result_summary": {
+                "subtotal": "$38.85",
+                "delivery": "$2.99",
+                "service": "$4.66",
+                "tax": "$3.11",
+                "tip": "$2.00",
+                "total": "$51.61"
+              }
+            }
+          ],
+          "acceptance_check": "Preview shows every line subtotal, each fee (including the small-order fee), tax once, tip and the total as the App computes them, with the address and card, and stores nothing",
+          "screenshot": "04-checkout-asap/01-preview.png"
+        },
+        {
+          "step": 2,
+          "action": "Press Place order",
+          "expected": "One new order waiting for the restaurant, charged the previewed total; the cart is empty; a placed notice is written",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the Total charged row",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "submitted",
+              "charged": "$51.61",
+              "refunds": [],
+              "rating": null
+            },
+            "cart_lines": 0,
+            "last_notice": "notice.order_placed"
+          },
+          "version": "1.7",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 200,
+                "token": "260531ac0d33d909ca3fa717895f0bb4ac312b205b156684e2291b097ecc363f",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 6
+                },
+                "request_id": "web-evidence-0006"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-13",
+                "order": {
+                  "id": "o-13",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "submitted",
+                  "mode": "asap",
+                  "placed_at": "2026-11-18T09:00:00-08:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-18T09:00:00-08:00",
+                  "accept_by": "2026-11-18T12:20:00-05:00",
+                  "estimated_delivery_at": "2026-11-18T12:35:00-05:00",
+                  "delivered_at": null,
+                  "lines": [
+                    {
+                      "id": "ol-29",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "tax_cents": 239,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    },
+                    {
+                      "id": "ol-30",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "tax_cents": 72,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 466,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 3885,
+                  "tax_cents": 311,
+                  "tip_cents": 200,
+                  "total_cents": 5161,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 5161,
+                    "at": "2026-11-18T09:00:00-08:00"
+                  },
+                  "refunds": [],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T09:00:00-08:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": null,
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 7
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.orders.get",
+              "arguments": {
+                "order_id": "o-13"
+              },
+              "result_summary": "submitted"
+            }
+          ],
+          "acceptance_check": "Place order creates exactly one order to the previewed address, charged the previewed total",
+          "screenshot": "04-checkout-asap/02-placed.png"
+        },
+        {
+          "step": 3,
+          "action": "Reload the browser page",
+          "expected": "The page reopens Orders with the new order",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the new order in the list: “Waiting for the restaurant”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "submitted",
+              "charged": "$51.61",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.7",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": "After a reload the page reopens Orders and still shows the new order",
+          "screenshot": "04-checkout-asap/03-reload.png"
+        }
+      ]
+    },
+    {
+      "id": "05-tracking",
+      "title": "Follow the order",
+      "workflow": "Order tracking",
+      "scope": "Required (W2)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Infra applies order.accepted at 12:05 (the restaurant accepts), as a task runner would; the page is not refreshed",
+          "expected": "The page still shows the earlier state (waiting for the restaurant) while the App holds preparing",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the order in the list: “Waiting for the restaurant”",
+          "observed": {
+            "app_status": "preparing"
+          },
+          "version": "1.8",
+          "virtual_now": "2026-11-18T12:05:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 7
+                },
+                "event": {
+                  "event_id": "evidence-accept-1",
+                  "at": "2026-11-18T12:05:00-05:00",
+                  "operation": "order.accepted",
+                  "payload": {
+                    "order_id": "o-13"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-accept-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-accept-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T09:00:00-08:00",
+                  "applied_at": "2026-11-18T12:05:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 8
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Before Refresh the page still shows the earlier state",
+          "screenshot": "05-tracking/01-accepted-before-refresh.png"
+        },
+        {
+          "step": 2,
+          "action": "Press Refresh",
+          "expected": "Preparing, with the expected arrival",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the order in the list: “Preparing”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "preparing",
+              "charged": "$51.61",
+              "refunds": [],
+              "rating": null
+            },
+            "estimated_delivery_at": "2026-11-18T12:35:00-05:00"
+          },
+          "version": "1.8",
+          "virtual_now": "2026-11-18T12:05:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": "After an Infra acceptance, Refresh shows the order as preparing",
+          "screenshot": "05-tracking/02-preparing.png"
+        },
+        {
+          "step": 3,
+          "action": "Infra applies order.delayed at 12:15 with a new estimate of 12:55; press Refresh",
+          "expected": "The new expected arrival",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the order in the list: “arriving about 12:55 PM”",
+          "observed": {
+            "estimated_delivery_at": "2026-11-18T12:55:00-05:00",
+            "last_notice": "notice.order_delayed"
+          },
+          "version": "1.9",
+          "virtual_now": "2026-11-18T12:15:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 8
+                },
+                "event": {
+                  "event_id": "evidence-delay-1",
+                  "at": "2026-11-18T12:15:00-05:00",
+                  "operation": "order.delayed",
+                  "payload": {
+                    "order_id": "o-13",
+                    "estimated_delivery": "2026-11-18T12:55:00-05:00"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-delay-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-delay-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:05:00-05:00",
+                  "applied_at": "2026-11-18T12:15:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 9
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "05-tracking/03-delayed.png"
+        },
+        {
+          "step": 4,
+          "action": "Infra applies order.picked_up at 12:30; press Refresh",
+          "expected": "On the way; Cancel order is no longer offered, and a cancel preview through the Agent MCP interface is refused (invalid_state)",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the order in the list: “On the way”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "picked_up",
+              "charged": "$51.61",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.10",
+          "virtual_now": "2026-11-18T12:30:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 9
+                },
+                "event": {
+                  "event_id": "evidence-pickup-1",
+                  "at": "2026-11-18T12:30:00-05:00",
+                  "operation": "order.picked_up",
+                  "payload": {
+                    "order_id": "o-13"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-pickup-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-pickup-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:15:00-05:00",
+                  "applied_at": "2026-11-18T12:30:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 10
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-13"
+              },
+              "result_summary": {
+                "status": "invalid_state",
+                "message": "A picked_up order cannot be cancelled."
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "05-tracking/04-on-the-way.png"
+        },
+        {
+          "step": 5,
+          "action": "Infra applies order.delivered at 12:50; press Refresh",
+          "expected": "Delivered, with Report a problem and Rate order offered",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the Report a problem control: “Report a problem”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [],
+              "rating": null
+            },
+            "delivered_at": "2026-11-18T12:50:00-05:00"
+          },
+          "version": "1.11",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 10
+                },
+                "event": {
+                  "event_id": "evidence-deliver-1",
+                  "at": "2026-11-18T12:50:00-05:00",
+                  "operation": "order.delivered",
+                  "payload": {
+                    "order_id": "o-13"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-deliver-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-deliver-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:30:00-05:00",
+                  "applied_at": "2026-11-18T12:50:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 11
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "05-tracking/05-delivered.png"
+        }
+      ]
+    },
+    {
+      "id": "06-cancel",
+      "title": "Cancel an order",
+      "workflow": "Cancel",
+      "scope": "Required (W3)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Open the Masa Verde order that is being prepared and press Cancel order",
+          "expected": "The refund (delivery fee and tip) and the amount kept, as the App computes them; nothing changes yet",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the amount kept: “$22.69”",
+          "observed": {
+            "order": {
+              "id": "o-11",
+              "status": "preparing",
+              "charged": "$28.18",
+              "refunds": [],
+              "rating": null
+            },
+            "version_unchanged": true
+          },
+          "version": "1.11",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-11"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-11",
+                "stage": "preparing",
+                "charge_cents": 2818,
+                "prior_refunds_cents": 0,
+                "refund_cents": 549,
+                "kept_cents": 2269,
+                "refund_card_id": "c-1",
+                "token": "8c2b703e5f5436042fd1131461751fcba82395a1c03477f3d7c74d883ec8db63",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 11
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-11"
+              },
+              "result_summary": {
+                "refund": "$5.49",
+                "kept": "$22.69"
+              }
+            }
+          ],
+          "acceptance_check": "The cancel preview of a preparing order shows the App refund and the amount kept",
+          "screenshot": "06-cancel/01-preview-preparing.png"
+        },
+        {
+          "step": 2,
+          "action": "Press Keep order",
+          "expected": "The preview closes and the order is unchanged",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the Cancel order control again: “Cancel order”",
+          "observed": {
+            "order": {
+              "id": "o-11",
+              "status": "preparing",
+              "charged": "$28.18",
+              "refunds": [],
+              "rating": null
+            },
+            "version_unchanged": true
+          },
+          "version": "1.11",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": "Keep order closes the preview and changes nothing",
+          "screenshot": "06-cancel/02-kept.png"
+        },
+        {
+          "step": 3,
+          "action": "Open the scheduled Olive & Ember order and press Cancel order",
+          "expected": "A full refund and nothing kept",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the amount kept: “$0.00”",
+          "observed": {
+            "order": {
+              "id": "o-12",
+              "status": "scheduled",
+              "charged": "$57.63",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.11",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-12"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-12",
+                "stage": "scheduled",
+                "charge_cents": 5763,
+                "prior_refunds_cents": 0,
+                "refund_cents": 5763,
+                "kept_cents": 0,
+                "refund_card_id": "c-1",
+                "token": "a3c5310cd1f32aa1b8805512ee59ca27c9d23866ed82f94e194845a1f84ae216",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 11
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Cancelling the scheduled order previews a full refund",
+          "screenshot": "06-cancel/03-preview-scheduled.png"
+        },
+        {
+          "step": 4,
+          "action": "Press Confirm cancellation",
+          "expected": "Cancelled by you, one refund equal to the charge, net charge $0.00",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the net charge: “$0.00”",
+          "observed": {
+            "order": {
+              "id": "o-12",
+              "status": "cancelled",
+              "charged": "$57.63",
+              "refunds": [
+                "$57.63 cancelled"
+              ],
+              "rating": null
+            },
+            "cancellation": {
+              "at": "2026-11-18T12:50:00-05:00",
+              "reason": "account_holder",
+              "stage": "scheduled",
+              "refunded_cents": 5763,
+              "kept_cents": 0
+            }
+          },
+          "version": "1.12",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.cancel.confirm",
+              "arguments": {
+                "order_id": "o-12",
+                "token": "a3c5310cd1f32aa1b8805512ee59ca27c9d23866ed82f94e194845a1f84ae216",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 11
+                },
+                "request_id": "web-evidence-0007"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-12",
+                "order": {
+                  "id": "o-12",
+                  "restaurant_id": "r-3",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "cancelled",
+                  "mode": "scheduled",
+                  "placed_at": "2026-11-17T20:35:00-05:00",
+                  "delivery_at": "2026-11-18T19:30:00-05:00",
+                  "release_at": "2026-11-18T18:45:00-05:00",
+                  "submitted_at": null,
+                  "accept_by": null,
+                  "estimated_delivery_at": "2026-11-18T19:30:00-05:00",
+                  "delivered_at": null,
+                  "lines": [
+                    {
+                      "id": "ol-25",
+                      "item_id": "mi-15",
+                      "name": "Lamb Kofta",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 1895,
+                      "subtotal_cents": 1895,
+                      "tax_cents": 152,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    },
+                    {
+                      "id": "ol-26",
+                      "item_id": "mi-16",
+                      "name": "Hummus and Pita",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 850,
+                      "subtotal_cents": 850,
+                      "tax_cents": 68,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    },
+                    {
+                      "id": "ol-27",
+                      "item_id": "mi-17",
+                      "name": "Fattoush Salad",
+                      "options": [
+                        {
+                          "id": "op-28",
+                          "name": "Grilled halloumi",
+                          "price_delta_cents": 300
+                        }
+                      ],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 1350,
+                      "subtotal_cents": 1350,
+                      "tax_cents": 108,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 349,
+                    "service_cents": 491,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 4095,
+                  "tax_cents": 328,
+                  "tip_cents": 500,
+                  "total_cents": 5763,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 5763,
+                    "at": "2026-11-17T20:35:00-05:00"
+                  },
+                  "refunds": [
+                    {
+                      "id": "rf-4",
+                      "amount_cents": 5763,
+                      "reason": "cancelled",
+                      "line_id": null,
+                      "at": "2026-11-18T12:50:00-05:00"
+                    }
+                  ],
+                  "timeline": [
+                    {
+                      "at": "2026-11-17T20:35:00-05:00",
+                      "status": "scheduled",
+                      "note": "Order placed"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": "cancelled",
+                      "note": "Cancelled: account_holder"
+                    }
+                  ],
+                  "cancellation": {
+                    "at": "2026-11-18T12:50:00-05:00",
+                    "reason": "account_holder",
+                    "stage": "scheduled",
+                    "refunded_cents": 5763,
+                    "kept_cents": 0
+                  },
+                  "rating": null,
+                  "restaurant_name": "Olive & Ember",
+                  "refunded_cents": 5763
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 12
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Confirming cancels the order with one full refund",
+          "screenshot": "06-cancel/04-cancelled.png"
+        }
+      ]
+    },
+    {
+      "id": "07-report",
+      "title": "Report a missing or wrong item",
+      "workflow": "Report missing or incorrect items",
+      "scope": "Required (W4)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "On the delivered order press Report a problem, tick Tom Yum Soup and choose “missing”",
+          "expected": "The delivered lines, each with missing or wrong; nothing is sent yet",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the Send report control: “Send report”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.12",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "07-report/01-form.png"
+        },
+        {
+          "step": 2,
+          "action": "Press Send report",
+          "expected": "That line's subtotal and tax are refunded; the refunds name the dish",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refund row: “Reported item: Tom Yum Soup”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [
+                "$9.67 line_reported"
+              ],
+              "rating": null
+            },
+            "refund_line": "ol-30",
+            "last_notice": "notice.item_refunded"
+          },
+          "version": "1.13",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.report_issue",
+              "arguments": {
+                "order_id": "o-13",
+                "lines": [
+                  {
+                    "line_id": "ol-30",
+                    "kind": "missing"
+                  }
+                ],
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 12
+                },
+                "request_id": "web-evidence-0008"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-13",
+                "refunded_cents": 967,
+                "order": {
+                  "id": "o-13",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "delivered",
+                  "mode": "asap",
+                  "placed_at": "2026-11-18T09:00:00-08:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-18T09:00:00-08:00",
+                  "accept_by": "2026-11-18T12:20:00-05:00",
+                  "estimated_delivery_at": "2026-11-18T12:55:00-05:00",
+                  "delivered_at": "2026-11-18T12:50:00-05:00",
+                  "lines": [
+                    {
+                      "id": "ol-29",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "tax_cents": 239,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    },
+                    {
+                      "id": "ol-30",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "tax_cents": 72,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": {
+                        "kind": "missing",
+                        "at": "2026-11-18T12:50:00-05:00"
+                      }
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 466,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 3885,
+                  "tax_cents": 311,
+                  "tip_cents": 200,
+                  "total_cents": 5161,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 5161,
+                    "at": "2026-11-18T09:00:00-08:00"
+                  },
+                  "refunds": [
+                    {
+                      "id": "rf-5",
+                      "amount_cents": 967,
+                      "reason": "line_reported",
+                      "line_id": "ol-30",
+                      "at": "2026-11-18T12:50:00-05:00"
+                    }
+                  ],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T09:00:00-08:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    },
+                    {
+                      "at": "2026-11-18T12:05:00-05:00",
+                      "status": "preparing",
+                      "note": "Accepted by the restaurant"
+                    },
+                    {
+                      "at": "2026-11-18T12:15:00-05:00",
+                      "status": null,
+                      "note": "Delayed; new estimate 2026-11-18T12:55:00-05:00"
+                    },
+                    {
+                      "at": "2026-11-18T12:30:00-05:00",
+                      "status": "picked_up",
+                      "note": "Picked up by the courier"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": "delivered",
+                      "note": "Delivered"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": null,
+                      "note": "Line ol-30 reported missing and refunded"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": null,
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 967
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 13
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Reporting a missing item on the delivered order refunds that line in full",
+          "screenshot": "07-report/02-sent.png"
+        },
+        {
+          "step": 3,
+          "action": "Open the Lantern Noodle House order delivered on Sunday 15 November; a second Agent MCP client also sends plateway.orders.report_issue for it",
+          "expected": "No Report control; the page says problems could be reported until Tue, Nov 17, 8:33 PM; Rate is still offered. The MCP report is refused with window_closed and changes nothing",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the closed-window note: “Problems could be reported until Tue, Nov 17, 8:33 PM”",
+          "observed": {
+            "order": {
+              "id": "o-10",
+              "status": "delivered",
+              "charged": "$44.38",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.13",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "write",
+              "tool": "plateway.orders.report_issue",
+              "arguments": {
+                "order_id": "o-10",
+                "lines": [
+                  {
+                    "line_id": "ol-21",
+                    "kind": "missing"
+                  }
+                ],
+                "request_id": "evidence-main-2",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 13
+                }
+              },
+              "result": {
+                "status": "window_closed",
+                "message": "The window for this request has closed.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 13
+                }
+              }
+            }
+          ],
+          "acceptance_check": "After its 48-hour window an order offers no Report control and says when reporting closed, while Rate stays",
+          "screenshot": "07-report/03-window-closed.png"
+        }
+      ]
+    },
+    {
+      "id": "08-rate",
+      "title": "Rate an order",
+      "workflow": "Rate",
+      "scope": "Required (W4)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "On the delivered order press Rate order, choose 4 stars and write “Arrived hot.”",
+          "expected": "The rating form with 1 to 5 stars and an optional comment; nothing is sent yet",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the Submit rating control: “Submit rating”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [
+                "$9.67 line_reported"
+              ],
+              "rating": null
+            }
+          },
+          "version": "1.13",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "08-rate/01-form.png"
+        },
+        {
+          "step": 2,
+          "action": "Press Submit rating",
+          "expected": "The App stores 4 stars and the comment, and the order shows them; Rate is no longer offered",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the saved rating: “★★★★ · Arrived hot.”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [
+                "$9.67 line_reported"
+              ],
+              "rating": {
+                "stars": 4,
+                "text": "Arrived hot."
+              }
+            }
+          },
+          "version": "1.14",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.rate",
+              "arguments": {
+                "order_id": "o-13",
+                "stars": 4,
+                "text": "Arrived hot.",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 13
+                },
+                "request_id": "web-evidence-0009"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-13",
+                "order": {
+                  "id": "o-13",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "delivered",
+                  "mode": "asap",
+                  "placed_at": "2026-11-18T09:00:00-08:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-18T09:00:00-08:00",
+                  "accept_by": "2026-11-18T12:20:00-05:00",
+                  "estimated_delivery_at": "2026-11-18T12:55:00-05:00",
+                  "delivered_at": "2026-11-18T12:50:00-05:00",
+                  "lines": [
+                    {
+                      "id": "ol-29",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "tax_cents": 239,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    },
+                    {
+                      "id": "ol-30",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "tax_cents": 72,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": {
+                        "kind": "missing",
+                        "at": "2026-11-18T12:50:00-05:00"
+                      }
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 466,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 3885,
+                  "tax_cents": 311,
+                  "tip_cents": 200,
+                  "total_cents": 5161,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 5161,
+                    "at": "2026-11-18T09:00:00-08:00"
+                  },
+                  "refunds": [
+                    {
+                      "id": "rf-5",
+                      "amount_cents": 967,
+                      "reason": "line_reported",
+                      "line_id": "ol-30",
+                      "at": "2026-11-18T12:50:00-05:00"
+                    }
+                  ],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T09:00:00-08:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    },
+                    {
+                      "at": "2026-11-18T12:05:00-05:00",
+                      "status": "preparing",
+                      "note": "Accepted by the restaurant"
+                    },
+                    {
+                      "at": "2026-11-18T12:15:00-05:00",
+                      "status": null,
+                      "note": "Delayed; new estimate 2026-11-18T12:55:00-05:00"
+                    },
+                    {
+                      "at": "2026-11-18T12:30:00-05:00",
+                      "status": "picked_up",
+                      "note": "Picked up by the courier"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": "delivered",
+                      "note": "Delivered"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": null,
+                      "note": "Line ol-30 reported missing and refunded"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": null,
+                      "note": "Rated 4 stars"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": {
+                    "stars": 4,
+                    "text": "Arrived hot.",
+                    "at": "2026-11-18T12:50:00-05:00"
+                  },
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 967
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 14
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Rating the delivered order stores the stars and the comment",
+          "screenshot": "08-rate/02-rated.png"
+        },
+        {
+          "step": 3,
+          "action": "A second Agent MCP client rates the Lantern Noodle House order 5 stars with plateway.orders.rate; open that order and press Refresh",
+          "expected": "The page shows the 5-star rating written through MCP and no Rate control",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the rating written through MCP: “★★★★★ · Dumplings were great.”",
+          "observed": {
+            "order": {
+              "id": "o-10",
+              "status": "delivered",
+              "charged": "$44.38",
+              "refunds": [],
+              "rating": {
+                "stars": 5,
+                "text": "Dumplings were great."
+              }
+            }
+          },
+          "version": "1.15",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "write",
+              "tool": "plateway.orders.rate",
+              "arguments": {
+                "order_id": "o-10",
+                "stars": 5,
+                "text": "Dumplings were great.",
+                "request_id": "evidence-main-3",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 14
+                }
+              },
+              "result": {
+                "order_id": "o-10",
+                "order": {
+                  "id": "o-10",
+                  "restaurant_id": "r-2",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "delivered",
+                  "mode": "asap",
+                  "placed_at": "2026-11-15T20:00:00-05:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-15T20:00:00-05:00",
+                  "accept_by": "2026-11-15T20:20:00-05:00",
+                  "estimated_delivery_at": "2026-11-15T20:35:00-05:00",
+                  "delivered_at": "2026-11-15T20:33:00-05:00",
+                  "lines": [
+                    {
+                      "id": "ol-21",
+                      "item_id": "mi-8",
+                      "name": "Beef Noodle Soup",
+                      "options": [
+                        {
+                          "id": "op-18",
+                          "name": "Soft-boiled egg",
+                          "price_delta_cents": 150
+                        }
+                      ],
+                      "quantity": 1,
+                      "label": "For Alex",
+                      "unit_price_cents": 1745,
+                      "subtotal_cents": 1745,
+                      "tax_cents": 140,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    },
+                    {
+                      "id": "ol-22",
+                      "item_id": "mi-11",
+                      "name": "Kung Pao Chicken",
+                      "options": [
+                        {
+                          "id": "op-21",
+                          "name": "White rice",
+                          "price_delta_cents": 0
+                        }
+                      ],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 1495,
+                      "tax_cents": 120,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 199,
+                    "service_cents": 389,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 3240,
+                  "tax_cents": 260,
+                  "tip_cents": 350,
+                  "total_cents": 4438,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 4438,
+                    "at": "2026-11-15T20:00:00-05:00"
+                  },
+                  "refunds": [],
+                  "timeline": [
+                    {
+                      "at": "2026-11-15T20:00:00-05:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    },
+                    {
+                      "at": "2026-11-15T20:01:00-05:00",
+                      "status": "preparing",
+                      "note": "Accepted by the restaurant"
+                    },
+                    {
+                      "at": "2026-11-15T20:19:00-05:00",
+                      "status": "picked_up",
+                      "note": "Picked up by the courier"
+                    },
+                    {
+                      "at": "2026-11-15T20:33:00-05:00",
+                      "status": "delivered",
+                      "note": "Delivered"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": null,
+                      "note": "Rated 5 stars"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": {
+                    "stars": 5,
+                    "text": "Dumplings were great.",
+                    "at": "2026-11-18T12:50:00-05:00"
+                  },
+                  "restaurant_name": "Lantern Noodle House",
+                  "refunded_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 15
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "08-rate/03-independent-update.png"
+        }
+      ]
+    },
+    {
+      "id": "09-checkout-scheduled",
+      "title": "Schedule an order",
+      "workflow": "Checkout, as soon as possible and scheduled",
+      "scope": "Required (W1)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Add Tom Yum Soup, open Cart, choose Schedule for later and enter Thursday 19 November, 19:00",
+          "expected": "The restaurant's hours for that day; the small-order fee note for a subtotal under $12.00",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the hours for the chosen day: “Basil Row on Thursday: 11:00 AM – 9:00 PM.”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-31",
+                "item": "mi-3",
+                "options": [],
+                "quantity": 1,
+                "label": null
+              }
+            ]
+          },
+          "version": "1.16",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-3",
+                "option_ids": [],
+                "quantity": 1,
+                "label": null,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 15
+                },
+                "request_id": "web-evidence-0010"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-31",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-31",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 895
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 16
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Scheduling shows the restaurant hours for the chosen day",
+          "screenshot": "09-checkout-scheduled/01-schedule.png"
+        },
+        {
+          "step": 2,
+          "action": "Tip $1.50; press Preview total",
+          "expected": "Delivery Thu, Nov 19, 7:00 PM EST and the App's release time; the small-order fee in the receipt; the App's total",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the time the order is sent to the restaurant: “Thu, Nov 19”",
+          "observed": {
+            "total": "$17.72"
+          },
+          "version": "1.16",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "scheduled",
+                  "delivery_at": "2026-11-19T19:00:00-05:00"
+                },
+                "tip_cents": 150
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-31",
+                    "item_id": "mi-3",
+                    "name": "Tom Yum Soup",
+                    "options": [],
+                    "quantity": 1,
+                    "label": null,
+                    "unit_price_cents": 895,
+                    "subtotal_cents": 895,
+                    "tax_cents": 72
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 107,
+                  "small_order_cents": 249
+                },
+                "subtotal_cents": 895,
+                "tax_cents": 72,
+                "tip_cents": 150,
+                "total_cents": 1772,
+                "mode": "scheduled",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-19T19:00:00-05:00",
+                "delivery_at": "2026-11-19T19:00:00-05:00",
+                "release_at": "2026-11-19T18:25:00-05:00",
+                "token": "fd426037337d5f6d6e1f1ebc87545840a07f15c4423ef053aacd04de7aeb25e1",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 16
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "scheduled",
+                  "delivery_at": "2026-11-19T19:00:00-05:00"
+                },
+                "tip_cents": 150
+              },
+              "result_summary": {
+                "delivery_at": "2026-11-19T19:00:00-05:00",
+                "release_at": "2026-11-19T18:25:00-05:00",
+                "small_order_fee": "$2.49",
+                "total": "$17.72"
+              }
+            }
+          ],
+          "acceptance_check": "A scheduled preview shows the App delivery and release times in New York time",
+          "screenshot": "09-checkout-scheduled/02-preview.png"
+        },
+        {
+          "step": 3,
+          "action": "Press Place order",
+          "expected": "A scheduled order for Thursday 19:00 New York time",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the scheduled order in the list: “Scheduled for Thu, Nov 19, 7:00 PM”",
+          "observed": {
+            "order": {
+              "id": "o-14",
+              "status": "scheduled",
+              "charged": "$17.72",
+              "refunds": [],
+              "rating": null
+            },
+            "delivery_at": "2026-11-19T19:00:00-05:00",
+            "release_at": "2026-11-19T18:25:00-05:00"
+          },
+          "version": "1.17",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "scheduled",
+                  "delivery_at": "2026-11-19T19:00:00-05:00"
+                },
+                "tip_cents": 150,
+                "token": "fd426037337d5f6d6e1f1ebc87545840a07f15c4423ef053aacd04de7aeb25e1",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 16
+                },
+                "request_id": "web-evidence-0011"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-14",
+                "order": {
+                  "id": "o-14",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "scheduled",
+                  "mode": "scheduled",
+                  "placed_at": "2026-11-18T12:50:00-05:00",
+                  "delivery_at": "2026-11-19T19:00:00-05:00",
+                  "release_at": "2026-11-19T18:25:00-05:00",
+                  "submitted_at": null,
+                  "accept_by": null,
+                  "estimated_delivery_at": "2026-11-19T19:00:00-05:00",
+                  "delivered_at": null,
+                  "lines": [
+                    {
+                      "id": "ol-31",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "tax_cents": 72,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 107,
+                    "small_order_cents": 249
+                  },
+                  "subtotal_cents": 895,
+                  "tax_cents": 72,
+                  "tip_cents": 150,
+                  "total_cents": 1772,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 1772,
+                    "at": "2026-11-18T12:50:00-05:00"
+                  },
+                  "refunds": [],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": "scheduled",
+                      "note": "Order placed"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": null,
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 17
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Scheduled checkout creates a scheduled order for Thursday 19:00 New York time",
+          "screenshot": "09-checkout-scheduled/03-placed.png"
+        }
+      ]
+    },
+    {
+      "id": "10-checkout-refused",
+      "title": "Checkout refused: declining card and closed restaurant",
+      "workflow": "Checkout, as soon as possible and scheduled",
+      "scope": "Required (W1), failure paths",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Add Tom Yum Soup, open Cart, choose the card that declines (•••• 0005), Preview total, then Place order",
+          "expected": "payment_failed is shown; no order is created and the cart is kept",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “The card was declined.”",
+          "observed": {
+            "orders": 54,
+            "cart_lines": 1
+          },
+          "version": "1.18",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-3",
+                "option_ids": [],
+                "quantity": 1,
+                "label": null,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 17
+                },
+                "request_id": "web-evidence-0012"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-32",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-32",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 895
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 18
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-2",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-32",
+                    "item_id": "mi-3",
+                    "name": "Tom Yum Soup",
+                    "options": [],
+                    "quantity": 1,
+                    "label": null,
+                    "unit_price_cents": 895,
+                    "subtotal_cents": 895,
+                    "tax_cents": 72
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 107,
+                  "small_order_cents": 249
+                },
+                "subtotal_cents": 895,
+                "tax_cents": 72,
+                "tip_cents": 0,
+                "total_cents": 1622,
+                "mode": "asap",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-18T13:25:00-05:00",
+                "delivery_at": null,
+                "release_at": null,
+                "token": "9ba8ad3504f0d515e46b3e4cc7bc1a3dc07f3c59b6ce2077ea9e65f4e4f52f41",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 18
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-2",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0,
+                "token": "9ba8ad3504f0d515e46b3e4cc7bc1a3dc07f3c59b6ce2077ea9e65f4e4f52f41",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 18
+                },
+                "request_id": "web-evidence-0013"
+              },
+              "http": 200,
+              "result": {
+                "status": "payment_failed",
+                "message": "The card was declined.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 18
+                }
+              }
+            }
+          ],
+          "acceptance_check": "A declining card shows payment_failed and creates no order",
+          "screenshot": "10-checkout-refused/01-declined.png"
+        },
+        {
+          "step": 2,
+          "action": "Replace the dish with Scallion Pancake from Lantern Noodle House (closed until 5:00 PM), choose as soon as possible and press Preview total",
+          "expected": "restaurant_closed: the page says when it opens and suggests scheduling; nothing is stored",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the explanation: “opens today at 5:00 PM”",
+          "observed": {
+            "orders": 54,
+            "cart": [
+              {
+                "id": "ol-33",
+                "item": "mi-10",
+                "options": [],
+                "quantity": 1,
+                "label": null
+              }
+            ],
+            "version_unchanged": true
+          },
+          "version": "1.20",
+          "virtual_now": "2026-11-18T12:50:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.remove_item",
+              "arguments": {
+                "line_id": "ol-32",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 18
+                },
+                "request_id": "web-evidence-0014"
+              },
+              "http": 200,
+              "result": {
+                "cart": {
+                  "restaurant_id": null,
+                  "lines": [],
+                  "subtotal_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 19
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-10",
+                "option_ids": [],
+                "quantity": 1,
+                "label": null,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 19
+                },
+                "request_id": "web-evidence-0015"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-33",
+                "cart": {
+                  "restaurant_id": "r-2",
+                  "lines": [
+                    {
+                      "id": "ol-33",
+                      "item_id": "mi-10",
+                      "name": "Scallion Pancake",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 650,
+                      "subtotal_cents": 650,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 650
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 20
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0
+              },
+              "http": 200,
+              "result": {
+                "status": "restaurant_closed",
+                "message": "Lantern Noodle House is not taking orders now.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 20
+                }
+              }
+            }
+          ],
+          "acceptance_check": "Checking out a closed restaurant as soon as possible explains when it opens and suggests scheduling",
+          "screenshot": "10-checkout-refused/02-closed.png"
+        }
+      ]
+    },
+    {
+      "id": "11-stale",
+      "title": "Stale preview and stale version at checkout",
+      "workflow": "Checkout, as soon as possible and scheduled",
+      "scope": "Required (W1), stale and conflicting cases",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Replace the dish with Tom Yum Soup and press Preview total; Infra changes the Tom Yum Soup price to $9.25 at 12:55; press Refresh, then Place order with the earlier preview",
+          "expected": "stale_preview (the business details behind the preview changed; preview again); nothing is placed",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “preview again”",
+          "observed": {
+            "orders": 54
+          },
+          "version": "1.23",
+          "virtual_now": "2026-11-18T12:55:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.remove_item",
+              "arguments": {
+                "line_id": "ol-33",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 20
+                },
+                "request_id": "web-evidence-0016"
+              },
+              "http": 200,
+              "result": {
+                "cart": {
+                  "restaurant_id": null,
+                  "lines": [],
+                  "subtotal_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 21
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-3",
+                "option_ids": [],
+                "quantity": 1,
+                "label": null,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 21
+                },
+                "request_id": "web-evidence-0017"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-34",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-34",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 895
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 22
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-34",
+                    "item_id": "mi-3",
+                    "name": "Tom Yum Soup",
+                    "options": [],
+                    "quantity": 1,
+                    "label": null,
+                    "unit_price_cents": 895,
+                    "subtotal_cents": 895,
+                    "tax_cents": 72
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 107,
+                  "small_order_cents": 249
+                },
+                "subtotal_cents": 895,
+                "tax_cents": 72,
+                "tip_cents": 0,
+                "total_cents": 1622,
+                "mode": "asap",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-18T13:25:00-05:00",
+                "delivery_at": null,
+                "release_at": null,
+                "token": "e6a91d9d47270ac38df724fb3336559852f4069fae3cc23ed9a3600cef43837c",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 22
+                }
+              }
+            },
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 22
+                },
+                "event": {
+                  "event_id": "evidence-price-1",
+                  "at": "2026-11-18T12:55:00-05:00",
+                  "operation": "menu_item.price_changed",
+                  "payload": {
+                    "item_id": "mi-3",
+                    "price_cents": 925
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-price-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-price-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:50:00-05:00",
+                  "applied_at": "2026-11-18T12:55:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 23
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0,
+                "token": "e6a91d9d47270ac38df724fb3336559852f4069fae3cc23ed9a3600cef43837c",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 23
+                },
+                "request_id": "web-evidence-0018"
+              },
+              "http": 200,
+              "result": {
+                "status": "stale_preview",
+                "message": "The order changed since the preview; preview again.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 23
+                }
+              }
+            }
+          ],
+          "acceptance_check": "After a price change and Refresh, the old preview is refused as stale_preview and nothing is placed",
+          "screenshot": "11-stale/01-stale-preview.png"
+        },
+        {
+          "step": 2,
+          "action": "Preview total again; Infra changes the price to $9.50 at 12:56 without a Refresh; press Place order",
+          "expected": "stale_version (Plateway changed since the page last read it), shown apart from stale_preview; nothing is placed",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “Plateway changed since this page last read it”",
+          "observed": {
+            "orders": 54
+          },
+          "version": "1.24",
+          "virtual_now": "2026-11-18T12:56:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-34",
+                    "item_id": "mi-3",
+                    "name": "Tom Yum Soup",
+                    "options": [],
+                    "quantity": 1,
+                    "label": null,
+                    "unit_price_cents": 925,
+                    "subtotal_cents": 925,
+                    "tax_cents": 74
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 111,
+                  "small_order_cents": 249
+                },
+                "subtotal_cents": 925,
+                "tax_cents": 74,
+                "tip_cents": 0,
+                "total_cents": 1658,
+                "mode": "asap",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-18T13:30:00-05:00",
+                "delivery_at": null,
+                "release_at": null,
+                "token": "3558fa51b0bfc705cdf3fd66faa81349e4dc4365dfd580d4597420be5e7afd89",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 23
+                }
+              }
+            },
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 23
+                },
+                "event": {
+                  "event_id": "evidence-price-2",
+                  "at": "2026-11-18T12:56:00-05:00",
+                  "operation": "menu_item.price_changed",
+                  "payload": {
+                    "item_id": "mi-3",
+                    "price_cents": 950
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-price-2",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-price-2",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:55:00-05:00",
+                  "applied_at": "2026-11-18T12:56:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 24
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0,
+                "token": "3558fa51b0bfc705cdf3fd66faa81349e4dc4365dfd580d4597420be5e7afd89",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 23
+                },
+                "request_id": "web-evidence-0019"
+              },
+              "http": 200,
+              "result": {
+                "status": "stale_version",
+                "message": "The observed version is stale; read the current state before retrying.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 24
+                },
+                "current_version": {
+                  "epoch": 1,
+                  "revision": 24
+                }
+              }
+            }
+          ],
+          "acceptance_check": "A change the page has not read is refused as stale_version, shown apart from stale_preview, and nothing is placed",
+          "screenshot": "11-stale/02-stale-version.png"
+        },
+        {
+          "step": 3,
+          "action": "Press Refresh, Preview total and Place order",
+          "expected": "The order is placed once at the new price",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the Total charged row",
+          "observed": {
+            "order": {
+              "id": "o-15",
+              "status": "submitted",
+              "charged": "$16.88",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.25",
+          "virtual_now": "2026-11-18T12:56:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-34",
+                    "item_id": "mi-3",
+                    "name": "Tom Yum Soup",
+                    "options": [],
+                    "quantity": 1,
+                    "label": null,
+                    "unit_price_cents": 950,
+                    "subtotal_cents": 950,
+                    "tax_cents": 76
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 114,
+                  "small_order_cents": 249
+                },
+                "subtotal_cents": 950,
+                "tax_cents": 76,
+                "tip_cents": 0,
+                "total_cents": 1688,
+                "mode": "asap",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-18T13:31:00-05:00",
+                "delivery_at": null,
+                "release_at": null,
+                "token": "5152c53b40f1aafec6091826252ced6ba94c3f97f234099022befd700cdb99d4",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 24
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0,
+                "token": "5152c53b40f1aafec6091826252ced6ba94c3f97f234099022befd700cdb99d4",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 24
+                },
+                "request_id": "web-evidence-0020"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-15",
+                "order": {
+                  "id": "o-15",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "submitted",
+                  "mode": "asap",
+                  "placed_at": "2026-11-18T12:56:00-05:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-18T12:56:00-05:00",
+                  "accept_by": "2026-11-18T13:16:00-05:00",
+                  "estimated_delivery_at": "2026-11-18T13:31:00-05:00",
+                  "delivered_at": null,
+                  "lines": [
+                    {
+                      "id": "ol-34",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 950,
+                      "subtotal_cents": 950,
+                      "tax_cents": 76,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 114,
+                    "small_order_cents": 249
+                  },
+                  "subtotal_cents": 950,
+                  "tax_cents": 76,
+                  "tip_cents": 0,
+                  "total_cents": 1688,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 1688,
+                    "at": "2026-11-18T12:56:00-05:00"
+                  },
+                  "refunds": [],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T12:56:00-05:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": null,
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 25
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "11-stale/03-recovered.png"
+        }
+      ]
+    },
+    {
+      "id": "12-conflicts",
+      "title": "Stale and conflicting changes outside checkout",
+      "workflow": "Cart edit, cancel and report",
+      "scope": "Required (W1, W3, W4), stale and conflicting cases",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Add Fresh Spring Rolls and open Cart; a second Agent MCP client sets that line to quantity 3; without a Refresh, press + on the page",
+          "expected": "stale_version: the page's change is refused and nothing it sent is written; the page rereads the cart and shows the other client's quantity 3",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “Plateway changed since this page last read it”",
+          "observed": {
+            "cart": [
+              {
+                "id": "ol-35",
+                "item": "mi-4",
+                "options": [],
+                "quantity": 3,
+                "label": null
+              }
+            ]
+          },
+          "version": "1.27",
+          "virtual_now": "2026-11-18T12:56:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.add_item",
+              "arguments": {
+                "item_id": "mi-4",
+                "option_ids": [],
+                "quantity": 1,
+                "label": null,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 25
+                },
+                "request_id": "web-evidence-0021"
+              },
+              "http": 200,
+              "result": {
+                "line_id": "ol-35",
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-35",
+                      "item_id": "mi-4",
+                      "name": "Fresh Spring Rolls",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 750,
+                      "subtotal_cents": 750,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 750
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 26
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "write",
+              "tool": "plateway.cart.update_item",
+              "arguments": {
+                "line_id": "ol-35",
+                "quantity": 3,
+                "request_id": "evidence-main-4",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 26
+                }
+              },
+              "result": {
+                "cart": {
+                  "restaurant_id": "r-1",
+                  "lines": [
+                    {
+                      "id": "ol-35",
+                      "item_id": "mi-4",
+                      "name": "Fresh Spring Rolls",
+                      "options": [],
+                      "quantity": 3,
+                      "label": null,
+                      "unit_price_cents": 750,
+                      "subtotal_cents": 2250,
+                      "available": true
+                    }
+                  ],
+                  "subtotal_cents": 2250
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 27
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.cart.update_item",
+              "arguments": {
+                "line_id": "ol-35",
+                "quantity": 2,
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 26
+                },
+                "request_id": "web-evidence-0022"
+              },
+              "http": 200,
+              "result": {
+                "status": "stale_version",
+                "message": "The observed version is stale; read the current state before retrying.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 27
+                },
+                "current_version": {
+                  "epoch": 1,
+                  "revision": 27
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/01-cart-edit-stale.png"
+        },
+        {
+          "step": 2,
+          "action": "Open the order just placed (waiting for the restaurant) and press Cancel order",
+          "expected": "A full refund is quoted; nothing changes yet",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the quoted refund: “$16.88”",
+          "observed": {
+            "order": {
+              "id": "o-15",
+              "status": "submitted",
+              "charged": "$16.88",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.27",
+          "virtual_now": "2026-11-18T12:56:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-15"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-15",
+                "stage": "submitted",
+                "charge_cents": 1688,
+                "prior_refunds_cents": 0,
+                "refund_cents": 1688,
+                "kept_cents": 0,
+                "refund_card_id": "c-1",
+                "token": "54cd877d6fc4c2aa91ecc47b23c9755228cff9e664536d2bb4d68b496f86547e",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 27
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/02-cancel-quote.png"
+        },
+        {
+          "step": 3,
+          "action": "Infra accepts that order at 12:58; press Refresh (the quote stays open) and then Confirm cancellation",
+          "expected": "stale_preview: the quote was taken before the status changed, so nothing is cancelled or refunded",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “preview again”",
+          "observed": {
+            "order": {
+              "id": "o-15",
+              "status": "preparing",
+              "charged": "$16.88",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.28",
+          "virtual_now": "2026-11-18T12:58:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 27
+                },
+                "event": {
+                  "event_id": "evidence-accept-2",
+                  "at": "2026-11-18T12:58:00-05:00",
+                  "operation": "order.accepted",
+                  "payload": {
+                    "order_id": "o-15"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-accept-2",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-accept-2",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:56:00-05:00",
+                  "applied_at": "2026-11-18T12:58:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 28
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.cancel.confirm",
+              "arguments": {
+                "order_id": "o-15",
+                "token": "54cd877d6fc4c2aa91ecc47b23c9755228cff9e664536d2bb4d68b496f86547e",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 28
+                },
+                "request_id": "web-evidence-0023"
+              },
+              "http": 200,
+              "result": {
+                "status": "stale_preview",
+                "message": "The order changed since the preview; preview again.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 28
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/03-cancel-quote-stale.png"
+        },
+        {
+          "step": 4,
+          "action": "Press Cancel order again",
+          "expected": "A new quote for a preparing order: the delivery fee and tip refunded, the rest kept",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the amount kept: “$13.89”",
+          "observed": {
+            "order": {
+              "id": "o-15",
+              "status": "preparing",
+              "charged": "$16.88",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.28",
+          "virtual_now": "2026-11-18T12:58:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-15"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-15",
+                "stage": "preparing",
+                "charge_cents": 1688,
+                "prior_refunds_cents": 0,
+                "refund_cents": 299,
+                "kept_cents": 1389,
+                "refund_card_id": "c-1",
+                "token": "46ccdc2ab75d35ab0888088c80d31ed52bbcaff0082861768cae93b5e497f8d5",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 28
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.orders.cancel.preview",
+              "arguments": {
+                "order_id": "o-15"
+              },
+              "result_summary": {
+                "refund": "$2.99",
+                "kept": "$13.89"
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/04-cancel-requote.png"
+        },
+        {
+          "step": 5,
+          "action": "With that quote open, Infra records the courier's pickup at 12:59; without a Refresh, press Confirm cancellation",
+          "expected": "stale_version: the cancellation is refused; the order is on the way and nothing is refunded",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “Plateway changed since this page last read it”",
+          "observed": {
+            "order": {
+              "id": "o-15",
+              "status": "picked_up",
+              "charged": "$16.88",
+              "refunds": [],
+              "rating": null
+            }
+          },
+          "version": "1.29",
+          "virtual_now": "2026-11-18T12:59:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 28
+                },
+                "event": {
+                  "event_id": "evidence-pickup-2",
+                  "at": "2026-11-18T12:59:00-05:00",
+                  "operation": "order.picked_up",
+                  "payload": {
+                    "order_id": "o-15"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-pickup-2",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-pickup-2",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:58:00-05:00",
+                  "applied_at": "2026-11-18T12:59:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 29
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.cancel.confirm",
+              "arguments": {
+                "order_id": "o-15",
+                "token": "46ccdc2ab75d35ab0888088c80d31ed52bbcaff0082861768cae93b5e497f8d5",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 28
+                },
+                "request_id": "web-evidence-0024"
+              },
+              "http": 200,
+              "result": {
+                "status": "stale_version",
+                "message": "The observed version is stale; read the current state before retrying.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 29
+                },
+                "current_version": {
+                  "epoch": 1,
+                  "revision": 29
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/05-cancel-after-pickup.png"
+        },
+        {
+          "step": 6,
+          "action": "Open the delivered order, Report a problem, tick Pad Thai as missing; a second Agent MCP client reports the same line first; press Send report",
+          "expected": "stale_version: the page's report is refused; the line is refunded once, by the other client's report",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the refusal: “Plateway changed since this page last read it”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [
+                "$9.67 line_reported",
+                "$32.29 line_reported"
+              ],
+              "rating": {
+                "stars": 4,
+                "text": "Arrived hot."
+              }
+            }
+          },
+          "version": "1.30",
+          "virtual_now": "2026-11-18T12:59:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "second Agent MCP client",
+              "kind": "write",
+              "tool": "plateway.orders.report_issue",
+              "arguments": {
+                "order_id": "o-13",
+                "lines": [
+                  {
+                    "line_id": "ol-29",
+                    "kind": "missing"
+                  }
+                ],
+                "request_id": "evidence-main-5",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 29
+                }
+              },
+              "result": {
+                "order_id": "o-13",
+                "refunded_cents": 3229,
+                "order": {
+                  "id": "o-13",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "delivered",
+                  "mode": "asap",
+                  "placed_at": "2026-11-18T09:00:00-08:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-18T09:00:00-08:00",
+                  "accept_by": "2026-11-18T12:20:00-05:00",
+                  "estimated_delivery_at": "2026-11-18T12:55:00-05:00",
+                  "delivered_at": "2026-11-18T12:50:00-05:00",
+                  "lines": [
+                    {
+                      "id": "ol-29",
+                      "item_id": "mi-1",
+                      "name": "Pad Thai",
+                      "options": [
+                        {
+                          "id": "op-2",
+                          "name": "Medium",
+                          "price_delta_cents": 0
+                        },
+                        {
+                          "id": "op-5",
+                          "name": "Chicken",
+                          "price_delta_cents": 200
+                        }
+                      ],
+                      "quantity": 2,
+                      "label": "No peanuts, please",
+                      "unit_price_cents": 1495,
+                      "subtotal_cents": 2990,
+                      "tax_cents": 239,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": {
+                        "kind": "missing",
+                        "at": "2026-11-18T12:59:00-05:00"
+                      }
+                    },
+                    {
+                      "id": "ol-30",
+                      "item_id": "mi-3",
+                      "name": "Tom Yum Soup",
+                      "options": [],
+                      "quantity": 1,
+                      "label": null,
+                      "unit_price_cents": 895,
+                      "subtotal_cents": 895,
+                      "tax_cents": 72,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": {
+                        "kind": "missing",
+                        "at": "2026-11-18T12:50:00-05:00"
+                      }
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 466,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 3885,
+                  "tax_cents": 311,
+                  "tip_cents": 200,
+                  "total_cents": 5161,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 5161,
+                    "at": "2026-11-18T09:00:00-08:00"
+                  },
+                  "refunds": [
+                    {
+                      "id": "rf-5",
+                      "amount_cents": 967,
+                      "reason": "line_reported",
+                      "line_id": "ol-30",
+                      "at": "2026-11-18T12:50:00-05:00"
+                    },
+                    {
+                      "id": "rf-6",
+                      "amount_cents": 3229,
+                      "reason": "line_reported",
+                      "line_id": "ol-29",
+                      "at": "2026-11-18T12:59:00-05:00"
+                    }
+                  ],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T09:00:00-08:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    },
+                    {
+                      "at": "2026-11-18T12:05:00-05:00",
+                      "status": "preparing",
+                      "note": "Accepted by the restaurant"
+                    },
+                    {
+                      "at": "2026-11-18T12:15:00-05:00",
+                      "status": null,
+                      "note": "Delayed; new estimate 2026-11-18T12:55:00-05:00"
+                    },
+                    {
+                      "at": "2026-11-18T12:30:00-05:00",
+                      "status": "picked_up",
+                      "note": "Picked up by the courier"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": "delivered",
+                      "note": "Delivered"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": null,
+                      "note": "Line ol-30 reported missing and refunded"
+                    },
+                    {
+                      "at": "2026-11-18T12:50:00-05:00",
+                      "status": null,
+                      "note": "Rated 4 stars"
+                    },
+                    {
+                      "at": "2026-11-18T12:59:00-05:00",
+                      "status": null,
+                      "note": "Line ol-29 reported missing and refunded"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": {
+                    "stars": 4,
+                    "text": "Arrived hot.",
+                    "at": "2026-11-18T12:50:00-05:00"
+                  },
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 4196
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 30
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.report_issue",
+              "arguments": {
+                "order_id": "o-13",
+                "lines": [
+                  {
+                    "line_id": "ol-29",
+                    "kind": "missing"
+                  }
+                ],
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 29
+                },
+                "request_id": "web-evidence-0025"
+              },
+              "http": 200,
+              "result": {
+                "status": "stale_version",
+                "message": "The observed version is stale; read the current state before retrying.",
+                "applied": false,
+                "version": {
+                  "epoch": 1,
+                  "revision": 30
+                },
+                "current_version": {
+                  "epoch": 1,
+                  "revision": 30
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/06-report-conflict.png"
+        },
+        {
+          "step": 7,
+          "action": "Press Refresh",
+          "expected": "Pad Thai shows as reported, with one refund",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the refund row: “Reported item: Pad Thai”",
+          "observed": {
+            "order": {
+              "id": "o-13",
+              "status": "delivered",
+              "charged": "$51.61",
+              "refunds": [
+                "$9.67 line_reported",
+                "$32.29 line_reported"
+              ],
+              "rating": {
+                "stars": 4,
+                "text": "Arrived hot."
+              }
+            }
+          },
+          "version": "1.30",
+          "virtual_now": "2026-11-18T12:59:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "12-conflicts/07-report-refreshed.png"
+        }
+      ]
+    },
+    {
+      "id": "13-tracking-outcomes",
+      "title": "Order outcomes from the restaurant and the clock",
+      "workflow": "Order tracking",
+      "scope": "Required (W2), failure and timer outcomes",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Infra reports Elote unavailable on the Masa Verde order being prepared (13:00); press Refresh",
+          "expected": "Elote is removed and refunded (subtotal and tax); the rest of the order goes ahead",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the refund row: “Unavailable item: Elote”",
+          "observed": {
+            "order": {
+              "id": "o-11",
+              "status": "preparing",
+              "charged": "$28.18",
+              "refunds": [
+                "$6.43 line_unavailable"
+              ],
+              "rating": null
+            }
+          },
+          "version": "1.31",
+          "virtual_now": "2026-11-18T13:00:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 30
+                },
+                "event": {
+                  "event_id": "evidence-unavailable-1",
+                  "at": "2026-11-18T13:00:00-05:00",
+                  "operation": "order.item_unavailable",
+                  "payload": {
+                    "order_id": "o-11",
+                    "line_id": "ol-24"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-unavailable-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-unavailable-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T12:59:00-05:00",
+                  "applied_at": "2026-11-18T13:00:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 31
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "13-tracking-outcomes/01-item-unavailable.png"
+        },
+        {
+          "step": 2,
+          "action": "Check out the three Fresh Spring Rolls in the cart; Infra rejects the new order for the restaurant at 13:02; press Refresh",
+          "expected": "Cancelled, declined by the restaurant, with a full refund",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the cancellation reason: “declined by the restaurant”",
+          "observed": {
+            "order": {
+              "id": "o-16",
+              "status": "cancelled",
+              "charged": "$29.99",
+              "refunds": [
+                "$29.99 cancelled"
+              ],
+              "rating": null
+            },
+            "cancellation": {
+              "at": "2026-11-18T13:02:00-05:00",
+              "reason": "rejected",
+              "stage": "submitted",
+              "refunded_cents": 2999,
+              "kept_cents": 0
+            }
+          },
+          "version": "1.33",
+          "virtual_now": "2026-11-18T13:02:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "preview",
+              "tool": "plateway.checkout.preview",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0
+              },
+              "http": 200,
+              "result": {
+                "restaurant_id": "r-1",
+                "lines": [
+                  {
+                    "id": "ol-35",
+                    "item_id": "mi-4",
+                    "name": "Fresh Spring Rolls",
+                    "options": [],
+                    "quantity": 3,
+                    "label": null,
+                    "unit_price_cents": 750,
+                    "subtotal_cents": 2250,
+                    "tax_cents": 180
+                  }
+                ],
+                "fees": {
+                  "delivery_cents": 299,
+                  "service_cents": 270,
+                  "small_order_cents": 0
+                },
+                "subtotal_cents": 2250,
+                "tax_cents": 180,
+                "tip_cents": 0,
+                "total_cents": 2999,
+                "mode": "asap",
+                "estimate_minutes": 35,
+                "estimated_delivery_at": "2026-11-18T13:35:00-05:00",
+                "delivery_at": null,
+                "release_at": null,
+                "token": "a937cfc285b5acef02aad4257ae72bfec8978d756943ba6d8ebbf460f713d488",
+                "status": "ok",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 31
+                }
+              }
+            },
+            {
+              "client": "the page in the browser (POST /api/call)",
+              "kind": "write",
+              "tool": "plateway.orders.place",
+              "arguments": {
+                "address_id": "a-1",
+                "card_id": "c-1",
+                "when": {
+                  "mode": "asap"
+                },
+                "tip_cents": 0,
+                "token": "a937cfc285b5acef02aad4257ae72bfec8978d756943ba6d8ebbf460f713d488",
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 31
+                },
+                "request_id": "web-evidence-0026"
+              },
+              "http": 200,
+              "result": {
+                "order_id": "o-16",
+                "order": {
+                  "id": "o-16",
+                  "restaurant_id": "r-1",
+                  "address_id": "a-1",
+                  "card_id": "c-1",
+                  "status": "submitted",
+                  "mode": "asap",
+                  "placed_at": "2026-11-18T13:00:00-05:00",
+                  "delivery_at": null,
+                  "release_at": null,
+                  "submitted_at": "2026-11-18T13:00:00-05:00",
+                  "accept_by": "2026-11-18T13:20:00-05:00",
+                  "estimated_delivery_at": "2026-11-18T13:35:00-05:00",
+                  "delivered_at": null,
+                  "lines": [
+                    {
+                      "id": "ol-35",
+                      "item_id": "mi-4",
+                      "name": "Fresh Spring Rolls",
+                      "options": [],
+                      "quantity": 3,
+                      "label": null,
+                      "unit_price_cents": 750,
+                      "subtotal_cents": 2250,
+                      "tax_cents": 180,
+                      "removed": false,
+                      "removed_reason": null,
+                      "removed_at": null,
+                      "report": null
+                    }
+                  ],
+                  "fees": {
+                    "delivery_cents": 299,
+                    "service_cents": 270,
+                    "small_order_cents": 0
+                  },
+                  "subtotal_cents": 2250,
+                  "tax_cents": 180,
+                  "tip_cents": 0,
+                  "total_cents": 2999,
+                  "charge": {
+                    "card_id": "c-1",
+                    "amount_cents": 2999,
+                    "at": "2026-11-18T13:00:00-05:00"
+                  },
+                  "refunds": [],
+                  "timeline": [
+                    {
+                      "at": "2026-11-18T13:00:00-05:00",
+                      "status": "submitted",
+                      "note": "Order placed"
+                    }
+                  ],
+                  "cancellation": null,
+                  "rating": null,
+                  "restaurant_name": "Basil Row",
+                  "refunded_cents": 0
+                },
+                "status": "committed",
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 32
+                }
+              }
+            },
+            {
+              "client": "Infra MCP client",
+              "kind": "event",
+              "tool": "env.apply_event",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 32
+                },
+                "event": {
+                  "event_id": "evidence-reject-1",
+                  "at": "2026-11-18T13:02:00-05:00",
+                  "operation": "order.rejected",
+                  "payload": {
+                    "order_id": "o-16",
+                    "reason": "Kitchen closed early"
+                  }
+                }
+              },
+              "result": {
+                "status": "committed",
+                "event_id": "evidence-reject-1",
+                "trace": {
+                  "run_id": "plateway-web",
+                  "app_id": "plateway",
+                  "event_id": "evidence-reject-1",
+                  "cloud_event": null,
+                  "received_at": "host wall-clock time, left out so that repeated captures are identical",
+                  "virtual_received_at": "2026-11-18T13:00:00-05:00",
+                  "applied_at": "2026-11-18T13:02:00-05:00",
+                  "processed_at": "host wall-clock time, left out so that repeated captures are identical"
+                },
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 33
+                }
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "13-tracking-outcomes/02-rejected.png"
+        },
+        {
+          "step": 3,
+          "action": "Infra moves the clock to Thursday 18:30, after the scheduled order's release time (18:25); open that order and press Refresh",
+          "expected": "The scheduled order has been sent to the restaurant and is waiting for it; reads show this before any write stores it",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the order in the list: “Waiting for the restaurant”",
+          "observed": {
+            "stored_status": "scheduled",
+            "read_status": "submitted"
+          },
+          "version": "1.34",
+          "virtual_now": "2026-11-19T18:30:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "clock",
+              "tool": "env.advance_time",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 33
+                },
+                "virtual_now": "2026-11-19T18:30:00-05:00",
+                "request_id": "evidence-clock-2026-11-19T18:30:00-05:00"
+              },
+              "result": {
+                "status": "committed",
+                "request_id": "evidence-clock-2026-11-19T18:30:00-05:00",
+                "previous_virtual_now": "2026-11-18T13:02:00-05:00",
+                "virtual_now": "2026-11-19T18:30:00-05:00",
+                "advanced": true,
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 34
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.orders.get",
+              "arguments": {
+                "order_id": "o-14"
+              },
+              "result_summary": {
+                "status": "submitted",
+                "released_at": "2026-11-19T18:25:00-05:00",
+                "accept_by": "2026-11-19T18:45:00-05:00"
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "13-tracking-outcomes/03-released.png"
+        },
+        {
+          "step": 4,
+          "action": "Infra moves the clock to 18:46, past the 20 minutes the restaurant had to accept; press Refresh",
+          "expected": "Cancelled, not accepted by the restaurant in time, with a full refund",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the cancellation reason: “not accepted by the restaurant in time”",
+          "observed": {
+            "stored_status": "scheduled",
+            "read_status": "cancelled"
+          },
+          "version": "1.35",
+          "virtual_now": "2026-11-19T18:46:00-05:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "clock",
+              "tool": "env.advance_time",
+              "arguments": {
+                "expected_version": {
+                  "epoch": 1,
+                  "revision": 34
+                },
+                "virtual_now": "2026-11-19T18:46:00-05:00",
+                "request_id": "evidence-clock-2026-11-19T18:46:00-05:00"
+              },
+              "result": {
+                "status": "committed",
+                "request_id": "evidence-clock-2026-11-19T18:46:00-05:00",
+                "previous_virtual_now": "2026-11-19T18:30:00-05:00",
+                "virtual_now": "2026-11-19T18:46:00-05:00",
+                "advanced": true,
+                "app_id": "plateway",
+                "version": {
+                  "epoch": 1,
+                  "revision": 35
+                }
+              }
+            },
+            {
+              "client": "second Agent MCP client",
+              "kind": "read",
+              "tool": "plateway.orders.get",
+              "arguments": {
+                "order_id": "o-14"
+              },
+              "result_summary": {
+                "status": "cancelled",
+                "reason": "not_accepted",
+                "refunds": [
+                  "$17.72"
+                ]
+              }
+            }
+          ],
+          "acceptance_check": null,
+          "screenshot": "13-tracking-outcomes/04-not-accepted.png"
+        }
+      ]
+    },
+    {
+      "id": "14-account",
+      "title": "Account",
+      "workflow": "Account",
+      "scope": "Required (W1, read-only account view)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Open Account",
+          "expected": "The holder, the saved addresses and the masked cards, with the expired card marked and unavailable at checkout",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the expired card: “Expired 10/2026”",
+          "observed": {
+            "addresses": [
+              "Home",
+              "Office",
+              "Lake cabin"
+            ],
+            "cards": [
+              "•••• 4242",
+              "•••• 0005",
+              "•••• 1881"
+            ]
+          },
+          "version": "1.35",
+          "virtual_now": "2026-11-19T18:46:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": "A status message stays on the screen where it happened, and Account marks the expired card",
+          "screenshot": "14-account/01-account.png"
+        }
+      ]
+    },
+    {
+      "id": "15-phone",
+      "title": "Phone width",
+      "workflow": "Layout at 390 px",
+      "scope": "Required (GUI)",
+      "run": "plateway-web",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Set the viewport to 390 × 844 and open Orders",
+          "expected": "Every navigation tab visible; no horizontal overflow",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the last navigation tab: “Account”",
+          "observed": {
+            "viewport": "390x844"
+          },
+          "version": "1.35",
+          "virtual_now": "2026-11-19T18:46:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": "At 390 px every navigation tab is visible and there is no horizontal overflow in Orders, a restaurant with a dish open, Cart and Account",
+          "screenshot": "15-phone/01-orders.png"
+        },
+        {
+          "step": 2,
+          "action": "Open Basil Row and Pad Thai",
+          "expected": "The dish form fits the width",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the first spice option",
+          "observed": {
+            "viewport": "390x844"
+          },
+          "version": "1.35",
+          "virtual_now": "2026-11-19T18:46:00-05:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "15-phone/02-dish.png"
+        }
+      ]
+    },
+    {
+      "id": "16-policy",
+      "title": "A policy without orders.rate",
+      "workflow": "Rate",
+      "scope": "Required (GUI): denied by policy, on a separate run",
+      "run": "plateway-web-restricted",
+      "steps": [
+        {
+          "step": 1,
+          "action": "On a second fresh run, open the Lantern Noodle House order delivered on Sunday 15 November and press Rate order",
+          "expected": "The rating form is open",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the Submit rating control: “Submit rating”",
+          "observed": {
+            "order_rating": null
+          },
+          "version": "1.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [],
+          "acceptance_check": null,
+          "screenshot": "16-policy/01-form-open.png"
+        },
+        {
+          "step": 2,
+          "action": "Infra loads the same fixture with a policy that omits plateway.orders.rate; press Refresh",
+          "expected": "The open rating form and the Rate control are gone; Reorder stays",
+          "result": "as expected",
+          "submits": false,
+          "on_screen": "the remaining order action: “Reorder”",
+          "observed": {
+            "order_rating": null
+          },
+          "version": "2.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "Infra MCP client",
+              "kind": "management",
+              "tool": "env.load_seed",
+              "arguments": {
+                "data": "fixtures/minimal.json",
+                "policies": "fixtures/policies.json without plateway.orders.rate",
+                "request_id": "evidence-policy"
+              },
+              "result": {
+                "status": "ready"
+              }
+            }
+          ],
+          "acceptance_check": "After the policy drops orders.rate, Refresh removes the open rating form and the Rate control while the other order actions stay",
+          "screenshot": "16-policy/02-rate-removed.png"
+        },
+        {
+          "step": 3,
+          "action": "Send plateway.orders.rate directly from the page's business session",
+          "expected": "HTTP 403; the order stays unrated",
+          "result": "as expected",
+          "submits": true,
+          "on_screen": "the order without a Rate control: “Reorder”",
+          "observed": {
+            "order_rating": null
+          },
+          "version": "2.0",
+          "virtual_now": "2026-11-18T09:00:00-08:00",
+          "mcp_calls": [
+            {
+              "client": "the page's business session, sent directly to /api/call",
+              "kind": "forced call",
+              "tool": "plateway.orders.rate",
+              "arguments": {
+                "order_id": "o-10",
+                "stars": 5,
+                "expected_version": {
+                  "epoch": 2,
+                  "revision": 0
+                },
+                "request_id": "evidence-forced-rate"
+              },
+              "http": 403,
+              "result": {
+                "error": "Business operation not permitted"
+              }
+            }
+          ],
+          "acceptance_check": "A forced orders.rate call is refused (403) and the order stays unrated",
+          "screenshot": "16-policy/03-forced-call.png"
+        }
+      ]
+    }
+  ]
+}

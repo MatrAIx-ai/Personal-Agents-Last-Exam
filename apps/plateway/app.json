@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "app_id": "plateway",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:plateway"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "restaurant.status_changed",
+    "menu_item.availability_changed",
+    "menu_item.price_changed",
+    "order.accepted",
+    "order.rejected",
+    "order.picked_up",
+    "order.delayed",
+    "order.delivered",
+    "order.item_unavailable"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic restaurants, menus, couriers and payments only; no real brands, menus, people or payment data.",
+    "One account holder per App instance; ordering for someone else means ordering from this account.",
+    "Customer-facing business GUI on the shared local Web Host (gui/); no restaurant-facing or courier screens, whose actions are Infra events.",
+    "Time is the environment's: no clock event and no scheduler. Scheduled releases and the 20-minute acceptance limit are due times on each order, applied from the supplied virtual time.",
+    "No attachments or media: resources are not used."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

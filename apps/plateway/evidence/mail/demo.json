@@ -1,0 +1,1422 @@
+{
+  "schema": "plateway.mail-demonstration.v1",
+  "captured_on": "2026-11-27",
+  "command": "node apps/plateway/evidence/tools/mail.cjs",
+  "node": "v25.8.1",
+  "plateway_load_digest": "8f079543e0951a48ab1f0b246c0b3427daf4a63e17f5b694917d8b09e4fe7ef3",
+  "host": {
+    "runtime_version": "1.6.0",
+    "runtime_tree_sha256": "92112d954fe15d3ee9bb522b7c56841781e3c73d31202cb687d6eefdb0e2796a",
+    "files": {
+      "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+      "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+      "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+      "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+      "apps.registry.json": "fa87fb65e3ce19be1256796a579e5df0bd5cf2db8438551d965daea2b4f93cc2"
+    }
+  },
+  "participants": {
+    "runtime": {
+      "version": "1.6.0",
+      "core_api": "1.2.0"
+    },
+    "plateway": {
+      "app_id": "plateway",
+      "version": "1.0.0",
+      "publishes": [
+        {
+          "channel": "channel.email",
+          "schema_id": "urn:pale:email-message:2",
+          "schema_ref": "schemas/router-message.schema.json",
+          "status": "implemented",
+          "event_type": "org.pale.mail.notification.v1",
+          "payload_schema_id": "urn:pale:email-payload:1"
+        }
+      ]
+    },
+    "mail": {
+      "app_id": "mail",
+      "version": "1.3.0",
+      "package_sha256": "c3ab5a9a87d65f921c9d3f8bd1c0bdf06827ef16cb244230539e0b5637357ae4",
+      "receives": [
+        {
+          "channel": "channel.email",
+          "schema_id": "urn:pale:email-message:2",
+          "schema_ref": "schemas/router-message.schema.json",
+          "status": "implemented",
+          "mcp_tool": "env.apply_event",
+          "operation": "mail.receive_notification",
+          "event_type": "org.pale.mail.notification.v1",
+          "payload_schema_id": "urn:pale:email-payload:1"
+        }
+      ]
+    },
+    "wire_schema": {
+      "id": "urn:pale:email-message:2",
+      "sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0",
+      "identical_in_runtime_and_mail": true
+    },
+    "payload_schema": {
+      "id": "urn:pale:email-payload:1",
+      "sha256": "8cec4c19e42dc9c027b84798984a7950471457195e606e7583fe9f00cf635795"
+    },
+    "router": {
+      "module": "runtime/messaging (Router service, trusted stdio)",
+      "grants": [
+        {
+          "app_id": "mail",
+          "account_id": "mail-p-1",
+          "channel": "channel.email"
+        }
+      ]
+    },
+    "sender": "apps/plateway/infra/sender.cjs",
+    "mail_account": {
+      "app_id": "mail",
+      "account_id": "mail-p-1",
+      "owner_person_id": "p-1"
+    }
+  },
+  "gui": {
+    "run": "mail-gui-demo",
+    "browser": "chromium 141.0.7390.37",
+    "viewport": "1280x1000",
+    "locale": "en-US",
+    "browser_timezone": "America/New_York",
+    "initial": {
+      "plateway": {
+        "run_id": "mail-gui-demo",
+        "account_id": "plateway-p-1",
+        "owner_person_id": "p-1",
+        "version": "2.0",
+        "virtual_now": "2026-11-18T09:00:00-08:00",
+        "orders": 52,
+        "notices_in_seed": 122,
+        "bound_accounts": [
+          {
+            "app_id": "plateway",
+            "account_id": "plateway-p-1",
+            "owner_person_id": "p-1"
+          },
+          {
+            "app_id": "mail",
+            "account_id": "mail-p-1",
+            "owner_person_id": "p-1"
+          }
+        ]
+      },
+      "mail": {
+        "run_id": "mail-gui-demo",
+        "account_id": "mail-p-1",
+        "owner_person_id": "p-1",
+        "address": "mail-p-1@pale.example",
+        "version": "2.0",
+        "virtual_now": "2026-11-15T09:00:00-08:00",
+        "messages": 0
+      }
+    },
+    "order_ids": [
+      "o-13",
+      "o-14"
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "app": "Plateway (GUI)",
+        "action": "Add Tom Yum Soup and Fresh Spring Rolls, open Cart, tip $2.00, Preview total, Place order",
+        "expected": "Local commit in Plateway: one order and a notice.order_placed entry in its notice log; nothing is sent yet",
+        "observed": {
+          "order_id": "o-13",
+          "status": "submitted",
+          "pending_notices": [
+            "n-4 notice.order_placed"
+          ],
+          "mail_messages": 0
+        },
+        "version": "plateway 2.3",
+        "screenshot": "gui/01-plateway-order-placed.png"
+      },
+      {
+        "step": 2,
+        "app": "Plateway (Infra events, then GUI Refresh)",
+        "action": "Infra applies order.accepted, order.delayed (new estimate 12:50), order.picked_up and order.delivered, as a task runner would; press Refresh",
+        "expected": "Delivered; accepted, delayed and delivered notices join the placed one in Plateway's log (pickup has none); Mail is still empty",
+        "observed": {
+          "events": [
+            "order.accepted committed",
+            "order.delayed committed",
+            "order.picked_up committed",
+            "order.delivered committed"
+          ],
+          "pending_notices": [
+            "n-4 notice.order_placed",
+            "n-5 notice.order_accepted",
+            "n-6 notice.order_delayed",
+            "n-7 notice.order_delivered"
+          ],
+          "mail_messages": 0
+        },
+        "version": "plateway 2.7",
+        "screenshot": "gui/02-plateway-delivered.png"
+      },
+      {
+        "step": 3,
+        "app": "Plateway (GUI)",
+        "action": "Report a problem: Tom Yum Soup missing; Send report",
+        "expected": "The line is refunded and a notice.item_refunded entry is written locally",
+        "observed": {
+          "refund": {
+            "id": "rf-4",
+            "line_id": "ol-28",
+            "amount_cents": 967
+          },
+          "pending_notices": [
+            "n-4 notice.order_placed",
+            "n-5 notice.order_accepted",
+            "n-6 notice.order_delayed",
+            "n-7 notice.order_delivered",
+            "n-8 notice.item_refunded"
+          ]
+        },
+        "version": "plateway 2.8",
+        "screenshot": "gui/03-plateway-reported.png"
+      },
+      {
+        "step": 4,
+        "app": "Plateway (GUI)",
+        "action": "Order Mango Sticky Rice, then Cancel order and Confirm cancellation",
+        "expected": "A second order, cancelled with a full refund; notice.order_placed and notice.order_cancelled are written locally",
+        "observed": {
+          "order_id": "o-14",
+          "status": "cancelled",
+          "pending_notices": [
+            "n-4 notice.order_placed",
+            "n-5 notice.order_accepted",
+            "n-6 notice.order_delayed",
+            "n-7 notice.order_delivered",
+            "n-8 notice.item_refunded",
+            "n-9 notice.order_placed",
+            "n-10 notice.order_cancelled"
+          ]
+        },
+        "version": "plateway 2.11",
+        "screenshot": "gui/04-plateway-cancelled.png"
+      },
+      {
+        "step": 5,
+        "app": "Messaging and Mail (Infra runs the sender; Mail GUI)",
+        "action": "Infra brings Mail's clock to Plateway's and runs sender.send with the Router and the grant from infra/router.config.example.json; open the Mail page for the same run",
+        "expected": "Receiver commit: one committed Router receipt and one inbox record in mail-p-1 per notice, all six notice kinds, shown in Mail's own page; Plateway unchanged",
+        "observed": {
+          "receipts": [
+            "e2-n-4 notice.order_placed -> committed router-af3b85a4bc3c9f8d12d5f82492a8f20c",
+            "e2-n-5 notice.order_accepted -> committed router-28f0fb73404689ad52f58af2da2acd09",
+            "e2-n-6 notice.order_delayed -> committed router-8f3f2820b809105a20686f99ff6e9f85",
+            "e2-n-7 notice.order_delivered -> committed router-8474cf3c0326ff8c1d664550054af94a",
+            "e2-n-8 notice.item_refunded -> committed router-e9116e225b92fd45f1e175fb6cb325ba",
+            "e2-n-9 notice.order_placed -> committed router-ba2a76e918c66ed8ae869998c33217a0",
+            "e2-n-10 notice.order_cancelled -> committed router-70e2f9cc382de56f4ea7d608f1a5b975"
+          ],
+          "mail_records": [
+            "router-af3b85a4bc3c9f8d12d5f82492a8f20c Order placed",
+            "router-28f0fb73404689ad52f58af2da2acd09 Order accepted",
+            "router-8f3f2820b809105a20686f99ff6e9f85 Order delayed",
+            "router-8474cf3c0326ff8c1d664550054af94a Order delivered",
+            "router-e9116e225b92fd45f1e175fb6cb325ba Item refunded",
+            "router-ba2a76e918c66ed8ae869998c33217a0 Order placed",
+            "router-70e2f9cc382de56f4ea7d608f1a5b975 Order cancelled"
+          ],
+          "mail_event_status": [
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed"
+          ],
+          "plateway_version_unchanged": true
+        },
+        "version": "mail 2.8, plateway 2.11",
+        "screenshot": "gui/05-mail-inbox.png"
+      },
+      {
+        "step": 6,
+        "app": "Mail (GUI and Agent MCP)",
+        "action": "Open the “Item refunded” message; read it through Mail's Agent tool mail.get",
+        "expected": "The notice text as Plateway wrote it, from the Plateway sender address to mail-p-1",
+        "observed": {
+          "record_id": "router-e9116e225b92fd45f1e175fb6cb325ba",
+          "status": "ok",
+          "subject": "Item refunded",
+          "from": "plateway@pale.example",
+          "to": [
+            "mail-p-1@pale.example"
+          ],
+          "folder": "inbox",
+          "received_at": "2026-11-18T12:45:00-05:00",
+          "body_matches_notice": true
+        },
+        "version": "mail 2.8",
+        "screenshot": "gui/06-mail-refund.png"
+      },
+      {
+        "step": 7,
+        "app": "Mail (GUI and Agent MCP)",
+        "action": "Open the “Order cancelled” message; read it through Mail's Agent tool mail.get",
+        "expected": "The notice text as Plateway wrote it, from the Plateway sender address to mail-p-1",
+        "observed": {
+          "record_id": "router-70e2f9cc382de56f4ea7d608f1a5b975",
+          "status": "ok",
+          "subject": "Order cancelled",
+          "from": "plateway@pale.example",
+          "to": [
+            "mail-p-1@pale.example"
+          ],
+          "folder": "inbox",
+          "received_at": "2026-11-18T12:45:00-05:00",
+          "body_matches_notice": true
+        },
+        "version": "mail 2.8",
+        "screenshot": "gui/07-mail-cancelled.png"
+      }
+    ],
+    "stages": {
+      "local_commit": {
+        "app": "plateway",
+        "order_ids": [
+          "o-13",
+          "o-14"
+        ],
+        "notices": [
+          {
+            "id": "n-4",
+            "kind": "notice.order_placed",
+            "at": "2026-11-18T09:00:00-08:00"
+          },
+          {
+            "id": "n-5",
+            "kind": "notice.order_accepted",
+            "at": "2026-11-18T12:04:00-05:00"
+          },
+          {
+            "id": "n-6",
+            "kind": "notice.order_delayed",
+            "at": "2026-11-18T12:10:00-05:00"
+          },
+          {
+            "id": "n-7",
+            "kind": "notice.order_delivered",
+            "at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "n-8",
+            "kind": "notice.item_refunded",
+            "at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "n-9",
+            "kind": "notice.order_placed",
+            "at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "n-10",
+            "kind": "notice.order_cancelled",
+            "at": "2026-11-18T12:45:00-05:00"
+          }
+        ],
+        "plateway_version": "2.11"
+      },
+      "receiver_commit": {
+        "app": "mail",
+        "account_id": "mail-p-1",
+        "receipts": [
+          {
+            "notice_id": "n-4",
+            "kind": "notice.order_placed",
+            "message_id": "e2-n-4",
+            "request_id": "e2-n-4",
+            "status": "committed",
+            "event_id": "router-af3b85a4bc3c9f8d12d5f82492a8f20c",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T09:00:00-08:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "notice_id": "n-5",
+            "kind": "notice.order_accepted",
+            "message_id": "e2-n-5",
+            "request_id": "e2-n-5",
+            "status": "committed",
+            "event_id": "router-28f0fb73404689ad52f58af2da2acd09",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T12:04:00-05:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "notice_id": "n-6",
+            "kind": "notice.order_delayed",
+            "message_id": "e2-n-6",
+            "request_id": "e2-n-6",
+            "status": "committed",
+            "event_id": "router-8f3f2820b809105a20686f99ff6e9f85",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T12:10:00-05:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "notice_id": "n-7",
+            "kind": "notice.order_delivered",
+            "message_id": "e2-n-7",
+            "request_id": "e2-n-7",
+            "status": "committed",
+            "event_id": "router-8474cf3c0326ff8c1d664550054af94a",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T12:45:00-05:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "notice_id": "n-8",
+            "kind": "notice.item_refunded",
+            "message_id": "e2-n-8",
+            "request_id": "e2-n-8",
+            "status": "committed",
+            "event_id": "router-e9116e225b92fd45f1e175fb6cb325ba",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T12:45:00-05:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "notice_id": "n-9",
+            "kind": "notice.order_placed",
+            "message_id": "e2-n-9",
+            "request_id": "e2-n-9",
+            "status": "committed",
+            "event_id": "router-ba2a76e918c66ed8ae869998c33217a0",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T12:45:00-05:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "notice_id": "n-10",
+            "kind": "notice.order_cancelled",
+            "message_id": "e2-n-10",
+            "request_id": "e2-n-10",
+            "status": "committed",
+            "event_id": "router-70e2f9cc382de56f4ea7d608f1a5b975",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "channel": "channel.email",
+            "cloud_event_time": "2026-11-18T12:45:00-05:00",
+            "applied_at": "2026-11-18T12:45:00-05:00"
+          }
+        ],
+        "mail_event_status": [
+          {
+            "event_id": "router-af3b85a4bc3c9f8d12d5f82492a8f20c",
+            "status": "committed"
+          },
+          {
+            "event_id": "router-28f0fb73404689ad52f58af2da2acd09",
+            "status": "committed"
+          },
+          {
+            "event_id": "router-8f3f2820b809105a20686f99ff6e9f85",
+            "status": "committed"
+          },
+          {
+            "event_id": "router-8474cf3c0326ff8c1d664550054af94a",
+            "status": "committed"
+          },
+          {
+            "event_id": "router-e9116e225b92fd45f1e175fb6cb325ba",
+            "status": "committed"
+          },
+          {
+            "event_id": "router-ba2a76e918c66ed8ae869998c33217a0",
+            "status": "committed"
+          },
+          {
+            "event_id": "router-70e2f9cc382de56f4ea7d608f1a5b975",
+            "status": "committed"
+          }
+        ],
+        "records": [
+          {
+            "id": "router-af3b85a4bc3c9f8d12d5f82492a8f20c",
+            "subject": "Order placed",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "router-28f0fb73404689ad52f58af2da2acd09",
+            "subject": "Order accepted",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "router-8f3f2820b809105a20686f99ff6e9f85",
+            "subject": "Order delayed",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "router-8474cf3c0326ff8c1d664550054af94a",
+            "subject": "Order delivered",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "router-e9116e225b92fd45f1e175fb6cb325ba",
+            "subject": "Item refunded",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "router-ba2a76e918c66ed8ae869998c33217a0",
+            "subject": "Order placed",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          },
+          {
+            "id": "router-70e2f9cc382de56f4ea7d608f1a5b975",
+            "subject": "Order cancelled",
+            "folder": "inbox",
+            "received_at": "2026-11-18T12:45:00-05:00"
+          }
+        ],
+        "mail_version": "2.8"
+      },
+      "business_confirmation": "Not claimed. A committed Mail record shows delivery into the recipient's Mail account, not that the person read or acted on it."
+    },
+    "retry": {
+      "receipts": [
+        {
+          "message_id": "e2-n-4",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-af3b85a4bc3c9f8d12d5f82492a8f20c"
+        },
+        {
+          "message_id": "e2-n-5",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-28f0fb73404689ad52f58af2da2acd09"
+        },
+        {
+          "message_id": "e2-n-6",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-8f3f2820b809105a20686f99ff6e9f85"
+        },
+        {
+          "message_id": "e2-n-7",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-8474cf3c0326ff8c1d664550054af94a"
+        },
+        {
+          "message_id": "e2-n-8",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-e9116e225b92fd45f1e175fb6cb325ba"
+        },
+        {
+          "message_id": "e2-n-9",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-ba2a76e918c66ed8ae869998c33217a0"
+        },
+        {
+          "message_id": "e2-n-10",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-70e2f9cc382de56f4ea7d608f1a5b975"
+        }
+      ],
+      "mail_records": 7
+    },
+    "page_errors": 0
+  },
+  "integration": {
+    "command": "node apps/plateway/tests/mail.integration.cjs --evidence FILE",
+    "checks": [
+      {
+        "name": "Mail 1.3.0 is the receiver",
+        "status": "passed"
+      },
+      {
+        "name": "The package wire schema is byte-identical to the runtime contract",
+        "status": "passed"
+      },
+      {
+        "name": "The package wire schema is byte-identical to Mail's receive schema",
+        "status": "passed"
+      },
+      {
+        "name": "Only the run notices are pending, not seeded history",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for notice.order_placed matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for notice.order_accepted matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for notice.order_delivered matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Every notice is published with a committed receipt",
+        "status": "passed"
+      },
+      {
+        "name": "Message and request IDs come from the epoch and the notice",
+        "status": "passed"
+      },
+      {
+        "name": "One inbox record per notice, received at the synchronized time",
+        "status": "passed"
+      },
+      {
+        "name": "The delivered notice reads back in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "The receipt keeps the notice time as the CloudEvents time",
+        "status": "passed"
+      },
+      {
+        "name": "Publishing leaves Plateway unchanged",
+        "status": "passed"
+      },
+      {
+        "name": "An identical retry in the same Router session returns the first receipts marked duplicate",
+        "status": "passed"
+      },
+      {
+        "name": "A retry creates no second record",
+        "status": "passed"
+      },
+      {
+        "name": "A Plateway reset leaves Mail records unchanged",
+        "status": "passed"
+      },
+      {
+        "name": "Both clocks agree before the next delivery",
+        "status": "passed"
+      },
+      {
+        "name": "A notice written after a reset is a new message",
+        "status": "passed"
+      },
+      {
+        "name": "The run writes every notice kind: placed, accepted, delayed, item refunded, delivered and cancelled",
+        "status": "passed"
+      },
+      {
+        "name": "Every notice kind is published with a committed receipt",
+        "status": "passed"
+      },
+      {
+        "name": "One Mail record per notice, with the notice title as subject",
+        "status": "passed"
+      },
+      {
+        "name": "Every Mail body reads back as the notice text",
+        "status": "passed"
+      },
+      {
+        "name": "Mail records a committed receipt for every event",
+        "status": "passed"
+      },
+      {
+        "name": "Publishing leaves Plateway unchanged",
+        "status": "passed"
+      },
+      {
+        "name": "Skipping for lack of a grant changes neither App",
+        "status": "passed"
+      },
+      {
+        "name": "Without an Infra grant the sender publishes nothing",
+        "status": "passed"
+      },
+      {
+        "name": "A Router refusal changes neither App",
+        "status": "passed"
+      },
+      {
+        "name": "An ungranted publish is refused by the Router before dispatch, without halting",
+        "status": "passed"
+      },
+      {
+        "name": "A refused publish creates no Mail record",
+        "status": "passed"
+      },
+      {
+        "name": "The Router stays available after a pre-dispatch refusal",
+        "status": "passed"
+      },
+      {
+        "name": "An incompatible contract changes neither App",
+        "status": "passed"
+      },
+      {
+        "name": "An incompatible contract is rejected before dispatch",
+        "status": "passed"
+      },
+      {
+        "name": "An incompatible contract creates no Mail record",
+        "status": "passed"
+      },
+      {
+        "name": "A receiver rejection halts the Router",
+        "status": "passed"
+      },
+      {
+        "name": "A receiver rejection creates no Mail record",
+        "status": "passed"
+      },
+      {
+        "name": "A receiver rejection leaves Plateway committed state",
+        "status": "passed"
+      },
+      {
+        "name": "Later deliveries wait for reconciliation",
+        "status": "passed"
+      },
+      {
+        "name": "A receiver reset after Router setup invalidates the route",
+        "status": "passed"
+      },
+      {
+        "name": "No Mail record is created after the receiver reset",
+        "status": "passed"
+      },
+      {
+        "name": "A lost acknowledgement is unknown and halts the Router",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation in the same Mail epoch finds the committed event and exactly one record",
+        "status": "passed"
+      },
+      {
+        "name": "Plateway stays committed after an unknown acknowledgement",
+        "status": "passed"
+      },
+      {
+        "name": "The halted Router accepts no further delivery",
+        "status": "passed"
+      },
+      {
+        "name": "After a receiver reset the unknown outcome is recorded as indeterminate",
+        "status": "passed"
+      },
+      {
+        "name": "Without a bound Mail account nothing is published",
+        "status": "passed"
+      },
+      {
+        "name": "No Mail record is created",
+        "status": "passed"
+      },
+      {
+        "name": "The notice stays in the Plateway log",
+        "status": "passed"
+      }
+    ],
+    "cases": {
+      "mail-ok": {
+        "initial": {
+          "plateway": {
+            "run_id": "mail-ok",
+            "account_id": "plateway-p-1",
+            "owner_person_id": "p-1",
+            "version": "2.0",
+            "epoch": 2,
+            "virtual_now": "2026-11-18T12:00:00-05:00",
+            "notices_in_seed": 122,
+            "bound_accounts": [
+              {
+                "app_id": "plateway",
+                "account_id": "plateway-p-1",
+                "owner_person_id": "p-1"
+              },
+              {
+                "app_id": "mail",
+                "account_id": "mail-p-1",
+                "owner_person_id": "p-1"
+              }
+            ]
+          },
+          "mail": {
+            "run_id": "mail-ok",
+            "account_id": "mail-p-1",
+            "owner_person_id": "p-1",
+            "address": "mail-p-1@pale.example",
+            "version": "2.0",
+            "epoch": 2,
+            "messages": 0
+          }
+        },
+        "local_commit": {
+          "tool": "plateway.orders.place",
+          "order_id": "o-13",
+          "status": "committed",
+          "events": [
+            "committed",
+            "committed",
+            "committed"
+          ],
+          "plateway_version": "2.5",
+          "notices": [
+            {
+              "id": "n-4",
+              "kind": "notice.order_placed",
+              "title": "Order placed",
+              "at": "2026-11-18T12:00:00-05:00",
+              "order_id": "o-13"
+            },
+            {
+              "id": "n-5",
+              "kind": "notice.order_accepted",
+              "title": "Order accepted",
+              "at": "2026-11-18T12:04:00-05:00",
+              "order_id": "o-13"
+            },
+            {
+              "id": "n-6",
+              "kind": "notice.order_delivered",
+              "title": "Order delivered",
+              "at": "2026-11-18T12:38:00-05:00",
+              "order_id": "o-13"
+            }
+          ]
+        },
+        "command": "sender.send({ plateway: <Plateway Infra client>, router: <Router service client>, grants: <router config allowed_recipients> })",
+        "send": {
+          "status": "published",
+          "receipts": [
+            {
+              "notice_id": "n-4",
+              "message_id": "e2-n-4",
+              "request_id": "e2-n-4",
+              "receipt": {
+                "status": "committed",
+                "event_id": "router-206589d84656b58219c49a4a76b17500",
+                "channel": "channel.email",
+                "target": {
+                  "app_id": "mail",
+                  "account_id": "mail-p-1"
+                },
+                "version": {
+                  "epoch": 2,
+                  "revision": 2
+                },
+                "applied_at": "2026-11-18T12:38:00-05:00",
+                "cloud_event": {
+                  "id": "e2-n-4",
+                  "type": "org.pale.mail.notification.v1",
+                  "time": "2026-11-18T12:00:00-05:00",
+                  "source": "urn:pale:app:plateway:account:plateway-p-1"
+                }
+              }
+            },
+            {
+              "notice_id": "n-5",
+              "message_id": "e2-n-5",
+              "request_id": "e2-n-5",
+              "receipt": {
+                "status": "committed",
+                "event_id": "router-bcf1f8f78ca912936c324fab56603f4a",
+                "channel": "channel.email",
+                "target": {
+                  "app_id": "mail",
+                  "account_id": "mail-p-1"
+                },
+                "version": {
+                  "epoch": 2,
+                  "revision": 3
+                },
+                "applied_at": "2026-11-18T12:38:00-05:00",
+                "cloud_event": {
+                  "id": "e2-n-5",
+                  "type": "org.pale.mail.notification.v1",
+                  "time": "2026-11-18T12:04:00-05:00",
+                  "source": "urn:pale:app:plateway:account:plateway-p-1"
+                }
+              }
+            },
+            {
+              "notice_id": "n-6",
+              "message_id": "e2-n-6",
+              "request_id": "e2-n-6",
+              "receipt": {
+                "status": "committed",
+                "event_id": "router-e2fb714144b323df78ce44662f4c1d7b",
+                "channel": "channel.email",
+                "target": {
+                  "app_id": "mail",
+                  "account_id": "mail-p-1"
+                },
+                "version": {
+                  "epoch": 2,
+                  "revision": 4
+                },
+                "applied_at": "2026-11-18T12:38:00-05:00",
+                "cloud_event": {
+                  "id": "e2-n-6",
+                  "type": "org.pale.mail.notification.v1",
+                  "time": "2026-11-18T12:38:00-05:00",
+                  "source": "urn:pale:app:plateway:account:plateway-p-1"
+                }
+              }
+            }
+          ]
+        },
+        "receiver_commit": {
+          "mail_version": "2.4",
+          "records": [
+            {
+              "id": "router-206589d84656b58219c49a4a76b17500",
+              "folder": "inbox",
+              "subject": "Order placed",
+              "from": "plateway@pale.example",
+              "to": [
+                "mail-p-1@pale.example"
+              ],
+              "received_at": "2026-11-18T12:38:00-05:00"
+            },
+            {
+              "id": "router-bcf1f8f78ca912936c324fab56603f4a",
+              "folder": "inbox",
+              "subject": "Order accepted",
+              "from": "plateway@pale.example",
+              "to": [
+                "mail-p-1@pale.example"
+              ],
+              "received_at": "2026-11-18T12:38:00-05:00"
+            },
+            {
+              "id": "router-e2fb714144b323df78ce44662f4c1d7b",
+              "folder": "inbox",
+              "subject": "Order delivered",
+              "from": "plateway@pale.example",
+              "to": [
+                "mail-p-1@pale.example"
+              ],
+              "received_at": "2026-11-18T12:38:00-05:00"
+            }
+          ],
+          "mail_event_receipts": [
+            {
+              "event_id": "router-206589d84656b58219c49a4a76b17500",
+              "status": "committed"
+            },
+            {
+              "event_id": "router-bcf1f8f78ca912936c324fab56603f4a",
+              "status": "committed"
+            },
+            {
+              "event_id": "router-e2fb714144b323df78ce44662f4c1d7b",
+              "status": "committed"
+            }
+          ]
+        },
+        "readback": {
+          "tool": "mail.get",
+          "id": "router-e2fb714144b323df78ce44662f4c1d7b",
+          "status": "ok",
+          "subject": "Order delivered",
+          "folder": "inbox"
+        },
+        "plateway_after_publish": {
+          "version": "2.5",
+          "unchanged": true
+        },
+        "retry": {
+          "send": {
+            "status": "published",
+            "receipts": [
+              {
+                "notice_id": "n-4",
+                "message_id": "e2-n-4",
+                "request_id": "e2-n-4",
+                "receipt": {
+                  "status": "committed",
+                  "event_id": "router-206589d84656b58219c49a4a76b17500",
+                  "duplicate": true,
+                  "channel": "channel.email",
+                  "target": {
+                    "app_id": "mail",
+                    "account_id": "mail-p-1"
+                  },
+                  "version": {
+                    "epoch": 2,
+                    "revision": 2
+                  },
+                  "applied_at": "2026-11-18T12:38:00-05:00",
+                  "cloud_event": {
+                    "id": "e2-n-4",
+                    "type": "org.pale.mail.notification.v1",
+                    "time": "2026-11-18T12:00:00-05:00",
+                    "source": "urn:pale:app:plateway:account:plateway-p-1"
+                  }
+                }
+              },
+              {
+                "notice_id": "n-5",
+                "message_id": "e2-n-5",
+                "request_id": "e2-n-5",
+                "receipt": {
+                  "status": "committed",
+                  "event_id": "router-bcf1f8f78ca912936c324fab56603f4a",
+                  "duplicate": true,
+                  "channel": "channel.email",
+                  "target": {
+                    "app_id": "mail",
+                    "account_id": "mail-p-1"
+                  },
+                  "version": {
+                    "epoch": 2,
+                    "revision": 3
+                  },
+                  "applied_at": "2026-11-18T12:38:00-05:00",
+                  "cloud_event": {
+                    "id": "e2-n-5",
+                    "type": "org.pale.mail.notification.v1",
+                    "time": "2026-11-18T12:04:00-05:00",
+                    "source": "urn:pale:app:plateway:account:plateway-p-1"
+                  }
+                }
+              },
+              {
+                "notice_id": "n-6",
+                "message_id": "e2-n-6",
+                "request_id": "e2-n-6",
+                "receipt": {
+                  "status": "committed",
+                  "event_id": "router-e2fb714144b323df78ce44662f4c1d7b",
+                  "duplicate": true,
+                  "channel": "channel.email",
+                  "target": {
+                    "app_id": "mail",
+                    "account_id": "mail-p-1"
+                  },
+                  "version": {
+                    "epoch": 2,
+                    "revision": 4
+                  },
+                  "applied_at": "2026-11-18T12:38:00-05:00",
+                  "cloud_event": {
+                    "id": "e2-n-6",
+                    "type": "org.pale.mail.notification.v1",
+                    "time": "2026-11-18T12:38:00-05:00",
+                    "source": "urn:pale:app:plateway:account:plateway-p-1"
+                  }
+                }
+              }
+            ]
+          },
+          "mail_records": 3
+        },
+        "after_plateway_reset": {
+          "plateway_epoch": 3,
+          "send": {
+            "status": "published",
+            "receipts": [
+              {
+                "notice_id": "n-4",
+                "message_id": "e3-n-4",
+                "request_id": "e3-n-4",
+                "receipt": {
+                  "status": "committed",
+                  "event_id": "router-3e83ebcd3aeca9401fdbc6e4b1c6d8a7",
+                  "channel": "channel.email",
+                  "target": {
+                    "app_id": "mail",
+                    "account_id": "mail-p-1"
+                  },
+                  "version": {
+                    "epoch": 2,
+                    "revision": 5
+                  },
+                  "applied_at": "2026-11-18T12:38:00-05:00",
+                  "cloud_event": {
+                    "id": "e3-n-4",
+                    "type": "org.pale.mail.notification.v1",
+                    "time": "2026-11-18T12:38:00-05:00",
+                    "source": "urn:pale:app:plateway:account:plateway-p-1"
+                  }
+                }
+              }
+            ]
+          },
+          "mail_records": 4
+        }
+      },
+      "mail-kinds": {
+        "kinds": {
+          "orders": {
+            "a": "o-13",
+            "b": "o-14",
+            "c": "o-15"
+          },
+          "steps": [
+            "order.accepted committed",
+            "order.delayed committed",
+            "order.item_unavailable committed",
+            "order.picked_up committed",
+            "order.delivered committed",
+            "plateway.orders.report_issue committed",
+            "plateway.orders.cancel.confirm committed",
+            "order.rejected committed"
+          ],
+          "plateway_version": "2.16",
+          "mail_version": "2.11",
+          "notices": [
+            {
+              "notice_id": "n-4",
+              "kind": "notice.order_placed",
+              "title": "Order placed",
+              "order_id": "o-13",
+              "at": "2026-11-18T12:00:00-05:00",
+              "request_id": "e2-n-4",
+              "receipt": "committed",
+              "event_id": "router-c0a90e284fa7c5384534621a79f7abf5",
+              "mail_record": "router-c0a90e284fa7c5384534621a79f7abf5",
+              "mail_subject": "Order placed",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-5",
+              "kind": "notice.order_accepted",
+              "title": "Order accepted",
+              "order_id": "o-13",
+              "at": "2026-11-18T12:04:00-05:00",
+              "request_id": "e2-n-5",
+              "receipt": "committed",
+              "event_id": "router-af3c027f3a6c5cc59f39f03213d94cfb",
+              "mail_record": "router-af3c027f3a6c5cc59f39f03213d94cfb",
+              "mail_subject": "Order accepted",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-6",
+              "kind": "notice.order_delayed",
+              "title": "Order delayed",
+              "order_id": "o-13",
+              "at": "2026-11-18T12:10:00-05:00",
+              "request_id": "e2-n-6",
+              "receipt": "committed",
+              "event_id": "router-047c3934344dda4407bf5d0a32b33b4d",
+              "mail_record": "router-047c3934344dda4407bf5d0a32b33b4d",
+              "mail_subject": "Order delayed",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-7",
+              "kind": "notice.item_refunded",
+              "title": "Item refunded",
+              "order_id": "o-13",
+              "at": "2026-11-18T12:12:00-05:00",
+              "request_id": "e2-n-7",
+              "receipt": "committed",
+              "event_id": "router-1634746ebb1c1efc00d885f46046f5fc",
+              "mail_record": "router-1634746ebb1c1efc00d885f46046f5fc",
+              "mail_subject": "Item refunded",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-8",
+              "kind": "notice.order_delivered",
+              "title": "Order delivered",
+              "order_id": "o-13",
+              "at": "2026-11-18T12:45:00-05:00",
+              "request_id": "e2-n-8",
+              "receipt": "committed",
+              "event_id": "router-f39f505b0781616528d9fa318da6d921",
+              "mail_record": "router-f39f505b0781616528d9fa318da6d921",
+              "mail_subject": "Order delivered",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-9",
+              "kind": "notice.item_refunded",
+              "title": "Item refunded",
+              "order_id": "o-13",
+              "at": "2026-11-18T12:45:00-05:00",
+              "request_id": "e2-n-9",
+              "receipt": "committed",
+              "event_id": "router-27e996b61735dd50d4b9a29b5e6ce5d2",
+              "mail_record": "router-27e996b61735dd50d4b9a29b5e6ce5d2",
+              "mail_subject": "Item refunded",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-10",
+              "kind": "notice.order_placed",
+              "title": "Order placed",
+              "order_id": "o-14",
+              "at": "2026-11-18T12:45:00-05:00",
+              "request_id": "e2-n-10",
+              "receipt": "committed",
+              "event_id": "router-a930feb5f3d7b5f486d3dfd2cf90ccf2",
+              "mail_record": "router-a930feb5f3d7b5f486d3dfd2cf90ccf2",
+              "mail_subject": "Order placed",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-11",
+              "kind": "notice.order_cancelled",
+              "title": "Order cancelled",
+              "order_id": "o-14",
+              "at": "2026-11-18T12:45:00-05:00",
+              "request_id": "e2-n-11",
+              "receipt": "committed",
+              "event_id": "router-8959cf1002d6fdf00e3d9beee50f1c14",
+              "mail_record": "router-8959cf1002d6fdf00e3d9beee50f1c14",
+              "mail_subject": "Order cancelled",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-12",
+              "kind": "notice.order_placed",
+              "title": "Order placed",
+              "order_id": "o-15",
+              "at": "2026-11-18T12:45:00-05:00",
+              "request_id": "e2-n-12",
+              "receipt": "committed",
+              "event_id": "router-eaba08a6fa64433c7e43927aa09d58b6",
+              "mail_record": "router-eaba08a6fa64433c7e43927aa09d58b6",
+              "mail_subject": "Order placed",
+              "mail_receipt": "committed"
+            },
+            {
+              "notice_id": "n-13",
+              "kind": "notice.order_cancelled",
+              "title": "Order cancelled",
+              "order_id": "o-15",
+              "at": "2026-11-18T12:50:00-05:00",
+              "request_id": "e2-n-13",
+              "receipt": "committed",
+              "event_id": "router-915b3e1382fb37b426bf8691f6d10305",
+              "mail_record": "router-915b3e1382fb37b426bf8691f6d10305",
+              "mail_subject": "Order cancelled",
+              "mail_receipt": "committed"
+            }
+          ]
+        }
+      },
+      "mail-ungranted": {
+        "no_grant": {
+          "status": "skipped",
+          "reason": "no_email_grant",
+          "pending": [
+            "n-4"
+          ],
+          "receipts": [],
+          "before": {
+            "plateway": "2.2",
+            "mail": "2.1",
+            "mail_records": 0
+          },
+          "after": {
+            "plateway": "2.2",
+            "mail": "2.1",
+            "mail_records": 0
+          }
+        },
+        "router_refusal": {
+          "send": {
+            "status": "rejected",
+            "event_id": null,
+            "receipts": [
+              {
+                "notice_id": "n-4",
+                "message_id": "e2-n-4",
+                "request_id": "e2-n-4",
+                "receipt": {
+                  "status": "rejected",
+                  "code": "recipient_not_authorized"
+                }
+              }
+            ]
+          },
+          "mail_records": 0,
+          "router_halted": false,
+          "before": {
+            "plateway": "2.2",
+            "mail": "2.1",
+            "mail_records": 0
+          },
+          "after": {
+            "plateway": "2.2",
+            "mail": "2.1",
+            "mail_records": 0
+          }
+        }
+      },
+      "mail-incompatible": {
+        "incompatible": {
+          "publisher_copy": "a Plateway package copy whose wire schema description was changed",
+          "request_id": "e2-n-4",
+          "receipt": {
+            "status": "rejected",
+            "code": "incompatible_contract"
+          },
+          "mail_records": 0,
+          "before": {
+            "plateway": "2.2",
+            "mail": "2.0",
+            "mail_records": 0
+          },
+          "after": {
+            "plateway": "2.2",
+            "mail": "2.0",
+            "mail_records": 0
+          }
+        }
+      },
+      "mail-reject": {
+        "receiver_rejection": {
+          "cause": "a message ID longer than Mail stores",
+          "request_id": "reject-1",
+          "receipt": {
+            "status": "rejected",
+            "code": "receiver_rejected",
+            "event_id": "router-a370f453f7322be16f56533de31d84fb",
+            "stop_run": true
+          },
+          "mail_records": 0
+        }
+      },
+      "mail-receiver-reset": {
+        "receiver_reset": {
+          "send": {
+            "status": "rejected",
+            "event_id": null,
+            "receipts": [
+              {
+                "notice_id": "n-4",
+                "message_id": "e2-n-4",
+                "request_id": "e2-n-4",
+                "receipt": {
+                  "status": "rejected",
+                  "code": "receiver_lifecycle_changed",
+                  "stop_run": true
+                }
+              }
+            ]
+          },
+          "mail_records": 0
+        }
+      },
+      "mail-lost": {
+        "unknown": {
+          "cause": "the receiver reply is dropped after Mail commits",
+          "send": {
+            "status": "unknown",
+            "event_id": "router-6ad6da5cb3c915e858f06661cb7456d5",
+            "receipts": [
+              {
+                "notice_id": "n-4",
+                "message_id": "e2-n-4",
+                "request_id": "e2-n-4",
+                "receipt": {
+                  "status": "unknown",
+                  "code": "receiver_unconfirmed",
+                  "event_id": "router-6ad6da5cb3c915e858f06661cb7456d5",
+                  "stop_run": true
+                }
+              }
+            ]
+          },
+          "reconciled": {
+            "status": "committed",
+            "event_id": "router-6ad6da5cb3c915e858f06661cb7456d5",
+            "record_id": "router-6ad6da5cb3c915e858f06661cb7456d5"
+          },
+          "mail_records": [
+            "router-6ad6da5cb3c915e858f06661cb7456d5"
+          ],
+          "router_after": "halted",
+          "plateway_version_before": "2.2",
+          "plateway_version_after": "2.2"
+        }
+      },
+      "mail-lost-reset": {
+        "unknown_after_reset": {
+          "send": {
+            "status": "unknown",
+            "event_id": "router-8a1d9cc93a990becefad1610411e702e",
+            "receipts": [
+              {
+                "notice_id": "n-4",
+                "message_id": "e2-n-4",
+                "request_id": "e2-n-4",
+                "receipt": {
+                  "status": "unknown",
+                  "code": "receiver_unconfirmed",
+                  "event_id": "router-8a1d9cc93a990becefad1610411e702e",
+                  "stop_run": true
+                }
+              }
+            ]
+          },
+          "reconciled": {
+            "status": "indeterminate",
+            "reason": "receiver_changed",
+            "event_id": "router-8a1d9cc93a990becefad1610411e702e"
+          },
+          "mail_records": 0
+        }
+      },
+      "mail-none": {
+        "no_mail_account": {
+          "send": {
+            "status": "skipped",
+            "reason": "no_mail_account",
+            "pending": [
+              "n-4"
+            ],
+            "receipts": []
+          },
+          "mail_records": 0,
+          "plateway_notice_kept": "n-4"
+        }
+      }
+    }
+  }
+}

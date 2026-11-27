@@ -1,0 +1,94 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "plateway-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic Plateway fixture for one account holder: six invented restaurants, 36 dishes with option groups and allergen declarations; in the task timeline (2026) ten past orders, one in-progress order and one scheduled order; before it, a generated order history from 2025-01-01. For package validation and examples; not an evaluation task. The full-window delivery dataset for evaluation, 2025-01-01 to 2026-12-31, is the source delivery-dataset in dataset/; it is not loaded as the package fixture.",
+  "record_source_ids": [
+    "authored",
+    "generated-history"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Synthetic records of the task timeline (2026) authored for this package with AI assistance, checked by dev/check-fixture.cjs and reviewed by the contributor; no external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Plateway fixture authoring",
+        "tool_version": "1",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated-history",
+      "kind": "synthetic",
+      "description": "Synthetic order history from 2025-01-01 to 2026-07: 40 orders (receipts, refunds, two rejections by restaurants, two cancellations by the account holder, reported lines and ratings) and their notices, with IDs in a separate h series such as o-h1 and n-h1, outside the runtime counters. Produced deterministically by dev/generate-history.cjs, which replays the package's own tools and events (cart, checkout preview and place, accept, pick up, deliver, reject, cancel, report, rate) with a fixed seed, so every record is one the App itself wrote. Each order goes to Office on weekday lunchtimes and to Home otherwise, from a restaurant that delivers there and is open, at varied times, ASAP, on either of the two cards valid at the time; reports and ratings follow within a few hours of delivery; rating texts, receipt labels and rejection reasons are constants in the script. Checked by dev/check-fixture.cjs, which also regenerates it byte for byte.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dev/generate-history.cjs",
+        "tool_version": "1",
+        "seed": "2025",
+        "parameters": {
+          "from": "2025-01",
+          "to": "2026-07",
+          "orders_per_month": "1-3",
+          "seed": "2025"
+        }
+      }
+    },
+    {
+      "source_id": "delivery-dataset",
+      "kind": "synthetic",
+      "description": "Synthetic full-window delivery dataset from 2025-01-01 to 2026-12-31 (America/New_York) generated for this package; it reuses the account holder, addresses, cards, zones, restaurants and menu authored for the fixture and generates every order, line, refund, rating, report and notice; every record is synthetic and none was collected or observed, including those dated at or after the fixture clock 2026-11-18T12:00:00-05:00. dataset/generate.cjs replays the package's own tools as the account holder (cart edits, checkout preview and place, as soon as possible and scheduled, cancel, report, rate) and its events as Infra (accept, reject, unavailable line, delay, pick up, deliver; menu price and availability changes; restaurant pauses) with a fixed seed, validating every state against the seed schema and validateSeed, so every record is one the App itself wrote. It writes dataset/base.json (the account and catalog at 2025-01-01T00:00:00-05:00, with the earlier menu prices), dataset/replay.json (every committed step with its time) and dataset/full.json (the state at 2027-01-01T00:00:00-05:00), and regenerates them byte for byte with --check. At the fixture clock the account and catalog equal the fixture's; the orders are their own sequence (o-1, ol-1, rf-1, n-1, ...) and do not include the fixture's orders: the fixture's o-1 to o-12 are different orders, and the proposal's example events name fixture IDs. dataset/as-of.cjs selects the records dated before a first-session instant; dataset/coverage.cjs writes dataset/COVERAGE.json and dataset/COVERAGE.md. There is no real November 2026 anchor: DoorDash is only the workflow reference, the approved proposal excludes collecting its data (\"no crawling or copied menus\") and the restaurants are invented; this is a stated gap, pending maintainer agreement.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dataset/generate.cjs",
+        "tool_version": "1",
+        "seed": "20250101",
+        "parameters": {
+          "from": "2025-01-01",
+          "to": "2026-12-31",
+          "time_zone": "America/New_York",
+          "seed": "20250101",
+          "orders_per_month": "4 to 10 planned, more in winter and December, fewer in summer; none while the account holder is away (2025-07-12 to 2025-07-20, 2026-04-20 to 2026-04-23, 2026-08-08 to 2026-08-16) or on Thanksgiving",
+          "occasions": "weekday lunch to Office; dinner, weekend brunch and late night to Home; scheduled dinners and next-morning breakfasts",
+          "outcomes": "of as-soon-as-possible orders about 2.5% rejected, 1% not accepted in time, 4% cancelled by the account holder; of accepted orders about 12% delayed and 4% with an unavailable line; of delivered orders about 6% with a reported line and 40% rated",
+          "catalog_changes": "18 menu price changes, 8 availability changes and 5 restaurant pauses on fixed dates",
+          "base": "dataset/base.json",
+          "replay": "dataset/replay.json",
+          "end_state": "dataset/full.json",
+          "end_clock": "2027-01-01T00:00:00-05:00",
+          "reference_clock": "2026-11-18T12:00:00-05:00"
+        }
+      }
+    }
+  ],
+  "transformations": [],
+  "expected_counts": {
+    "records": 94,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

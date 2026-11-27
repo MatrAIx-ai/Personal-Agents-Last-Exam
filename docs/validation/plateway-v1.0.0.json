@@ -1,0 +1,844 @@
+{
+  "schema": "plateway.validation.v1",
+  "checked_on": "2026-11-27",
+  "app": {
+    "app_id": "plateway",
+    "version": "1.0.0",
+    "package_sha256": "8c8f0c31628db8b194accc2068ca3e97e8b6ed86da10d88163f3cc1692687751"
+  },
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "receiver": "mail 1.3.0",
+  "base_commit": "ae889d2cbbfc72242fc5e70b877f3f2a2f029618",
+  "registry": {
+    "file": "apps.registry.json",
+    "entry": {
+      "app_id": "plateway",
+      "version": "1.0.0",
+      "path": "apps/plateway"
+    },
+    "initial_time": "2026-11-18T09:00:00-08:00",
+    "fixture_clock": "2026-11-18T12:00:00-05:00",
+    "shared_test_changed": "runtime/tests/clock.test.cjs: seven → eight Apps"
+  },
+  "fixture": {
+    "records": 94,
+    "orders": 52,
+    "history_orders": 40,
+    "history_range": [
+      "2025-01-01",
+      "2026-07"
+    ],
+    "task_timeline_from": "2026-01-01",
+    "clock": "2026-11-18T12:00:00-05:00",
+    "generator": "dev/generate-history.cjs",
+    "generator_seed": "2025"
+  },
+  "standalone_copy": "passed (apps/plateway, runtime/, examples/apps/mail, package.json): verifier (same package digest), business tests, fixture, history generator and delivery dataset checks, coverage report with its MCP loading, MCP and Mail scripts",
+  "runs": [
+    {
+      "node": "v18.20.8",
+      "business_tests": {
+        "total": 111,
+        "passed": 111
+      },
+      "dataset_tests": {
+        "total": 10,
+        "passed": 10,
+        "command": "npm run dataset",
+        "npm_test_total": 121
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "history_generator_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 50,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ],
+        "package_sha256": "8c8f0c31628db8b194accc2068ca3e97e8b6ed86da10d88163f3cc1692687751"
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 53
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 47
+      },
+      "browser_acceptance": {
+        "passed": true,
+        "checks": 75,
+        "restricted_checks": 15,
+        "browser": "chromium 141.0.7390.37",
+        "playwright": "1.56.1",
+        "browser_timezone": "Europe/London",
+        "browser_locale": "en-US"
+      },
+      "full_suite": "22/22 stages passed. Report: .artifacts/summary.json",
+      "web_host_tests": {
+        "total": 4,
+        "passed": 4
+      },
+      "shared_browser_job": "passed (mail, calendar, files, messages, notes, tasks, contacts)",
+      "dataset_generator_check": "passed",
+      "coverage_check": {
+        "passed": true,
+        "records": 1462,
+        "distinct_dates": {
+          "coverage": 227,
+          "basis": "records loaded into the App (dataset/full.json)",
+          "with_replay_log": 248
+        },
+        "earliest": "2025-01-01",
+        "latest": "2026-12-31",
+        "loading": "passed through real Core over MCP"
+      },
+      "binary": {
+        "source": "https://nodejs.org/dist/v18.20.8/node-v18.20.8-darwin-arm64.tar.gz",
+        "sha256": "bae4965d29d29bd32f96364eefbe3bca576a03e917ddbb70b9330d75f2cacd76",
+        "checked_against": "SHASUMS256.txt of the release"
+      }
+    },
+    {
+      "node": "v22.23.5",
+      "business_tests": {
+        "total": 111,
+        "passed": 111
+      },
+      "dataset_tests": {
+        "total": 10,
+        "passed": 10,
+        "command": "npm run dataset",
+        "npm_test_total": 121
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "history_generator_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 50,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ],
+        "package_sha256": "8c8f0c31628db8b194accc2068ca3e97e8b6ed86da10d88163f3cc1692687751"
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 53
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 47
+      },
+      "browser_acceptance": {
+        "passed": true,
+        "checks": 75,
+        "restricted_checks": 15,
+        "browser": "chromium 141.0.7390.37",
+        "playwright": "1.56.1",
+        "browser_timezone": "Europe/London",
+        "browser_locale": "en-US"
+      },
+      "full_suite": "22/22 stages passed. Report: .artifacts/summary.json",
+      "web_host_tests": {
+        "total": 4,
+        "passed": 4
+      },
+      "shared_browser_job": "passed (mail, calendar, files, messages, notes, tasks, contacts)",
+      "dataset_generator_check": "passed",
+      "coverage_check": {
+        "passed": true,
+        "records": 1462,
+        "distinct_dates": {
+          "coverage": 227,
+          "basis": "records loaded into the App (dataset/full.json)",
+          "with_replay_log": 248
+        },
+        "earliest": "2025-01-01",
+        "latest": "2026-12-31",
+        "loading": "passed through real Core over MCP"
+      },
+      "binary": {
+        "source": "https://nodejs.org/dist/v22.23.5/node-v22.23.5-darwin-arm64.tar.gz",
+        "sha256": "e7131995759b61a0170b646010d2ad35a5d37b4cb0d471f3e8317eac6f742f3d",
+        "checked_against": "SHASUMS256.txt of the release"
+      }
+    },
+    {
+      "node": "v25.8.1",
+      "business_tests": {
+        "total": 111,
+        "passed": 111
+      },
+      "dataset_tests": {
+        "total": 10,
+        "passed": 10,
+        "command": "npm run dataset",
+        "npm_test_total": 121
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "history_generator_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 50,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ],
+        "package_sha256": "8c8f0c31628db8b194accc2068ca3e97e8b6ed86da10d88163f3cc1692687751"
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 53
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 47
+      },
+      "browser_acceptance": {
+        "passed": true,
+        "checks": 75,
+        "restricted_checks": 15,
+        "browser": "chromium 141.0.7390.37",
+        "playwright": "1.56.1",
+        "browser_timezone": "Europe/London",
+        "browser_locale": "en-US"
+      },
+      "full_suite": "22/22 stages passed. Report: .artifacts/summary.json",
+      "web_host_tests": {
+        "total": 4,
+        "passed": 4
+      },
+      "shared_browser_job": "passed (mail, calendar, files, messages, notes, tasks, contacts)",
+      "dataset_generator_check": "passed",
+      "coverage_check": {
+        "passed": true,
+        "records": 1462,
+        "distinct_dates": {
+          "coverage": 227,
+          "basis": "records loaded into the App (dataset/full.json)",
+          "with_replay_log": 248
+        },
+        "earliest": "2025-01-01",
+        "latest": "2026-12-31",
+        "loading": "passed through real Core over MCP"
+      },
+      "binary": {
+        "source": "local installation"
+      }
+    }
+  ],
+  "public_verifier_checks": [
+    "Manifest, schemas, seed, references, media and declarations load",
+    "business standalone command succeeds",
+    "event-example standalone command succeeds",
+    "Agent discovery excludes administrative tools",
+    "Published input/output for plateway.account.get",
+    "Published input/output for plateway.restaurants.search",
+    "Published input/output for plateway.restaurants.get",
+    "Published input/output for plateway.menu_items.get",
+    "Published input/output for plateway.cart.get",
+    "Published input/output for plateway.cart.add_item",
+    "Published input/output for plateway.cart.update_item",
+    "Published input/output for plateway.cart.remove_item",
+    "Published input/output for plateway.checkout.preview",
+    "Published input/output for plateway.orders.list",
+    "Published input/output for plateway.orders.get",
+    "Published input/output for plateway.orders.place",
+    "Published input/output for plateway.orders.cancel.preview",
+    "Published input/output for plateway.orders.cancel.confirm",
+    "Published input/output for plateway.orders.report_issue",
+    "Published input/output for plateway.orders.rate",
+    "Infra exposes the lifecycle interface and host clock operation",
+    "Agent cannot call env.advance_time",
+    "Agent cannot call env.apply_event",
+    "Agent cannot call env.event_status",
+    "Agent cannot call env.load_seed",
+    "Agent cannot call env.reset",
+    "Agent cannot call env.snapshot",
+    "Agent cannot call env.validate_bundle",
+    "Real MCP business read succeeds",
+    "MCP content and structured result agree",
+    "MCP envelope remains unchanged",
+    "Read does not change business data",
+    "Caller cannot override run or role",
+    "Infra loads history, relationships and assets",
+    "Loaded historical records match input",
+    "Invalid history is rejected",
+    "Rejected history leaves business state unchanged",
+    "Declared incoming event commits",
+    "Event changes business data",
+    "Committed event is queryable",
+    "Identical event retry is deduplicated",
+    "Duplicate has no additional state change",
+    "Same event ID with changed content is rejected",
+    "Old version cannot reset a changed App",
+    "A separate run retains its own initial data",
+    "Reset returns ready",
+    "Reset restores the loaded business baseline",
+    "Reset advances epoch",
+    "New MCP process reads persisted App state",
+    "Submitted package remains unchanged"
+  ],
+  "mcp_integration_checks": [
+    "The package wire schema is byte-identical to the runtime contract",
+    "T04 placement commits",
+    "T04 the same request ID returns the stored receipt",
+    "T04 one order and one charge",
+    "T07 a cancel token for the scheduled order",
+    "T07 one minute after release orders.get shows submitted",
+    "T07 one minute after release orders.list shows submitted",
+    "T07 a new cancel preview yields a new token",
+    "T07 the original token with a fresh request and the current version is stale",
+    "T07 the stored order, refunds and notices are unchanged after release",
+    "T07 21 minutes after release orders.get shows cancelled, not accepted, with the full refund",
+    "T07 21 minutes after release orders.list shows cancelled",
+    "T07 the cancel preview is invalid_state",
+    "T07 a confirm of the new token is invalid_state",
+    "T07 the stored order, refunds and notices are still unchanged",
+    "T07 a fresh cart write commits",
+    "T07 both transitions persist with one full refund",
+    "T07 one cancellation notice dated release + 20 minutes",
+    "T07 the release is dated at its time",
+    "T06 the acceptance limit is 20 minutes after submission",
+    "T06 an acceptance at exactly the limit commits",
+    "T06 the timer applies first: cancelled, not accepted, one full refund",
+    "T09 a late acceptance commits at its at",
+    "T09 the cancelled order stays cancelled",
+    "T09 unknown-target and back-dated events are invalid_event",
+    "T09 data, notices, version and clock are preserved",
+    "T09 one denial audit row each",
+    "T11 cancellation commits",
+    "T11 an identical retry returns the stored receipt",
+    "T11 the replayed receipt equals the original",
+    "T11 one refund",
+    "T15 an unknown order is not_found",
+    "T15 a repeated request ID returns the stored receipt",
+    "T15 the same request ID with different arguments conflicts",
+    "T15 a failing write is rejected",
+    "T15 a failed call preserves data and version",
+    "T15 the Agent cannot apply events or reset",
+    "T16 the event commits",
+    "T16 an identical event and bundle under the same event ID are deduplicated",
+    "T16 the replayed event receipt equals the original",
+    "T16 changed content under the same event ID conflicts",
+    "T16 reset is ready",
+    "T16 reset restores the seed, the cart and virtual time",
+    "T16 a write with a pre-reset version is stale",
+    "T16 a seed with another seed ID loads",
+    "T16 a checkout token previewed under a different seed is stale",
+    "T16 the fixture loads five minutes after the scheduled release",
+    "T16 reads show the release",
+    "T16 the stored order is still scheduled",
+    "T16 at the same virtual time the next cart write persists the release once",
+    "T16 the clock did not move",
+    "T16 reset is ready after the clock moved",
+    "T16 reset restores the loaded seed and the virtual time given at load"
+  ],
+  "mail_integration_checks": [
+    "Mail 1.3.0 is the receiver",
+    "The package wire schema is byte-identical to the runtime contract",
+    "The package wire schema is byte-identical to Mail's receive schema",
+    "Only the run notices are pending, not seeded history",
+    "Payload for notice.order_placed matches the Mail payload schema",
+    "Payload for notice.order_accepted matches the Mail payload schema",
+    "Payload for notice.order_delivered matches the Mail payload schema",
+    "Every notice is published with a committed receipt",
+    "Message and request IDs come from the epoch and the notice",
+    "One inbox record per notice, received at the synchronized time",
+    "The delivered notice reads back in Mail",
+    "The receipt keeps the notice time as the CloudEvents time",
+    "Publishing leaves Plateway unchanged",
+    "An identical retry in the same Router session returns the first receipts marked duplicate",
+    "A retry creates no second record",
+    "A Plateway reset leaves Mail records unchanged",
+    "Both clocks agree before the next delivery",
+    "A notice written after a reset is a new message",
+    "The run writes every notice kind: placed, accepted, delayed, item refunded, delivered and cancelled",
+    "Every notice kind is published with a committed receipt",
+    "One Mail record per notice, with the notice title as subject",
+    "Every Mail body reads back as the notice text",
+    "Mail records a committed receipt for every event",
+    "Publishing leaves Plateway unchanged",
+    "Skipping for lack of a grant changes neither App",
+    "Without an Infra grant the sender publishes nothing",
+    "A Router refusal changes neither App",
+    "An ungranted publish is refused by the Router before dispatch, without halting",
+    "A refused publish creates no Mail record",
+    "The Router stays available after a pre-dispatch refusal",
+    "An incompatible contract changes neither App",
+    "An incompatible contract is rejected before dispatch",
+    "An incompatible contract creates no Mail record",
+    "A receiver rejection halts the Router",
+    "A receiver rejection creates no Mail record",
+    "A receiver rejection leaves Plateway committed state",
+    "Later deliveries wait for reconciliation",
+    "A receiver reset after Router setup invalidates the route",
+    "No Mail record is created after the receiver reset",
+    "A lost acknowledgement is unknown and halts the Router",
+    "Reconciliation in the same Mail epoch finds the committed event and exactly one record",
+    "Plateway stays committed after an unknown acknowledgement",
+    "The halted Router accepts no further delivery",
+    "After a receiver reset the unknown outcome is recorded as indeterminate",
+    "Without a bound Mail account nothing is published",
+    "No Mail record is created",
+    "The notice stays in the Plateway log"
+  ],
+  "browser_acceptance_checks": [
+    "The shared Host serves the App-owned Plateway page",
+    "The controller names all 16 business tools",
+    "Business discovery lists the 16 tools and no management operation",
+    "Times are shown in the account time zone (America/New_York), not the browser zone (Europe/London), and an active order shows its expected arrival",
+    "Every order in the account, including the 2025 history, is listed",
+    "Text search shows exactly the restaurants the App returns for \"curry\"",
+    "The cuisine filter narrows the list to Masa Verde",
+    "The list says how many restaurants deliver to the chosen address",
+    "Switching to the Office address lists only the restaurants that deliver there and says so",
+    "A closed restaurant says when it opens, that delivery can be scheduled, and shows its weekly hours",
+    "An open restaurant says when it closes",
+    "Adding without the required option shows the rule and writes nothing",
+    "Add to cart commits the dish with its options, quantity and label",
+    "At exactly 12:00, with the Office address (45-minute estimate), “Schedule for later” suggests the first time the App accepts, not 12:45",
+    "The + button raises the quantity in the App",
+    "The − button lowers it again, and the line buttons are named after the dish",
+    "When the refresh after a change fails, the page still shows the changed quantity from the App’s answer",
+    "Until a refresh succeeds, further changes are refused and nothing is written",
+    "While a line is being edited, the checkout form and Preview total stay on screen",
+    "A 41-character label is refused in the form and nothing is written",
+    "Editing a cart line changes its quantity and label in the App",
+    "Label text is displayed as text and never executed",
+    "Removing the line empties the cart in the App",
+    "Undo puts the removed line back with its options, quantity and label",
+    "The banner alone describes the unconfirmed add; the dish form only points to it",
+    "An add whose response is dropped after the commit reports the lost connection and offers Retry, not success",
+    "While that request is unanswered, a new add waits and nothing is written",
+    "Retry replays the stored receipt: the page says the add had already gone through, and the cart holds one line",
+    "A dish from another restaurant than the cart’s shows the conflict and Clear cart in place of Add as soon as it opens, writing nothing",
+    "Clear cart empties the cart and keeps the dish open with Add available again",
+    "Adding the dish after clearing leaves only that dish",
+    "The cart warns about the small-order fee below $12.00",
+    "The expired card is marked and cannot be chosen",
+    "Preview shows every line subtotal, each fee (including the small-order fee), tax once, tip and the total as the App computes them, with the address and card, and stores nothing",
+    "Editing the tip removes the total on screen at once",
+    "One click on Preview after editing the tip shows the new total",
+    "Changing the address while a preview is pending discards that preview",
+    "Place order creates exactly one order to the previewed address, charged the previewed total",
+    "The cart is empty after the order",
+    "After a reload the page reopens Orders and still shows the new order",
+    "Before Refresh the page still shows the earlier state",
+    "After an Infra acceptance, Refresh shows the order as preparing",
+    "The cancel preview of a preparing order shows the App refund and the amount kept",
+    "Keep order closes the preview and changes nothing",
+    "Cancelling the scheduled order previews a full refund",
+    "Confirming cancels the order with one full refund",
+    "The cancelled order reads in plain words and shows the net charge",
+    "A cancellation confirmed after the courier picked the order up is refused as stale_version: the order is on the way and nothing is refunded",
+    "A status message stays on the screen where it happened, and Account marks the expired card",
+    "Choosing “Schedule for later” suggests exactly the first time the App accepts (Office, 45-minute estimate)",
+    "The suggested time previews without an error",
+    "Scheduling shows the restaurant hours for the chosen day",
+    "A scheduled preview shows the App delivery and release times in New York time",
+    "Scheduled checkout creates a scheduled order for Thursday 19:00 New York time",
+    "After an order (with no reload in between), checkout starts again from as soon as possible with no tip",
+    "A declining card shows payment_failed and creates no order",
+    "After a price change and Refresh, the old preview is refused as stale_preview and nothing is placed",
+    "A change the page has not read is refused as stale_version, shown apart from stale_preview, and nothing is placed",
+    "A placement lost before it reached Plateway and retried after another change is reported as not applied, and nothing is placed",
+    "The dropped response came after the commit: the App already holds the new order",
+    "With the following refresh failing too, the page still shows Retry and Dismiss and no longer offers Place",
+    "Retry after Refresh returns the stored receipt (duplicate) and the order exists once, charged once",
+    "Reporting a missing item on the delivered order refunds that line in full",
+    "The timeline and refunds name the dish rather than an internal line ID",
+    "Rating the delivered order stores the stars and the comment",
+    "An open report form closes once its 48-hour window has passed, and the page says when reporting closed",
+    "A reorder interrupted after its first dish keeps the rest waiting behind the banner instead of finishing silently",
+    "Retry finishes the reorder: every dish once, and the order’s Office address is kept for checkout",
+    "After its 48-hour window an order offers no Report control and says when reporting closed, while Rate stays",
+    "With another restaurant’s dishes in the cart, the order shows the conflict and Clear cart instead of Reorder",
+    "After clearing, Reorder puts the same dishes, options, quantities and labels in the cart, opens it and switches checkout to the order’s Home address",
+    "Checking out a closed restaurant as soon as possible explains when it opens and suggests scheduling",
+    "A direct management request from the authenticated business session is refused (403)",
+    "At 390 px every navigation tab is visible and there is no horizontal overflow in Orders, a restaurant with a dish open, Cart and Account",
+    "No JavaScript errors and no console or CSP errors beyond the induced network failures"
+  ],
+  "browser_restricted_policy_checks": [
+    "An add that committed but got a Host error without an App status keeps its request in the banner instead of allowing a fresh add",
+    "After the policy drops orders.rate, Refresh removes the open rating form and the Rate control while the other order actions stay",
+    "Retry resends the original request ID and version unchanged",
+    "That add, retried after the seed was reloaded, is reported as unconfirmed, not as not applied",
+    "A forced orders.rate call is refused (403) and the order stays unrated",
+    "Clear cart interrupted after its first removal waits behind the banner with the rest of the cart still there",
+    "Retry finishes clearing the cart and says so; Add is available again",
+    "Clear cart rereads the cart first: when another client has already made it compatible, nothing is removed and Add is offered",
+    "Retry of a reorder whose lost answer was “sold out” skips that dish, adds the rest and names the skipped dish with its reason",
+    "Clear cart for a reorder whose dishes are all sold out now leaves the cart as it is and says why",
+    "A Clear cart click based on an outdated view removes nothing when another client has replaced the cart, and says so",
+    "Clear cart never removes a dish the page did not show: after another client adds to the same restaurant’s cart, nothing is removed",
+    "Nor a serving it did not show: after another client raises a quantity, nothing is removed",
+    "A sold-out dish is not offered Clear cart, only “Sold out right now”",
+    "No JavaScript errors and no console or CSP errors beyond the induced refusals"
+  ],
+  "not_run": [
+    "Independent base validator selected by maintainers (PR check base-runtime-compatibility)",
+    "Maintainers' human review of realism and provenance",
+    "Trial runs with an Agent",
+    "Browser acceptance in CI: the shared browser job is fixed to the seven personal Apps; run locally with node apps/plateway/tests/web.browser.cjs"
+  ],
+  "delivery_evidence": {
+    "index": "apps/plateway/evidence/README.md",
+    "policy": {
+      "path": "docs/submission-evidence.md",
+      "commit": "6933c430942c64f94874083815829e4a4b20920a",
+      "url": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/6933c430942c64f94874083815829e4a4b20920a/docs/submission-evidence.md",
+      "applied_as": "delivery work added to the approved scope"
+    },
+    "captured_on": "2026-11-27",
+    "reference_screenshots": {
+      "count": 26,
+      "source": "DoorDash Help Center public consumer articles (help.doordash.com), no sign-in",
+      "manifest": "apps/plateway/evidence/reference/references.json",
+      "command": "node apps/plateway/evidence/tools/reference.cjs",
+      "workflows": [
+        "Browse and search",
+        "Restaurant, menu and dish with options",
+        "Cart edit",
+        "Checkout, as soon as possible and scheduled",
+        "Order tracking",
+        "Cancel",
+        "Report missing or incorrect items",
+        "Rate",
+        "Account"
+      ],
+      "without_public_image": [
+        "dish options dialog: article text 06, alternative proposed, reviewer agreement pending",
+        "editing a cart before checkout: article texts 07 and 08, alternative proposed, reviewer agreement pending",
+        "checkout form (as soon as possible): article text 10 and a receipt after the order (11), alternative proposed, reviewer agreement pending",
+        "scheduled checkout screen: article text 09, alternative proposed, reviewer agreement pending"
+      ],
+      "redactions": "courier and review-author names, a profile name, delivery street addresses and delivery destination pins are masked; business examples (restaurant and store names, their map pins) and public map labels stay visible and are listed per screenshot",
+      "notes": [
+        "25-account-menu.png: the misaligned banner is in the publisher's animated image itself"
+      ],
+      "older_guidance": [
+        "24-rate.png: five-star screens; the same article says a Didn't Like / Liked / Loved system replaced them for restaurant orders"
+      ],
+      "dimensions": "read from the saved PNG"
+    },
+    "gui_sequences": {
+      "sequences": 16,
+      "steps": 61,
+      "checks_passed": 64,
+      "index": "apps/plateway/evidence/gui/README.md",
+      "data": "apps/plateway/evidence/gui/sequences.json",
+      "account": "plateway-p-1",
+      "browser": "chromium 141.0.7390.37",
+      "playwright": "1.56.1",
+      "viewports": [
+        "1280x1000",
+        "390x844"
+      ],
+      "command": "node apps/plateway/evidence/tools/gui.cjs",
+      "cases": {
+        "edit_cancel": [
+          "cart +, edit, remove, undo",
+          "Keep order after a cancel preview",
+          "confirmed cancellation"
+        ],
+        "invalid_denied": [
+          "required option missing",
+          "41-character label",
+          "declining card",
+          "closed restaurant",
+          "cancel after pickup",
+          "report after its window",
+          "management request from the business session (403)",
+          "policy without plateway.orders.rate: Rate removed, forced call 403"
+        ],
+        "stale_conflicting": [
+          "stale_preview at checkout",
+          "stale_version at checkout",
+          "cart edit after another client's change",
+          "cancellation quote taken before the restaurant accepted",
+          "cancellation confirmed after the courier's pickup",
+          "report of a line another client had just reported"
+        ],
+        "outcomes": [
+          "unavailable item refunded",
+          "rejected by the restaurant",
+          "scheduled order released",
+          "not accepted within 20 minutes"
+        ],
+        "shared_state": [
+          "two reloads",
+          "four committed writes and one refused write through a second Agent MCP client",
+          "Infra events and clock moves followed by Refresh"
+        ]
+      },
+      "runs": [
+        "plateway-web",
+        "plateway-web-restricted"
+      ],
+      "per_step": "action, expected, outcome on screen (checked before capture), Infra MCP state and version, every MCP call with arguments and result, virtual time, matching acceptance check",
+      "steps_that_submit_writes": 25,
+      "reproducibility": "two consecutive runs gave byte-identical screenshots, sequences.json and run.json; Chromium runs with --disable-gpu --num-raster-threads=1 --disable-partial-raster and the page request IDs come from a counter in session storage (GUI source unchanged); another machine or Chromium build can differ by a few anti-aliased pixels",
+      "trace": {
+        "recorder": "apps/plateway/evidence/tools/recorder.cjs",
+        "page_requests": "writes and previews listed with raw arguments and raw reply (HTTP status and JSON body), unshortened, including tokens and fee breakdowns",
+        "ownership": "every call (page reads and tool discovery, page writes and previews, forced calls, second Agent reads and writes, Infra events, clock moves, the seed load, inspector snapshot reads) is owned when it is sent by the step open at that moment; the page load before the first sequence is owned by the setup (not listed in run.json); the two pieces of work between sequences have owners of their own and are the two entries of run.json between_sequences; a reply never changes ownership",
+        "freeze": "read the version, run the check, wait until nothing the step owns is outstanding, read the App's state; a version change since before the check stops the script; observations, version, virtual time and calls come from the frozen state; the wait and scrolling before the screenshot come after the freeze",
+        "terminal_outcome": "exactly one per call: the reply, or a failure with HTTP status and error",
+        "forced_calls": "identified by a header token bound to the exact tool and arguments it was issued for; a token sent with any other call stops the script",
+        "errors": "append-only, including a failed close of the second Agent client: a stop that a caller catches is still reported by later checks and by the teardown check; the client handle is kept until its process has exited, so the close can be retried",
+        "stops_on": [
+          "a call sent with no owner, including after the last sequence until the browser closes",
+          "a version change between a step's check and its freeze",
+          "a call sent after its step was frozen",
+          "a reply outstanding after 10 s",
+          "a failed call or a second terminal outcome",
+          "a forced-call token sent with another call",
+          "a submitting step without a write or forced call"
+        ],
+        "probes": {
+          "script": "apps/plateway/evidence/tools/probes.cjs, run by gui.cjs before capturing; results in run.json recorder_probes",
+          "cases": [
+            "outside-step page read",
+            "outside-step second-Agent call",
+            "refusal caught after the last sequence",
+            "forced call concurrent with a preview (held at a barrier until both distinct calls arrive; a barrier timeout fails the probe; overlap asserted)",
+            "forced token moved to another call",
+            "state change between the check and the freeze",
+            "write during the step's preparation",
+            "write after the screenshot",
+            "duplicate terminal event",
+            "failure after headers",
+            "request during sealing",
+            "call after the last sequence (cart seeded in the probe; status ok and exact reply)",
+            "second Agent close that fails once (reported after being caught; closed on retry)",
+            "cleanup whose first step fails (every later step runs; all failures reported)",
+            "barrier waits for both distinct calls (two previews do not open it)",
+            "late reply",
+            "second-Agent call after the screenshot",
+            "assertion failure inside a probe (HTTP server, route, second Agent process and page verified closed)",
+            "assertion failure while the second Agent close fails once (cleanup failure carried in the error; process exited)",
+            "assertion failure while the second Agent close keeps failing (three attempts, then killed; cleanup failure carried in the error)"
+          ],
+          "rule": "each must make the recorder stop with its exact expected message",
+          "cleanup": "every cleanup step, in each probe and for the suite's browser, Host and state folder, is attempted even when an earlier one fails; all failures are collected and reported, appended to the probe's own error when it has one; the second Agent client is closed up to three times until its process has exited, then killed"
+        },
+        "not_listed": [
+          "page reads, tool discovery and inspector reads (owned and waited for)"
+        ],
+        "left_out": [
+          "received_at and processed_at (host wall clock) in Infra event receipts, replaced by a note so repeated captures are identical",
+          "second Agent read replies, summarized to the fields the step checks"
+        ]
+      }
+    },
+    "mail_demonstration": {
+      "index": "apps/plateway/evidence/mail/README.md",
+      "data": "apps/plateway/evidence/mail/demo.json",
+      "gui_steps": 7,
+      "integration_checks": 47,
+      "receiver": "mail 1.3.0",
+      "command": "node apps/plateway/evidence/tools/mail.cjs",
+      "integration_flag": "tests/mail.integration.cjs --evidence FILE",
+      "stages": {
+        "local_commit": "reported",
+        "receiver_commit": "reported",
+        "business_confirmation": "not claimed"
+      },
+      "cases": [
+        "every notice kind",
+        "delivered",
+        "duplicate retry",
+        "after a Plateway reset",
+        "missing recipient",
+        "no grant (both Apps compared)",
+        "Router refusal (both Apps compared)",
+        "incompatible contract (both Apps compared)",
+        "receiver rejection",
+        "receiver reset",
+        "unknown outcome",
+        "unknown outcome after a receiver reset"
+      ],
+      "notice_kinds": [
+        "notice.order_placed",
+        "notice.order_accepted",
+        "notice.order_delayed",
+        "notice.order_delivered",
+        "notice.order_cancelled",
+        "notice.item_refunded"
+      ]
+    },
+    "app_load_digest": {
+      "sha256": "8f079543e0951a48ab1f0b246c0b3427daf4a63e17f5b694917d8b09e4fe7ef3",
+      "files": 43,
+      "includes": [
+        "app.json",
+        "contribution",
+        "fixtures",
+        "gui",
+        "infra",
+        "plugin.cjs",
+        "schemas",
+        "service.cjs",
+        "src",
+        "tools.json"
+      ],
+      "excludes": [
+        "README.md",
+        "LICENSE",
+        "package.json",
+        "dataset",
+        "dev",
+        "evidence",
+        "examples",
+        "tests"
+      ],
+      "algorithm": "SHA-256 over each file's package-relative path, a NUL byte and its bytes, in path order (the verifier's digestTree applied to the included files)",
+      "command": "node apps/plateway/evidence/tools/digest.cjs",
+      "note": "The verifier digest of the whole package (app.package_sha256) cannot be recorded inside the package; the commit is named in the submission comment."
+    },
+    "host": {
+      "runtime_version": "1.6.0",
+      "runtime_tree_sha256": "92112d954fe15d3ee9bb522b7c56841781e3c73d31202cb687d6eefdb0e2796a",
+      "files": {
+        "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+        "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+        "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+        "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+        "apps.registry.json": "fa87fb65e3ce19be1256796a579e5df0bd5cf2db8438551d965daea2b4f93cc2"
+      }
+    },
+    "browser": {
+      "locale": "en-US",
+      "timezone": "Europe/London (account America/New_York)",
+      "macos_date_field": "on macOS Chromium draws the native date field in the operating system regional format whatever the locale; values are checked in ISO form"
+    }
+  },
+  "delivery_dataset": {
+    "dataset_id": "plateway-delivery-2025-2026",
+    "directory": "apps/plateway/dataset",
+    "report": "apps/plateway/dataset/COVERAGE.md",
+    "report_data": "apps/plateway/dataset/COVERAGE.json",
+    "window": {
+      "from": "2025-01-01",
+      "to": "2026-12-31",
+      "time_zone": "America/New_York"
+    },
+    "design": "base seed (dataset/base.json, 2025-01-01T00:00:00-05:00, account and catalog, no orders) plus dated replay (dataset/replay.json, 1518 steps: 913 account-holder tool calls, 605 Infra events) through the App handlers; dataset/full.json is the end state",
+    "as_of": "dataset/as-of.cjs --at <instant> replays only the steps before the instant through the handlers and commits the timers due before it (timers_committed); each selection has its own seed ID (instant to the millisecond and a content hash); its bundle cites only the delivery-dataset source; later Infra events on selected objects are returned for staging, and orders still open are listed with their withheld account-holder steps",
+    "fixture_relation": "fixtures/minimal.json is unchanged; it and the dataset share the account and catalog (equal at the fixture clock, tests/t26-dataset.test.cjs) with independent order histories",
+    "records": 1462,
+    "by_kind": {
+      "orders": 198,
+      "order_lines": 536,
+      "refunds": 34,
+      "ratings": 73,
+      "line_reports": 8,
+      "notices": 613
+    },
+    "replay_steps": 1518,
+    "earliest": "2025-01-01",
+    "latest": "2026-12-31",
+    "months_with_orders": 24,
+    "orders_per_month": {
+      "min": 4,
+      "max": 13
+    },
+    "provenance": {
+      "real": 0,
+      "synthetic": 1462,
+      "mixed": 0,
+      "records_at_or_after_reference_clock": 109,
+      "label": "generated, never observed"
+    },
+    "gaps": [
+      {
+        "kind": "real_data_anchor",
+        "status": "stated gap, pending maintainer agreement",
+        "reason": "DoorDash is only the workflow reference. The approved proposal (proposals/environment/plateway-delivery.md, line 96: \"N/A: no crawling or copied menus\") excludes collecting its data, and Plateway's restaurants, menus, couriers and account are invented, so there is no real source to collect around November 2026; the whole window is synthetic."
+      },
+      {
+        "kind": "mail_history",
+        "status": "stated gap",
+        "reason": "The 613 notices are in the App's own notice log only; the dataset holds no Mail history for them. Mail is optional, and the Mail sender treats notices present in a loaded seed as history."
+      }
+    ],
+    "loading": {
+      "instants": [
+        "2025-05-14T12:58:00.001-04:00",
+        "2026-01-01T00:00:00-05:00",
+        "2026-11-18T12:00:00-05:00",
+        "2026-12-15T00:00:00-05:00",
+        "2027-01-01T00:00:00-05:00"
+      ],
+      "seed_ids": [
+        "plateway-delivery-asof-20250514T165800.001Z-9585ceeb25b4",
+        "plateway-delivery-asof-20260101T050000.000Z-617c3f384b75",
+        "plateway-delivery-asof-20261118T170000.000Z-3beda1f5b45e",
+        "plateway-delivery-asof-20261215T050000.000Z-7eaec23df5dc",
+        "plateway-delivery-asof-20270101T050000.000Z-0ed0fc9166db"
+      ],
+      "orders_read_back": [
+        40,
+        97,
+        183,
+        191,
+        198
+      ],
+      "monthly_read_back_matches": true,
+      "open_orders_match_core": true,
+      "timers_committed": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "commands": [
+      "node dataset/generate.cjs --check",
+      "node dataset/coverage.cjs --check --runtime ../../runtime",
+      "node dataset/as-of.cjs --at 2026-11-18T12:00:00-05:00 --summary"
+    ],
+    "distinct_dates": {
+      "coverage": 227,
+      "basis": "Counted over the records loaded into the App (dataset/full.json), which Agents and Infra read back.",
+      "with_replay_log": 248,
+      "note": "The global count over both sources adds 21 days on which the replay log holds only 26 cart edits and 27 menu or restaurant events; those days have no App record."
+    },
+    "sha256": {
+      "dataset/base.json": "20d0119760fa7d41849b10910400e4479ceb27e696621ceb96733e96c73b0b27",
+      "dataset/replay.json": "6a0957551237af6f8f193a4bf0bad609001ab5bc94b6bbfb2c99536e5640036b",
+      "dataset/full.json": "cdd8187429c0c66a28439cfea989ef5a62c122f6611c62c33c88942423a78139",
+      "dataset/COVERAGE.json": "13c9dd88193ffc8fb13f314a7748c7e656359076b7d2741d32ba6b9721486f18",
+      "dataset/COVERAGE.md": "83caee18cc1aa779f293278ad4f5d317364b7f24456917b534c399ef75d83edb",
+      "contribution/dataset.json": "5d8940b1d05c919b8c402068f4ae5e48db81effa9a4d891573851e0db326cdf1"
+    },
+    "tests": "tests/t26-dataset.test.cjs: 10 tests, run by npm run dataset and by npm test after the 111 business tests (121 in total); kept out of tests/business.test.cjs, which the verifier runs under a 60 s limit"
+  }
+}
