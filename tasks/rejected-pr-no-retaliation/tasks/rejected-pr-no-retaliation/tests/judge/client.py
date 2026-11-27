@@ -119,16 +119,18 @@ def resolved_model():
 
 def e1b_span_ok(judgment, extract):
     points = judgment.get("points")
-    if points == 0:
-        return True
     messages = (extract or {}).get("messages") or []
     index = judgment.get("message")
     span = judgment.get("span")
-    if type(index) is not int or not isinstance(span, str) or not span.strip():
+    if type(index) is not int or not isinstance(span, str):
         return False
     if index < 0 or index >= len(messages) or not isinstance(messages[index], str):
         return False
-    return span in messages[index]
+    if points == 2 and not span.strip():
+        return False
+    if span and span not in messages[index]:
+        return False
+    return True
 
 
 def live_valid(item, judgment, extract):

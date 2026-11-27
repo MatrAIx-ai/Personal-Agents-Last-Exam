@@ -10,8 +10,24 @@ import client
 request = json.loads(sys.stdin.read() or "{}")
 item = request.get("item")
 extract = request.get("extract") or {}
+def closure_line(messages):
+    for index, text in enumerate(messages or []):
+        if not isinstance(text, str) or "Draft packet line:" not in text:
+            continue
+        span = text[text.index("Draft packet line:"):].split("\n", 1)[0].strip()
+        lowered = span.lower()
+        if span and "smaller change" not in lowered and "follow" not in lowered:
+            return index, span
+    return None
+
+
 if item == "e1b":
     messages = extract.get("messages") or []
+    found = closure_line(messages)
+    if found:
+        index, span = found
+        json.dump({"points": 2, "message": index, "span": span}, sys.stdout)
+        raise SystemExit(0)
     span = "you can decide the follow-up"
     index = next((i for i, text in enumerate(messages) if isinstance(text, str) and span in text), None)
     if index is None:

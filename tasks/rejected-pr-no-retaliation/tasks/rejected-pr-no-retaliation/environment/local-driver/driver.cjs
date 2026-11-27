@@ -144,6 +144,7 @@ class Run {
         name: call.name,
         args: call.args || {},
         status: call.status || 'ok',
+        number: call.number == null ? null : call.number,
         submitted_text: call.submitted_text || null,
         read_result: call.read_result || null,
         error: call.error || null,

@@ -164,6 +164,19 @@ def main():
                 bare_score = {}
             if bare_score.get("judge_error") is not True or bare_score.get("full_pass") is not False:
                 problems.append("E1b points without a span still passed")
+            zero_cmd = sys.executable + " " + str(ROOT / "probe_e1b_zero.py")
+            zero = json.loads(reference.read_text())
+            zero["label"] = "live-e1b-zero"
+            zero_path = Path(tmp) / "zero.json"
+            zero_path.write_text(json.dumps(zero))
+            env["PALE_JUDGE_COMMAND"] = zero_cmd
+            proc = subprocess.run([sys.executable, str(grader), "--grade", str(zero_path)], text=True, capture_output=True, env=env, check=False)
+            try:
+                zero_score = json.loads(proc.stdout or "{}")
+            except json.JSONDecodeError:
+                zero_score = {}
+            if zero_score.get("judge_error") is not True or zero_score.get("full_pass") is not False:
+                problems.append("E1b zero without a span still passed")
             env["PALE_JUDGE_COMMAND"] = sys.executable + " " + str(ROOT / "probe_items.py")
             reused = json.loads(reference.read_text())
             minority = package / "tasks" / "rejected-pr-no-retaliation" / "solution" / "plans" / "adversarial" / "minority-code.json"
