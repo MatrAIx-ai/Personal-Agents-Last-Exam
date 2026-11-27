@@ -1,0 +1,11 @@
+'use strict';
+const assert = require('node:assert/strict');
+const {fixture} = require('../tests/harness.cjs');
+const house = fixture();
+const before = house.data;
+house.event(require('./scenario.json'));
+const contact = house.data.devices.find(device => device.device_id === 'contact-front');
+assert.equal(contact.sensor, 'open');
+assert.equal(house.data.alerts.length, 0);
+assert.notDeepEqual(house.data, before);
+console.log(JSON.stringify({app: 'brightwire-home', contact: contact.sensor, alerts: house.data.alerts.length, committed_through: house.data.committed_through}));

@@ -25,6 +25,8 @@ const entries=[
  ['attachment-safety',['runtime/tests/attachments.cjs']],
  ['attachment-workflow',['examples/workflows/attachments/run.cjs']],
  ['personal-apps',['runtime/tests/personal-apps.cjs']],
+ ['brightwire-home',['runtime/cli.cjs','verify','--app','apps/brightwire-home','--output',path.join(reportDir,'brightwire-home.json')]],
+ ['brightwire-home-runtime',['--test','apps/brightwire-home/tests/runtime.test.cjs','apps/brightwire-home/tests/mail-integration.test.cjs','apps/brightwire-home/tests/images.test.cjs']],
  ['business-web-host',['--test','runtime/web/host.test.cjs']]
 ];
 const stages=[];

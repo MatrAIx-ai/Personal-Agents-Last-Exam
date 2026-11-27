@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "brightwire-home-fixtures",
+  "version": "1.0.0",
+  "description": "Synthetic Brightwire households for reproducible acceptance. Not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Households, device history and reviewer images authored for this package.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/brightwire-home/scripts/materialize.cjs",
+        "tool_version": "1.0.0",
+        "seed": "brightwire-home-fixtures",
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Timestamps use the fixture UTC offset. Reviewer images are flat drawings with room labels."
+  ],
+  "expected_counts": {
+    "records": 1,
+    "assets": 18
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
