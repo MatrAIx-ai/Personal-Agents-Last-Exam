@@ -1,0 +1,1751 @@
+{
+  "scope": "Environment dataset coverage of the Rainshadow full-window evaluation dataset (datasets/full-window), as loaded by tests/dataset.integration.cjs. Not a Task history report.",
+  "dataset": {
+    "dataset_id": "rainshadow-full-window",
+    "version": "1.0.0",
+    "clock": "2026-12-31T20:00:00-07:00",
+    "files": {
+      "seed.json": {
+        "bytes": 1319281,
+        "sha256": "e1f2d87f6d9c8a603a44f7a664808fe719dda4fac87c2cb817917973d9ec0cfa"
+      },
+      "clock.json": {
+        "sha256": "db3fed8fd221985e16f2ba73deb70f7b31075587f27306440b5c092da2cf4b3f"
+      },
+      "dataset.json": {
+        "sha256": "55144459e3a964b3e703f8d8c671d16b65aea2401ebd798cec38d768d8f20242"
+      }
+    },
+    "records": 692,
+    "provenance": [
+      {
+        "source_id": "rainshadow-full-window-generator",
+        "kind": "synthetic",
+        "tool": "dev/dataset.cjs with dev/build-fixture.cjs and dev/history.cjs",
+        "seed": 20250103
+      }
+    ],
+    "record_ids": "Stable IDs: issuances iss-<source>-<place>-<yyyymmdd>-<hh> and aq-<place>-<yyyymmdd>-10 (the fixture's detailed days keep iss-<source>-<place>-<n>), observations ob-<place>-<yyyymmdd>-<hh>, alert threads al-<yyyymmdd>-<n> with messages <thread>-m<n>, watches w-NNNN, notices ntc-NNNN, activity rows by seq."
+  },
+  "time_zone": "America/Denver",
+  "window": {
+    "start": "2025-01-01",
+    "end": "2026-12-31",
+    "days": 730
+  },
+  "method": "Each record family has one authoritative date field. Timestamps (all with a UTC offset, Mountain or Pacific) are converted to a local date in America/Denver. A record counts when its local date is in the window and it is not after the dataset clock; missing or unparseable dates are counted as invalid and listed. Distinct dates are counted per family and once globally (a date with several records or families counts once). Each family names the Agent tool that reads it; the activity log is read through Infra's env.snapshot.",
+  "families": {
+    "actions": {
+      "label": "Actions: activity log rows (every event, every account write, and their effects)",
+      "date_field": "activity[].at",
+      "read_through": "env.snapshot (Infra)",
+      "provenance": {
+        "synthetic": 771,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 771,
+      "in_window": 771,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 310,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 38,
+          "dates": 14
+        },
+        "2025-02": {
+          "records": 25,
+          "dates": 12
+        },
+        "2025-03": {
+          "records": 31,
+          "dates": 14
+        },
+        "2025-04": {
+          "records": 17,
+          "dates": 11
+        },
+        "2025-05": {
+          "records": 22,
+          "dates": 12
+        },
+        "2025-06": {
+          "records": 24,
+          "dates": 13
+        },
+        "2025-07": {
+          "records": 33,
+          "dates": 16
+        },
+        "2025-08": {
+          "records": 31,
+          "dates": 15
+        },
+        "2025-09": {
+          "records": 44,
+          "dates": 15
+        },
+        "2025-10": {
+          "records": 15,
+          "dates": 9
+        },
+        "2025-11": {
+          "records": 19,
+          "dates": 12
+        },
+        "2025-12": {
+          "records": 32,
+          "dates": 13
+        },
+        "2026-01": {
+          "records": 27,
+          "dates": 13
+        },
+        "2026-02": {
+          "records": 34,
+          "dates": 12
+        },
+        "2026-03": {
+          "records": 29,
+          "dates": 10
+        },
+        "2026-04": {
+          "records": 14,
+          "dates": 10
+        },
+        "2026-05": {
+          "records": 19,
+          "dates": 11
+        },
+        "2026-06": {
+          "records": 23,
+          "dates": 13
+        },
+        "2026-07": {
+          "records": 27,
+          "dates": 12
+        },
+        "2026-08": {
+          "records": 29,
+          "dates": 15
+        },
+        "2026-09": {
+          "records": 26,
+          "dates": 11
+        },
+        "2026-10": {
+          "records": 16,
+          "dates": 11
+        },
+        "2026-11": {
+          "records": 123,
+          "dates": 16
+        },
+        "2026-12": {
+          "records": 73,
+          "dates": 20
+        }
+      }
+    },
+    "account_writes": {
+      "label": "The account holder's own writes (activity rows with actor \"agent\")",
+      "date_field": "activity[].at",
+      "read_through": "env.snapshot (Infra)",
+      "provenance": {
+        "synthetic": 92,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 92,
+      "in_window": 92,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 76,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 9,
+          "dates": 7
+        },
+        "2025-02": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-03": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-04": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-05": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-06": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-07": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-08": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-09": {
+          "records": 5,
+          "dates": 3
+        },
+        "2025-10": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-11": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-12": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-01": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-02": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-04": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-05": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-07": {
+          "records": 5,
+          "dates": 2
+        },
+        "2026-08": {
+          "records": 2,
+          "dates": 1
+        },
+        "2026-09": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-10": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-11": {
+          "records": 9,
+          "dates": 7
+        },
+        "2026-12": {
+          "records": 11,
+          "dates": 9
+        }
+      }
+    },
+    "weather_issuances": {
+      "label": "Weather forecast issuances, by issue time",
+      "date_field": "issuances[].issued_at (weather sources)",
+      "read_through": "rainshadow.forecast.issuances",
+      "provenance": {
+        "synthetic": 156,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 156,
+      "in_window": 156,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 97,
+      "earliest": "2025-01-06",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 6,
+          "dates": 4
+        },
+        "2025-02": {
+          "records": 4,
+          "dates": 3
+        },
+        "2025-03": {
+          "records": 8,
+          "dates": 6
+        },
+        "2025-04": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-05": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-06": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-07": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-08": {
+          "records": 6,
+          "dates": 4
+        },
+        "2025-09": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-10": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-11": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-12": {
+          "records": 6,
+          "dates": 4
+        },
+        "2026-01": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-02": {
+          "records": 6,
+          "dates": 5
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-04": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-05": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-06": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-07": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-08": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-09": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-10": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-11": {
+          "records": 41,
+          "dates": 7
+        },
+        "2026-12": {
+          "records": 22,
+          "dates": 9
+        }
+      }
+    },
+    "air_quality_issuances": {
+      "label": "Air-quality forecast issuances, by issue time",
+      "date_field": "issuances[].issued_at (air-quality source)",
+      "read_through": "rainshadow.forecast.issuances",
+      "provenance": {
+        "synthetic": 190,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 190,
+      "in_window": 190,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 170,
+      "earliest": "2025-01-06",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-02": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-03": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-04": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-05": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-06": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-07": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-08": {
+          "records": 8,
+          "dates": 8
+        },
+        "2025-09": {
+          "records": 11,
+          "dates": 11
+        },
+        "2025-10": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-11": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-12": {
+          "records": 7,
+          "dates": 7
+        },
+        "2026-01": {
+          "records": 7,
+          "dates": 7
+        },
+        "2026-02": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-03": {
+          "records": 7,
+          "dates": 7
+        },
+        "2026-04": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-05": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-06": {
+          "records": 7,
+          "dates": 7
+        },
+        "2026-07": {
+          "records": 8,
+          "dates": 8
+        },
+        "2026-08": {
+          "records": 9,
+          "dates": 9
+        },
+        "2026-09": {
+          "records": 8,
+          "dates": 8
+        },
+        "2026-10": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-11": {
+          "records": 25,
+          "dates": 10
+        },
+        "2026-12": {
+          "records": 12,
+          "dates": 7
+        }
+      }
+    },
+    "observations": {
+      "label": "Observations, by observation time (the newest per place is what conditions.get shows)",
+      "date_field": "observations[].observed_at",
+      "read_through": "rainshadow.conditions.get",
+      "provenance": {
+        "synthetic": 50,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 50,
+      "in_window": 50,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 34,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-02": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-03": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-07": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-08": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-09": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-11": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-12": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-01": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-02": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-03": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-07": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-08": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-09": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-11": {
+          "records": 16,
+          "dates": 3
+        },
+        "2026-12": {
+          "records": 7,
+          "dates": 4
+        }
+      }
+    },
+    "alert_messages": {
+      "label": "Alert messages (issued, updated, cancelled), by sending time",
+      "date_field": "alerts[].messages[].sent_at",
+      "read_through": "rainshadow.alerts.list, rainshadow.alerts.get",
+      "provenance": {
+        "synthetic": 164,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 164,
+      "in_window": 164,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 141,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 8,
+          "dates": 8
+        },
+        "2025-02": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-03": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-04": {
+          "records": 7,
+          "dates": 6
+        },
+        "2025-05": {
+          "records": 7,
+          "dates": 6
+        },
+        "2025-06": {
+          "records": 6,
+          "dates": 3
+        },
+        "2025-07": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-08": {
+          "records": 7,
+          "dates": 6
+        },
+        "2025-09": {
+          "records": 9,
+          "dates": 8
+        },
+        "2025-10": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-11": {
+          "records": 6,
+          "dates": 5
+        },
+        "2025-12": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-01": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-02": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-04": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-05": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-06": {
+          "records": 6,
+          "dates": 5
+        },
+        "2026-07": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-08": {
+          "records": 7,
+          "dates": 7
+        },
+        "2026-09": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-10": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-11": {
+          "records": 16,
+          "dates": 8
+        },
+        "2026-12": {
+          "records": 11,
+          "dates": 11
+        }
+      }
+    },
+    "acknowledgements": {
+      "label": "Acknowledgements of alert messages",
+      "date_field": "acknowledgements[].acknowledged_at",
+      "read_through": "rainshadow.alerts.get",
+      "provenance": {
+        "synthetic": 35,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 35,
+      "in_window": 35,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 35,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-02": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-03": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-05": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-06": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-07": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-08": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-09": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-11": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-12": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-01": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-02": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-03": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-05": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-06": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-07": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-08": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-09": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-11": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-12": {
+          "records": 5,
+          "dates": 5
+        }
+      }
+    },
+    "watch_changes": {
+      "label": "Watches: created, changed, cancelled",
+      "date_field": "watches[].created_at, updated_at, cancelled_at",
+      "read_through": "rainshadow.watches.list",
+      "provenance": {
+        "synthetic": 39,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 39,
+      "in_window": 39,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 34,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-30",
+      "by_month": {
+        "2025-01": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-02": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-03": {
+          "records": 3,
+          "dates": 2
+        },
+        "2025-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-07": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-08": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-09": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-11": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-12": {
+          "records": 3,
+          "dates": 2
+        },
+        "2026-01": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-02": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-03": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-07": {
+          "records": 3,
+          "dates": 2
+        },
+        "2026-08": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-09": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-11": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-12": {
+          "records": 5,
+          "dates": 4
+        }
+      }
+    },
+    "notices": {
+      "label": "Notices, by creation time",
+      "date_field": "notices[].created_at",
+      "read_through": "rainshadow.notices.list",
+      "provenance": {
+        "synthetic": 104,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 104,
+      "in_window": 104,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 87,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 6,
+          "dates": 5
+        },
+        "2025-02": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-03": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-04": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-05": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-06": {
+          "records": 3,
+          "dates": 2
+        },
+        "2025-07": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-08": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-09": {
+          "records": 10,
+          "dates": 8
+        },
+        "2025-10": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-11": {
+          "records": 4,
+          "dates": 3
+        },
+        "2025-12": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-01": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-02": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-04": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-06": {
+          "records": 3,
+          "dates": 2
+        },
+        "2026-07": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-08": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-09": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-10": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-11": {
+          "records": 14,
+          "dates": 8
+        },
+        "2026-12": {
+          "records": 9,
+          "dates": 9
+        }
+      }
+    },
+    "saved_places": {
+      "label": "Places saved at the clock, by the time they were saved",
+      "date_field": "saved_places[].saved_at",
+      "read_through": "rainshadow.places.list",
+      "provenance": {
+        "synthetic": 3,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 3,
+      "in_window": 3,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 2,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-10",
+      "by_month": {
+        "2025-01": {
+          "records": 2,
+          "dates": 1
+        },
+        "2025-02": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-03": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-05": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-06": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-07": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-08": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-09": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-11": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-12": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-01": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-02": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-03": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-04": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-05": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-06": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-07": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-08": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-09": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-10": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-11": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-12": {
+          "records": 0,
+          "dates": 0
+        }
+      }
+    }
+  },
+  "global": {
+    "actions_only": {
+      "families": [
+        "actions"
+      ],
+      "distinct_dates": 310,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31",
+      "gaps": {
+        "dates_without_records": 420,
+        "longest": [
+          {
+            "from": "2025-04-29",
+            "to": "2025-05-04",
+            "days": 6
+          },
+          {
+            "from": "2025-05-27",
+            "to": "2025-06-01",
+            "days": 6
+          },
+          {
+            "from": "2025-08-05",
+            "to": "2025-08-10",
+            "days": 6
+          },
+          {
+            "from": "2025-09-30",
+            "to": "2025-10-05",
+            "days": 6
+          },
+          {
+            "from": "2025-10-28",
+            "to": "2025-11-02",
+            "days": 6
+          }
+        ]
+      }
+    },
+    "all_history": {
+      "families": [
+        "actions",
+        "weather_issuances",
+        "air_quality_issuances",
+        "observations",
+        "alert_messages",
+        "acknowledgements",
+        "watch_changes",
+        "notices",
+        "saved_places"
+      ],
+      "distinct_dates": 310,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31",
+      "gaps": {
+        "dates_without_records": 420,
+        "longest": [
+          {
+            "from": "2025-04-29",
+            "to": "2025-05-04",
+            "days": 6
+          },
+          {
+            "from": "2025-05-27",
+            "to": "2025-06-01",
+            "days": 6
+          },
+          {
+            "from": "2025-08-05",
+            "to": "2025-08-10",
+            "days": 6
+          },
+          {
+            "from": "2025-09-30",
+            "to": "2025-10-05",
+            "days": 6
+          },
+          {
+            "from": "2025-10-28",
+            "to": "2025-11-02",
+            "days": 6
+          }
+        ]
+      }
+    }
+  },
+  "forecast_and_announced_times": {
+    "forecast_rows": 6642,
+    "forecast_rows_after_clock": 201,
+    "alert_messages_with_times": 151,
+    "alerts_ending_after_clock": 1,
+    "watches": 35,
+    "watch_windows_after_clock": 1,
+    "note": "The hours and days a forecast covers, the onset and end an alert announces and the window a watch looks at are excluded from every count above; only issue, sending, acknowledgement, creation and change times count."
+  },
+  "states_at_clock": {
+    "issuances_by_place": {
+      "pl-cinderhorn-pass": 42,
+      "pl-marrowby": 134,
+      "pl-port-brindle": 12,
+      "pl-quillmere": 65,
+      "pl-tamsin-heights": 59,
+      "pl-wren-lake": 34
+    },
+    "issuances_by_source": {
+      "src-aqb": 190,
+      "src-pfo": 124,
+      "src-skyline": 32
+    },
+    "alerts": {
+      "active": 1,
+      "cancelled": 13,
+      "expired": 126
+    },
+    "watches": {
+      "cancelled": 1,
+      "ended": 33,
+      "triggered": 1
+    },
+    "notices": {
+      "released": 104
+    },
+    "notices_by_kind": {
+      "alert.cancelled": 10,
+      "alert.issued": 70,
+      "alert.updated": 11,
+      "watch.cleared": 5,
+      "watch.triggered": 8
+    },
+    "saved_places": [
+      "Mom's house",
+      "Ski cabin road",
+      "Saturday hike"
+    ]
+  },
+  "invalid_or_missing_dates": [],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "days": 31,
+      "dates_with_any_record": 14,
+      "dates_with_actions": 14,
+      "weather_issuances": 6,
+      "air_quality_issuances": 6,
+      "observations": 2,
+      "alert_messages": 8,
+      "acknowledgements": 4,
+      "watch_changes": 2,
+      "notices": 6,
+      "account_writes": 9,
+      "actions": 38,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-02",
+      "days": 28,
+      "dates_with_any_record": 12,
+      "dates_with_actions": 12,
+      "weather_issuances": 4,
+      "air_quality_issuances": 6,
+      "observations": 1,
+      "alert_messages": 7,
+      "acknowledgements": 2,
+      "watch_changes": 1,
+      "notices": 4,
+      "account_writes": 3,
+      "actions": 25,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-03",
+      "days": 31,
+      "dates_with_any_record": 14,
+      "dates_with_actions": 14,
+      "weather_issuances": 8,
+      "air_quality_issuances": 7,
+      "observations": 2,
+      "alert_messages": 5,
+      "acknowledgements": 2,
+      "watch_changes": 3,
+      "notices": 3,
+      "account_writes": 5,
+      "actions": 31,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-04",
+      "days": 30,
+      "dates_with_any_record": 11,
+      "dates_with_actions": 11,
+      "weather_issuances": 2,
+      "air_quality_issuances": 6,
+      "observations": 0,
+      "alert_messages": 7,
+      "acknowledgements": 0,
+      "watch_changes": 0,
+      "notices": 1,
+      "account_writes": 1,
+      "actions": 17,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-05",
+      "days": 31,
+      "dates_with_any_record": 12,
+      "dates_with_actions": 12,
+      "weather_issuances": 4,
+      "air_quality_issuances": 6,
+      "observations": 1,
+      "alert_messages": 7,
+      "acknowledgements": 0,
+      "watch_changes": 1,
+      "notices": 2,
+      "account_writes": 2,
+      "actions": 22,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-06",
+      "days": 30,
+      "dates_with_any_record": 13,
+      "dates_with_actions": 13,
+      "weather_issuances": 4,
+      "air_quality_issuances": 7,
+      "observations": 1,
+      "alert_messages": 6,
+      "acknowledgements": 0,
+      "watch_changes": 1,
+      "notices": 3,
+      "account_writes": 2,
+      "actions": 24,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-07",
+      "days": 31,
+      "dates_with_any_record": 16,
+      "dates_with_actions": 16,
+      "weather_issuances": 6,
+      "air_quality_issuances": 7,
+      "observations": 2,
+      "alert_messages": 7,
+      "acknowledgements": 0,
+      "watch_changes": 2,
+      "notices": 5,
+      "account_writes": 4,
+      "actions": 33,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-08",
+      "days": 31,
+      "dates_with_any_record": 15,
+      "dates_with_actions": 15,
+      "weather_issuances": 6,
+      "air_quality_issuances": 8,
+      "observations": 2,
+      "alert_messages": 7,
+      "acknowledgements": 2,
+      "watch_changes": 2,
+      "notices": 3,
+      "account_writes": 5,
+      "actions": 31,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-09",
+      "days": 30,
+      "dates_with_any_record": 15,
+      "dates_with_actions": 15,
+      "weather_issuances": 5,
+      "air_quality_issuances": 11,
+      "observations": 3,
+      "alert_messages": 9,
+      "acknowledgements": 2,
+      "watch_changes": 3,
+      "notices": 10,
+      "account_writes": 5,
+      "actions": 44,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-10",
+      "days": 31,
+      "dates_with_any_record": 9,
+      "dates_with_actions": 9,
+      "weather_issuances": 2,
+      "air_quality_issuances": 6,
+      "observations": 0,
+      "alert_messages": 5,
+      "acknowledgements": 0,
+      "watch_changes": 0,
+      "notices": 1,
+      "account_writes": 1,
+      "actions": 15,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-11",
+      "days": 30,
+      "dates_with_any_record": 12,
+      "dates_with_actions": 12,
+      "weather_issuances": 2,
+      "air_quality_issuances": 6,
+      "observations": 0,
+      "alert_messages": 6,
+      "acknowledgements": 0,
+      "watch_changes": 0,
+      "notices": 4,
+      "account_writes": 1,
+      "actions": 19,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-12",
+      "days": 31,
+      "dates_with_any_record": 13,
+      "dates_with_actions": 13,
+      "weather_issuances": 6,
+      "air_quality_issuances": 7,
+      "observations": 2,
+      "alert_messages": 6,
+      "acknowledgements": 4,
+      "watch_changes": 3,
+      "notices": 4,
+      "account_writes": 7,
+      "actions": 32,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-01",
+      "days": 31,
+      "dates_with_any_record": 13,
+      "dates_with_actions": 13,
+      "weather_issuances": 4,
+      "air_quality_issuances": 7,
+      "observations": 1,
+      "alert_messages": 6,
+      "acknowledgements": 2,
+      "watch_changes": 1,
+      "notices": 5,
+      "account_writes": 3,
+      "actions": 27,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-02",
+      "days": 28,
+      "dates_with_any_record": 12,
+      "dates_with_actions": 12,
+      "weather_issuances": 6,
+      "air_quality_issuances": 6,
+      "observations": 2,
+      "alert_messages": 7,
+      "acknowledgements": 2,
+      "watch_changes": 2,
+      "notices": 7,
+      "account_writes": 5,
+      "actions": 34,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-03",
+      "days": 31,
+      "dates_with_any_record": 10,
+      "dates_with_actions": 10,
+      "weather_issuances": 5,
+      "air_quality_issuances": 7,
+      "observations": 1,
+      "alert_messages": 5,
+      "acknowledgements": 4,
+      "watch_changes": 1,
+      "notices": 5,
+      "account_writes": 5,
+      "actions": 29,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-04",
+      "days": 30,
+      "dates_with_any_record": 10,
+      "dates_with_actions": 10,
+      "weather_issuances": 2,
+      "air_quality_issuances": 6,
+      "observations": 0,
+      "alert_messages": 4,
+      "acknowledgements": 0,
+      "watch_changes": 0,
+      "notices": 1,
+      "account_writes": 1,
+      "actions": 14,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-05",
+      "days": 31,
+      "dates_with_any_record": 11,
+      "dates_with_actions": 11,
+      "weather_issuances": 4,
+      "air_quality_issuances": 6,
+      "observations": 1,
+      "alert_messages": 5,
+      "acknowledgements": 0,
+      "watch_changes": 1,
+      "notices": 1,
+      "account_writes": 2,
+      "actions": 19,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-06",
+      "days": 30,
+      "dates_with_any_record": 13,
+      "dates_with_actions": 13,
+      "weather_issuances": 4,
+      "air_quality_issuances": 7,
+      "observations": 1,
+      "alert_messages": 6,
+      "acknowledgements": 0,
+      "watch_changes": 1,
+      "notices": 3,
+      "account_writes": 1,
+      "actions": 23,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-07",
+      "days": 31,
+      "dates_with_any_record": 12,
+      "dates_with_actions": 12,
+      "weather_issuances": 3,
+      "air_quality_issuances": 8,
+      "observations": 1,
+      "alert_messages": 7,
+      "acknowledgements": 2,
+      "watch_changes": 3,
+      "notices": 3,
+      "account_writes": 5,
+      "actions": 27,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-08",
+      "days": 31,
+      "dates_with_any_record": 15,
+      "dates_with_actions": 15,
+      "weather_issuances": 4,
+      "air_quality_issuances": 9,
+      "observations": 2,
+      "alert_messages": 7,
+      "acknowledgements": 1,
+      "watch_changes": 1,
+      "notices": 4,
+      "account_writes": 2,
+      "actions": 29,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-09",
+      "days": 30,
+      "dates_with_any_record": 11,
+      "dates_with_actions": 11,
+      "weather_issuances": 4,
+      "air_quality_issuances": 8,
+      "observations": 2,
+      "alert_messages": 5,
+      "acknowledgements": 0,
+      "watch_changes": 2,
+      "notices": 4,
+      "account_writes": 2,
+      "actions": 26,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-10",
+      "days": 31,
+      "dates_with_any_record": 11,
+      "dates_with_actions": 11,
+      "weather_issuances": 2,
+      "air_quality_issuances": 6,
+      "observations": 0,
+      "alert_messages": 5,
+      "acknowledgements": 0,
+      "watch_changes": 0,
+      "notices": 2,
+      "account_writes": 1,
+      "actions": 16,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-11",
+      "days": 30,
+      "dates_with_any_record": 16,
+      "dates_with_actions": 16,
+      "weather_issuances": 41,
+      "air_quality_issuances": 25,
+      "observations": 16,
+      "alert_messages": 16,
+      "acknowledgements": 3,
+      "watch_changes": 4,
+      "notices": 14,
+      "account_writes": 9,
+      "actions": 123,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-12",
+      "days": 31,
+      "dates_with_any_record": 20,
+      "dates_with_actions": 20,
+      "weather_issuances": 22,
+      "air_quality_issuances": 12,
+      "observations": 7,
+      "alert_messages": 11,
+      "acknowledgements": 5,
+      "watch_changes": 5,
+      "notices": 9,
+      "account_writes": 11,
+      "actions": 73,
+      "provenance": "synthetic"
+    }
+  ]
+}

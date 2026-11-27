@@ -1,0 +1,76 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "rainshadow-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic Rainshadow fixture: an invented two-region world and one account's history from January 2025 to 20 November 2026 (forecasts, observations, alerts, watches, notices and the account's own changes), with the last three days kept in full. For package validation and examples; not an evaluation task.",
+  "record_source_ids": [
+    "scripted-history"
+  ],
+  "sources": [
+    {
+      "source_id": "scripted-history",
+      "kind": "synthetic",
+      "description": "Scripted synthetic history. Forecast numbers come from closed-form toy models; alerts, places, people and account activity are invented. The history is replayed through the App's own business functions, so notices, watch evaluations and the activity log follow the App rules. No external collection, no observed weather.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic script, no random numbers",
+        "tool": "dev/build-fixture.cjs with dev/history.cjs",
+        "tool_version": "2",
+        "seed": null,
+        "parameters": {
+          "regions": 2,
+          "time_zones": [
+            "America/Denver",
+            "America/Los_Angeles"
+          ],
+          "places": 6,
+          "zones": 8,
+          "sources": 3,
+          "history_start": "2025-01-01T00:00:00-07:00",
+          "first_record": "2025-01-01T10:12:00-07:00",
+          "clock": "2026-11-20T20:00:00-07:00",
+          "last_three_days": {
+            "weather_issuances": 36,
+            "air_quality_issuances": 18,
+            "observations": 12,
+            "alert_threads": 6,
+            "hourly_rows_per_weather_issuance": 48,
+            "daily_rows_per_weather_issuance": 7
+          },
+          "archive": {
+            "weather_issuances": 45,
+            "air_quality_issuances": 12,
+            "observations": 27,
+            "alert_threads": 46,
+            "hourly_rows_per_weather_issuance": 24,
+            "daily_rows_per_weather_issuance": 5
+          },
+          "watches": 30,
+          "notices": 66,
+          "acknowledgements": 23,
+          "activity_rows": 368
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "None: records are stored exactly as the script produces them."
+  ],
+  "expected_counts": {
+    "records": 315,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks (seed rules, dev/check-fixture.cjs) do not replace human review of realism: forecast numbers, alert and notice wording, the plausibility of the account's two-year history, and that every place and organization name is fictional."
+  }
+}

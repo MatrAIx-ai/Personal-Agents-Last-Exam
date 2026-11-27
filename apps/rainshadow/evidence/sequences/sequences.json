@@ -1,0 +1,551 @@
+{
+  "schema": "rainshadow.web-evidence.v1",
+  "app_version": "1.0.0",
+  "package_sha256_without_evidence": "2a90d37e3ebaea1a9d54eea36e9c04ef1f3d45b770de5444bc67f1ff48574778",
+  "runtime": "1.6.0",
+  "node": "v22.23.4",
+  "browser": "Chrome 153.0.8010.12, headless",
+  "viewport": "1360x960 (narrow checks at 390x844)",
+  "browser_time_zone": "Asia/Tokyo",
+  "place_time_zones": "each place's own (Wren Lake: America/Denver)",
+  "runs": {
+    "browser": "sandbox profile, fixtures/minimal.json, account rainshadow-maya (Maya Chen), clock 2026-11-20T20:00:00-07:00",
+    "restricted": "scenario profile, same fixture",
+    "full-window": "sandbox profile, datasets/full-window loaded by Infra at its clock"
+  },
+  "test": "tests/web.browser.cjs",
+  "checks": 61,
+  "steps": [
+    {
+      "sequence": "forecast",
+      "title": "Forecasts: the latest issuance, another source, an earlier issuance, a new and a late arrival",
+      "step": 1,
+      "caption": "Wren Lake: the latest issuance of the default source, in the place's own time zone",
+      "file": "forecast-01.jpg",
+      "action": "Places: open Wren Lake (saved as “Saturday hike”).",
+      "expected": "The latest issuance of the default source, iss-pfo-wren-3; hours in America/Denver although the browser runs in Asia/Tokyo; the latest observation.",
+      "observed": "Issued Fri, Nov 20, 3:00 PM by Public Forecast Office · iss-pfo-wren-3 · first hour: Fri 8 PM | ☾ Clear | 10.1 °C | 10.1 °C | 5 % | 0 % | 0 mm | 11 km/h | 18 km/h",
+      "state": {
+        "forecast.hourly": "iss-pfo-wren-3, issued 2026-11-20T15:00:00-07:00, 24 rows",
+        "conditions.get": "ob-wren-2"
+      },
+      "check": "the place page shows the latest issuance of the default source"
+    },
+    {
+      "sequence": "forecast",
+      "title": "Forecasts: the latest issuance, another source, an earlier issuance, a new and a late arrival",
+      "step": 2,
+      "caption": "Another source: its own latest issuance, never a mix",
+      "file": "forecast-02.jpg",
+      "action": "Forecast from: Skyline.",
+      "expected": "Skyline's own latest issuance, iss-sky-wren-3; nothing from the other source fills a gap.",
+      "observed": "Issued Fri, Nov 20, 6:00 PM by Skyline Weather · iss-sky-wren-3",
+      "state": {
+        "forecast.hourly": "source src-skyline: iss-sky-wren-3, issued 2026-11-20T18:00:00-07:00"
+      },
+      "check": "the source picker shows the other source's own issuance, with no fallback"
+    },
+    {
+      "sequence": "forecast",
+      "title": "Forecasts: the latest issuance, another source, an earlier issuance, a new and a late arrival",
+      "step": 3,
+      "caption": "An earlier issuance is labelled as such",
+      "file": "forecast-03.jpg",
+      "action": "Issuance: choose the one before the latest.",
+      "expected": "The page shows iss-sky-wren-2 and says that newer forecasts from this source exist.",
+      "observed": "Issued Fri, Nov 20, 6:00 AM by Skyline Weather · iss-sky-wren-2 · You are looking at an earlier issuance. Newer forecasts from this source exist. Show the latest",
+      "state": {
+        "forecast.issuances": "iss-sky-wren-2 issued 2026-11-20T06:00:00-07:00, is_latest false"
+      },
+      "check": "an earlier issuance is shown as such"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 1,
+      "caption": "A new watch, filled in before sending",
+      "file": "watch-01.jpg",
+      "action": "Wren Lake: New watch here; label “GUI hike”, Sunday 22 November 09:00–12:00 (the place's time), chance of rain at least 35 %, Add condition (chance of thunder).",
+      "expected": "The form holds the window in the place's own time and two conditions; nothing is written yet.",
+      "observed": "2026-11-22T09:00 → 2026-11-22T12:00 · 2 conditions",
+      "state": {
+        "watches.list": "30 watches"
+      }
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 2,
+      "caption": "Sent: the watch opens with its first evaluation",
+      "file": "watch-02.jpg",
+      "action": "Send.",
+      "expected": "rainshadow.watches.create writes the watch with the typed local times; the page shows its latest evaluation.",
+      "observed": "GUI hike Saturday hike (Wren Lake) · Sun, Nov 22, 9:00 AM – Sun, Nov 22, 12:00 PM · Clear",
+      "state": {
+        "watches.list": "w-0031 “GUI hike” 2026-11-22T09:00:00-07:00 → 2026-11-22T12:00:00-07:00, status clear",
+        "receipt": "request web-3457d162-1db4-48bc-8e65-fe0507369e3b",
+        "version": "epoch 1, revision 1"
+      },
+      "check": "the new watch opens with its evaluation"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 3,
+      "caption": "After a reload: read back from the App",
+      "file": "watch-03.jpg",
+      "action": "Reload the page; open the watch.",
+      "expected": "The same watch, read back from the App.",
+      "observed": "GUI hike Saturday hike (Wren Lake) · Sun, Nov 22, 9:00 AM – Sun, Nov 22, 12:00 PM · Clear",
+      "state": {
+        "watches.list": "w-0031 present"
+      },
+      "check": "a reload keeps the committed watch"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 4,
+      "caption": "Edited: only the end time",
+      "file": "watch-04.jpg",
+      "action": "Edit watch, end 13:00, Save.",
+      "expected": "rainshadow.watches.update sends only the end; the same record now ends at 13:00.",
+      "observed": "GUI hike Saturday hike (Wren Lake) · Sun, Nov 22, 9:00 AM – Sun, Nov 22, 1:00 PM · Clear",
+      "state": {
+        "watches.list": "w-0031 ends 2026-11-22T13:00:00-07:00",
+        "receipt": "request web-1bfeaf19-18f7-4980-848c-3db1dbc3442b",
+        "version": "epoch 1, revision 2"
+      },
+      "check": "an edit sends only the edited field"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 5,
+      "caption": "A form that went stale: the conflict is shown and the other change stands",
+      "file": "watch-05.jpg",
+      "action": "Edit watch; meanwhile another session renames it through MCP (request outside-edit); type “Stale label” and Save.",
+      "expected": "The App answers stale_version and the form says so; the label stays “Changed elsewhere”.",
+      "observed": "This record changed. Close this form and refresh before trying again.",
+      "state": {
+        "watches.list": "w-0031 “Changed elsewhere”",
+        "receipt": "request outside-edit (the other session)",
+        "version": "epoch 1, revision 3"
+      },
+      "check": "a stale form shows the conflict and the concurrent change stands"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 6,
+      "caption": "The response is lost: the form says so and keeps its input",
+      "file": "watch-06.jpg",
+      "action": "New watch “Lost response”, Monday 09:00–11:00, send. The test drops the response after the App has committed it.",
+      "expected": "The form reports the failure and offers to send again with the same request ID.",
+      "observed": "Failed to fetch",
+      "state": {
+        "watches.list": "“Lost response”: 1"
+      }
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 7,
+      "caption": "Sent again: still one watch",
+      "file": "watch-07.jpg",
+      "action": "Send again.",
+      "expected": "The retry is the same write with the same request ID: one watch.",
+      "observed": "Watch created.",
+      "state": {
+        "watches.list": "“Lost response”: 1",
+        "receipt": "request web-9789d950-9003-43e2-bfdf-a9578b14c395",
+        "version": "epoch 1, revision 4"
+      },
+      "check": "a retry after a lost response has one effect"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 8,
+      "caption": "A window that ends before it starts is refused",
+      "file": "watch-08.jpg",
+      "action": "New watch, Monday 12:00 → 10:00, send.",
+      "expected": "The App answers invalid_window and the form says why; nothing is written.",
+      "observed": "start must be before end.",
+      "state": {
+        "version": "epoch 1, revision 4"
+      },
+      "check": "an invalid window is refused visibly and writes nothing"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 9,
+      "caption": "Cancel asks first",
+      "file": "watch-09.jpg",
+      "action": "Open the watch, Cancel watch.",
+      "expected": "A confirmation names the watch.",
+      "observed": "Cancel Changed elsewhere? The watch stops checking the forecast and alerts. It stays in your history. Cancel Cancel watch",
+      "state": {
+        "watches.list": "w-0031 open"
+      }
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 10,
+      "caption": "Cancelled: kept, and marked as cancelled",
+      "file": "watch-10.jpg",
+      "action": "Confirm with Cancel watch.",
+      "expected": "rainshadow.watches.cancel commits the cancellation; the watch stays listed as Cancelled.",
+      "observed": "Changed elsewhere Saturday hike (Wren Lake) · Sun, Nov 22, 9:00 AM – Sun, Nov 22, 1:00 PM Cancelled",
+      "state": {
+        "watches.list": "w-0031 cancelled at 2026-11-20T20:00:00-07:00",
+        "receipt": "request web-05516d93-3a55-4af6-bef2-01faaa8a496d",
+        "version": "epoch 1, revision 5"
+      },
+      "check": "cancelling a watch commits it as cancelled"
+    },
+    {
+      "sequence": "alert",
+      "title": "An alert: acknowledging is refused while an update is unread, then recorded; the alert is cancelled",
+      "step": 1,
+      "caption": "Start: the coastal flood advisory for Marrowby, not acknowledged",
+      "file": "alert-01.jpg",
+      "action": "Alerts: open al-0004.",
+      "expected": "One message, in effect, with an Acknowledge control.",
+      "observed": "Coastal Flood Advisory Public Forecast Office · Flood · z-marrow · Severe Active Expected Likely · Acknowledged: Not yet",
+      "state": {
+        "alerts.get": "al-0004 active, 1 message, latest al-0004-m1, acknowledged false"
+      },
+      "check": "the alert thread is shown message by message"
+    },
+    {
+      "sequence": "alert",
+      "title": "An alert: acknowledging is refused while an update is unread, then recorded; the alert is cancelled",
+      "step": 2,
+      "caption": "An update arrives while the page is open: acknowledging is refused",
+      "file": "alert-02.jpg",
+      "action": "Infra applies rainshadow.alert.updated (event web-alert-update, message al-0004-m2); without refreshing, Acknowledge.",
+      "expected": "The page reads the thread again, finds a newer message and refuses; no acknowledgement is written.",
+      "observed": "A newer message arrived for this alert. Read it before acknowledging.",
+      "state": {
+        "alerts.get": "al-0004 latest al-0004-m2",
+        "env.event_status": "web-alert-update committed",
+        "acknowledgements": "23 (unchanged)"
+      },
+      "check": "acknowledging while a newer message is unread is refused and writes nothing"
+    },
+    {
+      "sequence": "alert",
+      "title": "An alert: acknowledging is refused while an update is unread, then recorded; the alert is cancelled",
+      "step": 3,
+      "caption": "After Refresh: the update is first in the thread",
+      "file": "alert-03.jpg",
+      "action": "Refresh.",
+      "expected": "Two messages, newest first; the advisory now ends at 8 AM; Acknowledge is offered again.",
+      "observed": "Coastal Flood Advisory Public Forecast Office · Flood · z-marrow · Severe Active Expected Likely · In effect: Fri, Nov 20, 4:00 PM – Sat, Nov 21, 8:00 AM",
+      "state": {
+        "alerts.get": "al-0004 messages al-0004-m1, al-0004-m2"
+      },
+      "check": "after Refresh the thread shows the update first"
+    },
+    {
+      "sequence": "alert",
+      "title": "An alert: acknowledging is refused while an update is unread, then recorded; the alert is cancelled",
+      "step": 4,
+      "caption": "Acknowledged: the App records the message that was read",
+      "file": "alert-04.jpg",
+      "action": "Acknowledge.",
+      "expected": "rainshadow.alerts.acknowledge records al-0004-m2; the control is replaced by Acknowledged.",
+      "observed": "Coastal Flood Advisory Public Forecast Office · Flood · z-marrow · Severe Active Expected Likely · Acknowledged: al-0004-m2 at Fri, Nov 20, 8:05 PM",
+      "state": {
+        "acknowledgements": "al-0004 al-0004-m2 at 2026-11-20T20:05:00-07:00",
+        "receipt": "request web-2df59019-b04b-4179-b374-5fed7c5e9533",
+        "version": "epoch 1, revision 7"
+      },
+      "check": "acknowledging records the latest message"
+    },
+    {
+      "sequence": "alert",
+      "title": "An alert: acknowledging is refused while an update is unread, then recorded; the alert is cancelled",
+      "step": 5,
+      "caption": "The forecaster cancels it: the alert closes and keeps its record",
+      "file": "alert-05.jpg",
+      "action": "Infra applies rainshadow.alert.cancelled (event web-alert-cancel); Refresh.",
+      "expected": "The alert is Cancelled, listed under Ended or cancelled, with three messages and the acknowledgement of al-0004-m2.",
+      "observed": "Coastal Flood Advisory Public Forecast Office · Flood · z-marrow · Severe Cancelled Expected Likely · Acknowledged: al-0004-m2 at Fri, Nov 20, 8:05 PM",
+      "state": {
+        "alerts.get": "al-0004 cancelled, 3 messages",
+        "env.event_status": "web-alert-cancel committed",
+        "version": "epoch 1, revision 8"
+      },
+      "check": "after Refresh a cancelled alert says so and keeps its acknowledgement"
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 1,
+      "caption": "Alerts paused for Marrowby",
+      "file": "place-01.jpg",
+      "action": "Places: open Marrowby, Pause alerts.",
+      "expected": "rainshadow.places.update sends only the paused flag.",
+      "observed": "Alerts paused for this place. · Mom's house Marrowby · Saltgrass Coast · times in PST (America/Los_Angeles) Alerts paused for this place.",
+      "state": {
+        "places.list": "pl-marrowby alert rule paused",
+        "receipt": "request web-afe8f86d-1c9e-4d82-bdb0-a4526f7b50ef",
+        "version": "epoch 1, revision 9"
+      },
+      "check": "the place is paused in the App"
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 2,
+      "caption": "Resumed, then renamed: the rule stays",
+      "file": "place-02.jpg",
+      "action": "Resume alerts; Edit place, label “Mom and Dad”, Save.",
+      "expected": "rainshadow.places.update sends only the label; the alert rule is active again.",
+      "observed": "Mom and Dad Marrowby · Saltgrass Coast · times in PST (America/Los_Angeles) Alerts about Flood, Storm, Wind, Temperature, Air quality, minor or worse.",
+      "state": {
+        "places.list": "pl-marrowby “Mom and Dad”, alert rule paused false",
+        "receipt": "request web-dca88a1d-cf76-4ec4-82e2-faa864e89393",
+        "version": "epoch 1, revision 11"
+      },
+      "check": "the place keeps its rule and gets the new label"
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 3,
+      "caption": "Add a place: search, choose, label",
+      "file": "place-03.jpg",
+      "action": "Add place; search “Quill”; choose Quillmere; label “Workshop”.",
+      "expected": "The search lists places from the App's regions; nothing is saved yet.",
+      "observed": "Wren Lake · Quillmere County · already saved as Saturday hike · results: 3",
+      "state": {
+        "places.list": "3 saved places"
+      }
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 4,
+      "caption": "Saved: listed last, with its forecast",
+      "file": "place-04.jpg",
+      "action": "Save.",
+      "expected": "rainshadow.places.save stores Quillmere as “Workshop”; it is listed last and opens.",
+      "observed": "Workshop Quillmere · Quillmere County · times in MST (America/Denver) Alerts about Flood, Storm, Winter, Wind, Temperature, Fire, Air quality, Other, moderate or worse. · Dense Fog Advisory · Upcoming · Sat, Nov 21, 4:00 AM – Sat, Nov 21, 9:00 AM Dense Fog Advisory from 4 AM to 9 AM Saturday Open alert",
+      "state": {
+        "places.list": "pl-quillmere “Workshop”",
+        "receipt": "request web-a9523323-b6c1-4e4d-9e29-c7a2e6f83cca",
+        "version": "epoch 1, revision 12"
+      },
+      "check": "a place found by search is saved with its label"
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 5,
+      "caption": "A place with an open watch is not removed",
+      "file": "place-05.jpg",
+      "action": "Open Wren Lake, Remove place, confirm.",
+      "expected": "The App answers place_in_use and the form names the open watch; the place stays.",
+      "observed": "Watch w-0029 still uses place pl-wren-lake. Cancel the watch first.",
+      "state": {
+        "places.list": "pl-wren-lake still saved",
+        "version": "epoch 1, revision 12"
+      },
+      "check": "a place with an open watch is not removed, and the refusal is visible"
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 6,
+      "caption": "Removing Quillmere asks first",
+      "file": "place-06.jpg",
+      "action": "Open Quillmere, Remove place.",
+      "expected": "A confirmation names the place.",
+      "observed": "Remove Workshop? It leaves your saved places. Earlier notices and ended watches stay in your history. A place with an open watch cannot be removed. Cancel Remove place",
+      "state": {
+        "places.list": "pl-quillmere still saved"
+      }
+    },
+    {
+      "sequence": "place",
+      "title": "Saved places: alerts paused, renamed, added by search, removal refused and done",
+      "step": 7,
+      "caption": "Removed",
+      "file": "place-07.jpg",
+      "action": "Confirm with Remove place.",
+      "expected": "rainshadow.places.remove deletes the saved place.",
+      "observed": "Place removed.",
+      "state": {
+        "places.list": "pl-marrowby, pl-cinderhorn-pass, pl-wren-lake",
+        "receipt": "request web-21d79020-62ec-4797-9052-5d228ca20165",
+        "version": "epoch 1, revision 13"
+      },
+      "check": "removing a place takes it out of the saved places"
+    },
+    {
+      "sequence": "settings",
+      "title": "Settings: units",
+      "step": 1,
+      "caption": "Saved: US units",
+      "file": "settings-01.jpg",
+      "action": "Settings: Units, US; Save settings.",
+      "expected": "rainshadow.preferences.update sends only the units.",
+      "observed": "Settings saved.",
+      "state": {
+        "preferences.get": "units us",
+        "receipt": "request web-c5606ea5-b6b7-4bfa-9360-46ec43f4ec10",
+        "version": "epoch 1, revision 14"
+      },
+      "check": "the App now uses US units"
+    },
+    {
+      "sequence": "settings",
+      "title": "Settings: units",
+      "step": 2,
+      "caption": "The forecast pages follow: °F, mph, in",
+      "file": "settings-02.jpg",
+      "action": "Places: open Wren Lake.",
+      "expected": "The hours are shown in the units the App now returns.",
+      "observed": "Next 24 hours °F, mph, in · first hour: Fri 8 PM | ☾ Clear | 50.2 °F | 50.2 °F | 5 % | 0 % | 0 in | 7 mph | 11 mph",
+      "state": {
+        "forecast.hourly": "units {\"temperature\":\"F\",\"wind\":\"mph\",\"precipitation\":\"in\"}"
+      },
+      "check": "the pages show the units the App returns"
+    },
+    {
+      "sequence": "forecast",
+      "title": "Forecasts: the latest issuance, another source, an earlier issuance, a new and a late arrival",
+      "step": 4,
+      "caption": "A new issuance arrives: after Refresh the page shows it",
+      "file": "forecast-04.jpg",
+      "action": "Infra applies rainshadow.forecast.issued (examples/scenario.json, iss-pfo-wren-4); Refresh.",
+      "expected": "Wren Lake shows iss-pfo-wren-4, issued 2026-11-20T20:30:00-07:00.",
+      "observed": "Issued Fri, Nov 20, 8:30 PM by Public Forecast Office · iss-pfo-wren-4",
+      "state": {
+        "env.event_status": "example-forecast-2030 committed",
+        "forecast.issuances": "latest iss-pfo-wren-4"
+      },
+      "check": "after Refresh the page shows an issuance that arrived as a scenario event"
+    },
+    {
+      "sequence": "forecast",
+      "title": "Forecasts: the latest issuance, another source, an earlier issuance, a new and a late arrival",
+      "step": 5,
+      "caption": "A late arrival with an older issue time does not replace the latest",
+      "file": "forecast-05.jpg",
+      "action": "Infra applies rainshadow.forecast.issued (event web-late: iss-pfo-wren-web-late, issued 19:30, received 20:50); open Wren Lake.",
+      "expected": "The page keeps iss-pfo-wren-4 (issued 20:30); the late one is listed as an earlier issuance.",
+      "observed": "Issued Fri, Nov 20, 8:30 PM by Public Forecast Office · iss-pfo-wren-4",
+      "state": {
+        "forecast.issuances": "iss-pfo-wren-4 (latest) issued 2026-11-20T20:30:00-07:00; iss-pfo-wren-web-late issued 2026-11-20T19:30:00-07:00; iss-sky-wren-3 (latest) issued 2026-11-20T18:00:00-07:00"
+      },
+      "check": "a late arrival with an older issue time does not replace the latest on the page"
+    },
+    {
+      "sequence": "watch",
+      "title": "Watches: saved, edited, stale, retried, refused, cancelled, ended",
+      "step": 11,
+      "caption": "The clock moves past the hike: the watch reads Ended",
+      "file": "watch-11.jpg",
+      "action": "Infra moves the clock to Saturday 21 November 19:00 (env.advance_time, request web-clock); Refresh; open “Saturday hike”.",
+      "expected": "The watch whose window is over reads Ended; nothing else wrote to it.",
+      "observed": "Saturday hike Saturday hike (Wren Lake) · Sat, Nov 21, 10:00 AM – Sat, Nov 21, 1:00 PM · Ended",
+      "state": {
+        "watches.list": "w-0029 ended, window 2026-11-21T10:00:00-07:00 → 2026-11-21T13:00:00-07:00"
+      },
+      "check": "after a clock move by Infra alone, a watch whose window is over reads ended"
+    },
+    {
+      "sequence": "restricted-policy",
+      "title": "A Task-like policy",
+      "step": 1,
+      "caption": "Under a Task-like policy a refused write says so",
+      "file": "restricted-policy-01.jpg",
+      "action": "A second run with the scenario profile: open Marrowby, Pause alerts.",
+      "expected": "The policy allows changes to Wren Lake only: the page says the action is not allowed; nothing is written. Add place and Remove place are not offered.",
+      "observed": "This operation is not allowed for the current account and policy.",
+      "state": {
+        "places.list": "pl-marrowby alert rule paused false"
+      },
+      "check": "a write the policy refuses is shown as refused and changes nothing"
+    },
+    {
+      "sequence": "restricted-policy",
+      "title": "A Task-like policy",
+      "step": 2,
+      "caption": "A change outside the allowed fields is refused",
+      "file": "restricted-policy-02.jpg",
+      "action": "Open Wren Lake (pausing its alerts is allowed and was done), Edit place, a new label, send.",
+      "expected": "The App answers permission_denied and the form says so; the label stays.",
+      "observed": "This operation is not allowed for the current account and policy.",
+      "state": {
+        "places.list": "pl-wren-lake “Saturday hike”, alert rule paused true"
+      },
+      "check": "a label change outside the allowed fields is refused"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 1,
+      "caption": "Two years of forecasts: the first place opens on its latest issuance at the dataset clock",
+      "file": "full-window-01.jpg",
+      "action": "A third run: Infra loads datasets/full-window with env.load_seed at its clock (2026-12-31T20:00:00-07:00); open the access link.",
+      "expected": "The first saved place shows its latest issuance, iss-pfo-marrow-20261231-15.",
+      "observed": "Issued Thu, Dec 31, 3:00 PM by Public Forecast Office · iss-pfo-marrow-20261231-15",
+      "state": {
+        "env.load_seed": "ready, 692 records",
+        "forecast.hourly": "pl-marrowby: iss-pfo-marrow-20261231-15, issued 2026-12-31T15:00:00-08:00"
+      },
+      "check": "on the full-window dataset the first place opens on its latest issuance at the dataset clock"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 2,
+      "caption": "The winter storm in effect at the clock",
+      "file": "full-window-02.jpg",
+      "action": "Alerts: open the alert in effect.",
+      "expected": "al-20261229-1 is active; what it announces after the clock (its end) is not counted as history.",
+      "observed": "Winter Storm Warning Public Forecast Office · Winter · z-cinder · Severe Active Expected Likely · In effect: Thu, Dec 31, 12:00 PM – Sat, Jan 2, 2027, 6:00 AM",
+      "state": {
+        "alerts.list": "al-20261229-1 active, ends 2027-01-02T06:00:00-07:00",
+        "coverage.json": "1 alert ends after the clock; announced times are excluded from every count"
+      },
+      "check": "the alert in effect at the dataset clock is listed and opens"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 3,
+      "caption": "A watch for New Year's Day: its window is after the clock",
+      "file": "full-window-03.jpg",
+      "action": "Watches: open “Drive up New Year's Day”.",
+      "expected": "The watch is open; the coverage report counts when it was created, not the hours it looks at.",
+      "observed": "Drive up New Year's Day Ski cabin road (Cinderhorn Pass) · Fri, Jan 1, 2027, 9:00 AM – Fri, Jan 1, 2027, 1:00 PM · Triggered",
+      "state": {
+        "watches.list": "w-0035 triggered, window 2027-01-01T09:00:00-07:00 → 2027-01-01T13:00:00-07:00",
+        "coverage.json": "1 watch window after the clock, excluded"
+      },
+      "check": "a watch whose window is after the dataset clock is open, and its window is not history"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 4,
+      "caption": "The oldest cancelled-alert notice, from 2025, with its year shown",
+      "file": "full-window-04.jpg",
+      "action": "Notices: kind Alert cancelled; open the last one in the list.",
+      "expected": "The notice written 2025-06-10T19:00:00-06:00; a date outside the clock's year shows its year.",
+      "observed": "Cancelled: Severe Thunderstorm Watch for Wren Lake (saved as Lake loop) Written Tue, Jun 10, 2025, 7:00 PM · Alert cancelled Released Moderate",
+      "state": {
+        "notices.list": "10 alert.cancelled notices; oldest ntc-0018 at 2025-06-10T19:00:00-06:00"
+      },
+      "check": "the oldest cancelled-alert notice of the dataset shows its year"
+    }
+  ]
+}
