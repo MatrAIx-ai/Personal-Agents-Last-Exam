@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operation": {
+      "enum": [
+        "authorization.request",
+        "authorization.capture",
+        "authorization.reverse",
+        "ledger.settle_due",
+        "change_request.owner_decision",
+        "notice.delivery_result",
+        "publication.halt",
+        "refund.issue",
+        "funding.top_up",
+        "dispute.update"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "authorization_key": { "type": "string" },
+        "authorization_id": { "type": "string" },
+        "capture_key": { "type": "string" },
+        "amount_cents": { "type": "integer" },
+        "currency": { "type": "string" },
+        "reason": { "type": "string" },
+        "card": { "type": "object" },
+        "merchant": { "type": "object" },
+        "merchant_ref": { "type": "object" },
+        "change_request_id": { "type": "string" },
+        "decision": { "type": "string" },
+        "notice_id": { "type": "string" },
+        "publish_request_id": { "type": "string" },
+        "status": { "type": "string" },
+        "event_id": { "type": "string" },
+        "code": { "type": "string" },
+        "cloud_event_id": { "type": "string" },
+        "stop_run": { "type": "boolean" },
+        "transaction_id": { "type": "string" },
+        "refund_key": { "type": "string" },
+        "top_up_key": { "type": "string" },
+        "dispute_id": { "type": "string" },
+        "refund_cents": { "type": "integer" },
+        "recipient_account_id": { "type": "string" },
+        "message": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["event_id", "at", "operation", "payload"],
+  "additionalProperties": false
+}
