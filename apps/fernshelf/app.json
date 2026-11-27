@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "app_id": "fernshelf",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:fernshelf (Junnan Li, @lijrjyan)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/reference.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "fernshelf.item.added",
+    "fernshelf.backup.resumed",
+    "fernshelf.member.changed",
+    "fernshelf.contribution.changed",
+    "fernshelf.share.viewed",
+    "fernshelf.removal.requested",
+    "fernshelf.removal.withdrawn"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "The web page (gui/, served by the shared Web Host) is the account holder's view only; there is no reviewer console or view for other people. Album members, link viewers and requesters act only through events.",
+    "One account per App instance; every album is the account holder's own. People labels, the plan, its quota and preferences are seed data.",
+    "No face recognition, visual search or pixel-level duplicate detection; exact duplicates are equal content_hash values and near-duplicates are seeded stacks.",
+    "Storage is counted from each item's declared_bytes; image files are small script-drawn stand-ins and videos are metadata only.",
+    "No upload by the Agent and no pixel editing; new items arrive through events, which carry metadata only.",
+    "Mail notices are stored as wire messages and dispatched only by the Infra-run sender (src/publisher.cjs); no outbox or cross-App transaction."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
