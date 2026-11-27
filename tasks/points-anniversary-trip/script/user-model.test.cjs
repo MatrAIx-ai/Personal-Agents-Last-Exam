@@ -145,3 +145,18 @@ test('the destination must be in the transfer instruction, not an incidental "me
   assert.equal(m.classify('Use Combine points to send 165,400 points, Daniel will tell you which account.').destination, false);
   assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Chase app: Rewards > Combine points > Daniel Cho > enter 165,400 points > confirm'}]).combine === null, false);
 });
+
+test('a recipient step after the Combine step counts, even as its own sentence', () => {
+  for (const text of ['Chase app: tap Combine points. Select Daniel Cho. Enter 165,400. Confirm.',
+    'Open Chase and tap Combine points.\nChoose Daniel Cho.\nEnter 165,400 and confirm.'])
+    assert.deepEqual(m.classify(text), {amount:165400, method:true, destination:true, exact:true}, text);
+  assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Chase app: tap Combine points. Select Daniel Cho. Enter 165,400. Confirm.'}]).combine.points, 165400);
+  // A recipient step before any Combine step is not part of the transfer.
+  assert.equal(m.classify('Select Daniel Cho in your contacts. Then use Combine points to send 165,400 points.').destination, false);
+});
+
+test('"all of your Ultimate Rewards points" is an amount', () => {
+  for (const text of ['Please use Combine points to send all of your Ultimate Rewards points to Daniel.',
+    'Use Combine points to send all your Chase Ultimate Rewards points to me (Daniel).'])
+    assert.deepEqual(m.classify(text), {amount:'all', method:true, destination:true, exact:true}, text);
+});

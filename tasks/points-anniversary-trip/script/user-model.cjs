@@ -89,7 +89,7 @@ function amountOf(text) {
   const unit = plain.match(/\b(\d{1,7}(?:\.\d+)?)\s*(k\b|thousand\b)?\s*(?:chase\s+|ultimate rewards\s+|ur\s+)?(points|pts|ur)\b/i)
     || plain.match(/\b(\d{1,4}(?:\.\d+)?)\s*(k|thousand)\b/i);
   if (unit) return Math.round(Number(unit[1]) * (unit[2] ? 1000 : 1));
-  if (/\ball\s+(of\s+)?(your|her|the)?\s*(chase\s+|ur\s+)?points\b/i.test(plain)) return 'all';
+  if (/\ball\s+(of\s+)?(your|her|the)?\s*(chase\s+)?(ur\s+|ultimate\s+rewards\s+)?points\b/i.test(plain)) return 'all';
   const verb = plain.match(/\b(?:send|transfer|move|combine)\b(?:\s+(?:at least|about|exactly|over|me|us|daniel))*\s+(\d{4,7})\b/i);
   if (verb) return Number(verb[1]);
   const entry = plain.match(/(?:\b(?:enter|type|input|amount)\b\s*:?|>|→)\s*(\d{4,7})(?![\d\/-])\b/i);
@@ -98,14 +98,19 @@ function amountOf(text) {
 // The destination must be part of the transfer instruction: a clause with send/transfer/move/combine/give that
 // says where the points go ("to me", "to Daniel", "into my account", "send me"). "Text me" or "ask me which
 // account" elsewhere is not a destination. Click-by-click steps name the recipient as a step of their own
-// ("Combine points > Daniel Cho > ...", "select Daniel"), which counts inside a Combine clause.
+// ("Combine points > Daniel Cho > ...", "select Daniel"), which counts inside a Combine clause or in any step
+// after one ("Tap Combine points. Select Daniel Cho. Enter 165,400.").
 const TRANSFER = /\b(send|transfer|move|combine|give)\b/i;
 const TO_DANIEL = /\b(?:(?:to|into)\s+(?:me|daniel|danny|my\s+(?:chase|account|sapphire|reserve|ur|ultimate rewards))|(?:send|transfer|move|give)\s+(?:me|daniel|danny))\b/i;
 const PICK_DANIEL = /(?:>|→|\b(?:select|choose|pick|tap|click)\s+)\s*(?:daniel|danny)\b/i;
 function classify(text) {
   const amount = amountOf(text);
   const method = /combine/i.test(text);
-  const destination = clauses(text).some(c => TRANSFER.test(c) && (TO_DANIEL.test(c) || /combine/i.test(c) && PICK_DANIEL.test(c)));
+  let combineFlow = false;
+  const destination = clauses(text).some(c => {
+    if (/combine/i.test(c)) combineFlow = true;
+    return TRANSFER.test(c) && TO_DANIEL.test(c) || combineFlow && PICK_DANIEL.test(c);
+  });
   return {amount, method, destination, exact:amount !== null && method && destination};
 }
 

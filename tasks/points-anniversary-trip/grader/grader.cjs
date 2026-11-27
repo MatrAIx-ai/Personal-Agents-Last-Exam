@@ -35,7 +35,8 @@ const SHORTFALL = 165400; // reference path: 150,000 + 150,000 + 147,000 UR less
 const CHANGE = {id:'chg-ua838-2027-10-25', alternative:'ALT-1', at:'2027-09-11T03:12:00-05:00', deadline:'2027-09-18T23:59:00-05:00'};
 const SESSION2 = '2027-09-12T10:30:00-05:00', SESSION3 = '2027-10-03T11:00:00-05:00';
 const KIKUNOI_AT = '2027-10-22T18:00:00+09:00';
-const STATEMENT = {balance:/\$?\s*1,?964\.33\b/, due:/2027-09-18|\b0?9\/18\b|\bSep(?:t(?:ember)?)?\.?\s+18(?:th)?\b|\b18(?:th)?\s+Sep/i};
+// The balance is a whole amount: "$11,964.33" contains 1,964.33 but is a different balance.
+const STATEMENT = {balance:/(?<![\d,.])\$?\s*1,?964\.33(?![\d])/, due:/2027-09-18|\b0?9\/18\b|\bSep(?:t(?:ember)?)?\.?\s+18(?:th)?\b|\b18(?:th)?\s+Sep/i};
 // Merchants outside the US for the 3% Freedom Unlimited fee when no card data is given (Aeroplan is
 // Canadian, Virgin Atlantic British; Harbor hotels are judged by their time zone).
 const FOREIGN_AIRLINE_PARTNERS = new Set(['aeroplan', 'virgin']);

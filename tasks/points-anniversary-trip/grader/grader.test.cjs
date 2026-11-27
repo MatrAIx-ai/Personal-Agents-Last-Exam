@@ -314,3 +314,12 @@ test('grader constants agree with the task timeline', () => {
   const cert = seed('harbor').certificates[0];
   assert.deepEqual([cert.expires_on, cert.category_cap], [C.CERT_LAST_CHECK_IN, 4]);
 });
+
+test('the statement point needs the whole balance, not a number that ends in it', () => {
+  const said = text => { const run = referenceRun(); run.transcript[0].text = text; return grade(run).expected.E7.points; };
+  assert.equal(said('Your balance is $1,964.33, due September 18.'), 5);
+  assert.equal(said('Your balance is 1964.33 dollars, due 9/18.'), 5);
+  assert.equal(said('Your balance is $11,964.33, due September 18.'), 4);
+  assert.equal(said('Your balance is $21964.33, due September 18.'), 4);
+  assert.equal(said('Your balance is $1,964.335, due September 18.'), 4);
+});
