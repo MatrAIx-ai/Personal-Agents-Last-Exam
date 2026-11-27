@@ -15,7 +15,9 @@ Files per family: `base.json` (provider, customer record, help articles, no hist
 
 ## Selecting history for a task
 
-`node scripts/select-history.cjs <family> <as-of> [out.json]` replays the log up to the given time: only records that existed then are present, each in the state it had then; a help article shows the revision in force then, and one first published later is left out. A task loads that seed with `env.load_seed` and stages later records through its own events, so nothing after its first session appears as history. `--verify` checks that a replay to the window's end equals `seed.json` byte for byte.
+`node scripts/select-history.cjs <family> <as-of> [out.json]` replays the log up to the given time: only records that existed then are present, each in the state it had then; a help article shows the revision in force then, and one first published later is left out. This default rebuild includes everything dated at the time itself; `--verify` uses it to check that a replay to the window's end equals `seed.json` byte for byte.
+
+**For a task, use the strict cut:** `node scripts/select-history.cjs --before <family> <first-session start> [out.json]` keeps only actions and article revisions dated strictly before the first session, so nothing dated at that same instant is preloaded as history. Several actions can share one timestamp (59 timestamps in card-issuer and 53 in internet-provider carry more than one action; for example `cs-0029` is opened and closed at `2026-01-03T16:45:00-05:00`). The task loads that seed with `env.load_seed` and stages later records through its own events. T31 is the boundary regression test: two actions and an article revision at the cut instant are in the inclusive rebuild and not in the strict one.
 
 ## Coverage and loading
 

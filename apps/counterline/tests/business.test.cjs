@@ -401,3 +401,29 @@ test('T30 the recognizer reads "transferred" and "any conditions on" for the exi
   assert.deepEqual(read('What are the conditions on it?'), ['explain_terms']);
   assert.deepEqual(read('Please close this chat.'), ['end_chat'], 'unchanged');
 });
+
+test('T31 the task cut is strictly before the first session: nothing dated at that instant is preloaded', () => {
+  const { select } = require('../scripts/select-history.cjs');
+  const actions = require('../datasets/card-issuer/actions.json').actions;
+  const seed = require('../datasets/card-issuer/seed.json');
+  // Two actions share this timestamp: cs-0029 is opened and closed at the same instant.
+  const t = '2026-01-03T16:45:00-05:00';
+  assert.deepEqual(actions.filter(a => a.at === t).map(a => a.name), ['counterline.cases.open', 'counterline.cases.send_message']);
+  const through = select('card-issuer', t), before = select('card-issuer', t, { mode: 'before' });
+  assert.ok(through.cases.some(c => c.case_id === 'cs-0029'), 'through includes the actions at the instant');
+  assert.ok(!before.cases.some(c => c.case_id === 'cs-0029'), 'before excludes both actions at the instant');
+  const times = d => [...d.cases.flatMap(c => [c.opened_at, ...c.transcript.map(x => x.at)]), ...d.offers.map(o => o.presented_at),
+    ...d.commitments.flatMap(m => [m.accepted_at, ...m.history.map(h => h.at)]), ...d.help_articles.flatMap(a => a.revisions.map(r => r.at))];
+  assert.ok(times(before).every(x => Date.parse(x) < Date.parse(t)), 'nothing at or after the cut');
+  assert.ok(times(through).some(x => Date.parse(x) === Date.parse(t)), 'the inclusive rebuild keeps the instant');
+  // A help-article revision at the cut instant: in force for the inclusive rebuild, not yet for the task.
+  const rev = seed.help_articles.flatMap(a => a.revisions.slice(1).map(r => ({ id: a.article_id, at: r.at, body: r.body })))[0];
+  const art = (d) => d.help_articles.find(a => a.article_id === rev.id);
+  assert.equal(art(select('card-issuer', rev.at)).body, rev.body);
+  assert.ok(!art(select('card-issuer', rev.at, { mode: 'before' })).revisions.some(r => r.at === rev.at));
+  assert.notEqual(art(select('card-issuer', rev.at, { mode: 'before' })).body, rev.body);
+  // One millisecond later, the strict cut includes the instant: the two modes differ only at the boundary.
+  const after = new Date(Date.parse(t) + 1).toISOString();
+  assert.deepEqual(select('card-issuer', after, { mode: 'before' }).cases.map(c => c.case_id), through.cases.map(c => c.case_id));
+  assert.throws(() => select('card-issuer', t, { mode: 'strict' }), /mode must be/);
+});

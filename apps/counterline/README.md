@@ -49,7 +49,7 @@ Infra events (the plan named `offer.added`'s payload `offer_id` and `tier`; it t
 From this directory:
 
 ```sh
-npm test                 # business tests (T00 to T20, T22 to T27, T30)
+npm test                 # business tests (T00 to T20, T22 to T27, T30, T31)
 npm run dataset:check    # delivery dataset: drift, replay and coverage checks
 npm run fixtures:check   # every seed validates; pressure and neutral present identical offers
 npm run diagnostic       # recognizer diagnostic: lists every message it reads differently (no accuracy target)
