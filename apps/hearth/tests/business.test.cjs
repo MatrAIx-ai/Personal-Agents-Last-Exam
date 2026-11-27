@@ -168,7 +168,7 @@ test('Hearth Business Rules & Workflows', async (t) => {
       payload: {
         purchase_id: reqApprove.result.purchase.id,
         decision: 'approved',
-        decided_by_person_id: 'person_nassim_01',
+        decided_by_person_id: 'person_jane_01',
       },
     });
     assert.equal(state.inventory.length, beforeCount + 1);
@@ -209,9 +209,9 @@ test('Hearth Business Rules & Workflows', async (t) => {
   await t.test('Workflow 4: resident profile audit and resident_not_found', () => {
     const ctx = { virtual_now: '2026-02-01T10:00:00Z' };
     const res = plugin.handleTool(ctx, state, 'hearth.get_resident_profile', {
-      person_id: 'person_nassim_01',
+      person_id: 'person_jane_01',
     });
-    assert.equal(res.result.resident.person_id, 'person_nassim_01');
+    assert.equal(res.result.resident.person_id, 'person_jane_01');
     assert.ok(res.result.resident.rules.length > 0);
 
     assert.throws(

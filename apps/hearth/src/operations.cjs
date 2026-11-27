@@ -25,6 +25,7 @@ function handleToolCall(ctx, state, toolName, params = {}) {
             property: projected.property,
             rooms: projected.rooms,
             budget: projected.budget,
+            purchases: projected.purchases,
           },
         };
 
@@ -90,6 +91,21 @@ function handleToolCall(ctx, state, toolName, params = {}) {
 
       const room = newState.rooms.find((r) => r.id === params.room_id);
       if (!room) fail('room_not_found', `Room ${params.room_id} does not exist.`);
+
+      const [x, y] = params.coordinates || [];
+      if (
+        !Array.isArray(params.coordinates) ||
+        params.coordinates.length !== 2 ||
+        x < 0 ||
+        y < 0 ||
+        x >= room.dimensions_cm[0] ||
+        y >= room.dimensions_cm[1]
+      ) {
+        fail(
+          'coordinates_out_of_bounds',
+          `Coordinates [${x}, ${y}] are outside ${room.name} (${room.dimensions_cm[0]}x${room.dimensions_cm[1]} cm).`
+        );
+      }
 
       item.room_id = params.room_id;
       item.coordinates = params.coordinates;
