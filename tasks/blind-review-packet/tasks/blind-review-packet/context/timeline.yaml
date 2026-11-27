@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "timezone": "America/New_York",
+  "initial_time": "2026-11-20T10:05:00-05:00",
+  "sessions": [
+    {
+      "id": "morning",
+      "start": "2026-11-20T10:05:00-05:00",
+      "deadline": "2026-11-20T10:30:00-05:00",
+      "work_time": "2026-11-20T10:20:00-05:00"
+    },
+    {
+      "id": "after-meeting",
+      "start": "2026-11-20T11:03:00-05:00",
+      "deadline": "2026-11-20T12:00:00-05:00",
+      "work_time": "2026-11-20T11:10:00-05:00"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "deliver-lab-1103",
+      "at": "2026-11-20T11:03:00-05:00",
+      "app": "mail",
+      "operation": "mail.deliver",
+      "payload": {
+        "id": "lab-1103",
+        "thread_id": "lab-notes",
+        "account_id": "mail-ren",
+        "from": "ren@lab.example",
+        "to": [
+          "calibration@lab.example"
+        ],
+        "subject": "Re: Lab notes",
+        "body": "At 11:00 I personally saw the source-labelled answers to Harbor and Weir in lab meeting. I am going straight to teach until noon.",
+        "received_at": "2026-11-20T11:03:00-05:00",
+        "folder": "inbox",
+        "read": false,
+        "attachments": []
+      }
+    }
+  ],
+  "ordering": [
+    "deliver due events",
+    "synchronize App clocks",
+    "open session or capture deadline"
+  ],
+  "clock": "The first agent action in each session advances both Apps to its work_time. Later tool calls at that tick follow transcript order. The external session boundary advances both Apps to the deadline even if the agent does nothing."
+}
