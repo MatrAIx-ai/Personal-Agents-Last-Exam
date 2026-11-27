@@ -2,6 +2,8 @@
 
 Use with [the implementation review guide](app-implementation.md). Record App commit/hash, Host revision and scope. For each item record **passed / failed / not run / not applicable**, evidence and the owner of a missing dependency. Check a box only when the applicable requirement passed.
 
+Use the [submission evidence contract](../submission-evidence.md) for screenshot comparisons/sequences, dependency demonstrations and historical-date counting. For already approved proposals, record agreed added work against the approval baseline.
+
 ## 1. Scope and public package
 
 - [ ] Establish promised workflows and modes (MCP/API/GUI) from the original request, approved proposal and review decisions, not only the current capability declarations. Missing implementation cannot redefine a requirement as optional.
@@ -14,6 +16,7 @@ Use with [the implementation review guide](app-implementation.md). Record App co
 - [ ] App-only tests run without private runtime code and exercise real functions, invalid transitions, missing objects and read-only behavior.
 - [ ] Applicable create/read/update/cancel flows produce expected state/history; invalid operations preserve business data.
 - [ ] Data/media references, original bytes and provenance are valid. A MIME declaration is not proof of parsing, OCR or visual quality.
+- [ ] The delivered Environment evaluation dataset covers 2025-01-01 through 2026-12-31 with working loading/retrieval. Inspect monthly/source distribution, real/synthetic provenance and gaps. If older website data are inaccessible, verify real source data from around November 2026 and synthetic completion of missing periods. Small smoke fixtures do not substitute for delivery data. The Task recommendation of 300 distinct dates is not an App acceptance threshold; see the [data requirements](../submission-evidence.md#3-environment-dataset-coverage).
 - [ ] Optional diagnostics do not change business results or require a missing hook.
 
 ## 3. Runtime and interaction
@@ -21,7 +24,7 @@ Use with [the implementation review guide](app-implementation.md). Record App co
 - [ ] Real MCP/API discovery and calls match contracts and committed state.
 - [ ] Business callers cannot seed history, reset, inject events or inspect hidden snapshots by guessing operations. Object/field/attachment authorization applies on the backend.
 - [ ] Seed/reset, separate runs/Apps, versions, retries, events and supplied time have observable success and failure evidence.
-- [ ] Declared messaging checks actual receiver records/files and receipts, including refusals and duplicate requests.
+- [ ] Every integration claimed as delivered (required or optional, separate Agent calls or Messaging) has a real pinned-dependency demonstration and test. Check both Apps' states, actual recipient, read/use of source records, immutable file versions/bytes and receipts; include relevant missing/denied dependency, incompatible version/contract, retries and unknown outcomes. Local send, receiver commit and business confirmation are distinct. Fakes and sender-only success do not pass this item.
 - [ ] Candidate and independently selected compatible base validators are run against exact packages. Unsupported Host features and skipped stages are separately reported.
 
 ### GUI acceptance, when required
@@ -30,11 +33,13 @@ A Web App is a valid App interface. Native desktop/mobile packaging is required 
 
 - [ ] **Runnable delivery:** the package contains its page/controller or a documented public dependency, and the Host starts a reachable business interface. A renderer, screenshot, placeholder URL or presentation-only demo is insufficient.
 - [ ] **Actual controls:** use a real browser for applicable navigation, search, selection, forms, create/edit/cancel and primary read/write flows. Direct API calls do not substitute for clicks.
+- [ ] **Reference comparison:** inspect original-product screenshots with source/date and corresponding implemented screenshots at the submitted revision. Map them to the same workflows and explain intentional differences. An inaccessible reference needs a reviewed alternative; pixel matching and copied branding are not required.
+- [ ] **Workflow sequence:** inspect ordered starting/action/intermediate/result screenshots for every core GUI workflow and relevant edit/cancel/error path. Reproduce key steps with actual controls and correlate the sequence with persisted state and MCP/browser tests. When a GUI flow uses another App, demonstrate its actual result there too (GUI when available, otherwise MCP/API).
 - [ ] **Shared state:** inspect the same run/account through MCP after a browser write; reload and verify persistence. Apply a separate permitted MCP write or scenario event, refresh and verify the new state.
 - [ ] **Failure behavior:** invalid input, denied operations, stale edits and failed writes remain visible without false success. Retrying must not silently repeat effects.
 - [ ] **Business-only access:** Agent pages and backend routes expose no management controls, snapshots or hidden future events. Also send a forbidden request directly; hiding buttons is insufficient.
 - [ ] **Files and content:** where supported, upload/download actual bytes under parent authorization; untrusted text must not execute HTML. Check relevant denied/missing cases.
-- [ ] **Evidence:** record commands, App/Host/browser versions, actions, state/receipts and browser errors. Screenshots supplement behavior evidence; browser automation is not a model-agent benchmark.
+- [ ] **Evidence:** record commands, App/Host/browser versions, viewport, run/account, actions, state/receipts and browser errors in the linked evidence index. Required screenshot sequences supplement business/MCP and browser behavior evidence; browser automation is not a model-agent benchmark.
 
 If the Host is missing, mark GUI integration **not run** and identify its owner. Missing App-owned controls are an App implementation gap. Neither is a full GUI pass. A user-simulator integration needs its own evidence when promised; an available interface alone does not prove simulator integration.
 
@@ -51,7 +56,8 @@ If the Host is missing, mark GUI integration **not run** and identify its owner.
 | Package and business tests | | | | | |
 | Public runtime and independent base | | | | | |
 | Cross-App integration | | | | | |
-| GUI workflows and isolation | | | | | |
+| GUI reference comparison, sequence and isolation | | | | | |
+| History loading and distinct-date evidence, when supplied | | | | | |
 | Human workflow / provenance | | | | | |
 
 Contribution-policy checks, approval and merge remain separate maintainer decisions. This checklist changes neither proposal requirements nor production deployment policy.
