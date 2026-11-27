@@ -182,35 +182,29 @@ function senderStaysInGroup(needle, members) {
   return seen;
 }
 
-function allMailSpans(sentence) {
-  const body = plain(sentence);
-  const mark = 'all mail from ';
-  const spans = [];
-  let from = 0;
-  while (from < body.length) {
-    const at = body.indexOf(mark, from);
-    if (at < 0) break;
-    let end = body.length;
-    for (const stop of ['replied-to', 'replied to']) {
-      const found = body.indexOf(stop, at + mark.length);
-      if (found >= 0 && found < end) end = found;
+function scopeAllIds(text, members) {
+  const ids = new Set();
+  const rows = (read('keep_scope', text) || {}).rows;
+  if (!Array.isArray(rows)) return ids;
+  for (const item of rows) {
+    if (!item || item.scope !== 'all') continue;
+    const needle = plain(item.name);
+    if (!nameInText(text, needle)) continue;
+    for (const member of members) {
+      const sender = plain(member.name);
+      if (sender && (sender === needle || sender.includes(needle) || needle.includes(sender))) ids.add(member.id);
     }
-    spans.push(body.slice(at + mark.length, end));
-    from = at + mark.length;
   }
-  return spans;
-}
-
-function namedInAllMail(sentence, needle) {
-  return allMailSpans(sentence).some((span) => span.includes(needle));
+  return ids;
 }
 
 function threadKeepOnly(text, needle, members) {
   if (senderStaysInGroup(needle, members)) return false;
-  const hits = splitSentences(text).filter((sentence) => plain(sentence).includes(needle));
-  if (!hits.length) return false;
-  if (hits.some((sentence) => namedInAllMail(sentence, needle))) return false;
-  return hits.every((sentence) => read('keep_replied', sentence).v === 'keep');
+  for (const id of scopeAllIds(text, members)) {
+    const sender = plain((members.find((member) => member.id === id) || {}).name);
+    if (sender && (sender === needle || sender.includes(needle) || needle.includes(sender))) return false;
+  }
+  return true;
 }
 
 function matchedIds(text, names, members) {
@@ -228,8 +222,10 @@ function matchedIds(text, names, members) {
 
 function retailTarget(text, row) {
   const members = retailMembers();
-  if (row.scope !== 'subset') return members.length;
+  const whole = scopeAllIds(text, members);
+  if (row.scope !== 'subset') return members.length - whole.size;
   const excluded = matchedIds(text, row.exclude, members);
+  for (const id of whole) excluded.add(id);
   const included = matchedIds(text, row.include, members);
   if (!excluded.size && !included.size) return members.length;
   let chosen = members.filter((member) => !excluded.has(member.id));

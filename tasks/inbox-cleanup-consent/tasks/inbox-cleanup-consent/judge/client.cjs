@@ -201,7 +201,7 @@ function live(task, text) {
   if (!spec) throw new Error('unknown reader task ' + task);
   ensureServer();
   const system = spec.system.replace('GROUP', task.startsWith('keep:') ? task.slice(5) : '');
-  const max = task === 'senders' ? 1200 : (task === 'deadline' || task === 'retail') ? 300 : 80;
+  const max = task === 'senders' ? 1200 : task === 'keep_scope' ? 400 : (task === 'deadline' || task === 'retail') ? 300 : 80;
   return post({
     model: loadedModel || model.id,
     temperature: model.temperature,
