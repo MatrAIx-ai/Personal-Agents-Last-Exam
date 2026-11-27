@@ -1,0 +1,273 @@
+{
+  "schema": "plateway.gui-evidence.v2",
+  "captured_on": "2026-11-27",
+  "rendering": "Chromium launched with --disable-gpu --num-raster-threads=1 --disable-partial-raster so repeated captures rasterize the same pixels",
+  "request_ids": "The page draws its request IDs from crypto.randomUUID; the capture replaces that function in the page with a counter kept in sessionStorage (web-evidence-0001, …), so IDs are stable between runs. The GUI source is unchanged.",
+  "command": "node apps/plateway/evidence/tools/gui.cjs",
+  "app": "plateway",
+  "app_version": "1.0.0",
+  "app_load_digest": {
+    "sha256": "8f079543e0951a48ab1f0b246c0b3427daf4a63e17f5b694917d8b09e4fe7ef3",
+    "files": 43,
+    "includes": [
+      "app.json",
+      "contribution",
+      "fixtures",
+      "gui",
+      "infra",
+      "plugin.cjs",
+      "schemas",
+      "service.cjs",
+      "src",
+      "tools.json"
+    ],
+    "excludes": [
+      {
+        "name": "README.md",
+        "why": "documentation"
+      },
+      {
+        "name": "LICENSE",
+        "why": "licence text"
+      },
+      {
+        "name": "package.json",
+        "why": "npm scripts for the tests"
+      },
+      {
+        "name": "dataset",
+        "why": "the delivery dataset, reaching Core only as an env.load_seed selection"
+      },
+      {
+        "name": "dev",
+        "why": "fixture and history generators and checker"
+      },
+      {
+        "name": "evidence",
+        "why": "this evidence"
+      },
+      {
+        "name": "examples",
+        "why": "the standalone event example"
+      },
+      {
+        "name": "tests",
+        "why": "tests"
+      }
+    ],
+    "algorithm": "SHA-256 over each file's package-relative path, a NUL byte and its bytes, in path order (the verifier's digestTree applied to the included files)",
+    "command": "node apps/plateway/evidence/tools/digest.cjs"
+  },
+  "host": {
+    "runtime_version": "1.6.0",
+    "runtime_tree_sha256": "92112d954fe15d3ee9bb522b7c56841781e3c73d31202cb687d6eefdb0e2796a",
+    "files": {
+      "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+      "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+      "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+      "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+      "apps.registry.json": "fa87fb65e3ce19be1256796a579e5df0bd5cf2db8438551d965daea2b4f93cc2"
+    },
+    "server": "runtime/web/server.cjs (shared public Web Host)",
+    "registry": "apps.registry.json"
+  },
+  "core_api_version": "1.2.0",
+  "node": "v25.8.1",
+  "playwright": "1.56.1",
+  "browser": "chromium 141.0.7390.37",
+  "viewport": {
+    "desktop": "1280x1000",
+    "phone": "390x844"
+  },
+  "browser_timezone": "Europe/London",
+  "browser_locale": "en-US",
+  "runs": [
+    "plateway-web",
+    "plateway-web-restricted"
+  ],
+  "profile": "sandbox",
+  "account": {
+    "app_account": "plateway-p-1",
+    "owner_person": "p-1",
+    "time_zone": "America/New_York",
+    "seed_id": "plateway-minimal-1",
+    "synthetic": true
+  },
+  "start_virtual_time": "2026-11-18T09:00:00-08:00",
+  "inspector": "Infra MCP client on the same run (env.snapshot), as in tests/web.browser.cjs",
+  "second_agent": "A separate Agent MCP client on the same run, for independent reads and writes through the public business tools",
+  "checks_passed": 64,
+  "recorder_probes": [
+    {
+      "probe": "outside-step page read",
+      "does": "After a sequence closes and before the next one begins, the page sends plateway.account.get",
+      "stopped_with": "Recorder error: plateway.account.get (page read) dispatched with no active step (after sequence probe closed)"
+    },
+    {
+      "probe": "outside-step second-Agent call",
+      "does": "After a sequence closes and before the next one begins, the second Agent client calls plateway.restaurants.search",
+      "stopped_with": "Recorder error: plateway.restaurants.search (second Agent read) dispatched with no active step (after sequence probe closed)",
+      "sent": false
+    },
+    {
+      "probe": "refusal caught after the last sequence",
+      "does": "After the last sequence closes the page sends plateway.account.get, then an Infra read is refused and the caller catches the refusal; the teardown check must still report both",
+      "stopped_with": "Recorder error: env.snapshot (Infra inspector read) dispatched after the last sequence closed; plateway.account.get (page read) dispatched after the last sequence closed",
+      "caught_by_the_caller": true,
+      "still_reported_at_teardown": 2
+    },
+    {
+      "probe": "forced call concurrent with a preview",
+      "does": "A route holds a preview and a forced plateway.orders.rate call until both are in flight; inside a step both are recorded once each, and after the next step is frozen both stop the script",
+      "stopped_with": "Recorder error: plateway.checkout.preview (page preview) dispatched after probe step 2 was frozen; plateway.orders.rate (forced call) dispatched after probe step 2 was frozen",
+      "held_until_both_arrived": true,
+      "in_flight_together": true,
+      "recorded_in_open_step": [
+        "forced call",
+        "preview"
+      ]
+    },
+    {
+      "probe": "forced token moved to another call",
+      "does": "The page moves the header token issued for a forced plateway.orders.rate call onto a preview, so the rating leaves without it",
+      "stopped_with": "Recorder error: the forced call plateway.orders.rate was not seen leaving the page; the forced-call token probe-1 was sent with plateway.checkout.preview and other arguments than the plateway.orders.rate call it was issued for",
+      "classified_as_forced": 0
+    },
+    {
+      "probe": "state change between the check and the freeze",
+      "does": "The page commits plateway.cart.add_item while the step's check runs",
+      "stopped_with": "Recorder error: probe step 1: the App's version changed between the step's check and its freeze",
+      "step_recorded": false
+    },
+    {
+      "probe": "write during the step's preparation",
+      "does": "After the step is frozen and while it waits before the screenshot, the page sends plateway.cart.add_item",
+      "stopped_with": "Recorder error: plateway.cart.add_item (page write) dispatched after probe step 1 was frozen",
+      "step_recorded": false
+    },
+    {
+      "probe": "write after the screenshot",
+      "does": "Right after the step's screenshot the page sends plateway.cart.add_item",
+      "stopped_with": "Recorder error: plateway.cart.add_item (page write) dispatched after probe step 1 was frozen",
+      "frozen_write_set": 0,
+      "frozen_version_kept": true
+    },
+    {
+      "probe": "duplicate terminal event",
+      "does": "A preview finishes and its requestfinished event is delivered a second time",
+      "stopped_with": "Recorder error: plateway.checkout.preview (page preview), started in probe step 1, received a second terminal outcome (reply after reply)",
+      "outcomes_seen": 2,
+      "kept_outcome": "reply"
+    },
+    {
+      "probe": "failure after headers",
+      "does": "A preview is answered with HTTP 200 headers and the start of a JSON body, then the connection closes",
+      "stopped_with": "Recorder error: plateway.checkout.preview (page preview), started in probe step 1, failed after its headers (HTTP 200): net::ERR_CONTENT_LENGTH_MISMATCH",
+      "outcomes_seen": 1,
+      "recorded": {
+        "http": 200,
+        "result": null,
+        "failure": "net::ERR_CONTENT_LENGTH_MISMATCH"
+      }
+    },
+    {
+      "probe": "request during sealing",
+      "does": "A preview delayed 600 ms is sent during the capture, and a second one delayed 1200 ms is sent 150 ms into sealing",
+      "stopped_with": "Recorder error: plateway.checkout.preview (page preview) dispatched after probe step 1 was frozen; plateway.checkout.preview (page preview) dispatched while probe step 1 was being sealed",
+      "replies_in_before_sealed": 2
+    },
+    {
+      "probe": "call after the last sequence",
+      "does": "Inside a step the second Agent client empties the cart, adds one Tom Yum Soup and asks for a checkout preview; after the last sequence closes the page sends the same preview, which succeeds",
+      "stopped_with": "Recorder error: plateway.checkout.preview (page preview) dispatched after the last sequence closed",
+      "recorded_reply": "HTTP 200, status ok with a token and a total for one Tom Yum Soup, identical to the App's answer to the same preview through the second Agent client"
+    },
+    {
+      "probe": "second Agent close fails once",
+      "does": "Closing the second Agent client fails the first time; the caller catches the failure, later checks must still report it, and a second close must reach the same client",
+      "stopped_with": "Recorder error: closing the second Agent client failed: injected close failure",
+      "still_reported_after_the_catch": true,
+      "closed_on_retry": true
+    },
+    {
+      "probe": "cleanup after a failed step",
+      "does": "The cleanup used by every probe and by the probe suite runs three steps; the first throws and the third reports something left open",
+      "stopped_with": "Cleanup problems: first: injected failure; third: left open",
+      "steps_attempted": 3
+    },
+    {
+      "probe": "barrier waits for both distinct calls",
+      "does": "Two previews reach the overlap barrier first; it must stay closed until the forced plateway.orders.rate call arrives",
+      "stopped_with": "The barrier stayed closed with two previews held, and opened when the rating call arrived",
+      "held_before_the_rating": 2
+    },
+    {
+      "probe": "late reply",
+      "does": "A preview is delayed 1500 ms and the step allows 300 ms for outstanding replies",
+      "stopped_with": "Recorder error: still outstanding after 300 ms: plateway.checkout.preview (page preview), started in probe step 1",
+      "reply_recorded_under_its_request": true
+    },
+    {
+      "probe": "second-Agent call after the screenshot",
+      "does": "Right after the step's screenshot the second Agent client calls plateway.restaurants.search",
+      "stopped_with": "Recorder error: plateway.restaurants.search (second Agent read) dispatched after probe step 1 was frozen",
+      "sent": false
+    },
+    {
+      "probe": "assertion failure inside a probe",
+      "does": "A probe opens an HTTP server, a route and a second Agent client, then fails an assertion",
+      "stopped_with": "deliberate assertion failure inside a probe",
+      "closed_in_finally": [
+        "HTTP server (no longer listening)",
+        "route (removed, and a request afterwards no longer reaches it)",
+        "second Agent client (its process exited)",
+        "browser page (closed)"
+      ]
+    },
+    {
+      "probe": "probe failure with an Agent close that fails once",
+      "does": "A probe fails an assertion while closing its second Agent client fails once",
+      "stopped_with": "deliberate assertion failure inside a probe (cleanup also failed: second Agent client: close failed 1 time (Recorder error: closing the second Agent client failed: injected close failure))",
+      "second_agent_exited": true
+    },
+    {
+      "probe": "probe failure with an Agent close that keeps failing",
+      "does": "A probe fails an assertion while closing its second Agent client fails every time",
+      "stopped_with": "deliberate assertion failure inside a probe (cleanup also failed: second Agent client: close failed 3 times (Recorder error: closing the second Agent client failed: injected close failure); second Agent client: killed after 3 failed closes)",
+      "second_agent_exited": true
+    }
+  ],
+  "between_sequences": [
+    {
+      "run": "plateway-web",
+      "owner": "the preparation between 01-browse and 02-restaurant-dish: the delivery address goes back to Home",
+      "calls": []
+    },
+    {
+      "run": "plateway-web",
+      "owner": "the management check between 14-account and 15-phone: a direct env.snapshot from the page's business session",
+      "calls": [
+        {
+          "client": "the page's business session, sent directly to /api/call",
+          "kind": "forced call",
+          "tool": "env.snapshot",
+          "arguments": {},
+          "http": 403,
+          "result": {
+            "error": "Business operation not permitted"
+          }
+        }
+      ]
+    }
+  ],
+  "trace": "Every call is owned when it is sent, by the step open at that moment: page reads and tool discovery, page writes and previews, forced calls, second Agent reads and writes, Infra events, clock moves, the seed load and the inspector's own snapshot reads. A step opens when the previous one is sealed or its sequence begins, and its action runs inside it. The page load before the first sequence is owned by the setup, which may make only unlisted reads and is not listed here; the two pieces of work between sequences are owned separately and are the two entries of between_sequences. A call sent with no owner stops the script, and a reply never changes ownership. A step is frozen before anything is taken from it: the recorder reads the version, runs the check, waits until nothing the step owns is outstanding and reads the App's state, and stops if the version changed since before the check; observations, version and virtual time come from that frozen state, the wait and scrolling before the screenshot come after it, and a call sent after the freeze stops the script and cannot count toward submits. Each call has exactly one terminal outcome, the reply or a failure with its HTTP status and error; a failure or a second outcome stops the script. A forced call carries a header token bound to the exact tool and arguments it was issued for; a token sent with any other call stops the script. Recorder errors are append-only, so a stop that a caller catches is still reported at teardown. Listed: page writes and previews with their raw arguments and raw reply (HTTP status and JSON body), unshortened; second Agent writes, Infra events, clock moves and forced calls raw, except the host wall-clock fields received_at and processed_at in Infra event receipts, replaced by a note so repeated captures are identical; second Agent reads summarized to the fields the step checks; the seed load by its file names. Page reads, tool discovery and inspector reads are owned and waited for but not listed. Before capturing, gui.cjs runs the recorder probes in evidence/tools/probes.cjs (recorder_probes); each makes the recorder stop with its exact expected message.",
+  "console_errors": {
+    "seen": 1,
+    "unexpected": []
+  },
+  "management_request": {
+    "tool": "env.snapshot",
+    "http": 403
+  },
+  "screenshots": 61
+}

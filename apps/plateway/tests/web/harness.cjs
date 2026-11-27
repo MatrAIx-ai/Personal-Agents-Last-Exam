@@ -11,11 +11,11 @@ const { Client } = require(path.join(root, 'runtime/client.cjs'));
 const { digestTree } = require(path.join(root, 'runtime/verify.cjs'));
 const { createRuntime } = require(path.join(root, 'runtime/core/runtime.cjs'));
 
-async function session(browser, { app, stateDir, run, profile, timezoneId, registry, report }) {
+async function session(browser, { app, stateDir, run, profile, timezoneId, locale, registry, report }) {
   const host = await start({ app, stateDir, run, profile, registry });
   const infra = new Client(app, 'infra', host.run, stateDir, 'web-acceptance-inspector', { registry: host.registry });
   await infra.initialize();
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId, locale });
   const page = await context.newPage();
   page.setDefaultTimeout(8000);
   const errors = [], consoleErrors = [], allowed = [];
@@ -108,7 +108,7 @@ async function session(browser, { app, stateDir, run, profile, timezoneId, regis
   return s;
 }
 
-async function runWebAcceptance({ app, appDir, steps, restricted, timezoneId = 'UTC', registry = path.join(root, 'apps.registry.json') }) {
+async function runWebAcceptance({ app, appDir, steps, restricted, timezoneId = 'UTC', locale = 'en-US', launchArgs = [], registry = path.join(root, 'apps.registry.json') }) {
   const out = path.resolve(process.env.PALE_WEB_REPORT_DIR || path.join(root, '.artifacts/web', app));
   fs.mkdirSync(out, { recursive: true });
   const manifest = JSON.parse(fs.readFileSync(path.join(appDir, 'app.json'), 'utf8'));
@@ -118,23 +118,23 @@ async function runWebAcceptance({ app, appDir, steps, restricted, timezoneId = '
     checked_at: new Date().toISOString(), node: process.version, browser: null,
     playwright: require('playwright/package.json').version, runtime_version: require(path.join(root, 'runtime/package.json')).version,
     core_api_version: null, host: 'runtime/web/server.cjs', registry: path.relative(root, registry),
-    command: 'node ' + path.relative(root, require.main.filename), browser_timezone: timezoneId,
+    command: 'node ' + path.relative(root, require.main.filename), browser_timezone: timezoneId, browser_locale: locale,
     checks: [], receipts: [], screenshots: [], restricted: null, passed: false, out
   };
   const check = list => (name, condition = true) => { assert.ok(condition, name); list.push(name); console.log('  ✓ ' + name); };
   let s, r, browser;
   try {
     report.core_api_version = createRuntime({ registryFile: registry }).registry.api;
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, args: ['--lang=' + locale, ...launchArgs], env: { ...process.env, LANG: locale.replace('-', '_') + '.UTF-8' } });
     report.browser = 'chromium ' + browser.version();
-    s = await session(browser, { app, stateDir, run: app + '-web', profile: 'sandbox', timezoneId, registry, report });
+    s = await session(browser, { app, stateDir, run: app + '-web', profile: 'sandbox', timezoneId, locale, registry, report });
     try { await steps({ ...s, check: check(report.checks), report }); }
     catch (e) { await s.shot('failed').catch(() => {}); throw e; }
     check(report.checks)('No JavaScript errors and no console or CSP errors beyond the induced network failures', s.errors.length === 0 && s.unexpectedConsole().length === 0);
     report.console_errors = { seen: s.consoleErrors.length, unexpected: s.unexpectedConsole() };
     if (restricted) {
       const checks = [];
-      r = await session(browser, { app, stateDir, run: app + '-web-restricted', profile: 'sandbox', timezoneId, registry, report });
+      r = await session(browser, { app, stateDir, run: app + '-web-restricted', profile: 'sandbox', timezoneId, locale, registry, report });
       try { await restricted({ ...r, check: check(checks), report }); }
       catch (e) { await r.shot('restricted-failed').catch(() => {}); throw e; }
       check(checks)('No JavaScript errors and no console or CSP errors beyond the induced refusals', r.errors.length === 0 && r.unexpectedConsole().length === 0);

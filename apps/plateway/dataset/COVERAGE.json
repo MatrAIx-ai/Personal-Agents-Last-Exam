@@ -1,0 +1,2757 @@
+{
+  "schema": "plateway.coverage.v1",
+  "scope": "Environment dataset coverage of the Plateway delivery dataset plateway-delivery-2025-2026, whole window. Not a Task history report: a Task reports its own selection after its first-session cutoff (dataset/as-of.cjs).",
+  "dataset_id": "plateway-delivery-2025-2026",
+  "time_zone": "America/New_York",
+  "window": {
+    "from": "2025-01-01",
+    "to": "2026-12-31"
+  },
+  "reference_clock": "2026-11-18T12:00:00-05:00",
+  "reproduce": [
+    "node dataset/generate.cjs --check",
+    "node dataset/coverage.cjs --check"
+  ],
+  "counting": "Every timestamp is ISO 8601 with its offset; each is converted to its calendar date in America/New_York before counting. No record is date-only. A date counts once however many records or sources fall on it. Records outside the window and invalid dates would be excluded and listed; there are none.",
+  "sources": [
+    {
+      "file": "dataset/base.json",
+      "role": "Seed at the window start 2025-01-01T00:00:00-05:00: the account, addresses, cards, zones, restaurants and menu with the earlier prices; no orders.",
+      "kind": "synthetic",
+      "bytes": 39676,
+      "sha256": "20d0119760fa7d41849b10910400e4479ceb27e696621ceb96733e96c73b0b27"
+    },
+    {
+      "file": "dataset/replay.json",
+      "role": "Every committed step in time order: the account holder's tool calls and Infra events, each with its time.",
+      "kind": "synthetic",
+      "bytes": 228211,
+      "sha256": "6a0957551237af6f8f193a4bf0bad609001ab5bc94b6bbfb2c99536e5640036b"
+    },
+    {
+      "file": "dataset/full.json",
+      "role": "Seed at 2027-01-01T00:00:00-05:00, the state after every step: all records of the window.",
+      "kind": "synthetic",
+      "bytes": 852812,
+      "sha256": "cdd8187429c0c66a28439cfea989ef5a62c122f6611c62c33c88942423a78139"
+    }
+  ],
+  "method": [
+    {
+      "file": "dataset/lib.cjs",
+      "sha256": "ab857d307a0ff982ea90136941f15b7e2942cc89d2ed9cc5674c4ee57da58167"
+    },
+    {
+      "file": "dataset/feedback.cjs",
+      "sha256": "ab9a45d2137e80d03b9d1f99b7e735423a3809d9926b826046e7810bd97c1e16"
+    },
+    {
+      "file": "dataset/generate.cjs",
+      "sha256": "50a2e4bde6cfc1726de5ddbfce95ccc477030c36873c23ccc3cfebc7adb3af11"
+    },
+    {
+      "file": "dataset/as-of.cjs",
+      "sha256": "eca3fa6c9aba869676622fc297ac88d5f4913ac6196d930dc2bfce2b20649a84"
+    },
+    {
+      "file": "dataset/coverage.cjs",
+      "sha256": "f4da83c178bdf491533f189db2ad8ebb391a05d68320ee80da752bed49444645"
+    }
+  ],
+  "record_kinds": [
+    {
+      "kind": "order",
+      "source": "dataset/full.json",
+      "path": "orders[]",
+      "id": "orders[].id",
+      "date_field": "placed_at",
+      "records": 198,
+      "distinct_dates": 190,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "order_line",
+      "source": "dataset/full.json",
+      "path": "orders[].lines[]",
+      "id": "orders[].lines[].id",
+      "date_field": "placed_at of the parent order",
+      "records": 536,
+      "distinct_dates": 190,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "refund",
+      "source": "dataset/full.json",
+      "path": "orders[].refunds[]",
+      "id": "orders[].refunds[].id",
+      "date_field": "at",
+      "records": 34,
+      "distinct_dates": 32,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-26"
+    },
+    {
+      "kind": "rating",
+      "source": "dataset/full.json",
+      "path": "orders[].rating",
+      "id": "<order id>/rating",
+      "date_field": "rating.at",
+      "records": 73,
+      "distinct_dates": 70,
+      "earliest": "2025-01-26",
+      "latest": "2026-12-24"
+    },
+    {
+      "kind": "line_report",
+      "source": "dataset/full.json",
+      "path": "orders[].lines[].report",
+      "id": "<line id>/report",
+      "date_field": "report.at",
+      "records": 8,
+      "distinct_dates": 8,
+      "earliest": "2025-01-12",
+      "latest": "2026-12-11"
+    },
+    {
+      "kind": "notice",
+      "source": "dataset/full.json",
+      "path": "notices[]",
+      "id": "notices[].id",
+      "date_field": "at",
+      "records": 613,
+      "distinct_dates": 198,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "replay_step",
+      "source": "dataset/replay.json",
+      "path": "steps[]",
+      "id": "steps[].id",
+      "date_field": "at",
+      "records": 1518,
+      "distinct_dates": 248,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    }
+  ],
+  "exclusions": [
+    {
+      "records": "restaurants[] and dishes[] in dataset/full.json",
+      "count": 42,
+      "reason": "Catalog records describe the menu as it stands and carry no occurrence date; their dated changes are the replay steps menu_item.price_changed, menu_item.availability_changed and restaurant.status_changed."
+    },
+    {
+      "records": "holder, zones[], addresses[] and cards[] in dataset/full.json",
+      "count": 10,
+      "reason": "Account rows with no occurrence date."
+    },
+    {
+      "records": "dataset/base.json",
+      "count": 0,
+      "reason": "Holds only the account and catalog at the window start; no dated records."
+    }
+  ],
+  "invalid_dates": 0,
+  "outside_window": 0,
+  "totals": {
+    "records": 1462,
+    "replay_steps": 1518,
+    "app_records": 240,
+    "catalog_records": 42
+  },
+  "distinct_dates": {
+    "coverage": 227,
+    "coverage_basis": "Counted over the records loaded into the App (dataset/full.json), which Agents and Infra read back.",
+    "coverage_note": "The global count over both sources adds 21 days on which the replay log holds only 26 cart edits and 27 menu or restaurant events; those days have no App record.",
+    "by_source": {
+      "dataset/full.json": 227,
+      "dataset/replay.json": 248
+    },
+    "by_kind": {
+      "order": 190,
+      "order_line": 190,
+      "refund": 32,
+      "rating": 70,
+      "line_report": 8,
+      "notice": 198,
+      "replay_step": 248
+    },
+    "global": 248
+  },
+  "earliest": "2025-01-01",
+  "latest": "2026-12-31",
+  "provenance": {
+    "real": 0,
+    "synthetic": 1462,
+    "mixed": 0,
+    "note": "Every record and step is synthetic, written by the App while dataset/generate.cjs replayed it; none was collected or observed."
+  },
+  "partitions": [
+    {
+      "partition": "synthetic, dated before the reference clock",
+      "from": "2025-01-01T00:00:00-05:00",
+      "to": "2026-11-18T12:00:00-05:00",
+      "records": 1353,
+      "replay_steps": 1394
+    },
+    {
+      "partition": "synthetic, dated at or after the reference clock: generated, never observed",
+      "from": "2026-11-18T12:00:00-05:00",
+      "to": "2027-01-01T00:00:00-05:00",
+      "records": 109,
+      "replay_steps": 124
+    }
+  ],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "orders": 12,
+      "order_lines": 35,
+      "refunds": 4,
+      "ratings": 1,
+      "line_reports": 1,
+      "notices": 38,
+      "replay_steps": 85,
+      "records": 91,
+      "distinct_dates": 13,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 91
+    },
+    {
+      "month": "2025-02",
+      "orders": 7,
+      "order_lines": 20,
+      "refunds": 3,
+      "ratings": 2,
+      "line_reports": 1,
+      "notices": 22,
+      "replay_steps": 58,
+      "records": 55,
+      "distinct_dates": 7,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 55
+    },
+    {
+      "month": "2025-03",
+      "orders": 9,
+      "order_lines": 22,
+      "refunds": 0,
+      "ratings": 4,
+      "line_reports": 0,
+      "notices": 28,
+      "replay_steps": 70,
+      "records": 63,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 10,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 63
+    },
+    {
+      "month": "2025-04",
+      "orders": 7,
+      "order_lines": 18,
+      "refunds": 3,
+      "ratings": 2,
+      "line_reports": 0,
+      "notices": 21,
+      "replay_steps": 51,
+      "records": 51,
+      "distinct_dates": 8,
+      "distinct_dates_with_replay_log": 9,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 51
+    },
+    {
+      "month": "2025-05",
+      "orders": 8,
+      "order_lines": 23,
+      "refunds": 1,
+      "ratings": 3,
+      "line_reports": 0,
+      "notices": 24,
+      "replay_steps": 56,
+      "records": 59,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 59
+    },
+    {
+      "month": "2025-06",
+      "orders": 9,
+      "order_lines": 20,
+      "refunds": 0,
+      "ratings": 4,
+      "line_reports": 0,
+      "notices": 27,
+      "replay_steps": 61,
+      "records": 60,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 10,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 60
+    },
+    {
+      "month": "2025-07",
+      "orders": 4,
+      "order_lines": 13,
+      "refunds": 1,
+      "ratings": 1,
+      "line_reports": 0,
+      "notices": 11,
+      "replay_steps": 30,
+      "records": 30,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 30
+    },
+    {
+      "month": "2025-08",
+      "orders": 8,
+      "order_lines": 19,
+      "refunds": 1,
+      "ratings": 3,
+      "line_reports": 0,
+      "notices": 23,
+      "replay_steps": 54,
+      "records": 54,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 11,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 54
+    },
+    {
+      "month": "2025-09",
+      "orders": 6,
+      "order_lines": 16,
+      "refunds": 4,
+      "ratings": 3,
+      "line_reports": 2,
+      "notices": 20,
+      "replay_steps": 57,
+      "records": 51,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 51
+    },
+    {
+      "month": "2025-10",
+      "orders": 9,
+      "order_lines": 24,
+      "refunds": 1,
+      "ratings": 4,
+      "line_reports": 0,
+      "notices": 29,
+      "replay_steps": 83,
+      "records": 67,
+      "distinct_dates": 13,
+      "distinct_dates_with_replay_log": 15,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 67
+    },
+    {
+      "month": "2025-11",
+      "orders": 7,
+      "order_lines": 19,
+      "refunds": 3,
+      "ratings": 2,
+      "line_reports": 1,
+      "notices": 21,
+      "replay_steps": 47,
+      "records": 53,
+      "distinct_dates": 8,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 53
+    },
+    {
+      "month": "2025-12",
+      "orders": 11,
+      "order_lines": 27,
+      "refunds": 1,
+      "ratings": 4,
+      "line_reports": 0,
+      "notices": 34,
+      "replay_steps": 78,
+      "records": 77,
+      "distinct_dates": 13,
+      "distinct_dates_with_replay_log": 14,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 77
+    },
+    {
+      "month": "2026-01",
+      "orders": 13,
+      "order_lines": 41,
+      "refunds": 2,
+      "ratings": 6,
+      "line_reports": 0,
+      "notices": 39,
+      "replay_steps": 100,
+      "records": 101,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 101
+    },
+    {
+      "month": "2026-02",
+      "orders": 10,
+      "order_lines": 28,
+      "refunds": 3,
+      "ratings": 5,
+      "line_reports": 0,
+      "notices": 30,
+      "replay_steps": 78,
+      "records": 76,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 76
+    },
+    {
+      "month": "2026-03",
+      "orders": 10,
+      "order_lines": 24,
+      "refunds": 1,
+      "ratings": 6,
+      "line_reports": 1,
+      "notices": 32,
+      "replay_steps": 77,
+      "records": 74,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 74
+    },
+    {
+      "month": "2026-04",
+      "orders": 6,
+      "order_lines": 17,
+      "refunds": 0,
+      "ratings": 1,
+      "line_reports": 0,
+      "notices": 20,
+      "replay_steps": 44,
+      "records": 44,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 44
+    },
+    {
+      "month": "2026-05",
+      "orders": 9,
+      "order_lines": 22,
+      "refunds": 2,
+      "ratings": 2,
+      "line_reports": 1,
+      "notices": 27,
+      "replay_steps": 63,
+      "records": 63,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 10,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 63
+    },
+    {
+      "month": "2026-06",
+      "orders": 4,
+      "order_lines": 12,
+      "refunds": 1,
+      "ratings": 0,
+      "line_reports": 0,
+      "notices": 13,
+      "replay_steps": 38,
+      "records": 30,
+      "distinct_dates": 4,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 30
+    },
+    {
+      "month": "2026-07",
+      "orders": 5,
+      "order_lines": 13,
+      "refunds": 1,
+      "ratings": 1,
+      "line_reports": 0,
+      "notices": 15,
+      "replay_steps": 34,
+      "records": 35,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 35
+    },
+    {
+      "month": "2026-08",
+      "orders": 5,
+      "order_lines": 13,
+      "refunds": 0,
+      "ratings": 4,
+      "line_reports": 0,
+      "notices": 16,
+      "replay_steps": 38,
+      "records": 38,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 38
+    },
+    {
+      "month": "2026-09",
+      "orders": 8,
+      "order_lines": 27,
+      "refunds": 0,
+      "ratings": 5,
+      "line_reports": 0,
+      "notices": 25,
+      "replay_steps": 67,
+      "records": 65,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 65
+    },
+    {
+      "month": "2026-10",
+      "orders": 10,
+      "order_lines": 32,
+      "refunds": 0,
+      "ratings": 3,
+      "line_reports": 0,
+      "notices": 32,
+      "replay_steps": 78,
+      "records": 77,
+      "distinct_dates": 13,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 77
+    },
+    {
+      "month": "2026-11",
+      "orders": 10,
+      "order_lines": 23,
+      "refunds": 0,
+      "ratings": 4,
+      "line_reports": 0,
+      "notices": 31,
+      "replay_steps": 79,
+      "records": 68,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 13,
+      "records_after_reference_clock": 29,
+      "real": 0,
+      "synthetic": 68
+    },
+    {
+      "month": "2026-12",
+      "orders": 11,
+      "order_lines": 28,
+      "refunds": 2,
+      "ratings": 3,
+      "line_reports": 1,
+      "notices": 35,
+      "replay_steps": 92,
+      "records": 80,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 80,
+      "real": 0,
+      "synthetic": 80
+    }
+  ],
+  "months_without_orders": [],
+  "gaps": [
+    {
+      "kind": "real_data_anchor",
+      "period": "2026-11",
+      "status": "stated gap, pending maintainer agreement",
+      "reason": "DoorDash is only the workflow reference. The approved proposal (proposals/environment/plateway-delivery.md, line 96: \"N/A: no crawling or copied menus\") excludes collecting its data, and Plateway's restaurants, menus, couriers and account are invented, so there is no real source to collect around November 2026; the whole window is synthetic."
+    },
+    {
+      "kind": "mail_history",
+      "status": "stated gap",
+      "reason": "The 613 notices are in the App's own notice log only; the dataset holds no Mail history for them. Mail is optional, and the Mail sender treats notices present in a loaded seed as history."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-02-08",
+      "to": "2025-02-15",
+      "days": 8,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-06-25",
+      "to": "2025-07-01",
+      "days": 7,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-07-03",
+      "to": "2025-07-10",
+      "days": 8,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-07-13",
+      "to": "2025-07-21",
+      "days": 9,
+      "reason": "The account holder is away from 2025-07-12 to 2025-07-20, so the generator plans no orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-08-28",
+      "to": "2025-09-05",
+      "days": 9,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-09-08",
+      "to": "2025-09-16",
+      "days": 9,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-09-25",
+      "to": "2025-10-03",
+      "days": 9,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-10-11",
+      "to": "2025-10-17",
+      "days": 7,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-11-25",
+      "to": "2025-12-01",
+      "days": 7,
+      "reason": "Includes Thanksgiving, when the generator plans no orders; otherwise ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-01-03",
+      "to": "2026-01-09",
+      "days": 7,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-06-01",
+      "to": "2026-06-08",
+      "days": 8,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-06-10",
+      "to": "2026-06-16",
+      "days": 7,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-07-02",
+      "to": "2026-07-10",
+      "days": 9,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-07-14",
+      "to": "2026-07-23",
+      "days": 10,
+      "reason": "No order is planned in these days; ordinary variation between orders."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-08-04",
+      "to": "2026-08-19",
+      "days": 16,
+      "reason": "The account holder is away from 2026-08-08 to 2026-08-16, so the generator plans no orders."
+    }
+  ],
+  "dates": {
+    "2025-01-01": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-01-03": {
+      "records": 11,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2025-01-08": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-01-09": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-01-10": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-01-12": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-01-13": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-01-15": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-01-19": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-01-22": {
+      "records": 4,
+      "orders": 1,
+      "replay_steps": 3
+    },
+    "2025-01-23": {
+      "records": 2,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2025-01-26": {
+      "records": 17,
+      "orders": 2,
+      "replay_steps": 18
+    },
+    "2025-01-27": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-02-01": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2025-02-07": {
+      "records": 17,
+      "orders": 2,
+      "replay_steps": 13
+    },
+    "2025-02-15": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 4
+    },
+    "2025-02-16": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 13
+    },
+    "2025-02-18": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-02-21": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-02-24": {
+      "records": 4,
+      "orders": 1,
+      "replay_steps": 3
+    },
+    "2025-02-25": {
+      "records": 3,
+      "orders": 0,
+      "replay_steps": 4
+    },
+    "2025-03-02": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-03-07": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2025-03-09": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2025-03-10": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-03-14": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-03-15": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2025-03-21": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-03-23": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-03-25": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-03-27": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-04-01": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2025-04-02": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-04-05": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-04-09": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-04-11": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-04-16": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-04-20": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-04-23": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-04-25": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-05-01": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-05-03": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-05-04": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-05-08": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-05-10": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-05-14": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 3
+    },
+    "2025-05-16": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-05-21": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-05-22": {
+      "records": 2,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2025-05-23": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-05-30": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-05-31": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-06-01": {
+      "records": 14,
+      "orders": 2,
+      "replay_steps": 14
+    },
+    "2025-06-02": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-06-03": {
+      "records": 3,
+      "orders": 0,
+      "replay_steps": 4
+    },
+    "2025-06-04": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-06-07": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-06-13": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-06-18": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-06-20": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-06-22": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-06-24": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-07-02": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-07-11": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2025-07-12": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-07-22": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-07-28": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-08-01": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-08-05": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-08-06": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-08-10": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-08-12": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-08-14": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-08-18": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-08-19": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-08-22": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-08-26": {
+      "records": 4,
+      "orders": 1,
+      "replay_steps": 3
+    },
+    "2025-08-27": {
+      "records": 3,
+      "orders": 0,
+      "replay_steps": 4
+    },
+    "2025-09-02": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2025-09-06": {
+      "records": 17,
+      "orders": 2,
+      "replay_steps": 15
+    },
+    "2025-09-07": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-09-14": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 5
+    },
+    "2025-09-17": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2025-09-20": {
+      "records": 13,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2025-09-23": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2025-09-24": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-10-04": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-10-05": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2025-10-06": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-10-07": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-10-10": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2025-10-13": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2025-10-17": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 7
+    },
+    "2025-10-18": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 11
+    },
+    "2025-10-19": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2025-10-22": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-10-23": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-10-26": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-10-27": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-10-28": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-10-29": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-11-04": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-11-07": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-11-11": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-11-14": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-11-19": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2025-11-20": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-11-21": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-11-24": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-12-02": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2025-12-05": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-12-06": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-12-08": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-12-09": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-12-11": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2025-12-12": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2025-12-13": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-12-16": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2025-12-19": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-12-20": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2025-12-26": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-12-28": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2025-12-31": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-01-01": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-01-02": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2026-01-05": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2026-01-10": {
+      "records": 14,
+      "orders": 2,
+      "replay_steps": 14
+    },
+    "2026-01-11": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-01-14": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-01-16": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-01-17": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-01-18": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-01-22": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-01-24": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-01-28": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2026-01-29": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-02-01": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-02-04": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-02-05": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-02-06": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2026-02-08": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-02-09": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-02-15": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-02-19": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-02-20": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-02-21": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-02-23": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-02-24": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-02-25": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-03-02": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2026-03-03": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-03-06": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-03-13": {
+      "records": 11,
+      "orders": 2,
+      "replay_steps": 11
+    },
+    "2026-03-14": {
+      "records": 3,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2026-03-15": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-03-17": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-03-18": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-03-19": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-03-21": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-03-23": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-03-28": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-03-30": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-04-05": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-04-08": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-04-11": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-04-18": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-04-25": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-04-27": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-05-02": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-05-03": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-05-04": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-05-07": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-05-13": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-05-17": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-05-21": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-05-24": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-05-27": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-05-31": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-06-01": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2026-06-07": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2026-06-09": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-06-17": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-06-20": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-06-21": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-06-24": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-06-27": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-07-01": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-07-11": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-07-13": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-07-24": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-07-29": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-08-02": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-08-03": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-08-20": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-08-23": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-08-29": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-08-30": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-09-06": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-09-07": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-09-08": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2026-09-10": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-09-11": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-09-12": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-09-15": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-09-20": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-09-21": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-09-25": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-09-27": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-09-29": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-09-30": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-10-01": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-10-03": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2026-10-05": {
+      "records": 4,
+      "orders": 1,
+      "replay_steps": 3
+    },
+    "2026-10-06": {
+      "records": 2,
+      "orders": 0,
+      "replay_steps": 3
+    },
+    "2026-10-07": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-10-11": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-10-15": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-10-16": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-10-21": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2026-10-23": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-10-26": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-10-28": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-10-31": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-11-04": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-11-05": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-11-07": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-11-08": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-11-10": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-11-12": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-11-13": {
+      "records": 4,
+      "orders": 1,
+      "replay_steps": 4
+    },
+    "2026-11-14": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 9
+    },
+    "2026-11-15": {
+      "records": 1,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-11-18": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 6
+    },
+    "2026-11-19": {
+      "records": 16,
+      "orders": 2,
+      "replay_steps": 18
+    },
+    "2026-11-25": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-11-27": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 1
+    },
+    "2026-12-01": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 2
+    },
+    "2026-12-02": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-12-04": {
+      "records": 0,
+      "orders": 0,
+      "replay_steps": 5
+    },
+    "2026-12-09": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 11
+    },
+    "2026-12-11": {
+      "records": 12,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2026-12-12": {
+      "records": 7,
+      "orders": 1,
+      "replay_steps": 7
+    },
+    "2026-12-15": {
+      "records": 5,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-12-17": {
+      "records": 9,
+      "orders": 1,
+      "replay_steps": 10
+    },
+    "2026-12-19": {
+      "records": 8,
+      "orders": 1,
+      "replay_steps": 8
+    },
+    "2026-12-24": {
+      "records": 10,
+      "orders": 1,
+      "replay_steps": 11
+    },
+    "2026-12-26": {
+      "records": 6,
+      "orders": 1,
+      "replay_steps": 5
+    },
+    "2026-12-31": {
+      "records": 12,
+      "orders": 2,
+      "replay_steps": 13
+    }
+  },
+  "representative": [
+    {
+      "example": "first order of the window",
+      "id": "o-1",
+      "placed_at": "2025-01-01T18:35:00-05:00",
+      "restaurant": "Masa Verde",
+      "address_id": "a-1",
+      "card_id": "c-1",
+      "mode": "asap",
+      "status": "cancelled",
+      "lines": [
+        "1 × Veggie Quesadilla",
+        "1 × Carnitas Tacos (Salsa roja, Cotija)",
+        "1 × Chicken Burrito",
+        "1 × Chips and Guacamole — For Alex",
+        "1 × Elote"
+      ],
+      "total_cents": 7083,
+      "refunds": [
+        "rf-1 cancelled $70.83"
+      ],
+      "cancellation": "account_holder",
+      "rating": null,
+      "timeline": [
+        "2025-01-01T18:35:00-05:00 Order placed",
+        "2025-01-01T18:36:00-05:00 Cancelled: account_holder"
+      ],
+      "notices": [
+        "n-1 Order placed",
+        "n-2 Order cancelled"
+      ]
+    },
+    {
+      "example": "last order of the window",
+      "id": "o-198",
+      "placed_at": "2026-12-31T18:04:00-05:00",
+      "restaurant": "Lantern Noodle House",
+      "address_id": "a-1",
+      "card_id": "c-1",
+      "mode": "asap",
+      "status": "delivered",
+      "lines": [
+        "1 × Beef Noodle Soup",
+        "1 × Pork and Chive Dumplings (Pan-fried)",
+        "1 × Garlic Bok Choy"
+      ],
+      "total_cents": 4902,
+      "refunds": [],
+      "cancellation": null,
+      "rating": null,
+      "timeline": [
+        "2026-12-31T18:04:00-05:00 Order placed",
+        "2026-12-31T18:10:00-05:00 Accepted by the restaurant",
+        "2026-12-31T18:22:00-05:00 Picked up by the courier",
+        "2026-12-31T18:38:00-05:00 Delivered"
+      ],
+      "notices": [
+        "n-611 Order placed",
+        "n-612 Order accepted",
+        "n-613 Order delivered"
+      ]
+    },
+    {
+      "example": "first order after the reference clock",
+      "id": "o-184",
+      "placed_at": "2026-11-18T12:42:00-05:00",
+      "restaurant": "Saffron Lane",
+      "address_id": "a-2",
+      "card_id": "c-1",
+      "mode": "asap",
+      "status": "delivered",
+      "lines": [
+        "1 × Lamb Biryani",
+        "1 × Garlic Naan"
+      ],
+      "total_cents": 3313,
+      "refunds": [],
+      "cancellation": null,
+      "rating": "3 stars: Fine, but the sides were cold.",
+      "timeline": [
+        "2026-11-18T12:42:00-05:00 Order placed",
+        "2026-11-18T12:48:00-05:00 Accepted by the restaurant",
+        "2026-11-18T13:15:00-05:00 Picked up by the courier",
+        "2026-11-18T13:31:00-05:00 Delivered",
+        "2026-11-19T12:30:00-05:00 Rated 3 stars"
+      ],
+      "notices": [
+        "n-566 Order placed",
+        "n-567 Order accepted",
+        "n-568 Order delivered"
+      ]
+    },
+    {
+      "example": "office lunch with a line for a colleague",
+      "id": "o-6",
+      "placed_at": "2025-01-13T11:42:00-05:00",
+      "restaurant": "Masa Verde",
+      "address_id": "a-2",
+      "card_id": "c-3",
+      "mode": "asap",
+      "status": "delivered",
+      "lines": [
+        "1 × Chicken Burrito",
+        "1 × Carnitas Tacos (Salsa verde) — For Priya"
+      ],
+      "total_cents": 3569,
+      "refunds": [],
+      "cancellation": null,
+      "rating": null,
+      "timeline": [
+        "2025-01-13T11:42:00-05:00 Order placed",
+        "2025-01-13T11:46:00-05:00 Accepted by the restaurant",
+        "2025-01-13T12:00:00-05:00 Picked up by the courier",
+        "2025-01-13T12:23:00-05:00 Delivered"
+      ],
+      "notices": [
+        "n-18 Order placed",
+        "n-19 Order accepted",
+        "n-20 Order delivered"
+      ]
+    },
+    {
+      "example": "scheduled dinner released at its time",
+      "id": "o-22",
+      "placed_at": "2025-03-09T13:55:00-04:00",
+      "restaurant": "Lantern Noodle House",
+      "address_id": "a-1",
+      "card_id": "c-1",
+      "mode": "scheduled",
+      "status": "delivered",
+      "lines": [
+        "3 × Dan Dan Noodles (Mild)",
+        "1 × Pork and Chive Dumplings (Pan-fried)",
+        "1 × Kung Pao Chicken (White rice) — For Alex"
+      ],
+      "total_cents": 8216,
+      "refunds": [],
+      "cancellation": null,
+      "rating": "2 stars: Arrived lukewarm and a bit soggy.",
+      "timeline": [
+        "2025-03-09T13:55:00-04:00 Order placed",
+        "2025-03-09T18:55:00-04:00 Released to the restaurant",
+        "2025-03-09T18:59:00-04:00 Accepted by the restaurant",
+        "2025-03-09T19:11:00-04:00 Picked up by the courier",
+        "2025-03-09T19:36:00-04:00 Delivered",
+        "2025-03-09T20:39:00-04:00 Rated 2 stars"
+      ],
+      "notices": [
+        "n-68 Order placed",
+        "n-69 Order accepted",
+        "n-70 Order delivered"
+      ]
+    },
+    {
+      "example": "breakfast scheduled the evening before",
+      "id": "o-9",
+      "placed_at": "2025-01-22T20:58:00-05:00",
+      "restaurant": "Hearth & Crumb",
+      "address_id": "a-1",
+      "card_id": "c-1",
+      "mode": "scheduled",
+      "status": "delivered",
+      "lines": [
+        "1 × Breakfast Sandwich (Smoked salmon)",
+        "1 × Almond Croissant — For Sam"
+      ],
+      "total_cents": 2288,
+      "refunds": [],
+      "cancellation": null,
+      "rating": null,
+      "timeline": [
+        "2025-01-22T20:58:00-05:00 Order placed",
+        "2025-01-23T08:38:00-05:00 Released to the restaurant",
+        "2025-01-23T08:44:00-05:00 Accepted by the restaurant",
+        "2025-01-23T08:52:00-05:00 Picked up by the courier",
+        "2025-01-23T09:02:00-05:00 Delivered"
+      ],
+      "notices": [
+        "n-26 Order placed",
+        "n-27 Order accepted",
+        "n-28 Order delivered"
+      ]
+    },
+    {
+      "example": "delayed order",
+      "id": "o-2",
+      "placed_at": "2025-01-03T20:04:00-05:00",
+      "restaurant": "Masa Verde",
+      "address_id": "a-1",
+      "card_id": "c-1",
+      "mode": "asap",
+      "status": "delivered",
+      "lines": [
+        "1 × Chicken Burrito (Sour cream)",
+        "1 × Carnitas Tacos (Salsa verde)",
+        "2 × Elote [removed: unavailable]",
+        "1 × Chips and Guacamole — For Alex"
+      ],
+      "total_cents": 6517,
+      "refunds": [
+        "rf-2 line_unavailable $12.85"
+      ],
+      "cancellation": null,
+      "rating": null,
+      "timeline": [
+        "2025-01-03T20:04:00-05:00 Order placed",
+        "2025-01-03T20:07:00-05:00 Accepted by the restaurant",
+        "2025-01-03T20:08:00-05:00 Line ol-8 removed and refunded",
+        "2025-01-03T20:11:00-05:00 Delayed; new estimate 2025-01-03T20:57:00-05:00",
+        "2025-01-03T20:43:00-05:00 Picked up by the courier",
+        "2025-01-03T21:00:00-05:00 Delivered"
+      ],
+      "notices": [
+        "n-3 Order placed",
+        "n-4 Order accepted",
+        "n-5 Item refunded",
+        "n-6 Order delayed",
+        "n-7 Order delivered"
+      ]
+    },
+    {
+      "example": "line removed as unavailable while preparing",
+      "id": "o-29",
+      "placed_at": "2025-04-02T12:37:00-04:00",
+      "restaurant": "Saffron Lane",
+      "address_id": "a-2",
+      "card_id": "c-3",
+      "mode": "asap",
+      "status": "delivered",
+      "lines": [
+        "1 × Lamb Biryani",
+        "1 × Vegetable Samosas [removed: unavailable]"
+      ],
+      "total_cents": 3669,
+      "refunds": [
+        "rf-8 line_unavailable $8.10"
+      ],
+      "cancellation": null,
+      "rating": null,
+      "timeline": [
+        "2025-04-02T12:37:00-04:00 Order placed",
+        "2025-04-02T12:41:00-04:00 Accepted by the restaurant",
+        "2025-04-02T12:43:00-04:00 Line ol-84 removed and refunded",
+        "2025-04-02T13:10:00-04:00 Picked up by the courier",
+        "2025-04-02T13:26:00-04:00 Delivered"
+      ],
+      "notices": [
+        "n-89 Order placed",
+        "n-90 Order accepted",
+        "n-91 Item refunded",
+        "n-92 Order delivered"
+      ]
+    },
+    {
+      "example": "reported line refunded",
+      "id": "o-5",
+      "placed_at": "2025-01-12T00:01:00-05:00",
+      "restaurant": "Lantern Noodle House",
+      "address_id": "a-1",
+      "card_id": "c-1",
+      "mode": "asap",
+      "status": "delivered",
+      "lines": [
+        "1 × Kung Pao Chicken (White rice) [reported wrong]"
+      ],
+      "total_cents": 2493,
+      "refunds": [
+        "rf-3 line_reported $16.15"
+      ],
+      "cancellation": null,
+      "rating": null,
+      "timeline": [
+        "2025-01-12T00:01:00-05:00 Order placed",
+        "2025-01-12T00:09:00-05:00 Accepted by the restaurant",
+        "2025-01-12T00:23:00-05:00 Picked up by the courier",
+        "2025-01-12T00:42:00-05:00 Delivered",
+        "2025-01-12T01:48:00-05:00 Line ol-15 reported wrong and refunded"
+      ],
+      "notices": [
+        "n-14 Order placed",
+        "n-15 Order accepted",
+        "n-16 Order delivered",
+        "n-17 Item refunded"
+      ]
+    },
+    {
+      "example": "rejected by the restaurant",
+      "id": "o-30",
+      "placed_at": "2025-04-05T08:49:00-04:00",
+      "restaurant": "Hearth & Crumb",
+      "address_id": "a-1",
+      "card_id": "c-3",
+      "mode": "asap",
+      "status": "cancelled",
+      "lines": [
+        "1 × Almond Croissant",
+        "1 × Granola Yogurt Bowl — For Alex"
+      ],
+      "total_cents": 2143,
+      "refunds": [
+        "rf-9 cancelled $21.43"
+      ],
+      "cancellation": "rejected",
+      "rating": null,
+      "timeline": [
+        "2025-04-05T08:49:00-04:00 Order placed",
+        "2025-04-05T08:55:00-04:00 Rejected by the restaurant: No courier available nearby",
+        "2025-04-05T08:55:00-04:00 Cancelled: rejected"
+      ],
+      "notices": [
+        "n-93 Order placed",
+        "n-94 Order cancelled"
+      ]
+    },
+    {
+      "example": "not accepted within 20 minutes",
+      "id": "o-40",
+      "placed_at": "2025-05-14T12:38:00-04:00",
+      "restaurant": "Saffron Lane",
+      "address_id": "a-2",
+      "card_id": "c-3",
+      "mode": "asap",
+      "status": "cancelled",
+      "lines": [
+        "1 × Butter Chicken (Mild)",
+        "1 × Vegetable Samosas"
+      ],
+      "total_cents": 3479,
+      "refunds": [
+        "rf-11 cancelled $34.79"
+      ],
+      "cancellation": "not_accepted",
+      "rating": null,
+      "timeline": [
+        "2025-05-14T12:38:00-04:00 Order placed",
+        "2025-05-14T12:58:00-04:00 Cancelled: not_accepted"
+      ],
+      "notices": [
+        "n-123 Order placed",
+        "n-124 Order cancelled"
+      ]
+    },
+    {
+      "example": "cancelled by the account holder before preparation",
+      "id": "o-17",
+      "placed_at": "2025-02-18T20:04:00-05:00",
+      "restaurant": "Lantern Noodle House",
+      "address_id": "a-1",
+      "card_id": "c-3",
+      "mode": "asap",
+      "status": "cancelled",
+      "lines": [
+        "1 × Pork and Chive Dumplings (Steamed)",
+        "1 × Kung Pao Chicken (White rice) — For Sam",
+        "1 × Scallion Pancake",
+        "2 × Garlic Bok Choy"
+      ],
+      "total_cents": 6681,
+      "refunds": [
+        "rf-7 cancelled $66.81"
+      ],
+      "cancellation": "account_holder",
+      "rating": null,
+      "timeline": [
+        "2025-02-18T20:04:00-05:00 Order placed",
+        "2025-02-18T20:07:00-05:00 Cancelled: account_holder"
+      ],
+      "notices": [
+        "n-53 Order placed",
+        "n-54 Order cancelled"
+      ]
+    },
+    {
+      "example": "cancelled by the account holder while preparing",
+      "id": "o-14",
+      "placed_at": "2025-02-07T00:03:00-05:00",
+      "restaurant": "Lantern Noodle House",
+      "address_id": "a-1",
+      "card_id": "c-3",
+      "mode": "asap",
+      "status": "cancelled",
+      "lines": [
+        "1 × Kung Pao Chicken (White rice)",
+        "1 × Garlic Bok Choy"
+      ],
+      "total_cents": 3668,
+      "refunds": [
+        "rf-5 cancelled $7.99"
+      ],
+      "cancellation": "account_holder",
+      "rating": null,
+      "timeline": [
+        "2025-02-07T00:03:00-05:00 Order placed",
+        "2025-02-07T00:09:00-05:00 Accepted by the restaurant",
+        "2025-02-07T00:17:00-05:00 Cancelled: account_holder"
+      ],
+      "notices": [
+        "n-43 Order placed",
+        "n-44 Order accepted",
+        "n-45 Order cancelled"
+      ]
+    }
+  ],
+  "loading": {
+    "interface": "Real Core 1.6.0 over MCP stdio: Infra loads each selection with env.load_seed (data, virtual_now and provenance bundle) and reads env.snapshot; the Agent reads plateway.account.get, plateway.orders.list, plateway.orders.get for every listed order, plateway.cart.get and plateway.menu_items.get; the first staged event, if any, is applied with env.apply_event.",
+    "runtime": "1.6.0",
+    "instants": [
+      {
+        "as_of": "2025-05-14T12:58:00.001-04:00",
+        "seed_id": "plateway-delivery-asof-20250514T165800.001Z-9585ceeb25b4",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 82,
+          "bundle_dataset_id": "plateway-delivery-asof-20250514T165800.001Z-9585ceeb25b4",
+          "automated_checks": "pass"
+        },
+        "account_now": "2025-05-14T12:58:00.001-04:00",
+        "steps_applied": 298,
+        "steps_withheld": 1220,
+        "orders_in_selection": 40,
+        "orders_listed": 40,
+        "listed_ids_match_selection": true,
+        "latest_listed_placed_at": "2025-05-14T12:38:00-04:00",
+        "orders_listed_from_as_of": 0,
+        "timers_committed": 1,
+        "open_orders": [],
+        "open_orders_match_core": true,
+        "read_back": {
+          "orders": 40,
+          "order_lines": 110,
+          "refunds": 11,
+          "ratings": 10,
+          "line_reports": 2,
+          "notices": 124
+        },
+        "monthly_read_back_matches_selection": true,
+        "cart_lines": 0,
+        "menu_item_mi_13_price_cents": 1595,
+        "staged_events_available": 31,
+        "first_staged_event": {
+          "event_id": "plateway-delivery-s-420",
+          "at": "2025-08-05T10:00:00-04:00",
+          "operation": "restaurant.status_changed",
+          "status": "committed",
+          "target_after": "r-3 paused"
+        }
+      },
+      {
+        "as_of": "2026-01-01T00:00:00-05:00",
+        "seed_id": "plateway-delivery-asof-20260101T050000.000Z-617c3f384b75",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 139,
+          "bundle_dataset_id": "plateway-delivery-asof-20260101T050000.000Z-617c3f384b75",
+          "automated_checks": "pass"
+        },
+        "account_now": "2026-01-01T00:00:00-05:00",
+        "steps_applied": 730,
+        "steps_withheld": 788,
+        "orders_in_selection": 97,
+        "orders_listed": 97,
+        "listed_ids_match_selection": true,
+        "latest_listed_placed_at": "2025-12-31T12:39:00-05:00",
+        "orders_listed_from_as_of": 0,
+        "timers_committed": 0,
+        "open_orders": [],
+        "open_orders_match_core": true,
+        "read_back": {
+          "orders": 97,
+          "order_lines": 256,
+          "refunds": 22,
+          "ratings": 33,
+          "line_reports": 5,
+          "notices": 298
+        },
+        "monthly_read_back_matches_selection": true,
+        "cart_lines": 0,
+        "menu_item_mi_13_price_cents": 1595,
+        "staged_events_available": 22,
+        "first_staged_event": {
+          "event_id": "plateway-delivery-s-750",
+          "at": "2026-01-05T06:00:00-05:00",
+          "operation": "menu_item.price_changed",
+          "status": "committed",
+          "target_after": "mi-31 $16.95, available"
+        }
+      },
+      {
+        "as_of": "2026-11-18T12:00:00-05:00",
+        "seed_id": "plateway-delivery-asof-20261118T170000.000Z-3beda1f5b45e",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 225,
+          "bundle_dataset_id": "plateway-delivery-asof-20261118T170000.000Z-3beda1f5b45e",
+          "automated_checks": "pass"
+        },
+        "account_now": "2026-11-18T12:00:00-05:00",
+        "steps_applied": 1394,
+        "steps_withheld": 124,
+        "orders_in_selection": 183,
+        "orders_listed": 183,
+        "listed_ids_match_selection": true,
+        "latest_listed_placed_at": "2026-11-14T19:28:00-05:00",
+        "orders_listed_from_as_of": 0,
+        "timers_committed": 0,
+        "open_orders": [],
+        "open_orders_match_core": true,
+        "read_back": {
+          "orders": 183,
+          "order_lines": 498,
+          "refunds": 32,
+          "ratings": 68,
+          "line_reports": 7,
+          "notices": 565
+        },
+        "monthly_read_back_matches_selection": true,
+        "cart_lines": 0,
+        "menu_item_mi_13_price_cents": 1650,
+        "staged_events_available": 5,
+        "first_staged_event": {
+          "event_id": "plateway-delivery-s-1426",
+          "at": "2026-11-27T16:00:00-05:00",
+          "operation": "menu_item.availability_changed",
+          "status": "committed",
+          "target_after": "mi-12 $8.95, available"
+        }
+      },
+      {
+        "as_of": "2026-12-15T00:00:00-05:00",
+        "seed_id": "plateway-delivery-asof-20261215T050000.000Z-7eaec23df5dc",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 233,
+          "bundle_dataset_id": "plateway-delivery-asof-20261215T050000.000Z-7eaec23df5dc",
+          "automated_checks": "pass"
+        },
+        "account_now": "2026-12-15T00:00:00-05:00",
+        "steps_applied": 1466,
+        "steps_withheld": 52,
+        "orders_in_selection": 191,
+        "orders_listed": 191,
+        "listed_ids_match_selection": true,
+        "latest_listed_placed_at": "2026-12-12T17:43:00-05:00",
+        "orders_listed_from_as_of": 0,
+        "timers_committed": 0,
+        "open_orders": [],
+        "open_orders_match_core": true,
+        "read_back": {
+          "orders": 191,
+          "order_lines": 517,
+          "refunds": 33,
+          "ratings": 71,
+          "line_reports": 8,
+          "notices": 592
+        },
+        "monthly_read_back_matches_selection": true,
+        "cart_lines": 0,
+        "menu_item_mi_13_price_cents": 1695,
+        "staged_events_available": 2,
+        "first_staged_event": {
+          "event_id": "plateway-delivery-s-1490",
+          "at": "2026-12-24T15:00:00-05:00",
+          "operation": "restaurant.status_changed",
+          "status": "committed",
+          "target_after": "r-4 paused"
+        }
+      },
+      {
+        "as_of": "2027-01-01T00:00:00-05:00",
+        "seed_id": "plateway-delivery-asof-20270101T050000.000Z-0ed0fc9166db",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 240,
+          "bundle_dataset_id": "plateway-delivery-asof-20270101T050000.000Z-0ed0fc9166db",
+          "automated_checks": "pass"
+        },
+        "account_now": "2027-01-01T00:00:00-05:00",
+        "steps_applied": 1518,
+        "steps_withheld": 0,
+        "orders_in_selection": 198,
+        "orders_listed": 198,
+        "listed_ids_match_selection": true,
+        "latest_listed_placed_at": "2026-12-31T18:04:00-05:00",
+        "orders_listed_from_as_of": 0,
+        "timers_committed": 0,
+        "open_orders": [],
+        "open_orders_match_core": true,
+        "read_back": {
+          "orders": 198,
+          "order_lines": 536,
+          "refunds": 34,
+          "ratings": 73,
+          "line_reports": 8,
+          "notices": 613
+        },
+        "monthly_read_back_matches_selection": true,
+        "cart_lines": 0,
+        "menu_item_mi_13_price_cents": 1695,
+        "staged_events_available": 0,
+        "first_staged_event": null,
+        "monthly_read_back": {
+          "2025-01": {
+            "orders": 12,
+            "order_lines": 35,
+            "refunds": 4,
+            "ratings": 1,
+            "line_reports": 1,
+            "notices": 38
+          },
+          "2025-02": {
+            "orders": 7,
+            "order_lines": 20,
+            "refunds": 3,
+            "ratings": 2,
+            "line_reports": 1,
+            "notices": 22
+          },
+          "2025-03": {
+            "orders": 9,
+            "order_lines": 22,
+            "refunds": 0,
+            "ratings": 4,
+            "line_reports": 0,
+            "notices": 28
+          },
+          "2025-04": {
+            "orders": 7,
+            "order_lines": 18,
+            "refunds": 3,
+            "ratings": 2,
+            "line_reports": 0,
+            "notices": 21
+          },
+          "2025-05": {
+            "orders": 8,
+            "order_lines": 23,
+            "refunds": 1,
+            "ratings": 3,
+            "line_reports": 0,
+            "notices": 24
+          },
+          "2025-06": {
+            "orders": 9,
+            "order_lines": 20,
+            "refunds": 0,
+            "ratings": 4,
+            "line_reports": 0,
+            "notices": 27
+          },
+          "2025-07": {
+            "orders": 4,
+            "order_lines": 13,
+            "refunds": 1,
+            "ratings": 1,
+            "line_reports": 0,
+            "notices": 11
+          },
+          "2025-08": {
+            "orders": 8,
+            "order_lines": 19,
+            "refunds": 1,
+            "ratings": 3,
+            "line_reports": 0,
+            "notices": 23
+          },
+          "2025-09": {
+            "orders": 6,
+            "order_lines": 16,
+            "refunds": 4,
+            "ratings": 3,
+            "line_reports": 2,
+            "notices": 20
+          },
+          "2025-10": {
+            "orders": 9,
+            "order_lines": 24,
+            "refunds": 1,
+            "ratings": 4,
+            "line_reports": 0,
+            "notices": 29
+          },
+          "2025-11": {
+            "orders": 7,
+            "order_lines": 19,
+            "refunds": 3,
+            "ratings": 2,
+            "line_reports": 1,
+            "notices": 21
+          },
+          "2025-12": {
+            "orders": 11,
+            "order_lines": 27,
+            "refunds": 1,
+            "ratings": 4,
+            "line_reports": 0,
+            "notices": 34
+          },
+          "2026-01": {
+            "orders": 13,
+            "order_lines": 41,
+            "refunds": 2,
+            "ratings": 6,
+            "line_reports": 0,
+            "notices": 39
+          },
+          "2026-02": {
+            "orders": 10,
+            "order_lines": 28,
+            "refunds": 3,
+            "ratings": 5,
+            "line_reports": 0,
+            "notices": 30
+          },
+          "2026-03": {
+            "orders": 10,
+            "order_lines": 24,
+            "refunds": 1,
+            "ratings": 6,
+            "line_reports": 1,
+            "notices": 32
+          },
+          "2026-04": {
+            "orders": 6,
+            "order_lines": 17,
+            "refunds": 0,
+            "ratings": 1,
+            "line_reports": 0,
+            "notices": 20
+          },
+          "2026-05": {
+            "orders": 9,
+            "order_lines": 22,
+            "refunds": 2,
+            "ratings": 2,
+            "line_reports": 1,
+            "notices": 27
+          },
+          "2026-06": {
+            "orders": 4,
+            "order_lines": 12,
+            "refunds": 1,
+            "ratings": 0,
+            "line_reports": 0,
+            "notices": 13
+          },
+          "2026-07": {
+            "orders": 5,
+            "order_lines": 13,
+            "refunds": 1,
+            "ratings": 1,
+            "line_reports": 0,
+            "notices": 15
+          },
+          "2026-08": {
+            "orders": 5,
+            "order_lines": 13,
+            "refunds": 0,
+            "ratings": 4,
+            "line_reports": 0,
+            "notices": 16
+          },
+          "2026-09": {
+            "orders": 8,
+            "order_lines": 27,
+            "refunds": 0,
+            "ratings": 5,
+            "line_reports": 0,
+            "notices": 25
+          },
+          "2026-10": {
+            "orders": 10,
+            "order_lines": 32,
+            "refunds": 0,
+            "ratings": 3,
+            "line_reports": 0,
+            "notices": 32
+          },
+          "2026-11": {
+            "orders": 10,
+            "order_lines": 23,
+            "refunds": 0,
+            "ratings": 4,
+            "line_reports": 0,
+            "notices": 31
+          },
+          "2026-12": {
+            "orders": 11,
+            "order_lines": 28,
+            "refunds": 2,
+            "ratings": 3,
+            "line_reports": 1,
+            "notices": 35
+          }
+        }
+      }
+    ]
+  }
+}

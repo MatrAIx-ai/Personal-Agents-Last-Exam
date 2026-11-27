@@ -23,3 +23,4 @@ require('./t22-integrity.test.cjs');
 require('./t23-history.test.cjs');
 require('./t24-consistency.test.cjs');
 require('./t25-review-items.test.cjs');
+require('./t26-dataset.test.cjs');
