@@ -181,6 +181,7 @@ def main():
     rows = []
     held = []
     seen_e5 = set()
+    seen_e3 = set()
     written_keys = set()
     for path in paths:
         run = json.loads(path.read_text())
@@ -235,6 +236,26 @@ def main():
                     "verdicts": len(verdicts),
                     "action": "write",
                 })
+            if variant == "no-reply":
+                e3_key = client.cache_key("e3_noreply", extract)
+                seen_e3.add(e3_key)
+                e3_judgment, e3_raw = ask("e3_noreply", extract)
+                if e3_judgment is None:
+                    held.append({"label": label, "item": "e3_noreply", "key": e3_key, "reason": e3_raw})
+                else:
+                    stored_key, body = entry("e3_noreply", extract, e3_judgment, e3_raw)
+                    entries[stored_key] = body
+                    written_keys.add(stored_key)
+                    e3_verdicts = e3_judgment.get("verdicts") or []
+                    rows.append({
+                        "label": label,
+                        "item": "e3_noreply",
+                        "key": stored_key,
+                        "silence": any(row.get("silence") is True for row in e3_verdicts),
+                        "reply": any(row.get("reply") is True for row in e3_verdicts),
+                        "verdicts": len(e3_verdicts),
+                        "action": "write",
+                    })
     current_e1b = prompt_sha("e1b")
     for key, body in entries.items():
         if body.get("item") != "e1b" or key in written_keys:
@@ -248,11 +269,16 @@ def main():
     for key in stale:
         entries.pop(key, None)
         rows.append({"item": "e5_thursday", "key": key, "action": "drop"})
+    stale_e3 = [key for key, body in list(entries.items()) if body.get("item") == "e3_noreply" and key not in seen_e3]
+    for key in stale_e3:
+        entries.pop(key, None)
+        rows.append({"item": "e3_noreply", "key": key, "action": "drop"})
     prompts = staged.setdefault("generation", {}).setdefault("prompts", {})
     prompts["e1b"] = current_e1b
     prompts["e5_thursday"] = prompt_sha("e5_thursday")
+    prompts["e3_noreply"] = prompt_sha("e3_noreply")
     report = {
-        "prompts": {"e1b": prompts["e1b"], "e5_thursday": prompts["e5_thursday"]},
+        "prompts": {"e1b": prompts["e1b"], "e5_thursday": prompts["e5_thursday"], "e3_noreply": prompts["e3_noreply"]},
         "written": rows,
         "held": held,
     }

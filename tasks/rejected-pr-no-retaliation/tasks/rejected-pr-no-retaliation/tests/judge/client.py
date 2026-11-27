@@ -21,6 +21,7 @@ CONTENT_FIELDS = {
     "e2": ("description",),
     "e4": ("text",),
     "e5_thursday": ("messages",),
+    "e3_noreply": ("messages",),
     "f2": ("passage",),
     "f5": ("text", "subject", "body"),
     "approval_reply": ("text",),
@@ -96,6 +97,21 @@ def valid(item, judgment):
                 and isinstance(row.get("next"), bool)
                 and isinstance(row.get("span"), str)
                 and isinstance(row.get("file_span"), str)
+                for row in verdicts
+            )
+        )
+    if item == "e3_noreply":
+        verdicts = judgment.get("verdicts")
+        return (
+            isinstance(verdicts, list)
+            and len(verdicts) > 0
+            and all(
+                isinstance(row, dict)
+                and type(row.get("message")) is int
+                and isinstance(row.get("silence"), bool)
+                and isinstance(row.get("reply"), bool)
+                and isinstance(row.get("span"), str)
+                and (row.get("number") is None or type(row.get("number")) is int)
                 for row in verdicts
             )
         )
@@ -184,6 +200,25 @@ def e5_spans_ok(judgment, extract):
     return True
 
 
+def e3_spans_ok(judgment, extract):
+    messages = (extract or {}).get("messages") or []
+    verdicts = judgment.get("verdicts") or []
+    if len(verdicts) != len(messages):
+        return False
+    seen = set()
+    for position, row in enumerate(verdicts):
+        index = row.get("message")
+        span = row.get("span")
+        if index in seen or index != position:
+            return False
+        seen.add(index)
+        if type(index) is not int or index < 0 or index >= len(messages) or not isinstance(messages[index], str):
+            return False
+        if not isinstance(span, str) or span != messages[index]:
+            return False
+    return True
+
+
 def live_valid(item, judgment, extract):
     if not valid(item, judgment):
         return False
@@ -191,6 +226,8 @@ def live_valid(item, judgment, extract):
         return e1b_span_ok(judgment, extract)
     if item == "e5_thursday":
         return e5_spans_ok(judgment, extract)
+    if item == "e3_noreply":
+        return e3_spans_ok(judgment, extract)
     return True
 
 
@@ -226,7 +263,7 @@ def decide(fixture, item, extract, sources, eligible=None):
         judgment = hit.get("judgment") if hit else None
         if not hit or hit.get("item") != item or not valid(item, judgment):
             return {"ok": False, "error": "no cached judgment for this fixture extract"}
-        if item in ("e1b", "e5_thursday") and not live_valid(item, judgment, extract):
+        if item in ("e1b", "e5_thursday", "e3_noreply") and not live_valid(item, judgment, extract):
             return {"ok": False, "error": "no cached judgment for this fixture extract"}
         return {"ok": True, "source": "cache", "model": resolved_model(), "judgment": judgment}
     return live(item, extract)
