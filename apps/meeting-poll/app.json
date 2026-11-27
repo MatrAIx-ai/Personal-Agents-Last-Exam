@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "app_id": "meeting-poll",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "@Billy1900 / repository issue tagged app:meeting-poll"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "meeting-poll.action",
+    "meeting-poll.close_due"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "Business Web GUI via pale.web v1",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One trusted account owner per App/run; other participants act through Infra scenario events.",
+    "No external Mail/Calendar delivery, anonymous access or recurring meetings."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

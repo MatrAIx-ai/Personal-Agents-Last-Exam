@@ -1,0 +1,863 @@
+{
+  "model": "gpt-4.1-mini-2025-04-14",
+  "scenario": "changed-response",
+  "run_id": "smoke-1",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a personal assistant operating a synthetic meeting application. Act only through the provided business tools. Read current state before deciding. Writes require the exact version returned by a read and a unique retry-stable request_id. These are concurrency metadata, not approval gates. The user authorizes the requested scheduling action. Do not modify unrelated meetings. Finish with a concise explanation."
+    },
+    {
+      "role": "user",
+      "content": "I am Maya. Please confirm Project planning at a time Alex has answered yes to. I can attend either candidate. Sam is optional, so do not wait for Sam. Use the latest availability and leave Design review unchanged."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_XeCGIXe5cS8Y78RnlBntPbXf",
+          "type": "function",
+          "function": {
+            "name": "meeting_tool_0",
+            "arguments": "{\"query\":\"Project planning\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_XeCGIXe5cS8Y78RnlBntPbXf",
+      "content": "{\"items\":[{\"id\":\"poll-team\",\"title\":\"Project planning\",\"description\":\"Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.\",\"location\":\"Team room\",\"organizer_id\":\"person-maya\",\"participant_ids\":[\"person-maya\",\"person-alex\",\"person-sam\"],\"deadline\":\"2026-11-20T17:00:00Z\",\"status\":\"open\",\"slots\":[{\"id\":\"slot-1\",\"start\":\"2026-11-23T17:00:00.000Z\",\"end\":\"2026-11-23T17:30:00.000Z\",\"timezone\":\"America/Los_Angeles\",\"active\":true},{\"id\":\"slot-2\",\"start\":\"2026-11-24T17:00:00.000Z\",\"end\":\"2026-11-24T17:30:00.000Z\",\"timezone\":\"Europe/London\",\"active\":true}],\"responses\":[{\"person_id\":\"person-alex\",\"votes\":[{\"slot_id\":\"slot-1\",\"value\":\"no\"},{\"slot_id\":\"slot-2\",\"value\":\"yes\"}],\"withdrawn\":false,\"at\":\"2026-11-18T16:00:00Z\"}],\"meetings\":[],\"history\":[{\"at\":\"2026-11-18T16:00:00Z\",\"actor_id\":\"person-maya\",\"action\":\"create\",\"reason\":\"\"},{\"at\":\"2026-11-18T16:00:00Z\",\"actor_id\":\"person-maya\",\"action\":\"publish\",\"reason\":\"\"},{\"at\":\"2026-11-18T16:00:00Z\",\"actor_id\":\"person-alex\",\"action\":\"respond\",\"reason\":\"\"}],\"created_at\":\"2026-11-18T16:00:00Z\",\"updated_at\":\"2026-11-18T16:00:00Z\",\"viewer_id\":\"person-maya\",\"viewer_role\":\"organizer\",\"effective_status\":\"open\"}],\"status\":\"ok\",\"app_id\":\"meeting-poll\",\"version\":{\"epoch\":1,\"revision\":0}}"
+    },
+    {
+      "role": "user",
+      "content": "Alex has just updated their availability. Please check the current replies before you commit."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_avNoB6KGTnxNxybOuMnD28yO",
+          "type": "function",
+          "function": {
+            "name": "meeting_tool_1",
+            "arguments": "{\"id\":\"poll-team\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_avNoB6KGTnxNxybOuMnD28yO",
+      "content": "{\"item\":{\"id\":\"poll-team\",\"title\":\"Project planning\",\"description\":\"Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.\",\"location\":\"Team room\",\"organizer_id\":\"person-maya\",\"participant_ids\":[\"person-maya\",\"person-alex\",\"person-sam\"],\"deadline\":\"2026-11-20T17:00:00Z\",\"status\":\"open\",\"slots\":[{\"id\":\"slot-1\",\"start\":\"2026-11-23T17:00:00.000Z\",\"end\":\"2026-11-23T17:30:00.000Z\",\"timezone\":\"America/Los_Angeles\",\"active\":true},{\"id\":\"slot-2\",\"start\":\"2026-11-24T17:00:00.000Z\",\"end\":\"2026-11-24T17:30:00.000Z\",\"timezone\":\"Europe/London\",\"active\":true}],\"responses\":[{\"person_id\":\"person-alex\",\"votes\":[{\"slot_id\":\"slot-1\",\"value\":\"no\"},{\"slot_id\":\"slot-2\",\"value\":\"yes\"}],\"withdrawn\":false,\"at\":\"2026-11-18T16:00:00Z\"},{\"person_id\":\"person-alex\",\"votes\":[{\"slot_id\":\"slot-1\",\"value\":\"yes\"},{\"slot_id\":\"slot-2\",\"value\":\"no\"}],\"withdrawn\":false,\"at\":\"2026-11-18T18:00:00Z\"}],\"meetings\":[],\"history\":[{\"at\":\"2026-11-18T16:00:00Z\",\"actor_id\":\"person-maya\",\"action\":\"create\",\"reason\":\"\"},{\"at\":\"2026-11-18T16:00:00Z\",\"actor_id\":\"person-maya\",\"action\":\"publish\",\"reason\":\"\"},{\"at\":\"2026-11-18T16:00:00Z\",\"actor_id\":\"person-alex\",\"action\":\"respond\",\"reason\":\"\"},{\"at\":\"2026-11-18T18:00:00Z\",\"actor_id\":\"person-alex\",\"action\":\"respond\",\"reason\":\"\"}],\"created_at\":\"2026-11-18T16:00:00Z\",\"updated_at\":\"2026-11-18T18:00:00Z\",\"viewer_id\":\"person-maya\",\"viewer_role\":\"organizer\",\"effective_status\":\"open\"},\"status\":\"ok\",\"app_id\":\"meeting-poll\",\"version\":{\"epoch\":1,\"revision\":1}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_M12jfLYB3SvZTvrIVoP0jmOy",
+          "type": "function",
+          "function": {
+            "name": "meeting_tool_9",
+            "arguments": "{\"id\":\"poll-team\",\"slot_id\":\"slot-1\",\"expected_version\":{\"epoch\":1,\"revision\":1},\"request_id\":\"finalize-project-planning-20261118-1\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_M12jfLYB3SvZTvrIVoP0jmOy",
+      "content": "{\"id\":\"poll-team\",\"status\":\"committed\",\"app_id\":\"meeting-poll\",\"version\":{\"epoch\":1,\"revision\":2}}"
+    },
+    {
+      "role": "assistant",
+      "content": "I have finalized the Project planning meeting at the time slot on 2026-11-23 from 17:00 to 17:30 America/Los_Angeles time, which Alex has answered yes to. Sam is optional and was not waited for. The Design review meeting remains unchanged.",
+      "refusal": null,
+      "annotations": []
+    }
+  ],
+  "model_responses": [
+    {
+      "id": "chatcmpl-Eox1ldH79qv9KbZRBnKRT4dbM8BBN",
+      "object": "chat.completion",
+      "created": 1795812009,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_XeCGIXe5cS8Y78RnlBntPbXf",
+                "type": "function",
+                "function": {
+                  "name": "meeting_tool_0",
+                  "arguments": "{\"query\":\"Project planning\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 1719,
+        "completion_tokens": 18,
+        "total_tokens": 1737,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_1a3e85a746"
+    },
+    {
+      "id": "chatcmpl-Eox1mOEVcawTIYD9KBpAoF04ZOmDZ",
+      "object": "chat.completion",
+      "created": 1795812010,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_avNoB6KGTnxNxybOuMnD28yO",
+                "type": "function",
+                "function": {
+                  "name": "meeting_tool_1",
+                  "arguments": "{\"id\":\"poll-team\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2196,
+        "completion_tokens": 18,
+        "total_tokens": 2214,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_1a3e85a746"
+    },
+    {
+      "id": "chatcmpl-Eox1nYHtUEN5t220LaEOrjOsaZTQe",
+      "object": "chat.completion",
+      "created": 1795812011,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_M12jfLYB3SvZTvrIVoP0jmOy",
+                "type": "function",
+                "function": {
+                  "name": "meeting_tool_9",
+                  "arguments": "{\"id\":\"poll-team\",\"slot_id\":\"slot-1\",\"expected_version\":{\"epoch\":1,\"revision\":1},\"request_id\":\"finalize-project-planning-20261118-1\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2737,
+        "completion_tokens": 51,
+        "total_tokens": 2788,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_1a3e85a746"
+    },
+    {
+      "id": "chatcmpl-Eox1poT7r1RCCgiyJCVejetwWiuWg",
+      "object": "chat.completion",
+      "created": 1795812013,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "I have finalized the Project planning meeting at the time slot on 2026-11-23 from 17:00 to 17:30 America/Los_Angeles time, which Alex has answered yes to. Sam is optional and was not waited for. The Design review meeting remains unchanged.",
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2826,
+        "completion_tokens": 60,
+        "total_tokens": 2886,
+        "prompt_tokens_details": {
+          "cached_tokens": 2560,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_1a3e85a746"
+    }
+  ],
+  "infra_events": [
+    {
+      "event": {
+        "event_id": "alex-changes-vote",
+        "at": "2026-11-18T18:00:00Z",
+        "operation": "meeting-poll.action",
+        "payload": {
+          "actor_id": "person-alex",
+          "action": "respond",
+          "arguments": {
+            "id": "poll-team",
+            "votes": [
+              {
+                "slot_id": "slot-1",
+                "value": "yes"
+              },
+              {
+                "slot_id": "slot-2",
+                "value": "no"
+              }
+            ]
+          }
+        }
+      },
+      "receipt": {
+        "status": "committed",
+        "event_id": "alex-changes-vote",
+        "trace": {
+          "run_id": "smoke-1",
+          "app_id": "meeting-poll",
+          "event_id": "alex-changes-vote",
+          "cloud_event": null,
+          "received_at": "2026-11-27T20:40:10.330Z",
+          "virtual_received_at": "2026-11-18T17:00:00Z",
+          "applied_at": "2026-11-18T18:00:00Z",
+          "processed_at": "2026-11-27T20:40:10.332Z"
+        },
+        "app_id": "meeting-poll",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    }
+  ],
+  "tool_results": [
+    {
+      "name": "meeting-poll.list",
+      "args": {
+        "query": "Project planning"
+      },
+      "response": {
+        "items": [
+          {
+            "id": "poll-team",
+            "title": "Project planning",
+            "description": "Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.",
+            "location": "Team room",
+            "organizer_id": "person-maya",
+            "participant_ids": [
+              "person-maya",
+              "person-alex",
+              "person-sam"
+            ],
+            "deadline": "2026-11-20T17:00:00Z",
+            "status": "open",
+            "slots": [
+              {
+                "id": "slot-1",
+                "start": "2026-11-23T17:00:00.000Z",
+                "end": "2026-11-23T17:30:00.000Z",
+                "timezone": "America/Los_Angeles",
+                "active": true
+              },
+              {
+                "id": "slot-2",
+                "start": "2026-11-24T17:00:00.000Z",
+                "end": "2026-11-24T17:30:00.000Z",
+                "timezone": "Europe/London",
+                "active": true
+              }
+            ],
+            "responses": [
+              {
+                "person_id": "person-alex",
+                "votes": [
+                  {
+                    "slot_id": "slot-1",
+                    "value": "no"
+                  },
+                  {
+                    "slot_id": "slot-2",
+                    "value": "yes"
+                  }
+                ],
+                "withdrawn": false,
+                "at": "2026-11-18T16:00:00Z"
+              }
+            ],
+            "meetings": [],
+            "history": [
+              {
+                "at": "2026-11-18T16:00:00Z",
+                "actor_id": "person-maya",
+                "action": "create",
+                "reason": ""
+              },
+              {
+                "at": "2026-11-18T16:00:00Z",
+                "actor_id": "person-maya",
+                "action": "publish",
+                "reason": ""
+              },
+              {
+                "at": "2026-11-18T16:00:00Z",
+                "actor_id": "person-alex",
+                "action": "respond",
+                "reason": ""
+              }
+            ],
+            "created_at": "2026-11-18T16:00:00Z",
+            "updated_at": "2026-11-18T16:00:00Z",
+            "viewer_id": "person-maya",
+            "viewer_role": "organizer",
+            "effective_status": "open"
+          }
+        ],
+        "status": "ok",
+        "app_id": "meeting-poll",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "name": "meeting-poll.get",
+      "args": {
+        "id": "poll-team"
+      },
+      "response": {
+        "item": {
+          "id": "poll-team",
+          "title": "Project planning",
+          "description": "Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.",
+          "location": "Team room",
+          "organizer_id": "person-maya",
+          "participant_ids": [
+            "person-maya",
+            "person-alex",
+            "person-sam"
+          ],
+          "deadline": "2026-11-20T17:00:00Z",
+          "status": "open",
+          "slots": [
+            {
+              "id": "slot-1",
+              "start": "2026-11-23T17:00:00.000Z",
+              "end": "2026-11-23T17:30:00.000Z",
+              "timezone": "America/Los_Angeles",
+              "active": true
+            },
+            {
+              "id": "slot-2",
+              "start": "2026-11-24T17:00:00.000Z",
+              "end": "2026-11-24T17:30:00.000Z",
+              "timezone": "Europe/London",
+              "active": true
+            }
+          ],
+          "responses": [
+            {
+              "person_id": "person-alex",
+              "votes": [
+                {
+                  "slot_id": "slot-1",
+                  "value": "no"
+                },
+                {
+                  "slot_id": "slot-2",
+                  "value": "yes"
+                }
+              ],
+              "withdrawn": false,
+              "at": "2026-11-18T16:00:00Z"
+            },
+            {
+              "person_id": "person-alex",
+              "votes": [
+                {
+                  "slot_id": "slot-1",
+                  "value": "yes"
+                },
+                {
+                  "slot_id": "slot-2",
+                  "value": "no"
+                }
+              ],
+              "withdrawn": false,
+              "at": "2026-11-18T18:00:00Z"
+            }
+          ],
+          "meetings": [],
+          "history": [
+            {
+              "at": "2026-11-18T16:00:00Z",
+              "actor_id": "person-maya",
+              "action": "create",
+              "reason": ""
+            },
+            {
+              "at": "2026-11-18T16:00:00Z",
+              "actor_id": "person-maya",
+              "action": "publish",
+              "reason": ""
+            },
+            {
+              "at": "2026-11-18T16:00:00Z",
+              "actor_id": "person-alex",
+              "action": "respond",
+              "reason": ""
+            },
+            {
+              "at": "2026-11-18T18:00:00Z",
+              "actor_id": "person-alex",
+              "action": "respond",
+              "reason": ""
+            }
+          ],
+          "created_at": "2026-11-18T16:00:00Z",
+          "updated_at": "2026-11-18T18:00:00Z",
+          "viewer_id": "person-maya",
+          "viewer_role": "organizer",
+          "effective_status": "open"
+        },
+        "status": "ok",
+        "app_id": "meeting-poll",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "name": "meeting-poll.finalize",
+      "args": {
+        "id": "poll-team",
+        "slot_id": "slot-1",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "request_id": "finalize-project-planning-20261118-1"
+      },
+      "response": {
+        "id": "poll-team",
+        "status": "committed",
+        "app_id": "meeting-poll",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      }
+    }
+  ],
+  "grade": {
+    "confirmed": true,
+    "correct_slot": true,
+    "other_poll_unchanged": true
+  },
+  "completed": true,
+  "final_business_state": {
+    "account_id": "poll-maya",
+    "owner_person_id": "person-maya",
+    "polls": [
+      {
+        "id": "poll-team",
+        "title": "Project planning",
+        "description": "Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.",
+        "location": "Team room",
+        "organizer_id": "person-maya",
+        "participant_ids": [
+          "person-maya",
+          "person-alex",
+          "person-sam"
+        ],
+        "deadline": "2026-11-20T17:00:00Z",
+        "status": "finalized",
+        "slots": [
+          {
+            "id": "slot-1",
+            "start": "2026-11-23T17:00:00.000Z",
+            "end": "2026-11-23T17:30:00.000Z",
+            "timezone": "America/Los_Angeles",
+            "active": true
+          },
+          {
+            "id": "slot-2",
+            "start": "2026-11-24T17:00:00.000Z",
+            "end": "2026-11-24T17:30:00.000Z",
+            "timezone": "Europe/London",
+            "active": true
+          }
+        ],
+        "responses": [
+          {
+            "person_id": "person-alex",
+            "votes": [
+              {
+                "slot_id": "slot-1",
+                "value": "no"
+              },
+              {
+                "slot_id": "slot-2",
+                "value": "yes"
+              }
+            ],
+            "withdrawn": false,
+            "at": "2026-11-18T16:00:00Z"
+          },
+          {
+            "person_id": "person-alex",
+            "votes": [
+              {
+                "slot_id": "slot-1",
+                "value": "yes"
+              },
+              {
+                "slot_id": "slot-2",
+                "value": "no"
+              }
+            ],
+            "withdrawn": false,
+            "at": "2026-11-18T18:00:00Z"
+          }
+        ],
+        "meetings": [
+          {
+            "id": "meeting-1",
+            "slot_id": "slot-1",
+            "status": "active",
+            "at": "2026-11-18T18:00:00Z"
+          }
+        ],
+        "history": [
+          {
+            "at": "2026-11-18T16:00:00Z",
+            "actor_id": "person-maya",
+            "action": "create",
+            "reason": ""
+          },
+          {
+            "at": "2026-11-18T16:00:00Z",
+            "actor_id": "person-maya",
+            "action": "publish",
+            "reason": ""
+          },
+          {
+            "at": "2026-11-18T16:00:00Z",
+            "actor_id": "person-alex",
+            "action": "respond",
+            "reason": ""
+          },
+          {
+            "at": "2026-11-18T18:00:00Z",
+            "actor_id": "person-alex",
+            "action": "respond",
+            "reason": ""
+          },
+          {
+            "at": "2026-11-18T18:00:00Z",
+            "actor_id": "person-maya",
+            "action": "finalize",
+            "reason": ""
+          }
+        ],
+        "created_at": "2026-11-18T16:00:00Z",
+        "updated_at": "2026-11-18T18:00:00Z"
+      },
+      {
+        "id": "poll-review",
+        "title": "Design review",
+        "description": "Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.",
+        "location": "Team room",
+        "organizer_id": "person-alex",
+        "participant_ids": [
+          "person-maya",
+          "person-alex",
+          "person-sam"
+        ],
+        "deadline": "2026-11-20T17:00:00Z",
+        "status": "open",
+        "slots": [
+          {
+            "id": "slot-1",
+            "start": "2026-11-23T17:00:00.000Z",
+            "end": "2026-11-23T17:30:00.000Z",
+            "timezone": "America/Los_Angeles",
+            "active": true
+          },
+          {
+            "id": "slot-2",
+            "start": "2026-11-24T17:00:00.000Z",
+            "end": "2026-11-24T17:30:00.000Z",
+            "timezone": "Europe/London",
+            "active": true
+          }
+        ],
+        "responses": [],
+        "meetings": [],
+        "history": [
+          {
+            "at": "2026-11-18T16:00:00Z",
+            "actor_id": "person-alex",
+            "action": "create",
+            "reason": ""
+          },
+          {
+            "at": "2026-11-18T16:00:00Z",
+            "actor_id": "person-alex",
+            "action": "publish",
+            "reason": ""
+          }
+        ],
+        "created_at": "2026-11-18T16:00:00Z",
+        "updated_at": "2026-11-18T16:00:00Z"
+      }
+    ],
+    "notifications": [
+      {
+        "id": "notice-1",
+        "poll_id": "poll-team",
+        "recipient_id": "person-maya",
+        "type": "response_changed",
+        "at": "2026-11-18T18:00:00Z",
+        "status": "delivered",
+        "read": false
+      },
+      {
+        "id": "notice-2",
+        "poll_id": "poll-team",
+        "recipient_id": "person-maya",
+        "type": "meeting_confirmed",
+        "at": "2026-11-18T18:00:00Z",
+        "status": "delivered",
+        "read": false
+      },
+      {
+        "id": "notice-3",
+        "poll_id": "poll-team",
+        "recipient_id": "person-alex",
+        "type": "meeting_confirmed",
+        "at": "2026-11-18T18:00:00Z",
+        "status": "delivered",
+        "read": false
+      },
+      {
+        "id": "notice-4",
+        "poll_id": "poll-team",
+        "recipient_id": "person-sam",
+        "type": "meeting_confirmed",
+        "at": "2026-11-18T18:00:00Z",
+        "status": "delivered",
+        "read": false
+      }
+    ]
+  },
+  "audit": [
+    {
+      "seq": 1,
+      "actor": "agent",
+      "tool": "meeting-poll.list",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T20:40:10.309Z",
+      "wall_time": "2026-11-27T20:40:10.310Z",
+      "virtual_time": "2026-11-18T17:00:00Z",
+      "connection_id": "d2381a46-ccd8-492b-91de-9a8d259476cf",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 2,
+      "actor": "infra",
+      "tool": "env.apply_event",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T20:40:10.330Z",
+      "wall_time": "2026-11-27T20:40:10.332Z",
+      "virtual_time": "2026-11-18T18:00:00Z",
+      "trace": {
+        "run_id": "smoke-1",
+        "app_id": "meeting-poll",
+        "event_id": "alex-changes-vote",
+        "cloud_event": null,
+        "received_at": "2026-11-27T20:40:10.330Z",
+        "virtual_received_at": "2026-11-18T17:00:00Z",
+        "applied_at": "2026-11-18T18:00:00Z",
+        "processed_at": "2026-11-27T20:40:10.332Z"
+      },
+      "connection_id": "b312464f-7097-4b64-9326-b8a59275391b",
+      "client_name": "smoke-runner",
+      "input": {
+        "expected_version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "event_id": "alex-changes-vote"
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 3,
+      "actor": "agent",
+      "tool": "meeting-poll.get",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T20:40:11.330Z",
+      "wall_time": "2026-11-27T20:40:11.331Z",
+      "virtual_time": "2026-11-18T18:00:00Z",
+      "connection_id": "d2381a46-ccd8-492b-91de-9a8d259476cf",
+      "client_name": "model-agent",
+      "input": {
+        "id": "poll-team"
+      },
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 4,
+      "actor": "agent",
+      "tool": "meeting-poll.finalize",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 2
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T20:40:13.005Z",
+      "wall_time": "2026-11-27T20:40:13.006Z",
+      "virtual_time": "2026-11-18T18:00:00Z",
+      "connection_id": "d2381a46-ccd8-492b-91de-9a8d259476cf",
+      "client_name": "model-agent",
+      "input": {
+        "id": "poll-team",
+        "request_id": "finalize-project-planning-20261118-1",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      },
+      "result": {
+        "status": "committed",
+        "object_id": "poll-team"
+      }
+    }
+  ],
+  "passed": true,
+  "usage": {
+    "prompt_tokens": 9478,
+    "completion_tokens": 147
+  }
+}

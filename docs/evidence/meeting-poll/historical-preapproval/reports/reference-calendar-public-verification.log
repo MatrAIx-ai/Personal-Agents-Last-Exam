@@ -1,0 +1,194 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "calendar",
+  "app_version": "1.3.0",
+  "package_sha256": "6eaae259b8f07668e435fc802d37759a2f55718a40eb0064bfffb68d7c2f6f91",
+  "node": "v22.16.0",
+  "verified_at": "2026-11-22T05:26:26.813Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for calendar.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for calendar.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for calendar.freebusy",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for calendar.update",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for calendar.export_ics",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for calendar.attachment.get",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: free/busy identifies an occupied range and leaves records unchanged\nok 1 - free/busy identifies an occupied range and leaves records unchanged\n  ---\n  duration_ms: 10.187907\n  type: 'test'\n  ...\n# Subtest: conflicting reschedule is rejected without altering the event\nok 2 - conflicting reschedule is rejected without altering the event\n  ---\n  duration_ms: 0.553444\n  type: 'test'\n  ...\n# Subtest: create, update, export and cancel a calendar event\nok 3 - create, update, export and cancel a calendar event\n  ---\n  duration_ms: 2.123068\n  type: 'test'\n  ...\n# Subtest: invalid time range and timezone fail domain validation\nok 4 - invalid time range and timezone fail domain validation\n  ---\n  duration_ms: 0.645354\n  type: 'test'\n  ...\n# Subtest: adjacent events do not overlap\nok 5 - adjacent events do not overlap\n  ---\n  duration_ms: 0.44413\n  type: 'test'\n  ...\n# Subtest: upsert changes the matching event without creating a duplicate\nok 6 - upsert changes the matching event without creating a duplicate\n  ---\n  duration_ms: 1.355455\n  type: 'test'\n  ...\n# Subtest: event from another account and unknown organizer are rejected\nok 7 - event from another account and unknown organizer are rejected\n  ---\n  duration_ms: 0.478548\n  type: 'test'\n  ...\n# Subtest: unknown events are rejected and messaging capability is empty\nok 8 - unknown events are rejected and messaging capability is empty\n  ---\n  duration_ms: 0.420063\n  type: 'test'\n  ...\n# Subtest: optional logging preserves Calendar results and state, including older contexts\nok 9 - optional logging preserves Calendar results and state, including older contexts\n  ---\n  duration_ms: 0.950521\n  type: 'test'\n  ...\n# Subtest: conflict diagnostics survive rejection and contain no prepared change\nok 10 - conflict diagnostics survive rejection and contain no prepared change\n  ---\n  duration_ms: 0.518376\n  type: 'test'\n  ...\n# Subtest: Calendar events report preparation; later validation can still reject the change\nok 11 - Calendar events report preparation; later validation can still reject the change\n  ---\n  duration_ms: 0.726172\n  type: 'test'\n  ...\n# Subtest: unavailable logging never changes a Calendar result or domain error\nok 12 - unavailable logging never changes a Calendar result or domain error\n  ---\n  duration_ms: 0.689951\n  type: 'test'\n  ...\n# Subtest: ICS imports, round trips escaped text and deduplicates by UID/sequence\nok 13 - ICS imports, round trips escaped text and deduplicates by UID/sequence\n  ---\n  duration_ms: 1.80767\n  type: 'test'\n  ...\n# Subtest: ICS higher sequence updates, stale or equal conflicting versions reject\nok 14 - ICS higher sequence updates, stale or equal conflicting versions reject\n  ---\n  duration_ms: 1.859873\n  type: 'test'\n  ...\n# Subtest: ICS conflict, invalid date and unsupported recurrence reject without partial events\nok 15 - ICS conflict, invalid date and unsupported recurrence reject without partial events\n  ---\n  duration_ms: 0.686645\n  type: 'test'\n  ...\n# Subtest: Calendar attachment add/remove respect cancelled state\nok 16 - Calendar attachment add/remove respect cancelled state\n  ---\n  duration_ms: 0.974369\n  type: 'test'\n  ...\n# Subtest: scenario cannot replace a newer event or change its UID\nok 17 - scenario cannot replace a newer event or change its UID\n  ---\n  duration_ms: 0.398281\n  type: 'test'\n  ...\n# Subtest: ICS import logging remains optional and fail-safe\nok 18 - ICS import logging remains optional and fail-safe\n  ---\n  duration_ms: 1.199781\n  type: 'test'\n  ...\n1..18\n# tests 18\n# suites 0\n# pass 18\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 60.096892\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"example\": \"calendar\",\n  \"mode\": \"local business functions\",\n  \"before\": {\n    \"account_id\": \"calendar-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"calendar_id\": \"cal-personal\",\n    \"timezone\": \"America/Los_Angeles\",\n    \"events\": [\n      {\n        \"id\": \"evt-review\",\n        \"uid\": \"design-review@pale.example\",\n        \"account_id\": \"calendar-maya\",\n        \"calendar_id\": \"cal-personal\",\n        \"title\": \"Design review\",\n        \"start\": \"2026-11-16T10:00:00-08:00\",\n        \"end\": \"2026-11-16T11:00:00-08:00\",\n        \"timezone\": \"America/Los_Angeles\",\n        \"organizer_person_id\": \"person-maya\",\n        \"attendees\": [\n          \"person-maya\",\n          \"person-alex\"\n        ],\n        \"location\": \"Room B\",\n        \"status\": \"confirmed\",\n        \"sequence\": 0,\n        \"attachments\": [\n          \"calendar-room\"\n        ]\n      },\n      {\n        \"id\": \"evt-lunch\",\n        \"uid\": \"lunch@pale.example\",\n        \"account_id\": \"calendar-maya\",\n        \"calendar_id\": \"cal-personal\",\n        \"title\": \"Lunch\",\n        \"start\": \"2026-11-16T13:00:00-08:00\",\n        \"end\": \"2026-11-16T14:00:00-08:00\",\n        \"timezone\": \"America/Los_Angeles\",\n        \"organizer_person_id\": \"person-maya\",\n        \"attendees\": [\n          \"person-maya\"\n        ],\n        \"location\": \"Cafe\",\n        \"status\": \"confirmed\",\n        \"sequence\": 0,\n        \"attachments\": []\n      }\n    ]\n  },\n  \"after\": {\n    \"account_id\": \"calendar-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"calendar_id\": \"cal-personal\",\n    \"timezone\": \"America/Los_Angeles\",\n    \"events\": [\n      {\n        \"id\": \"evt-review\",\n        \"uid\": \"design-review@pale.example\",\n        \"account_id\": \"calendar-maya\",\n        \"calendar_id\": \"cal-personal\",\n        \"title\": \"Design review\",\n        \"start\": \"2026-11-16T10:00:00-08:00\",\n        \"end\": \"2026-11-16T11:00:00-08:00\",\n        \"timezone\": \"America/Los_Angeles\",\n        \"organizer_person_id\": \"person-maya\",\n        \"attendees\": [\n          \"person-maya\",\n          \"person-alex\"\n        ],\n        \"location\": \"Room B\",\n        \"status\": \"confirmed\",\n        \"sequence\": 0,\n        \"attachments\": [\n          \"calendar-room\"\n        ]\n      },\n      {\n        \"id\": \"evt-lunch\",\n        \"uid\": \"lunch@pale.example\",\n        \"account_id\": \"calendar-maya\",\n        \"calendar_id\": \"cal-personal\",\n        \"title\": \"Lunch\",\n        \"start\": \"2026-11-16T13:00:00-08:00\",\n        \"end\": \"2026-11-16T14:00:00-08:00\",\n        \"timezone\": \"America/Los_Angeles\",\n        \"organizer_person_id\": \"person-maya\",\n        \"attendees\": [\n          \"person-maya\"\n        ],\n        \"location\": \"Cafe\",\n        \"status\": \"confirmed\",\n        \"sequence\": 0,\n        \"attachments\": []\n      },\n      {\n        \"id\": \"evt-busy\",\n        \"uid\": \"busy@pale.example\",\n        \"account_id\": \"calendar-maya\",\n        \"calendar_id\": \"cal-personal\",\n        \"title\": \"Temporary hold\",\n        \"start\": \"2026-11-16T11:30:00-08:00\",\n        \"end\": \"2026-11-16T12:30:00-08:00\",\n        \"timezone\": \"America/Los_Angeles\",\n        \"organizer_person_id\": \"person-maya\",\n        \"attendees\": [\n          \"person-maya\"\n        ],\n        \"location\": \"\",\n        \"status\": \"confirmed\",\n        \"sequence\": 0\n      }\n    ]\n  }\n}\nPASS: local App event example. Platform MCP, permissions and persistence are validated separately.\n{\n  \"diagnostic_steps\": [\n    {\n      \"call_index\": 1,\n      \"step\": \"calendar.event.started\",\n      \"details\": {\n        \"event_id\": \"calendar-busy-01\",\n        \"operation\": \"calendar.upsert\"\n      }\n    },\n    {\n      \"call_index\": 1,\n      \"step\": \"calendar.upsert.matched\",\n      \"details\": {\n        \"object_id\": \"evt-busy\",\n        \"found\": false\n      }\n    },\n    {\n      \"call_index\": 1,\n      \"step\": \"calendar.upsert.prepared\",\n      \"details\": {\n        \"object_id\": \"evt-busy\"\n      }\n    }\n  ]\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}

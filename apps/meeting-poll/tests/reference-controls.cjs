@@ -1,0 +1,5 @@
+'use strict';
+// Example runner-side checks, not a private benchmark task or an Agent tool.
+const assert=require('node:assert/strict'),{fixture}=require('./harness.cjs');
+function expected(d){const p=d.polls.find(p=>p.id==='poll-team');return p.status==='finalized'&&p.meetings.filter(m=>m.status==='active').length===1&&p.meetings.find(m=>m.status==='active').slot_id==='slot-2';}
+const h=fixture();assert.equal(expected(h.data),false,'No-op must fail');h.call('finalize',{id:'poll-team',slot_id:'slot-1'});assert.equal(expected(h.data),false,'Wrong time must fail');h.call('reopen',{id:'poll-team',deadline:'2026-11-21T17:00:00Z',reason:'Correct the choice'});h.call('finalize',{id:'poll-team',slot_id:'slot-2'});assert.equal(expected(h.data),true,'Reference solution must pass');h.call('cancel',{id:'poll-team',reason:'Demonstrate partial outcome'});assert.equal(expected(h.data),false,'Cancelled outcome must fail');console.log('Reference, no-op, wrong-slot and partial-outcome controls passed.');

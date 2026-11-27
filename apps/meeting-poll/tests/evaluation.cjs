@@ -1,0 +1,25 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const runtime=require('./runtime-path.cjs'),{Client}=require(path.join(runtime,'client.cjs')),{prepare}=require(path.join(runtime,'prepare.cjs')),{digestTree}=require(path.join(runtime,'verify.cjs'));
+const {coverage,hash}=require('../scripts/evaluation.cjs');
+const app=path.resolve(__dirname,'..'),dir=path.join(app,'evaluation'),out=path.resolve(process.env.PALE_REPORT_DIR||'.artifacts/meeting-poll');
+(async()=>{const prepared=prepare(app),clients=[],report={kind:'meeting-poll-evaluation-load',app_sha256:digestTree(app),node:process.version,timezone:'Etc/UTC',runtime:require(path.join(runtime,'package.json')).version,partitions:[],passed:false};
+ try{
+  const infra=new Client('meeting-poll','infra','evaluation',path.join(prepared.root,'state'),'dataset-check',{registry:prepared.registry,initialProfile:'sandbox'}),agent=new Client('meeting-poll','agent','evaluation',path.join(prepared.root,'state'),'dataset-check',{registry:prepared.registry});clients.push(infra,agent);await infra.initialize();await agent.initialize();const snap=()=>infra.call('env.snapshot');
+  const manifest=JSON.parse(fs.readFileSync(path.join(dir,'manifest.json'))),loaded=[];
+  for(const entry of manifest.partitions){const bytes=fs.readFileSync(path.join(dir,entry.file));assert.equal(hash(bytes),entry.sha256);const p=JSON.parse(bytes);const load=await infra.call('env.load_seed',{expected_version:(await snap()).version,data:p.data,binding:p.binding,virtual_now:p.virtual_now});assert.equal(load.status,'ready',JSON.stringify(load));
+   const snapshot=await snap();assert.deepEqual(snapshot.snapshot.data,p.data);loaded.push({...p,data:snapshot.snapshot.data});
+   const list=await agent.call('meeting-poll.list',{});assert.equal(list.status,'ok');const owner=p.data.owner_person_id;const visible=p.data.polls.filter(x=>x.organizer_id===owner||(x.status!=='draft'&&x.participant_ids.includes(owner)));assert.deepEqual(list.items.map(x=>x.id),visible.map(x=>x.id));
+   const queries=[];for(const poll of p.data.polls){const r=await agent.call('meeting-poll.get',{id:poll.id});if(!visible.includes(poll)){assert.equal(r.status,'not_found');queries.push({id:poll.id,status:r.status});continue;}assert.equal(r.status,'ok');assert.deepEqual(r.item.slots,poll.slots);assert.deepEqual(r.item.meetings,poll.meetings);assert.deepEqual(r.item.responses,poll.organizer_id===owner?poll.responses:poll.responses.filter(x=>x.person_id===owner));queries.push({id:poll.id,status:r.status,viewer_role:r.item.viewer_role,response_count:r.item.responses.length,meeting_count:r.item.meetings.length,title:r.item.title});}
+   const notices=await agent.call('meeting-poll.notifications',{});assert.deepEqual(notices.items,p.data.notifications.filter(n=>n.recipient_id===owner));
+   // Modify a loaded record, then prove reset returns to this exact imported baseline.
+   const note=notices.items[0];assert.ok(note);const edit=await agent.call('meeting-poll.notification.read',{id:note.id,expected_version:(await snap()).version,request_id:'read-'+p.month});assert.equal(edit.status,'committed');assert.equal((await snap()).snapshot.data.notifications.find(n=>n.id===note.id).read,true);
+   const reset=await infra.call('env.reset',{expected_version:(await snap()).version});assert.equal(reset.status,'ready');assert.deepEqual((await snap()).snapshot.data,p.data);
+   report.partitions.push({month:p.month,file:entry.file,sha256:entry.sha256,load_status:load.status,version:load.version,clock:p.virtual_now,queries,visible_notifications:notices.items.length,reset_matches:true});
+  }
+  const actual=coverage(loaded),expected=JSON.parse(fs.readFileSync(path.join(dir,'coverage.json')));delete expected.dataset_files;assert.deepEqual(actual,expected);assert.equal(actual.excluded.length,0);assert.equal(actual.monthly.length,24);assert.ok(actual.monthly.every(m=>m.polls===8&&m.records>0));
+  // Exercise the counter's negative paths, including UTC normalization and cross-source deduplication.
+  const sample={data:{polls:[{id:'a',created_at:'2025-01-01T00:30:00+01:00',slots:[{id:'s',start:'2025-01-01T05:00:00Z'}],responses:[{at:'invalid'}],history:[{at:'2025-01-01T05:00:00Z'}],meetings:[]}],notifications:[]},month:'2025-01'};const c=coverage([sample]);assert.equal(c.distinct_dates,1);assert.equal(c.excluded.length,2);assert.equal(c.included_records,2);
+  report.quality=require('../scripts/evaluation-quality.cjs').quality(loaded);assert.deepEqual(report.quality.issues,[]);assert.deepEqual(report.quality,JSON.parse(fs.readFileSync(path.join(dir,'quality.json'))));report.coverage_reconciles=true;report.negative_counter_checks=true;report.passed=true;
+ }catch(e){report.error=e.stack;process.exitCode=1;}finally{await Promise.allSettled(clients.map(c=>c.close()));prepared.cleanup();fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'evaluation-load.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({passed:report.passed,partitions:report.partitions.length,error:report.error}));}
+})();

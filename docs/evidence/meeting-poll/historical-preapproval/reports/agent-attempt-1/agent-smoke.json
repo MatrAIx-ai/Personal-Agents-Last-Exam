@@ -1,0 +1,76 @@
+{
+  "kind": "meeting-poll-agent-smoke",
+  "checked_at": "2026-11-22T05:22:40.752Z",
+  "app_sha256": "b7931bae39001c044f2b520f5fcccb3817e7dbdc0864027de673a9b2f96565ad",
+  "runtime": "1.6.0",
+  "node": "v22.16.0",
+  "models": [
+    "gpt-4.1-mini-2025-04-14",
+    "gpt-4.1-2025-04-14"
+  ],
+  "configuration": {
+    "temperature": 0,
+    "max_rounds": 10,
+    "max_completion_tokens": 1200,
+    "parallel_tool_calls": false,
+    "budget_reservation_cap_usd": 30,
+    "input_reserve_per_million": 10,
+    "output_reserve_per_million": 40
+  },
+  "runs": [
+    {
+      "model": "gpt-4.1-mini-2025-04-14",
+      "scenario": "ordinary",
+      "trace": "smoke-0.json",
+      "passed": false,
+      "completed": false,
+      "grade": null,
+      "error": "Model transport failed: ECONNRESET"
+    },
+    {
+      "model": "gpt-4.1-mini-2025-04-14",
+      "scenario": "changed-response",
+      "trace": "smoke-1.json",
+      "passed": false,
+      "completed": false,
+      "grade": null,
+      "error": "Model transport failed: ECONNRESET"
+    },
+    {
+      "model": "gpt-4.1-2025-04-14",
+      "scenario": "ordinary",
+      "trace": "smoke-2.json",
+      "passed": true,
+      "completed": true,
+      "grade": {
+        "confirmed": true,
+        "correct_slot": true,
+        "other_poll_unchanged": true
+      },
+      "usage": {
+        "prompt_tokens": 6159,
+        "completion_tokens": 124
+      }
+    },
+    {
+      "model": "gpt-4.1-2025-04-14",
+      "scenario": "changed-response",
+      "trace": "smoke-3.json",
+      "passed": true,
+      "completed": true,
+      "grade": {
+        "confirmed": true,
+        "correct_slot": true,
+        "other_poll_unchanged": true
+      },
+      "usage": {
+        "prompt_tokens": 9478,
+        "completion_tokens": 143
+      }
+    }
+  ],
+  "purpose": "Environment usability smoke only; not Task difficulty qualification.",
+  "conservative_reserved_usd": 1.44585,
+  "passed": false,
+  "billing_note": "Reservation is an intentionally conservative bound at configured rates, not an API invoice; actual token usage is recorded per run."
+}

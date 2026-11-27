@@ -1,0 +1,186 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "meeting-poll",
+  "app_version": "1.0.0",
+  "package_sha256": "ce2ff830ffcbca9549be78533683a10dc3e4969ebc28819bb705e0bbb8efb5b2",
+  "node": "v22.16.0",
+  "verified_at": "2026-11-27T22:12:39.697Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for meeting-poll.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for meeting-poll.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for meeting-poll.context",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for meeting-poll.notifications",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: all eight versioned fixtures are valid and reads do not mutate data\nok 1 - all eight versioned fixtures are valid and reads do not mutate data\n  ---\n  duration_ms: 23.840051\n  type: 'test'\n  ...\n# Subtest: complete create, publish, respond, withdraw, finalize, reopen, cancel lifecycle\nok 2 - complete create, publish, respond, withdraw, finalize, reopen, cancel lifecycle\n  ---\n  duration_ms: 11.299188\n  type: 'test'\n  ...\n# Subtest: participants cannot finalize, edit another reply, see private reply history or notices\nok 3 - participants cannot finalize, edit another reply, see private reply history or notices\n  ---\n  duration_ms: 3.491115\n  type: 'test'\n  ...\n# Subtest: uninvited and private drafts are invisible even by guessed ID\nok 4 - uninvited and private drafts are invisible even by guessed ID\n  ---\n  duration_ms: 1.379263\n  type: 'test'\n  ...\n# Subtest: deadline equality freezes writes without needing a close event; repeat close is harmless\nok 5 - deadline equality freezes writes without needing a close event; repeat close is harmless\n  ---\n  duration_ms: 2.251473\n  type: 'test'\n  ...\n# Subtest: replacing a slot does not transfer votes; removed slots cannot be finalized\nok 6 - replacing a slot does not transfer votes; removed slots cannot be finalized\n  ---\n  duration_ms: 1.702198\n  type: 'test'\n  ...\n# Subtest: duplicate, missing, unknown and incomplete votes fail atomically\nok 7 - duplicate, missing, unknown and incomplete votes fail atomically\n  ---\n  duration_ms: 0.679759\n  type: 'test'\n  ...\n# Subtest: invalid creation/edit leaves records and notifications untouched\nok 8 - invalid creation/edit leaves records and notifications untouched\n  ---\n  duration_ms: 2.752585\n  type: 'test'\n  ...\n# Subtest: past meetings and reversed/new deadlines are rejected\nok 9 - past meetings and reversed/new deadlines are rejected\n  ---\n  duration_ms: 0.764084\n  type: 'test'\n  ...\n# Subtest: DST gaps are rejected and both explicit fall-back offsets are valid\nok 10 - DST gaps are rejected and both explicit fall-back offsets are valid\n  ---\n  duration_ms: 0.560975\n  type: 'test'\n  ...\n# Subtest: seed rejects invalid binding, duplicate IDs, broken references and lifecycle\nok 11 - seed rejects invalid binding, duplicate IDs, broken references and lifecycle\n  ---\n  duration_ms: 1.202238\n  type: 'test'\n  ...\n# Subtest: scenario actions enforce actor business authority and rejection is atomic\nok 12 - scenario actions enforce actor business authority and rejection is atomic\n  ---\n  duration_ms: 1.239462\n  type: 'test'\n  ...\n# Subtest: notification read operates only on the account owner messages\nok 13 - notification read operates only on the account owner messages\n  ---\n  duration_ms: 2.873233\n  type: 'test'\n  ...\n# Subtest: delivered evaluation data reproduce and exclude invalid/out-of-window dates\nok 14 - delivered evaluation data reproduce and exclude invalid/out-of-window dates\n  ---\n  duration_ms: 381.671325\n  type: 'test'\n  ...\n# Subtest: evaluation histories vary actors and outcomes and retain realistic incomplete coordination\nok 15 - evaluation histories vary actors and outcomes and retain realistic incomplete coordination\n  ---\n  duration_ms: 18.030663\n  type: 'test'\n  ...\n1..15\n# tests 15\n# suites 0\n# pass 15\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 492.359606\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "Reference workflow: scenario reply change → confirmation → reopen → cancellation passed.\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}

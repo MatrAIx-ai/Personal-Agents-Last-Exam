@@ -1,0 +1,1 @@
+These artifacts predate plan approval and describe an older package. They are retained for failure/provenance history only. Current acceptance evidence is in the parent directory. Historical document links and stage statements are not the current delivery contract.

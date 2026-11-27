@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),check=process.argv.includes('--check');
+const at='2026-11-18T16:00:00Z';
+const make=(id,title,organizer)=>({id,title,description:'Coordinate a 30-minute project review. Alex needs to attend; do not treat missing replies as agreement.',location:'Team room',organizer_id:organizer,participant_ids:['person-maya','person-alex','person-sam'],deadline:'2026-11-20T17:00:00Z',status:'open',slots:[{id:'slot-1',start:'2026-11-23T17:00:00.000Z',end:'2026-11-23T17:30:00.000Z',timezone:'America/Los_Angeles',active:true},{id:'slot-2',start:'2026-11-24T17:00:00.000Z',end:'2026-11-24T17:30:00.000Z',timezone:'Europe/London',active:true}],responses:[],meetings:[],history:[{at,actor_id:organizer,action:'create',reason:''},{at,actor_id:organizer,action:'publish',reason:''}],created_at:at,updated_at:at});
+const base={account_id:'poll-maya',owner_person_id:'person-maya',polls:[make('poll-team','Project planning','person-maya'),make('poll-review','Design review','person-alex')],notifications:[]};
+base.polls[0].responses.push({person_id:'person-alex',votes:[{slot_id:'slot-1',value:'no'},{slot_id:'slot-2',value:'yes'}],withdrawn:false,at});base.polls[0].history.push({at,actor_id:'person-alex',action:'respond',reason:''});
+const variants={minimal:base};
+for(const key of ['draft','closed','finalized','cancelled','changed-vote','cross-zone','private'])variants[key]=structuredClone(base);
+variants.draft.polls[0].status='draft';variants.draft.polls[0].responses=[];variants.draft.polls[0].history=variants.draft.polls[0].history.slice(0,1);
+variants.closed.polls[0].status='closed';variants.closed.polls[0].deadline='2026-11-18T16:30:00Z';
+variants.finalized.polls[0].status='finalized';variants.finalized.polls[0].meetings=[{id:'meeting-1',slot_id:'slot-2',status:'active',at}];
+variants.cancelled.polls[0].status='cancelled';
+variants['changed-vote'].polls[0].responses.push({person_id:'person-alex',votes:[{slot_id:'slot-1',value:'yes'},{slot_id:'slot-2',value:'no'}],withdrawn:false,at});
+variants['cross-zone'].polls[0].slots[1].timezone='Asia/Shanghai';
+variants.private.polls[0].organizer_id='person-jules';variants.private.polls[0].participant_ids=['person-alex','person-sam'];variants.private.polls[0].history.forEach(h=>{if(h.actor_id==='person-maya')h.actor_id='person-jules';});
+const files=Object.fromEntries(Object.entries(variants).map(([k,v])=>['fixtures/'+k+'.json',v]));
+files['examples/scenario.json']={event_id:'alex-changes-vote',at:'2026-11-18T18:00:00Z',operation:'meeting-poll.action',payload:{actor_id:'person-alex',action:'respond',arguments:{id:'poll-team',votes:[{slot_id:'slot-1',value:'yes'},{slot_id:'slot-2',value:'no'}]}}};
+for(const[file,value]of Object.entries(files)){const content=JSON.stringify(value,null,2)+'\n',target=path.join(root,file);if(check){if(fs.readFileSync(target,'utf8')!==content)throw Error('Fixture drift: '+file);}else fs.writeFileSync(target,content);}
+console.log(check?'Fixtures match.':'Eight fixture variants generated.');
