@@ -1,0 +1,62 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "benchguide-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic lab-tested product reviews and matplotlib measurement PNG charts for BenchGuide.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored fictional consumer products, specs, and revision records.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": 42,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "synthetic-charts",
+      "kind": "synthetic",
+      "description": "Programmatically rendered PNG lab measurement charts via Python Matplotlib.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "matplotlib+PIL",
+        "tool_version": "3.x",
+        "seed": 42,
+        "parameters": {
+          "palette_colors": 64
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps, verified SHA-256 hashes, quantized PNGs to <= 1 MiB bundle budget."
+  ],
+  "expected_counts": {
+    "records": 22,
+    "assets": 22
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Synthetic local fixtures prepared for v1 validation."
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "app_id": "benchguide",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR #233 (@shangliy)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "benchguide.review.revise",
+    "benchguide.catalog.publish"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic lab-testing publication; no checkout, live prices, or external network access.",
+    "One account per App instance.",
+    "Local asset bundles: at most 64 assets / 1 MiB decoded bytes."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
