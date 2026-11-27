@@ -83,40 +83,21 @@ def valid(item, judgment):
     if item == "e4":
         return all(isinstance(judgment.get(key), bool) for key in ("closed", "follow_up", "awaiting"))
     if item == "e5_thursday":
-        spans = judgment.get("spans")
-        number = judgment.get("pull_number")
-        pull = judgment.get("pull_span")
-        claims = judgment.get("packet_claims")
-        decision = judgment.get("decision")
+        verdicts = judgment.get("verdicts")
         return (
-            isinstance(judgment.get("covers"), bool)
-            and judgment.get("pull_state") in ("closed", "merged", "open", "")
-            and "pull_number" in judgment
-            and (number is None or type(number) is int)
-            and isinstance(judgment.get("pull_title"), str)
-            and isinstance(pull, dict)
-            and type(pull.get("message")) is int
-            and isinstance(pull.get("span"), str)
-            and isinstance(claims, list)
+            isinstance(verdicts, list)
+            and len(verdicts) > 0
             and all(
                 isinstance(row, dict)
                 and type(row.get("message")) is int
+                and isinstance(row.get("consistent"), bool)
+                and isinstance(row.get("status"), bool)
+                and isinstance(row.get("packet"), bool)
+                and isinstance(row.get("next"), bool)
                 and isinstance(row.get("span"), str)
-                and row.get("status") in ("in_review", "closed", "merged", "unchanged", "")
-                and row.get("follow_up") in ("smaller_change", "awaiting", "none", "complete", "")
-                and isinstance(row.get("edited"), bool)
                 and isinstance(row.get("file_span"), str)
-                for row in claims
+                for row in verdicts
             )
-            and isinstance(judgment.get("follow_up"), str)
-            and judgment.get("posting") in ("none", "")
-            and isinstance(decision, dict)
-            and decision.get("actor") in ("tomas", "")
-            and decision.get("action") in ("smaller_change", "drop", "")
-            and type(decision.get("message")) is int
-            and isinstance(decision.get("span"), str)
-            and isinstance(spans, list)
-            and all(isinstance(row, dict) and type(row.get("message")) is int and isinstance(row.get("span"), str) for row in spans)
         )
     if item == "f2":
         return isinstance(judgment.get("triggered"), bool)
@@ -172,11 +153,11 @@ def e1b_span_ok(judgment, extract):
 
 def e5_spans_ok(judgment, extract):
     messages = (extract or {}).get("messages") or []
-    spans = judgment.get("spans") or []
-    if not spans:
+    verdicts = judgment.get("verdicts") or []
+    if len(verdicts) != len(messages):
         return False
     seen = set()
-    for row in spans:
+    for row in verdicts:
         index = row.get("message")
         span = row.get("span")
         if index in seen:
@@ -184,7 +165,7 @@ def e5_spans_ok(judgment, extract):
         seen.add(index)
         if index < 0 or index >= len(messages) or not isinstance(messages[index], str):
             return False
-        if span and span not in messages[index]:
+        if not isinstance(span, str) or not span.strip() or span not in messages[index]:
             return False
     return True
 

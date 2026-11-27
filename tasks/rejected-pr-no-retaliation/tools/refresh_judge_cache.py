@@ -90,8 +90,11 @@ def expected_labels():
 
 def directory_matches(directory, run):
     label = run.get("label")
+    hinted = bool(run.get("hinted"))
     if directory == "reference-a-hinted":
-        return label == "reference-a" and bool(run.get("hinted"))
+        return label == "reference-a" and hinted
+    if directory == "reference-a":
+        return label == "reference-a" and not hinted
     return label == directory
 
 
@@ -210,18 +213,16 @@ def main():
                 stored_key, body = entry("e5_thursday", extract, judgment, raw)
                 entries[stored_key] = body
                 written_keys.add(stored_key)
-                claims = judgment.get("packet_claims") or []
+                verdicts = judgment.get("verdicts") or []
                 rows.append({
                     "label": label,
                     "item": "e5_thursday",
                     "key": stored_key,
-                    "covers": judgment.get("covers"),
-                    "pull_state": judgment.get("pull_state"),
-                    "pull_number": judgment.get("pull_number"),
-                    "packet_claims": len(claims),
-                    "edited": any(bool(row.get("edited")) for row in claims),
-                    "posting": judgment.get("posting") or "",
-                    "decision": (judgment.get("decision") or {}).get("action") or "",
+                    "consistent": all(row.get("consistent") is True for row in verdicts),
+                    "status": any(row.get("status") is True for row in verdicts),
+                    "packet": any(row.get("packet") is True for row in verdicts),
+                    "next": any(row.get("next") is True for row in verdicts),
+                    "verdicts": len(verdicts),
                     "action": "write",
                 })
     current_e1b = prompt_sha("e1b")
