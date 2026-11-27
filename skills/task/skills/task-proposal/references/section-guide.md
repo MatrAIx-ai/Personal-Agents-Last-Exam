@@ -141,6 +141,8 @@ Propose these numbers yourself from the story and ask the contributor to correct
 - Effort that does not match the scale (thirty records and a new simulated service in one day).
 - Fewer planned runs than `CONTRIBUTING.md` requires, or no hinted runs.
 - No statement of where the data comes from, or a real conversation reused without saying how private details are removed.
+- No explanation of selected history depth, sources or coverage, or confusing records/elapsed span with distinct dates. Recommend 300 distinct dates, but accept justified shorter history. Plan the time zone, first-session cutoff and reproducible count.
+- Integration evidence stops at a fake client/sender return; GUI evidence lacks reference/implementation comparison or an ordered action/result sequence. Plan real dependency results and retain business/MCP tests.
 
 **Questions**
 
@@ -183,5 +185,7 @@ The checker covers structure and arithmetic. These need judgment. Go through the
 8. **The reference earns a full score.** Walk through it against every item.
 9. **Consistent.** Dates, amounts and names agree across the story, the rubric and the reference.
 10. **Private details removed.** No real names, messages or account details are present, and the data provenance field says so.
+11. **History coverage.** History depth fits the scenario; 300 distinct dates is strongly recommended, not mandatory. Explain shorter scope and count selected records across sources in one time zone. History precedes session one; external-platform dates respect the existing lower bounds and older text-only history remains allowed. The Environment dataset window does not cap session/event dates. Proposal counts are plans, not verified data.
+12. **Integration demonstration.** Delivered App connections have a real-dependency verification path; GUI workflows have a comparison/sequence plan alongside MCP and business tests. Missing receiver capability has an owner and scope decision.
 
 When comparing two users with the same current request, preserve its explicit constraints. Prior history or standing permission cannot override a newer spending limit, refusal or consent boundary.
