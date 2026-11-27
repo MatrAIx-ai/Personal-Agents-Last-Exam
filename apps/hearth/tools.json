@@ -1,0 +1,334 @@
+[
+  {
+    "name": "hearth.get_property",
+    "description": "Get general property details, room list, and current household budget.",
+    "read_only": true,
+    "scope": "hearth.get_property",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.get_room",
+    "description": "Get detailed physical dimensions, boundaries, and active furniture in a specific room.",
+    "read_only": true,
+    "scope": "hearth.get_room",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "room_id": { "type": "string" }
+      },
+      "required": ["room_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.list_inventory",
+    "description": "List household furniture and appliances with optional filters.",
+    "read_only": true,
+    "scope": "hearth.list_inventory",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "room_id": { "type": "string" },
+        "category": { "type": "string", "enum": ["furniture", "appliance", "decor"] },
+        "status": { "type": "string", "enum": ["active", "stored", "disposed"] }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.update_item_placement",
+    "description": "Move an active furniture item to a new room and 2D coordinate placement.",
+    "read_only": false,
+    "scope": "hearth.update_item_placement",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_id": { "type": "string" },
+        "room_id": { "type": "string" },
+        "coordinates": {
+          "type": "array",
+          "items": { "type": "integer" }
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["item_id", "room_id", "coordinates", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.store_item",
+    "description": "Move an active furniture or appliance item into storage.",
+    "read_only": false,
+    "scope": "hearth.store_item",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_id": { "type": "string" },
+        "storage_room_id": { "type": "string" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["item_id", "storage_room_id", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.dispose_item",
+    "description": "Permanently dispose of or sell an item from the household.",
+    "read_only": false,
+    "scope": "hearth.dispose_item",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_id": { "type": "string" },
+        "reason": { "type": "string" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["item_id", "reason", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.request_purchase",
+    "description": "Propose a new household purchase subject to resident approval.",
+    "read_only": false,
+    "scope": "hearth.request_purchase",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_name": { "type": "string" },
+        "category": { "type": "string", "enum": ["furniture", "appliance", "decor"] },
+        "target_room_id": { "type": "string" },
+        "cost_usd": { "type": "number", "minimum": 0 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["item_name", "category", "target_room_id", "cost_usd", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.cancel_purchase",
+    "description": "Cancel a pending purchase request, releasing reserved funds.",
+    "read_only": false,
+    "scope": "hearth.cancel_purchase",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "purchase_id": { "type": "string" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["purchase_id", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.list_maintenance_issues",
+    "description": "List household maintenance and appliance issues.",
+    "read_only": true,
+    "scope": "hearth.list_maintenance_issues",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["reported", "scheduled", "resolved", "cancelled"] }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.report_maintenance_issue",
+    "description": "Report an appliance or fixture problem requiring repair.",
+    "read_only": false,
+    "scope": "hearth.report_maintenance_issue",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appliance_id": { "type": "string" },
+        "description": { "type": "string" },
+        "severity": { "type": "string", "enum": ["minor", "critical"] },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["appliance_id", "description", "severity", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.schedule_maintenance",
+    "description": "Transition a reported issue to scheduled with a designated date and contact.",
+    "read_only": false,
+    "scope": "hearth.schedule_maintenance",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "issue_id": { "type": "string" },
+        "scheduled_date": { "type": "string" },
+        "service_contact_id": { "type": "string" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["issue_id", "scheduled_date", "service_contact_id", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.resolve_maintenance_issue",
+    "description": "Mark a maintenance issue resolved, recording resolution notes and repair cost.",
+    "read_only": false,
+    "scope": "hearth.resolve_maintenance_issue",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "issue_id": { "type": "string" },
+        "resolution_notes": { "type": "string" },
+        "cost_usd": { "type": "number", "minimum": 0 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer" },
+            "revision": { "type": "integer" }
+          },
+          "required": ["epoch", "revision"]
+        },
+        "request_id": { "type": "string" }
+      },
+      "required": ["issue_id", "resolution_notes", "cost_usd", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "hearth.get_resident_profile",
+    "description": "Get resident preferences, rules, and heirloom constraints by person ID.",
+    "read_only": true,
+    "scope": "hearth.get_resident_profile",
+    "resource_target": "current household",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "person_id": { "type": "string" }
+      },
+      "required": ["person_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+]

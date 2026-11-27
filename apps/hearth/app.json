@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "app_id": "hearth",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:hearth"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/seed.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "hearth.appliance_breakdown",
+    "hearth.cancel_maintenance_issue",
+    "hearth.purchase_approval"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "fixtures/assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
