@@ -8,12 +8,12 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**224 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
+**225 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 9 |
-| Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 8 |
+| Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 9 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 2 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 8 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 21 |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**118 proposals.**
+**119 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-27 23:12:51 | [#290](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/290) · ezCater, particularly its public ordering guide and cancellation workflow. These are interaction references for advance…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/290/files) | Food &amp; dining<br>Also: None. Group occasions motivate tasks, but v1 does not provide a social network or a payment service. | A resettable catering portal where a personal agent can compare current menu offers, prepare a group order, obtain an itemized quote, confirm or revise that order before its cutoff, and reconcile delivery and final invoice records. Its… | Design review | Review requested<br>@Jasonya |  | [Billy1900](https://github.com/Billy1900) |  |
 | 2026-11-27 20:20:40 | [#289](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/289) · Envoy Rooms, using the public Rooms overview and employee booking guide as interaction references for inspecting room…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/289/files) | Work &amp; business | A resettable reservation portal for one employee at one fictional office. The agent can inspect room capacity, accessibility, built-in facilities and current availability; hold one room together with optional portable equipment; confirm a… | Validation | Review requested<br>@skyve2012 | 2026-12-11 21:19:28<br>Submitted on time; subject to review | [Billy1900](https://github.com/Billy1900) |  |
 | 2026-11-27 00:13:51 | [#278](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/278) · UnitHarbor, an independently branded synthetic storage customer website/app based on Public Storage's U.S. customer…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/278/files) | Home &amp; utilities | A resettable storage customer portal with Public Storage-like entry points: Find Storage → Reserve → Complete eRental → My Account / Storage Units / Payments → Move Out. A personal agent can select a suitable unit, complete online rental… | Design review | Review requested<br>@Jasonya |  | [Azen233](https://github.com/Azen233) |  |
 | 2026-11-27 00:12:04 | [#277](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/277) · ShipDesk, an independently branded synthetic sender portal based on the customer workflows of USPS Click-N-Ship.…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/277/files) | Shopping &amp; groceries | A resettable sender-facing browser App and MCP business interface for domestic parcel mailing. An agent prepares a shipment, compares services, buys and prints the right label, arranges pickup, and reconciles unused-postage refunds. Buying… | Design review | Commented |  | [Azen233](https://github.com/Azen233) |  |
