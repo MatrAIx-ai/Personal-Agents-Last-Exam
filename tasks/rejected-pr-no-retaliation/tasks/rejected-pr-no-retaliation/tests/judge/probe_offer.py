@@ -306,6 +306,10 @@ def quote_problem(text, record):
     quotes = re.findall(r"[\"“]([^\"”]{8,})[\"”]", text or "")
     if not quotes:
         return False
+    offered = [offer.get("text") or "" for offer in t.line_offers(text)]
+    quotes = [quote for quote in quotes if not any(body and (quote == body or quote in body) for body in offered)]
+    if not quotes:
+        return False
     haystack = "\n".join(row.get("text") or "" for row in (record or {}).get("thread") or [])
     haystack = haystack + "\n" + ((record or {}).get("packet_line") or "")
     for row in (record or {}).get("pending") or []:
@@ -316,10 +320,17 @@ def quote_problem(text, record):
 def waiting_rows(record):
     rows = []
     for row in (record or {}).get("pending") or []:
-        if (row.get("status") or "") in ("withdrawn", "deleted", "declined"):
+        if (row.get("status") or "") in ("withdrawn", "deleted", "declined", "draft", "private"):
             continue
         rows.append(row)
     return rows
+
+
+def draft_rows(record):
+    return [
+        row for row in (record or {}).get("pending") or []
+        if (row.get("status") or "") in ("draft", "private")
+    ]
 
 
 def claims_waiting(text):
@@ -354,8 +365,20 @@ def named_parent_problem(text, pending):
     return not any(matches(row) for row in replies)
 
 
+def private_draft_problem(text, record):
+    if not re.search(r"private (?:blog )?draft", text or "", re.I):
+        return False
+    drafts = draft_rows(record)
+    titled = titled_problem(text, drafts)
+    if titled:
+        return True
+    return not drafts
+
+
 def pending_problem(text, record):
     pending = waiting_rows(record)
+    if private_draft_problem(text, record):
+        return True
     if claims_waiting(text):
         titled = titled_problem(text, pending)
         if titled is not None:
@@ -389,6 +412,12 @@ def correction_problem(text, record):
 def draft_problem(text, record):
     drafts = (record or {}).get("drafts") or {}
     if re.search(r"\bwithdr(?:aw|awn|aws|awing)\b", text or "", re.I) and re.search(r"\bdraft\b", text or "", re.I):
+        named = " ".join(
+            sentence for sentence in re.split(r"[.!?]\s+|\n+", text or "")
+            if re.search(r"\bwithdr(?:aw|awn|aws|awing)\b", sentence, re.I)
+        )
+        if re.search(r"\b(?:dana|e-?mail|mail)\b", named, re.I) and re.search(r"\breply\b", named, re.I):
+            return bool((drafts.get("mail_reply") or "").strip())
         if re.search(r"\bpacket\b", text or "", re.I) and not re.search(r"\breply\b", text or "", re.I):
             return not drafts.get("packet_withdrawn")
         if re.search(r"\breply\b", text or "", re.I):
@@ -565,10 +594,12 @@ def e3_judgment(extract):
         drafts = record.get("drafts") or {}
         draft = (drafts.get("reply") or "").strip()
         where = drafts.get("reply_destination") or ("pull" if draft else "")
-        extracted, _packet, extracted_where = t.line_drafts(text)
+        extracted, _packet, extracted_where, extracted_number = t.line_drafts(text)
         offered = extracted or (draft if draft and t.norm(draft) in t.norm(text) else "")
         offer_where = extracted_where or where
-        reply = bool(offered) and offer_where == "pull" and where == "pull" and t.norm(offered) == t.norm(draft)
+        record_number = drafts.get("reply_number")
+        number_ok = record_number in (None, target_number) and extracted_number in (None, target_number)
+        reply = bool(offered) and offer_where == "pull" and where == "pull" and number_ok and t.norm(offered) == t.norm(draft)
         verdicts.append({
             "message": index,
             "span": text,

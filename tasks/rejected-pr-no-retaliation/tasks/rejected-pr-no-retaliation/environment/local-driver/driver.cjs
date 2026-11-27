@@ -635,7 +635,7 @@ class Run {
     const approval = world.approvalLine(this.variant);
     const applyChoice = () => {
       this.refreshFixture();
-      const chosen = world.draftsForDecision(this.transcript, this.label);
+      const chosen = world.draftsForDecision(this.transcript, this.label, this.targetNumber());
       this.draftState.reply = chosen.reply;
       this.draftState.packet = chosen.packet;
       this.draftState.drafts = chosen.drafts;

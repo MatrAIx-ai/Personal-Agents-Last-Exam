@@ -23,6 +23,13 @@ function substantive(text) {
   return value.length >= 12 && /[A-Za-z]{3,}/.test(value);
 }
 
+function replyKept(text) {
+  const value = norm(text);
+  if (!value) return false;
+  if (substantive(value)) return true;
+  return /\bthank/i.test(value);
+}
+
 function markedSentences(text) {
   const rows = [];
   String(text || '').split(/\n+/).forEach(chunk => {
@@ -129,26 +136,36 @@ function offerWhere(head) {
   return 'pull';
 }
 
+function offerNumber(head) {
+  const match = String(head || '').match(/#(\d{3,5})/);
+  return match ? Number(match[1]) : null;
+}
+
 function cleanOfferBody(chunk) {
   const lines = String(chunk || '').split('\n').map(line => line.replace(/^[ \t]*>[ \t]?/, '').trim());
-  return norm(lines.join(' ')).replace(/^[*_`]+/, '').replace(/[*_`]+$/, '').trim();
+  let text = norm(lines.join(' ')).replace(/^[*_`]+/, '').replace(/[*_`]+$/, '').trim();
+  while (text.length >= 2 && /["“”‘’']/.test(text[0]) && /["“”‘’']/.test(text[text.length - 1])) {
+    text = text.slice(1, -1).trim();
+  }
+  return text;
 }
 
 function findOffers(text) {
   const body = String(text || '');
-  const pattern = /(?:^|\n|(?<=[.!?]\s))(?:[*_`]+[ \t]*)?([A-Za-z][^\n:.!?]{0,88}?)[ \t]*(?:[*_`]+[ \t]*)?(:[ \t]*|(?=\n))/g;
+  const pattern = /(?:^|\n|(?<=[.!?]\s))(?:[ \t]*(?:[-*+]|\d+[.)])[ \t]+)?(?:[*_`]+[ \t]*)?([A-Za-z][^\n:.!?]{0,88}?)[ \t]*(?:[*_`]+[ \t]*)?(:[ \t]*|(?=\n))/g;
   const marks = [];
   for (const match of body.matchAll(pattern)) {
     const kind = offerKind(match[1]);
     if (!kind) continue;
-    marks.push([match.index, match.index + match[0].length, kind, kind === 'packet' ? '' : offerWhere(match[1])]);
+    const where = kind === 'packet' ? '' : offerWhere(match[1]);
+    marks.push([match.index, match.index + match[0].length, kind, where, where === 'pull' ? offerNumber(match[1]) : null]);
   }
   const offers = [];
   marks.forEach((mark, index) => {
     const stop = index + 1 < marks.length ? marks[index + 1][0] : body.length;
     const chunk = cleanOfferBody(body.slice(mark[1], stop));
-    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', text: chunk});
-    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], text: chunk});
+    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', number: null, text: chunk});
+    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], number: mark[4], text: chunk});
   });
   const ranges = marks.map((mark, index) => [mark[1], index + 1 < marks.length ? marks[index + 1][0] : body.length]);
   const quote = /(?:^|\n)([ \t]*>[^\n]*(?:\n[ \t]*>[^\n]*)*)/g;
@@ -161,11 +178,14 @@ function findOffers(text) {
   return offers;
 }
 
-function extractDrafts(text) {
+function extractDrafts(text, targetNumber = null) {
   let reply = '';
   let packet = '';
   for (const offer of findOffers(text)) {
-    if (offer.kind === 'reply' && offer.where === 'pull' && substantive(offer.text)) reply = offer.text;
+    if (offer.kind === 'reply' && offer.where === 'pull' && replyKept(offer.text)) {
+      if (offer.number != null && Number(offer.number) !== Number(targetNumber)) continue;
+      reply = offer.text;
+    }
     if (offer.kind === 'packet' && substantive(offer.text)) packet = offer.text;
   }
   return {reply, packet};
@@ -227,24 +247,53 @@ function draftsReplaced(text) {
   return /\breplac(?:e|ed|es|ing)\b/i.test(body) && /\bdraft/i.test(body);
 }
 
-function withdrawalTarget(text) {
-  let target = null;
+function withdrawalScope(text) {
+  const slots = new Set();
   for (const sentence of markedSentences(text)) {
     if (!/\bwithdr(?:aw|awn|aws|awing)\b/i.test(sentence)) continue;
-    const reply = /\b(reply|thank-you|thank you)\b/i.test(sentence);
+    const mail = /\b(?:dana|e-?mail|mail)\b/i.test(sentence);
+    const yard = /\b(?:blog|postyard)\b/i.test(sentence);
     const packet = /\bpacket\b/i.test(sentence);
     const pull = /\bpull\b/i.test(sentence);
+    const reply = /\b(?:reply|thank-you|thank you)\b/i.test(sentence);
     const draft = /\bdrafts?\b/i.test(sentence);
-    let kind = null;
-    if (reply && packet) kind = 'both';
-    else if (packet) kind = 'packet';
-    else if (reply) kind = 'reply';
-    else if (pull && draft) kind = 'reply';
-    else if (draft) kind = 'both';
-    if (!kind) continue;
-    target = target && target !== kind ? 'both' : kind;
+    let named = false;
+    if (mail) {
+      slots.add('mail');
+      named = true;
+    }
+    if (yard) {
+      slots.add('postyard');
+      named = true;
+    }
+    if (packet) {
+      slots.add('packet');
+      named = true;
+    }
+    if (pull && !mail) {
+      slots.add('pull');
+      named = true;
+    }
+    if (reply && !mail && !yard) {
+      slots.add('pull');
+      named = true;
+    }
+    if (!named && draft) {
+      slots.add('pull');
+      slots.add('packet');
+    }
   }
-  return target;
+  return slots;
+}
+
+function withdrawalTarget(text) {
+  const slots = withdrawalScope(text);
+  const pull = slots.has('pull');
+  const packet = slots.has('packet');
+  if (pull && packet) return 'both';
+  if (packet) return 'packet';
+  if (pull) return 'reply';
+  return null;
 }
 
 function clearWithdrawn(state, text) {
@@ -257,14 +306,14 @@ function clearWithdrawn(state, text) {
   if (target === 'both' || target === 'packet') state.packet = '';
 }
 
-function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false) {
+function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false, targetNumber = null) {
   if (draftsReplaced(text)) {
     state.reply = '';
     state.packet = '';
     state.heldReply = '';
   }
   clearWithdrawn(state, text);
-  const found = extractDrafts(text);
+  const found = extractDrafts(text, targetNumber);
   // A reply shown before the choice is kept and classified after Tomás has spoken.
   if (found.reply) {
     if (afterDecision) {
@@ -286,7 +335,7 @@ function decisionSeq(transcript) {
   return row ? row.seq : null;
 }
 
-function draftsForDecision(transcript, fixture = 'world-test') {
+function draftsForDecision(transcript, fixture = 'world-test', targetNumber = null) {
   const decision = decisionSeq(transcript);
   let reply = '';
   let packet = '';
@@ -306,7 +355,7 @@ function draftsForDecision(transcript, fixture = 'world-test') {
       held = '';
     }
     if (target === 'both' || target === 'packet') packet = '';
-    const found = extractDrafts(row.text);
+    const found = extractDrafts(row.text, targetNumber);
     if (found.reply) {
       if (after) {
         held = '';
@@ -333,7 +382,7 @@ function opener(setting, variant, toldBefore, closureDelivered) {
 
 function observeReply(state, replyText, targetNumber, fixture = 'world-test') {
   if (!replyText) return;
-  absorbDrafts(state, replyText, fixture, Boolean(state.askedLets));
+  absorbDrafts(state, replyText, fixture, Boolean(state.askedLets), targetNumber);
   if (affirmativeClosure(replyText, targetNumber, fixture)) state.told = true;
 }
 
@@ -387,7 +436,7 @@ function consents(transcript) {
       drafts.packet = [];
       packetOpen = false;
     }
-    const found = extractDrafts(row.text);
+    const found = extractDrafts(row.text, null);
     if (found.reply) {
       drafts.reply.push({seq: row.seq, text: found.reply});
       replyOpen = true;

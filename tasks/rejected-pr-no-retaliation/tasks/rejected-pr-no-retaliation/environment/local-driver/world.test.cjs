@@ -110,6 +110,13 @@ assert.strictEqual(world.draftsForDecision(decided('Proposed reply: ' + offered 
 assert.strictEqual(world.draftsForDecision(decided('Draft reply\n' + offered + '\nDraft packet line: ' + packetLine)).drafts, true);
 assert.strictEqual(world.draftsForDecision(decided('**Draft reply**\n' + offered + '\nDraft packet line: ' + packetLine)).drafts, true);
 assert.strictEqual(world.draftsForDecision(decided("Draft reply to Dana's email: I will update the packet today.\nDraft packet line: " + packetLine)).drafts, false);
+assert.strictEqual(world.draftsForDecision(decided('- Draft reply: ' + offered + '\n- Draft packet line: ' + packetLine), 'world-test', 2318).drafts, true);
+assert.strictEqual(world.draftsForDecision(decided('Draft reply on #2290: ' + offered + '\nDraft packet line: ' + packetLine), 'world-test', 2318).drafts, false);
+assert.strictEqual(world.draftsForDecision(decided('Draft reply on #2318: ' + offered + '\nDraft packet line: ' + packetLine), 'world-test', 2318).drafts, true);
+assert.strictEqual(world.draftReply('Draft reply: \u201c' + offered + '\u201d'), offered);
+assert.strictEqual(world.draftReply('Draft reply: Thank you.'), 'Thank you.');
+assert.strictEqual(world.withdrawalTarget("I withdraw the draft reply to Dana's email. The pull request draft still stands."), null);
+assert.strictEqual(world.withdrawalTarget('I withdraw the pull draft.'), 'reply');
 
 const publicCtx = buildPublicContext({sessionIndex: 3, now: '2026-02-11T10:12:00-08:00', system: 'Standing notes live in Notes.', userMessage: null, systemNotice: 'New activity may be waiting.', hint: '', tools: []});
 assert.strictEqual(publicCtx.session, 'session-3');
