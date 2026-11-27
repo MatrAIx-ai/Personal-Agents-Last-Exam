@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:parkstead-parking:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "facilities": {
+      "type": "array",
+      "items": {
+        "$ref": "domain.schema.json#/$defs/facility"
+      },
+      "minItems": 12
+    },
+    "rates": {
+      "type": "array",
+      "items": {
+        "$ref": "domain.schema.json#/$defs/rate"
+      },
+      "minItems": 30
+    },
+    "cancellation_policies": {
+      "type": "array",
+      "items": {
+        "$ref": "domain.schema.json#/$defs/policy"
+      },
+      "minItems": 4
+    },
+    "vehicles": {
+      "type": "array",
+      "items": {
+        "$ref": "domain.schema.json#/$defs/vehicle"
+      },
+      "minItems": 3
+    },
+    "payment_methods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true
+      },
+      "minItems": 2
+    },
+    "quotes": {
+      "type": "array",
+      "items": {
+        "$ref": "domain.schema.json#/$defs/quote"
+      }
+    },
+    "reservations": {
+      "type": "array",
+      "items": {
+        "$ref": "domain.schema.json#/$defs/reservation"
+      }
+    },
+    "adjustments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "facility_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "inventory_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "processed_event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "profile",
+    "settings",
+    "facilities",
+    "rates",
+    "cancellation_policies",
+    "vehicles",
+    "payment_methods",
+    "quotes",
+    "reservations",
+    "adjustments",
+    "notifications",
+    "history",
+    "facility_events",
+    "inventory_events",
+    "processed_event_ids"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,974 @@
+[
+  {
+    "name": "parkstead-parking.parking.search",
+    "description": "Search and compare matching parking with prices, inventory, restrictions and policies.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.search",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "destination": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "arrival_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departure_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "vehicle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "max_walk_meters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "covered": {
+          "type": "boolean"
+        },
+        "accessible": {
+          "type": "boolean"
+        },
+        "ev_charging": {
+          "type": "boolean"
+        },
+        "in_out": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "destination",
+        "arrival_at",
+        "departure_at"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.facility.get",
+    "description": "Read one facility, its rate windows, amenities and restrictions.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.facility.get",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.quote.create",
+    "description": "Create a time-limited itemized booking quote.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.quote.create",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "vehicle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "arrival_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departure_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "facility_id",
+        "vehicle_id",
+        "arrival_at",
+        "departure_at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.quote.get",
+    "description": "Read a quote with its status computed at virtual time.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.quote.get",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.list",
+    "description": "List reservations with started/completed lifecycle derived at read time.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.reservation.list",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "upcoming",
+            "started",
+            "completed",
+            "action_required",
+            "cancelled",
+            "replaced"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.get",
+    "description": "Read a reservation, adjustments, revision history and related facility.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.reservation.get",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.create",
+    "description": "Confirm an active quote and atomically create a reservation.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.reservation.create",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "quote_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "quote_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.requote",
+    "description": "Create a replacement quote for an upcoming reservation window.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.reservation.requote",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "reservation_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "arrival_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departure_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "reservation_version",
+        "arrival_at",
+        "departure_at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.modify",
+    "description": "Accept a reservation-bound modification quote.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.reservation.modify",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "reservation_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quote_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "reservation_version",
+        "quote_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.cancel.preview",
+    "description": "Preview the exact cancellation fee and refund without changing state.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.reservation.cancel.preview",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.reservation.cancel",
+    "description": "Confirm cancellation using the previewed fee and refund.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.reservation.cancel",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "reservation_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "expected_refund_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "reservation_version",
+        "expected_fee_cents",
+        "expected_refund_cents",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.disruption.alternatives",
+    "description": "Read version-bound, expiring replacement quotes and the full-refund option.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.disruption.alternatives",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "reservation_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "reservation_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.disruption.resolve",
+    "description": "Accept one bound replacement quote or take a full disruption refund.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.disruption.resolve",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "reservation_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "action": {
+          "enum": [
+            "replace",
+            "refund"
+          ]
+        },
+        "replacement_quote_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "reservation_version",
+        "action",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.notification.list",
+    "description": "List in-App notifications and independent Mail delivery state.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.notification.list",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_all": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.history.list",
+    "description": "Read immutable reservation/event/adjustment history.",
+    "read_only": true,
+    "scope": "parkstead-parking.parking.history.list",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.notification.email.prepare",
+    "description": "Prepare one Mail-compatible CloudEvent without claiming delivery.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.notification.email.prepare",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "notification_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "router_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "notification_version",
+        "router_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "parkstead-parking.parking.notification.email.record",
+    "description": "Record delivered, rejected, or unknown Mail acknowledgement.",
+    "read_only": false,
+    "scope": "parkstead-parking.parking.notification.email.record",
+    "resource_target": "current authorized Parkstead account and referenced parking objects",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "notification_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "router_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "delivery_status": {
+          "enum": [
+            "delivered",
+            "rejected",
+            "unknown"
+          ]
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reconciled": {
+          "type": "boolean"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "notification_version",
+        "router_request_id",
+        "delivery_status",
+        "receipt_id",
+        "reconciled",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "parkstead-parking"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  }
+]

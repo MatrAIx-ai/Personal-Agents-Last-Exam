@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "pale.app-state.v1"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "package_version": {
+      "const": "1.0.0"
+    },
+    "core_api_version": {
+      "const": "1.2.0"
+    },
+    "app_id": {
+      "const": "parkstead-parking"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[-a-zA-Z0-9_]{1,80}$"
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "profile": {
+      "type": "string"
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "virtual_now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "initial_virtual_now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "initial_data": {
+      "$ref": "seed.schema.json"
+    },
+    "data": {
+      "$ref": "seed.schema.json"
+    },
+    "receipts": {
+      "type": "object"
+    },
+    "audit": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "resources": {
+      "type": "object"
+    },
+    "initial_resources": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema",
+    "schema_version",
+    "package_version",
+    "core_api_version",
+    "app_id",
+    "run_id",
+    "epoch",
+    "revision",
+    "profile",
+    "next_id",
+    "virtual_now",
+    "initial_virtual_now",
+    "binding",
+    "policies",
+    "initial_data",
+    "data",
+    "receipts",
+    "audit",
+    "resources",
+    "initial_resources"
+  ],
+  "additionalProperties": false
+}

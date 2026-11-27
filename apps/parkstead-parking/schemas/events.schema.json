@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:parkstead-parking:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "parking.facility_availability_changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "facility_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "available": {
+              "type": "boolean"
+            },
+            "affected_from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "affected_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason_category": {
+              "enum": [
+                "maintenance",
+                "safety",
+                "weather",
+                "operator_closure",
+                "reopened"
+              ]
+            }
+          },
+          "required": [
+            "facility_id",
+            "available",
+            "affected_from",
+            "affected_until",
+            "reason_category"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "parking.inventory_adjusted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "rate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "hourly_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            }
+          },
+          "required": [
+            "rate_id",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

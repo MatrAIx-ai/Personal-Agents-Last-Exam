@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:parkstead-parking:domain:1",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "money": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000000
+    },
+    "version": {
+      "type": "object",
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "epoch",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "facility": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metro": {
+          "type": "string",
+          "minLength": 1
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image_asset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "metro",
+        "address",
+        "image_asset_id",
+        "available",
+        "version"
+      ],
+      "additionalProperties": true
+    },
+    "rate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "starts_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ends_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hourly_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "facility_id",
+        "starts_at",
+        "ends_at",
+        "capacity",
+        "hourly_cents",
+        "version"
+      ],
+      "additionalProperties": true
+    },
+    "vehicle": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "size_class": {
+          "enum": [
+            "compact",
+            "midsize",
+            "large"
+          ]
+        },
+        "height_cm": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "size_class",
+        "height_cm"
+      ],
+      "additionalProperties": true
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "free_until_hours": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "late_fee_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "minimum_fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        }
+      },
+      "required": [
+        "id",
+        "free_until_hours",
+        "late_fee_bps",
+        "minimum_fee_cents"
+      ],
+      "additionalProperties": true
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "kind": {
+          "enum": [
+            "booking",
+            "modification",
+            "disruption_replacement"
+          ]
+        },
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "rate_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "vehicle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "arrival_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departure_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "accepted",
+            "invalidated"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "facility_id",
+        "rate_id",
+        "vehicle_id",
+        "arrival_at",
+        "departure_at",
+        "created_at",
+        "expires_at",
+        "status"
+      ],
+      "additionalProperties": true
+    },
+    "reservation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "rate_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "vehicle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "arrival_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "departure_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "paid_total_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "status": {
+          "enum": [
+            "booked",
+            "action_required",
+            "cancelled",
+            "replaced"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "facility_id",
+        "rate_id",
+        "vehicle_id",
+        "arrival_at",
+        "departure_at",
+        "paid_total_cents",
+        "status",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  }
+}
