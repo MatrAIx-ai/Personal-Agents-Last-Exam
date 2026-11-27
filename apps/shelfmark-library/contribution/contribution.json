@@ -1,0 +1,149 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "shelfmark-library",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        { "name": "shelfmark-library.catalog.search", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.catalog.get", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.card.list", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.hold.list", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.hold.get", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.hold.place", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.hold.suspend", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.hold.resume", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.hold.change_branch", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.hold.cancel", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.loan.list", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.loan.renew", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.fine.list", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.fine.preview_payment", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.fine.pay", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.fine.dispute", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.room.search", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.room.list_bookings", "effect": "read", "caller": "agent" },
+        { "name": "shelfmark-library.room.book", "effect": "write", "caller": "agent" },
+        { "name": "shelfmark-library.room.cancel", "effect": "write", "caller": "agent" }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        { "name": "env.reset", "effect": "admin", "caller": "infra" },
+        { "name": "env.load_seed", "effect": "admin", "caller": "infra" },
+        { "name": "env.apply_event", "effect": "admin", "caller": "infra" },
+        { "name": "env.snapshot", "effect": "admin", "caller": "infra" },
+        { "name": "env.event_status", "effect": "admin", "caller": "infra" },
+        { "name": "env.validate_bundle", "effect": "admin", "caller": "infra" }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check returning Core stale_version",
+    "commit_confirmation": "Core status=committed + epoch/revision plus App-owned hold_id, payment_receipt_id, and booking_confirmation_code",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      { "type": "hold.ready_for_pickup", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "hold.checked_out", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "loan.returned", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "loan.queue_pressure", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "fine.assess", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "fine.dispute_decided", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "branch.closure", "schema_ref": "schemas/events.schema.json", "status": "implemented" },
+      { "type": "room_booking.no_show", "schema_ref": "schemas/events.schema.json", "status": "implemented" }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": true,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "audio/mpeg",
+      "audio/wav",
+      "video/mp4",
+      "application/json",
+      "application/pdf",
+      "text/plain",
+      "text/calendar"
+    ],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}

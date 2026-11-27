@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "app_id": "shelfmark-library",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR #144 tagged app:shelfmark-library (@Hoyant-Su)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "hold.ready_for_pickup",
+    "hold.checked_out",
+    "loan.returned",
+    "loan.queue_pressure",
+    "fine.assess",
+    "fine.dispute_decided",
+    "branch.closure",
+    "room_booking.no_show"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Physical hold pickup, item returns, fine dispute decisions, and room no-shows arrive exclusively via Infra events; Agent tools cannot forge offline library desk actions.",
+    "Outbound channel.email publishing is invoked explicitly after commit via src/publisher.cjs and the Messaging router; advancing virtual time never mutates state or dispatches Mail automatically."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

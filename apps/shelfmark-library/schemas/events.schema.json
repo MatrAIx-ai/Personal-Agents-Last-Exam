@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ShelfMark Public Library Events",
+  "type": "object",
+  "required": ["event_id", "at", "operation", "payload"],
+  "properties": {
+    "event_id": { "type": "string", "minLength": 1 },
+    "at": { "type": "string", "minLength": 1 },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "hold.ready_for_pickup",
+        "hold.checked_out",
+        "loan.returned",
+        "loan.queue_pressure",
+        "fine.assess",
+        "fine.dispute_decided",
+        "branch.closure",
+        "room_booking.no_show"
+      ]
+    },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

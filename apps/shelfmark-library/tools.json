@@ -1,0 +1,1737 @@
+[
+  {
+    "name": "shelfmark-library.catalog.search",
+    "description": "Search and filter the multi-branch ShelfMark library catalog.",
+    "read_only": true,
+    "scope": "shelfmark-library.catalog.search",
+    "resource_target": "catalog",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "isbn": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "format": {
+          "enum": [
+            "print",
+            "large_print",
+            "audiobook",
+            "ebook",
+            "museum_pass",
+            "library_of_things"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "branch_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "available_only": {
+          "type": "boolean"
+        },
+        "max_queue_depth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "titles": {
+          "type": "array"
+        },
+        "branches": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "total",
+        "titles"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.catalog.get",
+    "description": "Inspect a catalog title by title_id with branch copy status and asset checks.",
+    "read_only": true,
+    "scope": "shelfmark-library.catalog.get",
+    "resource_target": "catalog",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "title_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "title": {
+          "type": "object"
+        },
+        "branches": {
+          "type": "array"
+        },
+        "asset_warnings": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "title"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.card.list",
+    "description": "List the parent library card and seed-declared managed household cards.",
+    "read_only": true,
+    "scope": "shelfmark-library.card.list",
+    "resource_target": "cards",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "cards": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "cards"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.list",
+    "description": "List holds across managed household cards with virtual-time effective_status.",
+    "read_only": true,
+    "scope": "shelfmark-library.hold.list",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "suspended",
+            "ready_for_pickup",
+            "checked_out",
+            "expired",
+            "cancelled"
+          ]
+        },
+        "branch_id": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "holds": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "holds"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.get",
+    "description": "Inspect a hold by hold_id with derived effective_status and branch asset check.",
+    "read_only": true,
+    "scope": "shelfmark-library.hold.get",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "hold_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.place",
+    "description": "Place a new hold on a catalog title for a managed card and pickup branch.",
+    "read_only": false,
+    "scope": "shelfmark-library.hold.place",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "pickup_branch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "title_id",
+        "card_id",
+        "pickup_branch_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "hold_id": {
+          "type": "string"
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.suspend",
+    "description": "Freeze a queued hold until resume_at while preserving queue position.",
+    "read_only": false,
+    "scope": "shelfmark-library.hold.suspend",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "resume_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "hold_id",
+        "resume_at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "hold_id": {
+          "type": "string"
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.resume",
+    "description": "Resume a suspended hold back to queued status.",
+    "read_only": false,
+    "scope": "shelfmark-library.hold.resume",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "hold_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "hold_id": {
+          "type": "string"
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.change_branch",
+    "description": "Redirect a queued or suspended hold to another pickup branch.",
+    "read_only": false,
+    "scope": "shelfmark-library.hold.change_branch",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "pickup_branch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "hold_id",
+        "pickup_branch_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "hold_id": {
+          "type": "string"
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.hold.cancel",
+    "description": "Cancel a queued, suspended, or ready_for_pickup hold.",
+    "read_only": false,
+    "scope": "shelfmark-library.hold.cancel",
+    "resource_target": "holds",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "hold_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "hold_id": {
+          "type": "string"
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.loan.list",
+    "description": "List loans across managed cards with derived overdue effective_status.",
+    "read_only": true,
+    "scope": "shelfmark-library.loan.list",
+    "resource_target": "loans",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "active",
+            "overdue",
+            "returned"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "loans": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "loans"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.loan.renew",
+    "description": "Renew an eligible active or overdue loan.",
+    "read_only": false,
+    "scope": "shelfmark-library.loan.renew",
+    "resource_target": "loans",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "loan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "loan_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "loan_id": {
+          "type": "string"
+        },
+        "loan": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "loan_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.fine.list",
+    "description": "List fines across managed household cards.",
+    "read_only": true,
+    "scope": "shelfmark-library.fine.list",
+    "resource_target": "fines",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "open",
+            "disputed",
+            "paid",
+            "waived"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "fines": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "fines"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.fine.preview_payment",
+    "description": "Preview exact fine payment total and card unblock impact.",
+    "read_only": true,
+    "scope": "shelfmark-library.fine.preview_payment",
+    "resource_target": "fines",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "fine_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "required": [
+        "card_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total_cents": {
+          "type": "integer"
+        },
+        "will_unblock_card": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "total_cents"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.fine.pay",
+    "description": "Confirm payment for open fines on a managed card.",
+    "read_only": false,
+    "scope": "shelfmark-library.fine.pay",
+    "resource_target": "fines",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "fine_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "payment_method": {
+          "enum": [
+            "card_on_file",
+            "debit",
+            "municipal_wallet"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "card_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "payment_receipt_id": {
+          "type": "string"
+        },
+        "total_paid_cents": {
+          "type": "integer"
+        },
+        "card_status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payment_receipt_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.fine.dispute",
+    "description": "Submit a dispute on an open fine.",
+    "read_only": false,
+    "scope": "shelfmark-library.fine.dispute",
+    "resource_target": "fines",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "fine_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        },
+        "evidence_note": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "fine_id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "fine_id": {
+          "type": "string"
+        },
+        "fine": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "fine_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.room.search",
+    "description": "Search study rooms and museum pass slots.",
+    "read_only": true,
+    "scope": "shelfmark-library.room.search",
+    "resource_target": "rooms",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "branch_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "kind": {
+          "enum": [
+            "study_room",
+            "museum_pass"
+          ]
+        },
+        "min_capacity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "amenity": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "start_at": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "end_at": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "rooms": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "rooms"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.room.list_bookings",
+    "description": "List study-room and museum-pass bookings.",
+    "read_only": true,
+    "scope": "shelfmark-library.room.list_bookings",
+    "resource_target": "rooms",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "branch_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "confirmed",
+            "cancelled",
+            "no_show"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string"
+        },
+        "total": {
+          "type": "integer"
+        },
+        "bookings": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "bookings"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.room.book",
+    "description": "Book an available study room or museum pass slot.",
+    "read_only": false,
+    "scope": "shelfmark-library.room.book",
+    "resource_target": "rooms",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "room_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "start_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "end_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "room_id",
+        "card_id",
+        "start_at",
+        "end_at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "booking_id": {
+          "type": "string"
+        },
+        "booking_confirmation_code": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "shelfmark-library.room.cancel",
+    "description": "Cancel a confirmed study-room or museum-pass booking.",
+    "read_only": false,
+    "scope": "shelfmark-library.room.cancel",
+    "resource_target": "rooms",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "booking_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "shelfmark-library"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "booking_id": {
+          "type": "string"
+        },
+        "late_cancellation": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking_id"
+      ],
+      "additionalProperties": true
+    }
+  }
+]

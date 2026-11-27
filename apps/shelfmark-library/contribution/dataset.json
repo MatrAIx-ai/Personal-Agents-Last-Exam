@@ -1,0 +1,82 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "shelfmark-library-minimal",
+  "version": "1.0.0",
+  "description": "Original synthetic municipal public-library catalog, multi-branch holdings, linked household cards, hold queues, loans, fines, study rooms, and museum passes.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original synthetic municipal library records spanning 2026-01-05 through 2026-11-18; zero scraped catalogs or live ILS data.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "ShelfMark fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "synthetic-graphics",
+      "kind": "synthetic",
+      "description": "Programmatically generated synthetic PNG branch maps and format cover cards (320x180 RGB).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "ShelfMark PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 320,
+          "height": 180
+        }
+      }
+    },
+    {
+      "source_id": "ui-generated",
+      "kind": "synthetic",
+      "description": "Original synthetic 64x64 ShelfMark emblem PNG.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "ShelfMark PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized offset-bearing ISO-8601 timestamps (>= 2026-01-01), shared person_ref/account_id bindings, and municipal fine-threshold policies."
+  ],
+  "expected_counts": {
+    "records": 54,
+    "assets": 8
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of library policy realism and provenance."
+  }
+}

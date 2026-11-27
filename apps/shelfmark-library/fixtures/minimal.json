@@ -1,0 +1,838 @@
+{
+  "schema_version": 1,
+  "account_id": "acct-maya",
+  "account": {
+    "account_id": "acct-maya",
+    "owner_person_id": "person-maya",
+    "display_name": "Maya Lin",
+    "email": "maya.lin@example.test",
+    "household_daily_room_hours_quota": 4
+  },
+  "branches": [
+    {
+      "id": "br-central",
+      "name": "Central Downtown Library",
+      "address": "210 Civic Plaza, Downtown",
+      "hours": "Mon-Sat 09:00-20:00, Sun 11:00-17:00",
+      "asset_id": "asset-map-central",
+      "closed_until": null,
+      "closure_reason": null
+    },
+    {
+      "id": "br-westside",
+      "name": "Westside Neighborhood Branch",
+      "address": "845 Cedar Ave, Westside",
+      "hours": "Mon-Sat 09:00-18:00, Sun Closed",
+      "asset_id": "asset-map-westside",
+      "closed_until": null,
+      "closure_reason": null
+    },
+    {
+      "id": "br-oakridge",
+      "name": "Oakridge Tech & Study Annex",
+      "address": "1420 Oakridge Blvd, North District",
+      "hours": "Mon-Fri 08:30-21:00, Sat-Sun 10:00-18:00",
+      "asset_id": "asset-map-oakridge",
+      "closed_until": null,
+      "closure_reason": null
+    },
+    {
+      "id": "br-harbor",
+      "name": "Harborview Reading Room",
+      "address": "52 Pier Way, Harbor District",
+      "hours": "Tue-Sat 10:00-17:00",
+      "asset_id": "asset-missing-map",
+      "closed_until": null,
+      "closure_reason": null
+    }
+  ],
+  "titles": [
+    {
+      "id": "ttl-901",
+      "title": "The Quiet Archipelago",
+      "author": "Elena Marchetti",
+      "isbn": "978-0-900101-01-4",
+      "format": "print",
+      "subjects": ["fiction", "coastal history"],
+      "description": "Literary novel set across three maritime trading towns.",
+      "queued_patrons": 2,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": "asset-cover-print",
+      "copies": [
+        { "copy_id": "cp-901-1", "branch_id": "br-central", "status": "checked_out" },
+        { "copy_id": "cp-901-2", "branch_id": "br-westside", "status": "on_hold_shelf" }
+      ]
+    },
+    {
+      "id": "ttl-902",
+      "title": "Field Guide to Pacific Kelp Forests",
+      "author": "Dr. Kenji Takahashi",
+      "isbn": "978-0-900101-02-1",
+      "format": "audiobook",
+      "subjects": ["marine biology", "nature"],
+      "description": "Unabridged audio edition exploring nearshore ecosystems.",
+      "queued_patrons": 1,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": "asset-cover-audio",
+      "copies": [
+        { "copy_id": "cp-902-1", "branch_id": "br-westside", "status": "available" },
+        { "copy_id": "cp-902-2", "branch_id": "br-oakridge", "status": "checked_out" }
+      ]
+    },
+    {
+      "id": "ttl-903",
+      "title": "Civic Transit Networks of the 20th Century",
+      "author": "Arthur Pendelton",
+      "isbn": "978-0-900101-03-8",
+      "format": "print",
+      "subjects": ["urban planning", "history"],
+      "description": "Comparative study of municipal rail and bus corridors.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-903-1", "branch_id": "br-central", "status": "checked_out" },
+        { "copy_id": "cp-903-2", "branch_id": "br-oakridge", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-904",
+      "title": "Middle School Robotics Lab Notebook",
+      "author": "Priya Deshmukh",
+      "isbn": "978-0-900101-04-5",
+      "format": "print",
+      "subjects": ["stem", "youth", "engineering"],
+      "description": "Hands-on mechanics, sensors, and microcontrollers for grades 6-8.",
+      "queued_patrons": 0,
+      "max_renewals": 3,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-904-1", "branch_id": "br-westside", "status": "available" },
+        { "copy_id": "cp-904-2", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-905",
+      "title": "Winter Soups and Sourdough",
+      "author": "Clara Lindqvist",
+      "isbn": "978-0-900101-05-2",
+      "format": "large_print",
+      "subjects": ["cooking", "baking"],
+      "description": "Large-print kitchen companion with 60 seasonal recipes.",
+      "queued_patrons": 1,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-905-1", "branch_id": "br-central", "status": "in_transit" },
+        { "copy_id": "cp-905-2", "branch_id": "br-westside", "status": "checked_out" }
+      ]
+    },
+    {
+      "id": "ttl-906",
+      "title": "Atlas of Watershed Restoration",
+      "author": "Samuel Okafor",
+      "isbn": "978-0-900101-06-9",
+      "format": "print",
+      "subjects": ["ecology", "geography"],
+      "description": "Cartographic survey of river basins and urban wetlands.",
+      "queued_patrons": 2,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-906-1", "branch_id": "br-central", "status": "checked_out" }
+      ]
+    },
+    {
+      "id": "ttl-907",
+      "title": "Practical Linear Algebra for Data Systems",
+      "author": "Hanna Kowalski",
+      "isbn": "978-0-900101-07-6",
+      "format": "ebook",
+      "subjects": ["mathematics", "computer science"],
+      "description": "Digital lending edition covering matrix factorizations and optimization.",
+      "queued_patrons": 0,
+      "max_renewals": 1,
+      "loan_days": 14,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-907-1", "branch_id": "br-oakridge", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-908",
+      "title": "The Brass Astrolabe",
+      "author": "Tariq Al-Mansoor",
+      "isbn": "978-0-900101-08-3",
+      "format": "audiobook",
+      "subjects": ["history of science", "astronomy"],
+      "description": "Audio history of medieval astronomical instruments.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-908-1", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-909",
+      "title": "Small-Space Vegetable Gardening",
+      "author": "Rosa Delgado",
+      "isbn": "978-0-900101-09-0",
+      "format": "print",
+      "subjects": ["gardening", "home"],
+      "description": "Container and balcony growing schedules for temperate zones.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-909-1", "branch_id": "br-westside", "status": "available" },
+        { "copy_id": "cp-909-2", "branch_id": "br-harbor", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-910",
+      "title": "Municipal Budget Literacy",
+      "author": "David Chen-Reyes",
+      "isbn": "978-0-900101-10-6",
+      "format": "print",
+      "subjects": ["civics", "public policy"],
+      "description": "Citizen guide to reading city capital budgets and public hearings.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-910-1", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-911",
+      "title": "Harbor Sketches in Watercolor",
+      "author": "Miriam Gallagher",
+      "isbn": "978-0-900101-11-3",
+      "format": "print",
+      "subjects": ["art", "painting"],
+      "description": "Plein-air pigment mixing and wash techniques along the waterfront.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-911-1", "branch_id": "br-harbor", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-912",
+      "title": "Introduction to Acoustic Ecology",
+      "author": "Nadia Benali",
+      "isbn": "978-0-900101-12-0",
+      "format": "audiobook",
+      "subjects": ["music", "nature"],
+      "description": "Field recordings and essays on natural soundscapes.",
+      "queued_patrons": 1,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-912-1", "branch_id": "br-oakridge", "status": "checked_out" }
+      ]
+    },
+    {
+      "id": "ttl-913",
+      "title": "Classic Short Stories in Large Print",
+      "author": "Various Authors",
+      "isbn": "978-0-900101-13-7",
+      "format": "large_print",
+      "subjects": ["fiction", "anthology"],
+      "description": "18-point typography anthology curated for comfortable reading.",
+      "queued_patrons": 0,
+      "max_renewals": 3,
+      "loan_days": 28,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-913-1", "branch_id": "br-westside", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-914",
+      "title": "Youth Astronomy Star Charts",
+      "author": "Lucas Novak",
+      "isbn": "978-0-900101-14-4",
+      "format": "print",
+      "subjects": ["astronomy", "youth", "science"],
+      "description": "Seasonal northern-hemisphere constellation guides for young observers.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-914-1", "branch_id": "br-westside", "status": "checked_out" },
+        { "copy_id": "cp-914-2", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-915",
+      "title": "Modern Timber Framing",
+      "author": "Gareth Owen",
+      "isbn": "978-0-900101-15-1",
+      "format": "print",
+      "subjects": ["architecture", "woodworking"],
+      "description": "Structural joinery and mass-timber design principles.",
+      "queued_patrons": 0,
+      "max_renewals": 1,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-915-1", "branch_id": "br-central", "status": "checked_out" }
+      ]
+    },
+    {
+      "id": "ttl-916",
+      "title": "Digital Archiving for Families",
+      "author": "Simone Laurent",
+      "isbn": "978-0-900101-16-8",
+      "format": "ebook",
+      "subjects": ["genealogy", "technology"],
+      "description": "Scanning, metadata, and long-term preservation of family photographs.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 14,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-916-1", "branch_id": "br-oakridge", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-917",
+      "title": "Conversational Spanish for Travelers",
+      "author": "Mateo Herrera",
+      "isbn": "978-0-900101-17-5",
+      "format": "audiobook",
+      "subjects": ["languages", "travel"],
+      "description": "Practical dialogues for transit, dining, and emergencies.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-917-1", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-918",
+      "title": "Community Mediation Handbook",
+      "author": "Dr. Evelyn Brooks",
+      "isbn": "978-0-900101-18-2",
+      "format": "print",
+      "subjects": ["law", "civics"],
+      "description": "Neighborhood dispute resolution protocols and facilitation tools.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-918-1", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-919",
+      "title": "City Science Discovery Museum Pass",
+      "author": "ShelfMark Civic Partners",
+      "isbn": "PASS-SCI-2026",
+      "format": "museum_pass",
+      "subjects": ["museum_pass", "science", "family"],
+      "description": "Admits up to 4 household visitors for one day; reserve via Study Rooms & Passes.",
+      "queued_patrons": 0,
+      "max_renewals": 0,
+      "loan_days": 3,
+      "cover_asset_id": "asset-cover-pass",
+      "copies": [
+        { "copy_id": "cp-919-1", "branch_id": "br-central", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-920",
+      "title": "Harbor Maritime & Art Museum Pass",
+      "author": "ShelfMark Civic Partners",
+      "isbn": "PASS-ART-2026",
+      "format": "museum_pass",
+      "subjects": ["museum_pass", "art", "family"],
+      "description": "Family admission pass for waterfront galleries and historic vessels.",
+      "queued_patrons": 0,
+      "max_renewals": 0,
+      "loan_days": 3,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-920-1", "branch_id": "br-harbor", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-921",
+      "title": "Home Energy Audit Thermal Camera Kit",
+      "author": "ShelfMark Library of Things",
+      "isbn": "LOT-THERM-01",
+      "format": "library_of_things",
+      "subjects": ["energy", "home", "tools"],
+      "description": "Handheld infrared inspection camera with carrying case and safety guide.",
+      "queued_patrons": 3,
+      "max_renewals": 0,
+      "loan_days": 7,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-921-1", "branch_id": "br-oakridge", "status": "checked_out" }
+      ]
+    },
+    {
+      "id": "ttl-922",
+      "title": "Portable USB-C Document Scanner",
+      "author": "ShelfMark Library of Things",
+      "isbn": "LOT-SCAN-02",
+      "format": "library_of_things",
+      "subjects": ["technology", "tools"],
+      "description": "Duplex sheet-fed scanner for digitizing receipts and forms.",
+      "queued_patrons": 0,
+      "max_renewals": 1,
+      "loan_days": 7,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-922-1", "branch_id": "br-oakridge", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-923",
+      "title": "Beginner Birding Binoculars Kit",
+      "author": "ShelfMark Library of Things",
+      "isbn": "LOT-BIRD-03",
+      "format": "library_of_things",
+      "subjects": ["nature", "outdoors"],
+      "description": "8x42 binoculars with local wetland species checklist.",
+      "queued_patrons": 0,
+      "max_renewals": 1,
+      "loan_days": 14,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-923-1", "branch_id": "br-westside", "status": "available" }
+      ]
+    },
+    {
+      "id": "ttl-924",
+      "title": "Public Law Research Primer",
+      "author": "Judge Sandra Alverez",
+      "isbn": "978-0-900101-24-3",
+      "format": "large_print",
+      "subjects": ["law", "research"],
+      "description": "Plain-language reference on municipal codes, tenants' rights, and small claims.",
+      "queued_patrons": 0,
+      "max_renewals": 2,
+      "loan_days": 21,
+      "cover_asset_id": null,
+      "copies": [
+        { "copy_id": "cp-924-1", "branch_id": "br-central", "status": "available" }
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "rm-central-a",
+      "branch_id": "br-central",
+      "name": "Central Study Room A",
+      "kind": "study_room",
+      "capacity": 4,
+      "amenities": ["whiteboard", "power", "quiet_zone"],
+      "max_duration_minutes": 180,
+      "free_cancel_hours_before": 4
+    },
+    {
+      "id": "rm-central-b",
+      "branch_id": "br-central",
+      "name": "Central Conference Pod B",
+      "kind": "study_room",
+      "capacity": 8,
+      "amenities": ["whiteboard", "monitor", "hdmi", "power"],
+      "max_duration_minutes": 180,
+      "free_cancel_hours_before": 4
+    },
+    {
+      "id": "rm-westside-1",
+      "branch_id": "br-westside",
+      "name": "Westside Group Room 1",
+      "kind": "study_room",
+      "capacity": 6,
+      "amenities": ["whiteboard", "monitor", "power"],
+      "max_duration_minutes": 180,
+      "free_cancel_hours_before": 4
+    },
+    {
+      "id": "rm-oakridge-av",
+      "branch_id": "br-oakridge",
+      "name": "Oakridge Media & AV Studio",
+      "kind": "study_room",
+      "capacity": 6,
+      "amenities": ["whiteboard", "monitor", "hdmi", "power", "audio_booth"],
+      "max_duration_minutes": 180,
+      "free_cancel_hours_before": 4
+    },
+    {
+      "id": "rm-pass-science",
+      "branch_id": "br-central",
+      "name": "Science Discovery Museum Pass Slot",
+      "kind": "museum_pass",
+      "capacity": 4,
+      "amenities": ["family_admission_4", "weekend_valid"],
+      "max_duration_minutes": 480,
+      "free_cancel_hours_before": 12
+    },
+    {
+      "id": "rm-pass-art",
+      "branch_id": "br-harbor",
+      "name": "Harbor Maritime & Art Pass Slot",
+      "kind": "museum_pass",
+      "capacity": 4,
+      "amenities": ["family_admission_4", "weekend_valid"],
+      "max_duration_minutes": 480,
+      "free_cancel_hours_before": 12
+    }
+  ],
+  "managed_cards": [
+    {
+      "id": "card-maya",
+      "holder_name": "Maya Lin",
+      "person_ref": "person-maya",
+      "role": "parent",
+      "home_branch_id": "br-westside",
+      "max_holds": 10,
+      "block_threshold_cents": 1000,
+      "card_status": "active"
+    },
+    {
+      "id": "card-leo",
+      "holder_name": "Leo Lin",
+      "person_ref": "person-leo",
+      "role": "child",
+      "home_branch_id": "br-westside",
+      "max_holds": 6,
+      "block_threshold_cents": 1000,
+      "card_status": "blocked_fines"
+    },
+    {
+      "id": "card-nora",
+      "holder_name": "Nora Lin",
+      "person_ref": "person-nora",
+      "role": "child",
+      "home_branch_id": "br-central",
+      "max_holds": 6,
+      "block_threshold_cents": 1000,
+      "card_status": "active"
+    }
+  ],
+  "loans": [
+    {
+      "id": "ln-101",
+      "title_id": "ttl-909",
+      "card_id": "card-maya",
+      "branch_id": "br-westside",
+      "checked_out_at": "2026-01-12T11:00:00+00:00",
+      "due_at": "2026-02-02T23:59:59+00:00",
+      "returned_at": "2026-01-31T16:20:00+00:00",
+      "returned_branch_id": "br-westside",
+      "status": "returned",
+      "renewals_used": 0,
+      "note": "Returned on time",
+      "history": [
+        { "at": "2026-01-12T11:00:00+00:00", "action": "checked_out" },
+        { "at": "2026-01-31T16:20:00+00:00", "action": "returned", "branch_id": "br-westside" }
+      ]
+    },
+    {
+      "id": "ln-102",
+      "title_id": "ttl-917",
+      "card_id": "card-nora",
+      "branch_id": "br-central",
+      "checked_out_at": "2026-05-04T14:15:00+00:00",
+      "due_at": "2026-05-25T23:59:59+00:00",
+      "returned_at": "2026-05-23T13:10:00+00:00",
+      "returned_branch_id": "br-central",
+      "status": "returned",
+      "renewals_used": 1,
+      "note": "Returned at Central desk",
+      "history": [
+        { "at": "2026-05-04T14:15:00+00:00", "action": "checked_out" },
+        { "at": "2026-05-23T13:10:00+00:00", "action": "returned", "branch_id": "br-central" }
+      ]
+    },
+    {
+      "id": "ln-301",
+      "title_id": "ttl-914",
+      "card_id": "card-leo",
+      "branch_id": "br-westside",
+      "checked_out_at": "2026-09-25T15:00:00+00:00",
+      "due_at": "2026-10-16T23:59:59+00:00",
+      "returned_at": "2026-10-16T18:10:00+00:00",
+      "returned_branch_id": "br-westside",
+      "status": "returned",
+      "renewals_used": 0,
+      "note": "Checked in at Westside exterior drop box",
+      "history": [
+        { "at": "2026-09-25T15:00:00+00:00", "action": "checked_out" },
+        { "at": "2026-10-16T18:10:00+00:00", "action": "returned", "branch_id": "br-westside" }
+      ]
+    },
+    {
+      "id": "ln-302",
+      "title_id": "ttl-903",
+      "card_id": "card-maya",
+      "branch_id": "br-central",
+      "checked_out_at": "2026-10-30T10:30:00+00:00",
+      "due_at": "2026-11-20T23:59:59+00:00",
+      "returned_at": null,
+      "returned_branch_id": null,
+      "status": "active",
+      "renewals_used": 0,
+      "note": null,
+      "history": [
+        { "at": "2026-10-30T10:30:00+00:00", "action": "checked_out" }
+      ]
+    },
+    {
+      "id": "ln-303",
+      "title_id": "ttl-906",
+      "card_id": "card-maya",
+      "branch_id": "br-central",
+      "checked_out_at": "2026-11-01T12:00:00+00:00",
+      "due_at": "2026-11-22T23:59:59+00:00",
+      "returned_at": null,
+      "returned_branch_id": null,
+      "status": "active",
+      "renewals_used": 0,
+      "note": null,
+      "history": [
+        { "at": "2026-11-01T12:00:00+00:00", "action": "checked_out" }
+      ]
+    },
+    {
+      "id": "ln-304",
+      "title_id": "ttl-915",
+      "card_id": "card-nora",
+      "branch_id": "br-central",
+      "checked_out_at": "2026-10-10T10:00:00+00:00",
+      "due_at": "2026-11-21T23:59:59+00:00",
+      "returned_at": null,
+      "returned_branch_id": null,
+      "status": "active",
+      "renewals_used": 1,
+      "note": null,
+      "history": [
+        { "at": "2026-10-10T10:00:00+00:00", "action": "checked_out" },
+        { "at": "2026-10-31T09:15:00+00:00", "action": "renewed" }
+      ]
+    }
+  ],
+  "holds": [
+    {
+      "id": "hld-401",
+      "title_id": "ttl-901",
+      "card_id": "card-maya",
+      "pickup_branch_id": "br-westside",
+      "status": "ready_for_pickup",
+      "queue_position": 1,
+      "placed_at": "2026-11-02T09:00:00+00:00",
+      "resume_at": null,
+      "ready_at": "2026-11-17T10:00:00+00:00",
+      "pickup_expires_at": "2026-11-21T17:00:00+00:00",
+      "closure_event_ids": [],
+      "history": [
+        { "at": "2026-11-02T09:00:00+00:00", "action": "placed" },
+        { "at": "2026-11-17T10:00:00+00:00", "action": "ready_for_pickup" }
+      ]
+    },
+    {
+      "id": "hld-402",
+      "title_id": "ttl-902",
+      "card_id": "card-maya",
+      "pickup_branch_id": "br-westside",
+      "status": "queued",
+      "queue_position": 2,
+      "placed_at": "2026-11-08T13:20:00+00:00",
+      "resume_at": null,
+      "ready_at": null,
+      "pickup_expires_at": null,
+      "closure_event_ids": [],
+      "history": [
+        { "at": "2026-11-08T13:20:00+00:00", "action": "placed" }
+      ]
+    },
+    {
+      "id": "hld-403",
+      "title_id": "ttl-905",
+      "card_id": "card-maya",
+      "pickup_branch_id": "br-central",
+      "status": "queued",
+      "queue_position": 1,
+      "placed_at": "2026-11-10T16:45:00+00:00",
+      "resume_at": null,
+      "ready_at": null,
+      "pickup_expires_at": null,
+      "closure_event_ids": [],
+      "history": [
+        { "at": "2026-11-10T16:45:00+00:00", "action": "placed" }
+      ]
+    },
+    {
+      "id": "hld-404",
+      "title_id": "ttl-912",
+      "card_id": "card-nora",
+      "pickup_branch_id": "br-oakridge",
+      "status": "suspended",
+      "queue_position": 1,
+      "placed_at": "2026-11-05T11:10:00+00:00",
+      "resume_at": "2026-11-25T09:00:00+00:00",
+      "ready_at": null,
+      "pickup_expires_at": null,
+      "closure_event_ids": [],
+      "history": [
+        { "at": "2026-11-05T11:10:00+00:00", "action": "placed" },
+        { "at": "2026-11-14T08:00:00+00:00", "action": "suspended", "resume_at": "2026-11-25T09:00:00+00:00" }
+      ]
+    },
+    {
+      "id": "hld-405",
+      "title_id": "ttl-911",
+      "card_id": "card-maya",
+      "pickup_branch_id": "br-harbor",
+      "status": "checked_out",
+      "queue_position": 1,
+      "placed_at": "2026-02-14T10:00:00+00:00",
+      "resume_at": null,
+      "ready_at": "2026-02-18T11:00:00+00:00",
+      "pickup_expires_at": "2026-02-22T17:00:00+00:00",
+      "closure_event_ids": [],
+      "history": [
+        { "at": "2026-02-14T10:00:00+00:00", "action": "placed" },
+        { "at": "2026-02-18T11:00:00+00:00", "action": "ready_for_pickup" },
+        { "at": "2026-02-19T15:00:00+00:00", "action": "checked_out" }
+      ]
+    }
+  ],
+  "fines": [
+    {
+      "id": "fin-101",
+      "card_id": "card-maya",
+      "loan_id": "ln-101",
+      "amount_cents": 350,
+      "reason": "late_return_7_days",
+      "status": "paid",
+      "assessed_at": "2026-03-04T09:00:00+00:00",
+      "paid_at": "2026-03-06T12:30:00+00:00",
+      "payment_receipt_id": "rcpt-20260306-01",
+      "dispute_reason": null,
+      "dispute_note": null,
+      "decision_note": null,
+      "history": [
+        { "at": "2026-03-04T09:00:00+00:00", "action": "assessed", "amount_cents": 350 },
+        { "at": "2026-03-06T12:30:00+00:00", "action": "paid", "payment_receipt_id": "rcpt-20260306-01" }
+      ]
+    },
+    {
+      "id": "fin-201",
+      "card_id": "card-leo",
+      "loan_id": "ln-301",
+      "amount_cents": 1200,
+      "reason": "unscanned_drop_box_return_fee",
+      "status": "open",
+      "assessed_at": "2026-10-28T08:00:00+00:00",
+      "paid_at": null,
+      "payment_receipt_id": null,
+      "dispute_reason": null,
+      "dispute_note": null,
+      "decision_note": null,
+      "history": [
+        { "at": "2026-10-28T08:00:00+00:00", "action": "assessed", "amount_cents": 1200 }
+      ]
+    },
+    {
+      "id": "fin-202",
+      "card_id": "card-leo",
+      "loan_id": null,
+      "amount_cents": 250,
+      "reason": "overdue_5_days_print",
+      "status": "open",
+      "assessed_at": "2026-10-12T08:00:00+00:00",
+      "paid_at": null,
+      "payment_receipt_id": null,
+      "dispute_reason": null,
+      "dispute_note": null,
+      "decision_note": null,
+      "history": [
+        { "at": "2026-10-12T08:00:00+00:00", "action": "assessed", "amount_cents": 250 }
+      ]
+    }
+  ],
+  "room_bookings": [
+    {
+      "id": "rmb-101",
+      "room_id": "rm-central-a",
+      "branch_id": "br-central",
+      "card_id": "card-maya",
+      "start_at": "2026-04-14T14:00:00+00:00",
+      "end_at": "2026-04-14T16:00:00+00:00",
+      "free_cancel_cutoff_at": "2026-04-14T10:00:00+00:00",
+      "status": "cancelled",
+      "created_at": "2026-04-10T09:15:00+00:00",
+      "confirmation_code": "SM-RM-101",
+      "purpose": "Neighborhood council prep",
+      "late_cancellation": false,
+      "waived_by_closure": false,
+      "note": "Cancelled ahead of cutoff",
+      "history": [
+        { "at": "2026-04-10T09:15:00+00:00", "action": "confirmed" },
+        { "at": "2026-04-13T18:00:00+00:00", "action": "cancelled" }
+      ]
+    },
+    {
+      "id": "rmb-201",
+      "room_id": "rm-westside-1",
+      "branch_id": "br-westside",
+      "card_id": "card-maya",
+      "start_at": "2026-11-20T14:00:00+00:00",
+      "end_at": "2026-11-20T16:00:00+00:00",
+      "free_cancel_cutoff_at": "2026-11-20T10:00:00+00:00",
+      "status": "confirmed",
+      "created_at": "2026-11-15T11:30:00+00:00",
+      "confirmation_code": "SM-RM-201",
+      "purpose": "Robotics study group",
+      "late_cancellation": false,
+      "waived_by_closure": false,
+      "note": null,
+      "history": [
+        { "at": "2026-11-15T11:30:00+00:00", "action": "confirmed" }
+      ]
+    },
+    {
+      "id": "rmb-202",
+      "room_id": "rm-pass-science",
+      "branch_id": "br-central",
+      "card_id": "card-nora",
+      "start_at": "2026-11-22T09:00:00+00:00",
+      "end_at": "2026-11-22T17:00:00+00:00",
+      "free_cancel_cutoff_at": "2026-11-21T21:00:00+00:00",
+      "status": "confirmed",
+      "created_at": "2026-11-16T08:45:00+00:00",
+      "confirmation_code": "SM-PASS-202",
+      "purpose": "Family science museum visit",
+      "late_cancellation": false,
+      "waived_by_closure": false,
+      "note": null,
+      "history": [
+        { "at": "2026-11-16T08:45:00+00:00", "action": "confirmed" }
+      ]
+    }
+  ]
+}
