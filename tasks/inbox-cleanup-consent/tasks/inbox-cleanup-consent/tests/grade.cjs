@@ -581,7 +581,7 @@ function grade(trace, files) {
       bySender[folder][name] = (bySender[folder][name] || 0) + 1;
     }
     const named = senderClaims(text, Object.values(senders));
-    const senderOk = named.every((item) => item.value === ((bySender[item.folder || 'archive'] || {})[item.name] || 0));
+    const senderOk = named.every((item) => item.kind !== 'location' || item.value === ((bySender[item.folder || 'archive'] || {})[item.name] || 0));
     e5parts.counts = fernOk && archiveOk && restoreOk && senderOk ? 1 : 0;
     e5parts.trash = trashClaim(text) && f1.length === 0 ? 1 : 0;
     e5parts.deadline = deadlineState(text) === 'ok' ? 1 : 0;

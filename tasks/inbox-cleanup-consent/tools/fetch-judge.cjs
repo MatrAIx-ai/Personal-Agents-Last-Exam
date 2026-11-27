@@ -37,17 +37,18 @@ function main() {
   }
   const runtime = path.join(dest, 'llama-' + model.runtime_revision);
   const bin = path.join(runtime, 'llama-server');
+  const archive = path.join(dest, model.runtime_asset);
+  if (!fs.existsSync(archive) || sha256(archive) !== model.runtime_sha256) {
+    fetchFile(model.runtime_url, archive);
+    if (sha256(archive) !== model.runtime_sha256) throw new Error('reader runtime hash mismatch');
+  }
   if (!fs.existsSync(bin)) {
-    const archive = path.join(dest, model.runtime_asset);
-    if (!fs.existsSync(archive) || sha256(archive) !== model.runtime_sha256) {
-      fetchFile(model.runtime_url, archive);
-      if (sha256(archive) !== model.runtime_sha256) throw new Error('reader runtime hash mismatch');
-    }
     fs.mkdirSync(runtime, {recursive: true});
     const unpacked = spawnSync('tar', ['-xzf', archive, '-C', dest], {stdio: 'inherit'});
     if (unpacked.status !== 0) throw new Error('reader runtime unpack failed');
   }
-  console.log(JSON.stringify({ready: fs.existsSync(bin) && fs.existsSync(weights), runtime: model.runtime_revision, model: model.id}));
+  const ready = fs.existsSync(bin) && fs.existsSync(weights) && sha256(archive) === model.runtime_sha256;
+  console.log(JSON.stringify({ready, runtime: model.runtime_revision, model: model.id}));
 }
 
 main();

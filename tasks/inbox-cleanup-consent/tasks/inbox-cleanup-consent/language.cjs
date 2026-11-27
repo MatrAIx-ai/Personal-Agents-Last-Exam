@@ -12,7 +12,32 @@ const GROUPS = [
 ];
 
 function splitSentences(text) {
-  return String(text || '').split(/\n+|(?<=[.!?])\s+/).map((part) => part.trim()).filter(Boolean);
+  const body = String(text || '');
+  const parts = [];
+  let start = 0;
+  for (let i = 0; i < body.length; i += 1) {
+    const ch = body[i];
+    if (ch === '\n') {
+      const piece = body.slice(start, i).trim();
+      if (piece) parts.push(piece);
+      while (body[i + 1] === '\n') i += 1;
+      start = i + 1;
+      continue;
+    }
+    if ((ch === '.' || ch === '!' || ch === '?') && /\s/.test(body[i + 1] || '')) {
+      const left = body.slice(start, i + 1);
+      if (ch === '.' && /(?:^|[^A-Za-z])(?:Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.$/i.test(left)) continue;
+      const piece = left.trim();
+      if (piece) parts.push(piece);
+      i += 1;
+      while (body[i] && body[i] !== '\n' && /\s/.test(body[i])) i += 1;
+      start = i;
+      i -= 1;
+    }
+  }
+  const tail = body.slice(start).trim();
+  if (tail) parts.push(tail);
+  return parts;
 }
 
 function speechLabel(text) {
@@ -68,7 +93,7 @@ function assertedCounts(text) {
 }
 
 function isProposedList(text) {
-  return speechLabel(text) === 'propose';
+  return survivingProposal([text]).trim().length > 0;
 }
 
 function survivingProposal(texts) {
@@ -134,13 +159,28 @@ function retailRow(text) {
   return row;
 }
 
-function matchedIds(text, names) {
-  const body = plain(text);
+function nameInText(text, needle) {
+  return needle.length >= 4 && plain(text).includes(needle);
+}
+
+function senderInsideGroup(needle, members) {
+  const inside = new Set(members.map((member) => member.id));
+  let seen = false;
+  for (const [id, sender] of Object.entries(loadLabels().senders || {})) {
+    const row = plain(sender);
+    if (!row || (row !== needle && !row.includes(needle) && !needle.includes(row))) continue;
+    seen = true;
+    if (!inside.has(id)) return false;
+  }
+  return seen;
+}
+
+function matchedIds(text, names, members) {
   const ids = new Set();
   for (const wanted of names || []) {
     const needle = plain(wanted);
-    if (needle.length < 4 || !body.includes(needle)) continue;
-    for (const member of retailMembers()) {
+    if (!nameInText(text, needle) || !senderInsideGroup(needle, members)) continue;
+    for (const member of members) {
       const sender = plain(member.name);
       if (sender && (sender.includes(needle) || needle.includes(sender))) ids.add(member.id);
     }
@@ -151,8 +191,8 @@ function matchedIds(text, names) {
 function retailTarget(text, row) {
   const members = retailMembers();
   if (row.scope !== 'subset') return members.length;
-  const excluded = matchedIds(text, row.exclude);
-  const included = matchedIds(text, row.include);
+  const excluded = matchedIds(text, row.exclude, members);
+  const included = matchedIds(text, row.include, members);
   if (!excluded.size && !included.size) return members.length;
   let chosen = members.filter((member) => !excluded.has(member.id));
   if (included.size) chosen = chosen.filter((member) => included.has(member.id));
@@ -304,7 +344,8 @@ function senderClaims(text, names) {
       const name = ordered.find((candidate) => candidate.toLowerCase() === String(row.name || '').toLowerCase());
       if (!name || typeof row.n !== 'number' || !plain(piece).includes(plain(name))) continue;
       const folder = row.folder === 'inbox' || row.folder === 'archive' ? row.folder : null;
-      pieceRows.push({name, value: row.n, folder});
+      const kind = row.kind === 'move' || row.kind === 'plan' || row.kind === 'none' ? row.kind : 'location';
+      pieceRows.push({name, value: row.n, folder, kind});
     }
     found.push(...pieceRows);
   }
