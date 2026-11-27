@@ -1,0 +1,37 @@
+{
+  "schema": "pale.inbox-cleanup.history.v1",
+  "task_id": "inbox-cleanup-consent",
+  "zone": "America/Los_Angeles",
+  "cutoff": "2026-11-16T09:02:00-08:00",
+  "cutoff_rule": "Records at or after the first session are excluded. Date-only records are not used.",
+  "sources": [
+    {
+      "id": "mail",
+      "file": "tasks/inbox-cleanup-consent/environment/workspace/mail/seed.json",
+      "sha256": "ac1c6546897474b68dbcdf9f8e0d1a83c7b287ce2461b4c39ea99b303a60cbbb",
+      "date_field": "received_at",
+      "records": 904,
+      "distinct_dates": 489,
+      "earliest": "2025-01-02",
+      "latest": "2026-11-15"
+    },
+    {
+      "id": "history",
+      "file": "tasks/inbox-cleanup-consent/context/user/history.json",
+      "sha256": "82204ca5f4da6085562d448f0cbc38364990bef99f9f985bf18be62fb41958db",
+      "date_field": "at",
+      "records": 13,
+      "distinct_dates": 7,
+      "earliest": "2026-03-03",
+      "latest": "2026-11-13"
+    }
+  ],
+  "excluded": {
+    "mail_at_or_after_cutoff": 0,
+    "history_at_or_after_cutoff": 0
+  },
+  "global_distinct_dates": 490,
+  "earliest": "2025-01-02",
+  "latest": "2026-11-15",
+  "depth": "The mailbox is the uncleaned inbox. Receipt dates cover the weekdays from 2025-01-02 through 2026-11-13, plus the November 14 and 15 story mail: 489 dates. The April 18 standing instruction falls on a Saturday, which the weekday mailbox does not use, so the global count is 490. The 300-date recommendation is met by the mailbox itself."
+}
