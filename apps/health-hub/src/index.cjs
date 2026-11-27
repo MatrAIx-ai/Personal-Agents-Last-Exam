@@ -1,161 +1,183 @@
-const operations = require("./operations.cjs");
+'use strict';
+const operations = require('./operations.cjs');
 
-/**
- * Six Core Registry Hooks required by the MatrAIx platform:
- * 1. validateSeed(seed, ctx)
- * 2. handleTool(name, params, ctx)
- * 3. applyEvent(event, ctx)
- * 4. records(ctx)
- * 5. objects(ctx)
- * 6. references(ctx)
- */
+function fail(code, message) {
+  return Object.assign(new Error(message), { code });
+}
 
-function validateSeed(seed) {
-  if (!seed || typeof seed !== "object") {
-    throw new Error("Seed must be a non-null object");
+function validateSeed(ctx, data) {
+  if (!data || typeof data !== 'object') {
+    throw fail('invalid_seed', 'Seed must be a non-null object.');
   }
-  if (!seed.account_id || !seed.owner_person_id) {
-    throw new Error("Seed missing required account_id or owner_person_id");
+  if (!data.account_id || !data.owner_person_id) {
+    throw fail('invalid_seed', 'Seed missing required account_id or owner_person_id.');
   }
-  if (!Array.isArray(seed.daily_summaries)) {
-    throw new Error("Seed missing required array: daily_summaries");
-  }
-
-  // Validate earliest historical data constraint (on or after 2025-01-01)
-  for (const s of seed.daily_summaries) {
-    if (s.date < "2025-01-01") {
-      throw new Error(`Historical data date ${s.date} is prior to allowed threshold 2025-01-01`);
+  if (ctx && ctx.binding) {
+    const bound = (ctx.binding.accounts || []).some(
+      (a) => a.app_id === 'health-hub' && a.account_id === data.account_id && a.owner_person_id === data.owner_person_id
+    );
+    if (!bound) {
+      throw fail('invalid_seed', 'Account or owner_person_id is not bound in runtime binding.');
     }
   }
+  if (!Array.isArray(data.daily_summaries)) {
+    throw fail('invalid_seed', 'Seed missing required array: daily_summaries.');
+  }
+
+  const seenDates = new Set();
+  for (const s of data.daily_summaries) {
+    if (s.date < '2025-01-01') {
+      throw fail('invalid_seed', `Historical data date ${s.date} is prior to allowed threshold 2025-01-01.`);
+    }
+    if (seenDates.has(s.date)) {
+      throw fail('invalid_seed', `Duplicate daily summary date: ${s.date}`);
+    }
+    seenDates.add(s.date);
+  }
+
+  const checkUniqueIds = (list, key, label) => {
+    const seen = new Set();
+    for (const item of list || []) {
+      if (seen.has(item[key])) {
+        throw fail('invalid_seed', `Duplicate ${label} id: ${item[key]}`);
+      }
+      seen.add(item[key]);
+    }
+  };
+  checkUniqueIds(data.workouts, 'workout_id', 'workout');
+  checkUniqueIds(data.goals, 'goal_id', 'goal');
+  checkUniqueIds(data.routine_templates, 'routine_id', 'routine_template');
 
   return { valid: true };
 }
 
-function handleTool(name, params, ctx) {
-  const state = ctx.state;
+function handleTool(ctx, data, name, args) {
+  let result;
   switch (name) {
-    case "health-hub.get_daily_summary":
-      return operations.getDailySummary(state, params);
-    case "health-hub.list_metrics":
-      return operations.listMetrics(state, params);
-    case "health-hub.list_workouts":
-      return operations.listWorkouts(state, params);
-    case "health-hub.plan_workout":
-      return operations.planWorkout(state, params, ctx);
-    case "health-hub.log_workout":
-      return operations.logWorkout(state, params, ctx);
-    case "health-hub.update_workout":
-      return operations.updateWorkout(state, params);
-    case "health-hub.list_goals":
-      return operations.listGoals(state, params, ctx);
-    case "health-hub.create_goal":
-      return operations.createGoal(state, params, ctx);
-    case "health-hub.update_goal":
-      return operations.updateGoal(state, params);
-    case "health-hub.list_routine_templates":
-      return operations.listRoutineTemplates(state, params);
-    case "health-hub.create_routine_template":
-      return operations.createRoutineTemplate(state, params, ctx);
-    case "health-hub.update_routine_template":
-      return operations.updateRoutineTemplate(state, params);
-    case "health-hub.list_notifications":
-      return operations.listNotifications(state);
+    case 'health-hub.get_daily_summary':
+      result = operations.getDailySummary(data, args);
+      break;
+    case 'health-hub.list_metrics':
+      result = operations.listMetrics(data, args);
+      break;
+    case 'health-hub.list_workouts':
+      result = operations.listWorkouts(data, args);
+      break;
+    case 'health-hub.plan_workout':
+      result = operations.planWorkout(data, args, ctx);
+      break;
+    case 'health-hub.log_workout':
+      result = operations.logWorkout(data, args, ctx);
+      break;
+    case 'health-hub.update_workout':
+      result = operations.updateWorkout(data, args);
+      break;
+    case 'health-hub.list_goals':
+      result = operations.listGoals(data, args, ctx);
+      break;
+    case 'health-hub.create_goal':
+      result = operations.createGoal(data, args, ctx);
+      break;
+    case 'health-hub.update_goal':
+      result = operations.updateGoal(data, args);
+      break;
+    case 'health-hub.list_routine_templates':
+      result = operations.listRoutineTemplates(data, args);
+      break;
+    case 'health-hub.create_routine_template':
+      result = operations.createRoutineTemplate(data, args, ctx);
+      break;
+    case 'health-hub.update_routine_template':
+      result = operations.updateRoutineTemplate(data, args);
+      break;
+    case 'health-hub.list_notifications':
+      result = operations.listNotifications(data);
+      break;
     default:
-      return { status: "unknown_tool", message: `Tool ${name} not recognized` };
+      throw fail('unknown_tool', `Tool ${name} not recognized.`);
   }
+  return { data, result };
 }
 
-function applyEvent(event, ctx) {
-  const state = ctx.state;
-  if (event.operation === "health-hub.ingest_daily_sync") {
-    const payload = event.payload;
-    const existingIndex = state.daily_summaries.findIndex((s) => s.date === payload.date);
-
-    const summaryRecord = {
-      date: payload.date,
-      status: "valid",
-      metrics: {
-        sleep: payload.sleep,
-        recovery: payload.recovery,
-        day_strain: payload.day_strain,
-        body_weight_kg: payload.body_weight_kg || null
-      }
-    };
-
-    if (existingIndex >= 0) {
-      state.daily_summaries[existingIndex] = summaryRecord;
-    } else {
-      state.daily_summaries.push(summaryRecord);
-    }
-
-    // Persist lifecycle notifications during write/event cycle
-    if (!state.notifications) state.notifications = [];
-
-    // Low recovery alert
-    if (payload.recovery && payload.recovery.recovery_score < 35) {
-      state.notifications.push({
-        notification_id: `notif_${Date.now()}_rec`,
-        created_at: event.at,
-        type: "low_recovery",
-        message: `Recovery score is ${payload.recovery.recovery_score}%. Consider scaling back exertion.`
-      });
-    }
-
-    // Check goals that passed their due date and commit status
-    if (Array.isArray(state.goals)) {
-      for (const g of state.goals) {
-        if (g.status === "active" && g.due_date && g.due_date < event.at) {
-          g.status = "missed";
-          state.notifications.push({
-            notification_id: `notif_${Date.now()}_goal`,
-            created_at: event.at,
-            type: "missed_goal",
-            message: `Goal '${g.title}' missed deadline ${g.due_date}.`
-          });
-        }
-      }
-    }
-
-    return { status: "ok", applied: true };
+function applyEvent(ctx, data, event) {
+  if (event.operation !== 'health-hub.ingest_daily_sync') {
+    throw fail('invalid_event', `Event operation ${event.operation} unsupported.`);
   }
 
-  return { status: "unsupported_event", message: `Event operation ${event.operation} unsupported` };
+  const payload = event.payload;
+  const existingIndex = data.daily_summaries.findIndex((s) => s.date === payload.date);
+
+  const summaryRecord = {
+    date: payload.date,
+    status: 'valid',
+    metrics: {
+      sleep: payload.sleep,
+      recovery: payload.recovery,
+      day_strain: payload.day_strain,
+      body_weight_kg: payload.body_weight_kg ?? null
+    }
+  };
+
+  if (existingIndex >= 0) {
+    data.daily_summaries[existingIndex] = summaryRecord;
+  } else {
+    data.daily_summaries.push(summaryRecord);
+  }
+
+  if (!Array.isArray(data.notifications)) data.notifications = [];
+
+  if (payload.recovery && payload.recovery.recovery_score < 35) {
+    data.notifications.push({
+      notification_id: `notif_${event.event_id}_rec`,
+      created_at: event.at,
+      type: 'low_recovery',
+      message: `Recovery score is ${payload.recovery.recovery_score}%. Consider scaling back exertion.`
+    });
+  }
+
+  if (Array.isArray(data.goals)) {
+    for (const g of data.goals) {
+      if (g.status === 'active' && g.due_date && g.due_date < event.at) {
+        g.status = 'missed';
+        data.notifications.push({
+          notification_id: `notif_${event.event_id}_goal_${g.goal_id}`,
+          created_at: event.at,
+          type: 'missed_goal',
+          message: `Goal '${g.title}' missed deadline ${g.due_date}.`
+        });
+      }
+    }
+  }
+
+  return data;
 }
 
-function records(ctx) {
-  const state = ctx.state;
+function records(data) {
   return [
-    ...(state.daily_summaries || []).map((r) => ({ type: "daily_summary", ...r })),
-    ...(state.workouts || []).map((r) => ({ type: "workout", ...r })),
-    ...(state.goals || []).map((r) => ({ type: "goal", ...r })),
-    ...(state.routine_templates || []).map((r) => ({ type: "routine_template", ...r })),
-    ...(state.notifications || []).map((r) => ({ type: "notification", ...r }))
+    ...(data.daily_summaries || []).map((r) => ({ type: 'daily_summary', ...r })),
+    ...(data.workouts || []).map((r) => ({ type: 'workout', ...r })),
+    ...(data.goals || []).map((r) => ({ type: 'goal', ...r })),
+    ...(data.routine_templates || []).map((r) => ({ type: 'routine_template', ...r })),
+    ...(data.notifications || []).map((r) => ({ type: 'notification', ...r }))
   ];
 }
 
-function objects(ctx) {
-  const state = ctx.state;
-  return {
-    daily_summaries: state.daily_summaries || [],
-    workouts: state.workouts || [],
-    goals: state.goals || [],
-    routine_templates: state.routine_templates || [],
-    notifications: state.notifications || []
-  };
+function objects(data) {
+  return [
+    ...(data.daily_summaries || []).map((r) => `summary:${r.date}`),
+    ...(data.workouts || []).map((r) => r.workout_id),
+    ...(data.goals || []).map((r) => r.goal_id),
+    ...(data.routine_templates || []).map((r) => r.routine_id),
+    ...(data.notifications || []).map((r) => r.notification_id)
+  ];
 }
 
-function references(ctx) {
-  const state = ctx.state;
-  const refs = [];
-  if (state.owner_person_id) {
-    refs.push({ type: "person", id: state.owner_person_id });
-  }
-  for (const w of state.workouts || []) {
-    if (w.linked_calendar_event_id) {
-      refs.push({ type: "calendar_event", id: w.linked_calendar_event_id });
-    }
-  }
-  return refs;
+function references() {
+  return [];
+}
+
+function assetReferences() {
+  return [];
 }
 
 module.exports = {
@@ -164,5 +186,6 @@ module.exports = {
   applyEvent,
   records,
   objects,
-  references
+  references,
+  assetReferences
 };

@@ -17,7 +17,13 @@ assert.strictEqual(personaFiles.length, 5, "Must generate exactly 5 persona prof
 
 personaFiles.forEach((file) => {
   const seed = JSON.parse(fs.readFileSync(path.join(personasDir, file), "utf-8"));
-  const res = plugin.validateSeed(seed);
+  const res = plugin.validateSeed({
+    binding: {
+      people: [{ person_id: seed.owner_person_id, name: "Persona" }],
+      accounts: [{ app_id: "health-hub", account_id: seed.account_id, owner_person_id: seed.owner_person_id }],
+      objects: {}
+    }
+  }, seed);
   assert.strictEqual(res.valid, true, `Seed validation failed for ${file}`);
   assert.strictEqual(seed.daily_summaries.length, 365, `${file} should have 365 days of 2025 history`);
 

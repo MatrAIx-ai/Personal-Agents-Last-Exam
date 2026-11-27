@@ -1,13 +1,52 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "app_id": "health-hub",
-  "entrypoint": "gui/index.html",
-  "title": "Personal Health & Life Hub",
+  "schema_version": "pale.gui.v1",
+  "status": "declared",
+  "surface_id": "health-hub-reviewer",
+  "audience": [
+    "reviewer"
+  ],
+  "state_connection": {
+    "app_ids": [
+      "health-hub"
+    ],
+    "adapter": "pale.mcp_bridge",
+    "authoritative_state": "app_runtime"
+  },
   "routes": [
-    { "path": "/", "title": "Dashboard" },
-    { "path": "/recovery", "title": "Recovery & Biometrics" },
-    { "path": "/workouts", "title": "Workouts" },
-    { "path": "/goals", "title": "Goals & Habits" },
-    { "path": "/routines", "title": "Routine Templates" }
-  ]
+    {
+      "route_id": "main",
+      "path": "/",
+      "asset_bindings": []
+    }
+  ],
+  "content_policy": {
+    "untrusted_html": "text_only",
+    "svg": "disabled",
+    "remote_fetch": "disabled",
+    "remote_allowlist": [],
+    "missing_asset_behavior": "placeholder"
+  },
+  "observation": {
+    "mechanism": "screen_observation",
+    "payload_policy": "visible_surface_only"
+  },
+  "extensions": [
+    {
+      "namespace": "pale.web",
+      "version": "1",
+      "required": false,
+      "data": {
+        "page": "gui/index.html",
+        "controller": "gui/app.js",
+        "audience": [
+          "agent",
+          "user"
+        ],
+        "host": "runtime/web/server.cjs",
+        "transport": "agent-mcp-bridge",
+        "status": "implemented"
+      }
+    }
+  ],
+  "renderer_ref": "gui/app.js"
 }

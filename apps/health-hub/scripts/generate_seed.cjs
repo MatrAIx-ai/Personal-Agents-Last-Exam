@@ -57,8 +57,8 @@ while (currentDate <= endDate) {
 }
 
 const seed = {
-  account_id: "acc_nassim_health_01",
-  owner_person_id: "person_nassim_01",
+  account_id: "acc_jane_health_01",
+  owner_person_id: "person_jane_01",
   daily_summaries,
   workouts: [
     {

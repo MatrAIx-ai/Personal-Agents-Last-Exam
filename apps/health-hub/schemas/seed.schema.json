@@ -15,28 +15,38 @@
           "status": { "type": "string", "enum": ["valid", "no_data"] },
           "reason": { "type": "string", "enum": ["device_not_worn", "sync_failed"] },
           "metrics": {
-            "type": "object",
-            "properties": {
-              "sleep": {
+            "oneOf": [
+              { "type": "null" },
+              {
                 "type": "object",
                 "properties": {
-                  "duration_minutes": { "type": "number" },
-                  "deep_sleep_minutes": { "type": "number" },
-                  "rem_sleep_minutes": { "type": "number" },
-                  "sleep_score": { "type": "number" }
+                  "sleep": {
+                    "type": "object",
+                    "properties": {
+                      "duration_minutes": { "type": "number" },
+                      "deep_sleep_minutes": { "type": "number" },
+                      "rem_sleep_minutes": { "type": "number" },
+                      "sleep_score": { "type": "number" }
+                    }
+                  },
+                  "recovery": {
+                    "type": "object",
+                    "properties": {
+                      "resting_hr": { "type": "number" },
+                      "hrv_rmssd": { "type": "number" },
+                      "recovery_score": { "type": "number" }
+                    }
+                  },
+                  "day_strain": { "type": "number" },
+                  "body_weight_kg": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "type": "number" }
+                    ]
+                  }
                 }
-              },
-              "recovery": {
-                "type": "object",
-                "properties": {
-                  "resting_hr": { "type": "number" },
-                  "hrv_rmssd": { "type": "number" },
-                  "recovery_score": { "type": "number" }
-                }
-              },
-              "day_strain": { "type": "number" },
-              "body_weight_kg": { "type": "number" }
-            }
+              }
+            ]
           }
         }
       }

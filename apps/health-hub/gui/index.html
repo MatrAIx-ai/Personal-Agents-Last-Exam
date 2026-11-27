@@ -3,35 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Health & Life Hub</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Personal Health &amp; Life Hub · PALE</title>
+  <link rel="stylesheet" href="/shared/style.css">
 </head>
 <body>
-  <div class="app-layout">
+  <div class="app-shell">
     <aside class="sidebar">
-      <div class="logo">
-        <span class="icon">❤️</span>
-        <h2>Health Hub</h2>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">♥</span>
+        <h1>Health Hub</h1>
       </div>
-      <nav>
-        <button class="nav-btn active" data-tab="tab-overview">Overview</button>
-        <button class="nav-btn" data-tab="tab-recovery">Recovery & Sleep</button>
-        <button class="nav-btn" data-tab="tab-workouts">Workouts</button>
-        <button class="nav-btn" data-tab="tab-goals">Goals</button>
-        <button class="nav-btn" data-tab="tab-routines">Routines</button>
+      <nav aria-label="Health Hub navigation">
+        <button type="button" class="nav-btn" data-tab="tab-overview" aria-current="page">
+          <span class="nav-symbol" aria-hidden="true">◈</span><span>Overview</span>
+        </button>
+        <button type="button" class="nav-btn" data-tab="tab-recovery">
+          <span class="nav-symbol" aria-hidden="true">☾</span><span>Recovery &amp; Sleep</span>
+        </button>
+        <button type="button" class="nav-btn" data-tab="tab-workouts">
+          <span class="nav-symbol" aria-hidden="true">⚡</span><span>Workouts</span>
+        </button>
+        <button type="button" class="nav-btn" data-tab="tab-goals">
+          <span class="nav-symbol" aria-hidden="true">◎</span><span>Goals</span>
+        </button>
+        <button type="button" class="nav-btn" data-tab="tab-routines">
+          <span class="nav-symbol" aria-hidden="true">▤</span><span>Routines</span>
+        </button>
       </nav>
-      <div class="user-badge" id="user-badge">User: Loading...</div>
+      <div class="sidebar-foot">
+        <span class="avatar small" aria-hidden="true">H</span>
+        <div>
+          <strong id="user-badge">Personal Health</strong>
+          <small id="virtual-clock">PALE MCP Bridge</small>
+        </div>
+      </div>
     </aside>
 
-    <main class="main-content">
-      <header class="topbar">
-        <h1 id="page-title">Dashboard Overview</h1>
-        <div class="clock-display" id="virtual-clock">Clock: 2026-01-01</div>
+    <main class="app-main">
+      <header class="toolbar">
+        <h2 id="page-title">Overview</h2>
+        <button type="button" id="refresh-btn">Refresh</button>
       </header>
 
+      <p role="status" aria-live="polite" id="status">Connecting…</p>
+
       <!-- Overview Tab -->
-      <section id="tab-overview" class="view-panel active">
-        <div class="metrics-grid">
+      <section id="tab-overview" class="view-panel">
+        <div id="overview-metrics" class="metrics-grid">
           <div class="card metric-card">
             <h3>Recovery Score</h3>
             <div class="metric-val" id="val-recovery">--%</div>
@@ -45,16 +63,16 @@
           <div class="card metric-card">
             <h3>Day Strain</h3>
             <div class="metric-val" id="val-strain">--</div>
-            <p class="subtext">Scale: 0.0 - 21.0</p>
+            <p class="subtext">Scale: 0.0 – 21.0</p>
           </div>
           <div class="card metric-card">
             <h3>Body Weight</h3>
             <div class="metric-val" id="val-weight">-- kg</div>
-            <p class="subtext">Target: Maintained</p>
+            <p class="subtext" id="val-latest-date">Latest reading</p>
           </div>
         </div>
 
-        <div class="content-split">
+        <div id="overview-split" class="content-split">
           <div class="card section-card">
             <h3>Recent Notifications</h3>
             <ul id="notification-list" class="styled-list">
@@ -71,10 +89,17 @@
       </section>
 
       <!-- Recovery Tab -->
-      <section id="tab-recovery" class="view-panel">
-        <div class="card">
-          <h3>Historical Biometric Trends (Past 7 Days)</h3>
-          <div id="biometrics-table-container">
+      <section id="tab-recovery" class="view-panel" hidden>
+        <div class="card section-card">
+          <div class="card-head">
+            <h3>Biometric Trends &amp; Gap Inspection</h3>
+            <form id="metrics-filter-form" class="inline-form">
+              <label><span>From</span> <input type="date" id="metrics-start" value="2025-10-10"></label>
+              <label><span>To</span> <input type="date" id="metrics-end" value="2026-12-31"></label>
+              <button type="submit" class="primary">Load</button>
+            </form>
+          </div>
+          <div class="table-wrap">
             <table class="data-table" id="biometrics-table">
               <thead>
                 <tr>
@@ -85,6 +110,7 @@
                   <th>RHR</th>
                   <th>HRV</th>
                   <th>Strain</th>
+                  <th>Weight</th>
                 </tr>
               </thead>
               <tbody id="biometrics-tbody"></tbody>
@@ -94,44 +120,86 @@
       </section>
 
       <!-- Workouts Tab -->
-      <section id="tab-workouts" class="view-panel">
-        <div class="card">
-          <div class="card-header">
-            <h3>Workout History & Planned Sessions</h3>
+      <section id="tab-workouts" class="view-panel" hidden>
+        <div class="card section-card" id="workout-forms">
+          <h3>Plan Workout</h3>
+          <form id="plan-workout-form" class="inline-form">
+            <label><span>Activity</span><input type="text" id="wkt-activity" placeholder="e.g. running" required></label>
+            <label><span>Scheduled At (ISO)</span><input type="text" id="wkt-scheduled" placeholder="2026-01-03T07:00:00Z" value="2026-01-03T07:00:00Z" required></label>
+            <label><span>Duration (min)</span><input type="number" id="wkt-duration" min="1" value="45" required></label>
+            <button type="submit" class="primary">Plan Workout</button>
+          </form>
+        </div>
+        <div class="card section-card">
+          <div class="card-head">
+            <h3>Workout History &amp; Planned Sessions</h3>
+            <div class="inline-form">
+              <label><span>Status</span>
+                <select id="workout-status-filter">
+                  <option value="">All</option>
+                  <option value="planned">Planned</option>
+                  <option value="completed">Completed</option>
+                  <option value="skipped">Skipped</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </label>
+            </div>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Workout ID</th>
-                <th>Activity</th>
-                <th>Status</th>
-                <th>Scheduled / Completed</th>
-                <th>Duration</th>
-                <th>Avg HR</th>
-              </tr>
-            </thead>
-            <tbody id="workouts-tbody"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Workout ID</th>
+                  <th>Activity</th>
+                  <th>Status</th>
+                  <th>Scheduled / Logged</th>
+                  <th>Duration</th>
+                  <th>Avg HR</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="workouts-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <!-- Goals Tab -->
-      <section id="tab-goals" class="view-panel">
-        <div class="card">
-          <h3>Active Wellness Goals & Habits</h3>
+      <section id="tab-goals" class="view-panel" hidden>
+        <div class="card section-card">
+          <h3>Create Wellness Goal</h3>
+          <form id="create-goal-form" class="inline-form">
+            <label><span>Title</span><input type="text" id="goal-title" placeholder="e.g. Sleep 8h" required></label>
+            <label><span>Metric</span><input type="text" id="goal-metric" placeholder="sleep_minutes" required></label>
+            <label><span>Target</span><input type="number" id="goal-target" placeholder="480" min="1" step="any" required></label>
+            <label><span>Due Date (optional)</span><input type="text" id="goal-due" placeholder="2026-02-01T00:00:00Z"></label>
+            <button type="submit" class="primary">Create Goal</button>
+          </form>
+        </div>
+        <div class="card section-card">
+          <h3>Wellness Goals &amp; Habits</h3>
           <ul id="goals-list" class="styled-list"></ul>
         </div>
       </section>
 
       <!-- Routines Tab -->
-      <section id="tab-routines" class="view-panel">
-        <div class="card">
+      <section id="tab-routines" class="view-panel" hidden>
+        <div class="card section-card">
+          <h3>Create Routine Template</h3>
+          <form id="create-routine-form" class="inline-form">
+            <label><span>Title</span><input type="text" id="rtn-title" placeholder="Morning Mobility" required></label>
+            <label><span>First Block</span><input type="text" id="rtn-block-name" placeholder="Foam Rolling" required></label>
+            <label><span>Minutes</span><input type="number" id="rtn-block-duration" min="1" value="20" required></label>
+            <button type="submit" class="primary">Create Draft</button>
+          </form>
+        </div>
+        <div class="card section-card">
           <h3>Routine Templates</h3>
           <div id="routines-container" class="cards-flow"></div>
         </div>
       </section>
     </main>
   </div>
-  <script src="app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
