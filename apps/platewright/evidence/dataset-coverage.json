@@ -1,0 +1,1302 @@
+{
+  "schema": "platewright.dataset-coverage.v1",
+  "scope": "Environment dataset coverage of the delivered reference seed (not a Task history selection)",
+  "seed": "fixtures/reference.json",
+  "loaded_time": "2026-11-08T08:00:00-05:00",
+  "time_zone": "America/New_York",
+  "loaded_date": "2026-11-08",
+  "window": {
+    "start": "2025-01-01",
+    "end": "2026-12-31"
+  },
+  "method": "Timestamps are converted to calendar dates in the household time zone with Intl (src/common.cjs localDate); date-only fields are taken as dates in that zone. A row counts as history when its date is in the window and it is not a plan slot dated on or after the loaded date; such slots are scheduled meals and are reported separately. Each distinct calendar date counts once per family and once globally.",
+  "files": {
+    "fixtures/binding.json": {
+      "bytes": 482,
+      "sha256": "8de9a892ef1850b111d614618627e119e3319b68f488471fc4b3a0e6b918385b"
+    },
+    "fixtures/clock.json": {
+      "bytes": 50,
+      "sha256": "c248167301a9a54f4815409ac66058877c21addb5d47854bfee78ae92bd95cf2"
+    },
+    "fixtures/minimal.json": {
+      "bytes": 50971,
+      "sha256": "a6f10c5e1a30867e8ba637068fcc655d1c4cd23e16d37862ba218fb155f2a213"
+    },
+    "fixtures/policies-fence.json": {
+      "bytes": 1581,
+      "sha256": "d250fdd0c22eebf2fad04409a20e87fffbd97980a4aaba2ff0685f2e4bf03bd2"
+    },
+    "fixtures/policies.json": {
+      "bytes": 1362,
+      "sha256": "ec7e1bb7491d3ec2b6b7da132b7e0f7a2849214bf098aebd4ce6d6440420228d"
+    },
+    "fixtures/reference.json": {
+      "bytes": 1018433,
+      "sha256": "5e6241c7e6870d52c5db048f4eea01ba1d93740474c567b819256593a06914d3"
+    },
+    "scripts/history.cjs": {
+      "bytes": 21005,
+      "sha256": "715b0b80195d58e608f726ee1c15c4840fc2bf04724ff34eb1579fe3b97a7aad"
+    },
+    "scripts/build-fixtures.cjs": {
+      "bytes": 36191,
+      "sha256": "eb696c3a44777f26b875a624c5985140b876cdff5ec93a94ef3d676f47b4a202"
+    },
+    "scripts/fixture-data.cjs": {
+      "bytes": 65995,
+      "sha256": "6abdca00677da1eaf0373d34aa31eb6e4bc0bb8dca377f8e602423e5c4fcbd5a"
+    }
+  },
+  "totals": {
+    "records_core_counts": 1361,
+    "dated_rows": 2428,
+    "history_rows": 2414,
+    "scheduled_rows": 14,
+    "excluded_rows": 0,
+    "global_distinct_history_dates": 631,
+    "earliest_date": "2025-01-01",
+    "latest_history_date": "2026-11-07",
+    "scheduled_dates": 8,
+    "scheduled_from": "2026-11-08",
+    "scheduled_to": "2026-11-15",
+    "months_with_history": 23,
+    "months_without_history": [
+      "2026-12"
+    ]
+  },
+  "provenance": {
+    "history_rows": {
+      "synthetic, generated": 2014,
+      "synthetic, hand-written": 342,
+      "synthetic, hand-written content dated by the generator": 58
+    },
+    "real_records": 0,
+    "generator": {
+      "script": "scripts/history.cjs",
+      "seed": 20250101,
+      "prng": "mulberry32",
+      "from": "2025-01-01",
+      "to": "2026-10-11"
+    },
+    "rules": [
+      "plan slots and their history rows: generated when the meal is dated on or before 2026-10-11, hand-written from 2026-10-12",
+      "notifications, activity rows and rows written by events: generated when the event ID starts with ev-pw-h, otherwise hand-written",
+      "constraint history: generated for the five constraints of scripts/history.cjs (CONSTRAINTS), otherwise hand-written",
+      "recipe history: the creation rows of 58 of the 60 written recipes are dated by the generator's schedule (24 on 2025-01-01, then one every ten days through 2025); the other two were added by members' events in the hand-written weeks; revisions, archiving and variants are hand-written",
+      "pantry rows: rows of a cooked meal follow the meal; other rows by the account before 2026-10-10T16:00:00-04:00 are generated unless they are the item's hand-written row (scripts/build-fixtures.cjs PANTRY)",
+      "shopping line rows: hand-written (the current list of 7 November 2026)"
+    ]
+  },
+  "sources": [
+    {
+      "family": "plan_slots",
+      "label": "plan slots (`plan`)",
+      "date_field": "`date` (the meal's date, date-only)",
+      "tool": "platewright.plan.get (windows of up to 42 days)",
+      "records": 880,
+      "dated_rows": 880,
+      "history_rows": 866,
+      "scheduled_rows": 14,
+      "distinct_dates": 620,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-07",
+      "provenance": {
+        "synthetic, generated": 809,
+        "synthetic, hand-written": 57
+      },
+      "months": {
+        "2025-01": {
+          "rows": 39,
+          "distinct_dates": 30
+        },
+        "2025-02": {
+          "rows": 39,
+          "distinct_dates": 26
+        },
+        "2025-03": {
+          "rows": 40,
+          "distinct_dates": 30
+        },
+        "2025-04": {
+          "rows": 41,
+          "distinct_dates": 28
+        },
+        "2025-05": {
+          "rows": 36,
+          "distinct_dates": 29
+        },
+        "2025-06": {
+          "rows": 34,
+          "distinct_dates": 24
+        },
+        "2025-07": {
+          "rows": 34,
+          "distinct_dates": 27
+        },
+        "2025-08": {
+          "rows": 36,
+          "distinct_dates": 27
+        },
+        "2025-09": {
+          "rows": 34,
+          "distinct_dates": 26
+        },
+        "2025-10": {
+          "rows": 43,
+          "distinct_dates": 30
+        },
+        "2025-11": {
+          "rows": 36,
+          "distinct_dates": 26
+        },
+        "2025-12": {
+          "rows": 43,
+          "distinct_dates": 30
+        },
+        "2026-01": {
+          "rows": 41,
+          "distinct_dates": 27
+        },
+        "2026-02": {
+          "rows": 39,
+          "distinct_dates": 27
+        },
+        "2026-03": {
+          "rows": 31,
+          "distinct_dates": 27
+        },
+        "2026-04": {
+          "rows": 43,
+          "distinct_dates": 27
+        },
+        "2026-05": {
+          "rows": 37,
+          "distinct_dates": 27
+        },
+        "2026-06": {
+          "rows": 38,
+          "distinct_dates": 27
+        },
+        "2026-07": {
+          "rows": 37,
+          "distinct_dates": 30
+        },
+        "2026-08": {
+          "rows": 33,
+          "distinct_dates": 27
+        },
+        "2026-09": {
+          "rows": 40,
+          "distinct_dates": 30
+        },
+        "2026-10": {
+          "rows": 58,
+          "distinct_dates": 31
+        },
+        "2026-11": {
+          "rows": 14,
+          "distinct_dates": 7
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "plan_slot_history",
+      "label": "rows of each slot's `history`",
+      "date_field": "`history[].at` (when the meal was planned, changed, cleared, cooked or skipped)",
+      "tool": "platewright.plan.get (each slot carries its history)",
+      "records": 880,
+      "dated_rows": 1004,
+      "history_rows": 1004,
+      "scheduled_rows": 0,
+      "distinct_dates": 622,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-07",
+      "provenance": {
+        "synthetic, generated": 872,
+        "synthetic, hand-written": 132
+      },
+      "months": {
+        "2025-01": {
+          "rows": 46,
+          "distinct_dates": 30
+        },
+        "2025-02": {
+          "rows": 40,
+          "distinct_dates": 26
+        },
+        "2025-03": {
+          "rows": 45,
+          "distinct_dates": 30
+        },
+        "2025-04": {
+          "rows": 46,
+          "distinct_dates": 27
+        },
+        "2025-05": {
+          "rows": 40,
+          "distinct_dates": 27
+        },
+        "2025-06": {
+          "rows": 37,
+          "distinct_dates": 24
+        },
+        "2025-07": {
+          "rows": 35,
+          "distinct_dates": 28
+        },
+        "2025-08": {
+          "rows": 42,
+          "distinct_dates": 29
+        },
+        "2025-09": {
+          "rows": 42,
+          "distinct_dates": 27
+        },
+        "2025-10": {
+          "rows": 49,
+          "distinct_dates": 30
+        },
+        "2025-11": {
+          "rows": 40,
+          "distinct_dates": 27
+        },
+        "2025-12": {
+          "rows": 43,
+          "distinct_dates": 30
+        },
+        "2026-01": {
+          "rows": 41,
+          "distinct_dates": 27
+        },
+        "2026-02": {
+          "rows": 40,
+          "distinct_dates": 26
+        },
+        "2026-03": {
+          "rows": 33,
+          "distinct_dates": 27
+        },
+        "2026-04": {
+          "rows": 45,
+          "distinct_dates": 28
+        },
+        "2026-05": {
+          "rows": 40,
+          "distinct_dates": 26
+        },
+        "2026-06": {
+          "rows": 38,
+          "distinct_dates": 27
+        },
+        "2026-07": {
+          "rows": 39,
+          "distinct_dates": 30
+        },
+        "2026-08": {
+          "rows": 36,
+          "distinct_dates": 28
+        },
+        "2026-09": {
+          "rows": 40,
+          "distinct_dates": 30
+        },
+        "2026-10": {
+          "rows": 120,
+          "distinct_dates": 31
+        },
+        "2026-11": {
+          "rows": 27,
+          "distinct_dates": 7
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "recipe_history",
+      "label": "rows of each recipe's `history`",
+      "date_field": "`history[].at` (created, revised, archived, restored)",
+      "tool": "platewright.recipes.get (history and revisions); platewright.recipes.search lists the recipes",
+      "records": 66,
+      "dated_rows": 73,
+      "history_rows": 73,
+      "scheduled_rows": 0,
+      "distinct_dates": 50,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-05",
+      "provenance": {
+        "synthetic, hand-written content dated by the generator": 58,
+        "synthetic, hand-written": 15
+      },
+      "months": {
+        "2025-01": {
+          "rows": 27,
+          "distinct_dates": 4
+        },
+        "2025-02": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2025-03": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-04": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-05": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-06": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-07": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-08": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-09": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-10": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-11": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-12": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-01": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-02": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-03": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-04": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-05": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-06": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-07": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-08": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-09": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-10": {
+          "rows": 7,
+          "distinct_dates": 7
+        },
+        "2026-11": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "constraint_history",
+      "label": "rows of each member constraint's `history`",
+      "date_field": "`history[].at` (when the need was recorded, changed or ended)",
+      "tool": "platewright.household.get (members with constraints and their history)",
+      "records": 23,
+      "dated_rows": 28,
+      "history_rows": 28,
+      "scheduled_rows": 0,
+      "distinct_dates": 26,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-03",
+      "provenance": {
+        "synthetic, hand-written": 21,
+        "synthetic, generated": 7
+      },
+      "months": {
+        "2025-01": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2025-02": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-03": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2025-04": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-05": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2025-06": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-07": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-08": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2025-09": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-10": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-11": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-12": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-01": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2026-02": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-03": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-04": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2026-05": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-06": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-07": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-08": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-09": {
+          "rows": 4,
+          "distinct_dates": 3
+        },
+        "2026-10": {
+          "rows": 5,
+          "distinct_dates": 5
+        },
+        "2026-11": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "pantry_history",
+      "label": "rows of each pantry item's `history`",
+      "date_field": "`history[].at` (stocking, shops, cooking deductions)",
+      "tool": "platewright.pantry.list (include_out: true)",
+      "records": 40,
+      "dated_rows": 256,
+      "history_rows": 256,
+      "scheduled_rows": 0,
+      "distinct_dates": 78,
+      "earliest": "2025-01-02",
+      "latest": "2026-11-06",
+      "provenance": {
+        "synthetic, generated": 206,
+        "synthetic, hand-written": 50
+      },
+      "months": {
+        "2025-01": {
+          "rows": 36,
+          "distinct_dates": 4
+        },
+        "2025-02": {
+          "rows": 6,
+          "distinct_dates": 3
+        },
+        "2025-03": {
+          "rows": 12,
+          "distinct_dates": 4
+        },
+        "2025-04": {
+          "rows": 13,
+          "distinct_dates": 5
+        },
+        "2025-05": {
+          "rows": 7,
+          "distinct_dates": 3
+        },
+        "2025-06": {
+          "rows": 6,
+          "distinct_dates": 2
+        },
+        "2025-07": {
+          "rows": 7,
+          "distinct_dates": 2
+        },
+        "2025-08": {
+          "rows": 7,
+          "distinct_dates": 3
+        },
+        "2025-09": {
+          "rows": 7,
+          "distinct_dates": 2
+        },
+        "2025-10": {
+          "rows": 12,
+          "distinct_dates": 4
+        },
+        "2025-11": {
+          "rows": 6,
+          "distinct_dates": 2
+        },
+        "2025-12": {
+          "rows": 5,
+          "distinct_dates": 2
+        },
+        "2026-01": {
+          "rows": 10,
+          "distinct_dates": 3
+        },
+        "2026-02": {
+          "rows": 6,
+          "distinct_dates": 2
+        },
+        "2026-03": {
+          "rows": 5,
+          "distinct_dates": 2
+        },
+        "2026-04": {
+          "rows": 9,
+          "distinct_dates": 3
+        },
+        "2026-05": {
+          "rows": 8,
+          "distinct_dates": 3
+        },
+        "2026-06": {
+          "rows": 15,
+          "distinct_dates": 6
+        },
+        "2026-07": {
+          "rows": 8,
+          "distinct_dates": 3
+        },
+        "2026-08": {
+          "rows": 9,
+          "distinct_dates": 3
+        },
+        "2026-09": {
+          "rows": 22,
+          "distinct_dates": 4
+        },
+        "2026-10": {
+          "rows": 25,
+          "distinct_dates": 7
+        },
+        "2026-11": {
+          "rows": 15,
+          "distinct_dates": 6
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "shopping_line_history",
+      "label": "rows of each current shopping line's `history`",
+      "date_field": "`history[].at`",
+      "tool": "platewright.shopping.get",
+      "records": 36,
+      "dated_rows": 39,
+      "history_rows": 39,
+      "scheduled_rows": 0,
+      "distinct_dates": 1,
+      "earliest": "2026-11-07",
+      "latest": "2026-11-07",
+      "provenance": {
+        "synthetic, hand-written": 39
+      },
+      "months": {
+        "2025-01": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-02": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-03": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-04": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-05": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-06": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-07": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-08": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-09": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-10": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-11": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2025-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-01": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-02": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-03": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-04": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-05": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-06": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-07": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-08": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-09": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-10": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-11": {
+          "rows": 39,
+          "distinct_dates": 1
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "notifications",
+      "label": "notifications",
+      "date_field": "`at` (the event's time)",
+      "tool": "platewright.notifications.list",
+      "records": 74,
+      "dated_rows": 74,
+      "history_rows": 74,
+      "scheduled_rows": 0,
+      "distinct_dates": 68,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-07",
+      "provenance": {
+        "synthetic, generated": 60,
+        "synthetic, hand-written": 14
+      },
+      "months": {
+        "2025-01": {
+          "rows": 5,
+          "distinct_dates": 5
+        },
+        "2025-02": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2025-03": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-04": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2025-05": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-06": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-07": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2025-08": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2025-09": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-10": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-11": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-12": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-01": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-02": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-03": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2026-04": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2026-05": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2026-06": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-07": {
+          "rows": 3,
+          "distinct_dates": 2
+        },
+        "2026-08": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2026-09": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-10": {
+          "rows": 10,
+          "distinct_dates": 10
+        },
+        "2026-11": {
+          "rows": 5,
+          "distinct_dates": 3
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    },
+    {
+      "family": "activity",
+      "label": "activity rows",
+      "date_field": "`at`",
+      "tool": "none for the Agent: evaluator record, read through Infra `env.snapshot`",
+      "records": 74,
+      "dated_rows": 74,
+      "history_rows": 74,
+      "scheduled_rows": 0,
+      "distinct_dates": 68,
+      "earliest": "2025-01-01",
+      "latest": "2026-11-07",
+      "provenance": {
+        "synthetic, generated": 60,
+        "synthetic, hand-written": 14
+      },
+      "months": {
+        "2025-01": {
+          "rows": 5,
+          "distinct_dates": 5
+        },
+        "2025-02": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2025-03": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-04": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2025-05": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-06": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-07": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2025-08": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2025-09": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-10": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2025-11": {
+          "rows": 4,
+          "distinct_dates": 4
+        },
+        "2025-12": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-01": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-02": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-03": {
+          "rows": 2,
+          "distinct_dates": 2
+        },
+        "2026-04": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2026-05": {
+          "rows": 5,
+          "distinct_dates": 4
+        },
+        "2026-06": {
+          "rows": 1,
+          "distinct_dates": 1
+        },
+        "2026-07": {
+          "rows": 3,
+          "distinct_dates": 2
+        },
+        "2026-08": {
+          "rows": 3,
+          "distinct_dates": 3
+        },
+        "2026-09": {
+          "rows": 0,
+          "distinct_dates": 0
+        },
+        "2026-10": {
+          "rows": 10,
+          "distinct_dates": 10
+        },
+        "2026-11": {
+          "rows": 5,
+          "distinct_dates": 3
+        },
+        "2026-12": {
+          "rows": 0,
+          "distinct_dates": 0
+        }
+      }
+    }
+  ],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "history_rows": 160,
+      "distinct_dates": 30,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 133,
+        "synthetic, hand-written content dated by the generator": 27
+      }
+    },
+    {
+      "month": "2025-02",
+      "history_rows": 89,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 87,
+        "synthetic, hand-written content dated by the generator": 2
+      }
+    },
+    {
+      "month": "2025-03",
+      "history_rows": 107,
+      "distinct_dates": 30,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 104,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-04",
+      "history_rows": 113,
+      "distinct_dates": 28,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 110,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-05",
+      "history_rows": 96,
+      "distinct_dates": 29,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 92,
+        "synthetic, hand-written content dated by the generator": 4
+      }
+    },
+    {
+      "month": "2025-06",
+      "history_rows": 88,
+      "distinct_dates": 24,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 85,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-07",
+      "history_rows": 83,
+      "distinct_dates": 28,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 80,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-08",
+      "history_rows": 100,
+      "distinct_dates": 30,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 97,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-09",
+      "history_rows": 94,
+      "distinct_dates": 28,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 91,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-10",
+      "history_rows": 113,
+      "distinct_dates": 30,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 110,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-11",
+      "history_rows": 93,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 90,
+        "synthetic, hand-written content dated by the generator": 3
+      }
+    },
+    {
+      "month": "2025-12",
+      "history_rows": 95,
+      "distinct_dates": 31,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 94,
+        "synthetic, hand-written content dated by the generator": 1
+      }
+    },
+    {
+      "month": "2026-01",
+      "history_rows": 99,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 94,
+        "synthetic, hand-written": 5
+      }
+    },
+    {
+      "month": "2026-02",
+      "history_rows": 86,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 85,
+        "synthetic, hand-written": 1
+      }
+    },
+    {
+      "month": "2026-03",
+      "history_rows": 75,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 73,
+        "synthetic, hand-written": 2
+      }
+    },
+    {
+      "month": "2026-04",
+      "history_rows": 105,
+      "distinct_dates": 28,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 103,
+        "synthetic, hand-written": 2
+      }
+    },
+    {
+      "month": "2026-05",
+      "history_rows": 97,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 95,
+        "synthetic, hand-written": 2
+      }
+    },
+    {
+      "month": "2026-06",
+      "history_rows": 94,
+      "distinct_dates": 27,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 91,
+        "synthetic, hand-written": 3
+      }
+    },
+    {
+      "month": "2026-07",
+      "history_rows": 91,
+      "distinct_dates": 30,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 89,
+        "synthetic, hand-written": 2
+      }
+    },
+    {
+      "month": "2026-08",
+      "history_rows": 85,
+      "distinct_dates": 28,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 80,
+        "synthetic, hand-written": 5
+      }
+    },
+    {
+      "month": "2026-09",
+      "history_rows": 107,
+      "distinct_dates": 30,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 85,
+        "synthetic, hand-written": 22
+      }
+    },
+    {
+      "month": "2026-10",
+      "history_rows": 235,
+      "distinct_dates": 31,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {
+        "synthetic, generated": 46,
+        "synthetic, hand-written": 189
+      }
+    },
+    {
+      "month": "2026-11",
+      "history_rows": 109,
+      "distinct_dates": 7,
+      "scheduled_rows": 14,
+      "scheduled_dates": 8,
+      "provenance": {
+        "synthetic, hand-written": 109
+      }
+    },
+    {
+      "month": "2026-12",
+      "history_rows": 0,
+      "distinct_dates": 0,
+      "scheduled_rows": 0,
+      "scheduled_dates": 0,
+      "provenance": {}
+    }
+  ],
+  "undated": [
+    {
+      "records": "ingredients",
+      "count": 213,
+      "reason": "reference table (allergens, units, nutrition); no occurrence date"
+    },
+    {
+      "records": "substitution_rules",
+      "count": 48,
+      "reason": "reference table; no occurrence date"
+    },
+    {
+      "records": "members",
+      "count": 4,
+      "reason": "people of the household; their constraints are counted by their history rows"
+    }
+  ],
+  "excluded": {},
+  "gaps": {
+    "after_loaded_time": "History ends on 2026-11-07 (the loaded time is 2026-11-08T08:00:00-05:00). Scheduled meals are dated 2026-11-08 to 2026-11-15 (14 plan slots); they are planned, not history. No record of any kind is dated 2026-11-16 to 2026-12-31.",
+    "empty_months": [
+      "2026-12"
+    ],
+    "months_with_only_scheduled_records": [],
+    "partial_months": [
+      "2026-11"
+    ]
+  }
+}

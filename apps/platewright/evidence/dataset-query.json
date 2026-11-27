@@ -1,0 +1,167 @@
+{
+  "schema": "platewright.dataset-query.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "seed": "fixtures/reference.json",
+  "loaded": {
+    "version": {
+      "epoch": 1,
+      "revision": 0
+    },
+    "virtual_now": "2026-11-08T08:00:00-05:00",
+    "profile": "scenario"
+  },
+  "coverage_report": "evidence/dataset-coverage.json",
+  "passed": true,
+  "families": [
+    {
+      "family": "plan_slots",
+      "tool": "platewright.plan.get",
+      "calls": 18,
+      "sample": {
+        "arguments": {
+          "start": "2025-01-01",
+          "end": "2025-02-11"
+        },
+        "status": "ok",
+        "slots": 57,
+        "first": {
+          "id": "2025-01-01:dinner",
+          "state": "cooked",
+          "dishes": 1
+        }
+      },
+      "records_retrieved": 880,
+      "rows_retrieved": 880,
+      "records_in_report": 880,
+      "rows_in_report": 880,
+      "matches": true
+    },
+    {
+      "family": "plan_slot_history",
+      "tool": "platewright.plan.get",
+      "calls": 0,
+      "sample": {
+        "note": "the same calls; each slot carries its history"
+      },
+      "records_retrieved": 880,
+      "rows_retrieved": 1004,
+      "records_in_report": 880,
+      "rows_in_report": 1004,
+      "matches": true
+    },
+    {
+      "family": "recipe_history",
+      "tool": "platewright.recipes.search + platewright.recipes.get",
+      "calls": 67,
+      "sample": {
+        "arguments": {
+          "include_archived": true,
+          "limit": 100,
+          "offset": 0
+        },
+        "status": "ok",
+        "total": 66,
+        "items": 66
+      },
+      "records_retrieved": 66,
+      "rows_retrieved": 73,
+      "records_in_report": 66,
+      "rows_in_report": 73,
+      "matches": true
+    },
+    {
+      "family": "constraint_history",
+      "tool": "platewright.household.get",
+      "calls": 1,
+      "sample": {
+        "arguments": {},
+        "status": "ok",
+        "members": 4,
+        "constraints": 23
+      },
+      "records_retrieved": 23,
+      "rows_retrieved": 28,
+      "records_in_report": 23,
+      "rows_in_report": 28,
+      "matches": true
+    },
+    {
+      "family": "pantry_history",
+      "tool": "platewright.pantry.list",
+      "calls": 1,
+      "sample": {
+        "arguments": {
+          "include_out": true
+        },
+        "status": "ok",
+        "items": 40
+      },
+      "records_retrieved": 40,
+      "rows_retrieved": 256,
+      "records_in_report": 40,
+      "rows_in_report": 256,
+      "matches": true
+    },
+    {
+      "family": "shopping_line_history",
+      "tool": "platewright.shopping.get",
+      "calls": 1,
+      "sample": {
+        "arguments": {},
+        "status": "ok",
+        "lines": 36,
+        "window": [
+          "2026-11-09",
+          "2026-11-15"
+        ]
+      },
+      "records_retrieved": 36,
+      "rows_retrieved": 39,
+      "records_in_report": 36,
+      "rows_in_report": 39,
+      "matches": true
+    },
+    {
+      "family": "notifications",
+      "tool": "platewright.notifications.list",
+      "calls": 1,
+      "sample": {
+        "arguments": {},
+        "status": "ok",
+        "notifications": 74,
+        "first": {
+          "at": "2025-01-01T10:30:00-05:00",
+          "title": "Evan added a constraint"
+        }
+      },
+      "records_retrieved": 74,
+      "rows_retrieved": 74,
+      "records_in_report": 74,
+      "rows_in_report": 74,
+      "matches": true
+    },
+    {
+      "family": "activity",
+      "tool": "env.snapshot (Infra)",
+      "calls": 1,
+      "sample": {
+        "arguments": {},
+        "rows": 74
+      },
+      "records_retrieved": null,
+      "rows_retrieved": 74,
+      "records_in_report": null,
+      "rows_in_report": 74,
+      "matches": true
+    }
+  ],
+  "plan_slots_retrieved": {
+    "earliest": "2025-01-01",
+    "latest": "2026-11-15",
+    "per_year": {
+      "2025": 455,
+      "2026": 425
+    }
+  }
+}

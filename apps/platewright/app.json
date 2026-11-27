@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "app_id": "platewright",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:platewright (Junnan Li, @lijrjyan)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/reference.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "platewright.member.updated",
+    "platewright.recipe.added",
+    "platewright.plan.changed",
+    "platewright.guest.changed",
+    "platewright.pantry.changed",
+    "platewright.shopping.changed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Business web interface through the shared Web Host (contribution/gui.json); the other household members act only through events.",
+    "One household and one account per App instance.",
+    "No prices, stores, products, carts or orders; the shopping list is a record and is sent nowhere.",
+    "Nutrition values are illustrative and the suitability check is not medical, allergy or dietary advice.",
+    "No messaging in either direction; notifications stay in the App's own log."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
