@@ -1,0 +1,45 @@
+{
+  "schema_version": "pale.gui.v1",
+  "status": "implemented",
+  "surface_id": "mail-web",
+  "audience": [
+    "reviewer"
+  ],
+  "state_connection": {
+    "app_ids": [
+      "mail"
+    ],
+    "adapter": "pale.mcp_bridge",
+    "authoritative_state": "app_runtime"
+  },
+  "routes": [
+    {
+      "route_id": "main",
+      "path": "/",
+      "asset_bindings": [
+        {
+          "slot": "header.logo",
+          "asset_id": "mail-logo",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "content_policy": {
+    "untrusted_html": "text_only",
+    "svg": "disabled",
+    "remote_fetch": "disabled",
+    "remote_allowlist": [],
+    "missing_asset_behavior": "placeholder"
+  },
+  "observation": {
+    "mechanism": "screen_observation",
+    "payload_policy": "visible_surface_only"
+  },
+  "extensions": [],
+  "entrypoint": {
+    "kind": "local_web",
+    "location": "#example"
+  },
+  "renderer_ref": "gui/src/view.js"
+}
