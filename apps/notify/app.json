@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "notify",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:notify (proposal #191, @RuihongY)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "notify.reminder.fire",
+    "notify.receive",
+    "notify.focus.set",
+    "notify.device.silence",
+    "notify.feed.dismiss"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app and reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Reminders fire only when Infra applies notify.reminder.fire; the App never schedules itself.",
+    "Calendar-anchored reminders keep the fire time computed when they were set; a moved event does not move them.",
+    "Focus, silence and dismissal are user actions applied as Infra events; Core 1.2 has no separate user role.",
+    "Text only; no sounds, badges, snooze, recurrence or location triggers."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

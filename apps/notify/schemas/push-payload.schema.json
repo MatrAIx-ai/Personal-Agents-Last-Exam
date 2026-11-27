@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:push-payload:1",
+  "title": "Notify-owned phone push payload",
+  "type": "object",
+  "properties": {
+    "channel": {
+      "const": "channel.push"
+    },
+    "recipient": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "app_account_ref"
+        },
+        "app_id": {
+          "const": "notify"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "kind",
+        "app_id",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "source_object": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "object_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "app_id",
+        "object_type",
+        "object_id",
+        "account_id"
+      ],
+      "additionalProperties": false
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "body": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "actionable": {
+          "type": "boolean"
+        },
+        "deep_link": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "title",
+        "body",
+        "actionable",
+        "deep_link"
+      ],
+      "additionalProperties": false
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "namespace",
+          "version",
+          "required",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 0
+    }
+  },
+  "required": [
+    "channel",
+    "recipient",
+    "source_object",
+    "content",
+    "extensions"
+  ],
+  "additionalProperties": false
+}
