@@ -285,3 +285,18 @@ test('the Web page shows times on the phone clock, whatever the browser time zon
   assert.equal(config.subtitle(plants), 'Upcoming · Nov 18, 11:00 PM'); // 23:00 Pacific on Maya's phone
   assert.equal(config.sections().find(s => s.id === 'feed').count, false);
 });
+
+test('Calendar IDs are kept exactly as Calendar returns them (any nonempty string up to 100 characters)', () => {
+  const f = fixture();
+  const opaque = 'Team sync #7 / Room B (Thu 19 Nov) – équipe', account = 'Maya’s calendar', long = 'e'.repeat(100);
+  const anchor = event_id => ({calendar_account_id:account, calendar_event_id:event_id, event_start:'2026-11-19T09:00:00-08:00', minutes_before:15});
+  const out = f.call('notify.reminder.create', {title:'Team sync', ...anchor(opaque)});
+  assert.deepEqual(reminder(f, out.id).anchor.calendar_event_ref, {app_id:'calendar', account_id:account, event_id:opaque});
+  f.call('notify.reminder.update', {id:out.id, patch:anchor(long)});
+  assert.equal(reminder(f, out.id).anchor.calendar_event_ref.event_id, long);
+  // The harness checks arguments against tools.json, as Core does.
+  for (const bad of ['', 'e'.repeat(101)]) unchanged(f, () => f.call('notify.reminder.create', {title:'Bad', ...anchor(bad)}), /Input schema/);
+  // A seed may carry such an anchor; Notify's own IDs keep their stricter rule.
+  assert.doesNotThrow(() => plugin.validateSeed(f.ctx, f.data));
+  unchanged(f, () => f.call('notify.reminder.get', {id:'not a notify id'}), /Input schema/);
+});

@@ -11,6 +11,7 @@ const {due, fireEvent} = require('../../../apps/notify/src/due.cjs');
 const root = path.resolve(__dirname, '../../..');
 const registry = path.join(root, 'registry.notify.json');
 const copy = value => structuredClone(value);
+const OPAQUE_ID = 'Team sync #7 / Room B (Thu 19 Nov) – équipe';
 
 async function run() {
   const state = fs.mkdtempSync(path.join(os.tmpdir(), 'pale-calendar-reminder-'));
@@ -76,6 +77,17 @@ async function run() {
 
     await bind(notifyInfra, [tripsBinding]);
     await sandbox(notifyInfra); await sandbox(calendarInfra);
+    // Calendar IDs are opaque (any nonempty string up to 100 characters). Give Calendar an event whose ID
+    // Notify's own ID rule would refuse, to check that Notify keeps it exactly as calendar.get returns it.
+    {
+      const s = await calendarInfra.call('env.snapshot'), data = copy(s.snapshot.data);
+      data.events.push({...copy(data.events[0]), id:OPAQUE_ID, uid:'team-sync-7@pale.example', title:'Team sync',
+        start:'2026-11-19T09:00:00-08:00', end:'2026-11-19T09:30:00-08:00', attachments:[]});
+      const bundle = copy(s.snapshot.resources.bundle); bundle.dataset.expected_counts.records++;
+      const seeded = await calendarInfra.call('env.load_seed', {expected_version:s.version, request_id:'opaque-calendar-id', data,
+        binding:copy(s.snapshot.binding), policies:copy(s.snapshot.policies), bundle});
+      assert.equal(seeded.status, 'ready', JSON.stringify(seeded));
+    }
 
     // 1. The Agent puts a flight on the calendar and asks for an alert 15 minutes before it.
     const event = await write(calendar, calendarInfra, 'calendar.create', {title:'Flight to Denver', start:'2026-11-18T16:00:00-08:00',
@@ -122,12 +134,21 @@ async function run() {
     equal('A push inside focus is stored as silenced', (await notify.call('notify.feed.list', {})).items.find(f => f.id === night.event_id).delivery, 'silenced');
     equal('Agent can read why the phone is quiet', (await notify.call('notify.focus.get', {})).focus_id, 'focus-sleep');
 
-    // 5. Notify never wrote to Calendar; a moved event does not move an existing reminder.
+    // 5. A Calendar event ID outside Notify's ID rule is stored and read back exactly, and its reminder fires.
+    const opaque = (await calendar.call('calendar.get', {id:OPAQUE_ID})).event;
+    const anchored = await write(notify, notifyInfra, 'notify.reminder.create', {title:'Team sync in 15 minutes', body:'',
+      calendar_account_id:opaque.account_id, calendar_event_id:opaque.id, event_start:opaque.start, minutes_before:15});
+    equal('An opaque Calendar event ID survives storage and readback', (await notify.call('notify.reminder.get', {id:anchored.id})).item.anchor.calendar_event_ref,
+      {app_id:'calendar', account_id:opaque.account_id, event_id:OPAQUE_ID});
+    equal('The reminder for that event fires at its time', await fireDue(notifyInfra, '2026-11-19T09:00:00-08:00'), [anchored.id]);
+    equal('It is delivered (08:45 Thursday is outside both focus windows)', (await notify.call('notify.reminder.get', {id:anchored.id})).item.status, 'delivered');
+
+    // 6. Notify never wrote to Calendar; a moved event does not move an existing reminder.
     equal('Calendar state is untouched by Notify', (await calendarInfra.call('env.snapshot')).snapshot.data, calendarAfterCreate);
     await write(calendar, calendarInfra, 'calendar.update', {id:event.id, patch:{start:'2026-11-18T19:05:00-08:00', end:'2026-11-18T21:30:00-08:00'}});
     equal('Reminder keeps the time computed when it was set', (await notify.call('notify.reminder.get', {id:reminder.id})).item.fire_at, reminder.fire_at);
 
-    // 6. A sender that is not bound to the device owner is refused by the receiver, with no partial record.
+    // 7. A sender that is not bound to the device owner is refused by the receiver, with no partial record.
     const strangerInfra = await open('notify', 'infra', 'unbound-sender');
     const strangerBefore = (await strangerInfra.call('env.snapshot')).snapshot.data;
     const strangerBridge = await router('unbound-sender');

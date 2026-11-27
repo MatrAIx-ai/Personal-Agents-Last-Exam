@@ -9,6 +9,9 @@ const root = path.resolve(__dirname, '..');
 
 const ID = {type:'string', pattern:'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$'};
 const LONG_ID = {type:'string', pattern:'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$'};
+// Calendar owns its account and event IDs: any nonempty string up to 100 characters (Calendar seed schema).
+// Notify keeps them exactly as calendar.get returns them; ID stays the rule for Notify-owned IDs.
+const CALENDAR_ID = {type:'string', minLength:1, maxLength:100};
 const DT = {type:'string', format:'date-time'};
 const NULLABLE_DT = {anyOf:[DT, {type:'null'}]};
 const text = (min, max) => ({type:'string', minLength:min, maxLength:max});
@@ -21,7 +24,7 @@ const DAYS = {type:'array', items:{enum:['mon','tue','wed','thu','fri','sat','su
 const FOCUS_WINDOW = object({id:ID, label:text(1, 80), days:DAYS, start:CLOCK, end:CLOCK});
 const FOCUS_LIST = {type:'array', items:FOCUS_WINDOW, maxItems:20};
 const DEEP_LINK = {anyOf:[{type:'string', minLength:1, maxLength:512, pattern:'^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$'}, {type:'null'}]};
-const CALENDAR_REF = object({app_id:{const:'calendar'}, account_id:ID, event_id:ID},['app_id','account_id','event_id']);
+const CALENDAR_REF = object({app_id:{const:'calendar'}, account_id:CALENDAR_ID, event_id:CALENDAR_ID},['app_id','account_id','event_id']);
 const ANCHOR = {anyOf:[object({
   calendar_event_ref:CALENDAR_REF,
   event_start:{...DT, description:'Event start as read with calendar.get when the reminder was set. Notify does not read Calendar itself.'},
@@ -86,8 +89,8 @@ function events(message) {
 const WRITE = {expected_version:VERSION, request_id:ID};
 // Calendar anchor as flat optional inputs: give all four or none.
 const ANCHOR_INPUT = {
-  calendar_account_id:{...ID, description:'Calendar account of the event (from calendar.get).'},
-  calendar_event_id:{...ID, description:'Calendar event ID to anchor to.'},
+  calendar_account_id:{...CALENDAR_ID, description:'Calendar account of the event, exactly as calendar.get returns it.'},
+  calendar_event_id:{...CALENDAR_ID, description:'Calendar event ID to anchor to, exactly as calendar.get returns it.'},
   event_start:{...DT, description:'The event start as read with calendar.get. Notify does not read Calendar itself.'},
   minutes_before:{type:'integer', minimum:0, maximum:10080}
 };
