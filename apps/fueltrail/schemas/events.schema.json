@@ -1,0 +1,24 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"urn:pale:fueltrail:events:1",
+  "oneOf":[
+    {
+      "type":"object","properties":{
+        "event_id":{"$ref":"domain.schema.json#/$defs/id"},"at":{"type":"string","format":"date-time"},"operation":{"const":"fuel.price_observed"},
+        "payload":{"type":"object","properties":{"station_id":{"$ref":"domain.schema.json#/$defs/id"},"grade":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"price_type":{"enum":["cash","credit"]},"price_mills":{"type":"integer","minimum":500,"maximum":20000},"reason":{"type":"string","minLength":1,"maxLength":120}},"required":["station_id","grade","price_type","price_mills","reason"],"additionalProperties":false}
+      },"required":["event_id","at","operation","payload"],"additionalProperties":false
+    },
+    {
+      "type":"object","properties":{
+        "event_id":{"$ref":"domain.schema.json#/$defs/id"},"at":{"type":"string","format":"date-time"},"operation":{"const":"fuel.station_status_changed"},
+        "payload":{"type":"object","properties":{"station_id":{"$ref":"domain.schema.json#/$defs/id"},"status":{"enum":["open","closed"]},"reason":{"type":"string","minLength":1,"maxLength":120}},"required":["station_id","status","reason"],"additionalProperties":false}
+      },"required":["event_id","at","operation","payload"],"additionalProperties":false
+    },
+    {
+      "type":"object","properties":{
+        "event_id":{"$ref":"domain.schema.json#/$defs/id"},"at":{"type":"string","format":"date-time"},"operation":{"const":"fuel.station_details_changed"},
+        "payload":{"type":"object","properties":{"station_id":{"$ref":"domain.schema.json#/$defs/id"},"patch":{"type":"object","properties":{"brand":{"type":"string","minLength":1,"maxLength":80},"open_24h":{"type":"boolean"},"amenities":{"type":"array","items":{"enum":["restroom","air","car_wash","convenience_store","accessible","truck_access"]},"uniqueItems":true,"maxItems":6},"grades":{"type":"array","items":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"uniqueItems":true,"minItems":1,"maxItems":6}},"minLength":1,"additionalProperties":false},"reason":{"type":"string","minLength":1,"maxLength":120}},"required":["station_id","patch","reason"],"additionalProperties":false}
+      },"required":["event_id","at","operation","payload"],"additionalProperties":false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"urn:pale:fueltrail:seed:1",
+  "type":"object",
+  "properties":{
+    "account_id":{"$ref":"domain.schema.json#/$defs/id"},
+    "owner_person_id":{"$ref":"domain.schema.json#/$defs/id"},
+    "settings":{"type":"object","properties":{"email_alerts_enabled":{"type":"boolean"},"mail_account_id":{"$ref":"domain.schema.json#/$defs/nullableId"}},"required":["email_alerts_enabled","mail_account_id"],"additionalProperties":false},
+    "places":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/place"},"minItems":1,"maxItems":100},
+    "stations":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/station"},"minItems":1,"maxItems":1000},
+    "price_observations":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/observation"},"maxItems":10000},
+    "vehicles":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/vehicle"},"minItems":1,"maxItems":100},
+    "price_alerts":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/alert"},"maxItems":1000},
+    "notifications":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/notification"},"maxItems":5000},
+    "fuel_logs":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/fuelLog"},"maxItems":10000},
+    "previews":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/preview"},"maxItems":1000},
+    "processed_event_ids":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/id"},"uniqueItems":true,"maxItems":10000}
+  },
+  "required":["account_id","owner_person_id","settings","places","stations","price_observations","vehicles","price_alerts","notifications","fuel_logs","previews","processed_event_ids"],
+  "additionalProperties":false
+}

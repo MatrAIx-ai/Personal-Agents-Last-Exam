@@ -1,0 +1,15 @@
+{
+  "schema_version":"pale.dataset.v1",
+  "dataset_id":"fueltrail-synthetic-v1",
+  "version":"1.0.0",
+  "description":"Deterministic hand-authored and generated synthetic stations, prices, vehicles, alerts, notifications and fuel logs for Fueltrail acceptance.",
+  "record_source_ids":["authored-synthetic"],
+  "sources":[{
+    "source_id":"authored-synthetic","kind":"synthetic","description":"Original fictional records generated locally; public GasBuddy help pages informed workflow categories only.","uri":null,"license":"MIT","usage":"permitted","collection":null,
+    "generation":{"method":"deterministic script","tool":"apps/fueltrail/scripts/generate-fixtures.cjs","tool_version":"1.0.0","seed":"fueltrail-v1","parameters":{"stations":30,"price_observations":120,"vehicles":3,"alerts":8,"fuel_logs":24}}
+  }],
+  "transformations":["Integer-normalized prices, amounts, volumes and odometers; fictional names and places; timestamps constrained to 2026."],
+  "expected_counts":{"records":190,"assets":0},
+  "quality_policy":{"duplicate_records":"reject","duplicate_assets":"reject","missing_assets":"reject"},
+  "review":{"status":"pending","reviewer":null,"notes":"Automated checks do not replace human review of realism and workflow quality."}
+}
