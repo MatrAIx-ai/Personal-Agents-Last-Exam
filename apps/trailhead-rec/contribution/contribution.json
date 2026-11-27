@@ -1,0 +1,250 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "trailhead-rec",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "trailhead-rec.program.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.program.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.household.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.household.update_member",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.preview",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.enroll",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.accept_offer",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.decline_offer",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.withdraw",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.court.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.court.list_bookings",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.court.book",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.court.cancel",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.enrollment.transfer",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "trailhead-rec.court.booking.modify",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check returning Core stale_version",
+    "commit_confirmation": "Core status=committed + epoch/revision plus App-owned confirmation_code; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "waitlist.spot_opened",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "facility.weather_closure",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "member.waiver_status_changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "program.schedule_changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": true,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "audio/mpeg",
+      "audio/wav",
+      "video/mp4",
+      "application/json",
+      "application/pdf",
+      "text/plain",
+      "text/calendar"
+    ],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}

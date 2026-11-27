@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "trailhead-rec",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR #145 tagged app:trailhead-rec (@Hoyant-Su)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "waitlist.spot_opened",
+    "facility.weather_closure",
+    "member.waiver_status_changed",
+    "program.schedule_changed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Waiver statuses change only via the Infra event member.waiver_status_changed; no Agent tool can sign or restore a waiver.",
+    "Outbound channel.email publishing is invoked explicitly after commit via src/publisher.cjs and Messaging router; advancing virtual time never dispatches Mail automatically."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
