@@ -65,12 +65,10 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
       inWindowByMonth[rep.month_key] = (inWindowByMonth[rep.month_key] || 0) + 1;
     }
 
-    // Separate represented document date from simulated ingestion timestamp.
-    // Only day-precision extracted dates map to an exact ISO timestamp; month-only
-    // and unresolved records use the explicit synthetic ingestion timestamp for
-    // Core schema fields while preserving exact represented_date + precision.
+    // Use one unambiguous synthetic availability/ingestion timestamp strictly before
+    // the first session across all Core fields, while keeping represented_date separate.
     const ingestedAt = SYNTHETIC_INGESTION_AT;
-    const recordTimestamp = rep.precision === 'day' ? `${rep.value}T09:00:00-08:00` : ingestedAt;
+    const recordTimestamp = ingestedAt;
 
     documents.push({
       id,
@@ -94,7 +92,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
           provenance: rep.provenance
         },
         ingested_at: ingestedAt,
-        ingestion_provenance: rep.precision === 'day' ? 'represented_day_anchor' : 'synthetic_ingestion_fallback'
+        ingestion_provenance: 'synthetic_availability_before_session'
       },
       created_at: recordTimestamp,
       updated_at: recordTimestamp,

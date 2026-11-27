@@ -11,14 +11,42 @@ function sha256Hex(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
 }
 
-function computeProposalHash({ target_type, target_id, expected_version, proposed_changes }) {
+function computeProposalHash({ target_type, target_id, expected_version, target_state_hash, proposed_changes }) {
   const canonical = JSON.stringify({
     target_type,
     target_id,
     expected_version: expected_version ?? null,
+    target_state_hash: target_state_hash || null,
     proposed_changes: proposed_changes || {}
   });
   return sha256Hex(Buffer.from(canonical, 'utf8'));
+}
+
+function computeTargetStateHash(targetType, target, parentDoc) {
+  if (targetType === 'document_metadata') {
+    return sha256Hex(Buffer.from(JSON.stringify({
+      title: target.title,
+      category: target.category,
+      tags: target.tags || [],
+      valid_until: target.valid_until ?? null,
+      verification_state: target.verification_state,
+      current_version_number: target.current_version_number
+    }), 'utf8'));
+  }
+  if (targetType === 'claim') {
+    return sha256Hex(Buffer.from(JSON.stringify({
+      document_id: target.document_id,
+      version_number: target.version_number,
+      extraction_revision: target.extraction_revision,
+      start_offset: target.start_offset,
+      end_offset: target.end_offset,
+      cited_text: target.cited_text,
+      claim_text: target.claim_text,
+      verification_state: target.verification_state,
+      parent_doc_version: parentDoc ? parentDoc.current_version_number : null
+    }), 'utf8'));
+  }
+  return null;
 }
 
 function extractFieldsFromText(text) {
@@ -116,6 +144,7 @@ module.exports = {
   fail,
   sha256Hex,
   computeProposalHash,
+  computeTargetStateHash,
   extractFieldsFromText,
   decodeAndExtract,
   validateSeed,

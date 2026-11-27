@@ -488,9 +488,10 @@
         },
         "proposal_id": { "type": "string" },
         "proposal_status": { "const": "PENDING" },
-        "proposal_hash": { "type": "string" }
+        "proposal_hash": { "type": "string" },
+        "target_state_hash": { "type": "string" }
       },
-      "required": ["status", "app_id", "version", "proposal_id", "proposal_status", "proposal_hash"],
+      "required": ["status", "app_id", "version", "proposal_id", "proposal_status", "proposal_hash", "target_state_hash"],
       "additionalProperties": false
     }
   },
@@ -507,6 +508,7 @@
         "decision": { "type": "string", "enum": ["APPROVE", "REJECT", "CANCEL"] },
         "expected_proposal_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "expected_target_version": { "type": "integer", "minimum": 1 },
+        "expected_target_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "rejection_reason": { "type": "string" },
         "expected_version": {
           "type": "object",

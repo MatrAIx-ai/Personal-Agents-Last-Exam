@@ -12,8 +12,8 @@
 ## Confirmation Boundary & UI Surfaces
 
 - **Trusted User Confirmation Path:**
-  - `personal-records.propose_update` (allowed in `scenario` policy) records a `PENDING` proposal with a deterministic `proposal_hash` (SHA-256 of `{ target_type, target_id, expected_version, proposed_changes }`) without mutating base records.
-  - `personal-records.confirm_update` is **denied** in `scenario` policy (`permission_denied` for Agent-only runs). Independent user decisions are delivered via `env.apply_event` (`personal-records.confirm_decision`) or a trusted user session, binding `proposal_id`, `expected_proposal_hash`, and `expected_target_version`. Stale versions (`stale_proposal_version`), hash mismatches (`proposal_mismatch`), and replayed decisions (`invalid_state`) are rejected.
+  - `personal-records.propose_update` (allowed in `scenario` policy) validates a nonempty, target-specific set of editable fields (`document_metadata` or `claim`) and records a `PENDING` proposal bound to `expected_target_version`, `target_state_hash`, and `proposal_hash` without mutating base records.
+  - `personal-records.confirm_update` is **denied** in `scenario` policy (`permission_denied` for Agent-only runs). Independent user decisions are delivered exclusively via `env.apply_event` (`personal-records.confirm_decision`), binding `proposal_id`, `expected_proposal_hash`, `expected_target_version`, and `expected_target_state_hash`. Stale versions/state (`stale_proposal_version`), hash mismatches (`proposal_mismatch`), and replayed decisions (`invalid_state`) are rejected.
 - **UI Surfaces:**
   - **Reviewer Renderer (`contribution/gui.json`):** `pale.gui.v1` declaration (`audience: ["reviewer"]`).
   - **Interactive Web Host UI (`gui/host.html`, `gui/src/app.js`):** Served by `runtime/web/server.cjs` via `/shared/client.js`. Uses `sandbox` policy for local interactive preview only (not as proof of independent user authority).
@@ -21,9 +21,9 @@
 
 ## Connected Apps: Delivered vs. Deferred
 
-- **Delivered in v1:** `personal-records.import_from_source` ingests caller-supplied `source_payload` (bytes, MIME, source reference). Cross-App reads against pinned `mail@1.3.0` (`mail.get`, `mail.attachment.get`) and `files@1.0.0` (`files.read`) are verified when `--with` sibling packages are supplied.
+- **Delivered in v1:** `personal-records.import_from_source` ingests caller-supplied `source_payload` bytes and metadata.
 - **Mock-Only / Deferred in v1:** `app.json` declares `dependencies: []` and `real_delivery: false`.
-  - **Calendar (`1.3.0`) & Contacts (`1.0.0`) lookups:** Simulated only in standalone tests (`fixtures/peer-apps.json`, `src/adapters.cjs`); **deferred** from the Node 18 PALE runtime.
+  - **Live Mail (`mail.get`, `mail.attachment.get`), Files (`files.read`), Calendar (`1.3.0`), & Contacts (`1.0.0`) reads:** Simulated only in standalone tests (`fixtures/peer-apps.json`, `src/adapters.cjs`); **deferred** from the Node 18 PALE v1 runtime.
   - **Outbound Mail (`urn:pale:email-message:2`):** **Deferred** (`messaging.publishes: []`); expiry and discrepancy alerts persist CloudEvent-shaped records in `data.notifications` without live router delivery.
 
 ## Verification & Dataset Commands

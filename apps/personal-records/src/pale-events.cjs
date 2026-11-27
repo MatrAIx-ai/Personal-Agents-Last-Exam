@@ -119,6 +119,7 @@ function applyEvent(ctx, data, event) {
       decision: payload.decision,
       expected_proposal_hash: payload.expected_proposal_hash,
       expected_target_version: payload.expected_target_version,
+      expected_target_state_hash: payload.expected_target_state_hash,
       rejection_reason: payload.rejection_reason
     });
     return out.data;

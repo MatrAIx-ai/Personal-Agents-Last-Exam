@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
-const { fail, decodeAndExtract, computeProposalHash } = require('./pale-model.cjs');
+const { fail, decodeAndExtract, computeProposalHash, computeTargetStateHash } = require('./pale-model.cjs');
 
 function nextId(prefix, existing) {
   let n = existing.length + 1;
@@ -337,14 +337,29 @@ function handleTool(ctx, data, name, args) {
     }
 
     case 'personal-records.propose_update': {
-      if (args.target_type === 'document_metadata') {
-        const doc = data.documents.find(d => d.id === args.target_id);
-        if (!doc) fail('not_found', `Target document ${args.target_id} not found`);
-      } else if (args.target_type === 'claim') {
-        const claim = data.claims.find(c => c.id === args.target_id);
-        if (!claim) fail('not_found', `Target claim ${args.target_id} not found`);
-      } else {
+      const allowedFields = {
+        document_metadata: ['title', 'category', 'tags', 'valid_until', 'verification_state'],
+        claim: ['claim_text', 'verification_state']
+      };
+      const allowed = allowedFields[args.target_type];
+      if (!allowed) {
         fail('invalid_arguments', `Unsupported target_type in v1: ${args.target_type}`);
+      }
+      const changeKeys = Object.keys(args.proposed_changes || {});
+      if (changeKeys.length === 0 || changeKeys.some(k => !allowed.includes(k))) {
+        fail('invalid_arguments', `proposed_changes must be a nonempty subset of [${allowed.join(', ')}] for ${args.target_type}`);
+      }
+
+      let targetObj = null;
+      let parentDoc = null;
+      if (args.target_type === 'document_metadata') {
+        targetObj = data.documents.find(d => d.id === args.target_id);
+        if (!targetObj) fail('not_found', `Target document ${args.target_id} not found`);
+        parentDoc = targetObj;
+      } else {
+        targetObj = data.claims.find(c => c.id === args.target_id);
+        if (!targetObj) fail('not_found', `Target claim ${args.target_id} not found`);
+        parentDoc = data.documents.find(d => d.id === targetObj.document_id);
       }
 
       const proposalId = nextId('prop', data.proposals);
@@ -352,10 +367,12 @@ function handleTool(ctx, data, name, args) {
       if (typeof expectedTargetVer !== 'number' || expectedTargetVer < 1) {
         fail('invalid_arguments', 'expected_target_version is required to bind proposal to target revision');
       }
+      const targetStateHash = computeTargetStateHash(args.target_type, targetObj, parentDoc);
       const proposalHash = computeProposalHash({
         target_type: args.target_type,
         target_id: args.target_id,
         expected_version: expectedTargetVer,
+        target_state_hash: targetStateHash,
         proposed_changes: args.proposed_changes
       });
       data.proposals.push({
@@ -368,6 +385,7 @@ function handleTool(ctx, data, name, args) {
         proposed_changes: args.proposed_changes,
         rationale: args.rationale,
         proposal_hash: proposalHash,
+        target_state_hash: targetStateHash,
         status: 'PENDING',
         rejection_reason: null,
         created_at: now,
@@ -379,7 +397,8 @@ function handleTool(ctx, data, name, args) {
         result: {
           proposal_id: proposalId,
           proposal_status: 'PENDING',
-          proposal_hash: proposalHash
+          proposal_hash: proposalHash,
+          target_state_hash: targetStateHash
         }
       };
     }
@@ -401,15 +420,17 @@ function handleTool(ctx, data, name, args) {
         fail('unbound_proposal', `Proposal ${args.proposal_id} is missing target version binding`);
       }
 
-      // Validate target & version BEFORE any mutation (including REJECT/CANCEL or APPROVE)
+      // Validate target, version, and editable target state fingerprint BEFORE any mutation
       let targetDoc = null;
       let targetClaim = null;
+      let currentTargetStateHash = null;
       if (proposal.target_type === 'document_metadata') {
         targetDoc = data.documents.find(d => d.id === proposal.target_id);
         if (!targetDoc) fail('not_found', `Target document ${proposal.target_id} not found`);
         if (proposal.expected_version !== targetDoc.current_version_number) {
           fail('stale_proposal_version', `Document version changed while proposal was pending`);
         }
+        currentTargetStateHash = computeTargetStateHash('document_metadata', targetDoc, targetDoc);
       } else if (proposal.target_type === 'claim') {
         targetClaim = data.claims.find(c => c.id === proposal.target_id);
         if (!targetClaim) fail('not_found', `Target claim ${proposal.target_id} not found`);
@@ -417,8 +438,16 @@ function handleTool(ctx, data, name, args) {
         if (!targetDoc || proposal.expected_version !== targetDoc.current_version_number) {
           fail('stale_proposal_version', `Parent document version changed while claim proposal was pending`);
         }
+        currentTargetStateHash = computeTargetStateHash('claim', targetClaim, targetDoc);
       } else {
         fail('invalid_state', `Unsupported target_type in v1: ${proposal.target_type}`);
+      }
+
+      if (args.expected_target_state_hash && args.expected_target_state_hash !== currentTargetStateHash) {
+        fail('stale_proposal_version', `Editable target state changed while proposal was pending`);
+      }
+      if (proposal.target_state_hash && proposal.target_state_hash !== currentTargetStateHash) {
+        fail('stale_proposal_version', `Target state fingerprint no longer matches proposal`);
       }
 
       if (args.decision === 'REJECT' || args.decision === 'CANCEL') {
