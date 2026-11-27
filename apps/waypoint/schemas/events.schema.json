@@ -1,0 +1,407 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:waypoint:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "waypoint.receive"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "recipient_account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "message": {
+              "$id": "urn:pale:loyalty-credit-message:1",
+              "title": "CloudEvents with loyalty credit payload v1",
+              "description": "CloudEvents JSON envelope; PALE requires JSON object data, dataschema and an absolute source URI. No binary/batch or custom context extensions in this profile. MCP wrapping is a PALE convention, not a standard CloudEvents MCP binding.",
+              "type": "object",
+              "properties": {
+                "specversion": {
+                  "const": "1.0"
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "source": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+                  "maxLength": 512
+                },
+                "type": {
+                  "const": "org.pale.loyalty.credit.v1"
+                },
+                "time": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "subject": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "datacontenttype": {
+                  "const": "application/json"
+                },
+                "dataschema": {
+                  "const": "urn:pale:loyalty-credit:1"
+                },
+                "data": {
+                  "$id": "urn:pale:loyalty-credit:1",
+                  "title": "Loyalty points credit payload",
+                  "type": "object",
+                  "properties": {
+                    "channel": {
+                      "const": "channel.loyalty-credit"
+                    },
+                    "recipient": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "app_account_ref"
+                        },
+                        "app_id": {
+                          "enum": [
+                            "waypoint",
+                            "skyline",
+                            "harbor"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "app_id",
+                        "id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "source_object": {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "const": "waypoint"
+                        },
+                        "account_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "object_type": {
+                          "enum": [
+                            "transfer",
+                            "combine"
+                          ]
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "object_type",
+                        "object_id",
+                        "account_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "partner_transfer",
+                            "household_combine"
+                          ]
+                        },
+                        "member_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "member_number": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 40
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "points": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10000000
+                        },
+                        "base_points": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10000000
+                        },
+                        "bonus_pct": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 200
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "member_person_id",
+                        "member_number",
+                        "points",
+                        "base_points",
+                        "bonus_pct"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "extensions": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  },
+                  "required": [
+                    "channel",
+                    "recipient",
+                    "source_object",
+                    "content",
+                    "extensions"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "specversion",
+                "id",
+                "source",
+                "type",
+                "datacontenttype",
+                "dataschema",
+                "data"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "recipient_account_id",
+            "message"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "waypoint.transfer.settle"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "transfer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "outcome": {
+              "enum": [
+                "credited",
+                "rejected"
+              ]
+            },
+            "receipt": {
+              "type": "object",
+              "properties": {
+                "event_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "target_app_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "target_account_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                }
+              },
+              "required": [
+                "event_id",
+                "target_app_id",
+                "target_account_id"
+              ],
+              "additionalProperties": false
+            },
+            "rejection": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "code",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "transfer_id",
+            "outcome"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "waypoint.bonus.start"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "bonus": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "partner_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "percent": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                },
+                "starts_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "ends_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "partner_id",
+                "percent",
+                "starts_at",
+                "ends_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "bonus"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "waypoint.bonus.end"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "bonus_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "bonus_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

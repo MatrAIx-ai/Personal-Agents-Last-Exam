@@ -1,0 +1,1774 @@
+[
+  {
+    "name": "harbor.account",
+    "description": "Read the Harbor account: points balance, member number, last qualifying activity, when points expire after inactivity, any forfeiture, free-night certificates, payment labels, the points ledger and charges. Reading changes nothing.",
+    "read_only": true,
+    "scope": "harbor.account",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "member_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "balance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "last_activity_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "forfeited_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inactivity_months": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "payment_labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Opaque payment label, one of the account's payment_labels."
+          },
+          "maxItems": 20
+        },
+        "certificates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "category_cap": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8
+              },
+              "expires_on": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Last allowed check-in date."
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "used",
+                  "expired"
+                ]
+              },
+              "reservation_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "id",
+              "category_cap",
+              "expires_on",
+              "status",
+              "reservation_id",
+              "created_at",
+              "updated_at",
+              "history"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "ledger": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "kind": {
+                "enum": [
+                  "opening",
+                  "redeem",
+                  "refund",
+                  "transfer_in",
+                  "expire"
+                ]
+              },
+              "points": {
+                "type": "integer",
+                "minimum": -100000000,
+                "maximum": 100000000
+              },
+              "balance_after": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reservation_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "reservation_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "app_id": {
+                        "const": "waypoint"
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "object_type": {
+                        "enum": [
+                          "transfer",
+                          "combine"
+                        ]
+                      },
+                      "object_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "message_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                      },
+                      "sent_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "app_id",
+                      "account_id",
+                      "object_type",
+                      "object_id",
+                      "message_id",
+                      "sent_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind",
+              "points",
+              "balance_after",
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        },
+        "charges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "description": "Opaque payment label, one of the account's payment_labels."
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": -100000000,
+                "maximum": 100000000,
+                "description": "Signed amount; refunds are negative."
+              },
+              "currency": {
+                "const": "USD"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reservation_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "reservation_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "label",
+              "amount_cents",
+              "currency",
+              "description",
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account_id",
+        "member_number",
+        "balance",
+        "last_activity_at",
+        "expires_at",
+        "forfeited_at",
+        "inactivity_months",
+        "payment_labels",
+        "certificates",
+        "ledger",
+        "charges"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "harbor.search",
+    "description": "Search hotels in a city for a stay. Each hotel shows the category in effect now and any announced future change, the price of the whole stay in points, Points + Cash (when offered) and cash, whether award nights are available (no blackout night), and which active certificates could pay for it (1 night, category within the cap, check-in on or before the certificate's last check-in date). Reading changes nothing.",
+    "read_only": true,
+    "scope": "harbor.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "check_in": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local check-in date at the hotel."
+        },
+        "check_out": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local check-out date; after check_in, at most 30 nights."
+        }
+      },
+      "required": [
+        "city",
+        "check_in",
+        "check_out"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "check_in": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+        },
+        "check_out": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+        },
+        "nights": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "priced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hotels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hotel_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "timezone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "category": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "Category in effect now; a booking now is priced and locked at this category."
+              },
+              "upcoming_category_change": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "category": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 8
+                      },
+                      "effective_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "announced_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "category",
+                      "effective_at",
+                      "announced_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "dates_open": {
+                "type": "boolean",
+                "description": "False when check-in is not after today's date at the hotel."
+              },
+              "award_available": {
+                "type": "boolean",
+                "description": "False when any night of the stay is a blackout date (points, certificate and Points + Cash)."
+              },
+              "blackout_nights": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+                },
+                "maxItems": 30
+              },
+              "prices": {
+                "type": "object",
+                "properties": {
+                  "points": {
+                    "type": "object",
+                    "properties": {
+                      "points": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      }
+                    },
+                    "required": [
+                      "points"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "points_cash": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "points": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000000
+                          },
+                          "cash_cents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000000
+                          }
+                        },
+                        "required": [
+                          "points",
+                          "cash_cents"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "cash": {
+                    "type": "object",
+                    "properties": {
+                      "cash_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      }
+                    },
+                    "required": [
+                      "cash_cents"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "points",
+                  "points_cash",
+                  "cash"
+                ],
+                "additionalProperties": false
+              },
+              "eligible_certificate_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "hotel_id",
+              "name",
+              "city",
+              "timezone",
+              "category",
+              "upcoming_category_change",
+              "dates_open",
+              "award_available",
+              "blackout_nights",
+              "prices",
+              "eligible_certificate_ids"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "city",
+        "check_in",
+        "check_out",
+        "nights",
+        "priced_at",
+        "hotels"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "harbor.book",
+    "description": "Book a stay. payment.method is points, certificate (give certificate_id; exactly 1 night), points_cash or cash (give payment_label for both). Check-in must be after today's date at the hotel. Award methods need every night free of blackout dates. The price uses the category in effect now and is locked on the reservation. Points and Points + Cash redemptions count as account activity; cash and certificate stays do not.",
+    "read_only": false,
+    "scope": "harbor.book",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hotel_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "check_in": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local check-in date at the hotel."
+        },
+        "check_out": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local check-out date; after check_in, at most 30 nights."
+        },
+        "payment": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "enum": [
+                "points",
+                "certificate",
+                "points_cash",
+                "cash"
+              ]
+            },
+            "certificate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "description": "Opaque payment label, one of the account's payment_labels."
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "hotel_id",
+        "check_in",
+        "check_out",
+        "payment",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "confirmation": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{6,12}$"
+        },
+        "category_locked": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "nights": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "cash_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "charge_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "certificate_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "balance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "last_activity_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notice_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "confirmation",
+        "category_locked",
+        "nights",
+        "points",
+        "cash_cents",
+        "charge_id",
+        "certificate_id",
+        "balance",
+        "last_activity_at",
+        "notice_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "harbor.reservations",
+    "description": "List reservations, optionally by status, in check-in order; give id to read one reservation (also returned as item). Reading changes nothing.",
+    "read_only": true,
+    "scope": "harbor.reservations",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "confirmed",
+            "cancelled"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "confirmation": {
+                "type": "string",
+                "pattern": "^[A-Z0-9]{6,12}$"
+              },
+              "hotel_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "check_in": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+              },
+              "check_out": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+              },
+              "nights": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "status": {
+                "enum": [
+                  "confirmed",
+                  "cancelled"
+                ]
+              },
+              "payment": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "enum": [
+                      "points",
+                      "certificate",
+                      "points_cash",
+                      "cash"
+                    ]
+                  },
+                  "certificate_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "payment_label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80,
+                        "description": "Opaque payment label, one of the account's payment_labels."
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "method",
+                  "certificate_id",
+                  "payment_label"
+                ],
+                "additionalProperties": false
+              },
+              "category_locked": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8,
+                "description": "Category in effect when the reservation was booked; later changes do not reprice it."
+              },
+              "points": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "cash_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "charge_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 10
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "id",
+              "confirmation",
+              "hotel_id",
+              "check_in",
+              "check_out",
+              "nights",
+              "status",
+              "payment",
+              "category_locked",
+              "points",
+              "cash_cents",
+              "charge_ids",
+              "created_at",
+              "updated_at",
+              "history"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "confirmation": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{6,12}$"
+            },
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "check_in": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+            },
+            "check_out": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Calendar date YYYY-MM-DD, read in the hotel's own time zone."
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "cancelled"
+              ]
+            },
+            "payment": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "enum": [
+                    "points",
+                    "certificate",
+                    "points_cash",
+                    "cash"
+                  ]
+                },
+                "certificate_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "payment_label": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80,
+                      "description": "Opaque payment label, one of the account's payment_labels."
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "method",
+                "certificate_id",
+                "payment_label"
+              ],
+              "additionalProperties": false
+            },
+            "category_locked": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8,
+              "description": "Category in effect when the reservation was booked; later changes do not reprice it."
+            },
+            "points": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "cash_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "charge_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "confirmation",
+            "hotel_id",
+            "check_in",
+            "check_out",
+            "nights",
+            "status",
+            "payment",
+            "category_locked",
+            "points",
+            "cash_cents",
+            "charge_ids",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "harbor.cancel",
+    "description": "Cancel a confirmed reservation before its check-in date at the hotel. Points come back to the balance (a refund is not account activity), cash comes back as a negative charge to the same label, and a certificate becomes active again if today at the hotel is on or before its last check-in date, otherwise it expires.",
+    "read_only": false,
+    "scope": "harbor.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "reservation_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "refunded_points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "refunded_cash_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "refund_charge_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "certificate": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "status": {
+                  "enum": [
+                    "active",
+                    "expired"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "balance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "refunded_points",
+        "refunded_cash_cents",
+        "refund_charge_id",
+        "certificate",
+        "balance"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "harbor.notices.list",
+    "description": "List notices the program has written for this member (booking confirmations, category changes, expiry warnings), newest first. Reading changes nothing.",
+    "read_only": true,
+    "scope": "harbor.notices.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "kind": {
+                "enum": [
+                  "booking_confirmed",
+                  "category_change",
+                  "expiry_warning"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "body": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "object_type": {
+                        "enum": [
+                          "reservation",
+                          "hotel",
+                          "account"
+                        ]
+                      },
+                      "object_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "object_type",
+                      "object_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "created_at",
+              "updated_at",
+              "history",
+              "kind",
+              "title",
+              "body",
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "harbor.notices.outbound",
+    "description": "Build the Mail message for one notice: a stable CloudEvent for Mail's email receive contract (urn:pale:email-message:2) addressed to the member's Mail account. Building it changes nothing; Infra publishes it through Messaging.",
+    "read_only": true,
+    "scope": "harbor.notices.outbound",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "harbor"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "message": {
+          "$id": "urn:pale:email-message:2",
+          "title": "CloudEvents 1.0 + Mail Email payload v1",
+          "description": "Generated from the PALE CloudEvents JSON profile and Mail-owned email-payload.schema.json. Do not hand-edit copies.",
+          "type": "object",
+          "properties": {
+            "specversion": {
+              "const": "1.0"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            },
+            "source": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+              "maxLength": 512
+            },
+            "type": {
+              "const": "org.pale.mail.notification.v1"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "datacontenttype": {
+              "const": "application/json"
+            },
+            "dataschema": {
+              "const": "urn:pale:email-payload:1"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "channel": {
+                  "const": "channel.email"
+                },
+                "recipient": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "person_ref",
+                        "app_account_ref",
+                        "device_ref"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "app_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$",
+                      "description": "Required by PALE validation when kind is app_account_ref."
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                },
+                "source_object": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "object_type": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "object_type",
+                    "object_id",
+                    "account_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "content": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "format": {
+                          "const": "text/plain"
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 20000
+                        }
+                      },
+                      "required": [
+                        "format",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "asset_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "uniqueItems": true,
+                      "maxItems": 0
+                    },
+                    "template_ref": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "deep_link": {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "route_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "route_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "body",
+                    "asset_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                "subscription_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "extensions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "namespace": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+                      },
+                      "version": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "data": {
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "namespace",
+                      "version",
+                      "required",
+                      "data"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "channel",
+                "recipient",
+                "source_object",
+                "content",
+                "extensions"
+              ],
+              "additionalProperties": false,
+              "$id": "urn:pale:email-payload:1",
+              "title": "Mail-owned Email notification payload",
+              "description": "Business data only. Maintained by Mail; publisher packages consume a pinned copy."
+            }
+          },
+          "required": [
+            "specversion",
+            "id",
+            "source",
+            "type",
+            "datacontenttype",
+            "dataschema",
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

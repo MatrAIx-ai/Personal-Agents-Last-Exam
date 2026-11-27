@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "app_id": "skyline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:skyline (proposal #193, @RuihongY)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "skyline.receive",
+    "skyline.inventory.sold",
+    "skyline.schedule.changed",
+    "skyline.alternative.expired"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app and reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Saver seats sell, schedules change and alternatives expire only when Infra applies the matching event; the App never schedules itself.",
+    "One-way awards with at most one connection; a round trip is two bookings. Award holds, cash fares, upgrades and elite status are not modelled.",
+    "Taxes and fees are recorded against opaque payment labels; no card network or real payment is involved.",
+    "Synthetic carriers, schedules and prices; text only."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
