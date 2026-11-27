@@ -182,32 +182,35 @@ function senderStaysInGroup(needle, members) {
   return seen;
 }
 
-function statesNumber(sentence, n) {
-  const body = String(sentence);
-  const digits = String(n);
+function allMailSpans(sentence) {
+  const body = plain(sentence);
+  const mark = 'all mail from ';
+  const spans = [];
   let from = 0;
   while (from < body.length) {
-    const at = body.indexOf(digits, from);
-    if (at < 0) return false;
-    const before = at > 0 ? body[at - 1] : '';
-    const after = body[at + digits.length] || '';
-    if (!/\d/.test(before) && !/\d/.test(after)) return true;
-    from = at + 1;
+    const at = body.indexOf(mark, from);
+    if (at < 0) break;
+    let end = body.length;
+    for (const stop of ['replied-to', 'replied to']) {
+      const found = body.indexOf(stop, at + mark.length);
+      if (found >= 0 && found < end) end = found;
+    }
+    spans.push(body.slice(at + mark.length, end));
+    from = at + mark.length;
   }
-  return false;
+  return spans;
+}
+
+function namedInAllMail(sentence, needle) {
+  return allMailSpans(sentence).some((span) => span.includes(needle));
 }
 
 function threadKeepOnly(text, needle, members) {
   if (senderStaysInGroup(needle, members)) return false;
   const hits = splitSentences(text).filter((sentence) => plain(sentence).includes(needle));
   if (!hits.length) return false;
-  return hits.every((sentence) => {
-    const row = read('retail', sentence) || {};
-    const covered = namesCover(row.exclude, needle) || namesCover(row.include, needle);
-    if (row.scope === 'subset' && row.n > 0 && statesNumber(sentence, row.n) && covered) return false;
-    if (row.scope === 'none' && namesCover(row.exclude, needle)) return false;
-    return read('keep_replied', sentence).v === 'keep';
-  });
+  if (hits.some((sentence) => namedInAllMail(sentence, needle))) return false;
+  return hits.every((sentence) => read('keep_replied', sentence).v === 'keep');
 }
 
 function matchedIds(text, names, members) {
