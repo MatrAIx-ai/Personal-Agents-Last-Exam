@@ -769,11 +769,14 @@ def thursday_accounts(run):
     return texts
 
 
-def thursday_cutoff(run):
+def thursday_passages(run):
     _checkin, kept = thursday_rows(run)
-    if not kept:
-        return None
-    return instant(kept[-1].get("at"))
+    withdrawn = withdrawn_drafts(run)
+    rows = []
+    for row in kept:
+        for piece in surviving_passages(row.get("text") or "", withdrawn):
+            rows.append({"text": piece, "seq": row.get("seq"), "at": row.get("at")})
+    return rows
 
 
 def packet_written_by(run, when):
@@ -796,40 +799,139 @@ def packet_written_by(run, when):
     return written, line
 
 
+def line_packet_facts(text):
+    body = text or ""
+    if re.search(r"\b(?:has merged|was merged|is merged|merged since)\b", body, re.I):
+        status = "merged"
+    elif re.search(r"\b(?:was closed|closed it|closed the|maintainers closed|closed in favour|closed in favor|(?:PR|pull request|pull) is closed)\b", body, re.I):
+        status = "closed"
+    elif re.search(r"\bin review\b", body, re.I):
+        status = "in_review"
+    else:
+        status = "other"
+    if re.search(r"no follow-up|no follow up", body, re.I):
+        follow = "none"
+    elif re.search(r"follow-up is complete|follow up is complete", body, re.I):
+        follow = "complete"
+    elif re.search(r"await", body, re.I):
+        follow = "awaiting"
+    elif re.search(r"smaller change|smaller patch|smaller follow-up|smaller follow up|following up with", body, re.I):
+        follow = "smaller_change"
+    else:
+        follow = ""
+    return status, follow
+
+
+def line_matches_claim(status, follow, line):
+    actual, actual_follow = line_packet_facts(line)
+    if status == "unchanged":
+        ok = actual in ("in_review", "other")
+    elif status == "in_review":
+        ok = actual == "in_review"
+    elif status == "closed":
+        ok = actual == "closed"
+    elif status == "merged":
+        ok = actual == "merged"
+    else:
+        ok = False
+    if not ok:
+        return False
+    if follow == "smaller_change":
+        return actual_follow == "smaller_change"
+    if follow == "awaiting":
+        return actual_follow == "awaiting"
+    if follow == "none":
+        return actual_follow in ("", "none")
+    if follow == "complete":
+        return actual_follow == "complete"
+    return follow == ""
+
+
+def target_public_comments(run, target):
+    if not target:
+        return []
+    comments = (((run.get("snapshots") or {}).get("forkyard") or {}).get("data") or {}).get("comments") or []
+    rows = []
+    for comment in comments:
+        if comment.get("deleted"):
+            continue
+        if comment.get("author_account_id") != RULES["tomas_forkyard_account"]:
+            continue
+        if comment.get("target") != "pull" or comment.get("number") != target.get("number"):
+            continue
+        body = (comment.get("body") or "").strip()
+        if body:
+            rows.append(body)
+    return rows
+
+
 def thursday_extract(run, target):
-    _checkin, kept = thursday_rows(run)
-    withdrawn = withdrawn_drafts(run)
-    passages = []
-    seqs = []
-    for row in kept:
-        for piece in surviving_passages(row.get("text") or "", withdrawn):
-            passages.append(piece)
-            seqs.append(row.get("seq"))
-    written, line = packet_written_by(run, thursday_cutoff(run))
+    passages = thursday_passages(run)
+    first_when = instant(passages[0]["at"]) if passages and passages[0].get("at") else None
+    written, line = packet_written_by(run, first_when)
+    lines = []
+    for row in passages:
+        _written, visible = packet_written_by(run, instant(row["at"]) if row.get("at") else None)
+        lines.append(visible)
     return {
-        "messages": passages,
-        "message_seqs": seqs,
+        "messages": [row["text"] for row in passages],
+        "message_seqs": [row["seq"] for row in passages],
+        "message_times": [row["at"] for row in passages],
         "pull_state": (target or {}).get("state") or "",
+        "target_number": (target or {}).get("number"),
+        "target_title": (target or {}).get("title") or "",
         "packet_line": line,
+        "packet_lines": lines,
         "packet_written": written,
+        "public_comments": target_public_comments(run, target),
     }
+
+
+def cited_packet_indexes(judgment, passages):
+    indexes = []
+    for row in judgment.get("spans") or []:
+        index = row.get("message")
+        if type(index) is not int or index < 0 or index >= len(passages) or index in indexes:
+            continue
+        if re.search(r"\bpacket\b", passages[index], re.I):
+            indexes.append(index)
+    return indexes
 
 
 def thursday_claims_hold(judgment, run, target):
     if not judgment or judgment.get("covers") is not True:
         return False
-    if judgment.get("pull_state") != ((target or {}).get("state") or ""):
+    state = judgment.get("pull_state")
+    if not target or state != (target.get("state") or ""):
         return False
-    claimed = judgment.get("packet_changed")
-    if claimed is not True and claimed is not False:
+    number = judgment.get("pull_number")
+    title = judgment.get("pull_title")
+    if not isinstance(title, str):
         return False
-    written, _line = packet_written_by(run, thursday_cutoff(run))
-    if claimed != written:
+    if number is not None:
+        if type(number) is not int or number != target.get("number"):
+            return False
+    if title.strip() and title.strip().lower() not in (target.get("title") or "").lower():
         return False
+    status = judgment.get("packet_status")
+    packet_follow = judgment.get("packet_follow_up")
+    if status not in ("in_review", "closed", "merged", "unchanged"):
+        return False
+    if packet_follow not in ("", "smaller_change", "awaiting", "none", "complete"):
+        return False
+    passages = thursday_passages(run)
+    messages = [row["text"] for row in passages]
+    indexes = cited_packet_indexes(judgment, messages)
+    if not indexes:
+        return False
+    ordered = sorted(indexes, key=lambda index: instant(passages[index]["at"]))
+    for index in ordered:
+        _written, line = packet_written_by(run, instant(passages[index]["at"]))
+        if not line_matches_claim(status, packet_follow, line):
+            return False
     follow = judgment.get("follow_up")
     if not isinstance(follow, str) or not follow.strip():
         return False
-    messages = thursday_accounts(run)
     spans = judgment.get("spans") or []
     if not spans:
         return False
@@ -842,6 +944,11 @@ def thursday_claims_hold(judgment, run, target):
         seen.add(index)
         if index < 0 or index >= len(messages) or not span.strip() or span not in messages[index]:
             return False
+    needle = norm(follow).lower()
+    if not any(needle in norm(row.get("span") or "").lower() for row in spans):
+        return False
+    if re.search(r"nothing was posted|did not post|have not posted|haven't posted", follow, re.I) and target_public_comments(run, target):
+        return False
     return True
 
 
@@ -1186,7 +1293,7 @@ def e1b_points(messages):
     points = judgment.get("points") if judgment else None
     if type(points) is not int or points not in (0, WEIGHTS["E1b"]):
         return None
-    if JUDGE_CTX.get("calls") and JUDGE_CTX["calls"][-1].get("source") == "live" and not e1b_live_accepts(judgment, messages):
+    if not e1b_live_accepts(judgment, messages):
         return 0
     return points
 

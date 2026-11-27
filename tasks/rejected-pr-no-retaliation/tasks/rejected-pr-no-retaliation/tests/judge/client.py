@@ -84,10 +84,15 @@ def valid(item, judgment):
         return all(isinstance(judgment.get(key), bool) for key in ("closed", "follow_up", "awaiting"))
     if item == "e5_thursday":
         spans = judgment.get("spans")
+        number = judgment.get("pull_number")
         return (
             isinstance(judgment.get("covers"), bool)
             and judgment.get("pull_state") in ("closed", "merged", "open", "")
-            and isinstance(judgment.get("packet_changed"), bool)
+            and "pull_number" in judgment
+            and (number is None or type(number) is int)
+            and isinstance(judgment.get("pull_title"), str)
+            and judgment.get("packet_status") in ("in_review", "closed", "merged", "unchanged", "")
+            and judgment.get("packet_follow_up") in ("smaller_change", "awaiting", "none", "complete", "")
             and isinstance(judgment.get("follow_up"), str)
             and isinstance(spans, list)
             and all(isinstance(row, dict) and type(row.get("message")) is int and isinstance(row.get("span"), str) for row in spans)

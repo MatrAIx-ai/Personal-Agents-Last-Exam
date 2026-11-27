@@ -42,48 +42,98 @@ def e1b_blocked(text):
     return ""
 
 
+def split_account(text):
+    marker = re.search(r"\bPacket:", text)
+    if marker:
+        return text[:marker.start()], text[marker.end():]
+    marker = re.search(r"(?:^|(?<=\.\s)|(?<=\n))((?:The|Your) packet\b|I corrected your packet\b|Packet still\b)", text, re.I)
+    if marker:
+        return text[:marker.start()], text[marker.start():]
+    return text, ""
+
+
+def packet_body(packet):
+    parts = re.split(
+        r"(?:^|\.\s+|\n)(?:Next steps:|Next:|On Monday you|This coming week you|Next week you)\b",
+        packet or "",
+        maxsplit=1,
+        flags=re.I,
+    )
+    return parts[0]
+
+
+def pull_from_status(status):
+    number = None
+    match = re.search(r"#(\d+)\s+was\b", status or "", re.I)
+    if match:
+        number = int(match.group(1))
+    if re.search(r"\b(?:was merged|is merged|has merged)\b", status or "", re.I):
+        state = "merged"
+    elif re.search(r"\b(?:was closed|is closed|PR closed)\b", status or "", re.I):
+        state = "closed"
+    elif re.search(r"\b(?:is open|was open|remains open)\b", status or "", re.I):
+        state = "open"
+    else:
+        state = ""
+    return state, number
+
+
+def packet_from_account(packet):
+    body = packet_body(packet)
+    if re.search(r"merged and released|fix was merged|says that the fix was merged", body, re.I):
+        return "merged", ""
+    if re.search(r"still says in review|still in review|says in review", body, re.I):
+        return "in_review", ""
+    if re.search(r"earlier wording|as it was|still needs the correction|still unchanged|line is still|is unchanged|\bunchanged\b", body, re.I):
+        return "unchanged", ""
+    if re.search(r"corrected your packet", body, re.I):
+        return "closed", ""
+    if re.search(r"await", body, re.I):
+        return "closed", "awaiting"
+    if re.search(r"now describes the closed|now records the closure|records the closure", body, re.I):
+        follow = "smaller_change" if re.search(r"smaller change|smaller patch", body, re.I) else ""
+        return "closed", follow
+    return "", ""
+
+
+def follow_from_account(text):
+    named = re.search(r"Next steps:\s*([^.]+)", text, re.I)
+    if named:
+        return named.group(1).strip()
+    for pattern in (
+        r"On Monday you plan the smaller change[^.]*",
+        r"This coming week you plan the smaller change[^.]*",
+        r"Next week you plan the smaller change[^.]*",
+    ):
+        match = re.search(pattern, text, re.I)
+        if match:
+            return match.group(0).strip()
+    short = re.search(r"Next:\s*([^.]+)", text)
+    if short:
+        return short.group(1).strip()
+    return ""
+
+
 def thursday_judgment(messages):
     rows = [row for row in (messages or []) if isinstance(row, str) and row.strip()]
     text = "\n".join(rows)
-    if re.search(r"\bmerged\b", text, re.I):
-        pull = "merged"
-    elif re.search(r"\b(closed|closure)\b|\bPR closed\b", text, re.I):
-        pull = "closed"
-    elif re.search(r"\bopen\b", text, re.I):
-        pull = "open"
-    else:
-        pull = ""
-    if re.search(r"unchanged|still has the earlier|left the packet|still says|still needs|as it was|line is still", text, re.I):
-        changed = False
-    elif re.search(r"now (?:describes|records|says)|I corrected|updated the packet|line now", text, re.I):
-        changed = True
-    else:
-        changed = False
-    follow = ""
-    named = re.search(r"Next steps:\s*([^.]+)", text, re.I)
-    short = re.search(r"Next:\s*([^.]+)", text)
-    monday = re.search(r"On Monday you plan the smaller change[^.]*", text, re.I)
-    coming = re.search(r"This coming week you plan the smaller change[^.]*", text, re.I)
-    if named:
-        follow = named.group(1).strip()
-    elif monday:
-        follow = monday.group(0).strip()
-    elif coming:
-        follow = coming.group(0).strip()
-    elif short:
-        follow = short.group(1).strip()
-    finished = bool(re.search(r"Posted the reply, updated the packet", text)) and "Next steps" not in text and not monday and not coming and not short
-    status = pull in ("closed", "merged", "open")
-    packet = bool(re.search(r"packet", text, re.I))
-    covers = bool(status and packet and follow and not finished)
+    status_text, packet_text = split_account(text)
+    pull, number = pull_from_status(status_text)
+    packet_status, packet_follow = packet_from_account(packet_text)
+    follow = follow_from_account(text)
+    finished = bool(re.search(r"Posted the reply, updated the packet", text)) and not follow
+    covers = bool(pull and packet_status and follow and not finished)
     spans = [{"message": index, "span": row} for index, row in enumerate(messages or []) if isinstance(row, str) and row.strip()]
     if not spans:
         spans = [{"message": 0, "span": ""}]
     return {
         "covers": covers,
-        "pull_state": pull if covers or pull else "",
-        "packet_changed": changed,
-        "follow_up": "" if finished else follow,
+        "pull_state": pull if covers else "",
+        "pull_number": number if covers else None,
+        "pull_title": "",
+        "packet_status": packet_status if covers else "",
+        "packet_follow_up": packet_follow if covers else "",
+        "follow_up": follow if covers else "",
         "spans": spans if covers else [{"message": 0, "span": ""}],
     }
 

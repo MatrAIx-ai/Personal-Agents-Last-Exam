@@ -58,6 +58,8 @@ def ask(item, extract):
         return None, "output is not JSON"
     if not client.live_valid(item, judgment, extract):
         return None, "output is invalid"
+    if item == "e1b" and not outcomes.e1b_live_accepts(judgment, (extract or {}).get("messages")):
+        return None, "offer check failed"
     return judgment, proc.stdout
 
 
@@ -80,15 +82,59 @@ def entry(item, extract, judgment, raw):
     }
 
 
+def expected_labels():
+    official = json.loads((TESTS / "expected_outcomes.json").read_text())
+    adversarial = json.loads((TESTS / "adversarial_outcomes.json").read_text())
+    return set(official) | set(adversarial)
+
+
+def inventory_problem(paths):
+    found = []
+    runs = []
+    for path in paths:
+        run = json.loads(path.read_text())
+        runs.append(run)
+        found.append(run.get("label") or path.parent.name)
+        if path.parent.name not in found:
+            found.append(path.parent.name)
+    missing = sorted(expected_labels() - set(found))
+    if missing:
+        return "missing runs: " + ", ".join(missing[:8])
+    mismatched = []
+    fixtures = client.load_fixtures()
+    for run in runs:
+        label = run.get("label")
+        if label in fixtures and outcomes.verified_fixture(run) != label:
+            mismatched.append(label)
+    if mismatched:
+        return "replay mismatch: " + ", ".join(sorted(mismatched)[:8])
+    return ""
+
+
+def publish(path, text):
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(text)
+    os.replace(temporary, path)
+
+
 def main():
     if len(sys.argv) < 2:
         raise SystemExit("usage: refresh_judge_cache.py <runs-directory>")
+    paths = run_paths(sys.argv[1])
+    problem = inventory_problem(paths)
+    if problem:
+        print(json.dumps({"error": problem}))
+        return 2
+    if not (os.environ.get("PALE_JUDGE_COMMAND") or "").strip():
+        raise SystemExit("PALE_JUDGE_COMMAND is required")
     document = json.loads(CACHE_PATH.read_text())
-    entries = document.setdefault("entries", {})
+    staged = json.loads(json.dumps(document))
+    entries = staged.setdefault("entries", {})
     rows = []
     held = []
     seen_e5 = set()
-    for path in run_paths(sys.argv[1]):
+    written_keys = set()
+    for path in paths:
         run = json.loads(path.read_text())
         label = run.get("label") or path.parent.name
         variant = run.get("variant")
@@ -115,41 +161,54 @@ def main():
                 else:
                     stored_key, body = entry("e1b", extract, judgment, raw)
                     entries[stored_key] = body
+                    written_keys.add(stored_key)
                     rows.append({"label": label, "item": "e1b", "key": stored_key, "points": judgment.get("points"), "action": "write"})
         passages = [text for text in outcomes.thursday_accounts(run) if (text or "").strip()]
         if passages:
             extract = outcomes.thursday_extract(run, target)
-            judgment, raw = ask("e5_thursday", extract)
             key = client.cache_key("e5_thursday", extract)
             seen_e5.add(key)
+            judgment, raw = ask("e5_thursday", extract)
             if judgment is None:
                 held.append({"label": label, "item": "e5_thursday", "key": key, "reason": raw})
             else:
                 stored_key, body = entry("e5_thursday", extract, judgment, raw)
                 entries[stored_key] = body
+                written_keys.add(stored_key)
                 rows.append({
                     "label": label,
                     "item": "e5_thursday",
                     "key": stored_key,
                     "covers": judgment.get("covers"),
                     "pull_state": judgment.get("pull_state"),
-                    "packet_changed": judgment.get("packet_changed"),
+                    "pull_number": judgment.get("pull_number"),
+                    "packet_status": judgment.get("packet_status"),
+                    "packet_follow_up": judgment.get("packet_follow_up"),
                     "action": "write",
                 })
+    current_e1b = prompt_sha("e1b")
+    for key, body in entries.items():
+        if body.get("item") != "e1b" or key in written_keys:
+            continue
+        generation = body.setdefault("generation", {})
+        judgment = body.get("judgment") or {}
+        if generation.get("prompt_sha256") != current_e1b and judgment.get("points") == 0:
+            generation["source"] = "historical"
+            rows.append({"item": "e1b", "key": key, "action": "historical"})
     stale = [key for key, body in list(entries.items()) if body.get("item") == "e5_thursday" and key not in seen_e5]
     for key in stale:
         entries.pop(key, None)
         rows.append({"item": "e5_thursday", "key": key, "action": "drop"})
-    prompts = document.setdefault("generation", {}).setdefault("prompts", {})
-    prompts["e1b"] = prompt_sha("e1b")
+    prompts = staged.setdefault("generation", {}).setdefault("prompts", {})
+    prompts["e1b"] = current_e1b
     prompts["e5_thursday"] = prompt_sha("e5_thursday")
-    CACHE_PATH.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n")
     report = {
         "prompts": {"e1b": prompts["e1b"], "e5_thursday": prompts["e5_thursday"]},
         "written": rows,
         "held": held,
     }
-    LIST_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+    publish(CACHE_PATH, json.dumps(staged, indent=2, ensure_ascii=False) + "\n")
+    publish(LIST_PATH, json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps({"written": len(rows), "held": len(held), "dropped_thursday": len(stale)}))
     return 0 if not held else 1
 
