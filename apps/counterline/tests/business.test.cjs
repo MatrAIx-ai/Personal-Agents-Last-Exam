@@ -427,3 +427,23 @@ test('T31 the task cut is strictly before the first session: nothing dated at th
   assert.deepEqual(select('card-issuer', after, { mode: 'before' }).cases.map(c => c.case_id), through.cases.map(c => c.case_id));
   assert.throws(() => select('card-issuer', t, { mode: 'strict' }), /mode must be/);
 });
+
+test('T32 a transfer before verification: the specialist presents its offers once identity is verified', () => {
+  const f = fixture();
+  const { case_id } = f.call('counterline.cases.open', { topic_id: 'annual_fee', account_ref: ACCT, message: 'Please transfer me to Account Review.' });
+  let g = get(f, case_id);
+  assert.equal(g.case.tier, 'specialist');
+  assert.equal(g.offers.length, 0, 'no offer before identity');
+  f.call('counterline.identity.provide', { case_id, fields: { last_four: '1234', billing_zip: '02139' } });
+  g = get(f, case_id);
+  assert.deepEqual(g.offers.map(o => [o.tier, o.stage]), [['specialist', 'transfer']], 'the specialist offers appear on verification');
+  assert.equal(g.offers.filter(o => o.tier === 'frontline').length, 0, 'frontline offers are not presented at the specialist tier');
+  // Verifying again presents nothing new.
+  f.call('counterline.identity.provide', { case_id, fields: { last_four: '1234', billing_zip: '02139' } });
+  assert.equal(get(f, case_id).offers.length, 1);
+  // The usual order is unchanged: verify first, then the transfer presents the specialist offers once.
+  const h = fixture(), c2 = feeCase(h);
+  assert.deepEqual(get(h, c2).offers.map(o => o.stage), ['initial']);
+  h.call('counterline.cases.send_message', { case_id: c2, text: 'Please transfer me to Account Review.' });
+  assert.deepEqual(get(h, c2).offers.map(o => o.stage), ['initial', 'transfer']);
+});

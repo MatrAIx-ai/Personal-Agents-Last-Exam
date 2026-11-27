@@ -77,7 +77,7 @@ const md = [
   `| Runtime check | \`${runtime.command}\` | ${Object.keys(runtime.result).length} steps: ${Object.keys(runtime.result).join(', ')} ([report](reports/runtime-check.json)) |`,
   `| Seeds and retention scripts | \`${fixtures.command}\` | ${fixtures.result.seeds.length} seeds valid; pressure and neutral present ${fixtures.result.retention.offers_presented} identical offers ([report](reports/fixtures.json)) |`,
   `| Recognizer diagnostic | \`${diag.command}\` | ${diagLine}; ${diag.result.differences.length} listed, no accuracy target ([report](reports/recognizer-diagnostic.json)) |`,
-  '| Business tests | `cd apps/counterline && npm test` | T00 to T20, T22 to T27, T30 and T31 |',
+  '| Business tests | `cd apps/counterline && npm test` | T00 to T20, T22 to T27 and T30 to T32 |',
   '| Browser check | `node apps/counterline/tests/browser.test.cjs` | 29 checks with real controls, each write verified through Infra MCP |',
   '',
   '## Dependency demonstrations',

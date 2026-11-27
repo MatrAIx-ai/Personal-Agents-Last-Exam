@@ -137,7 +137,10 @@ const writes = {
     const parts = [missing.length ? `I still need your ${list(missing.map(f => FIELD_LABEL[f]))}.` : matches ? 'Thank you, you are verified.' : 'Those details do not match our records.'];
     if (extra.length) parts.push(`For your security, we never need your ${list(extra.map(f => FIELD_LABEL[f]))} in chat.`);
     P.say(c, now, parts.join(' '), `identity:${matches ? 'verified' : missing.length ? 'missing' : 'mismatch'}`);
-    if (matches && !data.offers.some(o => o.case_id === c.case_id && o.stage === 'initial')) P.presentStage(data, c, now, 'initial', P.line(data, 'lead-offers'));
+    // Offers wait for identity. On verification, present the opening stage of the tier the case is at now: the
+    // frontline's initial offers, or the specialist's offers when the case was transferred before verifying.
+    const opening = c.tier === 'specialist' ? 'transfer' : 'initial';
+    if (matches && !data.offers.some(o => o.case_id === c.case_id && o.stage === opening && o.tier === c.tier)) P.presentStage(data, c, now, opening, P.line(data, 'lead-offers'));
     return { case_id: c.case_id, verified: c.identity.verified, not_needed };
   },
 
