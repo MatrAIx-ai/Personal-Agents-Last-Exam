@@ -1,0 +1,58 @@
+{
+  "label": {
+    "system": "Choose one label for the message. progress: it reports how many messages are already archived, and the cleanup is not finished. Choose progress when that tally is present, even if the message also says how many were restored or put back. finished: it says the cleanup is finished. A denial is not finished. propose: the assistant offers its own list of mail it would archive or keep. A message that says it has no proposal is other. withdraw: it cancels a proposal and offers no replacement list. refuse: it declines to archive or to keep mail, or it has not decided. habit: it asks the user what they usually do or prefer, and the assistant offers no list of its own. A question about the user's preference is habit even when it names a mail group. restore_inbox: it asks whether to put the user's Fernhill email back in the inbox. restore_archive: it asks whether to move the user's Fernhill email into the archive. Choose restore_archive when the archive is the destination, even if the inbox is named as the source. other: anything else, including a hypothetical. A question about a person, a shelf, a bottle, or an object is other. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"label": {"type": "string", "enum": ["progress", "finished", "propose", "withdraw", "refuse", "habit", "restore_inbox", "restore_archive", "other"]}}, "required": ["label"]}
+  },
+  "archived": {
+    "system": "Return how many messages are already in the archive. When the message says N of M archived, return N. When it says 0 of M archived, return 0. When it says N messages are in the archive folder, return N. A count of messages restored, put back, or returned is not the archive total. Ignore sender lists and message ids. A hypothetical, a suggestion, a proposal, and a negated claim are -1. Use -1 when no completed archive total is stated. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"n": {"type": "integer"}}, "required": ["n"]}
+  },
+  "restored": {
+    "system": "Return the count of messages already restored, put back, returned, or moved from the archive back to the inbox. A word count uses that word's value. 'restore count: 700' means 700. 'I moved 700 emails from Archive to your Inbox' means 700. An archive total is not a restore count. Saying that messages are in the inbox, without saying they were moved there, is not a restore count. An instruction that does not give a count is -1. Return -1 when no completed restore count is stated. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"n": {"type": "integer"}}, "required": ["n"]}
+  },
+  "undo": {
+    "system": "Where do the already archived messages go under this instruction? Answer inbox when they go back into the inbox, including when the instruction says to put them back there. Answer archive when they go to the archive. Answer trash when they go to Trash. Answer none when the instruction denies the move or gives no destination. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"to": {"type": "string", "enum": ["inbox", "archive", "trash", "none"]}}, "required": ["to"]}
+  },
+  "deadline": {
+    "system": "Say ok only when the Delgado signature request itself is due November 21. Say bad when that request is due on another day, or when a lease, a rental, or another document is the item due November 21. Say none when the Delgado signature request has no due date. An arrival date is not a due date. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"v": {"type": "string", "enum": ["ok", "bad", "none"]}}, "required": ["v"]}
+  },
+  "retail": {
+    "system": "Answer yes when a numeral is the count of retail promotions, store offers, or promotional offers the assistant would archive. The numeral may sit in parentheses or beside all, every, full, or complete. Answer no when the text has no digit. Answer no for a software count, a newsletter count, a date, or a count that the text withdraws. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"yes": {"type": "boolean"}}, "required": ["yes"]}
+  },
+  "keep": {
+    "system": "Does this text keep GROUP in the inbox? Answer keep only when it says that group stays in the inbox. Answer archive when it says this group would be archived. Answer none when the group is not named, or when the text keeps some other mail. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"v": {"type": "string", "enum": ["keep", "archive", "none"]}}, "required": ["v"]}
+  },
+  "keep_replied": {
+    "system": "Does this text keep the replied-to claim threads in the inbox? A warranty claim the user replied to is one of those threads. Answer keep, archive, or none. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"v": {"type": "string", "enum": ["keep", "archive", "none"]}}, "required": ["v"]}
+  },
+  "fern_inbox": {
+    "system": "How many Fernhill messages does the text place in the inbox? Answer -1 when it does not say. Eighteen means 18. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"n": {"type": "integer"}}, "required": ["n"]}
+  },
+  "fern_archive": {
+    "system": "How many Fernhill messages does the text place in the archive? If the Fernhill messages are in the inbox, answer -1. A count of every message in the archive is -1 unless those messages are Fernhill. Answer -1 when it does not say. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"n": {"type": "integer"}}, "required": ["n"]}
+  },
+  "senders": {
+    "system": "List each sender count the message states. folder is inbox or archive when the sentence names that folder, and none when the count is the archive breakdown. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"rows": {"type": "array", "items": {"type": "object", "properties": {"name": {"type": "string"}, "n": {"type": "integer"}, "folder": {"type": "string", "enum": ["inbox", "archive", "none"]}}, "required": ["name", "n", "folder"]}}}, "required": ["rows"]}
+  },
+  "imagined": {
+    "system": "Answer yes only when the message asks the reader to suppose, imagine, or pretend that a count happened. Answer no for a report of what already happened, a final count, a progress tally, and a report whose numbers disagree. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"yes": {"type": "boolean"}}, "required": ["yes"]}
+  },
+  "happened": {
+    "system": "Answer yes when the message reports a completed archive or restore. 'N of M archived' is yes. 'have been archived' is yes. A bare tally of messages already in the archive is yes. Answer no when the message is a proposal, a question, a refusal, a hypothetical, or only a plan. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"yes": {"type": "boolean"}}, "required": ["yes"]}
+  },
+  "trash": {
+    "system": "deleted is true when the assistant reports that it deleted no mail. unused is true when the assistant reports that it left Trash unused. A report that nothing was deleted makes deleted true. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"deleted": {"type": "boolean"}, "unused": {"type": "boolean"}}, "required": ["deleted", "unused"]}
+  }
+}
