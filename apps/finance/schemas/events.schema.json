@@ -1,0 +1,469 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.credit_posted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "account_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "amount_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9000000000000
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "account_id",
+            "amount_cents",
+            "source_ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.debit_due"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "account_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "obligation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "occurrence_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "amount_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9000000000000
+            }
+          },
+          "required": [
+            "account_id",
+            "obligation_id",
+            "occurrence_id",
+            "amount_cents"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.balance_check"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "account_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "rule_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "business_date": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            }
+          },
+          "required": [
+            "account_id",
+            "rule_id",
+            "business_date"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.quote_published"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "quote_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "instrument_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "price_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9000000000000
+            },
+            "valid_until": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "quote_id",
+            "instrument_id",
+            "price_cents",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.announcement_published"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "announcement_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "instrument_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "announcement_id",
+            "instrument_id",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.instruction_updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "instruction_revision": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 9000000000000
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "instruction_revision",
+            "text",
+            "source_ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.decision_recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "approval_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "proposal_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "proposal_revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9000000000000
+            },
+            "decision": {
+              "enum": [
+                "approve",
+                "reject"
+              ]
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "approval_id",
+            "proposal_id",
+            "proposal_revision",
+            "decision",
+            "expires_at",
+            "source_ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.authority_revoked"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "approval_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "approval_id",
+            "source_ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "finance.market_imported"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "live",
+                "replay"
+              ]
+            },
+            "snapshot": {
+              "$ref": "seed.schema.json#/$defs/market_snapshot"
+            }
+          },
+          "required": [
+            "mode",
+            "snapshot"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
