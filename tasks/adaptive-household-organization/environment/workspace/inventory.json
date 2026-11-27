@@ -1,0 +1,93 @@
+{
+  "schema": "pale.household_inventory.v1",
+  "unit": "cm",
+  "coordinate_convention": "Origin (0, 0) at south-west corner of bedroom_2_multipurpose; +X is east (0..350), +Y is north (0..300). position_cm is [x_min, y_min] of the placed footprint; rotation_deg is clockwise/counter-clockwise in 90-deg increments or arbitrary angle around footprint center.",
+  "rooms": {
+    "bedroom_2_multipurpose": {
+      "width_cm": 350,
+      "height_cm": 300,
+      "door": {
+        "wall": "east",
+        "hinge_cm": [350, 10],
+        "width_cm": 80,
+        "swing_arc_bbox_cm": [270, 10, 350, 90]
+      },
+      "window": {
+        "wall": "north",
+        "span_x_cm": [60, 210],
+        "y_cm": 300
+      },
+      "radiator": {
+        "wall": "north",
+        "bbox_cm": [70, 285, 200, 300],
+        "required_clearance_bbox_cm": [70, 270, 200, 300]
+      },
+      "closet": {
+        "location": "north_east_alcove",
+        "bbox_cm": [275, 235, 350, 300],
+        "stowed_capacity_cm": [75, 65]
+      },
+      "wall_b_bookshelf_zone": {
+        "wall": "south",
+        "bbox_cm": [100, 0, 250, 32],
+        "description": "Neutral bookshelf wall suitable for telehealth video call backdrop"
+      }
+    }
+  },
+  "items": [
+    {
+      "item_id": "armchair_grandfather",
+      "name": "Grandfather's mid-century leather armchair",
+      "dimensions_cm": { "length": 95, "width": 90, "height": 85 },
+      "weight_kg": 34,
+      "condition": "excellent_heirloom",
+      "current_room": "bedroom_2_multipurpose",
+      "current_position_cm": [0, 15],
+      "sentimental": true,
+      "allow_basement_storage": false,
+      "allow_discard": false
+    },
+    {
+      "item_id": "bookshelf_wall_b",
+      "name": "Solid oak 4-tier bookshelf",
+      "dimensions_cm": { "length": 150, "width": 32, "height": 180 },
+      "weight_kg": 48,
+      "condition": "good",
+      "current_room": "bedroom_2_multipurpose",
+      "current_position_cm": [100, 0],
+      "anchored": true
+    },
+    {
+      "item_id": "desk_compact",
+      "name": "Compact birch work desk",
+      "dimensions_cm": { "length": 120, "width": 60, "height": 75 },
+      "weight_kg": 24,
+      "condition": "good",
+      "current_room": "bedroom_1",
+      "current_position_cm": [20, 180],
+      "movable": true
+    },
+    {
+      "item_id": "guest_cot_foldable",
+      "name": "Tri-fold guest floor mattress / folding cot",
+      "dimensions_cm": { "length": 190, "width": 80, "height": 15 },
+      "folded_dimensions_cm": { "length": 80, "width": 60, "height": 45 },
+      "weight_kg": 11,
+      "condition": "new_purchase_candidate",
+      "estimated_cost_usd": 120.00,
+      "current_room": "not_yet_purchased",
+      "stowable_in_closet": true
+    },
+    {
+      "item_id": "sofa_bed_sleeper",
+      "name": "Full dual-sleeper fold-out sofa bed (store catalog option)",
+      "dimensions_cm": { "length": 210, "width": 95, "height": 85 },
+      "unfolded_dimensions_cm": { "length": 210, "width": 195, "height": 45 },
+      "weight_kg": 82,
+      "condition": "retail_catalog",
+      "estimated_cost_usd": 649.00,
+      "current_room": "not_yet_purchased",
+      "stowable_in_closet": false
+    }
+  ]
+}

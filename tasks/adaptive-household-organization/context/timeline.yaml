@@ -1,0 +1,63 @@
+schema: "pale.timeline.v1"
+task_id: "adaptive-household-organization"
+timezone: "America/Los_Angeles"
+initial_virtual_now: "2026-10-05T09:00:00-07:00"
+simulated_span_days: 38
+
+sessions:
+  - session_id: "session_1"
+    day: 1
+    virtual_now: "2026-10-05T09:00:00-07:00"
+    title: "User orientation and space audit"
+    events:
+      - event_id: "evt_s1_audit"
+        order: 1
+        trigger: "session_start"
+        description: "User shares initial apartment overview and asks agent to review floorplan.png and inventory.json."
+
+  - session_id: "session_2"
+    day: 8
+    virtual_now: "2026-10-12T10:30:00-07:00"
+    title: "Hybrid work setup and monitor glare"
+    events:
+      - event_id: "evt_s2_glare"
+        order: 1
+        trigger: "session_start"
+        description: "User reports monitor glare in bedroom_1 during morning remote work and asks about shifting the desk to bedroom_2_multipurpose."
+
+  - session_id: "session_3"
+    day: 20
+    virtual_now: "2026-10-24T17:00:00-07:00"
+    title: "Dinner hosting preparation"
+    events:
+      - event_id: "evt_s3_dinner"
+        order: 1
+        trigger: "session_start"
+        description: "User plans dinner for friends and checks living room chair configuration without disturbing bedroom_2."
+
+  - session_id: "session_4"
+    day: 32
+    virtual_now: "2026-11-05T18:15:00-08:00"
+    title: "Brother's 3-week visit announced (Critical Gate)"
+    events:
+      - event_id: "evt_s4_visit"
+        order: 1
+        trigger: "session_start"
+        description: "User announces brother is visiting for 3 weeks and needs both a guest sleeping setup and daytime workspace in bedroom_2_multipurpose with a $250 budget cap."
+        hint_injection_point: true
+
+  - session_id: "session_5"
+    day: 38
+    virtual_now: "2026-11-11T19:00:00-08:00"
+    title: "Final layout proposal and commit"
+    events:
+      - event_id: "evt_s5_finalize"
+        order: 1
+        trigger: "session_start"
+        description: "User reviews revisions and asks the agent to commit the final layout to workspace/layout_proposal.json and rationale.md."
+
+termination:
+  required_outputs:
+    - "workspace/layout_proposal.json"
+    - "workspace/rationale.md"
+  max_sessions: 5
