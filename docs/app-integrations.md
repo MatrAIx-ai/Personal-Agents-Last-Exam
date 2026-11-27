@@ -18,6 +18,8 @@ In your README and proposal, name the existing App, link the exact tool or recei
 
 Include an integration example/test that invokes the real dependency through its public interface and verifies the receiver's records, files or receipt. An App-only fake client is useful for business tests but does not prove integration. Missing dependencies, incompatible versions/contracts and rejected calls need visible outcomes. If the required receiving capability does not exist, identify that gap for scope review instead of implementing a private copy of the receiving App.
 
+Apply this to every connection claimed as implemented: required dependencies, delivered optional connections, reads through separate Agent calls, and Messaging. The [submission evidence contract](submission-evidence.md#2-demonstrate-declared-app-dependencies) specifies the demonstration: pinned participants, initial states, initiating GUI/MCP action, target account/record/file version, actual receiver result and failure/retry evidence. Keep local commit, delivery and recipient/business confirmation separate. Deferred connections must be labeled deferred, not shown as working integrations.
+
 Proposal reviewers check the dependency choice, interface links and acceptance plan. Implementation reviewers check the pinned packages, actual calls and receiver-side evidence using the [delivery review criteria](review/app-implementation.md).
 
 ## Responsibilities
