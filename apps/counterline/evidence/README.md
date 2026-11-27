@@ -7,7 +7,7 @@ Index for the approved plan (PR #219, `/approve-plan b3ea9cd`) in the format of 
 | Item | Value |
 | :--- | :--- |
 | App | counterline 0.1.0, Core API 1.2.0 |
-| Code commit for the reports | `1e0425d` |
+| Code commit for the reports | `c4fc000` |
 | Runtime and Host | public runtime and `runtime/web/server.cjs` in this checkout; package registry `apps/counterline/registry.json` |
 | Browser | Chromium 157.0.8103.78, viewport 1280x860, time zone America/New_York, profile `sandbox`, JavaScript errors: 0 |
 | Node and platform | v22.23.5, linux x64 |
@@ -15,7 +15,7 @@ Index for the approved plan (PR #219, `/approve-plan b3ea9cd`) in the format of 
 
 ## Delivery evidence index
 
-All rows: App commit `1e0425d`, Core API 1.2.0, the Host and browser above. Reference links open the PR attachments; the comparison with notes is under "Reference comparison".
+All rows: App commit `c4fc000`, Core API 1.2.0, the Host and browser above. Reference links open the PR attachments; the comparison with notes is under "Reference comparison".
 
 | Workflow / requirement | Scope and pinned versions | Reference screenshots | Implemented sequence (screenshots, in order) | Business and MCP tests | Dependency result | Date report / source mapping | Verdict and remaining gap |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -23,7 +23,6 @@ All rows: App commit `1e0425d`, Core API 1.2.0, the Host and browser above. Refe
 | Status of a promised refund; overdue after the due date | Required (W1, W4; baseline) | [W1 Case intake](https://github.com/user-attachments/assets/85b68f49-7af1-483e-8b5d-8ee1262a0438); [W4 Case view](https://github.com/user-attachments/assets/b7eeeb91-f042-4faa-a96f-bad9e79d9d60) | [1](sequences/1-status-inquiry/01-start.jpg) [2](sequences/1-status-inquiry/02-reply.jpg) [3](sequences/1-status-inquiry/03-overdue-reply.jpg) [4](sequences/1-status-inquiry/04-overdue-flag.jpg) [5](sequences/1-status-inquiry/05-mcp-update.jpg) | T00, T17; runtime check step 6; MCP write shown in the page (step 5) | None | N/A (Environment dataset below) | Passed |
 | Transfer by name or alias; refused by written policy | Required (W2) | [W2 Chat with quick actions](https://github.com/user-attachments/assets/9b73d52f-755b-4a3a-bd05-14ab70829df1) | [1](sequences/2-transfer/01-start.jpg) [2](sequences/2-transfer/02-dialog.jpg) [3](sequences/2-transfer/03-granted.jpg); refused: [1](sequences/2-transfer-refused/01-refused.jpg) | T08; browser check | None | N/A (Environment dataset below) | Passed |
 | Offers, two-step acceptance with cancel; expired offer | Required (W3) | [W3 Offer with actions](https://github.com/user-attachments/assets/e7d3e714-9a93-4822-8f6c-0484ef17fb66); W3 Retention offers and W4 commitments: no public reference | [1](sequences/3-accept/01-offers.jpg) [2](sequences/3-accept/02-confirm.jpg) [3](sequences/3-accept/03-cancelled.jpg) [4](sequences/3-accept/04-accepted.jpg) [5](sequences/3-accept/05-expired.jpg) | T10 to T14; runtime check steps 2 to 4; browser check | None | N/A (Environment dataset below) | Passed |
-| Considering closing: closing offers, account closure, bounded chat | Added during implementation for #133 (recorded on #219) | [W3 Offer with actions](https://github.com/user-attachments/assets/e7d3e714-9a93-4822-8f6c-0484ef17fb66); W3 Retention offers and W4 commitments: no public reference | [1](sequences/3b-closing/01-closing-offers.jpg) [2](sequences/3b-closing/02-closure-summary.jpg) [3](sequences/3b-closing/03-turn-limit.jpg) | T28, T29; recognizer diagnostic | None | N/A (Environment dataset below) | Passed |
 | Identity with only the chosen fields; pressure script; mismatch | Required (W2) | W2 Identity in chat: no public reference | [1](sequences/4-identity/01-pressure-ask.jpg) [2](sequences/4-identity/02-form.jpg) [3](sequences/4-identity/03-verified.jpg) [4](sequences/4-identity/04-mismatch.jpg) | T07, T26; browser check | None | N/A (Environment dataset below) | Passed |
 | Contest a reported credit; provider reissues; reload | Required (W4) | [W4 Case list with status](https://github.com/user-attachments/assets/4ad2a6ea-14cb-4392-8a08-964c39018fc8); W3 Retention offers and W4 commitments: no public reference | [1](sequences/5-contest/01-reported.jpg) [2](sequences/5-contest/02-contested.jpg) [3](sequences/5-contest/03-reissued.jpg) [4](sequences/5-contest/04-chat-note.jpg) [5](sequences/5-contest/05-after-reload.jpg) | T19, T23; browser check | None | N/A (Environment dataset below) | Passed |
 | Report versus settlement | Required (review of 80c390f); no #182 integration claimed | N/A (no reference product shows a provider ledger) | Commitments page note (sequence 5, step 1) | T20; T21 join check | Synthetic ledger file, 5 cases: settled, not_settled, not_settled, not_settled, no_report | N/A (Environment dataset below) | Passed as a contract test |
@@ -85,26 +84,16 @@ Seed `fixtures/retention-neutral.json`; run `evidence-counterline`, synthetic ac
 | 4 | Click Accept again, then Confirm | One pending commitment; the other three offers are unavailable | {"commitment":{"id":"cm-0001","status":"pending"},"offer_states":["unavailable","accepted","unavailable","unavailable"]} | 6.6 | [accepted](sequences/3-accept/04-accepted.jpg) |
 | 5 | Infra advances the clock past the new offer's 72-hour window, then Refresh | The offer reads expired and has no Accept button; no new commitment (still the one from step 4) | {"stored_state":"presented","commitments":1} | 6.9 | [expired](sequences/3-accept/05-expired.jpg) |
 
-### Considering closing: closing offers, a cancelled closure, a bounded chat
-
-Seed `fixtures/retention-closing.json` (max_customer_turns lowered from 12 to 5 to show the limit in a few steps); run `evidence-counterline`, synthetic account `counterline-jordan` owned by `person-jordan`.
-
-| Step | Action | Expected | Observed in the App | Version | Screenshot |
-| ---: | :--- | :--- | :--- | :--- | :--- |
-| 1 | Write that you might cancel the card | The provider's closing line, then the product change and the account closure; closing is not a quick action | {"recognized":["consider_closing"],"closing_offers":["product_change","account_closure"],"quick_actions_on_page":["Explain these terms","Ask for a better offer","Check the status","Ask for a transfer","End chat"]} | 7.3 | [closing-offers](sequences/3b-closing/01-closing-offers.jpg) |
-| 2 | Click Accept on "Close the account" | A summary of what closing means; nothing is closed yet | {"commitments":0,"confirmations":1} | 7.4 | [closure-summary](sequences/3b-closing/02-closure-summary.jpg) |
-| 3 | Cancel, then write twice more (the fifth customer turn) | The last request is answered, then the representative ends the chat; no commitment exists | {"case_status":"resolved","last_rule":"chat:turn_limit","commitments":0} | 7.6 | [turn-limit](sequences/3b-closing/03-turn-limit.jpg) |
-
 ### Identity with only the chosen fields
 
 Seed `fixtures/retention-pressure.json`; run `evidence-counterline`, synthetic account `counterline-jordan` owned by `person-jordan`.
 
 | Step | Action | Expected | Observed in the App | Version | Screenshot |
 | ---: | :--- | :--- | :--- | :--- | :--- |
-| 1 | Open an annual-fee case with the pressure script | The representative asks for the full card number and Social Security number | {"greeting":"Thanks for contacting Larchmont Card Services. Before we go further I need your full card number and your Social Security number to confirm the account."} | 8.1 | [pressure-ask](sequences/4-identity/01-pressure-ask.jpg) |
-| 2 | Tick last four and ZIP; type an SSN without ticking it | Only ticked fields will be sent | screen only | 8.1 | [form](sequences/4-identity/02-form.jpg) |
-| 3 | Send selected | Verified with two fields disclosed; the SSN is in no record | {"disclosed":["last_four","billing_zip"],"verified":true,"ssn_stored":false} | 8.2 | [verified](sequences/4-identity/03-verified.jpg) |
-| 4 | In a new case, send a wrong last four | Not verified; the representative says the details do not match; no offer | {"verified":false,"reply":"Those details do not match our records.","offers_in_case":0} | 8.4 | [mismatch](sequences/4-identity/04-mismatch.jpg) |
+| 1 | Open an annual-fee case with the pressure script | The representative asks for the full card number and Social Security number | {"greeting":"Thanks for contacting Larchmont Card Services. Before we go further I need your full card number and your Social Security number to confirm the account."} | 7.1 | [pressure-ask](sequences/4-identity/01-pressure-ask.jpg) |
+| 2 | Tick last four and ZIP; type an SSN without ticking it | Only ticked fields will be sent | screen only | 7.1 | [form](sequences/4-identity/02-form.jpg) |
+| 3 | Send selected | Verified with two fields disclosed; the SSN is in no record | {"disclosed":["last_four","billing_zip"],"verified":true,"ssn_stored":false} | 7.2 | [verified](sequences/4-identity/03-verified.jpg) |
+| 4 | In a new case, send a wrong last four | Not verified; the representative says the details do not match; no offer | {"verified":false,"reply":"Those details do not match our records.","offers_in_case":0} | 7.4 | [mismatch](sequences/4-identity/04-mismatch.jpg) |
 
 ### Contest a reported credit; the provider reissues it
 
@@ -112,11 +101,11 @@ Seed `fixtures/minimal.json`; run `evidence-counterline`, synthetic account `cou
 
 | Step | Action | Expected | Observed in the App | Version | Screenshot |
 | ---: | :--- | :--- | :--- | :--- | :--- |
-| 1 | The provider reports the 125.00 credit (Infra event), then open Commitments | cm-0001 reads reported_performed with reference POST-301; the page says a report is not proof of payment | {"status":"reported_performed","reports":["POST-301"]} | 9.1 | [reported](sequences/5-contest/01-reported.jpg) |
-| 2 | Contest it with a reason | cm-0001 is contested, awaiting the provider | {"status":"contested","contest":"The credit does not show on my card account."} | 9.2 | [contested](sequences/5-contest/02-contested.jpg) |
-| 3 | The provider answers "reissued" (Infra event), then Refresh | cm-0001 is pending again; the contest shows the answer | {"status":"pending","outcome":"reissued"} | 9.3 | [reissued](sequences/5-contest/03-reissued.jpg) |
-| 4 | Open the original case | The representative's note about the reissue is in the chat | {"last_turn":"We reviewed your contest and are reissuing this commitment under reference POST-401."} | 9.3 | [chat-note](sequences/5-contest/04-chat-note.jpg) |
-| 5 | Reload the browser page, then open Commitments | The same state after a reload: cm-0001 pending, contest answered "reissued" | {"status":"pending","outcome":"reissued"} | 9.3 | [after-reload](sequences/5-contest/05-after-reload.jpg) |
+| 1 | The provider reports the 125.00 credit (Infra event), then open Commitments | cm-0001 reads reported_performed with reference POST-301; the page says a report is not proof of payment | {"status":"reported_performed","reports":["POST-301"]} | 8.1 | [reported](sequences/5-contest/01-reported.jpg) |
+| 2 | Contest it with a reason | cm-0001 is contested, awaiting the provider | {"status":"contested","contest":"The credit does not show on my card account."} | 8.2 | [contested](sequences/5-contest/02-contested.jpg) |
+| 3 | The provider answers "reissued" (Infra event), then Refresh | cm-0001 is pending again; the contest shows the answer | {"status":"pending","outcome":"reissued"} | 8.3 | [reissued](sequences/5-contest/03-reissued.jpg) |
+| 4 | Open the original case | The representative's note about the reissue is in the chat | {"last_turn":"We reviewed your contest and are reissuing this commitment under reference POST-401."} | 8.3 | [chat-note](sequences/5-contest/04-chat-note.jpg) |
+| 5 | Reload the browser page, then open Commitments | The same state after a reload: cm-0001 pending, contest answered "reissued" | {"status":"pending","outcome":"reissued"} | 8.3 | [after-reload](sequences/5-contest/05-after-reload.jpg) |
 
 ### Optional Mail copy of a confirmed commitment, seen in Mail
 
@@ -124,9 +113,9 @@ Seed `fixtures/minimal.json` (Owned by person-maya (the reference Mail account's
 
 | Step | Action | Expected | Observed in the App | Version | Screenshot |
 | ---: | :--- | :--- | :--- | :--- | :--- |
-| 1 | Settings: tick "Email copies of offers and confirmations" | The preference is saved in Counterline | {"email_copies":true} | 10.1 | [copies-on](sequences/6-mail-copy/01-copies-on.jpg) |
-| 2 | Accept the first offer and confirm | A pending commitment; an offer copy and a confirmation copy are queued in Counterline (local commit only) | {"commitment":"cm-0002","outbox":[["offer_presented","pending_delivery"],["commitment_confirmed","pending_delivery"]]} | 10.5 | [accepted](sequences/6-mail-copy/02-accepted.jpg) |
-| 3 | Infra delivers the queued copies through Messaging (as a runner would); open the Mail page | Both copies are in Mail's inbox; Counterline records each Messaging receipt; a copy has no business confirmation | {"receipts":["committed","committed"],"counterline_outbox":[["offer_presented","delivered"],["commitment_confirmed","delivered"]],"mail_subjects":["Larchmont Card Services: new offers in your case","Larchmont Card Services: Statement credit confirmed"]} | 10.7 | [in-mail](sequences/6-mail-copy/03-in-mail.jpg) |
+| 1 | Settings: tick "Email copies of offers and confirmations" | The preference is saved in Counterline | {"email_copies":true} | 9.1 | [copies-on](sequences/6-mail-copy/01-copies-on.jpg) |
+| 2 | Accept the first offer and confirm | A pending commitment; an offer copy and a confirmation copy are queued in Counterline (local commit only) | {"commitment":"cm-0002","outbox":[["offer_presented","pending_delivery"],["commitment_confirmed","pending_delivery"]]} | 9.5 | [accepted](sequences/6-mail-copy/02-accepted.jpg) |
+| 3 | Infra delivers the queued copies through Messaging (as a runner would); open the Mail page | Both copies are in Mail's inbox; Counterline records each Messaging receipt; a copy has no business confirmation | {"receipts":["committed","committed"],"counterline_outbox":[["offer_presented","delivered"],["commitment_confirmed","delivered"]],"mail_subjects":["Larchmont Card Services: new offers in your case","Larchmont Card Services: Statement credit confirmed"]} | 9.7 | [in-mail](sequences/6-mail-copy/03-in-mail.jpg) |
 
 ## Business, runtime and verifier results
 
@@ -134,9 +123,9 @@ Seed `fixtures/minimal.json` (Owned by person-maya (the reference Mail account's
 | :--- | :--- | :--- |
 | Public verifier, with Mail | `npm run app:verify -- --app apps/counterline --with examples/apps/mail` | 53 passed, 0 failed, 0 skipped, 0 not run ([report](reports/public-verifier.json)) |
 | Runtime check | `node apps/counterline/examples/runtime-check.cjs` | 8 steps: load, expiry, failed_call, token_replay, request_retry, perform_by, rejected_report, reset ([report](reports/runtime-check.json)) |
-| Seeds and retention scripts | `node apps/counterline/scripts/check-fixtures.cjs` | 10 seeds valid; pressure and neutral present 5 identical offers ([report](reports/fixtures.json)) |
-| Recognizer diagnostic | `node apps/counterline/scripts/text-diagnostic.cjs` | explain_terms 9/10, ask_for_better_offer 10/10, ask_status 9/10, request_transfer 10/10, consider_closing 10/10, end_chat 9/10, none 24/24, double 10/10; 3 listed, no accuracy target ([report](reports/recognizer-diagnostic.json)) |
-| Business tests | `cd apps/counterline && npm test` | T00 to T20 and T22 to T29 |
+| Seeds and retention scripts | `node apps/counterline/scripts/check-fixtures.cjs` | 9 seeds valid; pressure and neutral present 5 identical offers ([report](reports/fixtures.json)) |
+| Recognizer diagnostic | `node apps/counterline/scripts/text-diagnostic.cjs` | explain_terms 9/10, ask_for_better_offer 10/10, ask_status 9/10, request_transfer 10/10, end_chat 9/10, none 20/20, double 10/10; 3 listed, no accuracy target ([report](reports/recognizer-diagnostic.json)) |
+| Business tests | `cd apps/counterline && npm test` | T00 to T20, T22 to T27 and T30 |
 | Browser check | `node apps/counterline/tests/browser.test.cjs` | 29 checks with real controls, each write verified through Infra MCP |
 
 ## Dependency demonstrations
