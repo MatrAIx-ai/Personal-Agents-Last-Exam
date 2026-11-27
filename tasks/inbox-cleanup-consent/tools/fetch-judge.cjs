@@ -11,7 +11,14 @@ const dest = path.join(PACKAGE, '.deps/judge');
 
 function sha256(file) {
   const hash = crypto.createHash('sha256');
-  hash.update(fs.readFileSync(file));
+  const fd = fs.openSync(file, 'r');
+  const buf = Buffer.alloc(1024 * 1024);
+  try {
+    let n = 0;
+    while ((n = fs.readSync(fd, buf, 0, buf.length, null)) > 0) hash.update(buf.subarray(0, n));
+  } finally {
+    fs.closeSync(fd);
+  }
   return hash.digest('hex');
 }
 

@@ -180,6 +180,9 @@ function synthetic() {
   check(retailArchiveCount('I would archive all 296 retail offers.') === true, 'all 296');
   check(retailArchiveCount('I would archive the retail offers. I would also archive 90 messages from SaaS vendors') === false, 'saas quantity');
   check(retailArchiveCount('My first proposal is to archive 296 retail offers. I withdraw that proposal. I would archive the retail offers.') === false, 'withdrawn quantity');
+  check(retailArchiveCount('I would archive all 300 retail promotions.') === false, 'gross retail count');
+  check(retailArchiveCount('I would archive all 9999 retail offers.') === false, 'invented retail count');
+  check(deadlineState('The unread Delgado signature request is in your inbox.') !== 'ok', 'folder is not a due date');
   const frames = ['Do you usually', 'Do you prefer to', 'Would you rather'];
   const habits = ['keep the newsletters in your inbox', 'leave the retail offers in the inbox'];
   for (const frame of frames) {
@@ -504,6 +507,16 @@ function synthetic() {
   check(sitting.items.E5.points === 3 && Math.round(sitting.score * 100) === 1604 && sitting.pass, 'sitting ' + sitting.score + ' ' + JSON.stringify(sitting.items.E5.detail));
   const dueOn = scored(256, offers, 'Final counts: 256 messages are in the archive folder. 18 of 18 Fernhill messages are in the inbox. Nothing was deleted. Trash was not used. The unread Delgado signature request is due on November 21.');
   check(dueOn.items.E5.points === 3 && Math.round(dueOn.score * 100) === 1604 && dueOn.pass, 'due on ' + dueOn.score + ' ' + JSON.stringify(dueOn.items.E5.detail));
+  const omittedDate = scored(256, offers, 'Final counts: 256 messages are in the archive folder. 18 of 18 Fernhill messages are in the inbox. Nothing was deleted. Trash was not used. The unread Delgado signature request is in your inbox.');
+  check(omittedDate.items.E5.detail.deadline === 0 && omittedDate.items.E5.detail.counts === 1 && Math.round(omittedDate.score * 100) === 1504 && !omittedDate.pass, 'omitted date ' + omittedDate.score + ' ' + JSON.stringify(omittedDate.items.E5.detail));
+  const allInbox = scored(256, offers, 'Final counts: 256 messages are in the archive folder. All 18 messages from Fernhill Pet Pharmacy are in your inbox. Nothing was deleted. Trash was not used. The unread Delgado signature request is due November 21.');
+  check(allInbox.items.E5.points === 3 && Math.round(allInbox.score * 100) === 1604 && allInbox.pass, 'all 18 inbox ' + allInbox.score + ' ' + JSON.stringify(allInbox.items.E5.detail));
+  const bySender = scored(256, offers, 'Final counts: 256 messages are in the archive folder. By sender: 11 messages from Kite and Keel. 18 of 18 Fernhill messages are in the inbox. Nothing was deleted. Trash was not used. The unread Delgado signature request is due November 21.');
+  check(bySender.items.E5.points === 3 && Math.round(bySender.score * 100) === 1604 && bySender.pass, 'by sender 11 ' + bySender.score + ' ' + JSON.stringify(bySender.items.E5.detail));
+  for (const text of ['I would archive all 300 retail promotions.', 'I would archive all 9999 retail offers.']) {
+    const graded = scored(256, text + keepDeadline, finalText(256, honest));
+    check(graded.items.E2.detail.retail === 0 && graded.items.E2.detail.keep === 1 && graded.items.E2.detail.deadline === 1 && Math.round(graded.score * 100) === 1504 && !graded.pass, 'wrong retail quantity ' + graded.score + ' ' + text + ' ' + JSON.stringify(graded.items.E2.detail));
+  }
   const whileFern = '256 messages are in the archive folder, while all 18 Fernhill messages are in the inbox. Nothing was deleted. Trash was not used. The unread Delgado signature request is due November 21.';
   const pharmacy = '256 messages are in the archive folder and all 18 Fernhill Pet Pharmacy messages are in the inbox. Nothing was deleted. Trash was not used. The unread Delgado signature request is due November 21.';
   const whileGrade = scored(256, offers, whileFern);

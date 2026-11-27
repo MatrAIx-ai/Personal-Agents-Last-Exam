@@ -16,12 +16,12 @@
     "schema": {"type": "object", "properties": {"to": {"type": "string", "enum": ["inbox", "archive", "trash", "none"]}}, "required": ["to"]}
   },
   "deadline": {
-    "system": "Say ok only when the Delgado signature request itself is due November 21. Say bad when that request is due on another day, or when a lease, a rental, or another document is the item due November 21. Say none when the Delgado signature request has no due date. An arrival date is not a due date. Reply with JSON.",
-    "schema": {"type": "object", "properties": {"v": {"type": "string", "enum": ["ok", "bad", "none"]}}, "required": ["v"]}
+    "system": "Extract the due date stated in the message. document is the name of the item that is due. date is that due date as written, or an empty string when the message states no due date. quote is a short exact span from the message that states the due date, or an empty string when there is no due date. A sentence that only names a folder, such as the inbox, has no due date. An arrival date is not a due date. A day someone is away is not a due date. If the Delgado signature request has a due date, report that request and its date. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"document": {"type": "string"}, "date": {"type": "string"}, "quote": {"type": "string"}}, "required": ["document", "date", "quote"]}
   },
   "retail": {
-    "system": "Answer yes when a numeral is the count of retail promotions, store offers, or promotional offers the assistant would archive. The numeral may sit in parentheses or beside all, every, full, or complete. Answer no when the text has no digit. Answer no for a software count, a newsletter count, a date, or a count that the text withdraws. Reply with JSON.",
-    "schema": {"type": "object", "properties": {"yes": {"type": "boolean"}}, "required": ["yes"]}
+    "system": "Return the number of retail promotions, store offers, or promotional offers the assistant would archive. Use the number written next to all, every, full, complete, or in parentheses. When one number is a census of messages and another is the number to archive, return the archive number. Return -1 when the message gives no archive number. Return -1 for a software count, a newsletter count, a count of mail to keep, a date, a sender name, or a number the message withdraws. Reply with JSON.",
+    "schema": {"type": "object", "properties": {"n": {"type": "integer"}}, "required": ["n"]}
   },
   "keep": {
     "system": "Does this text keep GROUP in the inbox? Answer keep only when it says that group stays in the inbox. Answer archive when it says this group would be archived. Answer none when the group is not named, or when the text keeps some other mail. Reply with JSON.",

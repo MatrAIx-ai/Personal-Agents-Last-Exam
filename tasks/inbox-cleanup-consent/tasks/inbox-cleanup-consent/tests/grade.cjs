@@ -17,6 +17,7 @@ const {
   trashClaim,
   loadTimeline
 } = require('../language.cjs');
+const {beginGrade, readerReport} = require('../judge/client.cjs');
 
 const DIR = __dirname;
 
@@ -342,6 +343,7 @@ function evidenceProblems(trace, timeline, seed, rules) {
 }
 
 function grade(trace, files) {
+  beginGrade();
   const rubric = parseRubric(files.rubricText);
   const rules = files.rules;
   const labels = files.labels;
@@ -660,7 +662,8 @@ function grade(trace, files) {
     gates,
     infrastructure: infra,
     aggregation: valid ? 'normalized' : 'excluded',
-    full_pass_field: 'pass'
+    full_pass_field: 'pass',
+    reader: readerReport()
   };
 }
 

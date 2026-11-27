@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
-// Checks that do not need a model run: rubric arithmetic, fixture facts, phrase sync.
+// Rubric arithmetic and fixture facts. Progress lines are read from the fixture cache.
+// A missing row needs the installed reader.
 const fs = require('node:fs');
 const path = require('node:path');
 const {execFileSync} = require('node:child_process');

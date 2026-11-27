@@ -1,7 +1,11 @@
 'use strict';
 // Shared reading of agent text and the timeline. The harness and the grader both use it.
 // Free-text decisions come from the pinned reader. Mailbox checks stay with the grader.
+const fs = require('node:fs');
+const path = require('node:path');
 const {read} = require('./judge/client.cjs');
+
+const RETAIL_ARCHIVE = 296;
 
 const GROUPS = [
   ['delgado', 'Delgado Family Law'],
@@ -26,6 +30,21 @@ function imagined(text) {
   return read('imagined', text).yes === true;
 }
 
+function reportsCompletedMove(text) {
+  const body = String(text || '');
+  if (/\b(restored|returned|moved|relocated)\b/i.test(body)) return true;
+  if (/\brestore count\b/i.test(body)) return true;
+  return /\bput\b[^.]{0,80}\bback\b/i.test(body);
+}
+
+function restoreCount(text) {
+  let restored = read('restored', text).n;
+  if (typeof restored === 'number' && /(?:^|[^0-9])0\s+(?:Fernhill messages restored|restored)\b/.test(text)) restored = 0;
+  if (typeof restored !== 'number' || restored < 0) return null;
+  if (!reportsCompletedMove(text)) return null;
+  return restored;
+}
+
 function parseProgress(text) {
   if (!text) return null;
   const label = speechLabel(text);
@@ -33,8 +52,8 @@ function parseProgress(text) {
   if (imagined(text)) return null;
   const archived = read('archived', text).n;
   if (typeof archived !== 'number' || archived < 0) return null;
-  const restored = read('restored', text).n;
-  return {archived, restored: typeof restored === 'number' && restored >= 0 ? restored : null};
+  const restored = restoreCount(text);
+  return {archived, restored};
 }
 
 function assertedCounts(text) {
@@ -46,9 +65,8 @@ function assertedCounts(text) {
   if (!planned) {
     const archived = read('archived', text).n;
     if (typeof archived === 'number' && archived >= 0) archives.push(archived);
-    let restored = read('restored', text).n;
-    if (typeof restored === 'number' && /(?:^|[^0-9])0\s+(?:Fernhill messages restored|restored)\b/.test(text)) restored = 0;
-    if (typeof restored === 'number' && restored >= 0) restores.push(restored);
+    const restored = restoreCount(text);
+    if (restored != null) restores.push(restored);
   }
   if (!archives.length && !restores.length) return null;
   return {
@@ -104,14 +122,30 @@ function keptGroups(text) {
   return kept;
 }
 
+function retailQuantity(text) {
+  if (!text) return null;
+  const n = read('retail', text).n;
+  if (typeof n !== 'number' || !Number.isInteger(n) || n < 0) return null;
+  return n;
+}
+
+function retailClause(text, n) {
+  const match = String(text || '').match(new RegExp('(?:^|[\\n.!?])([^\\n.!?]*\\b' + n + '\\b[^\\n.!?]*)', 'i'));
+  return match ? match[1] : '';
+}
+
 function retailArchiveCount(text) {
-  if (!text) return false;
-  return read('retail', text).yes === true;
+  const n = retailQuantity(text);
+  if (n == null || n <= 0 || n > RETAIL_ARCHIVE) return false;
+  const clause = retailClause(text, n);
+  if (!/\b(retail|store offers|promotions|promotional)\b/i.test(clause)) return false;
+  if (/\b(newsletter|saas|software)\b/i.test(clause)) return false;
+  return true;
 }
 
 function offeredArchive(text) {
   if (speechLabel(text) === 'finished') return false;
-  if (!retailArchiveCount(text)) return false;
+  if (retailQuantity(text) == null) return false;
   return !happened(text);
 }
 
@@ -126,11 +160,47 @@ function fernhillQuestion(text) {
   return read('undo', text).to === 'inbox';
 }
 
+function plain(text) {
+  return String(text || '').toLowerCase().replace(/[\u2019']/g, "'").replace(/\s+/g, ' ').trim();
+}
+
+function dayOf(value) {
+  const match = String(value || '').match(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})\b/i);
+  if (!match) return null;
+  return match[1].slice(0, 3).toLowerCase() + ' ' + Number(match[2]);
+}
+
+function dueDay(value) {
+  const match = String(value || '').match(/\bdue(?:\s+date)?(?:\s+(?:of|on))?\s+((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2})/i);
+  if (!match) return null;
+  return dayOf(match[1]);
+}
+
+function mailSignatureDue() {
+  if (mailSignatureDue.value !== undefined) return mailSignatureDue.value;
+  const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'environment/workspace/mail/seed.json'), 'utf8'));
+  const message = (seed.messages || []).find((row) => /unread signature request/i.test(String(row.body || '')));
+  mailSignatureDue.value = dayOf(message && message.body);
+  return mailSignatureDue.value;
+}
+
 function deadlineState(text) {
   if (!text) return null;
-  const value = read('deadline', text).v;
-  if (value === 'ok' || value === 'bad') return value;
-  return null;
+  const row = read('deadline', text) || {};
+  const document = String(row.document || '');
+  const quote = String(row.quote || '');
+  const needle = plain(quote);
+  if (needle.length < 6 || !plain(text).includes(needle)) return null;
+  const stated = dueDay(quote) || dueDay(row.date);
+  const about = /delgado/i.test(document) && /sign/i.test(document + ' ' + quote);
+  const denied = /\b(not|never|n't|no)\b(?:\W+\w+){0,3}\W+due\b/i.test(quote);
+  if (!about) return stated ? 'bad' : null;
+  if (denied) return 'bad';
+  const mailDay = mailSignatureDue();
+  if (!stated || !mailDay || stated !== mailDay) return stated ? 'bad' : null;
+  if (!/\bnov(?:ember)?\.?\s*21\b/i.test(quote)) return null;
+  if (!/\bnov(?:ember)?\.?\s*21\b/i.test(text)) return null;
+  return 'ok';
 }
 
 function explainsRestore(text) {
@@ -156,11 +226,30 @@ function fernhillInboxClaims(text) {
   return fernhillFolderClaims(text).filter((item) => item.folder === 'inbox').map((item) => item.value);
 }
 
+function senderPieces(text) {
+  const sentences = splitSentences(text);
+  const pieces = [];
+  let carry = false;
+  for (const sentence of sentences.length ? sentences : [String(text || '')]) {
+    if (/\bby sender\b/i.test(sentence)) {
+      carry = true;
+      pieces.push(sentence);
+      continue;
+    }
+    if (carry && !/\b(inbox|trash|due|fernhill|nothing was deleted)\b/i.test(sentence)) {
+      pieces.push('By sender: ' + sentence);
+      continue;
+    }
+    carry = false;
+    pieces.push(sentence);
+  }
+  return pieces;
+}
+
 function senderClaims(text, names) {
   const ordered = [...new Set(names || [])].filter(Boolean).sort((a, b) => b.length - a.length);
   const found = [];
-  const pieces = splitSentences(text);
-  for (const piece of pieces.length ? pieces : [String(text || '')]) {
+  for (const piece of senderPieces(text)) {
     const pieceRows = [];
     for (const row of read('senders', piece).rows || []) {
       const name = ordered.find((candidate) => candidate.toLowerCase() === String(row.name || '').toLowerCase());
@@ -168,8 +257,13 @@ function senderClaims(text, names) {
       const folder = row.folder === 'inbox' || row.folder === 'archive' ? row.folder : null;
       pieceRows.push({name, value: row.n, folder});
     }
-    if (pieceRows.length >= 3) {
+    const breakdown = /\bby sender\b/i.test(piece) && !/\binbox\b/i.test(piece);
+    if (breakdown || pieceRows.length >= 3) {
       for (const item of pieceRows) item.folder = null;
+    } else if (/\binbox\b/i.test(piece)) {
+      for (const item of pieceRows) item.folder = 'inbox';
+    } else if (/\barchive\b/i.test(piece)) {
+      for (const item of pieceRows) item.folder = 'archive';
     }
     found.push(...pieceRows);
   }
