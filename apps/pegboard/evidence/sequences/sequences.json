@@ -1,0 +1,546 @@
+{
+  "schema": "pegboard.web-evidence.v1",
+  "app_version": "1.0.0",
+  "package_sha256_without_evidence": "ba557e8d42c6adbb40fffe375d5d9482371e87aa8a23149d58463f2ed89c3ae0",
+  "runtime": "1.6.0",
+  "node": "v22.23.4",
+  "browser": "Chrome 153.0.8010.12, headless",
+  "viewport": "1360x960 (narrow checks at 390x844)",
+  "browser_time_zone": "Asia/Tokyo",
+  "workplace_time_zone": "America/Los_Angeles",
+  "runs": {
+    "browser": "sandbox profile, fixtures/minimal.json, account pegboard-noor (Noor Haddad), clock 2026-11-21T18:00:00-08:00",
+    "restricted": "scenario profile, same fixture",
+    "full-window": "sandbox profile, datasets/full-window loaded by Infra at its clock"
+  },
+  "test": "tests/web.browser.cjs",
+  "checks": 65,
+  "steps": [
+    {
+      "sequence": "cover-refused",
+      "title": "Asking for cover: refused by the rules",
+      "step": 1,
+      "caption": "Noor's Thursday shift, before anything is asked",
+      "file": "cover-refused-01.jpg",
+      "action": "Schedule, week of 23 November: open sh-1126-02.",
+      "expected": "The shift is Noor's, with no handoff pending.",
+      "observed": "Cashier · Quay kiosk Thu, Nov 26, 8:00 AM – 2:00 PM (6 hours) · Yours",
+      "state": {
+        "shifts.get": "person-noor, pending handoff null",
+        "version": "epoch 1, revision 0"
+      }
+    },
+    {
+      "sequence": "cover-refused",
+      "title": "Asking for cover: refused by the rules",
+      "step": 2,
+      "caption": "The form shows the App's check for Ines",
+      "file": "cover-refused-02.jpg",
+      "action": "Ask for cover, then choose Ines Okafor.",
+      "expected": "The check says she cannot take it: not_qualified.",
+      "observed": "Ines Okafor cannot take it: does not hold the position. Week of Mon, Nov 23: 30 → 36 of 40 hours. Rest before 13 h, after 18 h (minimum 10 h).",
+      "state": {
+        "eligibility.check": "eligible false, blocks not_qualified"
+      }
+    },
+    {
+      "sequence": "cover-refused",
+      "title": "Asking for cover: refused by the rules",
+      "step": 3,
+      "caption": "Sending it anyway is refused, and nothing is written",
+      "file": "cover-refused-03.jpg",
+      "action": "Send the request.",
+      "expected": "pegboard.handoffs.cover answers not_qualified; no handoff is created.",
+      "observed": "Ines Okafor does not hold the position Cashier. Use eligibility.check to see every rule.",
+      "state": {
+        "handoffs.list": "pending for sh-1126-02: 0",
+        "version": "epoch 1, revision 0"
+      },
+      "check": "a cover the rules refuse is refused visibly and writes nothing"
+    },
+    {
+      "sequence": "cover-expired",
+      "title": "Asking for cover: pending, then expired at its cut-off",
+      "step": 1,
+      "caption": "The form shows Kai can take it",
+      "file": "cover-expired-01.jpg",
+      "action": "Ask for cover again, choose Kai Moreno and write a message.",
+      "expected": "The App's check says Kai is eligible (14 → 20 of 20 hours).",
+      "observed": "Kai Moreno can take it. Week of Mon, Nov 23: 14 → 20 of 20 hours. Rest before 12 h, after 89 h (minimum 10 h).",
+      "state": {
+        "eligibility.check": "eligible true"
+      }
+    },
+    {
+      "sequence": "cover-expired",
+      "title": "Asking for cover: pending, then expired at its cut-off",
+      "step": 2,
+      "caption": "Sent: it waits for Kai and the shift stays Noor's",
+      "file": "cover-expired-02.jpg",
+      "action": "Send the request.",
+      "expected": "A handoff waits for Kai until its cut-off; the shift keeps its assignee and shows the pending handoff.",
+      "observed": "Cashier · Quay kiosk Thu, Nov 26, 8:00 AM – 2:00 PM (6 hours) · Yours Handoff pending",
+      "state": {
+        "handoffs.get": "ho-0015 awaiting_coworker, cut-off 2026-11-25T08:00:00-08:00",
+        "shifts.get": "person-noor, pending ho-0015",
+        "receipt": "request web-33d778f5-dd51-4c92-8958-7584cb38514c",
+        "version": "epoch 1, revision 1"
+      },
+      "check": "the cover is the App's record and the shift stays mine until it is approved"
+    },
+    {
+      "sequence": "stale-form",
+      "title": "A form that went stale",
+      "step": 1,
+      "caption": "A cover form open for Monday's shift",
+      "file": "stale-form-01.jpg",
+      "action": "Open sh-1123-01, Ask for cover, choose Ada Brennan; do not send yet.",
+      "expected": "The form was read at the current version.",
+      "observed": "Ask for cover",
+      "state": {
+        "version": "epoch 1, revision 1"
+      }
+    },
+    {
+      "sequence": "stale-form",
+      "title": "A form that went stale",
+      "step": 2,
+      "caption": "Another client released the shift first: the form says so",
+      "file": "stale-form-02.jpg",
+      "action": "Meanwhile the same run releases sh-1123-01 through MCP (pegboard.handoffs.release); then send the form.",
+      "expected": "The write is refused as stale_version; the release made elsewhere stands.",
+      "observed": "This record changed. Close this form and refresh before trying again.",
+      "state": {
+        "handoffs.list": "sh-1123-01: release awaiting_manager",
+        "version": "epoch 1, revision 2"
+      },
+      "check": "a stale form shows the conflict and the concurrent change stands"
+    },
+    {
+      "sequence": "release-denied",
+      "title": "Release: a lost response, a retry, then denied by the manager",
+      "step": 1,
+      "caption": "The response to \"Release\" is lost: the form says so and keeps its input",
+      "file": "release-denied-01.jpg",
+      "action": "Open Friday's shift sh-1127-05, Release to open shifts, send. The test drops the response after the App has committed it.",
+      "expected": "The form reports the failure and offers to send again with the same request ID.",
+      "observed": "Failed to fetch",
+      "state": {
+        "handoffs.list": "releases of sh-1127-05: 1"
+      }
+    },
+    {
+      "sequence": "release-denied",
+      "title": "Release: a lost response, a retry, then denied by the manager",
+      "step": 2,
+      "caption": "Sent again: one release, waiting for the manager",
+      "file": "release-denied-02.jpg",
+      "action": "Send again.",
+      "expected": "The retry is the same write: one release, waiting for the manager; the shift is still Noor's.",
+      "observed": "Cashier · Finch Street Fri, Nov 27, 4:00 PM – 8:00 PM (4 hours) · Yours Handoff pending",
+      "state": {
+        "handoffs.get": "ho-0017 awaiting_manager",
+        "shifts.get": "person-noor",
+        "version": "epoch 1, revision 3"
+      },
+      "check": "a retry after a lost response has one effect"
+    },
+    {
+      "sequence": "trade-approved",
+      "title": "Trade: accepted by the coworker, approved by the manager",
+      "step": 1,
+      "caption": "The trade form checks both sides",
+      "file": "trade-approved-01.jpg",
+      "action": "Week of 30 November: open Noor's sh-1201-03, Offer a trade, choose Kai's sh-1130-03.",
+      "expected": "Noor may take Kai's shift and Kai may take hers: both checks pass.",
+      "observed": "You can take it. Week of Mon, Nov 30: 20 → 20 of 24 hours. Rest before 35 h, after 67 h (minimum 10 h). Kai Moreno can take your shift.",
+      "state": {
+        "eligibility.check": "Noor true, Kai true"
+      }
+    },
+    {
+      "sequence": "trade-approved",
+      "title": "Trade: accepted by the coworker, approved by the manager",
+      "step": 2,
+      "caption": "Sent: it waits for Kai; nothing has changed hands",
+      "file": "trade-approved-02.jpg",
+      "action": "Send the offer.",
+      "expected": "One trade waits for Kai; both shifts keep their assignees.",
+      "observed": "Cashier · Finch Street Tue, Dec 1, 7:00 AM – 1:00 PM (6 hours) · Yours Handoff pending Outside availability · Outside your availability. The manager’s schedule stands; this only says where it breaks the policy or your own records.",
+      "state": {
+        "handoffs.get": "ho-0018 awaiting_coworker",
+        "shifts.get": "sh-1201-03 person-noor, sh-1130-03 person-kai",
+        "receipt": "request web-acd167c7-ab26-487a-986e-9e0ab790fbfb",
+        "version": "epoch 1, revision 4"
+      }
+    },
+    {
+      "sequence": "pickup-refused",
+      "title": "Picking up an open shift: refused by the rules",
+      "step": 1,
+      "caption": "The pick-up form shows Noor's hours for that week",
+      "file": "pickup-refused-01.jpg",
+      "action": "Week of 23 November: open the open shift sh-1125-02, Pick up this shift.",
+      "expected": "The App's check: over_hours (20 → 26 of 24 hours).",
+      "observed": "You cannot take it: would pass the weekly cap. Week of Mon, Nov 23: 20 → 26 of 24 hours. Rest before 44 h, after 18 h (minimum 10 h).",
+      "state": {
+        "eligibility.check": "eligible false, blocks over_hours"
+      }
+    },
+    {
+      "sequence": "pickup-refused",
+      "title": "Picking up an open shift: refused by the rules",
+      "step": 2,
+      "caption": "Sending it anyway is refused, and nothing is written",
+      "file": "pickup-refused-02.jpg",
+      "action": "Send the request.",
+      "expected": "pegboard.handoffs.pickup answers over_hours; no pick-up is created.",
+      "observed": "The account holder would have 26 hours that week; the cap is 24. Use eligibility.check to see every rule.",
+      "state": {
+        "handoffs.list": "pick-ups of sh-1125-02: 0",
+        "version": "epoch 1, revision 4"
+      },
+      "check": "a pick-up the rules refuse is refused visibly and writes nothing"
+    },
+    {
+      "sequence": "incoming-declined",
+      "title": "A coworker's request: accepting refused, then declined",
+      "step": 1,
+      "caption": "Ada asks Noor to cover her Sunday shift",
+      "file": "incoming-declined-01.jpg",
+      "action": "Handoffs: open the request that waits for Noor.",
+      "expected": "The request, the shift, Ada's message and the cut-off, waiting for Noor.",
+      "observed": "Cover: Sun, Nov 29, 6:00 AM – 12:00 PM Ada Brennan asks you · Waiting for you Cover · Nothing has changed hands yet. The shift stays with its owner until this is approved.",
+      "state": {
+        "handoffs.get": "ho-0014 awaiting_me, cut-off 2026-11-28T06:00:00-08:00"
+      }
+    },
+    {
+      "sequence": "incoming-declined",
+      "title": "A coworker's request: accepting refused, then declined",
+      "step": 2,
+      "caption": "Accepting is refused by the rules",
+      "file": "incoming-declined-02.jpg",
+      "action": "Accept, then send.",
+      "expected": "pegboard.handoffs.respond answers over_hours; the request still waits for Noor.",
+      "observed": "The account holder would have 26 hours that week; the cap is 24. Use eligibility.check to see every rule.",
+      "state": {
+        "handoffs.get": "ho-0014 awaiting_me"
+      }
+    },
+    {
+      "sequence": "incoming-declined",
+      "title": "A coworker's request: accepting refused, then declined",
+      "step": 3,
+      "caption": "Declined with a message",
+      "file": "incoming-declined-03.jpg",
+      "action": "Decline, write \"Sorry, I am at my cap that week.\" and send.",
+      "expected": "The request is declined, with Noor's message in its history; Ada's shift stays hers.",
+      "observed": "Cover: Sun, Nov 29, 6:00 AM – 12:00 PM Ada Brennan asks you · Declined Cover",
+      "state": {
+        "handoffs.get": "ho-0014 declined",
+        "shifts.get": "sh-1129-01 person-ada",
+        "version": "epoch 1, revision 5"
+      },
+      "check": "the request is declined in the App"
+    },
+    {
+      "sequence": "request-cancelled",
+      "title": "Cancelling my own request",
+      "step": 1,
+      "caption": "Noor's own request, still waiting for Tomas",
+      "file": "request-cancelled-01.jpg",
+      "action": "Handoffs: open Noor's pending cover request to Tomas.",
+      "expected": "The request waits for the coworker and can be cancelled.",
+      "observed": "Cover: Sat, Nov 28, 4:00 PM – 8:00 PM You ask Tomas Lindqvist · Waiting for the coworker Cover · Nothing has changed hands yet. The shift stays with its owner until this is approved.",
+      "state": {
+        "handoffs.get": "ho-0013 awaiting_coworker"
+      }
+    },
+    {
+      "sequence": "request-cancelled",
+      "title": "Cancelling my own request",
+      "step": 2,
+      "caption": "Cancelled: closed, and the shift is still Noor's",
+      "file": "request-cancelled-02.jpg",
+      "action": "Cancel request, then confirm.",
+      "expected": "The request is cancelled; nothing changed hands.",
+      "observed": "Cover: Sat, Nov 28, 4:00 PM – 8:00 PM You ask Tomas Lindqvist · Cancelled Cover",
+      "state": {
+        "handoffs.get": "ho-0013 cancelled",
+        "shifts.get": "sh-1128-05 person-noor",
+        "version": "epoch 1, revision 6"
+      },
+      "check": "cancelling my request closes it in the App"
+    },
+    {
+      "sequence": "trade-approved",
+      "title": "Trade: accepted by the coworker, approved by the manager",
+      "step": 3,
+      "caption": "Kai accepts: it now waits for the manager",
+      "file": "trade-approved-03.jpg",
+      "action": "Infra applies pegboard.handoff.answered (accept) from Kai; Refresh.",
+      "expected": "The trade waits for the manager; still nothing has changed hands.",
+      "observed": "Trade: Tue, Dec 1, 7:00 AM – 1:00 PM You ask Kai Moreno · Waiting for the manager Trade · Nothing has changed hands yet. The shift stays with its owner until this is approved.",
+      "state": {
+        "handoffs.get": "ho-0018 awaiting_manager",
+        "shifts.get": "sh-1201-03 person-noor",
+        "version": "epoch 1, revision 7"
+      },
+      "check": "after Refresh the trade Kai accepted waits for the manager"
+    },
+    {
+      "sequence": "trade-approved",
+      "title": "Trade: accepted by the coworker, approved by the manager",
+      "step": 4,
+      "caption": "Rosa approves: both shifts change hands",
+      "file": "trade-approved-04.jpg",
+      "action": "Infra applies pegboard.handoff.decided (approve) from Rosa; Refresh.",
+      "expected": "The trade is approved: sh-1201-03 is Kai's, sh-1130-03 is Noor's, each with a history row naming the trade; Noor gets a notification.",
+      "observed": "Trade: Tue, Dec 1, 7:00 AM – 1:00 PM You ask Kai Moreno · Approved Trade · Approved: the shift has changed hands.",
+      "state": {
+        "handoffs.get": "ho-0018 approved",
+        "shifts.get": "sh-1201-03 person-kai, sh-1130-03 person-noor",
+        "notifications.list": "ntf-0018 \"Your trade was approved\"",
+        "version": "epoch 1, revision 8"
+      },
+      "check": "after Refresh the approved trade has moved both shifts, each with a history row naming it"
+    },
+    {
+      "sequence": "trade-approved",
+      "title": "Trade: accepted by the coworker, approved by the manager",
+      "step": 5,
+      "caption": "After a reload: Kai's Monday shift is Noor's, with the move in its history",
+      "file": "trade-approved-05.jpg",
+      "action": "Reload the page; Schedule, week of 30 November; open sh-1130-03.",
+      "expected": "The shift is Noor's; its history ends with the move by the approved trade.",
+      "observed": "Cashier · Finch Street Mon, Nov 30, 7:00 AM – 1:00 PM (6 hours) · Yours",
+      "state": {
+        "shifts.get": "sh-1130-03 person-noor, last history row: handoff ho-0018"
+      },
+      "check": "after a reload, Kai's Monday shift is shown as Noor's, with the trade in its history"
+    },
+    {
+      "sequence": "release-denied",
+      "title": "Release: a lost response, a retry, then denied by the manager",
+      "step": 3,
+      "caption": "Rosa denies it: nothing changes hands",
+      "file": "release-denied-03.jpg",
+      "action": "Infra applies pegboard.handoff.decided (deny, with a note) from Rosa; Refresh.",
+      "expected": "The release is denied with Rosa's note; sh-1127-05 is still Noor's; Noor gets a notification.",
+      "observed": "Release: Fri, Nov 27, 4:00 PM – 8:00 PM You offer it to the open shifts · Denied Release",
+      "state": {
+        "handoffs.get": "ho-0017 denied",
+        "shifts.get": "sh-1127-05 person-noor",
+        "notifications.list": "ntf-0019 \"Your release was denied\"",
+        "version": "epoch 1, revision 9"
+      },
+      "check": "after Refresh the denied release shows the manager's note and the shift is still mine"
+    },
+    {
+      "sequence": "time-off",
+      "title": "Time off: refused, requested, cancelled",
+      "step": 1,
+      "caption": "Nine days ahead is too late: the form says so",
+      "file": "time-off-01.jpg",
+      "action": "Time off: Request time off for Monday 30 November and send.",
+      "expected": "pegboard.time_off.request answers too_late (the policy asks 14 days); nothing is written.",
+      "observed": "Time off needs 14 days of notice: the first day can be 2026-12-05 at the earliest.",
+      "state": {
+        "time_off.list": "5 entries"
+      }
+    },
+    {
+      "sequence": "time-off",
+      "title": "Time off: refused, requested, cancelled",
+      "step": 2,
+      "caption": "Requested: two days, pending the manager",
+      "file": "time-off-02.jpg",
+      "action": "Request 28 and 29 December with the reason \"Family visit\".",
+      "expected": "A pending entry for the two days, waiting for the manager.",
+      "observed": "Mon, Dec 28 – Tue, Dec 29 (2 days) Family visit · Pending",
+      "state": {
+        "time_off.list": "to-0006 pending, 2 days",
+        "receipt": "request web-31251c71-8221-4734-9369-dcdb7a29e22f",
+        "version": "epoch 1, revision 10"
+      },
+      "check": "the time off is the App's pending entry"
+    },
+    {
+      "sequence": "time-off",
+      "title": "Time off: refused, requested, cancelled",
+      "step": 3,
+      "caption": "Cancelled",
+      "file": "time-off-03.jpg",
+      "action": "Cancel time off, then confirm.",
+      "expected": "The entry is cancelled and kept in the list of closed entries.",
+      "observed": "Mon, Dec 28 – Tue, Dec 29 (2 days) Family visit · Cancelled",
+      "state": {
+        "time_off.list": "to-0006 cancelled",
+        "version": "epoch 1, revision 11"
+      },
+      "check": "cancelling the time off is recorded in the App"
+    },
+    {
+      "sequence": "availability",
+      "title": "Availability: refused, saved, flagged on a shift",
+      "step": 1,
+      "caption": "Two Thursday times that overlap are refused",
+      "file": "availability-01.jpg",
+      "action": "Availability: add Thursday 08:00–14:00 and Thursday 13:00–15:00, save.",
+      "expected": "pegboard.availability.update answers invalid_arguments; the saved list is unchanged.",
+      "observed": "Two blocks on thu overlap.",
+      "state": {
+        "availability.get": "3 blocks"
+      },
+      "check": "overlapping times are refused visibly and nothing changes"
+    },
+    {
+      "sequence": "availability",
+      "title": "Availability: refused, saved, flagged on a shift",
+      "step": 2,
+      "caption": "Saved without the overlap: Thursday's shift is now flagged",
+      "file": "availability-02.jpg",
+      "action": "Remove the second time and save; open Thursday's shift sh-1126-02.",
+      "expected": "The list is saved; the shift inside the new time carries the flag outside_availability. The manager's schedule stands.",
+      "observed": "Cashier · Quay kiosk Thu, Nov 26, 8:00 AM – 2:00 PM (6 hours) · Yours Handoff pending Outside availability · Outside your availability. The manager’s schedule stands; this only says where it breaks the policy or your own records.",
+      "state": {
+        "availability.get": "4 blocks",
+        "shifts.get": "flags outside_availability",
+        "version": "epoch 1, revision 12"
+      },
+      "check": "a shift in the new blocked time is flagged at the next read"
+    },
+    {
+      "sequence": "settings",
+      "title": "Settings: saved, refused",
+      "step": 1,
+      "caption": "Open-shift notices switched off and saved",
+      "file": "settings-01.jpg",
+      "action": "Settings: untick open-shift notices, Save settings.",
+      "expected": "Only open_shift_notices is sent; the App stores it.",
+      "observed": "Status: Settings saved.",
+      "state": {
+        "preferences.get": "open_shift_notices false",
+        "version": "epoch 1, revision 13"
+      },
+      "check": "settings send only what changed"
+    },
+    {
+      "sequence": "settings",
+      "title": "Settings: saved, refused",
+      "step": 2,
+      "caption": "Quiet hours from 07:00 to 07:00 are refused",
+      "file": "settings-02.jpg",
+      "action": "Set quiet hours to start at 07:00 (they end at 07:00), Save settings.",
+      "expected": "pegboard.preferences.update answers invalid_arguments; quiet hours stay 22:00–07:00.",
+      "observed": "Quiet hours cannot start and end at the same time.",
+      "state": {
+        "preferences.get": "quiet hours 22:00–07:00"
+      },
+      "check": "quiet hours that start and end at the same time are refused visibly and nothing changes"
+    },
+    {
+      "sequence": "manager-change",
+      "title": "A manager's change voids a pending release",
+      "step": 1,
+      "caption": "Rosa moves Monday's opening shift an hour earlier",
+      "file": "manager-change-01.jpg",
+      "action": "Infra applies the package's scenario event (pegboard.shift.changed, ev-pb-310); Refresh; open sh-1123-01.",
+      "expected": "The shift now starts at 05:00, with the change and its reason in its history.",
+      "observed": "Barista · Finch Street Mon, Nov 23, 5:00 AM – 11:00 AM (6 hours) · Yours Short rest · Less rest than the minimum between working days. The manager’s schedule stands; this only says where it breaks the policy or your own records.",
+      "state": {
+        "shifts.get": "start 2026-11-23T05:00:00-08:00",
+        "version": "epoch 1, revision 14"
+      },
+      "check": "after Refresh the schedule shows a manager's change that arrived as a scenario event"
+    },
+    {
+      "sequence": "manager-change",
+      "title": "A manager's change voids a pending release",
+      "step": 2,
+      "caption": "The release that named it is void: nothing changed hands",
+      "file": "manager-change-02.jpg",
+      "action": "Handoffs: open the release made earlier through MCP for sh-1123-01.",
+      "expected": "The release reads Void; the shift stays Noor's.",
+      "observed": "Release: Mon, Nov 23, 5:00 AM – 11:00 AM You offer it to the open shifts · Void Release",
+      "state": {
+        "handoffs.get": "ho-0016 void",
+        "shifts.get": "person-noor"
+      },
+      "check": "the pending handoff that named the changed shift reads void"
+    },
+    {
+      "sequence": "cover-expired",
+      "title": "Asking for cover: pending, then expired at its cut-off",
+      "step": 3,
+      "caption": "Kai never answered: past the cut-off the request reads Expired",
+      "file": "cover-expired-03.jpg",
+      "action": "Infra moves the clock to 25 November 09:00 with env.advance_time (no App event); Refresh; open the request.",
+      "expected": "The request is expired (derived from its cut-off, nothing rewritten); the shift is still Noor's.",
+      "observed": "Cover: Thu, Nov 26, 8:00 AM – 2:00 PM You ask Kai Moreno · Expired Cover",
+      "state": {
+        "handoffs.get": "ho-0015 expired",
+        "shifts.get": "sh-1126-02 person-noor",
+        "version": "epoch 1, revision 16"
+      },
+      "check": "after a clock move by Infra alone, a request past its cut-off reads expired"
+    },
+    {
+      "sequence": "restricted-policy",
+      "title": "A Task-like policy",
+      "step": 1,
+      "caption": "Under the scenario policy, a cover for a shift it does not list is refused",
+      "file": "restricted-policy-01.jpg",
+      "action": "A second run with the scenario profile: open sh-1123-01, Ask for cover, choose Ada, send.",
+      "expected": "Core answers permission_denied (the policy allows covers for three shifts only); nothing is written.",
+      "observed": "This operation is not allowed for the current account and policy.",
+      "state": {
+        "env.snapshot": "pending handoffs for sh-1123-01: 0"
+      }
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 1,
+      "caption": "Two years of history: the page opens on Noor's next shift after the clock",
+      "file": "full-window-01.jpg",
+      "action": "A third run: Infra loads datasets/full-window with env.load_seed at its clock (2026-12-31T20:00:00-08:00); open the access link.",
+      "expected": "The schedule opens on the week of Noor's next shift that has not ended, 2027-01-04, with that shift selected.",
+      "observed": "Barista · Finch Street Wed, Jan 6, 6:00 AM – 12:00 PM (6 hours) · Yours Handoff pending",
+      "state": {
+        "env.load_seed": "ready, 3799 records",
+        "shifts.list": "next shift sh-270106-01 (week of 2027-01-04)"
+      },
+      "check": "on the full-window dataset the schedule opens on the week of Noor's next shift, past two years of history, with that shift selected"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 2,
+      "caption": "The oldest handoff, from January 2025",
+      "file": "full-window-02.jpg",
+      "action": "Handoffs: open the last closed request in the list.",
+      "expected": "The request of 2025-01-10 with its history; dates outside the opening year show their year.",
+      "observed": "Trade: Mon, Jan 13, 2025, 7:00 AM – 1:00 PM Jo Ainsworth asks you · Cancelled Trade",
+      "state": {
+        "handoffs.get": "ho-0001 cancelled, created 2025-01-10T19:45:00-08:00"
+      },
+      "check": "the oldest handoff of the dataset opens with its year shown"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 3,
+      "caption": "Its shift, in its week of January 2025",
+      "file": "full-window-03.jpg",
+      "action": "Open the shift.",
+      "expected": "The schedule moves to the week of 2025-01-13 and lists the whole team's shifts of that week.",
+      "observed": "← Week of Mon, Jan 13, 2025 → · Cashier · Finch Street Mon, Jan 13, 2025, 7:00 AM – 1:00 PM (6 hours) · Ended",
+      "state": {
+        "shifts.list": "31 shifts that week"
+      },
+      "check": "opening its shift moves the schedule to that week of January 2025"
+    }
+  ]
+}

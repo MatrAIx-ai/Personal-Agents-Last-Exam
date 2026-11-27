@@ -1,0 +1,187 @@
+{
+  "schema": "pegboard.dataset-integration.v1",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "node": "v18.20.8",
+  "dataset": {
+    "dataset_id": "pegboard-full-window",
+    "version": "1.0.0",
+    "seed_sha256": "aa84c05745f94b0d1c767e097875a931103cfe0c97966b4d7a2b3978026abefa",
+    "seed_bytes": 1608682,
+    "records": 3799,
+    "clock": "2026-12-31T20:00:00-08:00"
+  },
+  "load_request_bytes": 1608896,
+  "mcp_message_limit_bytes": 2097152,
+  "monthly": [
+    {
+      "month": "2025-01",
+      "shifts": 130,
+      "dates": 30,
+      "account_shifts": 17
+    },
+    {
+      "month": "2025-02",
+      "shifts": 119,
+      "dates": 28,
+      "account_shifts": 15
+    },
+    {
+      "month": "2025-03",
+      "shifts": 133,
+      "dates": 31,
+      "account_shifts": 15
+    },
+    {
+      "month": "2025-04",
+      "shifts": 128,
+      "dates": 30,
+      "account_shifts": 16
+    },
+    {
+      "month": "2025-05",
+      "shifts": 147,
+      "dates": 31,
+      "account_shifts": 13
+    },
+    {
+      "month": "2025-06",
+      "shifts": 140,
+      "dates": 30,
+      "account_shifts": 15
+    },
+    {
+      "month": "2025-07",
+      "shifts": 168,
+      "dates": 31,
+      "account_shifts": 17
+    },
+    {
+      "month": "2025-08",
+      "shifts": 171,
+      "dates": 31,
+      "account_shifts": 16
+    },
+    {
+      "month": "2025-09",
+      "shifts": 141,
+      "dates": 30,
+      "account_shifts": 15
+    },
+    {
+      "month": "2025-10",
+      "shifts": 134,
+      "dates": 31,
+      "account_shifts": 15
+    },
+    {
+      "month": "2025-11",
+      "shifts": 124,
+      "dates": 29,
+      "account_shifts": 11
+    },
+    {
+      "month": "2025-12",
+      "shifts": 129,
+      "dates": 30,
+      "account_shifts": 19
+    },
+    {
+      "month": "2026-01",
+      "shifts": 129,
+      "dates": 30,
+      "account_shifts": 16
+    },
+    {
+      "month": "2026-02",
+      "shifts": 121,
+      "dates": 28,
+      "account_shifts": 14
+    },
+    {
+      "month": "2026-03",
+      "shifts": 133,
+      "dates": 31,
+      "account_shifts": 18
+    },
+    {
+      "month": "2026-04",
+      "shifts": 125,
+      "dates": 30,
+      "account_shifts": 14
+    },
+    {
+      "month": "2026-05",
+      "shifts": 149,
+      "dates": 31,
+      "account_shifts": 14
+    },
+    {
+      "month": "2026-06",
+      "shifts": 141,
+      "dates": 30,
+      "account_shifts": 13
+    },
+    {
+      "month": "2026-07",
+      "shifts": 169,
+      "dates": 31,
+      "account_shifts": 18
+    },
+    {
+      "month": "2026-08",
+      "shifts": 169,
+      "dates": 31,
+      "account_shifts": 17
+    },
+    {
+      "month": "2026-09",
+      "shifts": 140,
+      "dates": 30,
+      "account_shifts": 17
+    },
+    {
+      "month": "2026-10",
+      "shifts": 135,
+      "dates": 31,
+      "account_shifts": 16
+    },
+    {
+      "month": "2026-11",
+      "shifts": 125,
+      "dates": 29,
+      "account_shifts": 14
+    },
+    {
+      "month": "2026-12",
+      "shifts": 128,
+      "dates": 30,
+      "account_shifts": 14
+    }
+  ],
+  "checks": 20,
+  "passed": true,
+  "duration_ms": 30949,
+  "names": [
+    "coverage.json counts this seed.json (same SHA-256 and size)",
+    "the env.load_seed request (1608896 bytes) fits in one MCP message (2097152 bytes)",
+    "Infra loads the dataset with its clock: every record",
+    "the loaded data and clock are the baseline",
+    "pegboard.shifts.list returns, month by month, the shifts the coverage report counts",
+    "shifts are on every open day of the window",
+    "the first open day of the window (2025-01-02) has its shifts; New Year's Day has none",
+    "the last day of the window has its shifts, all started before the clock",
+    "the posted future weeks are readable and match the coverage report",
+    "every handoff is listed, with the states the coverage report gives at the clock",
+    "the oldest handoff (ho-0001, 2025-01-10) reads back with its history",
+    "every time-off entry is listed, with its state at the clock",
+    "every notification is listed, by kind",
+    "notifications from before the window are there but outside it",
+    "weekly hours read for January 2025 and December 2026",
+    "the team, preferences and availability are the dataset's",
+    "a coworker request waits for Noor at the clock",
+    "reset to the sandbox profile keeps the loaded data and clock",
+    "Noor answers it through MCP: committed, one revision later, stored with its history row",
+    "reset returns to the loaded dataset and clock"
+  ]
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "event_id": "ev-pb-301",
+    "at": "2026-11-09T15:00:00-08:00",
+    "operation": "pegboard.schedule.published",
+    "payload": {
+      "week_start": "2026-11-23",
+      "shifts": [
+        {
+          "shift_id": "sh-1123-01",
+          "location_id": "loc-finch",
+          "position_id": "pos-barista",
+          "start": "2026-11-23T06:00:00-08:00",
+          "end": "2026-11-23T12:00:00-08:00",
+          "assignee": "person-noor"
+        },
+        {
+          "shift_id": "sh-1124-04",
+          "location_id": "loc-finch",
+          "position_id": "pos-barista",
+          "start": "2026-11-24T13:00:00-08:00",
+          "end": "2026-11-24T19:00:00-08:00",
+          "assignee": "person-ines"
+        },
+        {
+          "shift_id": "sh-1125-02",
+          "location_id": "loc-quay",
+          "position_id": "pos-cashier",
+          "start": "2026-11-25T08:00:00-08:00",
+          "end": "2026-11-25T14:00:00-08:00",
+          "assignee": null
+        }
+      ]
+    }
+  },
+  {
+    "event_id": "ev-pb-310",
+    "at": "2026-11-21T20:40:00-08:00",
+    "operation": "pegboard.shift.changed",
+    "payload": {
+      "shift_id": "sh-1123-01",
+      "change": {
+        "start": "2026-11-23T05:00:00-08:00",
+        "end": "2026-11-23T11:00:00-08:00"
+      },
+      "changed_by": "person-rosa",
+      "reason": "Early delivery on Monday"
+    }
+  },
+  {
+    "event_id": "ev-pb-311",
+    "at": "2026-11-22T09:00:00-08:00",
+    "operation": "pegboard.shift.cancelled",
+    "payload": {
+      "shift_id": "sh-1127-06",
+      "changed_by": "person-rosa",
+      "reason": "Kiosk closed for repairs"
+    }
+  },
+  {
+    "event_id": "ev-pb-320",
+    "at": "2026-11-20T18:05:00-08:00",
+    "operation": "pegboard.handoff.received",
+    "payload": {
+      "handoff_id": "ho-0031",
+      "kind": "trade",
+      "from_person_id": "person-ines",
+      "their_shift_id": "sh-1124-04",
+      "your_shift_id": "sh-1123-01",
+      "message": "Could you take my Tuesday close if I take your Monday open?"
+    }
+  },
+  {
+    "event_id": "ev-pb-321",
+    "at": "2026-11-20T19:30:00-08:00",
+    "operation": "pegboard.handoff.answered",
+    "payload": {
+      "handoff_id": "ho-0030",
+      "answer": "accept",
+      "message": "Sure, I can take it."
+    }
+  },
+  {
+    "event_id": "ev-pb-322",
+    "at": "2026-11-21T09:10:00-08:00",
+    "operation": "pegboard.handoff.decided",
+    "payload": {
+      "handoff_id": "ho-0030",
+      "decision": "approve",
+      "decided_by": "person-rosa",
+      "note": "Approved."
+    }
+  },
+  {
+    "event_id": "ev-pb-323",
+    "at": "2026-11-21T10:00:00-08:00",
+    "operation": "pegboard.handoff.withdrawn",
+    "payload": {
+      "handoff_id": "ho-0031",
+      "message": "Never mind, sorted it out."
+    }
+  },
+  {
+    "event_id": "ev-pb-330",
+    "at": "2026-11-18T11:00:00-08:00",
+    "operation": "pegboard.time_off.decided",
+    "payload": {
+      "time_off_id": "to-0004",
+      "decision": "deny",
+      "decided_by": "person-rosa",
+      "note": "Two people are already off that weekend."
+    }
+  }
+]

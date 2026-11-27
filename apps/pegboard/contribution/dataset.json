@@ -1,0 +1,60 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "pegboard-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic Pegboard fixture: an invented café with two locations, ten people and four posted weeks, with one employee account and its history of handoffs, time off and notifications. For package validation and examples; not an evaluation task.",
+  "record_source_ids": [
+    "scripted-history"
+  ],
+  "sources": [
+    {
+      "source_id": "scripted-history",
+      "kind": "synthetic",
+      "description": "Scripted synthetic history. The weekly schedule comes from a fixed template of six shifts a day, a list of pinned assignments and a deterministic fill rule; people, the workplace, messages and reasons are invented. The history is replayed through the App's own business functions, so shift histories, handoffs, time off, notifications and the activity log follow the App rules. No external collection, no real schedule.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic script, no random numbers",
+        "tool": "dev/build-fixture.cjs",
+        "tool_version": "1",
+        "seed": null,
+        "parameters": {
+          "workplaces": 1,
+          "time_zone": "America/Los_Angeles",
+          "locations": 2,
+          "positions": 3,
+          "people": 10,
+          "posted_weeks": 4,
+          "shifts": 168,
+          "open_shifts": 12,
+          "cancelled_shifts": 3,
+          "account_holder_shifts": 16,
+          "availability_blocks": 3,
+          "time_off_entries": 5,
+          "handoffs": 14,
+          "notifications": 16,
+          "clock": "2026-11-21T18:00:00-08:00"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "None: records are stored exactly as the script produces them."
+  ],
+  "expected_counts": {
+    "records": 219,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks (seed rules, dev/check-fixture.cjs) do not replace human review of realism: the schedule and the policy values, the wording of messages and notifications, and that the workplace and every person are fictional."
+  }
+}
