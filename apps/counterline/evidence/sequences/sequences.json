@@ -1,0 +1,599 @@
+{
+  "schema": "counterline.gui-sequences.v1",
+  "captured_at": "2026-11-27T09:58:31.490Z",
+  "node": "v22.23.5",
+  "browser": "157.0.8103.78",
+  "viewport": "1280x860",
+  "time_zone": "America/New_York",
+  "host": "runtime/web/server.cjs",
+  "mail_version": "1.3.0",
+  "registry": "apps/counterline/registry.json",
+  "profile": "sandbox",
+  "javascript_errors": 0,
+  "sequences": [
+    {
+      "id": "0-help-center",
+      "title": "Search the help center and read an article",
+      "seed": "retention-neutral.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "search",
+          "action": "Search \"fee\"",
+          "expected": "Matching articles listed by title and tags; searching writes nothing",
+          "observed": {
+            "cases": 0
+          },
+          "version": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/0-help-center/01-search.jpg"
+        },
+        {
+          "step": 2,
+          "name": "article",
+          "action": "Open \"Questions about your annual fee\"",
+          "expected": "The article names Account Review, the department a transfer needs; no business data changes",
+          "observed": {
+            "cases": 0
+          },
+          "version": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/0-help-center/02-article.jpg"
+        }
+      ]
+    },
+    {
+      "id": "1-status-inquiry",
+      "title": "Status of a promised refund, then overdue",
+      "seed": "refund-minimal.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "start",
+          "action": "Open the page with one promised 40.00 refund (cm-0101, due 2026-12-10)",
+          "expected": "Case list shows the earlier billing case",
+          "observed": {
+            "commitment": "pending"
+          },
+          "version": {
+            "epoch": 3,
+            "revision": 0
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/1-status-inquiry/01-start.jpg"
+        },
+        {
+          "step": 2,
+          "name": "reply",
+          "action": "Open a refund-status case with that question",
+          "expected": "The representative says it is still being processed and due by 2026-12-10; nothing is offered",
+          "observed": {
+            "reply": "The Refund of the duplicate router charge (40.00) is still being processed and is due by 2026-12-10.",
+            "offers_in_case": 0,
+            "commitment": "pending"
+          },
+          "version": {
+            "epoch": 3,
+            "revision": 1
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/1-status-inquiry/02-reply.jpg"
+        },
+        {
+          "step": 3,
+          "name": "overdue-reply",
+          "action": "After the due date (Infra advances the clock), ask again",
+          "expected": "The reply says the refund is late; the commitment stays pending",
+          "observed": {
+            "reply": "The Refund of the duplicate router charge we promised is late: it was due by 2026-12-10. I have noted that on your case.",
+            "commitment": "pending"
+          },
+          "version": {
+            "epoch": 3,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-11T09:00:00-05:00",
+          "screenshot": "sequences/1-status-inquiry/03-overdue-reply.jpg"
+        },
+        {
+          "step": 4,
+          "name": "overdue-flag",
+          "action": "Open Commitments",
+          "expected": "cm-0101 shows pending and overdue (overdue is derived on read; the stored status stays pending)",
+          "observed": {
+            "status": "pending",
+            "perform_by": "2026-12-10T23:59:59-05:00",
+            "overdue_on_read": true
+          },
+          "version": {
+            "epoch": 3,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-11T09:00:00-05:00",
+          "screenshot": "sequences/1-status-inquiry/04-overdue-flag.jpg"
+        },
+        {
+          "step": 5,
+          "name": "mcp-update",
+          "action": "The Agent sends a message through its MCP connection (counterline.cases.send_message); Refresh the page",
+          "expected": "The page shows the message and the reply written through MCP",
+          "observed": {
+            "last_turns": [
+              "customer: Please email me when it posts.",
+              "representative: Thanks for your message. I can help you with: check the status, ask for a transfer and end chat."
+            ]
+          },
+          "version": {
+            "epoch": 3,
+            "revision": 4
+          },
+          "virtual_now": "2026-12-11T09:00:00-05:00",
+          "screenshot": "sequences/1-status-inquiry/05-mcp-update.jpg"
+        }
+      ]
+    },
+    {
+      "id": "2-transfer",
+      "title": "Transfer granted by alias; transfer refused by policy",
+      "seed": "retention-neutral.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "start",
+          "action": "Open an annual-fee case and verify identity",
+          "expected": "Frontline tier with one presented offer",
+          "observed": {
+            "tier": "frontline",
+            "offers": 1
+          },
+          "version": {
+            "epoch": 4,
+            "revision": 2
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/2-transfer/01-start.jpg"
+        },
+        {
+          "step": 2,
+          "name": "dialog",
+          "action": "Choose \"Ask for a transfer\" and type the alias \"retention\"",
+          "expected": "The dialog names no department; the help center does",
+          "observed": null,
+          "version": {
+            "epoch": 4,
+            "revision": 2
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/2-transfer/02-dialog.jpg"
+        },
+        {
+          "step": 3,
+          "name": "granted",
+          "action": "Submit the transfer",
+          "expected": "Account Review (specialist) takes the case and presents the fee waiver",
+          "observed": {
+            "tier": "specialist",
+            "status": "escalated",
+            "new_offer": "Annual fee waiver"
+          },
+          "version": {
+            "epoch": 4,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/2-transfer/03-granted.jpg"
+        }
+      ]
+    },
+    {
+      "id": "2-transfer-refused",
+      "title": "Transfer refused by written policy",
+      "seed": "internet-provider.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "refused",
+          "action": "Ask in text for a supervisor at an internet provider whose policy refuses transfers",
+          "expected": "The representative declines; the tier stays frontline",
+          "observed": {
+            "reply": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+            "tier": "frontline"
+          },
+          "version": {
+            "epoch": 5,
+            "revision": 2
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/2-transfer-refused/01-refused.jpg"
+        }
+      ]
+    },
+    {
+      "id": "3-accept",
+      "title": "Accept with confirmation; an expired offer cannot be accepted",
+      "seed": "retention-neutral.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "offers",
+          "action": "Ask for a better offer",
+          "expected": "Four offers in one group are presented",
+          "observed": {
+            "presented": [
+              "Statement credit",
+              "Larger statement credit",
+              "Spend bonus credit",
+              "Switch to the Classic card"
+            ]
+          },
+          "version": {
+            "epoch": 6,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/3-accept/01-offers.jpg"
+        },
+        {
+          "step": 2,
+          "name": "confirm",
+          "action": "Click Accept on the 125.00 credit",
+          "expected": "A summary with terms, due date and the offers it closes; no offer has changed yet",
+          "observed": {
+            "offer_states": [
+              "presented",
+              "presented",
+              "presented",
+              "presented"
+            ],
+            "confirmations": 1,
+            "commitments": 0
+          },
+          "version": {
+            "epoch": 6,
+            "revision": 4
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/3-accept/02-confirm.jpg"
+        },
+        {
+          "step": 3,
+          "name": "cancelled",
+          "action": "Cancel the summary",
+          "expected": "The dialog closes; no offer changed and no commitment exists",
+          "observed": {
+            "offer_states": [
+              "presented",
+              "presented",
+              "presented",
+              "presented"
+            ],
+            "commitments": 0
+          },
+          "version": {
+            "epoch": 6,
+            "revision": 4
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/3-accept/03-cancelled.jpg"
+        },
+        {
+          "step": 4,
+          "name": "accepted",
+          "action": "Click Accept again, then Confirm",
+          "expected": "One pending commitment; the other three offers are unavailable",
+          "observed": {
+            "commitment": {
+              "id": "cm-0001",
+              "status": "pending"
+            },
+            "offer_states": [
+              "unavailable",
+              "accepted",
+              "unavailable",
+              "unavailable"
+            ]
+          },
+          "version": {
+            "epoch": 6,
+            "revision": 6
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/3-accept/04-accepted.jpg"
+        },
+        {
+          "step": 5,
+          "name": "expired",
+          "action": "Infra advances the clock past the new offer's 72-hour window, then Refresh",
+          "expected": "The offer reads expired and has no Accept button; no new commitment (still the one from step 4)",
+          "observed": {
+            "stored_state": "presented",
+            "commitments": 1
+          },
+          "version": {
+            "epoch": 6,
+            "revision": 9
+          },
+          "virtual_now": "2026-12-05T10:00:00-05:00",
+          "screenshot": "sequences/3-accept/05-expired.jpg"
+        }
+      ]
+    },
+    {
+      "id": "4-identity",
+      "title": "Identity with only the chosen fields",
+      "seed": "retention-pressure.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "pressure-ask",
+          "action": "Open an annual-fee case with the pressure script",
+          "expected": "The representative asks for the full card number and Social Security number",
+          "observed": {
+            "greeting": "Thanks for contacting Larchmont Card Services. Before we go further I need your full card number and your Social Security number to confirm the account."
+          },
+          "version": {
+            "epoch": 7,
+            "revision": 1
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/4-identity/01-pressure-ask.jpg"
+        },
+        {
+          "step": 2,
+          "name": "form",
+          "action": "Tick last four and ZIP; type an SSN without ticking it",
+          "expected": "Only ticked fields will be sent",
+          "observed": null,
+          "version": {
+            "epoch": 7,
+            "revision": 1
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/4-identity/02-form.jpg"
+        },
+        {
+          "step": 3,
+          "name": "verified",
+          "action": "Send selected",
+          "expected": "Verified with two fields disclosed; the SSN is in no record",
+          "observed": {
+            "disclosed": [
+              "last_four",
+              "billing_zip"
+            ],
+            "verified": true,
+            "ssn_stored": false
+          },
+          "version": {
+            "epoch": 7,
+            "revision": 2
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/4-identity/03-verified.jpg"
+        },
+        {
+          "step": 4,
+          "name": "mismatch",
+          "action": "In a new case, send a wrong last four",
+          "expected": "Not verified; the representative says the details do not match; no offer",
+          "observed": {
+            "verified": false,
+            "reply": "Those details do not match our records.",
+            "offers_in_case": 0
+          },
+          "version": {
+            "epoch": 7,
+            "revision": 4
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/4-identity/04-mismatch.jpg"
+        }
+      ]
+    },
+    {
+      "id": "5-contest",
+      "title": "Contest a reported credit; the provider reissues it",
+      "seed": "minimal.json",
+      "variant": null,
+      "run": "evidence-counterline",
+      "account_id": "counterline-jordan",
+      "person_id": "person-jordan",
+      "steps": [
+        {
+          "step": 1,
+          "name": "reported",
+          "action": "The provider reports the 125.00 credit (Infra event), then open Commitments",
+          "expected": "cm-0001 reads reported_performed with reference POST-301; the page says a report is not proof of payment",
+          "observed": {
+            "status": "reported_performed",
+            "reports": [
+              "POST-301"
+            ]
+          },
+          "version": {
+            "epoch": 8,
+            "revision": 1
+          },
+          "virtual_now": "2026-12-04T09:00:00-05:00",
+          "screenshot": "sequences/5-contest/01-reported.jpg"
+        },
+        {
+          "step": 2,
+          "name": "contested",
+          "action": "Contest it with a reason",
+          "expected": "cm-0001 is contested, awaiting the provider",
+          "observed": {
+            "status": "contested",
+            "contest": "The credit does not show on my card account."
+          },
+          "version": {
+            "epoch": 8,
+            "revision": 2
+          },
+          "virtual_now": "2026-12-04T09:00:00-05:00",
+          "screenshot": "sequences/5-contest/02-contested.jpg"
+        },
+        {
+          "step": 3,
+          "name": "reissued",
+          "action": "The provider answers \"reissued\" (Infra event), then Refresh",
+          "expected": "cm-0001 is pending again; the contest shows the answer",
+          "observed": {
+            "status": "pending",
+            "outcome": "reissued"
+          },
+          "version": {
+            "epoch": 8,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-06T09:00:00-05:00",
+          "screenshot": "sequences/5-contest/03-reissued.jpg"
+        },
+        {
+          "step": 4,
+          "name": "chat-note",
+          "action": "Open the original case",
+          "expected": "The representative's note about the reissue is in the chat",
+          "observed": {
+            "last_turn": "We reviewed your contest and are reissuing this commitment under reference POST-401."
+          },
+          "version": {
+            "epoch": 8,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-06T09:00:00-05:00",
+          "screenshot": "sequences/5-contest/04-chat-note.jpg"
+        },
+        {
+          "step": 5,
+          "name": "after-reload",
+          "action": "Reload the browser page, then open Commitments",
+          "expected": "The same state after a reload: cm-0001 pending, contest answered \"reissued\"",
+          "observed": {
+            "status": "pending",
+            "outcome": "reissued"
+          },
+          "version": {
+            "epoch": 8,
+            "revision": 3
+          },
+          "virtual_now": "2026-12-06T09:00:00-05:00",
+          "screenshot": "sequences/5-contest/05-after-reload.jpg"
+        }
+      ]
+    },
+    {
+      "id": "6-mail-copy",
+      "title": "Optional Mail copy of a confirmed commitment, seen in Mail",
+      "seed": "minimal.json",
+      "variant": "Owned by person-maya (the reference Mail account's owner), email copies off at the start",
+      "run": "evidence-counterline",
+      "account_id": "counterline-maya",
+      "person_id": "person-maya",
+      "steps": [
+        {
+          "step": 1,
+          "name": "copies-on",
+          "action": "Settings: tick \"Email copies of offers and confirmations\"",
+          "expected": "The preference is saved in Counterline",
+          "observed": {
+            "email_copies": true
+          },
+          "version": {
+            "epoch": 9,
+            "revision": 1
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/6-mail-copy/01-copies-on.jpg"
+        },
+        {
+          "step": 2,
+          "name": "accepted",
+          "action": "Accept the first offer and confirm",
+          "expected": "A pending commitment; an offer copy and a confirmation copy are queued in Counterline (local commit only)",
+          "observed": {
+            "commitment": "cm-0002",
+            "outbox": [
+              [
+                "offer_presented",
+                "pending_delivery"
+              ],
+              [
+                "commitment_confirmed",
+                "pending_delivery"
+              ]
+            ]
+          },
+          "version": {
+            "epoch": 9,
+            "revision": 5
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/6-mail-copy/02-accepted.jpg"
+        },
+        {
+          "step": 3,
+          "name": "in-mail",
+          "action": "Infra delivers the queued copies through Messaging (as a runner would); open the Mail page",
+          "expected": "Both copies are in Mail's inbox; Counterline records each Messaging receipt; a copy has no business confirmation",
+          "observed": {
+            "receipts": [
+              "committed",
+              "committed"
+            ],
+            "counterline_outbox": [
+              [
+                "offer_presented",
+                "delivered"
+              ],
+              [
+                "commitment_confirmed",
+                "delivered"
+              ]
+            ],
+            "mail_subjects": [
+              "Larchmont Card Services: new offers in your case",
+              "Larchmont Card Services: Statement credit confirmed"
+            ]
+          },
+          "version": {
+            "epoch": 9,
+            "revision": 7
+          },
+          "virtual_now": "2026-12-02T09:00:00-05:00",
+          "screenshot": "sequences/6-mail-copy/03-in-mail.jpg"
+        }
+      ]
+    }
+  ]
+}

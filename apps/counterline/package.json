@@ -1,0 +1,24 @@
+{
+  "name": "@pale/app-counterline",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/business.test.cjs",
+    "example": "node examples/run.cjs",
+    "contracts": "node examples/build-contracts.cjs",
+    "contracts:check": "node examples/build-contracts.cjs --check",
+    "join": "node examples/join/run.cjs",
+    "integration": "node examples/mail-integration/run.cjs",
+    "dataset": "node scripts/generate-dataset.cjs && node scripts/coverage-report.cjs",
+    "dataset:check": "node scripts/generate-dataset.cjs --check && node scripts/select-history.cjs --verify && node scripts/coverage-report.cjs --check",
+    "fixtures:check": "node scripts/check-fixtures.cjs",
+    "diagnostic": "node scripts/text-diagnostic.cjs",
+    "runtime-check": "node examples/runtime-check.cjs",
+    "evidence:reference": "node scripts/reference-manifest.cjs",
+    "evidence": "node tests/evidence.capture.cjs && node scripts/evidence-reports.cjs && node scripts/evidence-index.cjs"
+  }
+}

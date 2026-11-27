@@ -1,0 +1,251 @@
+{
+ "account_id": "counterline-jordan",
+ "owner_person_id": "person-jordan",
+ "provider": {
+  "provider_id": "isp-kestrel",
+  "name": "Kestrel Fiber",
+  "kind": "internet_provider",
+  "time_zone": "America/New_York",
+  "reopen_days": 30,
+  "identity_policy": {
+   "required": [
+    "full_name",
+    "billing_zip"
+   ],
+   "accepted": [
+    "full_name",
+    "billing_zip",
+    "last_four"
+   ]
+  },
+  "departments": [
+   {
+    "department_id": "dep-billing",
+    "name": "Billing Support",
+    "aliases": [
+     "billing"
+    ],
+    "tier": "frontline",
+    "transfer": "allowed"
+   },
+   {
+    "department_id": "dep-review",
+    "name": "Billing Review",
+    "aliases": [
+     "supervisor",
+     "manager",
+     "escalations"
+    ],
+    "tier": "specialist",
+    "transfer": "refused"
+   }
+  ],
+  "topics": [
+   {
+    "topic_id": "refund_status",
+    "title": "Status of a refund",
+    "greeting_script_id": "greet-status",
+    "identity_required": false
+   },
+   {
+    "topic_id": "billing_review",
+    "title": "A charge on my bill",
+    "greeting_script_id": "greet-billing",
+    "identity_required": true
+   },
+   {
+    "topic_id": "outage_credit",
+    "title": "Credit for a service outage",
+    "greeting_script_id": "greet-outage",
+    "identity_required": true
+   },
+   {
+    "topic_id": "plan_change",
+    "title": "Change my plan",
+    "greeting_script_id": "greet-plan",
+    "identity_required": true
+   },
+   {
+    "topic_id": "equipment",
+    "title": "A problem with my router",
+    "greeting_script_id": "greet-general",
+    "identity_required": false
+   },
+   {
+    "topic_id": "moving",
+    "title": "Moving to a new address",
+    "greeting_script_id": "greet-general",
+    "identity_required": false
+   }
+  ],
+  "scripts": [
+   {
+    "script_id": "greet-status",
+    "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you."
+   },
+   {
+    "script_id": "greet-billing",
+    "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code."
+   },
+   {
+    "script_id": "followup-refund-processed",
+    "text": "Your refund has been processed."
+   },
+   {
+    "script_id": "greet-outage",
+    "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code."
+   },
+   {
+    "script_id": "greet-plan",
+    "text": "Thanks for contacting Kestrel Fiber. I can look at plan options. Please confirm the name on the account and your billing ZIP code."
+   },
+   {
+    "script_id": "greet-general",
+    "text": "Thanks for contacting Kestrel Fiber. How can I help today?"
+   }
+  ],
+  "offer_catalog": [
+   {
+    "catalog_id": "cat-dup-f1",
+    "topic_id": "billing_review",
+    "tier": "frontline",
+    "stage": "initial",
+    "kind": "refund",
+    "title": "Duplicate charge refund",
+    "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+    "value": {
+     "amount_minor": 800,
+     "currency": "USD"
+    },
+    "conditions": [],
+    "group": "billing_review-relief",
+    "expires_hours": 72,
+    "perform_days": 10
+   },
+   {
+    "catalog_id": "cat-out-f1",
+    "topic_id": "outage_credit",
+    "tier": "frontline",
+    "stage": "initial",
+    "kind": "statement_credit",
+    "title": "Outage credit",
+    "terms": "A 15.00 credit on your next bill for the outage.",
+    "value": {
+     "amount_minor": 1500,
+     "currency": "USD"
+    },
+    "conditions": [],
+    "group": "outage_credit-relief",
+    "expires_hours": 72,
+    "perform_days": 10
+   },
+   {
+    "catalog_id": "cat-plan-f1",
+    "topic_id": "plan_change",
+    "tier": "frontline",
+    "stage": "initial",
+    "kind": "product_change",
+    "title": "Switch to Fiber 300",
+    "terms": "Move to the Fiber 300 plan at 45.00 a month from your next bill.",
+    "value": null,
+    "conditions": [],
+    "group": "plan_change-relief",
+    "expires_hours": 72,
+    "perform_days": 14
+   }
+  ]
+ },
+ "customer_record": {
+  "full_name": "Jordan Avery",
+  "last_four": "7731",
+  "billing_zip": "02139",
+  "date_of_birth": null
+ },
+ "preferences": {
+  "email_copies": false
+ },
+ "help_articles": [
+  {
+   "article_id": "kb-refunds",
+   "title": "Refund timing",
+   "body": "Refunds we promise in chat are sent to your original payment method within 10 days. Your bank statement is the record that the money arrived.",
+   "tags": [
+    "refund",
+    "timing"
+   ],
+   "updated_at": "2025-10-13T09:00:00-04:00",
+   "revisions": [
+    {
+     "at": "2025-04-21T09:00:00-04:00",
+     "note": "Published.",
+     "body": "Refunds we promise in chat are sent to your payment method within 10 days. Your bank statement is the record that the money arrived."
+    },
+    {
+     "at": "2025-10-13T09:00:00-04:00",
+     "note": "Refunds now go to the original payment method by default.",
+     "body": "Refunds we promise in chat are sent to your original payment method within 10 days. Your bank statement is the record that the money arrived."
+    }
+   ]
+  },
+  {
+   "article_id": "kb-escalation",
+   "title": "Escalations",
+   "body": "Billing questions are handled by Billing Support. Chat agents do not transfer cases to Billing Review; to request a review, describe the charge and the invoices it appears on.",
+   "tags": [
+    "escalation",
+    "billing review"
+   ],
+   "updated_at": "2025-09-15T10:00:00-04:00",
+   "revisions": [
+    {
+     "at": "2025-09-15T10:00:00-04:00",
+     "note": "Published.",
+     "body": "Billing questions are handled by Billing Support. Chat agents do not transfer cases to Billing Review; to request a review, describe the charge and the invoices it appears on."
+    }
+   ]
+  },
+  {
+   "article_id": "kb-outages",
+   "title": "Outage credits",
+   "body": "If service is down for more than 3 hours, ask for an outage credit in chat.",
+   "tags": [
+    "outage",
+    "credit"
+   ],
+   "updated_at": "2026-06-15T10:00:00-04:00",
+   "revisions": [
+    {
+     "at": "2025-07-07T10:00:00-04:00",
+     "note": "Published.",
+     "body": "If service is down for more than 4 hours, ask for an outage credit in chat."
+    },
+    {
+     "at": "2026-06-15T10:00:00-04:00",
+     "note": "Outage threshold lowered from 4 to 3 hours.",
+     "body": "If service is down for more than 3 hours, ask for an outage credit in chat."
+    }
+   ]
+  },
+  {
+   "article_id": "kb-moving",
+   "title": "Moving your service",
+   "body": "Tell us your new address two weeks before you move.",
+   "tags": [
+    "moving"
+   ],
+   "updated_at": "2026-03-02T10:00:00-05:00",
+   "revisions": [
+    {
+     "at": "2026-03-02T10:00:00-05:00",
+     "note": "Published.",
+     "body": "Tell us your new address two weeks before you move."
+    }
+   ]
+  }
+ ],
+ "cases": [],
+ "offers": [],
+ "commitments": [],
+ "confirmations": [],
+ "outbox": []
+}

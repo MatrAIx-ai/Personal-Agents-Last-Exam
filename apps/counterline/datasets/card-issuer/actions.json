@@ -1,0 +1,2789 @@
+{
+ "family": "card-issuer",
+ "time_zone": "America/New_York",
+ "window": [
+  "2025-01-01",
+  "2026-12-31"
+ ],
+ "generator": "scripts/generate-dataset.cjs",
+ "actions": [
+  {
+   "at": "2025-01-06T12:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Will my card work in Canada?"
+   }
+  },
+  {
+   "at": "2025-01-06T12:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0001",
+    "text": "Thanks, that is all."
+   }
+  },
+  {
+   "at": "2025-01-06T12:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0001",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2025-01-06T12:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0001",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-01-08T12:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0001"
+   }
+  },
+  {
+   "at": "2025-01-13T14:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2025-01-13T14:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0002",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-01-15T14:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0002"
+   }
+  },
+  {
+   "at": "2025-01-20T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "late_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "There is a late fee on my statement. Can you take another look?"
+   }
+  },
+  {
+   "at": "2025-01-20T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0003",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-01-20T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0003",
+    "text": "Thanks. Can you explain the terms?"
+   }
+  },
+  {
+   "at": "2025-01-20T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0001"
+   }
+  },
+  {
+   "at": "2025-01-20T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0001",
+    "confirmation_token": "cf-e49fb075bc91ad24"
+   }
+  },
+  {
+   "at": "2025-01-20T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0003",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-01-23T15:45:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0015",
+    "at": "2025-01-23T15:45:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0001",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-001",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-02-09T15:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0003"
+   }
+  },
+  {
+   "at": "2025-02-11T15:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "foreign_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I was charged a foreign transaction fee for an online order in dollars."
+   }
+  },
+  {
+   "at": "2025-02-11T15:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0004",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-02-11T15:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0002"
+   }
+  },
+  {
+   "at": "2025-02-11T15:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0002",
+    "confirmation_token": "cf-1e114fa42add5f31"
+   }
+  },
+  {
+   "at": "2025-02-11T15:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0004",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-02-14T15:30:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0022",
+    "at": "2025-02-14T15:30:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0002",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-002",
+     "amount_minor": 1125,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-02-18T15:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I am traveling to Portugal next month. Do I need to tell you?"
+   }
+  },
+  {
+   "at": "2025-02-18T15:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0005",
+    "text": "Thanks, that is all."
+   }
+  },
+  {
+   "at": "2025-02-18T15:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0005",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2025-02-18T15:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0005",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-03-03T15:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0004"
+   }
+  },
+  {
+   "at": "2025-03-10T16:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Did my payment from last week post?"
+   }
+  },
+  {
+   "at": "2025-03-10T16:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0006",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-03-12T16:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0006"
+   }
+  },
+  {
+   "at": "2025-03-25T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "interest_charge",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Why was I charged interest this month?"
+   }
+  },
+  {
+   "at": "2025-03-25T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0007",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-03-25T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0007",
+    "text": "Can you explain the terms?"
+   }
+  },
+  {
+   "at": "2025-03-25T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0003"
+   }
+  },
+  {
+   "at": "2025-03-25T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0003",
+    "confirmation_token": "cf-f02250e17e304739"
+   }
+  },
+  {
+   "at": "2025-03-25T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0007",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-03-28T09:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0037",
+    "at": "2025-03-28T09:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0003",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-003",
+     "amount_minor": 1240,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-04-03T09:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0038",
+    "at": "2025-04-03T09:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0003",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-004",
+     "amount_minor": 1240,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-04-14T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0007"
+   }
+  },
+  {
+   "at": "2025-04-16T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "card_replacement",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I need a new card; the chip stopped working."
+   }
+  },
+  {
+   "at": "2025-04-16T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0008",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-04-16T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0004"
+   }
+  },
+  {
+   "at": "2025-04-16T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0004",
+    "confirmation_token": "cf-df1b7b9014a3945a"
+   }
+  },
+  {
+   "at": "2025-04-16T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0008",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-04-21T10:45:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0045",
+    "at": "2025-04-21T10:45:00-04:00",
+    "operation": "counterline.case.followup",
+    "payload": {
+     "case_id": "cs-0008",
+     "script_id": "followup-report-posted"
+    }
+   }
+  },
+  {
+   "at": "2025-04-23T17:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can you explain a pending charge on my statement?"
+   }
+  },
+  {
+   "at": "2025-04-23T17:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0009",
+    "text": "Thanks, that is all."
+   }
+  },
+  {
+   "at": "2025-04-23T17:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0009",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2025-04-23T17:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0009",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-04-25T17:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0009"
+   }
+  },
+  {
+   "at": "2025-05-06T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0008"
+   }
+  },
+  {
+   "at": "2025-05-21T14:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "When does my statement close each month?"
+   }
+  },
+  {
+   "at": "2025-05-21T14:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0010",
+    "text": "ok sure whatever works"
+   }
+  },
+  {
+   "at": "2025-05-21T14:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0010",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-05-21T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can you explain a pending charge on my statement?"
+   }
+  },
+  {
+   "at": "2025-05-21T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0011",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-05-28T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "late_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "There is a late fee on my statement. Can you take another look?"
+   }
+  },
+  {
+   "at": "2025-05-28T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0012",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-05-28T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0005"
+   }
+  },
+  {
+   "at": "2025-05-28T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0005",
+    "confirmation_token": "cf-b531269b0713dd65"
+   }
+  },
+  {
+   "at": "2025-05-28T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0012",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-06-01T16:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0062",
+    "at": "2025-06-01T16:15:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0005",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-005",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-06-06T17:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "When does my statement close each month?"
+   }
+  },
+  {
+   "at": "2025-06-06T17:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0013",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2025-06-06T17:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0013",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-06-08T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.commitments.contest",
+   "args": {
+    "commitment_id": "cm-0005",
+    "reason": "I cannot find this credit on my statement."
+   }
+  },
+  {
+   "at": "2025-06-11T16:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0067",
+    "at": "2025-06-11T16:15:00-04:00",
+    "operation": "counterline.contest.answered",
+    "payload": {
+     "commitment_id": "cm-0005",
+     "outcome": "reissued",
+     "reference_id": "POST-006"
+    }
+   }
+  },
+  {
+   "at": "2025-06-15T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "When does my statement close each month?"
+   }
+  },
+  {
+   "at": "2025-06-15T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0014",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2025-06-15T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0014",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-06-15T16:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0071",
+    "at": "2025-06-15T16:15:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0005",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-007",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-06-17T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0012"
+   }
+  },
+  {
+   "at": "2025-07-06T13:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I am traveling to Portugal next month. Do I need to tell you?"
+   }
+  },
+  {
+   "at": "2025-07-06T13:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0015",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-07-09T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "foreign_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "There is a foreign fee on a purchase I made at home."
+   }
+  },
+  {
+   "at": "2025-07-09T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0016",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-07-09T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0006"
+   }
+  },
+  {
+   "at": "2025-07-09T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0006",
+    "confirmation_token": "cf-43182a77506b5fbc"
+   }
+  },
+  {
+   "at": "2025-07-09T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0016",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-07-11T15:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0080",
+    "at": "2025-07-11T15:15:00-04:00",
+    "operation": "counterline.commitment.revoked",
+    "payload": {
+     "commitment_id": "cm-0006",
+     "reason": "the charge was already reversed by another adjustment"
+    }
+   }
+  },
+  {
+   "at": "2025-07-25T17:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I will be abroad for two weeks. Anything I should know?"
+   }
+  },
+  {
+   "at": "2025-07-25T17:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0017",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-07-29T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0016"
+   }
+  },
+  {
+   "at": "2025-08-04T14:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I paid twice by mistake. What happens now?"
+   }
+  },
+  {
+   "at": "2025-08-04T14:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0018",
+    "text": "Thanks, that is all."
+   }
+  },
+  {
+   "at": "2025-08-04T14:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0018",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2025-08-04T14:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0018",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-08-09T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I paid twice by mistake. What happens now?"
+   }
+  },
+  {
+   "at": "2025-08-09T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0019",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-08-11T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0019"
+   }
+  },
+  {
+   "at": "2025-08-19T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "interest_charge",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I paid my balance in full but I see an interest charge."
+   }
+  },
+  {
+   "at": "2025-08-19T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0020",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-08-19T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0020",
+    "text": "Thanks. Can you explain the terms?"
+   }
+  },
+  {
+   "at": "2025-08-19T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0007"
+   }
+  },
+  {
+   "at": "2025-08-19T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0007",
+    "confirmation_token": "cf-87c0fbee3cf0b2c3"
+   }
+  },
+  {
+   "at": "2025-08-19T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0020",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-08-25T10:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0097",
+    "at": "2025-08-25T10:15:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0007",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-008",
+     "amount_minor": 2480,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-09-08T10:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0020"
+   }
+  },
+  {
+   "at": "2025-09-13T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Will my card work in Canada?"
+   }
+  },
+  {
+   "at": "2025-09-13T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0021",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-09-15T16:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0021"
+   }
+  },
+  {
+   "at": "2025-09-30T09:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "card_replacement",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I need a new card; the chip stopped working."
+   }
+  },
+  {
+   "at": "2025-09-30T09:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0022",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-09-30T09:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0008"
+   }
+  },
+  {
+   "at": "2025-09-30T09:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0008",
+    "confirmation_token": "cf-8376521db70e275d"
+   }
+  },
+  {
+   "at": "2025-09-30T09:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0022",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-10-04T09:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0107",
+    "at": "2025-10-04T09:15:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0008",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-009",
+     "amount_minor": 1500,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-10-20T09:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0022"
+   }
+  },
+  {
+   "at": "2025-10-26T15:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2025-10-26T15:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0023",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-11-04T18:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "annual_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "My annual fee just posted. Is there anything you can do?"
+   }
+  },
+  {
+   "at": "2025-11-04T18:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0024",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-11-04T18:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0024",
+    "text": "Thanks. Is there anything better?"
+   }
+  },
+  {
+   "at": "2025-11-04T18:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0011"
+   }
+  },
+  {
+   "at": "2025-11-04T18:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0011",
+    "confirmation_token": "cf-25a4a338b71e1587"
+   }
+  },
+  {
+   "at": "2025-11-04T18:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0024",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-11-07T09:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2025-11-07T09:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0025",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-11-11T16:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Will my card work in Canada?"
+   }
+  },
+  {
+   "at": "2025-11-11T16:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0026",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-12-09T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "late_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "There is a late fee on my statement. Can you take another look?"
+   }
+  },
+  {
+   "at": "2025-12-09T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0027",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2025-12-09T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0013"
+   }
+  },
+  {
+   "at": "2025-12-09T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0013",
+    "confirmation_token": "cf-c2bfc5c04a4a953d"
+   }
+  },
+  {
+   "at": "2025-12-09T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0027",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-12-11T16:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can you explain a pending charge on my statement?"
+   }
+  },
+  {
+   "at": "2025-12-11T16:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0028",
+    "text": "ok sure whatever works"
+   }
+  },
+  {
+   "at": "2025-12-11T16:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0028",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2025-12-13T16:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0028"
+   }
+  },
+  {
+   "at": "2025-12-13T16:30:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0130",
+    "at": "2025-12-13T16:30:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0010",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-010",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2025-12-20T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.commitments.contest",
+   "args": {
+    "commitment_id": "cm-0010",
+    "reason": "My statement still shows the full charge."
+   }
+  },
+  {
+   "at": "2025-12-23T16:30:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0132",
+    "at": "2025-12-23T16:30:00-05:00",
+    "operation": "counterline.contest.answered",
+    "payload": {
+     "commitment_id": "cm-0010",
+     "outcome": "upheld",
+     "reference_id": null
+    }
+   }
+  },
+  {
+   "at": "2025-12-29T16:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0027"
+   }
+  },
+  {
+   "at": "2026-01-03T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Did my payment from last week post?"
+   }
+  },
+  {
+   "at": "2026-01-03T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0029",
+    "text": "Goodbye."
+   }
+  },
+  {
+   "at": "2026-01-05T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0029"
+   }
+  },
+  {
+   "at": "2026-01-18T08:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I will be abroad for two weeks. Anything I should know?"
+   }
+  },
+  {
+   "at": "2026-01-18T08:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0030",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-01-27T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "foreign_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "There is a foreign fee on a purchase I made at home."
+   }
+  },
+  {
+   "at": "2026-01-27T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0031",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-01-27T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0031",
+    "text": "Can you explain the terms?"
+   }
+  },
+  {
+   "at": "2026-01-27T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0014"
+   }
+  },
+  {
+   "at": "2026-01-27T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0014",
+    "confirmation_token": "cf-9efbcd3e91b92ffa"
+   }
+  },
+  {
+   "at": "2026-01-27T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0031",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-01-30T16:00:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0145",
+    "at": "2026-01-30T16:00:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0011",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-011",
+     "amount_minor": 1125,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-02-03T09:00:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0146",
+    "at": "2026-02-03T09:00:00-05:00",
+    "operation": "counterline.commitment.condition_missed",
+    "payload": {
+     "commitment_id": "cm-0009",
+     "reason": "purchases reached 1,840.00 of 3,000.00 within 90 days"
+    }
+   }
+  },
+  {
+   "at": "2026-02-03T14:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Did my payment from last week post?"
+   }
+  },
+  {
+   "at": "2026-02-03T14:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0032",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2026-02-03T14:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0032",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-02-05T14:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0032"
+   }
+  },
+  {
+   "at": "2026-02-12T17:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2026-02-12T17:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0033",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-02-14T17:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0033"
+   }
+  },
+  {
+   "at": "2026-02-16T16:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0031"
+   }
+  },
+  {
+   "at": "2026-03-10T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "interest_charge",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Why was I charged interest this month?"
+   }
+  },
+  {
+   "at": "2026-03-10T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0034",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-03-10T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0034",
+    "text": "Thanks. Can you explain the terms?"
+   }
+  },
+  {
+   "at": "2026-03-10T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0015"
+   }
+  },
+  {
+   "at": "2026-03-10T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0015",
+    "confirmation_token": "cf-db803d5af0f41fed"
+   }
+  },
+  {
+   "at": "2026-03-10T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0034",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-03-14T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can you explain a pending charge on my statement?"
+   }
+  },
+  {
+   "at": "2026-03-14T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0035",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-03-15T15:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0163",
+    "at": "2026-03-15T15:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0012",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-012",
+     "amount_minor": 2480,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-03-16T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0035"
+   }
+  },
+  {
+   "at": "2026-03-30T15:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0034"
+   }
+  },
+  {
+   "at": "2026-04-11T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2026-04-11T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0036",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2026-04-11T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0036",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-04-13T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0036"
+   }
+  },
+  {
+   "at": "2026-04-21T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "card_replacement",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I need a new card; the chip stopped working."
+   }
+  },
+  {
+   "at": "2026-04-21T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0037",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-04-21T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0016"
+   }
+  },
+  {
+   "at": "2026-04-21T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0016",
+    "confirmation_token": "cf-e34a6fd81d86095e"
+   }
+  },
+  {
+   "at": "2026-04-21T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0037",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-04-24T09:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0175",
+    "at": "2026-04-24T09:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0013",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-013",
+     "amount_minor": 750,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-04-24T18:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Will my card work in Canada?"
+   }
+  },
+  {
+   "at": "2026-04-24T18:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0038",
+    "text": "Goodbye."
+   }
+  },
+  {
+   "at": "2026-04-26T18:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0038"
+   }
+  },
+  {
+   "at": "2026-04-30T09:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0179",
+    "at": "2026-04-30T09:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0013",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-014",
+     "amount_minor": 750,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-05-11T09:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0037"
+   }
+  },
+  {
+   "at": "2026-05-23T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I am traveling to Portugal next month. Do I need to tell you?"
+   }
+  },
+  {
+   "at": "2026-05-23T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0039",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2026-05-23T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0039",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-05-25T10:45:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0039"
+   }
+  },
+  {
+   "at": "2026-06-02T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "late_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I was charged a late fee but I paid on the due date."
+   }
+  },
+  {
+   "at": "2026-06-02T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0040",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-06-02T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0040",
+    "text": "Can you explain the terms?"
+   }
+  },
+  {
+   "at": "2026-06-02T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0017"
+   }
+  },
+  {
+   "at": "2026-06-02T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0017",
+    "confirmation_token": "cf-38f78b8d0baea19d"
+   }
+  },
+  {
+   "at": "2026-06-02T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0040",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-06-06T14:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0191",
+    "at": "2026-06-06T14:15:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0014",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-015",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-06-15T13:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Why is my statement balance different from my current balance?"
+   }
+  },
+  {
+   "at": "2026-06-15T13:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0041",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-06-22T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0040"
+   }
+  },
+  {
+   "at": "2026-07-08T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I am traveling to Portugal next month. Do I need to tell you?"
+   }
+  },
+  {
+   "at": "2026-07-08T16:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0042",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-07-14T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "foreign_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I was charged a foreign transaction fee for an online order in dollars."
+   }
+  },
+  {
+   "at": "2026-07-14T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0043",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-07-14T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0018"
+   }
+  },
+  {
+   "at": "2026-07-14T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0018",
+    "confirmation_token": "cf-69e34a3fd3c01b27"
+   }
+  },
+  {
+   "at": "2026-07-14T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0043",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-07-18T10:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0202",
+    "at": "2026-07-18T10:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0015",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-016",
+     "amount_minor": 1125,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-07-25T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.commitments.contest",
+   "args": {
+    "commitment_id": "cm-0015",
+    "reason": "My statement still shows the full charge."
+   }
+  },
+  {
+   "at": "2026-07-28T10:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0204",
+    "at": "2026-07-28T10:30:00-04:00",
+    "operation": "counterline.contest.answered",
+    "payload": {
+     "commitment_id": "cm-0015",
+     "outcome": "reissued",
+     "reference_id": "POST-017"
+    }
+   }
+  },
+  {
+   "at": "2026-08-01T10:30:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0205",
+    "at": "2026-08-01T10:30:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0015",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-018",
+     "amount_minor": 1125,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-08-03T10:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0043"
+   }
+  },
+  {
+   "at": "2026-08-15T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Why is my statement balance different from my current balance?"
+   }
+  },
+  {
+   "at": "2026-08-15T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0044",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-08-17T14:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0044"
+   }
+  },
+  {
+   "at": "2026-08-17T19:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2026-08-17T19:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0045",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-08-25T12:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "interest_charge",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I paid my balance in full but I see an interest charge."
+   }
+  },
+  {
+   "at": "2026-08-25T12:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0046",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-08-25T12:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0019"
+   }
+  },
+  {
+   "at": "2026-08-25T12:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0019",
+    "confirmation_token": "cf-aec8c937b564b8de"
+   }
+  },
+  {
+   "at": "2026-08-25T12:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0046",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-08-27T12:00:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0217",
+    "at": "2026-08-27T12:00:00-04:00",
+    "operation": "counterline.commitment.revoked",
+    "payload": {
+     "commitment_id": "cm-0016",
+     "reason": "the charge was already reversed by another adjustment"
+    }
+   }
+  },
+  {
+   "at": "2026-09-08T17:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Will my card work in Canada?"
+   }
+  },
+  {
+   "at": "2026-09-08T17:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0047",
+    "text": "ok sure whatever works"
+   }
+  },
+  {
+   "at": "2026-09-08T17:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0047",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-09-10T17:30:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0047"
+   }
+  },
+  {
+   "at": "2026-09-14T12:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0046"
+   }
+  },
+  {
+   "at": "2026-09-23T19:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can you explain a pending charge on my statement?"
+   }
+  },
+  {
+   "at": "2026-09-23T19:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0048",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-09-25T19:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0048"
+   }
+  },
+  {
+   "at": "2026-10-05T12:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I will be abroad for two weeks. Anything I should know?"
+   }
+  },
+  {
+   "at": "2026-10-05T12:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0049",
+    "text": "Also, can you check on the status of any credit you promised me?"
+   }
+  },
+  {
+   "at": "2026-10-05T12:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0049",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-10-06T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "late_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I was charged a late fee but I paid on the due date."
+   }
+  },
+  {
+   "at": "2026-10-06T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0050",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-10-06T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0050",
+    "text": "What are the conditions?"
+   }
+  },
+  {
+   "at": "2026-10-06T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0020"
+   }
+  },
+  {
+   "at": "2026-10-06T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0020",
+    "confirmation_token": "cf-0118f7cd688c06e5"
+   }
+  },
+  {
+   "at": "2026-10-06T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0050",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-10-07T12:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0049"
+   }
+  },
+  {
+   "at": "2026-10-09T15:15:00-04:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0236",
+    "at": "2026-10-09T15:15:00-04:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0017",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-019",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-10-13T11:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can you explain a pending charge on my statement?"
+   }
+  },
+  {
+   "at": "2026-10-13T11:00:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0051",
+    "text": "Goodbye."
+   }
+  },
+  {
+   "at": "2026-10-26T15:15:00-04:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0050"
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "annual_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "The annual fee posted again. I would like to discuss it."
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0052",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0052",
+    "text": "Can you explain the terms, and is there anything better?"
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0052",
+    "text": "Please transfer me to Account Review."
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0025"
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0025",
+    "confirmation_token": "cf-fa04bce17662e135"
+   }
+  },
+  {
+   "at": "2026-11-03T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0052",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-11-06T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "travel_notice",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Will my card work in Canada?"
+   }
+  },
+  {
+   "at": "2026-11-06T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0053",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-11-08T19:00:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0249",
+    "at": "2026-11-08T19:00:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0018",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-020",
+     "amount_minor": 25000,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-11-14T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "payment_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Can I change my autopay date?"
+   }
+  },
+  {
+   "at": "2026-11-14T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0054",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-11-23T19:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0052"
+   }
+  },
+  {
+   "at": "2026-12-15T12:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "foreign_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I was charged a foreign transaction fee for an online order in dollars."
+   }
+  },
+  {
+   "at": "2026-12-15T12:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0055",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-12-15T12:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0055",
+    "text": "What are the conditions?"
+   }
+  },
+  {
+   "at": "2026-12-15T12:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0026"
+   }
+  },
+  {
+   "at": "2026-12-15T12:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0026",
+    "confirmation_token": "cf-db0e91ad18e33b62"
+   }
+  },
+  {
+   "at": "2026-12-15T12:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0055",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-12-18T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "late_fee",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I was charged a late fee but I paid on the due date."
+   }
+  },
+  {
+   "at": "2026-12-18T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0056",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-12-18T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0027"
+   }
+  },
+  {
+   "at": "2026-12-18T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0027",
+    "confirmation_token": "cf-4ccc65ac9d8df9a6"
+   }
+  },
+  {
+   "at": "2026-12-18T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0056",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-12-22T09:30:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0264",
+    "at": "2026-12-22T09:30:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0020",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-021",
+     "amount_minor": 3900,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  },
+  {
+   "at": "2026-12-22T13:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "card_replacement",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "I need a new card; the chip stopped working."
+   }
+  },
+  {
+   "at": "2026-12-22T13:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0057",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-12-22T13:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0057",
+    "text": "What are the conditions?"
+   }
+  },
+  {
+   "at": "2026-12-22T13:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0028"
+   }
+  },
+  {
+   "at": "2026-12-22T13:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0028",
+    "confirmation_token": "cf-a64f92754b408310"
+   }
+  },
+  {
+   "at": "2026-12-22T13:00:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0057",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-12-23T11:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "statement_question",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Why is my statement balance different from my current balance?"
+   }
+  },
+  {
+   "at": "2026-12-23T11:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.send_message",
+   "args": {
+    "case_id": "cs-0058",
+    "text": "Goodbye."
+   }
+  },
+  {
+   "at": "2026-12-25T11:15:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.close",
+   "args": {
+    "case_id": "cs-0058"
+   }
+  },
+  {
+   "at": "2026-12-26T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.open",
+   "args": {
+    "topic_id": "interest_charge",
+    "account_ref": "brindle:acct-jordan-1234",
+    "message": "Why was I charged interest this month?"
+   }
+  },
+  {
+   "at": "2026-12-26T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.identity.provide",
+   "args": {
+    "case_id": "cs-0059",
+    "fields": {
+     "last_four": "1234",
+     "billing_zip": "02139"
+    }
+   }
+  },
+  {
+   "at": "2026-12-26T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0029"
+   }
+  },
+  {
+   "at": "2026-12-26T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.offers.accept",
+   "args": {
+    "offer_id": "of-0029",
+    "confirmation_token": "cf-2d001384ff18e1cd"
+   }
+  },
+  {
+   "at": "2026-12-26T16:45:00-05:00",
+   "type": "tool",
+   "name": "counterline.cases.take_action",
+   "args": {
+    "case_id": "cs-0059",
+    "action": "end_chat"
+   }
+  },
+  {
+   "at": "2026-12-29T09:30:00-05:00",
+   "type": "tool",
+   "name": "counterline.commitments.contest",
+   "args": {
+    "commitment_id": "cm-0020",
+    "reason": "The credit does not show on my account."
+   }
+  },
+  {
+   "at": "2026-12-29T16:45:00-05:00",
+   "type": "event",
+   "event": {
+    "event_id": "ev-ds-0280",
+    "at": "2026-12-29T16:45:00-05:00",
+    "operation": "counterline.commitment.performance_reported",
+    "payload": {
+     "commitment_id": "cm-0022",
+     "provider_id": "issuer-larchmont",
+     "reference_id": "POST-022",
+     "amount_minor": 1240,
+     "currency": "USD",
+     "status": "reported"
+    }
+   }
+  }
+ ]
+}

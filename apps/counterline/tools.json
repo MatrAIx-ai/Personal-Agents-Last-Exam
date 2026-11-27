@@ -1,0 +1,2871 @@
+[
+  {
+    "name": "counterline.help.search",
+    "description": "Search the provider help center by words in titles, bodies and tags. Read-only.",
+    "read_only": true,
+    "scope": "counterline.help.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "articles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "article_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              }
+            },
+            "required": [
+              "article_id",
+              "title",
+              "tags"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "articles"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.help.get",
+    "description": "Read one help article. Read-only.",
+    "read_only": true,
+    "scope": "counterline.help.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "article_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "article": {
+          "type": "object",
+          "properties": {
+            "article_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "body": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              }
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8000
+                  }
+                },
+                "required": [
+                  "at",
+                  "note",
+                  "body"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "article_id",
+            "title",
+            "body",
+            "tags",
+            "updated_at",
+            "revisions"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "article"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.list",
+    "description": "List the customer's support cases, optionally by status, with the provider's name, the topics a new case can be opened on and the customer's notification preferences. Read-only.",
+    "read_only": true,
+    "scope": "counterline.cases.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "open",
+            "waiting_on_customer",
+            "escalated",
+            "resolved",
+            "closed"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "provider": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "kind": {
+              "enum": [
+                "card_issuer",
+                "internet_provider",
+                "membership_club",
+                "other"
+              ]
+            },
+            "time_zone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          },
+          "required": [
+            "name",
+            "kind",
+            "time_zone"
+          ],
+          "additionalProperties": false
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "topic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "waiting_on_customer",
+                  "escalated",
+                  "resolved",
+                  "closed"
+                ]
+              },
+              "tier": {
+                "enum": [
+                  "frontline",
+                  "specialist"
+                ]
+              },
+              "opened_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "case_id",
+              "topic_id",
+              "account_ref",
+              "status",
+              "tier",
+              "opened_at",
+              "closed_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "topic_id",
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "email_copies": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "email_copies"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "provider",
+        "cases",
+        "topics",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.get",
+    "description": "Read one case with its transcript, the offers presented in it and the quick actions the chat offers now. Offers past their expiry read \"expired\". Read-only.",
+    "read_only": true,
+    "scope": "counterline.cases.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "case_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case": {
+          "type": "object",
+          "properties": {
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "topic_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "status": {
+              "enum": [
+                "open",
+                "waiting_on_customer",
+                "escalated",
+                "resolved",
+                "closed"
+              ]
+            },
+            "tier": {
+              "enum": [
+                "frontline",
+                "specialist"
+              ]
+            },
+            "opened_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "identity": {
+              "type": "object",
+              "properties": {
+                "verified": {
+                  "type": "boolean"
+                },
+                "disclosures": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "fields": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "full_name",
+                            "last_four",
+                            "billing_zip",
+                            "date_of_birth",
+                            "full_card_number",
+                            "ssn",
+                            "one_time_code"
+                          ]
+                        }
+                      },
+                      "not_needed": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "full_name",
+                            "last_four",
+                            "billing_zip",
+                            "date_of_birth",
+                            "full_card_number",
+                            "ssn",
+                            "one_time_code"
+                          ]
+                        }
+                      },
+                      "matched": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "at",
+                      "fields",
+                      "not_needed",
+                      "matched"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "verified",
+                "disclosures"
+              ],
+              "additionalProperties": false
+            },
+            "transcript": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "turn_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "speaker": {
+                    "enum": [
+                      "customer",
+                      "representative"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "source": {
+                    "enum": [
+                      "text",
+                      "action",
+                      "script",
+                      "system"
+                    ]
+                  },
+                  "recognized": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "rule": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "turn_id",
+                  "at",
+                  "speaker",
+                  "text",
+                  "source",
+                  "recognized",
+                  "rule"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "available_actions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "explain_terms",
+                      "ask_for_better_offer",
+                      "ask_status",
+                      "request_transfer",
+                      "end_chat"
+                    ]
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "needs_department": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "action",
+                  "label",
+                  "needs_department"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "case_id",
+            "topic_id",
+            "account_ref",
+            "status",
+            "tier",
+            "opened_at",
+            "closed_at",
+            "identity",
+            "transcript",
+            "available_actions"
+          ],
+          "additionalProperties": false
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "offer_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "case_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "catalog_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stage": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "initial",
+                      "better",
+                      "transfer"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "kind": {
+                "enum": [
+                  "statement_credit",
+                  "conditional_credit",
+                  "fee_waiver",
+                  "refund",
+                  "product_change",
+                  "hold"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "terms": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount_minor": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                      }
+                    },
+                    "required": [
+                      "amount_minor",
+                      "currency"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                }
+              },
+              "group": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tier": {
+                "enum": [
+                  "frontline",
+                  "specialist"
+                ]
+              },
+              "presented_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expires_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "perform_days": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 365
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "state": {
+                "enum": [
+                  "presented",
+                  "accepted",
+                  "declined",
+                  "unavailable",
+                  "expired"
+                ]
+              }
+            },
+            "required": [
+              "offer_id",
+              "case_id",
+              "catalog_id",
+              "stage",
+              "kind",
+              "title",
+              "terms",
+              "value",
+              "conditions",
+              "group",
+              "tier",
+              "presented_at",
+              "expires_at",
+              "perform_days",
+              "state"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case",
+        "offers",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.offers.get",
+    "description": "Read one presented offer with its terms and conditions. Read-only.",
+    "read_only": true,
+    "scope": "counterline.offers.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "offer_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "offer": {
+          "type": "object",
+          "properties": {
+            "offer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "catalog_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "stage": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "initial",
+                    "better",
+                    "transfer"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "kind": {
+              "enum": [
+                "statement_credit",
+                "conditional_credit",
+                "fee_waiver",
+                "refund",
+                "product_change",
+                "hold"
+              ]
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "terms": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "amount_minor": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$"
+                    }
+                  },
+                  "required": [
+                    "amount_minor",
+                    "currency"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              }
+            },
+            "group": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tier": {
+              "enum": [
+                "frontline",
+                "specialist"
+              ]
+            },
+            "presented_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "expires_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "perform_days": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 365
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "state": {
+              "enum": [
+                "presented",
+                "accepted",
+                "declined",
+                "unavailable",
+                "expired"
+              ]
+            }
+          },
+          "required": [
+            "offer_id",
+            "case_id",
+            "catalog_id",
+            "stage",
+            "kind",
+            "title",
+            "terms",
+            "value",
+            "conditions",
+            "group",
+            "tier",
+            "presented_at",
+            "expires_at",
+            "perform_days",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "offer",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.commitments.list",
+    "description": "List the provider's commitments to this customer with status, reports and an overdue flag. Read-only.",
+    "read_only": true,
+    "scope": "counterline.commitments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "reported_performed",
+            "partially_reported",
+            "condition_missed",
+            "revoked",
+            "contested"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "commitments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "commitment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "offer_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "case_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "kind": {
+                "enum": [
+                  "statement_credit",
+                  "conditional_credit",
+                  "fee_waiver",
+                  "refund",
+                  "product_change",
+                  "hold"
+                ]
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount_minor": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                      }
+                    },
+                    "required": [
+                      "amount_minor",
+                      "currency"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "conditional": {
+                "type": "boolean"
+              },
+              "accepted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "perform_by": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "reported_performed",
+                  "partially_reported",
+                  "condition_missed",
+                  "revoked",
+                  "contested"
+                ]
+              },
+              "reports": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reference_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "amount_minor": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$"
+                    }
+                  },
+                  "required": [
+                    "event_id",
+                    "at",
+                    "reference_id",
+                    "amount_minor",
+                    "currency"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "reported_performed",
+                        "partially_reported",
+                        "condition_missed",
+                        "revoked",
+                        "contested"
+                      ]
+                    },
+                    "event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "note": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 400
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "status",
+                    "event_id",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "contest": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      "prior_status": {
+                        "enum": [
+                          "pending",
+                          "reported_performed",
+                          "partially_reported",
+                          "condition_missed",
+                          "revoked",
+                          "contested"
+                        ]
+                      },
+                      "answered_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "outcome": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "reissued",
+                              "upheld"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "at",
+                      "reason",
+                      "prior_status",
+                      "answered_at",
+                      "outcome"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "overdue": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "commitment_id",
+              "offer_id",
+              "case_id",
+              "provider_id",
+              "account_ref",
+              "kind",
+              "value",
+              "conditional",
+              "accepted_at",
+              "perform_by",
+              "status",
+              "reports",
+              "history",
+              "contest",
+              "overdue"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "commitments",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.commitments.get",
+    "description": "Read one commitment with its performance reports and history. Read-only.",
+    "read_only": true,
+    "scope": "counterline.commitments.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "commitment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "commitment_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "commitment": {
+          "type": "object",
+          "properties": {
+            "commitment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "offer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "kind": {
+              "enum": [
+                "statement_credit",
+                "conditional_credit",
+                "fee_waiver",
+                "refund",
+                "product_change",
+                "hold"
+              ]
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "amount_minor": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$"
+                    }
+                  },
+                  "required": [
+                    "amount_minor",
+                    "currency"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "conditional": {
+              "type": "boolean"
+            },
+            "accepted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "perform_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "reported_performed",
+                "partially_reported",
+                "condition_missed",
+                "revoked",
+                "contested"
+              ]
+            },
+            "reports": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "event_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "reference_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount_minor": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "currency": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{3}$"
+                  }
+                },
+                "required": [
+                  "event_id",
+                  "at",
+                  "reference_id",
+                  "amount_minor",
+                  "currency"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "pending",
+                      "reported_performed",
+                      "partially_reported",
+                      "condition_missed",
+                      "revoked",
+                      "contested"
+                    ]
+                  },
+                  "event_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 400
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "event_id",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "contest": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    "prior_status": {
+                      "enum": [
+                        "pending",
+                        "reported_performed",
+                        "partially_reported",
+                        "condition_missed",
+                        "revoked",
+                        "contested"
+                      ]
+                    },
+                    "answered_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "outcome": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "reissued",
+                            "upheld"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "prior_status",
+                    "answered_at",
+                    "outcome"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "overdue": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "commitment_id",
+            "offer_id",
+            "case_id",
+            "provider_id",
+            "account_ref",
+            "kind",
+            "value",
+            "conditional",
+            "accepted_at",
+            "perform_by",
+            "status",
+            "reports",
+            "history",
+            "contest",
+            "overdue"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "commitment",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.open",
+    "description": "Open a support case on one of the provider's topics for an account reference, with a first message. The representative answers with the topic greeting, then each request the message makes, as in send_message.",
+    "read_only": false,
+    "scope": "counterline.cases.open",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "topic_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "account_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "topic_id",
+        "account_ref",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.send_message",
+    "description": "Write a plain-language message in a case. The representative answers every request it recognizes, in order; anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything.",
+    "read_only": false,
+    "scope": "counterline.cases.send_message",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "case_id",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "recognized": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "turns_added": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id",
+        "recognized",
+        "turns_added"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.take_action",
+    "description": "Use one of the quick actions the case lists now in available_actions. request_transfer takes a department name.",
+    "read_only": false,
+    "scope": "counterline.cases.take_action",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "action": {
+          "enum": [
+            "explain_terms",
+            "ask_for_better_offer",
+            "ask_status",
+            "request_transfer",
+            "end_chat"
+          ]
+        },
+        "department": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "case_id",
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "action": {
+          "enum": [
+            "explain_terms",
+            "ask_for_better_offer",
+            "ask_status",
+            "request_transfer",
+            "end_chat"
+          ]
+        },
+        "turns_added": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id",
+        "action",
+        "turns_added"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.close",
+    "description": "Close a case. A closed case takes no writes until it is reopened.",
+    "read_only": false,
+    "scope": "counterline.cases.close",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "case_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_status": {
+          "enum": [
+            "open",
+            "waiting_on_customer",
+            "escalated",
+            "resolved",
+            "closed"
+          ]
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id",
+        "case_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.cases.reopen",
+    "description": "Reopen a closed case within the provider's reopen window.",
+    "read_only": false,
+    "scope": "counterline.cases.reopen",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "case_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_status": {
+          "enum": [
+            "open",
+            "waiting_on_customer",
+            "escalated",
+            "resolved",
+            "closed"
+          ]
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id",
+        "case_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.identity.provide",
+    "description": "Give the representative selected identity fields for a case. Every field given is recorded as disclosed, including fields the provider does not need.",
+    "read_only": false,
+    "scope": "counterline.identity.provide",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "full_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "last_four": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "billing_zip": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "date_of_birth": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "full_card_number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "ssn": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "one_time_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "case_id",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "not_needed": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "full_name",
+              "last_four",
+              "billing_zip",
+              "date_of_birth",
+              "full_card_number",
+              "ssn",
+              "one_time_code"
+            ]
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "case_id",
+        "verified",
+        "not_needed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.offers.accept",
+    "description": "Accept a presented offer in two steps. Without confirmation_token, returns a summary and a token and changes no offer. With that token, creates the commitment.",
+    "read_only": false,
+    "scope": "counterline.offers.accept",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "confirmation_token": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "offer_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "step": {
+          "enum": [
+            "confirm",
+            "accepted"
+          ]
+        },
+        "confirmation_token": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "terms": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "amount_minor": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "currency": {
+                          "type": "string",
+                          "pattern": "^[A-Z]{3}$"
+                        }
+                      },
+                      "required": [
+                        "amount_minor",
+                        "currency"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  }
+                },
+                "perform_by": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "group_closes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                }
+              },
+              "required": [
+                "title",
+                "terms",
+                "value",
+                "conditions",
+                "perform_by",
+                "group_closes"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commitment_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "offer_id",
+        "step",
+        "confirmation_token",
+        "summary",
+        "commitment_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.offers.decline",
+    "description": "Decline a presented offer.",
+    "read_only": false,
+    "scope": "counterline.offers.decline",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "offer_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "declined"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "offer_id",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.commitments.contest",
+    "description": "Contest a commitment, for example when the provider reports a credit the account does not show. The provider answers by event.",
+    "read_only": false,
+    "scope": "counterline.commitments.contest",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "commitment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "commitment_id",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "commitment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "commitment_status": {
+          "const": "contested"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "commitment_id",
+        "commitment_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "counterline.preferences.update",
+    "description": "Turn plain-text email copies of offers and confirmations on or off.",
+    "read_only": false,
+    "scope": "counterline.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "email_copies": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "email_copies"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "counterline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "email_copies": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "email_copies"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

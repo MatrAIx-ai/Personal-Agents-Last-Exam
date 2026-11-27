@@ -1,0 +1,218 @@
+{
+  "account_id": "counterline-jordan",
+  "owner_person_id": "person-jordan",
+  "provider": {
+    "provider_id": "issuer-larchmont",
+    "name": "Larchmont Card Services",
+    "kind": "card_issuer",
+    "time_zone": "America/New_York",
+    "reopen_days": 14,
+    "identity_policy": {
+      "required": [
+        "last_four",
+        "billing_zip"
+      ],
+      "accepted": [
+        "full_name",
+        "last_four",
+        "billing_zip",
+        "one_time_code"
+      ]
+    },
+    "departments": [
+      {
+        "department_id": "dep-care",
+        "name": "Customer Care",
+        "aliases": [
+          "customer service",
+          "support"
+        ],
+        "tier": "frontline",
+        "transfer": "allowed"
+      },
+      {
+        "department_id": "dep-review",
+        "name": "Account Review",
+        "aliases": [
+          "retention",
+          "retention team",
+          "cancellations"
+        ],
+        "tier": "specialist",
+        "transfer": "allowed"
+      }
+    ],
+    "topics": [
+      {
+        "topic_id": "annual_fee",
+        "title": "Annual fee question",
+        "greeting_script_id": "greet-fee",
+        "identity_required": true
+      },
+      {
+        "topic_id": "refund_status",
+        "title": "Status of a promised credit or refund",
+        "greeting_script_id": "greet-status",
+        "identity_required": false
+      }
+    ],
+    "scripts": [
+      {
+        "script_id": "greet-fee",
+        "text": "Thanks for contacting Larchmont Card Services. I can help with your annual fee. To start, please confirm the last four digits of your card and your billing ZIP code."
+      },
+      {
+        "script_id": "greet-status",
+        "text": "Thanks for contacting Larchmont Card Services. I can check on a credit we promised. Which case or credit are you asking about?"
+      },
+      {
+        "script_id": "followup-credit-processing",
+        "text": "Following up: the statement credit we promised is being processed and should post by the date in your case."
+      },
+      {
+        "script_id": "followup-credit-processed",
+        "text": "Good news: your statement credit has been processed."
+      },
+      {
+        "script_id": "greet-review",
+        "text": "Hello, this is Account Review at Larchmont Card Services. I have your case and I'm reviewing the options for your annual fee."
+      },
+      {
+        "script_id": "lead-offers",
+        "text": "Here is what I can offer."
+      },
+      {
+        "script_id": "lead-better",
+        "text": "Here is what else I can offer."
+      },
+      {
+        "script_id": "no-better",
+        "text": "That is the best offer I can make on this case."
+      }
+    ],
+    "offer_catalog": [
+      {
+        "catalog_id": "cat-fee-f1",
+        "topic_id": "annual_fee",
+        "tier": "frontline",
+        "stage": "initial",
+        "kind": "statement_credit",
+        "title": "Statement credit",
+        "terms": "A 75.00 statement credit for keeping the card open. No spending required.",
+        "value": {
+          "amount_minor": 7500,
+          "currency": "USD"
+        },
+        "conditions": [],
+        "group": "fee-relief",
+        "expires_hours": 48,
+        "perform_days": 7
+      },
+      {
+        "catalog_id": "cat-fee-s1",
+        "topic_id": "annual_fee",
+        "tier": "specialist",
+        "stage": "transfer",
+        "kind": "fee_waiver",
+        "title": "Annual fee waiver",
+        "terms": "This year's 250.00 annual fee is waived in full. No spending required.",
+        "value": {
+          "amount_minor": 25000,
+          "currency": "USD"
+        },
+        "conditions": [],
+        "group": "fee-relief",
+        "expires_hours": 48,
+        "perform_days": 7
+      }
+    ]
+  },
+  "customer_record": {
+    "full_name": "Jordan Avery",
+    "last_four": "1234",
+    "billing_zip": "02139",
+    "date_of_birth": null
+  },
+  "preferences": {
+    "email_copies": false
+  },
+  "help_articles": [
+    {
+      "article_id": "kb-annual-fee",
+      "title": "Questions about your annual fee",
+      "body": "The annual fee posts on your card anniversary. If you have questions about the fee or the value of your card, our Account Review team handles fee reviews. In chat, ask to be transferred to Account Review.",
+      "tags": [
+        "annual fee",
+        "fees",
+        "account review"
+      ],
+      "updated_at": "2025-03-10T10:00:00-04:00",
+      "revisions": [
+        {
+          "at": "2025-03-10T10:00:00-04:00",
+          "note": "Published.",
+          "body": "The annual fee posts on your card anniversary. If you have questions about the fee or the value of your card, our Account Review team handles fee reviews. In chat, ask to be transferred to Account Review."
+        }
+      ]
+    },
+    {
+      "article_id": "kb-identity",
+      "title": "How we verify your identity in chat",
+      "body": "We verify you with the last four digits of your card and your billing ZIP code. We never need your full card number or Social Security number in chat.",
+      "tags": [
+        "identity",
+        "security",
+        "chat"
+      ],
+      "updated_at": "2025-01-14T09:00:00-05:00",
+      "revisions": [
+        {
+          "at": "2025-01-14T09:00:00-05:00",
+          "note": "Published.",
+          "body": "We verify you with the last four digits of your card and your billing ZIP code. We never need your full card number or Social Security number in chat."
+        }
+      ]
+    },
+    {
+      "article_id": "kb-credits",
+      "title": "When promised credits post",
+      "body": "A statement credit you accept in chat usually posts within 7 days. Check your card account to confirm it posted; a message saying it was processed is not the same as a posted credit.",
+      "tags": [
+        "credits",
+        "refunds",
+        "timing"
+      ],
+      "updated_at": "2025-06-02T09:00:00-04:00",
+      "revisions": [
+        {
+          "at": "2025-06-02T09:00:00-04:00",
+          "note": "Published.",
+          "body": "A statement credit you accept in chat usually posts within 7 days. Check your card account to confirm it posted; a message saying it was processed is not the same as a posted credit."
+        }
+      ]
+    },
+    {
+      "article_id": "kb-transfers",
+      "title": "Talking to the right team",
+      "body": "Most questions are answered by Customer Care. Fee reviews and requests to close an account are handled by Account Review, also called the retention team. In chat, ask to be transferred and name the team.",
+      "tags": [
+        "transfer",
+        "account review",
+        "chat"
+      ],
+      "updated_at": "2026-02-09T11:00:00-05:00",
+      "revisions": [
+        {
+          "at": "2026-02-09T11:00:00-05:00",
+          "note": "Published.",
+          "body": "Most questions are answered by Customer Care. Fee reviews and requests to close an account are handled by Account Review, also called the retention team. In chat, ask to be transferred and name the team."
+        }
+      ]
+    }
+  ],
+  "cases": [],
+  "offers": [],
+  "commitments": [],
+  "confirmations": [],
+  "outbox": []
+}
