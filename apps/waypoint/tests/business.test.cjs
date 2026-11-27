@@ -50,10 +50,10 @@ test('the loyalty-credit contract copies match the receivers when they are prese
 test('reads are side-effect free and report balance, partners, bonuses and transfers', () => {
   const f = fixture(), before = f.data;
   const balance = f.call('waypoint.balance', {});
-  assert.deepEqual([balance.balance, balance.pending_points, balance.ledger.length, balance.household[0].person_id], [181600, 0, 4, 'person-mei']);
+  assert.deepEqual([balance.balance, balance.pending_points, balance.ledger.length, balance.household[0].person_id], [181600, 0, 6, 'person-mei']);
   assert.deepEqual(f.call('waypoint.partners', {}).items.map(p => [p.id, p.delay_minutes, p.bonus_pct_now]), [['skyline', 0, 0], ['harbor', 1440, 0]]);
   assert.deepEqual(f.call('waypoint.bonuses', {}).items.map(b => [b.id, b.state]), [['bonus-1', 'upcoming']]);
-  assert.deepEqual(f.call('waypoint.transfers.list', {}).items.map(t => [t.id, t.status]), [['transfer-1', 'completed']]);
+  assert.deepEqual(f.call('waypoint.transfers.list', {}).items.map(t => [t.id, t.status]), [['transfer-2026-0001', 'completed'], ['transfer-1', 'completed']]);
   assert.deepEqual(f.call('waypoint.transfers.list', {status:'pending'}).items, []);
   assert.deepEqual(f.data, before);
   assert.throws(() => f.call('waypoint.transfers.get', {id:'missing'}), code('not_found'));
@@ -264,4 +264,26 @@ test('reviewer renderer escapes untrusted content', () => {
   const view = require('../gui/src/view.js');
   const html = view.render([{id:'test', description:'<img src=x onerror=alert(1)>', name:'<script>bad</script>'}]);
   assert.ok(!html.includes('<img')); assert.ok(!html.includes('<script>')); assert.ok(html.includes('&lt;'));
+});
+
+// registry.points.json assembles these fixtures, so a historical partner credit must have been sent and funded here.
+const siblings = ['skyline', 'harbor'].map(id => path.resolve(__dirname, '../../' + id + '/fixtures/minimal.json'));
+test('every seeded Skyline and Harbor credit has a funded Waypoint transfer', {skip:!siblings.every(f => fs.existsSync(f)) && 'sibling Apps not present'}, () => {
+  const waypoint = require('../fixtures/minimal.json');
+  const transfers = new Map(waypoint.transfers.map(t => [t.id, t]));
+  const ledger = new Map(waypoint.ledger.map(r => [r.id, r]));
+  let credits = 0;
+  for (const file of siblings) {
+    const app = JSON.parse(fs.readFileSync(file, 'utf8'));
+    for (const e of app.ledger.filter(r => r.kind === 'transfer_in')) {
+      credits++;
+      const t = transfers.get(e.ref.object_id), label = path.basename(path.dirname(path.dirname(file))) + ' ' + e.id;
+      assert.ok(t, label + ' names a transfer Waypoint never made');
+      assert.equal(e.ref.account_id, waypoint.account_id, label);
+      assert.deepEqual([t.status, t.recipient.account_id, t.points], ['completed', app.account_id, e.points], label);
+      const debit = ledger.get(t.debit_ledger_id);
+      assert.ok(debit.balance_after >= 0 && Date.parse(debit.at) <= Date.parse(e.at), label + ' is credited before Waypoint debits it');
+    }
+  }
+  assert.equal(credits, 2);
 });

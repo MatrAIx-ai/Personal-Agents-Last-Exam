@@ -8,11 +8,11 @@ Public runtime 1.6.0, Core API 1.2.0, Mail 1.3.0 (reference App, receiver of not
 
 | Command | Result |
 | --- | --- |
-| `node --test apps/waypoint/tests/business.test.cjs` | 18/18 tests pass |
+| `node --test apps/waypoint/tests/business.test.cjs` | 19/19 tests pass |
 | `node --test apps/skyline/tests/business.test.cjs` | 33/33 tests pass |
 | `node --test apps/harbor/tests/business.test.cjs` | 27/27 tests pass |
 | `node apps/<id>/examples/run.cjs` for each | Runs: combine and transfers settled (Waypoint); credit, award ticketed with seats, schedule change (Skyline); credit, certificate and points stays (Harbor) |
-| `node runtime/cli.cjs verify --app apps/<id> --output .artifacts/<id>.json` | `passed: true`: Waypoint 40 checks, Skyline 39, Harbor 39 |
+| `node runtime/cli.cjs verify --app apps/<id> --output .artifacts/<id>.json` | `passed: true`: Waypoint 40 checks, Skyline 39, Harbor 39. `verify` copies one package alone, so Waypoint's test that its fixture funds the Skyline and Harbor credits skips there (18 + 1 skipped). |
 | `npm run example:points-trip` | `passed: true`, 45 checks over real MCP, Messaging and Mail |
 | `node apps/<id>/build/schemas.cjs --check`, `node runtime/sdk/sync.cjs --check`, `node runtime/build-contracts.cjs --check` | No drift. The loyalty-credit payload and wire schemas are byte-identical in the three packages; Skyline's and Harbor's `email-message.schema.json` equal Mail's `router-message.schema.json`. |
 | `npm test` | 22/22 stages pass (no existing App or runtime file is changed) |
