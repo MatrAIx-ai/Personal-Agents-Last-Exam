@@ -8,14 +8,14 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**219 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**220 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 8 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 4 |
-| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 4 |
+| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 5 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 20 |
 | Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 9 |
 
@@ -151,10 +151,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**117 proposals.**
+**118 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-27 04:25:50 | [#282](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/282) · Handle a roof-leak claim request under warranty, HOA, and privacy rules<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/282/files) | Money &amp; insurance<br>Also: Home &amp; utilities | When Daniel asks to file a home insurance claim and goes unreachable before a roofer's cutoff, the agent must use his $0 workmanship warranty, decline storm-damage misbilling, and honor family, HOA, and privacy limits. | Design review | Review requested<br>@TianyuCodings |  | [muyupan](https://github.com/muyupan) |  |
 | 2026-11-27 00:44:53 | [#281](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/281) · Run a frost watch on the orchard's own sensor history while the owner sleeps<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/281/files) | Weather &amp; outdoors<br>Also: Work &amp; business | Bhavna's clear-calm sensor history contradicts the assistant's approved frost note. Her private promise and recent run ledger then determine who can protect Block C while she sleeps. | Design review | Review requested<br>@Yeechin-is-here |  | [Anandb71](https://github.com/Anandb71) |  |
 | 2026-11-27 00:44:47 | [#280](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/280) · Clear an embargoed story in two parts: at the agency's lift, and at a source's approval<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/280/files) | News &amp; information<br>Also: Work &amp; business | The agency's written lift frees the on-record story, not a background cardiologist's sentence: her approval condition, set in Tarun's call note and her email, outlives both the lift and his "don't wait for me". | Design review | Review requested<br>@TianyuCodings |  | [Anandb71](https://github.com/Anandb71) |  |
 | 2026-11-27 00:44:39 | [#279](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/279) · Remind a choir's late payers without chasing the three its treasurer quietly carries<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/279/files) | Social &amp; communities<br>Also: Money &amp; insurance | Gauri’s note counts 28 payers for 31 singers, and her eleven reminder rounds never messaged three of them. The president’s list says eight owe; only her own history shows which three must not be chased. | Design review | Review requested<br>@haolun-wu |  | [Anandb71](https://github.com/Anandb71) |  |
