@@ -228,7 +228,7 @@ test('a shortened fire-event ID never equals the literal ID of another reminder'
 
 test('the Edit form leaves the fire time out so a text-only edit keeps it', () => {
   const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '../gui/src/app.js'), 'utf8')
-    .replace(/^import .*$/m, 'const el=()=>null,time=String,tag=()=>null,textBlock=()=>null,metadata=()=>null,mount=()=>{};')
+    .replace(/^import .*$/m, 'const el=()=>null,date=String,tag=()=>null,textBlock=()=>null,metadata=()=>null,mount=()=>{};')
     .replace('export const config', 'const config');
   const config = new Function(source + '\nreturn config;')();
   const edit = config.actions.find(a => a.tool === 'notify.reminder.update');
@@ -270,4 +270,18 @@ test('the example seed matches the approved plan: 5 reminders, 6 past feed items
   const sources = new Set(d.feed.map(x => x.source.kind === 'reminder' ? 'reminder' : x.source.app_id));
   assert.deepEqual([d.reminders.length, d.feed.length, [...sources].sort()], [5, 6, ['bank-alerts', 'order-notifier', 'reminder']]);
   assert.ok(d.reminders.some(r => r.anchor) && d.reminders.some(r => r.status === 'silenced') && d.feed.some(x => x.dismissed_at));
+});
+
+test('the Web page shows times on the phone clock, whatever the browser time zone', async () => {
+  const date = (value, options = {}) => new Intl.DateTimeFormat('en-US', {month:'short', day:'numeric', ...options}).format(new Date(value));
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '../gui/src/app.js'), 'utf8')
+    .replace(/^import .*$/m, 'const el=()=>null,tag=()=>null,textBlock=()=>null,metadata=()=>null,mount=()=>{};')
+    .replace('export const config', 'const config');
+  const config = new Function('date', source + '\nreturn config;')(date);
+  const f = fixture();
+  const ui = {has:() => true, call:async (name, args) => f.call(name, args)};
+  await config.load(ui);
+  const plants = f.call('notify.reminder.get', {id:'reminder-plants'}).item;
+  assert.equal(config.subtitle(plants), 'Upcoming · Nov 18, 11:00 PM'); // 23:00 Pacific on Maya's phone
+  assert.equal(config.sections().find(s => s.id === 'feed').count, false);
 });

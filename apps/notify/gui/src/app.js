@@ -1,4 +1,7 @@
-import {mount,el,time,tag,textBlock,metadata} from '/shared/client.js';
+import {mount,el,date,tag,textBlock,metadata} from '/shared/client.js';
+// Times show on the phone's clock (the device time zone from notify.focus.get), not the browser's.
+let zone;
+const time=value=>{try{return date(value,{hour:'numeric',minute:'2-digit',timeZone:zone});}catch{return date(value,{hour:'numeric',minute:'2-digit'});}};
 // App-owned interaction catalog and presentation. The Host only supplies an Agent connection,
 // so focus, silence and dismissal (user actions applied by Infra) are shown but not editable here.
 const statusLabel={scheduled:'Upcoming',delivered:'Delivered',silenced:'Arrived silently',cancelled:'Cancelled'};
@@ -38,11 +41,11 @@ Object.assign(config,{
  symbol:'◔',searchLabel:'Search reminders',initialSection:'upcoming',
  load:async ui=>({
   feed:ui.has('notify.feed.list')?(await ui.call('notify.feed.list',{include_dismissed:true})).items:[],
-  focus:ui.has('notify.focus.get')?await ui.call('notify.focus.get',{}):null
+  focus:ui.has('notify.focus.get')?await ui.call('notify.focus.get',{}).then(f=>{zone=f.device?.timezone;return f;}):null
  }),
  sections:()=>[
   {id:'upcoming',label:'Upcoming',symbol:'◷',filter:r=>r.status==='scheduled'},
-  {id:'feed',label:'Lock screen',symbol:'▤',filter:()=>false},
+  {id:'feed',label:'Lock screen',symbol:'▤',filter:()=>false,count:false}, // the feed is not a reminder list
   {id:'fired',label:'Fired',symbol:'✓',filter:r=>r.status==='delivered'||r.status==='silenced'},
   {id:'cancelled',label:'Cancelled',symbol:'×',filter:r=>r.status==='cancelled'}
  ],
