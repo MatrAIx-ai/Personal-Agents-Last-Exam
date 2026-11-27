@@ -1,0 +1,66 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "gustline-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic weather, air-quality, alert and rule fixture for package validation; not an evaluation task.",
+  "record_source_ids": [
+    "gustline-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "gustline-generator",
+      "kind": "synthetic",
+      "description": "Places, issuances, observations, alerts and rules written by the seeded generator. All places are fictional, with plausible but not real coordinates, so no record implies conditions at a real location.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "seeded procedural generation",
+        "tool": "apps/gustline/scripts/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20271008,
+        "parameters": {
+          "prng": "mulberry32"
+        }
+      }
+    },
+    {
+      "source_id": "epa-aqi-tad-2024",
+      "kind": "reused",
+      "description": "AQI breakpoint tables (PM2.5 2024 revision, PM10, 8-hour O3) used by src/aqi.cjs; a U.S. federal government work in the public domain.",
+      "uri": "https://www.airnow.gov/publications/air-quality-index/technical-assistance-document-for-reporting-the-daily-aqi/",
+      "license": "Public domain (U.S. federal government work)",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "noaa-solar-calculator",
+      "kind": "reused",
+      "description": "Solar position equations used by src/solar.cjs; NOAA Global Monitoring Laboratory, public domain.",
+      "uri": "https://gml.noaa.gov/grad/solcalc/",
+      "license": "Public domain (U.S. federal government work)",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    }
+  ],
+  "transformations": [
+    "All times are RFC 3339 with UTC offsets; values are stored in metric units."
+  ],
+  "expected_counts": {
+    "records": 69,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automatic checks do not replace human review of realism, wording and provenance."
+  }
+}
