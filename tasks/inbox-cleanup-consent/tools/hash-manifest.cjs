@@ -50,7 +50,7 @@ const manifest = {
       proposal_path: 'proposals/task/inbox-cleanup-consent.md',
       primary_domain: 'Work & business',
       secondary_domains: ['Home & utilities'],
-      dependencies: ['runtime', 'mail', 'notes']
+      dependencies: ['runtime', 'mail', 'notes', 'node-bookworm']
     }
   ],
   dependencies: [
@@ -77,6 +77,13 @@ const manifest = {
       source: 'https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam',
       path: 'apps/notes',
       revision: upstream
+    },
+    {
+      id: 'node-bookworm',
+      kind: 'image',
+      version: '22-bookworm-slim',
+      source: 'docker.io/library/node',
+      digest: 'sha256:be979e5523c76fa4d5ca4ebd3099078f220aa47ec39c48ad5b5df9314debd6eb'
     }
   ],
   files,

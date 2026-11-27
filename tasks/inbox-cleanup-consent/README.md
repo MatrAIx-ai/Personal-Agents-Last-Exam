@@ -244,7 +244,7 @@ Mail has no starred flag, no paging and no unsubscribe. The rules use replied-to
 - Issue #135 row 7 is still open. The official batch uses setting A if that row is available at the freeze, and setting B otherwise. Later A runs are reported separately. The stand-in already runs both.
 - Issue #135 row 2 (platform memory) is open. The delivered source is the Notes fallback.
 - The official model roster is not published. This package has no model rollouts and no pass rate. The plan's batch, five unhinted runs and one hinted run per designated model on one setting, waits for that roster.
-- Harbor execution is pending. `task.toml`, `environment/Dockerfile` and `tests/test.sh` are in the package for the later pin. When that pin is added it will name Harbor, the adapter and the image digest.
+- Harbor execution is pending. `task.toml`, `environment/Dockerfile` and `tests/test.sh` are in the package. The base image is `node:22-bookworm-slim` at digest `sha256:be979e5523c76fa4d5ca4ebd3099078f220aa47ec39c48ad5b5df9314debd6eb`. When the remaining pins are added they will name Harbor and the adapter.
 - `PR_UPDATE.md` is the proposed pull request text. It is included in `manifest.json` hashes.
 
 ## Rollout plan

@@ -160,7 +160,14 @@ function retailRow(text) {
 }
 
 function nameInText(text, needle) {
-  return needle.length >= 4 && plain(text).includes(needle);
+  const wanted = plain(needle);
+  return wanted.length >= 4 && plain(text).includes(wanted);
+}
+
+function senderMatches(sender, needle) {
+  const left = plain(sender);
+  const right = plain(needle);
+  return left.length >= 4 && right.length >= 4 && (left === right || left.includes(right) || right.includes(left));
 }
 
 function namesCover(names, needle) {
@@ -182,55 +189,117 @@ function senderStaysInGroup(needle, members) {
   return seen;
 }
 
+function retailIdsFor(needle, members) {
+  const ids = [];
+  for (const member of members) {
+    if (senderMatches(member.name, needle)) ids.push(member.id);
+  }
+  return ids;
+}
+
+function keepRows(sentence) {
+  const rows = (read('keep_scope', sentence) || {}).rows;
+  return Array.isArray(rows) ? rows : [];
+}
+
+function resolvedKeeps(text) {
+  const found = new Map();
+  for (const sentence of splitSentences(text)) {
+    for (const row of keepRows(sentence)) {
+      const name = String(row && row.name || '');
+      const scope = row && row.scope;
+      if ((scope !== 'all' && scope !== 'threads') || !nameInText(sentence, name)) continue;
+      if (read('keep:' + name, sentence).v !== 'keep') continue;
+      const key = plain(name);
+      if (!found.has(key)) found.set(key, {name, all: false, threads: false});
+      const slot = found.get(key);
+      if (scope === 'all') slot.all = true;
+      else slot.threads = true;
+    }
+  }
+  const out = [];
+  for (const slot of found.values()) {
+    if (slot.all) out.push({name: slot.name, scope: 'all'});
+    else if (slot.threads) out.push({name: slot.name, scope: 'threads'});
+  }
+  return out;
+}
+
+function senderScope(text, needle) {
+  const wanted = plain(needle);
+  if (wanted.length < 4) return '';
+  for (const row of resolvedKeeps(text)) {
+    if (senderMatches(row.name, wanted)) return row.scope;
+  }
+  return '';
+}
+
 function scopeAllIds(text, members) {
   const ids = new Set();
-  const rows = (read('keep_scope', text) || {}).rows;
-  if (!Array.isArray(rows)) return ids;
-  for (const item of rows) {
-    if (!item || item.scope !== 'all') continue;
-    const needle = plain(item.name);
-    if (!nameInText(text, needle)) continue;
-    for (const member of members) {
-      const sender = plain(member.name);
-      if (sender && (sender === needle || sender.includes(needle) || needle.includes(sender))) ids.add(member.id);
+  for (const row of resolvedKeeps(text)) {
+    if (row.scope !== 'all') continue;
+    for (const id of retailIdsFor(row.name, members)) ids.add(id);
+  }
+  return ids;
+}
+
+function archivedSenderIds(text, members) {
+  const ids = new Set();
+  for (const sentence of splitSentences(text)) {
+    for (const row of keepRows(sentence)) {
+      const name = String(row && row.name || '');
+      if (!row || row.scope !== 'all' || !nameInText(sentence, name)) continue;
+      if (read('keep:' + name, sentence).v !== 'archive') continue;
+      for (const id of retailIdsFor(name, members)) ids.add(id);
     }
   }
   return ids;
 }
 
-function threadKeepOnly(text, needle, members) {
-  if (senderStaysInGroup(needle, members)) return false;
-  for (const id of scopeAllIds(text, members)) {
-    const sender = plain((members.find((member) => member.id === id) || {}).name);
-    if (sender && (sender === needle || sender.includes(needle) || needle.includes(sender))) return false;
-  }
-  return true;
-}
-
-function matchedIds(text, names, members) {
+function includedIds(text, names, members) {
   const ids = new Set();
+  let unresolved = false;
+  const known = Object.values(loadLabels().senders || {});
   for (const wanted of names || []) {
     const needle = plain(wanted);
-    if (!nameInText(text, needle) || threadKeepOnly(text, needle, members)) continue;
-    for (const member of members) {
-      const sender = plain(member.name);
-      if (sender && (sender.includes(needle) || needle.includes(sender))) ids.add(member.id);
+    if (!nameInText(text, needle)) continue;
+    const hits = retailIdsFor(needle, members);
+    if (hits.length) {
+      for (const id of hits) ids.add(id);
+      continue;
     }
+    if (!known.some((sender) => senderMatches(sender, needle))) unresolved = true;
   }
-  return ids;
+  return {ids, unresolved};
 }
 
 function retailTarget(text, row) {
   const members = retailMembers();
   const whole = scopeAllIds(text, members);
   if (row.scope !== 'subset') return members.length - whole.size;
-  const excluded = matchedIds(text, row.exclude, members);
-  for (const id of whole) excluded.add(id);
-  const included = matchedIds(text, row.include, members);
-  if (!excluded.size && !included.size) return members.length;
-  let chosen = members.filter((member) => !excluded.has(member.id));
-  if (included.size) chosen = chosen.filter((member) => included.has(member.id));
-  return chosen.length;
+  const archived = archivedSenderIds(text, members);
+  const named = includedIds(text, row.include, members);
+  for (const id of archived) named.ids.add(id);
+  if (named.unresolved && !named.ids.size) return -1;
+  const excluded = new Set();
+  for (const wanted of row.exclude || []) {
+    const needle = plain(wanted);
+    if (!nameInText(text, needle)) continue;
+    const stays = senderStaysInGroup(needle, members);
+    for (const id of retailIdsFor(needle, members)) {
+      if (archived.has(id)) continue;
+      if (stays || whole.has(id)) excluded.add(id);
+    }
+  }
+  for (const id of whole) {
+    if (!archived.has(id)) excluded.add(id);
+  }
+  if (named.ids.size) {
+    let count = 0;
+    for (const id of named.ids) if (!excluded.has(id)) count += 1;
+    return count;
+  }
+  return members.length - excluded.size;
 }
 
 function retailQuantity(text) {
@@ -463,6 +532,7 @@ module.exports = {
   survivingProposal,
   keptGroups,
   retailArchiveCount,
+  senderScope,
   saysFinished,
   fernhillQuestion,
   deadlineState,
