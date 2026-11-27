@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operation": {
+      "enum": [
+        "personal-records.upsert",
+        "personal-records.inject_document",
+        "personal-records.expiry_check"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "account_id": { "type": "string" },
+        "title": { "type": "string", "minLength": 1 },
+        "category": {
+          "type": "string",
+          "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"]
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "mime_type": { "type": "string" },
+        "content_bytes": { "type": "string" },
+        "raw_text": { "type": "string" },
+        "valid_until": {
+          "anyOf": [
+            { "type": "string", "format": "date-time" },
+            { "type": "null" }
+          ]
+        },
+        "threshold_days": { "type": "integer", "minimum": 0 },
+        "suppress_days": { "type": "integer", "minimum": 0 },
+        "source": { "type": "string" },
+        "source_account": { "type": "string" },
+        "message_id": { "type": "string" },
+        "asset_id": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "event_id",
+    "at",
+    "operation",
+    "payload"
+  ],
+  "additionalProperties": false
+}

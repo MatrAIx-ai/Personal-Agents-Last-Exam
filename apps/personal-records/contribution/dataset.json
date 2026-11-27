@@ -1,0 +1,49 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "personal-records-synthetic-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic 2025-2026 personal administration records (payslips, tax filings, insurance policies, contracts, receipts) with deterministic corpus generator and minimal runtime seed.",
+  "record_source_ids": [
+    "synthetic-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "synthetic-generator",
+      "kind": "synthetic",
+      "description": "Deterministically generated personal administration records (fixtures/generator.cjs, fixtures/corpus.json, fixtures/truth.json, fixtures/minimal.json).",
+      "uri": null,
+      "license": "CC-BY-4.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "programmatic",
+        "tool": "apps/personal-records/fixtures/generator.cjs",
+        "tool_version": "1.0.0",
+        "seed": 42,
+        "parameters": {
+          "corpus_documents": 165,
+          "scenario_slice_documents": 20,
+          "minimal_seed_documents": 3,
+          "timeline": "2025-01-01 to 2026-12-31"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Deterministic SHA-256 content addressing, UTF-8 text extraction, and character-offset span verification."
+  ],
+  "expected_counts": {
+    "records": 3,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Covers #260 Environment dataset plan: 165-doc 2025-2026 corpus + 20-doc truth slice + 3-doc minimal baseline."
+  }
+}

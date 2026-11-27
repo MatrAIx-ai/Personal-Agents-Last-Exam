@@ -1,181 +1,640 @@
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "name": "personal-records",
-  "version": "1.0.0",
-  "description": "Personal document management and verifiable intelligence environment",
-  "tools": [
-    {
-      "name": "records.upload_document",
-      "description": "Directly upload a digital document (PDF, PNG, JPEG, TXT). Enforces SHA-256 deduplication and initiates version 1.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "title": { "type": "string", "description": "Human-readable document title" },
-          "content_bytes": { "type": "string", "description": "Base64-encoded raw file bytes" },
-          "mime_type": {
-            "type": "string",
-            "enum": ["application/pdf", "image/png", "image/jpeg", "text/plain", "application/octet-stream"],
-            "description": "Standard MIME type"
-          },
-          "category": {
-            "type": "string",
-            "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"],
-            "description": "Primary domain classification"
-          },
-          "tags": { "type": "array", "items": { "type": "string" }, "description": "Searchable tags" },
-          "valid_until": { "type": "string", "format": "date-time", "description": "Document expiry or renewal ISO 8601 timestamp" },
-          "idempotency_key": { "type": "string", "description": "Unique key to ensure idempotent replay" }
+[
+  {
+    "name": "personal-records.search",
+    "description": "Full-text and metadata search across document titles, tags, categories, and extracted text. Non-mutating.",
+    "read_only": true,
+    "scope": "personal-records.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "minLength": 0, "maxLength": 200 },
+        "category": {
+          "type": "string",
+          "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"]
         },
-        "required": ["title", "content_bytes", "mime_type"]
-      }
+        "verification_state": {
+          "type": "string",
+          "enum": ["INFERRED", "USER_CONFIRMED", "SUPERSEDED"]
+        },
+        "valid_before": { "type": "string", "format": "date-time" },
+        "valid_after": { "type": "string", "format": "date-time" },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "offset": { "type": "integer", "minimum": 0 }
+      },
+      "required": [],
+      "additionalProperties": false
     },
-    {
-      "name": "records.import_from_source",
-      "description": "Import a document from connected apps (Mail attachments or Files) via public read contracts.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "source_app": { "type": "string", "enum": ["mail", "files"] },
-          "title": { "type": "string", "description": "Document title in Records" },
-          "mail_params": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string", "description": "Mail message ID" },
-              "asset_id": { "type": "string", "description": "Attachment asset ID" }
-            },
-            "required": ["id", "asset_id"]
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "ok" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
           },
-          "files_params": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string", "description": "Files file ID" },
-              "number": { "type": "integer", "description": "Optional version number" }
-            },
-            "required": ["id"]
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "total": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["status", "app_id", "version", "items", "total"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.get_document",
+    "description": "Retrieve document metadata, version history, extracted text/passages, claims, and links. Non-mutating.",
+    "read_only": true,
+    "scope": "personal-records.get_document",
+    "resource_target": "document",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "include_extracted_text": { "type": "boolean" },
+        "include_claims": { "type": "boolean" },
+        "include_links": { "type": "boolean" }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "ok" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
           },
-          "category": {
-            "type": "string",
-            "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"],
-            "description": "Primary domain classification"
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "item": { "type": "object" }
+      },
+      "required": ["status", "app_id", "version", "item"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.list_proposals",
+    "description": "List agent proposals and their review statuses for the current account. Non-mutating.",
+    "read_only": true,
+    "scope": "personal-records.list_proposals",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "USER_CONFIRMED", "REJECTED", "CANCELLED"]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "ok" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
           },
-          "tags": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "Searchable tags"
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "proposals": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "required": ["status", "app_id", "version", "proposals"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.list_links",
+    "description": "List directed relationship links between documents in the current account. Non-mutating.",
+    "read_only": true,
+    "scope": "personal-records.list_links",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_id": { "type": "string" }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "ok" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
           },
-          "idempotency_key": {
-            "type": "string",
-            "description": "Unique key to ensure idempotent replay"
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "links": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "required": ["status", "app_id", "version", "links"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.upload_document",
+    "description": "Upload a digital document (PDF, PNG, JPEG, TXT, or raw attachment). Enforces SHA-256 deduplication and initiates version 1.",
+    "read_only": false,
+    "scope": "personal-records.upload_document",
+    "resource_target": "document",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "content_bytes": { "type": "string", "minLength": 1 },
+        "mime_type": {
+          "type": "string",
+          "enum": ["application/pdf", "image/png", "image/jpeg", "text/plain", "application/octet-stream"]
+        },
+        "category": {
+          "type": "string",
+          "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"]
+        },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "valid_until": {
+          "anyOf": [
+            { "type": "string", "format": "date-time" },
+            { "type": "null" }
+          ]
+        },
+        "raw_text_override": { "type": "string" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["title", "content_bytes", "mime_type", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "document_id": { "type": "string" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string" },
+        "processing_status": { "type": "string" }
+      },
+      "required": ["status", "app_id", "version", "document_id", "version_number", "sha256", "processing_status"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.import_from_source",
+    "description": "Import a document from connected apps (Mail attachments or Files) via public read contracts.",
+    "read_only": false,
+    "scope": "personal-records.import_from_source",
+    "resource_target": "document",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_app": { "type": "string", "enum": ["mail", "files"] },
+        "title": { "type": "string", "minLength": 1 },
+        "source_payload": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "asset_id": { "type": "string" },
+            "number": { "type": "integer" },
+            "content_bytes": { "type": "string" },
+            "mime_type": { "type": "string" },
+            "filename": { "type": "string" }
           }
         },
-        "required": ["source_app", "title"]
-      }
-    },
-    {
-      "name": "records.create_version",
-      "description": "Upload a new version for an existing document. Increments version_number and triggers citation invalidation checks.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "document_id": { "type": "string", "description": "Target document ID" },
-          "content_bytes": { "type": "string", "description": "Base64-encoded raw file bytes" },
-          "mime_type": { "type": "string" },
-          "change_summary": { "type": "string", "description": "Reason for the version update" },
-          "expected_parent_version": { "type": "integer", "description": "Optimistic lock check against current version" },
-          "idempotency_key": { "type": "string" }
+        "category": {
+          "type": "string",
+          "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"]
         },
-        "required": ["document_id", "content_bytes", "mime_type"]
-      }
-    },
-    {
-      "name": "records.get_document",
-      "description": "Retrieve document metadata, version history, and extracted text/passages. Non-mutating.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "document_id": { "type": "string", "description": "Target document ID" },
-          "version_number": { "type": "integer", "description": "Specific version (defaults to latest if omitted)" },
-          "include_extracted_text": { "type": "boolean", "default": true },
-          "include_claims": { "type": "boolean", "default": false },
-          "include_links": {"type": "boolean", "default": false, "description": "Include incoming and outgoing relationship links"}
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
         },
-        "required": ["document_id"]
-      }
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["source_app", "title", "expected_version", "request_id"],
+      "additionalProperties": false
     },
-    {
-      "name": "records.search",
-      "description": "Full-text (FTS5) and metadata search across document titles, tags, and extracted text. Non-mutating.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "query": { "type": "string", "description": "SQLite FTS5 query string" },
-          "category": { "type": "string" },
-          "verification_state": { "type": "string", "enum": ["INFERRED", "USER_CONFIRMED", "SUPERSEDED"] },
-          "valid_before": { "type": "string", "format": "date-time" },
-          "valid_after": { "type": "string", "format": "date-time" },
-          "limit": { "type": "integer", "default": 20, "maximum": 50 },
-          "offset": { "type": "integer", "default": 0 }
-        }
-      }
-    },
-    {
-      "name": "records.link_documents",
-      "description": "Create a directed relationship link between two documents (e.g. 'supersedes', 'receipt_for', 'tax_supporting_document').",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "source_id": { "type": "string", "description": "Origin document ID" },
-          "target_id": { "type": "string", "description": "Destination document ID" },
-          "relationship_type": { "type": "string", "description": "Open relationship identifier string" },
-          "metadata": { "type": "object", "description": "Optional arbitrary link attributes" }
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
         },
-        "required": ["source_id", "target_id", "relationship_type"]
-      }
-    },
-    {
-      "name": "records.create_evidence_claim",
-      "description": "Bind a factual statement to a precise text span anchored to a specific document version and extraction revision.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "document_id": { "type": "string" },
-          "version_number": { "type": "integer" },
-          "extraction_revision": { "type": "string" },
-          "start_offset": { "type": "integer", "minimum": 0 },
-          "end_offset": { "type": "integer", "minimum": 0 },
-          "cited_text": { "type": "string", "description": "Exact text substring between offsets" },
-          "claim_text": { "type": "string", "description": "Factual claim or assertion supported by cited text" }
-        },
-        "required": ["document_id", "version_number", "extraction_revision", "start_offset", "end_offset", "cited_text", "claim_text"]
-      }
-    },
-    {
-      "name": "records.propose_update",
-      "description": "Agent tool: Propose a high-consequence update (metadata edit, deletion, or confirmed record mutation) pending human review.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "target_type": { "type": "string", "enum": ["document_metadata", "link", "claim", "document_version"] },
-          "target_id": { "type": "string" },
-          "expected_version": { "type": "integer" },
-          "proposed_changes": { "type": "object", "description": "Key-value changes requested" },
-          "rationale": { "type": "string", "description": "Explanation presented to user" }
-        },
-        "required": ["target_type", "target_id", "proposed_changes", "rationale"]
-      }
-    },
-    {
-      "name": "records.confirm_update",
-      "description": "User-only tool: Approve or reject a pending proposal. Requires authenticated user session token; agents are rejected.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "proposal_id": { "type": "string" },
-          "decision": { "type": "string", "enum": ["APPROVE", "REJECT", "CANCEL"] },
-          "rejection_reason": { "type": "string" }
-        },
-        "required": ["proposal_id", "decision"]
-      }
+        "document_id": { "type": "string" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string" }
+      },
+      "required": ["status", "app_id", "version", "document_id", "version_number", "sha256"],
+      "additionalProperties": false
     }
-  ]
-}
+  },
+  {
+    "name": "personal-records.create_version",
+    "description": "Upload a new version for an existing document. Increments version_number and preserves historical citations.",
+    "read_only": false,
+    "scope": "personal-records.create_version",
+    "resource_target": "document",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_id": { "type": "string", "minLength": 1 },
+        "content_bytes": { "type": "string", "minLength": 1 },
+        "mime_type": { "type": "string", "minLength": 1 },
+        "change_summary": { "type": "string" },
+        "expected_parent_version": { "type": "integer", "minimum": 1 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["document_id", "content_bytes", "mime_type", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "document_id": { "type": "string" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string" }
+      },
+      "required": ["status", "app_id", "version", "document_id", "version_number", "sha256"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.link_documents",
+    "description": "Create a directed relationship link between two documents (e.g. 'supersedes', 'receipt_for', 'tax_supporting_document').",
+    "read_only": false,
+    "scope": "personal-records.link_documents",
+    "resource_target": "link",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "target_id": { "type": "string", "minLength": 1 },
+        "relationship_type": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "metadata": { "type": "object" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["source_id", "target_id", "relationship_type", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "link_id": { "type": "string" },
+        "source_id": { "type": "string" },
+        "target_id": { "type": "string" },
+        "relationship_type": { "type": "string" }
+      },
+      "required": ["status", "app_id", "version", "link_id", "source_id", "target_id", "relationship_type"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.create_evidence_claim",
+    "description": "Bind a factual statement to a precise text span anchored to a specific document version and extraction revision.",
+    "read_only": false,
+    "scope": "personal-records.create_evidence_claim",
+    "resource_target": "claim",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_id": { "type": "string", "minLength": 1 },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "extraction_revision": { "type": "string", "minLength": 1 },
+        "start_offset": { "type": "integer", "minimum": 0 },
+        "end_offset": { "type": "integer", "minimum": 1 },
+        "cited_text": { "type": "string", "minLength": 1 },
+        "claim_text": { "type": "string", "minLength": 1 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["document_id", "version_number", "extraction_revision", "start_offset", "end_offset", "cited_text", "claim_text", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "claim_id": { "type": "string" },
+        "document_id": { "type": "string" },
+        "version_number": { "type": "integer" },
+        "verification_state": { "type": "string" }
+      },
+      "required": ["status", "app_id", "version", "claim_id", "document_id", "version_number", "verification_state"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.propose_update",
+    "description": "Propose a high-consequence update (metadata edit, verification confirmation, or claim update) pending human review.",
+    "read_only": false,
+    "scope": "personal-records.propose_update",
+    "resource_target": "proposal",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "target_type": { "type": "string", "enum": ["document_metadata", "link", "claim", "document_version"] },
+        "target_id": { "type": "string", "minLength": 1 },
+        "expected_target_version": { "type": "integer", "minimum": 1 },
+        "proposed_changes": { "type": "object" },
+        "rationale": { "type": "string", "minLength": 1 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["target_type", "target_id", "proposed_changes", "rationale", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "proposal_id": { "type": "string" },
+        "proposal_status": { "const": "PENDING" }
+      },
+      "required": ["status", "app_id", "version", "proposal_id", "proposal_status"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.confirm_update",
+    "description": "User-only confirmation: Approve, reject, or cancel a pending proposal. Blocked for untrusted agent policies.",
+    "read_only": false,
+    "scope": "personal-records.confirm_update",
+    "resource_target": "proposal",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "proposal_id": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string", "enum": ["APPROVE", "REJECT", "CANCEL"] },
+        "rejection_reason": { "type": "string" },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["proposal_id", "decision", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "proposal_id": { "type": "string" },
+        "proposal_status": { "type": "string" }
+      },
+      "required": ["status", "app_id", "version", "proposal_id", "proposal_status"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.check_expiries",
+    "description": "Evaluate document valid_until dates against ctx.virtual_now and generate expiry notifications with 7-day duplicate suppression.",
+    "read_only": false,
+    "scope": "personal-records.check_expiries",
+    "resource_target": "notification",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "threshold_days": { "type": "integer", "minimum": 0 },
+        "suppress_days": { "type": "integer", "minimum": 0 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "dispatched": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "required": ["status", "app_id", "version", "dispatched"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "personal-records.check_discrepancies",
+    "description": "Compare numerical extracted fields between two linked or successive documents and flag unconfirmed discrepancies.",
+    "read_only": false,
+    "scope": "personal-records.check_discrepancies",
+    "resource_target": "notification",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "newer_document_id": { "type": "string", "minLength": 1 },
+        "older_document_id": { "type": "string", "minLength": 1 },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "required": ["newer_document_id", "older_document_id", "expected_version", "request_id"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "committed" },
+        "app_id": { "const": "personal-records" },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": { "type": "integer", "minimum": 1 },
+            "revision": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["epoch", "revision"],
+          "additionalProperties": false
+        },
+        "flagged": { "type": "boolean" },
+        "discrepancies": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "required": ["status", "app_id", "version", "flagged", "discrepancies"],
+      "additionalProperties": false
+    }
+  }
+]

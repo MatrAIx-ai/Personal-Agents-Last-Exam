@@ -140,6 +140,18 @@ The environment enforces caller authorization at the handler level:
   - **Per-Scenario Run Budget:** Capped at 15–25 active documents per run, strictly respecting the reference host limit of $\le 64$ assets and $\le 1\text{ MiB}$ decoded payload per App bundle.
   - **Ground Truth vs. Runtime Text:** Synthetic fixtures cleanly separate runtime parser fallback text (`fallback_content`) from grading-only evaluation criteria in `truth.json` (such as expected key-value extraction assertions and link graphs).
 
+### Environment Dataset Plan (#260)
+
+- **Deliverable Versioned 2025–2026 History:**
+  - `apps/personal-records/fixtures/corpus.json`: 165 deterministically generated synthetic documents spanning `2025-01-01` through `2026-12-31` across 8 personal administration domains (employment payslips, tax W-2/1040 filings, insurance policies, property leases, utility bills, healthcare EOBs, banking statements, legal notices).
+  - `apps/personal-records/fixtures/truth.json`: 20-document scenario slice ($\le 1\text{ MiB}$, $\le 64$ assets) with verified passage spans, directed link graphs, and discrepancy ground truth.
+  - `apps/personal-records/fixtures/minimal.json`: 3-document baseline seed (`doc_payslip_nov2026`, `doc_payslip_dec2026`, `doc_auto_policy_2026`) with versioned history, `supersedes` link, passage claim, pending proposal, and `valid_until` expiry date.
+- **Dates & Provenance Reporting:**
+  - All temporal fields (`created_at`, `updated_at`, `valid_until`, `dispatched_at`, `history[].at`) use ISO 8601 timestamps evaluated strictly against `ctx.virtual_now`.
+  - Provenance is tracked per document and per version (`source_type`, `source_reference`, `sha256`, `extraction_revision`, `extraction_source`) and declared in `apps/personal-records/contribution/dataset.json` (`dataset_id: "personal-records-synthetic-2025-2026"`, `source_id: "synthetic-generator"`, `license: "CC-BY-4.0"`, deterministic `seed: 42`).
+- **Actual Load & Query Verification:**
+  - Verified end-to-end via `env.load_seed` $\rightarrow$ `env.snapshot` $\rightarrow$ `personal-records.search` $\rightarrow$ `personal-records.get_document` in `node runtime/cli.cjs verify --app apps/personal-records` and `node --test tests/dataset.test.cjs`.
+
 ## 4. Construction plan and effort
 
 ### Work breakdown (required)

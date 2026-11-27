@@ -2,86 +2,43 @@
 
 **Personal Records** is a document intelligence and management environment for the Personal Agents' Last Exam (PALE) benchmark. It enables personal agents to store, search, organize, and reason over personal administration records (payslips, tax filings, employment contracts, insurance policies, and household receipts) with byte-verified passage citations and strict confirmation boundaries.
 
-## Features
+## Supported Runtime Matrix
 
-- **Native Runtime Architecture:** Built on Node.js 22.5+ using built-in `node:sqlite` (with FTS5) and native `node:test`. Requires zero native C++ compilation or Python build tools (`node-gyp`).
-- **Lightweight Extraction with Deterministic Fallbacks:** Digital PDFs are parsed via lightweight local parsing (`pdf-parse`) paired with deterministic fixture text in `truth.json` for 100% reproducible CI runs.
-- **Full-Text Content Search:** SQLite FTS5 index across document metadata, tags, and extracted text.
-- **Immutable Version History:** Content-addressed blob storage partitioned by `account_id` enforcing the 10 MB per-file budget limit.
-- **Reproducible Passage Citations:** Factual claims are bound to exact character spans `[start_offset, end_offset]` anchored to a stable triple: `(document_id, version_number, extraction_revision)`.
-- **Arbitrary Relationship Graph:** Directed document links with configurable semantic types (e.g., `supersedes`, `tax_supporting_document`, `receipt_for`).
-- **Trusted Confirmation Security Boundary:** Strict caller separation between Agent proposals (`records.propose_update`, status `PENDING`) and human User approvals (`records.confirm_update`, status `USER_CONFIRMED`). Agents attempting to approve their own mutations are rejected with `PERMISSION_DENIED`.
-- **Platform Lifecycle Compliance:** Fully adheres to `runtime/core/runtime.cjs:119–126` for deterministic `platform.seed`, baseline `platform.reset`, evaluation `snapshot` dumps, and `idempotency_key` deduplication.
-- **App Lookups & CloudEvent Alerts:** Pinned read adapters for `mail.get`, `mail.attachment.get`, `files.read`, `contacts.list`, and `calendar.list`, plus outbound notifications adhering to `urn:pale:email-message:2`.
-- **Web Host UI (`gui/`):** Responsive vanilla HTML5/CSS3/JS views served by PALE's Business Web Host (`runtime/web/`).
+| Mode | Entrypoint | Node.js Requirement | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **PALE Public Runtime** (`app:verify`, `app:serve`, `runtime/web`) | `plugin.cjs`, `service.cjs` | **Node.js 18+** | Zero external dependencies (Node built-ins only) |
+| **Standalone SQLite Engine** (local FTS5 & CLI) | `src/index.cjs`, `scripts/run-gui.cjs` | **Node.js 22.5+** (`node:sqlite`) | Optional `pdf-parse` for local binary PDF extraction |
 
----
+## Features & Security Boundaries
 
-## Directory Structure
+- **Discoverable PALE Package (`app.json`):** Integrates with `runtime/ci/select-apps.cjs`, `runtime/cli.cjs verify`, `runtime/cli.cjs serve`, and `runtime/web/server.cjs` via `plugin.cjs` and `tools.json`.
+- **Full-Text & Metadata Search (`personal-records.search`):** Searches document titles, categories, tags, and extracted text without mutating state.
+- **Immutable Version History & Deduplication (`personal-records.upload_document`, `personal-records.create_version`):** Content-addressed SHA-256 deduplication and optimistic parent-version locking.
+- **Reproducible Passage Citations (`personal-records.create_evidence_claim`):** Factual claims bound to exact character spans `[start_offset, end_offset]` anchored to `(document_id, version_number, extraction_revision)`.
+- **Arbitrary Relationship Graph (`personal-records.link_documents`, `personal-records.list_links`):** Directed document links with configurable semantic types (`supersedes`, `tax_supporting_document`, `receipt_for`).
+- **Trusted User Confirmation Boundary:**
+  - `personal-records.propose_update` is permitted in the `scenario` agent policy and records a `PENDING` proposal without mutating base documents or claims.
+  - `personal-records.confirm_update` is **blocked** in `scenario` policy (`permission_denied` for agents) and permitted only in `sandbox` / trusted user confirmation sessions.
+- **Virtual Time Expiry & Discrepancy Checks (`personal-records.check_expiries`, `personal-records.check_discrepancies`):** Evaluates `valid_until <= ctx.virtual_now + threshold_days` with 7-day duplicate alert suppression and detects unconfirmed numerical deltas across linked payslips.
+- **Web Host UI (`gui/host.html`, `gui/src/app.js`):** Served by PALE's Business Web Host (`runtime/web/server.cjs`) via `/shared/client.js`. Standalone preview UI remains in `gui/index.html` + `gui/app.js`.
 
-```text
-apps/personal-records/
-├── package.json                   # Pinned package definition (Node >= 22.5.0)
-├── tools.json                     # Canonical MCP tool contracts and parameter schemas
-├── README.md                      # Package documentation
-├── src/
-│   ├── index.cjs                  # Universal MCP tool router and app entry point
-│   ├── db.cjs                     # Relational schema (tables, FTS5 virtual table, foreign keys)
-│   ├── blob-store.cjs             # Account-partitioned filesystem blob storage
-│   ├── extraction.cjs             # Digital text extraction and deterministic truth fallback
-│   ├── document-service.cjs       # Core transactions, versioning, deduplication, and FTS5 search
-│   ├── evidence-service.cjs       # Directed link graph, passage citations, and proposals
-│   ├── platform.cjs               # Seed fixtures, deterministic reset, and idempotency
-│   ├── events.cjs                 # Expiry checks, payslip discrepancy detection, and CloudEvents
-│   └── adapters.cjs               # Read-only adapters for Mail, Files, Contacts, and Calendar
-├── gui/
-│   ├── index.html                 # Web Host dashboard (Library, Viewer, Graph, Proposals)
-│   ├── style.css                  # Responsive stylesheet with passage highlight styles
-│   └── app.js                     # Frontend controller with user/agent session gating
-├── scripts/
-│   ├── run-gui.cjs                # Standalone Web Host HTTP runner with live fixture seeding
-│   └── test-local-file.cjs        # Developer CLI to test file uploads and extraction
-├── fixtures/
-│   ├── generator.cjs              # Deterministic synthetic dataset generator
-│   ├── truth.json                 # Scenario reference slice (20 active documents <= 1 MiB)
-│   ├── corpus.json                # Full synthetic archive (165 documents across 8 domains)
-│   └── peer-apps.json             # Mock fixtures for Mail, Files, Contacts, and Calendar
-└── tests/
-    ├── document-service.test.cjs  # Ingestion, deduplication, optimistic locks, and FTS5
-    ├── evidence-service.test.cjs  # Link graphs, citation offsets, and confirmation boundary
-    ├── platform.test.cjs          # Seed, mutate, snapshot, reset, and idempotency tests
-    ├── events-and-adapters.test.cjs # Expiries, discrepancies, CloudEvents, and Mail/Files reads
-    ├── adapters.test.cjs          # Peer app contracts, immutability, and entity matching
-    ├── gui.test.cjs               # Web Host GUI DOM completeness and tool bindings
-    ├── dataset.test.cjs           # Corpus scale (165 docs), payload limits, and span checks
-    ├── integration.test.cjs       # Full end-to-end tool router integration test
-    ├── real-documents.test.cjs    # Binary PDF/PNG preservation and extraction tests
-    └── task-validation.test.cjs   # Benchmark task simulation (Task #102 & Task #106)
-```
+## Connected Apps & Simulated Adapters
 
----
+- **Pinned Public Contracts:** `mail@1.3.0` (`mail.get`, `mail.attachment.get`), `calendar@1.3.0` (`calendar.list`), `files@1.0.0` (`files.read`), `contacts@1.0.0` (`contacts.list`).
+- **Simulated Adapters (Standalone Test Doubles):** `fixtures/peer-apps.json` and the mock client adapters in `src/adapters.cjs` / `tests/adapters.test.cjs` simulate these contracts locally when running without `--with` sibling App packages.
+- **Live / Cross-App Mode:** In PALE runtime runs, `personal-records.import_from_source` accepts structured payloads sourced via authorized Mail/Files read contracts without mutating source apps.
 
-## Verification & Testing
-
-Tests run using Node's native test runner (`node:test`):
+## Verification Commands
 
 ```bash
-# Run all test suites
-npm test
+# Public PALE runtime verification (Node 18+)
+node runtime/cli.cjs verify --app apps/personal-records
 
-# Run benchmark task trajectories (Task #102 & Task #106)
-npm run test:tasks
+# App-only business tests & event example (Node 18+)
+cd apps/personal-records
+node --test tests/business.test.cjs
+node examples/run.cjs
 
-# Regenerate synthetic fixture archives
-npm run generate:fixtures
-```
-
-### Local Preview (Web UI & Uploads)
-
-```bash
-# 1. Start the Business Web Host locally at http://localhost:3000
-node scripts/run-gui.cjs
-
-# 2. Test uploading a real local file into the demo account
-node scripts/test-local-file.cjs /path/to/document.pdf
+# Full standalone SQLite & dataset test suite (Node 22.5+)
+node --test tests/*.test.cjs
 ```

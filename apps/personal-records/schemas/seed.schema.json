@@ -1,0 +1,452 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "tax",
+              "employment",
+              "insurance",
+              "property",
+              "utilities",
+              "healthcare",
+              "banking",
+              "legal",
+              "other"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "current_version_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "processing_status": {
+            "type": "string",
+            "enum": [
+              "PENDING_INGEST",
+              "PARSING",
+              "READY",
+              "EXTRACTION_FAILED",
+              "RAW_ATTACHMENT"
+            ]
+          },
+          "verification_state": {
+            "type": "string",
+            "enum": [
+              "INFERRED",
+              "USER_CONFIRMED",
+              "SUPERSEDED"
+            ]
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_type": {
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              { "type": "object" },
+              { "type": "null" }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": ["at", "action"],
+              "additionalProperties": false
+            }
+          },
+          "versions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "version_number": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "mime_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "byte_size": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "content_base64": {
+                  "type": "string"
+                },
+                "change_summary": {
+                  "anyOf": [
+                    { "type": "string" },
+                    { "type": "null" }
+                  ]
+                },
+                "extraction_revision": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "extraction_source": {
+                  "type": "string"
+                },
+                "raw_text": {
+                  "type": "string"
+                },
+                "extracted_fields": {
+                  "type": "object"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "version_number",
+                "sha256",
+                "mime_type",
+                "byte_size",
+                "extraction_revision",
+                "extraction_source",
+                "raw_text",
+                "extracted_fields",
+                "created_at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "title",
+          "category",
+          "tags",
+          "current_version_number",
+          "processing_status",
+          "verification_state",
+          "created_at",
+          "updated_at",
+          "history",
+          "versions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "relationship_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "source_id",
+          "target_id",
+          "relationship_type",
+          "created_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "version_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "extraction_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_offset": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "cited_text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_state": {
+            "type": "string",
+            "enum": [
+              "INFERRED",
+              "USER_CONFIRMED",
+              "SUPERSEDED"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "document_id",
+          "version_number",
+          "extraction_revision",
+          "start_offset",
+          "end_offset",
+          "cited_text",
+          "claim_text",
+          "verification_state",
+          "created_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "caller_role": {
+            "type": "string"
+          },
+          "target_type": {
+            "type": "string",
+            "enum": [
+              "document_metadata",
+              "link",
+              "claim",
+              "document_version"
+            ]
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "expected_version": {
+            "anyOf": [
+              { "type": "integer" },
+              { "type": "null" }
+            ]
+          },
+          "proposed_changes": {
+            "type": "object"
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "USER_CONFIRMED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "rejection_reason": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "null" }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolved_at": {
+            "anyOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "caller_role",
+          "target_type",
+          "target_id",
+          "proposed_changes",
+          "rationale",
+          "status",
+          "created_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "notification_type": {
+            "type": "string",
+            "enum": [
+              "EXPIRY_ALERT",
+              "DISCREPANCY_FLAG"
+            ]
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "dispatched_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cloud_event": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "notification_type",
+          "document_id",
+          "subject",
+          "body_text",
+          "dispatched_at"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "documents",
+    "links",
+    "claims",
+    "proposals",
+    "notifications"
+  ],
+  "additionalProperties": false
+}
