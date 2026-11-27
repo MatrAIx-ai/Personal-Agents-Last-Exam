@@ -1,0 +1,45 @@
+{
+  "schema": "pale.user_script.v1",
+  "task_id": "adaptive-household-organization",
+  "sessions": [
+    {
+      "session_id": "session_1",
+      "opening_prompt": "Hi! We moved into our two-bedroom apartment recently and our needs are starting to shift. Can you review `workspace/floorplan.png`, `workspace/photos/`, and `workspace/inventory.json` to get oriented with our layout and furniture?",
+      "branches": {
+        "asks_about_rooms": "Bedroom 1 is our main sleeping room. Bedroom 2 (`bedroom_2_multipurpose`, 3.5m x 3.0m) currently holds a bookshelf, my grandfather's leather armchair, and some boxes.",
+        "suggests_buying_early": "Let's hold off on buying anything yet—we prefer reusing what we have before spending money."
+      }
+    },
+    {
+      "session_id": "session_2",
+      "opening_prompt": "I'm working from home more days now, and the morning sun in Bedroom 1 is causing terrible glare on my monitor. I'm thinking of moving my compact desk into `bedroom_2_multipurpose`. What do you think?",
+      "branches": {
+        "asks_about_work_hours_or_partner": "Marcus also uses the desk in the mornings for work. Check our notes folder if you need his exact schedule.",
+        "proposes_blocking_window_radiator": "Careful—there's a radiator right under the north window in Bedroom 2, so we shouldn't push furniture flush against it."
+      }
+    },
+    {
+      "session_id": "session_3",
+      "opening_prompt": "We're having four friends over for dinner this weekend. Can we borrow any extra seating from Bedroom 2 for the living room, or should we keep Bedroom 2's seating intact?",
+      "branches": {
+        "suggests_moving_armchair_permanently": "We can bring a folding dining chair from the hall closet if needed, but please leave the leather armchair in Bedroom 2—it's heavy and we want it kept safe."
+      }
+    },
+    {
+      "session_id": "session_4",
+      "opening_prompt": "Big update: my brother is coming to stay with us for 3 weeks! He'll need a guest sleeping setup in `bedroom_2_multipurpose`, while we still need the daytime workspace in that same room. Our budget cap for anything new is $250. How should we arrange it?",
+      "branches": {
+        "proposes_basement_for_armchair": "No! Do not put my grandfather's armchair in the basement locker—there are moisture leaks down there, and it's an irreplaceable heirloom.",
+        "proposes_sofa_bed_or_over_budget": "A sofa bed is way over our $250 budget and wouldn't fit with the armchair anyway, plus we can't have a bed visible behind the desk during Marcus's 9-11 AM calls.",
+        "proposes_foldable_cot_or_trifold": "A compact folding cot or tri-fold mattress that stows in the closet during the day sounds great, as long as there's plenty of walkway clearance and the door still opens freely."
+      }
+    },
+    {
+      "session_id": "session_5",
+      "opening_prompt": "Everything looks solid. Please finalize the dual-mode (daytime and nighttime) arrangement for `bedroom_2_multipurpose` and write the final proposal to `workspace/layout_proposal.json` along with your explanation in `workspace/rationale.md`.",
+      "branches": {
+        "default": "Thank you! Make sure all dimensions, clearances, purchases, and trade-offs are clearly documented."
+      }
+    }
+  ]
+}

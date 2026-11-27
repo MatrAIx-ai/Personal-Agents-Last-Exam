@@ -1,0 +1,38 @@
+{
+  "schema": "pale.rules.v1",
+  "task_id": "adaptive-household-organization",
+  "room_id": "bedroom_2_multipurpose",
+  "room_bounds_cm": { "width": 350, "height": 300 },
+  "min_walkway_cm": 75,
+  "door": {
+    "hinge_cm": [350, 10],
+    "swing_radius_cm": 80,
+    "arc_bbox_cm": [270, 10, 350, 90],
+    "entrance_point_cm": [310, 50]
+  },
+  "radiator_clearance_bbox_cm": [70, 270, 200, 300],
+  "closet_bbox_cm": [275, 235, 350, 300],
+  "fixed_items": [
+    {
+      "item_id": "bookshelf_wall_b",
+      "bbox_cm": [100, 0, 250, 32]
+    }
+  ],
+  "item_dimensions_cm": {
+    "armchair_grandfather": [95, 90],
+    "desk_compact": [120, 60],
+    "guest_cot_foldable": [190, 80],
+    "guest_cot_foldable_stowed": [70, 55],
+    "bookshelf_wall_b": [150, 32],
+    "sofa_bed_sleeper": [210, 195]
+  },
+  "heirloom_item_id": "armchair_grandfather",
+  "allowed_heirloom_actions": ["retained", "relocated"],
+  "forbidden_heirloom_actions": ["discarded", "sold", "stored_in_basement", "basement", "removed"],
+  "budget_cap_usd": 250.00,
+  "camera_frustum": {
+    "fov_deg": 90,
+    "required_backdrop_item": "bookshelf_wall_b",
+    "forbidden_visible_items": ["guest_cot_foldable", "sofa_bed_sleeper"]
+  }
+}

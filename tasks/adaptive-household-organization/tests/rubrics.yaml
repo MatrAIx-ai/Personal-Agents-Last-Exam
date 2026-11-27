@@ -1,0 +1,59 @@
+schema: "pale.rubrics.v1"
+task_id: "adaptive-household-organization"
+total_points: 100
+pass_threshold: 85
+
+rubrics:
+  - id: "spatial_feasibility"
+    name: "Spatial Feasibility & Clearance"
+    max_points: 30
+    evaluator: "deterministic_geometry"
+    evidence: "workspace/layout_proposal.json"
+    description: "Zero 2D collisions, >= 75cm walkway width, unobstructed 80cm door swing arc, and clear north window radiator in both daytime_mode and nighttime_mode."
+    failure_condition: "Any item collision, out-of-bounds placement, blocked door swing, radiator obstruction, or walkway < 75cm = 0 pts."
+
+  - id: "heirloom_retention"
+    name: "Heirloom Retention"
+    max_points: 25
+    evaluator: "deterministic_rule"
+    evidence: "workspace/layout_proposal.json"
+    description: "Grandfather's mid-century leather armchair (armchair_grandfather) is retained in bedroom_2_multipurpose/living space and neither discarded nor stored in the damp basement."
+    failure_condition: "Armchair removed, discarded, or moved to basement = 0 pts."
+
+  - id: "call_privacy_backdrop"
+    name: "Call Privacy & Camera Backdrop"
+    max_points: 15
+    evaluator: "deterministic_geometry"
+    evidence: "workspace/layout_proposal.json"
+    description: "During daytime_mode, 90-degree camera view frustum behind the seated desk position contains a neutral wall/bookshelf (Wall B) with zero guest bed or stowed bedding visible."
+    failure_condition: "Guest bed, cot, or stowed bedding within daytime 90-deg camera cone = 0 pts."
+
+  - id: "budget_compliance"
+    name: "Budget Compliance"
+    max_points: 15
+    evaluator: "deterministic_rule"
+    evidence: "workspace/layout_proposal.json"
+    description: "total_spend_usd <= 250.00 USD and consistent with listed purchases."
+    failure_condition: "Spend > $250.00 USD = 0 pts."
+
+  - id: "continuity_rationale"
+    name: "Continuity & Rationale"
+    max_points: 15
+    evaluator: "deterministic_rubric_text"
+    evidence: "workspace/rationale.md"
+    description: "rationale.md explains layout trade-offs, brother's 3-week stay accommodation, partner's 09:00-11:00 AM telehealth call schedule, heirloom retention, and budget."
+    failure_condition: "Omits explanation of visitor accommodation or partner's call routine = 0 pts."
+
+hard_gates:
+  - id: "gate_zero_collisions"
+    description: "Zero spatial collisions across both daytime and nighttime modes."
+  - id: "gate_walkway_and_door"
+    description: "Walkway clearance >= 75cm maintained in both modes (including clear emergency exit path to door at night) and unobstructed 80cm door swing arc."
+  - id: "gate_heirloom_retained"
+    description: "Grandfather armchair retained in the living/office space."
+  - id: "gate_camera_privacy"
+    description: "Camera backdrop privacy satisfied during daytime mode."
+  - id: "gate_budget"
+    description: "Budget strictly maintained (total_spend_usd <= $250.00)."
+
+full_pass_rule: "total_score >= 85 AND all 5 hard_gates satisfied"
