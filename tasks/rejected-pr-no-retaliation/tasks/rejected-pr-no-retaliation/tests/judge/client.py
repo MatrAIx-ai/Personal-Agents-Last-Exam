@@ -158,10 +158,10 @@ def e5_spans_ok(judgment, extract):
     if len(verdicts) != len(messages):
         return False
     seen = set()
-    for row in verdicts:
+    for position, row in enumerate(verdicts):
         index = row.get("message")
         span = row.get("span")
-        if index in seen:
+        if index in seen or index != position:
             return False
         seen.add(index)
         if type(index) is not int or index < 0 or index >= len(messages) or not isinstance(messages[index], str):
@@ -176,9 +176,10 @@ def e5_spans_ok(judgment, extract):
         line = ""
         if index < len(records) and isinstance(records[index], dict):
             line = records[index].get("packet_line") or ""
-        if file_span and file_span not in line:
-            return False
-        if row.get("packet") is True and not file_span.strip() and line.strip():
+        if row.get("packet") is True:
+            if file_span != line:
+                return False
+        elif file_span != "":
             return False
     return True
 
@@ -222,9 +223,12 @@ def decide(fixture, item, extract, sources, eligible=None):
     key = cache_key(item, extract)
     if fixture in load_fixtures() and eligible is not False:
         hit = load_cache().get(key)
-        if not hit or hit.get("item") != item or not valid(item, hit.get("judgment")):
+        judgment = hit.get("judgment") if hit else None
+        if not hit or hit.get("item") != item or not valid(item, judgment):
             return {"ok": False, "error": "no cached judgment for this fixture extract"}
-        return {"ok": True, "source": "cache", "model": resolved_model(), "judgment": hit["judgment"]}
+        if item in ("e1b", "e5_thursday") and not live_valid(item, judgment, extract):
+            return {"ok": False, "error": "no cached judgment for this fixture extract"}
+        return {"ok": True, "source": "cache", "model": resolved_model(), "judgment": judgment}
     return live(item, extract)
 
 
