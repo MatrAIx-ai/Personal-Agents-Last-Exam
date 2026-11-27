@@ -10,6 +10,8 @@ const route = (data, id) => data.routes.find(r => r.route_id === id);
 const node = (data, id) => data.nodes.find(n => n.node_id === id);
 const stopOf = (data, nodeId) => node(data, nodeId)?.stop_id;
 const nodesOf = (data, stopId) => data.nodes.filter(n => n.stop_id === stopId).map(n => n.node_id);
+// ID of the access link joining a place (or a stop, at zero length) to one of its nodes.
+const linkId = (ref, nodeId) => `acc:${ref}:${nodeId}`;
 
 // Trip instances for one service date, as in GTFS frequencies.txt (exact_times): a trip leaves the first stop
 // at start, start + headway, ... up to end. ID: trip:<route>:<direction>:<date>:<HHMM at the first stop>.
@@ -120,5 +122,5 @@ function stopOrFail(data, id) {
   return s;
 }
 
-module.exports = {period, tripsOn, tripById, tripsBetween, route, node, stopOf, nodesOf, latest, alertStatus, alertsAt, informs, inPeriod,
+module.exports = {period, tripsOn, tripById, tripsBetween, route, node, stopOf, nodesOf, linkId, latest, alertStatus, alertsAt, informs, inPeriod,
   facilityAt, facilityNow, latestUpdate, live, stopOrFail, minutes};

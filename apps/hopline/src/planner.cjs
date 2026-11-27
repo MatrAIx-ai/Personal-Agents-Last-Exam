@@ -9,10 +9,11 @@ const net = require('./network.cjs');
 const SEC = 1000;
 function endpoint(data, ref, code) {
   const place = data.places.find(p => p.place_id === ref);
-  if (place) return {ref, name: place.name, links: place.access.map(a => ({...a}))};
+  if (place) return {ref, name: place.name, links: place.access.map(a => ({...a, link_id: net.linkId(ref, a.node_id)}))};
   const stop = data.stops.find(s => s.stop_id === ref);
   // A station is entered and left at street level (entrances and bus bays), so its elevators count.
-  if (stop) return {ref, name: stop.name, links: data.nodes.filter(n => n.stop_id === ref && n.kind !== 'platform').map(n => ({node_id: n.node_id, seconds: 0, length_m: 0, step_free: true}))};
+  if (stop) return {ref, name: stop.name, links: data.nodes.filter(n => n.stop_id === ref && n.kind !== 'platform')
+    .map(n => ({node_id: n.node_id, seconds: 0, length_m: 0, step_free: true, link_id: net.linkId(ref, n.node_id)}))};
   fail(code, 'No place or stop with that ID.');
 }
 
@@ -118,9 +119,18 @@ function path(rounds, k, node) {
   return steps;
 }
 
-function itinerary(data, search, k, from, to, depart) {
-  const b = search.best[k], steps = path(search.rounds, k, b.node), legs = [], estimates = [];
+function itinerary(data, search, k, from, to, {depart, asOf}) {
+  const b = search.best[k], steps = path(search.rounds, k, b.node), legs = [], estimates = [], edges = [];
   let walk = null, t = depart;
+  // Every access link, pathway and ride in traversal order, joined end to end from `from` to `to`, with the
+  // facility status entry each pathway was checked against (known at as_of), so a grader can replay the path.
+  const edge = (e, enter, exit) => edges.push({...e, enter_at: at(data, enter), exit_at: at(data, exit)});
+  const facility = (p, ms) => {
+    if (!p.facility_id) return {facility_id: null, facility_status: null, facility_status_seq: null, uses_estimate: false};
+    const s = net.facilityAt(data.facilities.find(f => f.facility_id === p.facility_id), ms, asOf);
+    return {facility_id: p.facility_id, facility_status: s.status, facility_status_seq: s.seq, uses_estimate: !!s.uses_estimate};
+  };
+  const access = (link, fromRef, toRef, exit) => edge({kind: 'access', link_id: link.link_id, from: fromRef, to: toRef, length_m: link.length_m, step_free: link.step_free !== false}, t, exit);
   const name = nodeId => data.stops.find(s => s.stop_id === net.stopOf(data, nodeId))?.name;
   const flush = () => { if (walk && walk.length_m === 0 && walk.arriveMs === walk.departMs) walk = null; if (walk) { walk.arrive = at(data, walk.arriveMs); walk.minutes = Math.round((walk.arriveMs - walk.departMs) / MIN); delete walk.departMs; delete walk.arriveMs; legs.push(walk); walk = null; } };
   const walkTo = (fromName, toName, ms, length, pathway, stepFree) => {
@@ -130,9 +140,13 @@ function itinerary(data, search, k, from, to, depart) {
     t = ms;
   };
   for (const s of steps) {
-    if (s.type === 'access') walkTo(from.name, name(s.node), s.time, s.link.length_m, null, s.link.step_free !== false);
-    else if (s.type === 'walk') {
-      walkTo(name(s.from), name(s.to), s.time, s.pathway.length_m, s.pathway, STEP_FREE_MODES.includes(s.pathway.mode));
+    if (s.type === 'access') {
+      access(s.link, from.ref, s.node, s.time);
+      walkTo(from.name, name(s.node), s.time, s.link.length_m, null, s.link.step_free !== false);
+    } else if (s.type === 'walk') {
+      const p = s.pathway;
+      edge({kind: 'pathway', pathway_id: p.pathway_id, from: s.from, to: s.to, mode: p.mode, length_m: p.length_m, step_free: STEP_FREE_MODES.includes(p.mode), ...facility(p, t)}, t, s.time);
+      walkTo(name(s.from), name(s.to), s.time, p.length_m, p, STEP_FREE_MODES.includes(p.mode));
       if (s.estimate && !estimates.some(e => e.facility_id === s.estimate.facility_id)) estimates.push(s.estimate);
     } else {
       flush();
@@ -140,18 +154,22 @@ function itinerary(data, search, k, from, to, depart) {
       legs.push({kind: 'ride', route_id: r.route_id, route: r.name, mode: r.mode, trip_id: s.trip.trip_id, from_stop_id: bs.stop_id, from: name(bs.node_id),
         to_stop_id: as.stop_id, to: name(as.node_id), scheduled_departure: at(data, bs.sched), departure: at(data, bs.time), arrival: at(data, as.time),
         delay_min: s.trip.delay_min, trip_update: s.trip.update, moved_stop: bs.moved || as.moved || null});
+      edge({kind: 'ride', trip_id: s.trip.trip_id, route_id: r.route_id, mode: r.mode, from: bs.node_id, to: as.node_id, from_stop_id: bs.stop_id, to_stop_id: as.stop_id}, bs.time, as.time);
       t = as.time;
     }
   }
+  access(b.link, b.node, to.ref, b.time);
   if (b.link.seconds || b.link.length_m || !walk) walkTo(walk ? walk.to : name(b.node), to.name, b.time, b.link.length_m, null, b.link.step_free !== false);
   flush();
   const rides = legs.filter(l => l.kind === 'ride');
   return {depart: at(data, depart), arrive: at(data, b.time), arriveMs: b.time, duration_min: Math.round((b.time - depart) / MIN), transfers: Math.max(0, rides.length - 1),
-    walk_m: b.walk, step_free: legs.every(l => l.kind !== 'walk' || l.step_free), first_route: rides[0]?.route_id || null, legs, uses_estimates: estimates};
+    walk_m: b.walk, step_free: legs.every(l => l.kind !== 'walk' || l.step_free), first_route: rides[0]?.route_id || null, legs, edges, uses_estimates: estimates};
 }
 
 const sameRides = (a, b) => JSON.stringify(a.legs.filter(l => l.kind === 'ride').map(l => l.trip_id + l.from_stop_id + l.to_stop_id)) ===
   JSON.stringify(b.legs.filter(l => l.kind === 'ride').map(l => l.trip_id + l.from_stop_id + l.to_stop_id));
+const edgeKey = it => JSON.stringify(it.edges.map(e => e.kind === 'ride' ? [e.trip_id, e.from, e.to] : [e.link_id || e.pathway_id, e.from]));
+const sameEdges = (a, b) => edgeKey(a) === edgeKey(b);
 const dominated = (a, b) => a.arriveMs >= b.arriveMs && a.transfers >= b.transfers && a.walk_m >= b.walk_m;
 
 // Up to three itineraries: the earliest arrival; the earliest with fewer transfers; the earliest whose first
@@ -161,7 +179,7 @@ function choose(data, from, to, opts) {
   const pick = (sr, ks) => {
     let best = null;
     for (const k of ks) { const b = sr.best[k]; if (b && (!best || b.time < sr.best[best].time)) best = k; }
-    return best === null ? null : itinerary(data, sr, best, from, to, opts.depart);
+    return best === null ? null : itinerary(data, sr, best, from, to, opts);
   };
   const ks = [...Array(opts.maxRides + 1).keys()];
   const one = pick(s, ks);
@@ -182,20 +200,16 @@ function blockers(data, from, to, opts, chosen) {
   const relaxed = choose(data, from, to, {...opts, relaxed: true, maxRides: Math.max(opts.maxRides, 4)}), out = [];
   const add = b => { if (!out.some(x => x.id === b.id)) out.push(b); };
   for (const it of relaxed) {
-    if (chosen.some(c => sameRides(c, it) && c.legs.length === it.legs.length)) continue;
-    for (const leg of it.legs) {
-      if (leg.kind === 'walk') {
-        let tt = Date.parse(leg.depart);
-        for (const p of leg.pathways) {
-          const path = data.pathways.find(x => x.pathway_id === p.pathway_id);
-          if (p.facility_id) {
-            const f = data.facilities.find(x => x.facility_id === p.facility_id), st = net.facilityAt(f, tt, opts.asOf);
-            if (!st.usable) add({id: f.facility_id, kind: 'facility', code: f.code, stop_id: f.stop_id, reason: st.estimate_passed ? 'estimate_passed' : 'out_of_service',
-              expected_return: st.expected_return || null});
-          }
-          tt += path.seconds * SEC;
+    if (chosen.some(c => sameEdges(c, it))) continue;
+    for (const leg of it.edges) {
+      if (leg.kind === 'pathway') {
+        if (leg.facility_id) {
+          // Checked at the time the pathway is entered, as the search does.
+          const f = data.facilities.find(x => x.facility_id === leg.facility_id), st = net.facilityAt(f, Date.parse(leg.enter_at), opts.asOf);
+          if (!st.usable) add({id: f.facility_id, kind: 'facility', code: f.code, stop_id: f.stop_id, reason: st.estimate_passed ? 'estimate_passed' : 'out_of_service',
+            expected_return: st.expected_return || null});
         }
-      } else {
+      } else if (leg.kind === 'ride') {
         const trip = net.live(data, net.tripById(data, leg.trip_id));
         if (trip.cancelled) add({id: trip.trip_id, kind: 'trip', reason: 'cancelled', trip_update: trip.update});
         for (const s of trip.stops.filter(x => [leg.from_stop_id, leg.to_stop_id].includes(x.stop_id) || (x.moved && [leg.from_stop_id, leg.to_stop_id].includes(x.moved.from_stop_id)))) {

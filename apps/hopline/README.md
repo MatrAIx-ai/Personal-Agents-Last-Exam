@@ -114,7 +114,13 @@ All tool names carry the `hopline.` prefix: 13 reads and 12 writes. Every read r
 - **Endpoints:** a place, or a stop ID. A station is entered and left through its street entrances and bus bays, so its elevators count for step-free plans. The same origin and destination returns `no_route`.
 - **Fares in plans:** the fare is quoted for `card_id` (pass, cap, reduced fare and transfers from its history). Without a card, full fares with the transfer rule are quoted.
 - **Step-free:** stairs and escalators are excluded, and so is any elevator or ramp that is out of service at the leg's time. An outage whose estimated return is still in the future at `as_of`, but before the leg, is allowed and listed in `uses_estimates`. Once the estimate has passed with no `restored` event, the facility is excluded again and reported as a blocker with `estimate_passed`.
-- **Blockers:** the disruptions that the itineraries of a search ignoring disruptions would hit. These are out-of-service facilities, cancelled trips, skipped stops and closed stops. A plan returns them, and `no_step_free_route` and `no_route` name them in their message.
+- **Blockers:** the disruptions that the itineraries of a search ignoring disruptions would hit. These are out-of-service facilities, cancelled trips, skipped stops and closed stops. Such an itinerary is skipped only if a returned itinerary has the same edges. A plan returns blockers, and `no_step_free_route` and `no_route` name them in their message.
+- **Edges:** each itinerary also lists `edges`: every access link, pathway and ride it traverses, in order. The first edge starts at the plan's `from`, each edge starts at the node where the previous one ends, and the last ends at `to`. Every edge has `enter_at` and `exit_at`.
+  - `access`: `link_id`, which is `acc:<place_id>:<node_id>` (a stop's own nodes join it at zero length, as `acc:<stop_id>:<node_id>`), `length_m` and `step_free`. A place links to each node at most once.
+  - `pathway`: `pathway_id`, the direction walked (`from`, `to`), `mode`, `length_m` and `step_free`. On a facility's pathway it also has `facility_id`, the `facility_status` and `facility_status_seq` it was checked against at `enter_at`, as known at `as_of` (`0` means no status record), and `uses_estimate`.
+  - `ride`: `trip_id`, `route_id`, `mode`, the node and stop IDs at each end, departure and arrival.
+
+  `legs` remain the readable view. A walk leg that only uses an access link has an empty `pathways` list; the link is in `edges`.
 - **Alerts in planning:**
   - `stop_moved` (with `replacement_stop_id`) moves the boarding stop for the informed routes;
   - `stop_closed` closes stops;
@@ -208,6 +214,21 @@ The example and the integration test call it explicitly; no platform step calls 
 | `rejected` without `stop_run` | `delivery_failed`, with the code |
 | `rejected` with `idempotency_conflict` | stays `pending_delivery` |
 | any result with `stop_run: true` | stays `pending_delivery`, with the code; the run halts for reconciliation |
+
+## Using Hopline in a task
+
+A task supplies its own network and history as a seed through `env.load_seed`. The contract is `schemas/seed.schema.json`, and Hopline rejects an inconsistent seed with `invalid_seed`. The packs below are worked examples.
+
+- **Named endpoints** are `places` (`address` or `landmark`), each with up to 10 access links to network nodes. A plan starts and ends at a place or a stop.
+- **Walking-only networks:** a seed with no routes plans walks over access links and pathways alone. Every node and every facility belongs to a stop, so a building or passage with a lift is a `station` whose entrances are its nodes. The walking-network test in `tests/business.test.cjs` has a lift, a stair passage and a longer ramp.
+- **Outages** are `facility.status_changed` events that the task scripts in advance. `since` may be earlier than the event, but a plan sees the new status only from the event time (`recorded_at`) on.
+- **Grading a committed itinerary:** take `env.snapshot` and replay the itinerary's `edges` against it:
+  - the edges are joined from `from` to `to`;
+  - each access link and pathway exists, in an allowed direction, with that length and duration;
+  - each ride's trip serves both nodes at those times and is not cancelled;
+  - each facility's history gives the status the edge reports at `enter_at`.
+
+  To judge passability with what became known later, read the snapshot's full facility history instead of the entry the plan saw. `replayEdges` in `tests/business.test.cjs` does these checks.
 
 ## Scenario packs
 

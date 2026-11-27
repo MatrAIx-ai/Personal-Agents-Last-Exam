@@ -115,6 +115,86 @@ test('W2 planning rules: arrive_by, avoid_modes, max_walk_m, horizon and unknown
   fails(f, () => plan(f, {depart_at: T('12-07', '02:00')}), 'outside_service_hours');
 });
 
+// Replays an itinerary's edges against the network, as a task grader would from a snapshot.
+function replayEdges(data, p, it) {
+  const e = it.edges, ms = Date.parse;
+  assert.deepEqual([e[0].from, e.at(-1).to, e[0].enter_at, e.at(-1).exit_at], [p.from, p.to, it.depart, it.arrive]);
+  e.forEach((x, i) => {
+    if (i) assert.ok(x.from === e[i - 1].to && ms(x.enter_at) >= ms(e[i - 1].exit_at), 'joined end to end, in time order');
+    if (x.kind === 'access') {
+      assert.ok(i === 0 || i === e.length - 1, 'access links only at the ends');
+      const [ref, node] = i === 0 ? [p.from, x.to] : [p.to, x.from], place = data.places.find(pl => pl.place_id === ref);
+      const link = place ? place.access.find(a => a.node_id === node) : data.nodes.some(n => n.node_id === node && n.stop_id === ref) && {seconds: 0, length_m: 0, step_free: true};
+      assert.ok(link, 'link exists');
+      assert.deepEqual([x.link_id, x.length_m, x.step_free, ms(x.exit_at) - ms(x.enter_at)], [`acc:${ref}:${node}`, link.length_m, link.step_free, link.seconds * 1000]);
+    } else if (x.kind === 'pathway') {
+      const pw = data.pathways.find(q => q.pathway_id === x.pathway_id);
+      assert.ok((pw.from === x.from && pw.to === x.to) || (pw.bidirectional && pw.to === x.from && pw.from === x.to), 'direction allowed');
+      assert.deepEqual([x.mode, x.length_m, x.facility_id, ms(x.exit_at) - ms(x.enter_at)], [pw.mode, pw.length_m, pw.facility_id, pw.seconds * 1000]);
+      if (x.facility_id) {
+        const st = net.facilityAt(data.facilities.find(f => f.facility_id === x.facility_id), ms(x.enter_at), ms(p.as_of));
+        assert.ok(st.usable);
+        assert.deepEqual([x.facility_status, x.facility_status_seq, x.uses_estimate], [st.status, st.seq, !!st.uses_estimate]);
+      }
+    } else {
+      const t = net.live(data, net.tripById(data, x.trip_id)), a = t.stops.findIndex(s => s.node_id === x.from && s.time === ms(x.enter_at));
+      assert.ok(a >= 0 && t.stops[a].served && !t.cancelled && t.stops.slice(a + 1).some(s => s.served && s.node_id === x.to && s.time === ms(x.exit_at)), 'the trip serves both');
+    }
+  });
+  assert.deepEqual(e.filter(x => x.kind === 'ride').map(x => [x.trip_id, x.from_stop_id, x.to_stop_id, x.enter_at, x.exit_at]),
+    it.legs.filter(l => l.kind === 'ride').map(l => [l.trip_id, l.from_stop_id, l.to_stop_id, l.departure, l.arrival]));
+  assert.equal(e.filter(x => x.kind !== 'ride').reduce((s, x) => s + x.length_m, 0), it.walk_m);
+  assert.equal(it.step_free, e.every(x => x.kind === 'ride' || x.step_free));
+}
+
+test('W2 itinerary edges join the origin to the destination and replay against the network', () => {
+  const f = fixture();
+  f.event(el12Out());
+  f.event(ev(T('12-07', '07:00'), 'service.alert_published', {alert_id: 'al-40-detour', version: 1, msg_type: 'alert', cause: 'construction', effect: 'stop_moved',
+    informed: {route_ids: ['rt-40'], stop_ids: ['st-elm-3rd']}, replacement_stop_id: 'st-elm-4th', active_periods: [{start: T('12-07', '09:00'), end: T('12-07', '17:00')}], header: 'Stop moved'}));
+  f.advance(T('12-07', '07:30'));
+  const plans = [plan(f, {depart_at: T('12-07', '07:35')}), plan(f, {depart_at: T('12-07', '07:35'), step_free: true}), plan(f, {arrive_by: T('12-07', '08:30')}),
+    plan(f, {depart_at: T('12-07', '10:00')}), plan(f, {from: 'st-central', to: 'st-mill', depart_at: T('12-07', '07:35')}), plan(f, {depart_at: T('12-08', '19:00'), step_free: true})];
+  for (const p of plans) for (const it of p.itineraries) replayEdges(f.data, p, it);
+  const est = plans[5].itineraries[0].edges.find(x => x.pathway_id === 'pw-central-el-12');
+  assert.deepEqual([est.facility_status, est.facility_status_seq, est.uses_estimate], ['out_of_service', 1, true]);
+  assert.ok(plans[3].itineraries.some(i => i.edges.some(x => x.kind === 'ride' && x.from_stop_id === 'st-elm-4th')), 'a moved stop joins at its replacement');
+  assert.deepEqual(f.call('hopline.places.search', {query: 'pl-elm-3rd'}).places[0].nearby_stops.map(s => s.link_id), ['acc:pl-elm-3rd:st-elm-3rd', 'acc:pl-elm-3rd:st-elm-4th']);
+});
+
+test('W2 a task-supplied walking network: a lift outage moves step-free walks to the ramp and names the lift', () => {
+  // A seed with no routes: two street levels joined by a lift, a stair passage and a longer ramp.
+  const seed = structuredClone(require('../fixtures/minimal.json')), S = hhmm => `2026-11-21T${hhmm}:00+08:00`;
+  const node = (node_id, stop_id) => ({node_id, stop_id, kind: 'entrance', name: node_id});
+  const pw = (pathway_id, from, to, mode, seconds, length_m, facility_id = null) => ({pathway_id, from, to, mode, seconds, length_m, bidirectional: true, facility_id});
+  Object.assign(seed, {settings: {time_zone: 'Asia/Singapore'}, routes: [], patterns: [], alerts: [], trip_updates: [], cards: [], ledger: [], taps: [], passes: [], applications: [],
+    saved: [], subscriptions: [], notifications: [], ignored_events: [], redirects: [],
+    stops: [['st-cc', 'Community Center', true], ['st-ep', 'East Passage', false], ['st-rr', 'Riverside Ramp', true]].map(([stop_id, name, step_free]) => ({stop_id, name, kind: 'station', step_free, external_ref: null})),
+    nodes: [node('hill-cc', 'st-cc'), node('canal-cc', 'st-cc'), node('hill-ep', 'st-ep'), node('canal-ep', 'st-ep'), node('hill-rr', 'st-rr'), node('canal-rr', 'st-rr')],
+    pathways: [pw('pw-cc-lift', 'hill-cc', 'canal-cc', 'elevator', 90, 10, 'fac-cc-lift'), pw('pw-hill-cc-ep', 'hill-cc', 'hill-ep', 'walkway', 120, 150),
+      pw('pw-ep-stairs', 'hill-ep', 'canal-ep', 'stairs', 60, 20), pw('pw-canal-ep-cc', 'canal-ep', 'canal-cc', 'walkway', 120, 150),
+      pw('pw-hill-ep-rr', 'hill-ep', 'hill-rr', 'walkway', 120, 150), pw('pw-rr-ramp', 'hill-rr', 'canal-rr', 'ramp', 150, 120), pw('pw-canal-rr-ep', 'canal-rr', 'canal-ep', 'walkway', 120, 150)],
+    facilities: [{facility_id: 'fac-cc-lift', code: 'CC-L1', kind: 'elevator', stop_id: 'st-cc', name: 'Community Center lift', pathway_ids: ['pw-cc-lift'], history: []}],
+    places: [{place_id: 'pl-jules', name: "Jules's flat, Hill Road", kind: 'address', access: [{node_id: 'hill-cc', seconds: 120, length_m: 150, step_free: true}]},
+      {place_id: 'pl-recipient', name: 'Block 12 Canal Walk', kind: 'address', access: [{node_id: 'canal-cc', seconds: 120, length_m: 150, step_free: true}]}]});
+  const f = fixture({seed, now: S('08:00')});
+  const walk = args => f.call('hopline.trips.plan', {from: 'pl-jules', to: 'pl-recipient', depart_at: S('10:00'), ...args});
+  const ids = p => p.itineraries[0].edges.map(x => x.link_id || x.pathway_id);
+  const before = walk({step_free: true});
+  assert.deepEqual(ids(before), ['acc:pl-jules:hill-cc', 'pw-cc-lift', 'acc:pl-recipient:canal-cc']);
+  assert.deepEqual([before.itineraries[0].edges[1].facility_status_seq, before.itineraries[0].edges[1].enter_at], [0, S('10:02')]);
+  f.event(ev(S('09:00'), 'facility.status_changed', {facility_id: 'fac-cc-lift', status: 'out_of_service', since: S('09:00'), expected_return: '2026-11-23T09:00:00+08:00', note: 'Closed until Monday'}));
+  f.advance(S('09:10'));
+  const after = walk({step_free: true});
+  assert.deepEqual(ids(after), ['acc:pl-jules:hill-cc', 'pw-hill-cc-ep', 'pw-hill-ep-rr', 'pw-rr-ramp', 'pw-canal-rr-ep', 'pw-canal-ep-cc', 'acc:pl-recipient:canal-cc']);
+  assert.deepEqual(after.blockers.map(b => [b.id, b.reason]), [['fac-cc-lift', 'out_of_service']]);
+  assert.deepEqual(after.service_state.facilities.map(x => [x.facility_id, x.status_seq]), [['fac-cc-lift', 1]]);
+  const stairs = walk({});
+  assert.deepEqual([ids(stairs), stairs.itineraries[0].step_free], [['acc:pl-jules:hill-cc', 'pw-hill-cc-ep', 'pw-ep-stairs', 'pw-canal-ep-cc', 'acc:pl-recipient:canal-cc'], false]);
+  for (const p of [before, after, stairs]) replayEdges(f.data, p, p.itineraries[0]);
+  fails(f, () => walk({step_free: true, max_walk_m: 600}), 'no_step_free_route', 'fac-cc-lift');
+});
+
 // ---- Workflow 3: alerts, trip updates and facilities ----
 test('W3 core example: an estimate that passes is not a restoration; a restored event makes Central plain again', () => {
   const f = fixture();
@@ -561,6 +641,7 @@ test('seed validation rejects inconsistent records', () => {
   bad(s => { s.cards[1].balance_cents += 1; }, 'reconcile');
   bad(s => { s.taps[0].at = '2026-12-08T08:00:00-05:00'; }, 'after the current virtual time');
   bad(s => { s.pathways[0].to = 'nowhere'; }, 'Unknown pathway node');
+  bad(s => { s.places[0].access.push({...s.places[0].access[0]}); }, 'Duplicate access node');
   bad(s => { s.pathways = s.pathways.filter(p => p.facility_id !== 'fac-el12'); s.facilities = s.facilities.filter(x => x.facility_id !== 'fac-el12'); }, 'step-free');
   bad(s => { s.patterns.push({...s.patterns[0], pattern_id: 'pt-dup'}); }, 'Duplicate trip');
   bad(s => { s.stops[0].external_ref = {app_id: 'switchback', account_id: 'sb-1', object_id: 'x'}; }, 'binding');

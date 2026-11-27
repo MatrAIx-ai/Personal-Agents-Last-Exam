@@ -39,7 +39,8 @@ function read(ctx, data, name_, args) {
   switch (name_) {
     case 'hopline.places.search': {
       const q = (args.query || '').trim().toLocaleLowerCase(), hit = x => !q || x.name.toLocaleLowerCase().includes(q) || (x.place_id || x.stop_id).includes(q);
-      return out({places: data.places.filter(hit).map(p => ({place_id: p.place_id, name: p.name, kind: p.kind, nearby_stops: p.access.map(l => ({stop_id: net.stopOf(data, l.node_id), walk_m: l.length_m, step_free: l.step_free !== false}))})),
+      return out({places: data.places.filter(hit).map(p => ({place_id: p.place_id, name: p.name, kind: p.kind, nearby_stops: p.access.map(l => ({stop_id: net.stopOf(data, l.node_id), node_id: l.node_id,
+        link_id: net.linkId(p.place_id, l.node_id), walk_m: l.length_m, step_free: l.step_free !== false}))})),
         stops: data.stops.filter(hit).map(s => ({stop_id: s.stop_id, name: s.name, kind: s.kind, routes: routesAt(data, s.stop_id)}))});
     }
     case 'hopline.stops.get': {

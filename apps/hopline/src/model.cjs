@@ -42,7 +42,8 @@ function validateNetwork(data, now) {
   const week = addDays(localDate(data, Date.parse(now)), 0);
   for (let i = 0; i < 7; i++) unique(net.tripsOn(data, addDays(week, i)), 'trip_id', 'trip');
   unique(data.places, 'place_id', 'place');
-  for (const p of data.places) p.access.forEach(a => known(nodes, a.node_id, 'access node'));
+  // Access link IDs are acc:<place_id>:<node_id>, so a place links to each node at most once.
+  for (const p of data.places) unique(p.access, 'node_id', 'access node').forEach(id => known(nodes, id, 'access node'));
   // A station marked step-free has a step-free path from an entrance to each platform (ignoring outages).
   for (const s of data.stops.filter(x => x.kind === 'station' && x.step_free)) {
     const mine = data.nodes.filter(n => n.stop_id === s.stop_id), start = mine.filter(n => n.kind === 'entrance').map(n => n.node_id), seen = new Set(start);

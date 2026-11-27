@@ -122,7 +122,7 @@ const tools = [
   tool('routes.get', 'A route: stop patterns, frequencies per service period, the trip ID rule and active alerts.', true, obj({route_id: id}), readOut({route: any})),
   tool('departures.list', 'Departures at a stop in a window: scheduled time, live estimate, cancelled or skipped, and the trip update behind it.', true,
     obj({stop_id: id, from: time, to: time}), readOut({stop_id: id, departures: arr(any, 2000)})),
-  tool('trips.plan', 'Up to three itineraries at the run\'s virtual time, with step-free routing, uses_estimates, blockers, the fare for a card, and the service state used.', true,
+  tool('trips.plan', 'Up to three itineraries at the run\'s virtual time, with step-free routing, uses_estimates, blockers, the fare for a card, and the service state used. Each itinerary lists its edges (access links, pathways and rides with IDs and times) in order.', true,
     obj({from: id, to: id, depart_at: time, arrive_by: time, step_free: bool, max_walk_m: int(0, 5000), max_transfers: int(0, 4), avoid_modes: arr(mode, 2, {uniqueItems: true}), card_id: id}, ['from', 'to']),
     readOut({from: id, to: id, itineraries: arr(any, 3), blockers: arr(any, 100), service_state: any})),
   tool('alerts.list', 'Alerts with status derived at the virtual time, optionally for a route, stop, facility or status.', true,
