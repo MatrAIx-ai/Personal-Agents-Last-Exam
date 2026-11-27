@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:roomline:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "roomline.rate_switch.expire"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "hotel_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "One hotel, or null for all hotels."
+            }
+          },
+          "required": [
+            "hotel_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "roomline.rate.change"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "plan": {
+              "enum": [
+                "refundable",
+                "non_refundable"
+              ]
+            },
+            "nightly_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            }
+          },
+          "required": [
+            "hotel_id",
+            "plan",
+            "nightly_cents"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "roomline.availability.sell_out"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "nights": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Local date at the hotel, YYYY-MM-DD."
+              },
+              "maxItems": 366,
+              "uniqueItems": true,
+              "minItems": 1
+            }
+          },
+          "required": [
+            "hotel_id",
+            "nights"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

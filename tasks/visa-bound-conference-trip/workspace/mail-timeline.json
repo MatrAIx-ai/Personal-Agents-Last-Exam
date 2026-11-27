@@ -1,0 +1,306 @@
+{
+  "schema": "pale49.mail-timeline.v1",
+  "description": "Mail the runner delivers after the session-1 snapshot, through env.apply_event (operation mail.deliver) on account mail-mingyu. kind=fixed: deliver at event.at. kind=conditional: deliver at event.at only if the condition holds. kind=rule: compute the delivery time from rule; event.at holds the reference-run time. Replace every {{placeholder}} in subject and body before delivery; example_values are the reference-run values.",
+  "account_id": "mail-mingyu",
+  "snapshot_at": "2027-02-08T20:30:00-06:00",
+  "items": [
+    {
+      "item_id": "tl-dental-reminder",
+      "kind": "fixed",
+      "role": "noise",
+      "event": {
+        "event_id": "pale49-tl-dental-reminder",
+        "at": "2027-02-11T07:30:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-dental-reminder",
+          "thread_id": "dental",
+          "account_id": "mail-mingyu",
+          "from": "reminders@lakeview-dental.example.com",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "Appointment reminder: Friday 9:00 am",
+          "body": "This is a reminder of your cleaning appointment on Friday, February 12 at 9:00 am at Lakeview Dental. Reply C to confirm.",
+          "received_at": "2027-02-11T07:30:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-scda-camera-ready",
+      "kind": "fixed",
+      "role": "noise",
+      "event": {
+        "event_id": "pale49-tl-scda-camera-ready",
+        "at": "2027-02-16T11:05:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-scda-camera-ready",
+          "thread_id": "scda-214",
+          "account_id": "mail-mingyu",
+          "from": "program-chairs@scda2027.example.org",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "SCDA 2027 camera-ready instructions and copyright form",
+          "body": "Dear authors,\n\nCamera-ready papers are due on March 8, 2027 (anywhere on earth). Please use the updated template, complete the copyright form in the submission system, and keep the paper within 6 pages plus references.\n\nSCDA 2027 Program Chairs",
+          "received_at": "2027-02-16T11:05:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-scda-registration-open",
+      "kind": "fixed",
+      "role": "relevant",
+      "event": {
+        "event_id": "pale49-tl-scda-registration-open",
+        "at": "2027-02-22T09:00:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-scda-registration-open",
+          "thread_id": "scda-registration",
+          "account_id": "mail-mingyu",
+          "from": "program-chairs@scda2027.example.org",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "SCDA 2027 author registration is now open",
+          "body": "Dear authors,\n\nAuthor registration for SCDA 2027 is now open in ConfDesk: https://confdesk.scda2027.example.org\n\n- Deadline: Monday, March 15, 2027, 23:59 US Central. Papers without a registered author by then will be removed from the proceedings.\n- Author rate: USD 720. The author fee is non-refundable and there is no refundable option.\n- Visa invitation letters are generated in ConfDesk and issued within 10 business days of a completed registration. Corrections must be requested in ConfDesk and are issued within 12 business days of the request.\n\nSCDA 2027 Program Chairs",
+          "received_at": "2027-02-22T09:00:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-lab-mock-quals",
+      "kind": "fixed",
+      "role": "noise",
+      "event": {
+        "event_id": "pale49-tl-lab-mock-quals",
+        "at": "2027-02-26T16:40:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-lab-mock-quals",
+          "thread_id": "lab-mock-quals",
+          "account_id": "mail-mingyu",
+          "from": "mixedsignal-lab@lists.npu.example.org",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "Mock quals sign-up",
+          "body": "Anyone with a qual this spring: put your name on the sheet in the lab and we'll run a mock with the usual suspects. Snacks provided.\n\nPriya",
+          "received_at": "2027-02-26T16:40:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-lease-reminder",
+      "kind": "fixed",
+      "role": "noise",
+      "event": {
+        "event_id": "pale49-tl-lease-reminder",
+        "at": "2027-03-01T09:00:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-lease-reminder",
+          "thread_id": "lease",
+          "account_id": "mail-mingyu",
+          "from": "leasing@riverside-apts.example.com",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "Reminder: lease renewal decision due today",
+          "body": "This is a reminder that your decision on renewing for 2027-2028 is due today. Reply to this email or stop by the office.",
+          "received_at": "2027-03-01T09:00:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-northline-schedule-change",
+      "kind": "conditional",
+      "role": "relevant",
+      "condition": "Delivered only if, at 2027-03-05T19:22:00-06:00, Mingyu holds a Northline booking (record locator {{record_locator}}) whose return is NL 95 on 2027-04-30. Infra applies the same change to that booking in the flights App at the same instant.",
+      "placeholders": {
+        "record_locator": "record locator of the booking that contains NL 95 (reference run: KQ8V3P)"
+      },
+      "example_values": {
+        "record_locator": "KQ8V3P"
+      },
+      "event": {
+        "event_id": "pale49-tl-northline-schedule-change",
+        "at": "2027-03-05T19:22:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-northline-schedule-change",
+          "thread_id": "northline-scda",
+          "account_id": "mail-mingyu",
+          "from": "notifications@northline.example.com",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "Schedule change for your trip {{record_locator}}",
+          "body": "Dear MINGYU ZHAO,\n\nWe have changed the schedule of your return flight on trip {{record_locator}}.\n\nOriginal: NL 95, Friday, April 30, 2027, Lyon (LYS) 10:15 - Minneapolis (MSP) 16:50, 1 stop\nNew:      NL 95R, Friday, April 30, 2027, Lyon (LYS) 16:20 - Minneapolis (MSP) Saturday, May 1, 2027 08:10, 1 stop with an overnight connection\n\nIf the new schedule does not work for you, you can switch at no cost in Manage Trip to one of these alternatives until Friday, March 12, 2027, 23:59 US Central:\n- NL 97, Friday, April 30, 2027, Lyon (LYS) 06:30 - Minneapolis (MSP) 21:45, 1 stop\n- AE 3391, Friday, April 30, 2027, Lyon (LYS) 11:00 - Minneapolis (MSP) 14:20, 1 stop, operated and marketed by our partner Aeris\n\nAfter that date, changes follow your fare rules and are subject to availability. If you take no action, you will travel on the new schedule.\n\nNorthline Airlines",
+          "received_at": "2027-03-05T19:22:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-scda-letter-misspelled",
+      "kind": "rule",
+      "role": "relevant",
+      "condition": "Delivered only after a completed author registration. The letter always misspells the surname as ZHOU.",
+      "rule": {
+        "after": "completed author registration in ConfDesk",
+        "business_days": 10,
+        "local_time": "10:00",
+        "time_zone": "America/Chicago",
+        "business_day_definition": "Monday to Friday; no holidays are observed"
+      },
+      "reference": {
+        "registration_completed_at": "2027-02-22T09:05:00-06:00",
+        "deliver_at": "2027-03-08T10:00:00-06:00"
+      },
+      "placeholders": {
+        "registration_id": "ConfDesk registration ID",
+        "letter_date": "delivery date written as \"8 March 2027\""
+      },
+      "example_values": {
+        "registration_id": "SCDA27-R-0388",
+        "letter_date": "8 March 2027"
+      },
+      "event": {
+        "event_id": "pale49-tl-scda-letter-misspelled",
+        "at": "2027-03-08T10:00:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-scda-letter-misspelled",
+          "thread_id": "scda-letter",
+          "account_id": "mail-mingyu",
+          "from": "noreply@confdesk.scda2027.example.org",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "SCDA 2027 visa invitation letter - registration {{registration_id}}",
+          "body": "Your visa invitation letter for SCDA 2027 is below. It is also available as a PDF in ConfDesk under My registration > Visa letter.\n\n--------------------------------------------------------------\nSCDA 2027 - Symposium on Circuit Design Automation\nCentre des Congres de Lyon, France, 26-29 April 2027\n\nLyon, {{letter_date}}\n\nTo the Consular Section concerned,\n\nThis letter confirms that Mr. Mingyu ZHOU, born 12 March 1998, citizen of the People's Republic of China, passport number as entered at registration, is a registered author of SCDA 2027 (registration {{registration_id}}, fee paid). SCDA 2027 takes place at the Centre des Congres de Lyon, France, from 26 to 29 April 2027.\n\nMr. ZHOU will present paper #214, \"Learned Placement Priors for Analog Layout Migration\", in Session 9B on Thursday 29 April 2027, 16:00-17:30.\n\nThe organizers do not cover travel, accommodation or living expenses of participants.\n\nProf. Claire Moreau\nGeneral Chair, SCDA 2027\n--------------------------------------------------------------\n\nPlease check every detail against your passport. If anything is incorrect, use Request correction under My registration > Visa letter in ConfDesk. This mailbox is not monitored and replies are not processed. Corrected letters are issued within 12 business days of the request.",
+          "received_at": "2027-03-08T10:00:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-northline-promo-mar",
+      "kind": "fixed",
+      "role": "noise",
+      "event": {
+        "event_id": "pale49-tl-northline-promo-mar",
+        "at": "2027-03-09T08:15:00-06:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-northline-promo-mar",
+          "thread_id": "northline-promo-mar",
+          "account_id": "mail-mingyu",
+          "from": "offers@northline.example.com",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "Summer fares to Asia from $899",
+          "body": "Shanghai, Seoul and Tokyo this summer. Book by March 31. Basic fares are non-refundable and cannot be changed.",
+          "received_at": "2027-03-09T08:15:00-06:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-scda-paper-removed",
+      "kind": "conditional",
+      "role": "relevant",
+      "condition": "Delivered only if no author registration for paper #214 was completed by 2027-03-15T23:59:00-05:00.",
+      "event": {
+        "event_id": "pale49-tl-scda-paper-removed",
+        "at": "2027-03-16T07:10:00-05:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-scda-paper-removed",
+          "thread_id": "scda-214",
+          "account_id": "mail-mingyu",
+          "from": "program-chairs@scda2027.example.org",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "SCDA 2027: paper #214 removed from the proceedings",
+          "body": "Dear Mingyu Zhao,\n\nNo author registration for paper #214, \"Learned Placement Priors for Analog Layout Migration\", was completed by the deadline of March 15, 2027, 23:59 US Central. As announced, the paper has been removed from the SCDA 2027 program and proceedings.\n\nSCDA 2027 Program Chairs",
+          "received_at": "2027-03-16T07:10:00-05:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    },
+    {
+      "item_id": "tl-scda-letter-corrected",
+      "kind": "rule",
+      "role": "relevant",
+      "condition": "Delivered only if a correction was requested through ConfDesk letter.request_correction. Email to the conference does not trigger it.",
+      "rule": {
+        "after": "letter.request_correction accepted by ConfDesk",
+        "business_days": 12,
+        "local_time": "10:00",
+        "time_zone": "America/Chicago",
+        "business_day_definition": "Monday to Friday; no holidays are observed"
+      },
+      "reference": {
+        "correction_requested_at": "2027-03-10T18:10:00-06:00",
+        "deliver_at": "2027-03-26T10:00:00-05:00"
+      },
+      "placeholders": {
+        "registration_id": "ConfDesk registration ID",
+        "letter_date": "delivery date written as \"26 March 2027\""
+      },
+      "example_values": {
+        "registration_id": "SCDA27-R-0388",
+        "letter_date": "26 March 2027"
+      },
+      "event": {
+        "event_id": "pale49-tl-scda-letter-corrected",
+        "at": "2027-03-26T10:00:00-05:00",
+        "operation": "mail.deliver",
+        "payload": {
+          "id": "msg-scda-letter-corrected",
+          "thread_id": "scda-letter",
+          "account_id": "mail-mingyu",
+          "from": "noreply@confdesk.scda2027.example.org",
+          "to": [
+            "mingyu.zhao@npu.example.org"
+          ],
+          "subject": "SCDA 2027 corrected visa invitation letter - registration {{registration_id}}",
+          "body": "Your corrected visa invitation letter for SCDA 2027 is below. It is also available as a PDF in ConfDesk under My registration > Visa letter.\n\n--------------------------------------------------------------\nSCDA 2027 - Symposium on Circuit Design Automation\nCentre des Congres de Lyon, France, 26-29 April 2027\n\nLyon, {{letter_date}}\n\nTo the Consular Section concerned,\n\nThis letter confirms that Mr. Mingyu ZHAO, born 12 March 1998, citizen of the People's Republic of China, passport number as entered at registration, is a registered author of SCDA 2027 (registration {{registration_id}}, fee paid). SCDA 2027 takes place at the Centre des Congres de Lyon, France, from 26 to 29 April 2027.\n\nMr. ZHAO will present paper #214, \"Learned Placement Priors for Analog Layout Migration\", in Session 9B on Thursday 29 April 2027, 16:00-17:30.\n\nThe organizers do not cover travel, accommodation or living expenses of participants.\n\nProf. Claire Moreau\nGeneral Chair, SCDA 2027\n--------------------------------------------------------------\n\nPlease check every detail against your passport. If anything is incorrect, use Request correction under My registration > Visa letter in ConfDesk. This mailbox is not monitored and replies are not processed. Corrected letters are issued within 12 business days of the request.",
+          "received_at": "2027-03-26T10:00:00-05:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "roomline-visa-bound-conference-trip",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic hotels in Munich and Lyon with refundable and non-refundable rates for PALE task #49 (visa-bound conference trip). Nothing is booked at the start.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored fictional hotels and prices; no external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Prices in integer euro cents; times as RFC 3339 with the hotel offset; records and assets declared separately."
+  ],
+  "expected_counts": {
+    "records": 6,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
