@@ -1,0 +1,7 @@
+# Task data
+
+`seed.json`, `binding.json` and `policies.json` are input examples: a small history of one researcher account, the people and accounts of the run, and the tools that the Agent may call. A task replaces all three through `env.load_seed`, with its own `virtual_now`. Loading is an Infra operation, so the Agent cannot do it. Edit the three files together, because the account and the owner in the seed must exist in the binding.
+
+This seed is built for a clock of `2026-12-02T07:00:00-05:00` (`clock.json`), so that the ten example events of the approved plan apply to it in time order. It holds November and the first day of December 2026 of the account `benchline-nadia` in Prof. Okafor's lab. At the clock the December allocation is 400 GPU-hours, with 212 used and 60 reserved, so 128 remain. Nadia has 36 used and 60 reserved of her share of 150, so 54 are left. Her two queued jobs of `cfg-mae-b16-v3` (seeds 0 and 1) have no run plan yet. Mei's results `job-0101` to `job-0103` (accuracy 0.712, 0.705 and 0.719) and Nadia's three results of `cfg-vit-s16-v2` are the rows of the W4 table. `proto-subj-v2` is the signed version of the line `subject-eval`, and `proto-subj-v1` is superseded.
+
+A seed may hold any part of the history, as long as it passes `validateSeed`. `dev/build-task-seed.cjs` writes the file by replaying a scripted history through the App. To check an edited seed, run `node dev/check-fixture.cjs examples/task-data/seed.json 2026-12-02T07:00:00-05:00` from the package folder.

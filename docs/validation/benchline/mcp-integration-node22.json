@@ -1,0 +1,521 @@
+{
+  "schema": "benchline.mcp-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "node": "v22.23.5",
+  "checks": [
+    {
+      "name": "Before the load, the clock of the fresh instance stands at 5 January 2027",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed loads the task seed with its binding, its policies and its own virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "The snapshot holds the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "The clock is the virtual_now of the seed: not the time that the instance had before, and not the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "project.get reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "usage.summary reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "configs.list reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "configs.get reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "jobs.list reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "jobs.get reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "jobs.estimate reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "results.list reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "results.compare reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "protocols.list reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "protocols.get reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "tables.list reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "tables.get of an unknown version returns not_found",
+      "status": "passed"
+    },
+    {
+      "name": "notifications.list reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "preferences.get reads now as 2026-12-02T07:00:00-05:00, with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "W1: usage.summary reads an allocation of 400, 212 used, 60 reserved and 128 remaining; Nadia has 36 used and 60 reserved of 150, so 54 are left",
+      "status": "passed"
+    },
+    {
+      "name": "W1: jobs.estimate for 2 GPUs and 12 hours on gpu-h reserves 48 and leaves 80 and 6",
+      "status": "passed"
+    },
+    {
+      "name": "W1: results.compare of a v2 result and a v1 result is not comparable and names eval_split",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists exactly the 29 operations of the plan",
+      "status": "passed"
+    },
+    {
+      "name": "15 of them are read tools",
+      "status": "passed"
+    },
+    {
+      "name": "14 of them are write tools",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists no env.* operation",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.apply_event gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.reset gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.advance_time gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.load_seed gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.snapshot gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.event_status gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.validate_bundle gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.apply_event gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The denied calls changed no business data and no version",
+      "status": "passed"
+    },
+    {
+      "name": "Each denied call has one deny row in the audit, with the Agent as the actor. The repeated env.apply_event counts as a second row",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a 30-hour limit on gpu-h returns time_limit_too_long",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: seed 7 under proto-subj-v2 returns protocol_mismatch",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: 4 GPUs for 24 hours (192 GPU-hours) returns over_allocation",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a labmate's job returns not_yours",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a limit with three decimals returns the App's own invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a job with no seed breaks the input schema, so Core returns invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: after four App errors and two argument errors the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: the version is the same",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one deny row for each failed call",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-02T07:30:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W2: jobs.submit at 07:30 adds a queued job that reserves 48",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with the same input returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: it submits no second job, writes no audit row and keeps the version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with changed input returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a write with a stale expected_version returns stale_version and names the current version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write changed no business data",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write each have one deny row in the audit",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: a fourth active job returns too_many_active",
+      "status": "passed"
+    },
+    {
+      "name": "ev-bl-210 records Mei's job-0131: it reads queued at 08:00, and it starts at 08:20",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: an identical event_id returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the repeated event records no second job and writes no audit row",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same event_id with other content returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an event dated before the clock returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an interruption of a job that has ended returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an interruption of a job that has ended the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an interruption of a job that has ended the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an interruption of a job that has ended the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: a recorded job of the account holder returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a recorded job of the account holder the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a recorded job of the account holder the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a recorded job of the account holder the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an answer for a signed version returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an answer for a signed version the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an answer for a signed version the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an answer for a signed version the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an invalidation of a job with no result returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an invalidation of a job with no result the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an invalidation of a job with no result the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an invalidation of a job with no result the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-02T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: the plan waits 30 minutes, so at 09:00 the job reads running from 08:00",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-02T18:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: after its 600 minutes, at 18:00, the job reads completed with its result, 40 charged and 0 reserved, and its job.ended notice is listed from then",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-02T19:40:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Review request: a submission with hold: true is held with the reason submitted_held and reserves nothing; the usage summary is unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Review request: jobs.release reruns the full check: with 2 GPU-hours left, the release of the 12-hour job returns over_allocation",
+      "status": "passed"
+    },
+    {
+      "name": "ev-bl-212: the 22:00 script job runs the same check; 48 do not fit what the project has left, so no job is added and one notice names over_allocation",
+      "status": "passed"
+    },
+    {
+      "name": "ev-bl-201 writes the allocation notice: the stored wire message is the plan's example, with the share sentence of the same event",
+      "status": "passed"
+    },
+    {
+      "name": "W2: the cut to 120 holds the two queued jobs with the reason allocation and the flag unfunded",
+      "status": "passed"
+    },
+    {
+      "name": "The event wrote its own row, one effect row for each held job and one for the notice",
+      "status": "passed"
+    },
+    {
+      "name": "W2: jobs.release of a held job while the project is overdrawn returns over_allocation",
+      "status": "passed"
+    },
+    {
+      "name": "W3: ev-bl-230 adds proto-subj-v3 as proposed, and Nadia is asked to sign it",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-03T14:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W3: the decline declines v3; seeds 0 to 4 make proto-subj-v4, proposed with respond_by five days later",
+      "status": "passed"
+    },
+    {
+      "name": "ev-bl-215 interrupts job-0140, and it leaves no result",
+      "status": "passed"
+    },
+    {
+      "name": "W3: ev-bl-231 is the last required signature: v4 reads signed and v2 superseded",
+      "status": "passed"
+    },
+    {
+      "name": "ev-bl-232 withdraws proto-subj-v5",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-04T13:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W4: the frozen table under the superseded v2 reads count 3, mean 0.7120 and sd 0.0070 for the first row, and its CSV has the same row",
+      "status": "passed"
+    },
+    {
+      "name": "W4: ev-bl-240 invalidates job-0102: the frozen manifest is unchanged and the table reads cites_invalidated",
+      "status": "passed"
+    },
+    {
+      "name": "The business data in env.snapshot is byte-identical before and after all 15 reads",
+      "status": "passed"
+    },
+    {
+      "name": "Each of the 15 reads has one allow row in the audit, with no state change",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a read carries input.id",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a windowed read carries input.start and input.end",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a write carries input.id, the request_id, the observed version and the ID of the object it wrote",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of each applied event carries its event_id",
+      "status": "passed"
+    },
+    {
+      "name": "The join scope: the snapshot gives run_id, app_id, epoch and revision next to the activity rows",
+      "status": "passed"
+    },
+    {
+      "name": "Every added activity row has seq, virtual time, actor, action, object ID and the request_id or event_id behind it",
+      "status": "passed"
+    },
+    {
+      "name": "Effect rows are marked effect true, and the rows of writes and events effect false",
+      "status": "passed"
+    },
+    {
+      "name": "Every committed write has one activity row with its request_id (8 writes)",
+      "status": "passed"
+    },
+    {
+      "name": "Every applied event has one activity row with its event_id (12 events)",
+      "status": "passed"
+    },
+    {
+      "name": "There is no other activity row, apart from the rows of effects",
+      "status": "passed"
+    },
+    {
+      "name": "Each new notification has one effect row",
+      "status": "passed"
+    },
+    {
+      "name": "A refused call has a deny row in the audit and no activity row (9 refusals)",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one row for each env.advance_time that is not a replay",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a replayed env.advance_time returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the replayed env.advance_time adds no audit row and moves nothing",
+      "status": "passed"
+    },
+    {
+      "name": "env.reset returns ready for this App instance only",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the time loaded with the seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset clears the audit and the receipts: only the row of the reset itself is left",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances the epoch",
+      "status": "passed"
+    },
+    {
+      "name": "Back at the loaded time, the two jobs of cfg-mae-b16-v3 read queued again, not held, so jobs.release returns invalid_state",
+      "status": "passed"
+    },
+    {
+      "name": "A second seed with another virtual_now is loaded in the same run",
+      "status": "passed"
+    },
+    {
+      "name": "A start time spelled in UTC is read with the -05:00 offset of the project",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: env.advance_time to 2026-12-03T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Reset goes back to the virtual_now of the seed loaded last, not to the first seed or the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "The second run other-run is not affected: its whole state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "The second run still holds the package fixture at the package clock, at its first version, with an empty audit",
+      "status": "passed"
+    }
+  ],
+  "passed": true
+}

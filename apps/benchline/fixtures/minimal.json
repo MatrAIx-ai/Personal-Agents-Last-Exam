@@ -1,0 +1,6157 @@
+{
+  "account_id": "benchline-nadia",
+  "owner_person_id": "person-nadia",
+  "project": {
+    "id": "proj-okafor-eeg",
+    "name": "Okafor Lab: EEG decoding",
+    "cluster": "Halden research cluster",
+    "timezone": "America/New_York",
+    "lab_head_person_id": "person-okafor",
+    "policy": {
+      "hard_shares": false,
+      "max_active_jobs": 3,
+      "required_signers": [
+        "person-okafor",
+        "person-nadia"
+      ],
+      "signoff_window_days": 5
+    }
+  },
+  "partitions": [
+    {
+      "id": "gpu-h",
+      "name": "H100 nodes",
+      "rate": 2,
+      "max_hours": 24
+    },
+    {
+      "id": "gpu-a",
+      "name": "A100 nodes",
+      "rate": 1,
+      "max_hours": 48
+    },
+    {
+      "id": "cpu",
+      "name": "CPU nodes",
+      "rate": 0,
+      "max_hours": 72
+    }
+  ],
+  "people": [
+    {
+      "person_id": "person-nadia",
+      "name": "Nadia Ferrante",
+      "role": "PhD student",
+      "share_hours": 320
+    },
+    {
+      "person_id": "person-okafor",
+      "name": "Prof. Okafor",
+      "role": "Lab head",
+      "share_hours": null
+    },
+    {
+      "person_id": "person-mei",
+      "name": "Mei Lindqvist",
+      "role": "Postdoc",
+      "share_hours": 120
+    },
+    {
+      "person_id": "person-tomas",
+      "name": "Tomas Arce",
+      "role": "PhD student",
+      "share_hours": 80
+    },
+    {
+      "person_id": "person-farid",
+      "name": "Farid Haddad",
+      "role": "Research engineer",
+      "share_hours": null
+    },
+    {
+      "person_id": "person-ines",
+      "name": "Ines Varga",
+      "role": "Master's student",
+      "share_hours": 60
+    }
+  ],
+  "allocation": {
+    "period_id": "alloc-2026-12",
+    "label": "December",
+    "starts_at": "2026-12-01T00:00:00-05:00",
+    "ends_at": "2026-12-31T23:59:59-05:00",
+    "opening_hours": 400,
+    "allocation_hours": 1500,
+    "opening_shares": [
+      {
+        "person_id": "person-nadia",
+        "share_hours": 150
+      },
+      {
+        "person_id": "person-mei",
+        "share_hours": 120
+      },
+      {
+        "person_id": "person-tomas",
+        "share_hours": 80
+      },
+      {
+        "person_id": "person-ines",
+        "share_hours": 40
+      }
+    ]
+  },
+  "past_periods": [
+    {
+      "period_id": "alloc-2026-10",
+      "label": "October",
+      "starts_at": "2026-10-01T00:00:00-04:00",
+      "ends_at": "2026-10-31T23:59:59-04:00",
+      "opening_hours": 360,
+      "allocation_hours": 360
+    },
+    {
+      "period_id": "alloc-2026-11",
+      "label": "November",
+      "starts_at": "2026-11-01T00:00:00-04:00",
+      "ends_at": "2026-11-30T23:59:59-05:00",
+      "opening_hours": 380,
+      "allocation_hours": 340
+    }
+  ],
+  "allocation_changes": [
+    {
+      "id": "alc-0001",
+      "period_id": "alloc-2026-11",
+      "at": "2026-11-24T09:00:00-05:00",
+      "from_hours": 380,
+      "to_hours": 340,
+      "shares": [],
+      "changed_by": "person-okafor",
+      "reason": "The department took back 40 hours for a course.",
+      "event_id": "ev-h-0013"
+    },
+    {
+      "id": "alc-0002",
+      "period_id": "alloc-2026-12",
+      "at": "2026-12-02T10:00:00-05:00",
+      "from_hours": 400,
+      "to_hours": 1500,
+      "shares": [
+        {
+          "person_id": "person-ines",
+          "from": 40,
+          "to": 60
+        },
+        {
+          "person_id": "person-nadia",
+          "from": 150,
+          "to": 320
+        }
+      ],
+      "changed_by": "person-okafor",
+      "reason": "The department added its end-of-year pool.",
+      "event_id": "ev-h-0044"
+    }
+  ],
+  "configs": [
+    {
+      "id": "cfg-mae-b16-v1",
+      "family": "mae-b16",
+      "version": 1,
+      "params": {
+        "lr": 0.0005,
+        "epochs": 60,
+        "mask_ratio": 0.75
+      },
+      "dataset_version": "eeg-subjects-2026.1",
+      "eval_split": "test-subjects",
+      "code_ref": "7d2f01c",
+      "registered_by": "person-mei",
+      "registered_at": "2026-08-18T10:12:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-mae-b16-v2",
+      "family": "mae-b16",
+      "version": 2,
+      "params": {
+        "lr": 0.0003,
+        "epochs": 60,
+        "mask_ratio": 0.75
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "9b40e7a",
+      "registered_by": "person-mei",
+      "registered_at": "2026-10-05T15:40:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-mae-b16-v3",
+      "family": "mae-b16",
+      "version": 3,
+      "params": {
+        "lr": 0.0003,
+        "epochs": 80,
+        "mask_ratio": 0.8
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "c13a5d9",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-11-12T11:05:00-05:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-vit-s16-v1",
+      "family": "vit-s16",
+      "version": 1,
+      "params": {
+        "lr": 0.001,
+        "epochs": 40,
+        "patch": 16
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-sessions",
+      "code_ref": "52e8b3f",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-09-02T09:30:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-vit-s16-v2",
+      "family": "vit-s16",
+      "version": 2,
+      "params": {
+        "lr": 0.001,
+        "epochs": 40,
+        "patch": 16
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "52e8b3f",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-10-14T13:20:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-vit-s16-v3",
+      "family": "vit-s16",
+      "version": 3,
+      "params": {
+        "lr": 0.0007,
+        "epochs": 50,
+        "patch": 16
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "a0c77e2",
+      "registered_by": "person-tomas",
+      "registered_at": "2026-11-09T16:45:00-05:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-atlas-v1",
+      "family": "atlas",
+      "version": 1,
+      "params": {
+        "lr": 0.0002,
+        "epochs": 100,
+        "depth": 12
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "e4d1b68",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-10-20T10:00:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-atlas-v2",
+      "family": "atlas",
+      "version": 2,
+      "params": {
+        "lr": 0.0002,
+        "epochs": 120,
+        "depth": 12
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "f09a3c1",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-11-04T14:10:00-05:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-atlas-v3",
+      "family": "atlas",
+      "version": 3,
+      "params": {
+        "lr": 0.00015,
+        "epochs": 120,
+        "depth": 16
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "code_ref": "1b6e2d4",
+      "registered_by": "person-tomas",
+      "registered_at": "2026-11-20T09:25:00-05:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-birch-abl-v1",
+      "family": "birch-abl",
+      "version": 1,
+      "params": {
+        "lr": 0.0003,
+        "epochs": 30,
+        "ablate": "no_mask"
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "val-subjects",
+      "code_ref": "3c8f9a0",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-10-28T17:00:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-birch-abl-v2",
+      "family": "birch-abl",
+      "version": 2,
+      "params": {
+        "lr": 0.0003,
+        "epochs": 30,
+        "ablate": "no_pos_embed"
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "val-subjects",
+      "code_ref": "3c8f9a0",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-10-28T17:05:00-04:00",
+      "event_id": null
+    },
+    {
+      "id": "cfg-birch-abl-v3",
+      "family": "birch-abl",
+      "version": 3,
+      "params": {
+        "lr": 0.0003,
+        "epochs": 30,
+        "ablate": "small_decoder"
+      },
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "val-subjects",
+      "code_ref": "3c8f9a0",
+      "registered_by": "person-nadia",
+      "registered_at": "2026-10-28T17:10:00-04:00",
+      "event_id": null
+    }
+  ],
+  "protocols": [
+    {
+      "id": "proto-subj-v1",
+      "line": "subject-eval",
+      "version": 1,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-sessions",
+      "metrics": [
+        {
+          "name": "accuracy",
+          "direction": "higher"
+        }
+      ],
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "proposed_by": "person-okafor",
+      "proposed_at": "2026-09-08T10:00:00-04:00",
+      "rationale": "Held-out sessions of the 2026.2 subjects, three seeds.",
+      "respond_by": "2026-09-13T10:00:00-04:00",
+      "stored_state": "superseded",
+      "signoffs": [
+        {
+          "person_id": "person-okafor",
+          "answer": "sign",
+          "at": "2026-09-08T10:00:00-04:00",
+          "note": null,
+          "request_id": null,
+          "event_id": null
+        },
+        {
+          "person_id": "person-nadia",
+          "answer": "sign",
+          "at": "2026-09-08T15:30:00-04:00",
+          "note": null,
+          "request_id": null,
+          "event_id": null
+        }
+      ],
+      "signed_at": "2026-09-08T15:30:00-04:00",
+      "supersedes": null,
+      "superseded_at": "2026-11-17T09:30:00-05:00",
+      "superseded_by": "proto-subj-v2",
+      "declined_at": null,
+      "withdrawn_at": null,
+      "withdraw_note": null,
+      "request_id": null,
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-17T09:30:00-05:00",
+          "action": "protocol.superseded",
+          "actor": "event",
+          "ref": "ev-h-0005"
+        }
+      ]
+    },
+    {
+      "id": "proto-subj-v2",
+      "line": "subject-eval",
+      "version": 2,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "metrics": [
+        {
+          "name": "accuracy",
+          "direction": "higher"
+        }
+      ],
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "proposed_by": "person-mei",
+      "proposed_at": "2026-11-16T10:00:00-05:00",
+      "rationale": "A subject-level split, so no test subject is seen in training.",
+      "respond_by": "2026-11-21T10:00:00-05:00",
+      "stored_state": "superseded",
+      "signoffs": [
+        {
+          "person_id": "person-nadia",
+          "answer": "sign",
+          "at": "2026-11-16T14:05:00-05:00",
+          "note": "Agreed. Session splits leak subjects.",
+          "request_id": "req-00006",
+          "event_id": null
+        },
+        {
+          "person_id": "person-okafor",
+          "answer": "sign",
+          "at": "2026-11-17T09:30:00-05:00",
+          "note": "Use it for the paper.",
+          "request_id": null,
+          "event_id": "ev-h-0005"
+        }
+      ],
+      "signed_at": "2026-11-17T09:30:00-05:00",
+      "supersedes": "proto-subj-v1",
+      "superseded_at": "2026-12-03T10:00:00-05:00",
+      "superseded_by": "proto-subj-v4",
+      "declined_at": null,
+      "withdrawn_at": null,
+      "withdraw_note": null,
+      "request_id": null,
+      "event_id": "ev-h-0004",
+      "history": [
+        {
+          "at": "2026-11-16T10:00:00-05:00",
+          "action": "protocol.proposed",
+          "actor": "event",
+          "ref": "ev-h-0004"
+        },
+        {
+          "at": "2026-11-16T14:05:00-05:00",
+          "action": "protocols.respond",
+          "actor": "agent",
+          "ref": "req-00006",
+          "answer": "sign"
+        },
+        {
+          "at": "2026-11-17T09:30:00-05:00",
+          "action": "protocol.answered",
+          "actor": "event",
+          "ref": "ev-h-0005",
+          "answer": "sign"
+        },
+        {
+          "at": "2026-12-03T10:00:00-05:00",
+          "action": "protocol.superseded",
+          "actor": "event",
+          "ref": "ev-h-0022"
+        }
+      ]
+    },
+    {
+      "id": "proto-subj-v3",
+      "line": "subject-eval",
+      "version": 3,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-trials",
+      "metrics": [
+        {
+          "name": "accuracy",
+          "direction": "higher"
+        }
+      ],
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "proposed_by": "person-tomas",
+      "proposed_at": "2026-12-02T11:00:00-05:00",
+      "rationale": "A trial-level split needs a third of the compute.",
+      "respond_by": "2026-12-07T11:00:00-05:00",
+      "stored_state": "declined",
+      "signoffs": [
+        {
+          "person_id": "person-nadia",
+          "answer": "decline",
+          "at": "2026-12-02T14:00:00-05:00",
+          "note": "The test subjects must stay unseen.",
+          "request_id": "req-00050",
+          "event_id": null
+        }
+      ],
+      "signed_at": null,
+      "supersedes": null,
+      "superseded_at": null,
+      "superseded_by": null,
+      "declined_at": "2026-12-02T14:00:00-05:00",
+      "withdrawn_at": null,
+      "withdraw_note": null,
+      "request_id": null,
+      "event_id": "ev-h-0021",
+      "history": [
+        {
+          "at": "2026-12-02T11:00:00-05:00",
+          "action": "protocol.proposed",
+          "actor": "event",
+          "ref": "ev-h-0021"
+        },
+        {
+          "at": "2026-12-02T14:00:00-05:00",
+          "action": "protocols.respond",
+          "actor": "agent",
+          "ref": "req-00050",
+          "answer": "decline"
+        }
+      ]
+    },
+    {
+      "id": "proto-trial-v1",
+      "line": "trial-eval",
+      "version": 1,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-trials",
+      "metrics": [
+        {
+          "name": "accuracy",
+          "direction": "higher"
+        },
+        {
+          "name": "macro_f1",
+          "direction": "higher"
+        }
+      ],
+      "seeds": [
+        0,
+        1
+      ],
+      "proposed_by": "person-tomas",
+      "proposed_at": "2026-12-02T12:00:00-05:00",
+      "rationale": "Trial-level numbers for the workshop.",
+      "respond_by": "2026-12-07T12:00:00-05:00",
+      "stored_state": "withdrawn",
+      "signoffs": [],
+      "signed_at": null,
+      "supersedes": null,
+      "superseded_at": null,
+      "superseded_by": null,
+      "declined_at": null,
+      "withdrawn_at": "2026-12-02T16:00:00-05:00",
+      "withdraw_note": "Withdrawn after the lab meeting.",
+      "request_id": null,
+      "event_id": "ev-h-0023",
+      "history": [
+        {
+          "at": "2026-12-02T12:00:00-05:00",
+          "action": "protocol.proposed",
+          "actor": "event",
+          "ref": "ev-h-0023"
+        },
+        {
+          "at": "2026-12-02T16:00:00-05:00",
+          "action": "protocol.withdrawn",
+          "actor": "event",
+          "ref": "ev-h-0024"
+        }
+      ]
+    },
+    {
+      "id": "proto-subj-v4",
+      "line": "subject-eval",
+      "version": 4,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "metrics": [
+        {
+          "name": "accuracy",
+          "direction": "higher"
+        }
+      ],
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "proposed_by": "person-nadia",
+      "proposed_at": "2026-12-02T14:10:00-05:00",
+      "rationale": "Five seeds for the paper.",
+      "respond_by": "2026-12-07T14:10:00-05:00",
+      "stored_state": "signed",
+      "signoffs": [
+        {
+          "person_id": "person-nadia",
+          "answer": "sign",
+          "at": "2026-12-02T14:10:00-05:00",
+          "note": null,
+          "request_id": "req-00051",
+          "event_id": null
+        },
+        {
+          "person_id": "person-okafor",
+          "answer": "sign",
+          "at": "2026-12-03T10:00:00-05:00",
+          "note": "Fine with five seeds.",
+          "request_id": null,
+          "event_id": "ev-h-0022"
+        }
+      ],
+      "signed_at": "2026-12-03T10:00:00-05:00",
+      "supersedes": "proto-subj-v2",
+      "superseded_at": null,
+      "superseded_by": null,
+      "declined_at": null,
+      "withdrawn_at": null,
+      "withdraw_note": null,
+      "request_id": "req-00051",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-02T14:10:00-05:00",
+          "action": "protocols.propose",
+          "actor": "agent",
+          "ref": "req-00051"
+        },
+        {
+          "at": "2026-12-03T10:00:00-05:00",
+          "action": "protocol.answered",
+          "actor": "event",
+          "ref": "ev-h-0022",
+          "answer": "sign"
+        }
+      ]
+    },
+    {
+      "id": "proto-trial-v2",
+      "line": "trial-eval",
+      "version": 2,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-trials",
+      "metrics": [
+        {
+          "name": "accuracy",
+          "direction": "higher"
+        }
+      ],
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "proposed_by": "person-tomas",
+      "proposed_at": "2026-12-03T09:00:00-05:00",
+      "rationale": "Three seeds, accuracy only.",
+      "respond_by": "2026-12-08T09:00:00-05:00",
+      "stored_state": "proposed",
+      "signoffs": [],
+      "signed_at": null,
+      "supersedes": null,
+      "superseded_at": null,
+      "superseded_by": null,
+      "declined_at": null,
+      "withdrawn_at": null,
+      "withdraw_note": null,
+      "request_id": null,
+      "event_id": "ev-h-0025",
+      "history": [
+        {
+          "at": "2026-12-03T09:00:00-05:00",
+          "action": "protocol.proposed",
+          "actor": "event",
+          "ref": "ev-h-0025"
+        }
+      ]
+    },
+    {
+      "id": "proto-lat-v1",
+      "line": "latency-eval",
+      "version": 1,
+      "dataset_version": "eeg-subjects-2026.2",
+      "eval_split": "test-subjects",
+      "metrics": [
+        {
+          "name": "latency_ms",
+          "direction": "lower"
+        }
+      ],
+      "seeds": [
+        0
+      ],
+      "proposed_by": "person-farid",
+      "proposed_at": "2026-12-07T15:00:00-05:00",
+      "rationale": "Inference latency on one seed.",
+      "respond_by": "2026-12-12T15:00:00-05:00",
+      "stored_state": "proposed",
+      "signoffs": [],
+      "signed_at": null,
+      "supersedes": null,
+      "superseded_at": null,
+      "superseded_by": null,
+      "declined_at": null,
+      "withdrawn_at": null,
+      "withdraw_note": null,
+      "request_id": null,
+      "event_id": "ev-h-0026",
+      "history": [
+        {
+          "at": "2026-12-07T15:00:00-05:00",
+          "action": "protocol.proposed",
+          "actor": "event",
+          "ref": "ev-h-0026"
+        }
+      ]
+    }
+  ],
+  "run_plans": [
+    {
+      "id": "rp-0001",
+      "config_id": "cfg-vit-s16-v1",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 20,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.684
+      },
+      "error": null,
+      "set_at": "2026-11-02T08:00:00-05:00",
+      "event_id": "ev-h-0001"
+    },
+    {
+      "id": "rp-0002",
+      "config_id": "cfg-atlas-v1",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 40,
+      "run_minutes": 540,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.702
+      },
+      "error": null,
+      "set_at": "2026-11-17T10:00:00-05:00",
+      "event_id": "ev-h-0006"
+    },
+    {
+      "id": "rp-0003",
+      "config_id": "cfg-atlas-v1",
+      "seed": 1,
+      "partition_id": null,
+      "queue_wait_minutes": 40,
+      "run_minutes": 540,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.708
+      },
+      "error": null,
+      "set_at": "2026-11-17T10:00:00-05:00",
+      "event_id": "ev-h-0007"
+    },
+    {
+      "id": "rp-0004",
+      "config_id": "cfg-atlas-v1",
+      "seed": 2,
+      "partition_id": null,
+      "queue_wait_minutes": 40,
+      "run_minutes": 560,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.697
+      },
+      "error": null,
+      "set_at": "2026-11-17T10:00:00-05:00",
+      "event_id": "ev-h-0008"
+    },
+    {
+      "id": "rp-0005",
+      "config_id": "cfg-birch-abl-v1",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 60,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.655
+      },
+      "error": null,
+      "set_at": "2026-12-01T21:30:00-05:00",
+      "event_id": "ev-h-0020"
+    },
+    {
+      "id": "rp-0006",
+      "config_id": "cfg-birch-abl-v2",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 60,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.641
+      },
+      "error": null,
+      "set_at": "2026-11-18T09:00:00-05:00",
+      "event_id": "ev-h-0010"
+    },
+    {
+      "id": "rp-0007",
+      "config_id": "cfg-birch-abl-v3",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 60,
+      "run_minutes": 480,
+      "outcome": "failed",
+      "metrics": null,
+      "error": "CUDA out of memory in the decoder.",
+      "set_at": "2026-11-18T09:00:00-05:00",
+      "event_id": "ev-h-0011"
+    },
+    {
+      "id": "rp-0008",
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 0,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 720,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.694
+      },
+      "error": null,
+      "set_at": "2026-12-01T07:45:00-05:00",
+      "event_id": "ev-h-0014"
+    },
+    {
+      "id": "rp-0009",
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 1,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 720,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.689
+      },
+      "error": null,
+      "set_at": "2026-12-01T07:45:00-05:00",
+      "event_id": "ev-h-0015"
+    },
+    {
+      "id": "rp-0010",
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 2,
+      "partition_id": "gpu-a",
+      "queue_wait_minutes": 30,
+      "run_minutes": 720,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.701
+      },
+      "error": null,
+      "set_at": "2026-12-01T07:45:00-05:00",
+      "event_id": "ev-h-0016"
+    },
+    {
+      "id": "rp-0011",
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "queue_wait_minutes": 20,
+      "run_minutes": 900,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.703
+      },
+      "error": null,
+      "set_at": "2026-12-01T07:45:00-05:00",
+      "event_id": "ev-h-0017"
+    },
+    {
+      "id": "rp-0012",
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 2,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.716
+      },
+      "error": null,
+      "set_at": "2026-12-01T07:45:00-05:00",
+      "event_id": "ev-h-0018"
+    },
+    {
+      "id": "rp-0013",
+      "config_id": "cfg-mae-b16-v2",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 45,
+      "run_minutes": 660,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.709
+      },
+      "error": null,
+      "set_at": "2026-12-01T07:45:00-05:00",
+      "event_id": "ev-h-0019"
+    },
+    {
+      "id": "rp-0014",
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 0,
+      "partition_id": null,
+      "queue_wait_minutes": 60,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.711
+      },
+      "error": null,
+      "set_at": "2026-12-02T12:30:00-05:00",
+      "event_id": "ev-h-0027"
+    },
+    {
+      "id": "rp-0015",
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 1,
+      "partition_id": null,
+      "queue_wait_minutes": 240,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.709
+      },
+      "error": null,
+      "set_at": "2026-12-02T12:30:00-05:00",
+      "event_id": "ev-h-0028"
+    },
+    {
+      "id": "rp-0016",
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 3,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 620,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.714
+      },
+      "error": null,
+      "set_at": "2026-12-03T10:30:00-05:00",
+      "event_id": "ev-h-0029"
+    },
+    {
+      "id": "rp-0017",
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 4,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 610,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.707
+      },
+      "error": null,
+      "set_at": "2026-12-03T10:30:00-05:00",
+      "event_id": "ev-h-0030"
+    },
+    {
+      "id": "rp-0018",
+      "config_id": "cfg-atlas-v2",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 20,
+      "run_minutes": 560,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.733
+      },
+      "error": null,
+      "set_at": "2026-12-03T10:30:00-05:00",
+      "event_id": "ev-h-0031"
+    },
+    {
+      "id": "rp-0019",
+      "config_id": "cfg-atlas-v2",
+      "seed": 3,
+      "partition_id": null,
+      "queue_wait_minutes": 20,
+      "run_minutes": 300,
+      "outcome": "failed",
+      "metrics": null,
+      "error": "NaN loss at step 41,200.",
+      "set_at": "2026-12-03T10:30:00-05:00",
+      "event_id": "ev-h-0032"
+    },
+    {
+      "id": "rp-0020",
+      "config_id": "cfg-atlas-v3",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 45,
+      "run_minutes": 1500,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.738
+      },
+      "error": null,
+      "set_at": "2026-12-03T10:30:00-05:00",
+      "event_id": "ev-h-0033"
+    },
+    {
+      "id": "rp-0021",
+      "config_id": "cfg-vit-s16-v3",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 480,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.698
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0034"
+    },
+    {
+      "id": "rp-0022",
+      "config_id": "cfg-vit-s16-v3",
+      "seed": null,
+      "partition_id": "cpu",
+      "queue_wait_minutes": 10,
+      "run_minutes": 1800,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.698
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0035"
+    },
+    {
+      "id": "rp-0023",
+      "config_id": "cfg-mae-b16-v1",
+      "seed": null,
+      "partition_id": null,
+      "queue_wait_minutes": 15,
+      "run_minutes": 400,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.664
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0036"
+    },
+    {
+      "id": "rp-0024",
+      "config_id": "cfg-birch-abl-v2",
+      "seed": 2,
+      "partition_id": null,
+      "queue_wait_minutes": 60,
+      "run_minutes": 600,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.644
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0037"
+    },
+    {
+      "id": "rp-0025",
+      "config_id": "cfg-birch-abl-v3",
+      "seed": 1,
+      "partition_id": null,
+      "queue_wait_minutes": 60,
+      "run_minutes": 480,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.638
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0038"
+    },
+    {
+      "id": "rp-0026",
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 3,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 660,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.716
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0039"
+    },
+    {
+      "id": "rp-0027",
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 4,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 660,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.71
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0040"
+    },
+    {
+      "id": "rp-0028",
+      "config_id": "cfg-atlas-v3",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "queue_wait_minutes": 40,
+      "run_minutes": 1200,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.736
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0041"
+    },
+    {
+      "id": "rp-0029",
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 3,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 720,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.697
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0042"
+    },
+    {
+      "id": "rp-0030",
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 4,
+      "partition_id": null,
+      "queue_wait_minutes": 30,
+      "run_minutes": 720,
+      "outcome": "completed",
+      "metrics": {
+        "accuracy": 0.692
+      },
+      "error": null,
+      "set_at": "2026-12-04T08:00:00-05:00",
+      "event_id": "ev-h-0043"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job-a0001",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v1",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v1",
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-03T09:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0001",
+        "starts_at": "2026-11-03T09:20:00-05:00",
+        "ends_at": "2026-11-03T19:20:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.684
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": {
+        "tags": [],
+        "note": null,
+        "excluded": true,
+        "reason": "Session split, kept only for comparison.",
+        "updated_at": "2026-12-04T09:02:00-05:00"
+      },
+      "invalidation": null,
+      "request_id": "req-00002",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-03T09:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00002",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-04T09:02:00-05:00",
+          "action": "results.update",
+          "actor": "agent",
+          "ref": "req-00081",
+          "disposition": "excluded"
+        }
+      ]
+    },
+    {
+      "id": "job-0081",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v1",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-04T08:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-11-04T08:30:00-05:00",
+        "ends_at": "2026-11-04T18:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.661
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0002",
+      "history": [
+        {
+          "at": "2026-11-04T08:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0002",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0082",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v1",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 24,
+      "protocol_id": "proto-subj-v1",
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-05T09:10:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-11-05T09:40:00-05:00",
+        "ends_at": "2026-11-05T21:10:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.679
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0003",
+      "history": [
+        {
+          "at": "2026-11-05T09:10:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0003",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0002",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-atlas-v1",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 10,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-17T11:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0002",
+        "starts_at": "2026-11-17T11:40:00-05:00",
+        "ends_at": "2026-11-17T20:40:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.702
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": {
+        "tags": [],
+        "note": null,
+        "excluded": true,
+        "reason": "Run on the old dataset cache.",
+        "updated_at": "2026-12-04T09:00:00-05:00"
+      },
+      "invalidation": null,
+      "request_id": "req-00011",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-17T11:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00011",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-04T09:00:00-05:00",
+          "action": "results.update",
+          "actor": "agent",
+          "ref": "req-00079",
+          "disposition": "excluded"
+        }
+      ]
+    },
+    {
+      "id": "job-a0003",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-atlas-v1",
+      "seed": 1,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 10,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-17T11:02:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0003",
+        "starts_at": "2026-11-17T11:42:00-05:00",
+        "ends_at": "2026-11-17T20:42:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.708
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00012",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-17T11:02:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00012",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0004",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-atlas-v1",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 10,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-17T11:04:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0004",
+        "starts_at": "2026-11-17T11:44:00-05:00",
+        "ends_at": "2026-11-17T21:04:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.697
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00013",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-17T11:04:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00013",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0090",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 0,
+      "partition_id": "cpu",
+      "gpus": 1,
+      "time_limit_hours": 48,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-19T07:30:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-11-19T07:35:00-05:00",
+        "ends_at": "2026-11-20T06:35:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.612
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0012",
+      "history": [
+        {
+          "at": "2026-11-19T07:30:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0012",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0005",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-birch-abl-v1",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-20T21:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0005",
+        "starts_at": "2026-11-20T22:00:00-05:00",
+        "ends_at": "2026-11-21T08:00:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.655
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00018",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-20T21:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00018",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0006",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-birch-abl-v2",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-20T21:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0006",
+        "starts_at": "2026-11-20T22:01:00-05:00",
+        "ends_at": "2026-11-21T08:01:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.641
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00019",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-20T21:01:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00019",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0007",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-birch-abl-v3",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-20T21:02:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0007",
+        "starts_at": "2026-11-20T22:02:00-05:00",
+        "ends_at": "2026-11-21T06:02:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": "CUDA out of memory in the decoder."
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00020",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-20T21:02:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00020",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0008",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-birch-abl-v1",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-21T21:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0005",
+        "starts_at": "2026-11-21T22:00:00-05:00",
+        "ends_at": "2026-11-22T08:00:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.655
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": {
+        "tags": [],
+        "note": null,
+        "excluded": true,
+        "reason": "Ablation config had a typo.",
+        "updated_at": "2026-12-04T09:01:00-05:00"
+      },
+      "invalidation": null,
+      "request_id": "req-00021",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-21T21:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00021",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-04T09:01:00-05:00",
+          "action": "results.update",
+          "actor": "agent",
+          "ref": "req-00080",
+          "disposition": "excluded"
+        }
+      ]
+    },
+    {
+      "id": "job-a0009",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-birch-abl-v2",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-11",
+      "submitted_at": "2026-11-21T21:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0006",
+        "starts_at": "2026-11-21T22:01:00-05:00",
+        "ends_at": "2026-11-22T08:01:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.641
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00022",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-11-21T21:01:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00022",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0101",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T07:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-01T07:20:00-05:00",
+        "ends_at": "2026-12-01T18:20:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.712
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-bl-101",
+      "history": [
+        {
+          "at": "2026-12-01T07:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-bl-101",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0102",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 1,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T07:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-01T07:20:00-05:00",
+        "ends_at": "2026-12-01T18:20:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.705
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": {
+        "by": "person-mei",
+        "at": "2026-12-06T14:30:00-05:00",
+        "reason": "Seed 1 read a cached split from the old dataset version.",
+        "event_id": "ev-h-0077"
+      },
+      "request_id": null,
+      "event_id": "ev-bl-102",
+      "history": [
+        {
+          "at": "2026-12-01T07:01:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-bl-102",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-06T14:30:00-05:00",
+          "action": "result.invalidated",
+          "actor": "event",
+          "ref": "ev-h-0077"
+        }
+      ]
+    },
+    {
+      "id": "job-0103",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T07:02:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-01T07:21:00-05:00",
+        "ends_at": "2026-12-01T18:21:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.719
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-bl-103",
+      "history": [
+        {
+          "at": "2026-12-01T07:02:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-bl-103",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0104",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v2",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T07:30:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-01T07:40:00-05:00",
+        "ends_at": "2026-12-01T18:40:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.731
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-bl-104",
+      "history": [
+        {
+          "at": "2026-12-01T07:30:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-bl-104",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0010",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T08:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0008",
+        "starts_at": "2026-12-01T08:30:00-05:00",
+        "ends_at": "2026-12-01T20:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.694
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": {
+        "tags": [
+          "paper",
+          "baseline"
+        ],
+        "note": "ViT-S/16 baseline, seed 0.",
+        "excluded": false,
+        "reason": null,
+        "updated_at": "2026-12-04T09:03:00-05:00"
+      },
+      "invalidation": null,
+      "request_id": "req-00035",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-01T08:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00035",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-04T09:03:00-05:00",
+          "action": "results.update",
+          "actor": "agent",
+          "ref": "req-00082",
+          "disposition": "candidate"
+        }
+      ]
+    },
+    {
+      "id": "job-a0011",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T08:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0009",
+        "starts_at": "2026-12-01T08:31:00-05:00",
+        "ends_at": "2026-12-01T20:31:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.689
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00036",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-01T08:01:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00036",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0012",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 2,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T08:02:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0010",
+        "starts_at": "2026-12-01T08:32:00-05:00",
+        "ends_at": "2026-12-01T20:32:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.701
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00037",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-01T08:02:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00037",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0013",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 1,
+      "time_limit_hours": 15,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T21:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0014",
+        "starts_at": "2026-12-02T13:30:00-05:00",
+        "ends_at": "2026-12-02T23:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.711
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00038",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-01T21:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00038",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-02T12:30:00-05:00",
+          "action": "job.planned",
+          "actor": "event",
+          "ref": "ev-h-0027"
+        }
+      ]
+    },
+    {
+      "id": "job-a0014",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 1,
+      "partition_id": "gpu-h",
+      "gpus": 1,
+      "time_limit_hours": 15,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-01T21:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0015",
+        "starts_at": "2026-12-02T16:30:00-05:00",
+        "ends_at": "2026-12-03T02:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.709
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00039",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-01T21:01:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00039",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-02T12:30:00-05:00",
+          "action": "job.planned",
+          "actor": "event",
+          "ref": "ev-h-0028"
+        }
+      ]
+    },
+    {
+      "id": "job-0131",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 4,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-02T08:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-02T08:20:00-05:00",
+        "ends_at": "2026-12-02T19:05:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.698
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0047",
+      "history": [
+        {
+          "at": "2026-12-02T08:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0047",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0132",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v3",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-02T09:30:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-02T09:45:00-05:00",
+        "ends_at": "2026-12-02T17:45:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.699
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0048",
+      "history": [
+        {
+          "at": "2026-12-02T09:30:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0048",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0133",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v3",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-02T09:31:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-02T09:46:00-05:00",
+        "ends_at": "2026-12-02T17:40:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.694
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0049",
+      "history": [
+        {
+          "at": "2026-12-02T09:31:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0049",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0134",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v3",
+      "seed": 2,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-02T09:32:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-02T09:46:00-05:00",
+        "ends_at": "2026-12-02T17:52:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.701
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": {
+        "by": "person-tomas",
+        "at": "2026-12-07T10:00:00-05:00",
+        "reason": "The config had the wrong patch size.",
+        "event_id": "ev-h-0078"
+      },
+      "request_id": null,
+      "event_id": "ev-h-0050",
+      "history": [
+        {
+          "at": "2026-12-02T09:32:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0050",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-07T10:00:00-05:00",
+          "action": "result.invalidated",
+          "actor": "event",
+          "ref": "ev-h-0078"
+        }
+      ]
+    },
+    {
+      "id": "job-0135",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 3,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-03T08:10:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-03T08:30:00-05:00",
+        "ends_at": "2026-12-03T19:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.716
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0051",
+      "history": [
+        {
+          "at": "2026-12-03T08:10:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0051",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0136",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 4,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-03T08:11:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-03T08:30:00-05:00",
+        "ends_at": "2026-12-03T19:31:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.71
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0052",
+      "history": [
+        {
+          "at": "2026-12-03T08:11:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0052",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0015",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 3,
+      "partition_id": "gpu-h",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-03T11:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0016",
+        "starts_at": "2026-12-03T11:30:00-05:00",
+        "ends_at": "2026-12-03T21:50:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.714
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00065",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-03T11:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00065",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0016",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 4,
+      "partition_id": "gpu-h",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-03T11:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0017",
+        "starts_at": "2026-12-03T11:31:00-05:00",
+        "ends_at": "2026-12-03T21:41:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.707
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00066",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-03T11:01:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00066",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0137",
+      "owner_person_id": "person-farid",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v1",
+      "seed": 0,
+      "partition_id": "cpu",
+      "gpus": 8,
+      "time_limit_hours": 24,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-03T13:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-03T13:05:00-05:00",
+        "ends_at": "2026-12-03T14:20:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0053",
+      "history": [
+        {
+          "at": "2026-12-03T13:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0053",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0138",
+      "owner_person_id": "person-farid",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v1",
+      "seed": 1,
+      "partition_id": "cpu",
+      "gpus": 8,
+      "time_limit_hours": 6,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-03T13:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-03T13:05:00-05:00",
+        "ends_at": "2026-12-03T19:05:00-05:00",
+        "end_kind": "timed_out",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0054",
+      "history": [
+        {
+          "at": "2026-12-03T13:01:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0054",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0017",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 3,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-04T09:30:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0029",
+        "starts_at": "2026-12-04T10:00:00-05:00",
+        "ends_at": "2026-12-04T22:00:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.697
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00083",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-04T09:30:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00083",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0139",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 1,
+      "partition_id": "cpu",
+      "gpus": 1,
+      "time_limit_hours": 48,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-04T10:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-04T10:05:00-05:00",
+        "ends_at": "2026-12-04T10:40:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0055",
+      "history": [
+        {
+          "at": "2026-12-04T10:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0055",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0140",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 2,
+      "partition_id": "cpu",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v2",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-04T10:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-04T10:05:00-05:00",
+        "ends_at": "2026-12-04T22:05:00-05:00",
+        "end_kind": "timed_out",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0056",
+      "history": [
+        {
+          "at": "2026-12-04T10:01:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0056",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0143",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 0,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-04T15:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-04T15:20:00-05:00",
+        "ends_at": "2026-12-04T18:10:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0059",
+      "history": [
+        {
+          "at": "2026-12-04T15:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0059",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0018",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 4,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-04T21:00:00-05:00",
+      "stored_state": "cancelled",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0030",
+        "starts_at": "2026-12-04T21:30:00-05:00",
+        "ends_at": "2026-12-05T09:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.692
+        },
+        "error": null
+      },
+      "cancelled_at": "2026-12-04T21:10:00-05:00",
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00087",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-04T21:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00087",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-04T21:10:00-05:00",
+          "action": "jobs.cancel",
+          "actor": "agent",
+          "ref": "req-00089",
+          "state": "cancelled"
+        }
+      ]
+    },
+    {
+      "id": "job-a0019",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-04T21:05:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0011",
+        "starts_at": "2026-12-04T21:25:00-05:00",
+        "ends_at": "2026-12-05T09:25:00-05:00",
+        "end_kind": "timed_out",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00088",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-04T21:05:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00088",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0144",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 1,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-05T08:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-05T08:15:00-05:00",
+        "ends_at": "2026-12-05T19:15:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.712
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0060",
+      "history": [
+        {
+          "at": "2026-12-05T08:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0060",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0145",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-05T08:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-05T08:15:00-05:00",
+        "ends_at": "2026-12-05T19:20:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.715
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0061",
+      "history": [
+        {
+          "at": "2026-12-05T08:01:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0061",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0146",
+      "owner_person_id": "person-farid",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v1",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 4,
+      "time_limit_hours": 10,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-05T09:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-05T09:10:00-05:00",
+        "ends_at": "2026-12-05T19:10:00-05:00",
+        "end_kind": "timed_out",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0062",
+      "history": [
+        {
+          "at": "2026-12-05T09:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0062",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0020",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-atlas-v3",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 24,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-05T10:00:00-05:00",
+      "stored_state": "interrupted",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0028",
+        "starts_at": "2026-12-05T10:40:00-05:00",
+        "ends_at": "2026-12-06T06:40:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.736
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": "2026-12-06T03:00:00-05:00",
+      "interrupt_reason": "Node gpu-a-03 failed.",
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00093",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-05T10:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00093",
+          "state": "queued"
+        },
+        {
+          "at": "2026-12-06T03:00:00-05:00",
+          "action": "job.interrupted",
+          "actor": "event",
+          "ref": "ev-h-0076",
+          "state": "interrupted"
+        }
+      ]
+    },
+    {
+      "id": "job-0147",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v1",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v1",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-05T14:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-05T14:05:00-05:00",
+        "ends_at": "2026-12-05T22:00:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.681
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0063",
+      "history": [
+        {
+          "at": "2026-12-05T14:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0063",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0021",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-birch-abl-v3",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-06T09:05:00-05:00",
+      "stored_state": "held",
+      "hold_reason": "submitted_held",
+      "run": null,
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00096",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-06T09:05:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00096",
+          "state": "held"
+        }
+      ]
+    },
+    {
+      "id": "job-0148",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v3",
+      "seed": 3,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-06T10:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-06T10:10:00-05:00",
+        "ends_at": "2026-12-06T11:25:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0064",
+      "history": [
+        {
+          "at": "2026-12-06T10:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0064",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0149",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v3",
+      "seed": 4,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 8,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-06T10:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-06T10:10:00-05:00",
+        "ends_at": "2026-12-06T18:10:00-05:00",
+        "end_kind": "timed_out",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0065",
+      "history": [
+        {
+          "at": "2026-12-06T10:01:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0065",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0151",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 4,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-07T08:01:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-07T08:10:00-05:00",
+        "ends_at": "2026-12-07T09:45:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0067",
+      "history": [
+        {
+          "at": "2026-12-07T08:01:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0067",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0152",
+      "owner_person_id": "person-farid",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-birch-abl-v1",
+      "seed": 0,
+      "partition_id": "cpu",
+      "gpus": 4,
+      "time_limit_hours": 24,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-07T11:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-07T11:05:00-05:00",
+        "ends_at": "2026-12-07T15:30:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0068",
+      "history": [
+        {
+          "at": "2026-12-07T11:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0068",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0155",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v2",
+      "seed": 0,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 24,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-08T12:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-08T12:30:00-05:00",
+        "ends_at": "2026-12-08T23:30:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.711
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0071",
+      "history": [
+        {
+          "at": "2026-12-08T12:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0071",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0157",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v1",
+      "seed": 2,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v1",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-08T14:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-08T14:05:00-05:00",
+        "ends_at": "2026-12-08T14:30:00-05:00",
+        "end_kind": "failed",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0073",
+      "history": [
+        {
+          "at": "2026-12-08T14:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0073",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0022",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "script",
+      "script": "atlas-sweep.sh",
+      "config_id": "cfg-atlas-v2",
+      "seed": 4,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-08T21:30:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0018",
+        "starts_at": "2026-12-08T21:50:00-05:00",
+        "ends_at": "2026-12-09T07:10:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.733
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0045",
+      "history": [
+        {
+          "at": "2026-12-08T21:30:00-05:00",
+          "action": "job.script_submitted",
+          "actor": "event",
+          "ref": "ev-h-0045",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0023",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-atlas-v3",
+      "seed": 1,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 24,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-08T22:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": "rp-0020",
+        "starts_at": "2026-12-08T22:45:00-05:00",
+        "ends_at": "2026-12-09T22:45:00-05:00",
+        "end_kind": "timed_out",
+        "metrics": null,
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00115",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-08T22:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00115",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0156",
+      "owner_person_id": "person-farid",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v1",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T07:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T07:10:00-05:00",
+        "ends_at": "2026-12-09T18:10:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.703
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0072",
+      "history": [
+        {
+          "at": "2026-12-09T07:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0072",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0158",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 3,
+      "partition_id": "cpu",
+      "gpus": 1,
+      "time_limit_hours": 48,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T07:30:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T07:35:00-05:00",
+        "ends_at": "2026-12-09T23:10:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.6
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0074",
+      "history": [
+        {
+          "at": "2026-12-09T07:30:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0074",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0153",
+      "owner_person_id": "person-ines",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-vit-s16-v1",
+      "seed": 1,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v1",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T08:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T11:00:00-05:00",
+        "ends_at": "2026-12-09T18:50:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.676
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0069",
+      "history": [
+        {
+          "at": "2026-12-09T08:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0069",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-a0024",
+      "owner_person_id": "person-nadia",
+      "submitted_by": "agent",
+      "script": null,
+      "config_id": "cfg-vit-s16-v2",
+      "seed": 5,
+      "partition_id": "gpu-a",
+      "gpus": 1,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T09:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": null,
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": "req-00120",
+      "event_id": null,
+      "history": [
+        {
+          "at": "2026-12-09T09:00:00-05:00",
+          "action": "jobs.submit",
+          "actor": "agent",
+          "ref": "req-00120",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0154",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v3",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 24,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T09:00:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T12:00:00-05:00",
+        "ends_at": "2026-12-09T23:59:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.737
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0070",
+      "history": [
+        {
+          "at": "2026-12-09T09:00:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0070",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0150",
+      "owner_person_id": "person-mei",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-mae-b16-v3",
+      "seed": 3,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T09:10:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T10:30:00-05:00",
+        "ends_at": "2026-12-09T21:20:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.713
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0066",
+      "history": [
+        {
+          "at": "2026-12-09T09:10:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0066",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0141",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v2",
+      "seed": 1,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T09:20:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T13:00:00-05:00",
+        "ends_at": "2026-12-09T22:15:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.729
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0057",
+      "history": [
+        {
+          "at": "2026-12-09T09:20:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0057",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0142",
+      "owner_person_id": "person-tomas",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v2",
+      "seed": 2,
+      "partition_id": "gpu-h",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": "proto-subj-v4",
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T09:21:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T13:00:00-05:00",
+        "ends_at": "2026-12-09T22:27:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.735
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0058",
+      "history": [
+        {
+          "at": "2026-12-09T09:21:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0058",
+          "state": "queued"
+        }
+      ]
+    },
+    {
+      "id": "job-0159",
+      "owner_person_id": "person-farid",
+      "submitted_by": "labmate",
+      "script": null,
+      "config_id": "cfg-atlas-v1",
+      "seed": 2,
+      "partition_id": "gpu-a",
+      "gpus": 2,
+      "time_limit_hours": 12,
+      "protocol_id": null,
+      "period_id": "alloc-2026-12",
+      "submitted_at": "2026-12-09T09:40:00-05:00",
+      "stored_state": "queued",
+      "hold_reason": null,
+      "run": {
+        "plan_id": null,
+        "starts_at": "2026-12-09T15:00:00-05:00",
+        "ends_at": "2026-12-09T23:00:00-05:00",
+        "end_kind": "completed",
+        "metrics": {
+          "accuracy": 0.699
+        },
+        "error": null
+      },
+      "cancelled_at": null,
+      "interrupted_at": null,
+      "interrupt_reason": null,
+      "review": null,
+      "invalidation": null,
+      "request_id": null,
+      "event_id": "ev-h-0075",
+      "history": [
+        {
+          "at": "2026-12-09T09:40:00-05:00",
+          "action": "job.recorded",
+          "actor": "event",
+          "ref": "ev-h-0075",
+          "state": "queued"
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "id": "tbl-0001.v1",
+      "table_id": "tbl-0001",
+      "version": 1,
+      "title": "Main results",
+      "protocol_id": "proto-subj-v2",
+      "stored_state": "superseded",
+      "rows": [
+        {
+          "name": "MAE-B/16 v2",
+          "result_ids": [
+            "job-0101",
+            "job-0102",
+            "job-0103"
+          ]
+        },
+        {
+          "name": "ViT-S/16 v2",
+          "result_ids": [
+            "job-a0010",
+            "job-a0011",
+            "job-a0012"
+          ]
+        }
+      ],
+      "created_at": "2026-12-02T15:00:00-05:00",
+      "frozen_at": "2026-12-02T15:10:00-05:00",
+      "superseded_at": "2026-12-06T15:10:00-05:00",
+      "discarded_at": null,
+      "revises": null,
+      "manifest": {
+        "table_id": "tbl-0001",
+        "version": 1,
+        "title": "Main results",
+        "protocol_id": "proto-subj-v2",
+        "metrics": [
+          {
+            "name": "accuracy",
+            "direction": "higher"
+          }
+        ],
+        "rows": [
+          {
+            "name": "MAE-B/16 v2",
+            "config_id": "cfg-mae-b16-v2",
+            "seeds": [
+              0,
+              1,
+              2
+            ],
+            "result_ids": [
+              "job-0101",
+              "job-0102",
+              "job-0103"
+            ],
+            "metrics": {
+              "accuracy": {
+                "count": 3,
+                "mean": 0.712,
+                "sd": 0.007
+              }
+            }
+          },
+          {
+            "name": "ViT-S/16 v2",
+            "config_id": "cfg-vit-s16-v2",
+            "seeds": [
+              0,
+              1,
+              2
+            ],
+            "result_ids": [
+              "job-a0010",
+              "job-a0011",
+              "job-a0012"
+            ],
+            "metrics": {
+              "accuracy": {
+                "count": 3,
+                "mean": 0.6947,
+                "sd": 0.006
+              }
+            }
+          }
+        ],
+        "frozen_at": "2026-12-02T15:10:00-05:00",
+        "content_hash": "sha256:de43753db16e0b98cb55b0e4b63dfc7acf4d11f4da90f4a49ff8fbc0730e5d82"
+      },
+      "request_id": "req-00052",
+      "history": [
+        {
+          "at": "2026-12-02T15:00:00-05:00",
+          "action": "tables.create",
+          "actor": "agent",
+          "ref": "req-00052"
+        },
+        {
+          "at": "2026-12-02T15:05:00-05:00",
+          "action": "tables.update",
+          "actor": "agent",
+          "ref": "req-00053",
+          "rows": 2
+        },
+        {
+          "at": "2026-12-02T15:10:00-05:00",
+          "action": "tables.freeze",
+          "actor": "agent",
+          "ref": "req-00054"
+        },
+        {
+          "at": "2026-12-06T15:10:00-05:00",
+          "action": "table.superseded",
+          "actor": "agent",
+          "ref": "req-00102"
+        }
+      ]
+    },
+    {
+      "id": "tbl-0001.v2",
+      "table_id": "tbl-0001",
+      "version": 2,
+      "title": "Main results",
+      "protocol_id": "proto-subj-v2",
+      "stored_state": "frozen",
+      "rows": [
+        {
+          "name": "ViT-S/16 v2",
+          "result_ids": [
+            "job-a0010",
+            "job-a0011",
+            "job-a0012"
+          ]
+        }
+      ],
+      "created_at": "2026-12-06T15:00:00-05:00",
+      "frozen_at": "2026-12-06T15:10:00-05:00",
+      "superseded_at": null,
+      "discarded_at": null,
+      "revises": "tbl-0001.v1",
+      "manifest": {
+        "table_id": "tbl-0001",
+        "version": 2,
+        "title": "Main results",
+        "protocol_id": "proto-subj-v2",
+        "metrics": [
+          {
+            "name": "accuracy",
+            "direction": "higher"
+          }
+        ],
+        "rows": [
+          {
+            "name": "ViT-S/16 v2",
+            "config_id": "cfg-vit-s16-v2",
+            "seeds": [
+              0,
+              1,
+              2
+            ],
+            "result_ids": [
+              "job-a0010",
+              "job-a0011",
+              "job-a0012"
+            ],
+            "metrics": {
+              "accuracy": {
+                "count": 3,
+                "mean": 0.6947,
+                "sd": 0.006
+              }
+            }
+          }
+        ],
+        "frozen_at": "2026-12-06T15:10:00-05:00",
+        "content_hash": "sha256:d21483fd41ac39170ec8c6f13d77128694d74fca15a83d12c974566c1447b1d9"
+      },
+      "request_id": "req-00100",
+      "history": [
+        {
+          "at": "2026-12-06T15:00:00-05:00",
+          "action": "tables.revise",
+          "actor": "agent",
+          "ref": "req-00100",
+          "from": "tbl-0001.v1"
+        },
+        {
+          "at": "2026-12-06T15:05:00-05:00",
+          "action": "tables.update",
+          "actor": "agent",
+          "ref": "req-00101",
+          "rows": 1
+        },
+        {
+          "at": "2026-12-06T15:10:00-05:00",
+          "action": "tables.freeze",
+          "actor": "agent",
+          "ref": "req-00102"
+        }
+      ]
+    },
+    {
+      "id": "tbl-0002.v1",
+      "table_id": "tbl-0002",
+      "version": 1,
+      "title": "Five-seed results",
+      "protocol_id": "proto-subj-v4",
+      "stored_state": "discarded",
+      "rows": [
+        {
+          "name": "MAE-B/16 v3",
+          "result_ids": [
+            "job-a0015",
+            "job-a0016"
+          ]
+        }
+      ],
+      "created_at": "2026-12-07T09:30:00-05:00",
+      "frozen_at": null,
+      "superseded_at": null,
+      "discarded_at": "2026-12-07T09:40:00-05:00",
+      "revises": null,
+      "manifest": null,
+      "request_id": "req-00104",
+      "history": [
+        {
+          "at": "2026-12-07T09:30:00-05:00",
+          "action": "tables.create",
+          "actor": "agent",
+          "ref": "req-00104"
+        },
+        {
+          "at": "2026-12-07T09:35:00-05:00",
+          "action": "tables.update",
+          "actor": "agent",
+          "ref": "req-00105",
+          "rows": 1
+        },
+        {
+          "at": "2026-12-07T09:40:00-05:00",
+          "action": "tables.discard",
+          "actor": "agent",
+          "ref": "req-00106"
+        }
+      ]
+    },
+    {
+      "id": "tbl-0003.v1",
+      "table_id": "tbl-0003",
+      "version": 1,
+      "title": "Five-seed results",
+      "protocol_id": "proto-subj-v4",
+      "stored_state": "draft",
+      "rows": [
+        {
+          "name": "MAE-B/16 v3",
+          "result_ids": [
+            "job-0144",
+            "job-0145",
+            "job-a0015",
+            "job-a0016"
+          ]
+        }
+      ],
+      "created_at": "2026-12-08T10:00:00-05:00",
+      "frozen_at": null,
+      "superseded_at": null,
+      "discarded_at": null,
+      "revises": null,
+      "manifest": null,
+      "request_id": "req-00110",
+      "history": [
+        {
+          "at": "2026-12-08T10:00:00-05:00",
+          "action": "tables.create",
+          "actor": "agent",
+          "ref": "req-00110"
+        },
+        {
+          "at": "2026-12-08T10:05:00-05:00",
+          "action": "tables.update",
+          "actor": "agent",
+          "ref": "req-00111",
+          "rows": 1
+        }
+      ]
+    }
+  ],
+  "preferences": {
+    "timezone": "America/New_York",
+    "email_notices": true,
+    "job_end_notices": true
+  },
+  "notifications": [
+    {
+      "id": "ntf-0022",
+      "at": "2026-12-03T09:00:00-05:00",
+      "kind": "protocol.proposed",
+      "event_id": "ev-h-0025",
+      "request_id": null,
+      "object_type": "protocol",
+      "object_id": "proto-trial-v2",
+      "title": "Tomas Arce asks you to sign proto-trial-v2",
+      "text": "Tomas Arce proposed proto-trial-v2, a new version of the protocol line trial-eval. The line has no signed version yet. Rationale: three seeds, accuracy only. You are a required signer. Sign or decline it by 8 December at 09:00. After that it expires.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0022",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-03T09:00:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "protocol",
+            "object_id": "proto-trial-v2"
+          },
+          "content": {
+            "title": "Tomas Arce asks you to sign proto-trial-v2",
+            "body": {
+              "format": "text/plain",
+              "text": "Tomas Arce proposed proto-trial-v2, a new version of the protocol line trial-eval. The line has no signed version yet. Rationale: three seeds, accuracy only. You are a required signer. Sign or decline it by 8 December at 09:00. After that it expires."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:protocol-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0023",
+      "at": "2026-12-03T10:00:00-05:00",
+      "kind": "protocol.updated",
+      "event_id": "ev-h-0022",
+      "request_id": null,
+      "object_type": "protocol",
+      "object_id": "proto-subj-v4",
+      "title": "Prof. Okafor signed proto-subj-v4",
+      "text": "Prof. Okafor signed proto-subj-v4 of subject-eval on 3 December at 10:00. Note: fine with five seeds. Every required signer has signed, so proto-subj-v4 is now the signed version of subject-eval. proto-subj-v2 is superseded.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0023",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-03T10:00:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "protocol",
+            "object_id": "proto-subj-v4"
+          },
+          "content": {
+            "title": "Prof. Okafor signed proto-subj-v4",
+            "body": {
+              "format": "text/plain",
+              "text": "Prof. Okafor signed proto-subj-v4 of subject-eval on 3 December at 10:00. Note: fine with five seeds. Every required signer has signed, so proto-subj-v4 is now the signed version of subject-eval. proto-subj-v2 is superseded."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:protocol-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0024",
+      "at": "2026-12-03T21:50:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00065",
+      "object_type": "job",
+      "object_id": "job-a0015",
+      "title": "Your job job-a0015 has completed",
+      "text": "Your job job-a0015 (cfg-mae-b16-v3, seed 3, 1 GPU on H100 nodes for up to 12 hours) completed on 3 December at 21:50. It ran for 10.33 hours and was charged 20.67 GPU-hours. Its result is ready in Benchline.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0024",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-03T21:50:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0015"
+          },
+          "content": {
+            "title": "Your job job-a0015 has completed",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0015 (cfg-mae-b16-v3, seed 3, 1 GPU on H100 nodes for up to 12 hours) completed on 3 December at 21:50. It ran for 10.33 hours and was charged 20.67 GPU-hours. Its result is ready in Benchline."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0025",
+      "at": "2026-12-03T21:41:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00066",
+      "object_type": "job",
+      "object_id": "job-a0016",
+      "title": "Your job job-a0016 has completed",
+      "text": "Your job job-a0016 (cfg-mae-b16-v3, seed 4, 1 GPU on H100 nodes for up to 12 hours) completed on 3 December at 21:41. It ran for 10.17 hours and was charged 20.33 GPU-hours. Its result is ready in Benchline.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0025",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-03T21:41:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0016"
+          },
+          "content": {
+            "title": "Your job job-a0016 has completed",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0016 (cfg-mae-b16-v3, seed 4, 1 GPU on H100 nodes for up to 12 hours) completed on 3 December at 21:41. It ran for 10.17 hours and was charged 20.33 GPU-hours. Its result is ready in Benchline."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0026",
+      "at": "2026-12-04T22:00:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00083",
+      "object_type": "job",
+      "object_id": "job-a0017",
+      "title": "Your job job-a0017 has completed",
+      "text": "Your job job-a0017 (cfg-vit-s16-v2, seed 3, 1 GPU on A100 nodes for up to 12 hours) completed on 4 December at 22:00. It ran for 12 hours and was charged 12 GPU-hours. Its result is ready in Benchline.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0026",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-04T22:00:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0017"
+          },
+          "content": {
+            "title": "Your job job-a0017 has completed",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0017 (cfg-vit-s16-v2, seed 3, 1 GPU on A100 nodes for up to 12 hours) completed on 4 December at 22:00. It ran for 12 hours and was charged 12 GPU-hours. Its result is ready in Benchline."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0027",
+      "at": "2026-12-05T09:30:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00087",
+      "object_type": "job",
+      "object_id": "job-a0018",
+      "title": "Your job job-a0018 has completed",
+      "text": "Your job job-a0018 (cfg-vit-s16-v2, seed 4, 1 GPU on A100 nodes for up to 12 hours) completed on 5 December at 09:30. It ran for 12 hours and was charged 12 GPU-hours. Its result is ready in Benchline.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0027",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-05T09:30:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0018"
+          },
+          "content": {
+            "title": "Your job job-a0018 has completed",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0018 (cfg-vit-s16-v2, seed 4, 1 GPU on A100 nodes for up to 12 hours) completed on 5 December at 09:30. It ran for 12 hours and was charged 12 GPU-hours. Its result is ready in Benchline."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": "2026-12-04T21:10:00-05:00"
+    },
+    {
+      "id": "ntf-0028",
+      "at": "2026-12-05T09:25:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00088",
+      "object_type": "job",
+      "object_id": "job-a0019",
+      "title": "Your job job-a0019 ran out of time",
+      "text": "Your job job-a0019 (cfg-vit-s16-v2, seed 2, 2 GPUs on H100 nodes for up to 12 hours) reached its time limit on 5 December at 09:25 and was stopped. It was charged 48 GPU-hours. It leaves no result.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0028",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-05T09:25:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0019"
+          },
+          "content": {
+            "title": "Your job job-a0019 ran out of time",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0019 (cfg-vit-s16-v2, seed 2, 2 GPUs on H100 nodes for up to 12 hours) reached its time limit on 5 December at 09:25 and was stopped. It was charged 48 GPU-hours. It leaves no result."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0029",
+      "at": "2026-12-06T06:40:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00093",
+      "object_type": "job",
+      "object_id": "job-a0020",
+      "title": "Your job job-a0020 has completed",
+      "text": "Your job job-a0020 (cfg-atlas-v3, seed 0, 2 GPUs on A100 nodes for up to 24 hours) completed on 6 December at 06:40. It ran for 20 hours and was charged 40 GPU-hours. Its result is ready in Benchline.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0029",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-06T06:40:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0020"
+          },
+          "content": {
+            "title": "Your job job-a0020 has completed",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0020 (cfg-atlas-v3, seed 0, 2 GPUs on A100 nodes for up to 24 hours) completed on 6 December at 06:40. It ran for 20 hours and was charged 40 GPU-hours. Its result is ready in Benchline."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": "2026-12-06T03:00:00-05:00"
+    },
+    {
+      "id": "ntf-0030",
+      "at": "2026-12-06T03:00:00-05:00",
+      "kind": "job.interrupted",
+      "event_id": "ev-h-0076",
+      "request_id": null,
+      "object_type": "job",
+      "object_id": "job-a0020",
+      "title": "Your job job-a0020 was interrupted",
+      "text": "Your job job-a0020 (cfg-atlas-v3, seed 0, 2 GPUs on A100 nodes for up to 24 hours) was interrupted on 6 December at 03:00. Reason given: node gpu-a-03 failed. It leaves no result. It was charged 32.67 GPU-hours. Submit it again if you still need it.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0030",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-06T03:00:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0020"
+          },
+          "content": {
+            "title": "Your job job-a0020 was interrupted",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0020 (cfg-atlas-v3, seed 0, 2 GPUs on A100 nodes for up to 24 hours) was interrupted on 6 December at 03:00. Reason given: node gpu-a-03 failed. It leaves no result. It was charged 32.67 GPU-hours. Submit it again if you still need it."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0031",
+      "at": "2026-12-06T14:30:00-05:00",
+      "kind": "result.invalidated",
+      "event_id": "ev-h-0077",
+      "request_id": null,
+      "object_type": "result",
+      "object_id": "job-0102",
+      "title": "The result of job-0102 was invalidated",
+      "text": "Mei Lindqvist marked the result of the job job-0102 (cfg-mae-b16-v2, seed 1) as invalid. Reason given: seed 1 read a cached split from the old dataset version. Your tables that cite it keep it and now read the flag cites_invalidated: tbl-0001.v1. A correction is a new version of the table.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0031",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-06T14:30:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "result",
+            "object_id": "job-0102"
+          },
+          "content": {
+            "title": "The result of job-0102 was invalidated",
+            "body": {
+              "format": "text/plain",
+              "text": "Mei Lindqvist marked the result of the job job-0102 (cfg-mae-b16-v2, seed 1) as invalid. Reason given: seed 1 read a cached split from the old dataset version. Your tables that cite it keep it and now read the flag cites_invalidated: tbl-0001.v1. A correction is a new version of the table."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:result-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0032",
+      "at": "2026-12-07T15:00:00-05:00",
+      "kind": "protocol.proposed",
+      "event_id": "ev-h-0026",
+      "request_id": null,
+      "object_type": "protocol",
+      "object_id": "proto-lat-v1",
+      "title": "Farid Haddad asks you to sign proto-lat-v1",
+      "text": "Farid Haddad proposed proto-lat-v1, a new version of the protocol line latency-eval. The line has no signed version yet. Rationale: inference latency on one seed. You are a required signer. Sign or decline it by 12 December at 15:00. After that it expires.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0032",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-07T15:00:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "protocol",
+            "object_id": "proto-lat-v1"
+          },
+          "content": {
+            "title": "Farid Haddad asks you to sign proto-lat-v1",
+            "body": {
+              "format": "text/plain",
+              "text": "Farid Haddad proposed proto-lat-v1, a new version of the protocol line latency-eval. The line has no signed version yet. Rationale: inference latency on one seed. You are a required signer. Sign or decline it by 12 December at 15:00. After that it expires."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:protocol-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0033",
+      "at": "2026-12-09T07:10:00-05:00",
+      "kind": "job.ended",
+      "event_id": "ev-h-0045",
+      "request_id": null,
+      "object_type": "job",
+      "object_id": "job-a0022",
+      "title": "Your job job-a0022 has completed",
+      "text": "Your job job-a0022 (cfg-atlas-v2, seed 4, 2 GPUs on H100 nodes for up to 12 hours) completed on 9 December at 07:10. It ran for 9.33 hours and was charged 37.33 GPU-hours. Its result is ready in Benchline.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0033",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-09T07:10:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0022"
+          },
+          "content": {
+            "title": "Your job job-a0022 has completed",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0022 (cfg-atlas-v2, seed 4, 2 GPUs on H100 nodes for up to 12 hours) completed on 9 December at 07:10. It ran for 9.33 hours and was charged 37.33 GPU-hours. Its result is ready in Benchline."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0034",
+      "at": "2026-12-09T22:45:00-05:00",
+      "kind": "job.ended",
+      "event_id": null,
+      "request_id": "req-00115",
+      "object_type": "job",
+      "object_id": "job-a0023",
+      "title": "Your job job-a0023 ran out of time",
+      "text": "Your job job-a0023 (cfg-atlas-v3, seed 1, 2 GPUs on H100 nodes for up to 24 hours) reached its time limit on 9 December at 22:45 and was stopped. It was charged 96 GPU-hours. It leaves no result.",
+      "details": null,
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0034",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-09T22:45:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "job",
+            "object_id": "job-a0023"
+          },
+          "content": {
+            "title": "Your job job-a0023 ran out of time",
+            "body": {
+              "format": "text/plain",
+              "text": "Your job job-a0023 (cfg-atlas-v3, seed 1, 2 GPUs on H100 nodes for up to 24 hours) reached its time limit on 9 December at 22:45 and was stopped. It was charged 96 GPU-hours. It leaves no result."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    },
+    {
+      "id": "ntf-0035",
+      "at": "2026-12-08T23:30:00-05:00",
+      "kind": "job.submission_rejected",
+      "event_id": "ev-h-0046",
+      "request_id": null,
+      "object_type": "config",
+      "object_id": "cfg-atlas-v2",
+      "title": "Your script's job was not submitted",
+      "text": "Your script atlas-sweep.sh tried to submit a job on 8 December at 23:30 (cfg-atlas-v2, seed 3, 2 GPUs on H100 nodes for up to 30 hours, under proto-subj-v4). Benchline did not add it, because the time limit is longer than 24 hours, the longest job time of H100 nodes (time_limit_too_long). No hours were reserved.",
+      "details": {
+        "script": "atlas-sweep.sh",
+        "config_id": "cfg-atlas-v2",
+        "seed": 3,
+        "partition_id": "gpu-h",
+        "gpus": 2,
+        "time_limit_hours": 30,
+        "protocol_id": "proto-subj-v4",
+        "hold": false,
+        "error": "time_limit_too_long"
+      },
+      "email": {
+        "specversion": "1.0",
+        "id": "ntf-0035",
+        "source": "urn:pale:app:benchline:account:benchline-nadia",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-08T23:30:00-05:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-nadia"
+          },
+          "source_object": {
+            "app_id": "benchline",
+            "account_id": "benchline-nadia",
+            "object_type": "config",
+            "object_id": "cfg-atlas-v2"
+          },
+          "content": {
+            "title": "Your script's job was not submitted",
+            "body": {
+              "format": "text/plain",
+              "text": "Your script atlas-sweep.sh tried to submit a job on 8 December at 23:30 (cfg-atlas-v2, seed 3, 2 GPUs on H100 nodes for up to 30 hours, under proto-subj-v4). Benchline did not add it, because the time limit is longer than 24 hours, the longest job time of H100 nodes (time_limit_too_long). No hours were reserved."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "benchline-nadia:job-updates",
+          "extensions": []
+        }
+      },
+      "removed_at": null
+    }
+  ],
+  "activity": [
+    {
+      "seq": 1,
+      "at": "2026-11-02T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0001",
+      "request_id": null,
+      "event_id": "ev-h-0001",
+      "effect": false
+    },
+    {
+      "seq": 2,
+      "at": "2026-11-03T09:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0001",
+      "request_id": "req-00002",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 4,
+      "at": "2026-11-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0081",
+      "request_id": null,
+      "event_id": "ev-h-0002",
+      "effect": false
+    },
+    {
+      "seq": 5,
+      "at": "2026-11-05T09:10:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0082",
+      "request_id": null,
+      "event_id": "ev-h-0003",
+      "effect": false
+    },
+    {
+      "seq": 6,
+      "at": "2026-11-16T10:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.proposed",
+      "object_id": "proto-subj-v2",
+      "request_id": null,
+      "event_id": "ev-h-0004",
+      "effect": false
+    },
+    {
+      "seq": 8,
+      "at": "2026-11-16T14:05:00-05:00",
+      "actor": "agent",
+      "action": "protocols.respond",
+      "object_id": "proto-subj-v2",
+      "request_id": "req-00006",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 9,
+      "at": "2026-11-17T09:30:00-05:00",
+      "actor": "event",
+      "action": "protocol.answered",
+      "object_id": "proto-subj-v2",
+      "request_id": null,
+      "event_id": "ev-h-0005",
+      "effect": false
+    },
+    {
+      "seq": 10,
+      "at": "2026-11-17T09:30:00-05:00",
+      "actor": "event",
+      "action": "protocol.superseded",
+      "object_id": "proto-subj-v1",
+      "request_id": null,
+      "event_id": "ev-h-0005",
+      "effect": true
+    },
+    {
+      "seq": 12,
+      "at": "2026-11-17T10:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0002",
+      "request_id": null,
+      "event_id": "ev-h-0006",
+      "effect": false
+    },
+    {
+      "seq": 13,
+      "at": "2026-11-17T10:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0003",
+      "request_id": null,
+      "event_id": "ev-h-0007",
+      "effect": false
+    },
+    {
+      "seq": 14,
+      "at": "2026-11-17T10:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0004",
+      "request_id": null,
+      "event_id": "ev-h-0008",
+      "effect": false
+    },
+    {
+      "seq": 15,
+      "at": "2026-11-17T11:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0002",
+      "request_id": "req-00011",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 17,
+      "at": "2026-11-17T11:02:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0003",
+      "request_id": "req-00012",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 19,
+      "at": "2026-11-17T11:04:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0004",
+      "request_id": "req-00013",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 21,
+      "at": "2026-11-18T09:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0005",
+      "request_id": null,
+      "event_id": "ev-h-0009",
+      "effect": false
+    },
+    {
+      "seq": 22,
+      "at": "2026-11-18T09:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0006",
+      "request_id": null,
+      "event_id": "ev-h-0010",
+      "effect": false
+    },
+    {
+      "seq": 23,
+      "at": "2026-11-18T09:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0007",
+      "request_id": null,
+      "event_id": "ev-h-0011",
+      "effect": false
+    },
+    {
+      "seq": 24,
+      "at": "2026-11-19T07:30:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0090",
+      "request_id": null,
+      "event_id": "ev-h-0012",
+      "effect": false
+    },
+    {
+      "seq": 25,
+      "at": "2026-11-20T21:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0005",
+      "request_id": "req-00018",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 27,
+      "at": "2026-11-20T21:01:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0006",
+      "request_id": "req-00019",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 29,
+      "at": "2026-11-20T21:02:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0007",
+      "request_id": "req-00020",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 31,
+      "at": "2026-11-21T21:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0008",
+      "request_id": "req-00021",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 33,
+      "at": "2026-11-21T21:01:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0009",
+      "request_id": "req-00022",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 35,
+      "at": "2026-11-24T09:00:00-05:00",
+      "actor": "event",
+      "action": "allocation.changed",
+      "object_id": "alloc-2026-11",
+      "request_id": null,
+      "event_id": "ev-h-0013",
+      "effect": false
+    },
+    {
+      "seq": 37,
+      "at": "2026-12-01T07:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0101",
+      "request_id": null,
+      "event_id": "ev-bl-101",
+      "effect": false
+    },
+    {
+      "seq": 38,
+      "at": "2026-12-01T07:01:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0102",
+      "request_id": null,
+      "event_id": "ev-bl-102",
+      "effect": false
+    },
+    {
+      "seq": 39,
+      "at": "2026-12-01T07:02:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0103",
+      "request_id": null,
+      "event_id": "ev-bl-103",
+      "effect": false
+    },
+    {
+      "seq": 40,
+      "at": "2026-12-01T07:30:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0104",
+      "request_id": null,
+      "event_id": "ev-bl-104",
+      "effect": false
+    },
+    {
+      "seq": 41,
+      "at": "2026-12-01T07:45:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0008",
+      "request_id": null,
+      "event_id": "ev-h-0014",
+      "effect": false
+    },
+    {
+      "seq": 42,
+      "at": "2026-12-01T07:45:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0009",
+      "request_id": null,
+      "event_id": "ev-h-0015",
+      "effect": false
+    },
+    {
+      "seq": 43,
+      "at": "2026-12-01T07:45:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0010",
+      "request_id": null,
+      "event_id": "ev-h-0016",
+      "effect": false
+    },
+    {
+      "seq": 44,
+      "at": "2026-12-01T07:45:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0011",
+      "request_id": null,
+      "event_id": "ev-h-0017",
+      "effect": false
+    },
+    {
+      "seq": 45,
+      "at": "2026-12-01T07:45:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0012",
+      "request_id": null,
+      "event_id": "ev-h-0018",
+      "effect": false
+    },
+    {
+      "seq": 46,
+      "at": "2026-12-01T07:45:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0013",
+      "request_id": null,
+      "event_id": "ev-h-0019",
+      "effect": false
+    },
+    {
+      "seq": 47,
+      "at": "2026-12-01T08:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0010",
+      "request_id": "req-00035",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 49,
+      "at": "2026-12-01T08:01:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0011",
+      "request_id": "req-00036",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 51,
+      "at": "2026-12-01T08:02:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0012",
+      "request_id": "req-00037",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 53,
+      "at": "2026-12-01T21:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0013",
+      "request_id": "req-00038",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 54,
+      "at": "2026-12-01T21:01:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0014",
+      "request_id": "req-00039",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 55,
+      "at": "2026-12-01T21:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0005",
+      "request_id": null,
+      "event_id": "ev-h-0020",
+      "effect": false
+    },
+    {
+      "seq": 56,
+      "at": "2026-12-02T08:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0131",
+      "request_id": null,
+      "event_id": "ev-h-0047",
+      "effect": false
+    },
+    {
+      "seq": 57,
+      "at": "2026-12-02T09:30:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0132",
+      "request_id": null,
+      "event_id": "ev-h-0048",
+      "effect": false
+    },
+    {
+      "seq": 58,
+      "at": "2026-12-02T09:31:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0133",
+      "request_id": null,
+      "event_id": "ev-h-0049",
+      "effect": false
+    },
+    {
+      "seq": 59,
+      "at": "2026-12-02T09:32:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0134",
+      "request_id": null,
+      "event_id": "ev-h-0050",
+      "effect": false
+    },
+    {
+      "seq": 60,
+      "at": "2026-12-02T10:00:00-05:00",
+      "actor": "event",
+      "action": "allocation.changed",
+      "object_id": "alloc-2026-12",
+      "request_id": null,
+      "event_id": "ev-h-0044",
+      "effect": false
+    },
+    {
+      "seq": 62,
+      "at": "2026-12-02T11:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.proposed",
+      "object_id": "proto-subj-v3",
+      "request_id": null,
+      "event_id": "ev-h-0021",
+      "effect": false
+    },
+    {
+      "seq": 64,
+      "at": "2026-12-02T12:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.proposed",
+      "object_id": "proto-trial-v1",
+      "request_id": null,
+      "event_id": "ev-h-0023",
+      "effect": false
+    },
+    {
+      "seq": 66,
+      "at": "2026-12-02T12:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0014",
+      "request_id": null,
+      "event_id": "ev-h-0027",
+      "effect": false
+    },
+    {
+      "seq": 67,
+      "at": "2026-12-02T12:30:00-05:00",
+      "actor": "event",
+      "action": "job.planned",
+      "object_id": "job-a0013",
+      "request_id": null,
+      "event_id": "ev-h-0027",
+      "effect": true
+    },
+    {
+      "seq": 69,
+      "at": "2026-12-02T12:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0015",
+      "request_id": null,
+      "event_id": "ev-h-0028",
+      "effect": false
+    },
+    {
+      "seq": 70,
+      "at": "2026-12-02T12:30:00-05:00",
+      "actor": "event",
+      "action": "job.planned",
+      "object_id": "job-a0014",
+      "request_id": null,
+      "event_id": "ev-h-0028",
+      "effect": true
+    },
+    {
+      "seq": 72,
+      "at": "2026-12-02T14:00:00-05:00",
+      "actor": "agent",
+      "action": "protocols.respond",
+      "object_id": "proto-subj-v3",
+      "request_id": "req-00050",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 73,
+      "at": "2026-12-02T14:10:00-05:00",
+      "actor": "agent",
+      "action": "protocols.propose",
+      "object_id": "proto-subj-v4",
+      "request_id": "req-00051",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 74,
+      "at": "2026-12-02T15:00:00-05:00",
+      "actor": "agent",
+      "action": "tables.create",
+      "object_id": "tbl-0001.v1",
+      "request_id": "req-00052",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 75,
+      "at": "2026-12-02T15:05:00-05:00",
+      "actor": "agent",
+      "action": "tables.update",
+      "object_id": "tbl-0001.v1",
+      "request_id": "req-00053",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 76,
+      "at": "2026-12-02T15:10:00-05:00",
+      "actor": "agent",
+      "action": "tables.freeze",
+      "object_id": "tbl-0001.v1",
+      "request_id": "req-00054",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 77,
+      "at": "2026-12-02T16:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.withdrawn",
+      "object_id": "proto-trial-v1",
+      "request_id": null,
+      "event_id": "ev-h-0024",
+      "effect": false
+    },
+    {
+      "seq": 79,
+      "at": "2026-12-03T08:10:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0135",
+      "request_id": null,
+      "event_id": "ev-h-0051",
+      "effect": false
+    },
+    {
+      "seq": 80,
+      "at": "2026-12-03T08:11:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0136",
+      "request_id": null,
+      "event_id": "ev-h-0052",
+      "effect": false
+    },
+    {
+      "seq": 81,
+      "at": "2026-12-03T09:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.proposed",
+      "object_id": "proto-trial-v2",
+      "request_id": null,
+      "event_id": "ev-h-0025",
+      "effect": false
+    },
+    {
+      "seq": 82,
+      "at": "2026-12-03T09:00:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0022",
+      "request_id": null,
+      "event_id": "ev-h-0025",
+      "effect": true
+    },
+    {
+      "seq": 83,
+      "at": "2026-12-03T10:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.answered",
+      "object_id": "proto-subj-v4",
+      "request_id": null,
+      "event_id": "ev-h-0022",
+      "effect": false
+    },
+    {
+      "seq": 84,
+      "at": "2026-12-03T10:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.superseded",
+      "object_id": "proto-subj-v2",
+      "request_id": null,
+      "event_id": "ev-h-0022",
+      "effect": true
+    },
+    {
+      "seq": 85,
+      "at": "2026-12-03T10:00:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0023",
+      "request_id": null,
+      "event_id": "ev-h-0022",
+      "effect": true
+    },
+    {
+      "seq": 86,
+      "at": "2026-12-03T10:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0016",
+      "request_id": null,
+      "event_id": "ev-h-0029",
+      "effect": false
+    },
+    {
+      "seq": 87,
+      "at": "2026-12-03T10:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0017",
+      "request_id": null,
+      "event_id": "ev-h-0030",
+      "effect": false
+    },
+    {
+      "seq": 88,
+      "at": "2026-12-03T10:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0018",
+      "request_id": null,
+      "event_id": "ev-h-0031",
+      "effect": false
+    },
+    {
+      "seq": 89,
+      "at": "2026-12-03T10:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0019",
+      "request_id": null,
+      "event_id": "ev-h-0032",
+      "effect": false
+    },
+    {
+      "seq": 90,
+      "at": "2026-12-03T10:30:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0020",
+      "request_id": null,
+      "event_id": "ev-h-0033",
+      "effect": false
+    },
+    {
+      "seq": 91,
+      "at": "2026-12-03T11:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0015",
+      "request_id": "req-00065",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 92,
+      "at": "2026-12-03T11:00:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0024",
+      "request_id": "req-00065",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 93,
+      "at": "2026-12-03T11:01:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0016",
+      "request_id": "req-00066",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 94,
+      "at": "2026-12-03T11:01:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0025",
+      "request_id": "req-00066",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 95,
+      "at": "2026-12-03T13:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0137",
+      "request_id": null,
+      "event_id": "ev-h-0053",
+      "effect": false
+    },
+    {
+      "seq": 96,
+      "at": "2026-12-03T13:01:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0138",
+      "request_id": null,
+      "event_id": "ev-h-0054",
+      "effect": false
+    },
+    {
+      "seq": 97,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0021",
+      "request_id": null,
+      "event_id": "ev-h-0034",
+      "effect": false
+    },
+    {
+      "seq": 98,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0022",
+      "request_id": null,
+      "event_id": "ev-h-0035",
+      "effect": false
+    },
+    {
+      "seq": 99,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0023",
+      "request_id": null,
+      "event_id": "ev-h-0036",
+      "effect": false
+    },
+    {
+      "seq": 100,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0024",
+      "request_id": null,
+      "event_id": "ev-h-0037",
+      "effect": false
+    },
+    {
+      "seq": 101,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0025",
+      "request_id": null,
+      "event_id": "ev-h-0038",
+      "effect": false
+    },
+    {
+      "seq": 102,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0026",
+      "request_id": null,
+      "event_id": "ev-h-0039",
+      "effect": false
+    },
+    {
+      "seq": 103,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0027",
+      "request_id": null,
+      "event_id": "ev-h-0040",
+      "effect": false
+    },
+    {
+      "seq": 104,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0028",
+      "request_id": null,
+      "event_id": "ev-h-0041",
+      "effect": false
+    },
+    {
+      "seq": 105,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0029",
+      "request_id": null,
+      "event_id": "ev-h-0042",
+      "effect": false
+    },
+    {
+      "seq": 106,
+      "at": "2026-12-04T08:00:00-05:00",
+      "actor": "event",
+      "action": "plan.set",
+      "object_id": "rp-0030",
+      "request_id": null,
+      "event_id": "ev-h-0043",
+      "effect": false
+    },
+    {
+      "seq": 107,
+      "at": "2026-12-04T09:00:00-05:00",
+      "actor": "agent",
+      "action": "results.update",
+      "object_id": "job-a0002",
+      "request_id": "req-00079",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 108,
+      "at": "2026-12-04T09:01:00-05:00",
+      "actor": "agent",
+      "action": "results.update",
+      "object_id": "job-a0008",
+      "request_id": "req-00080",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 109,
+      "at": "2026-12-04T09:02:00-05:00",
+      "actor": "agent",
+      "action": "results.update",
+      "object_id": "job-a0001",
+      "request_id": "req-00081",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 110,
+      "at": "2026-12-04T09:03:00-05:00",
+      "actor": "agent",
+      "action": "results.update",
+      "object_id": "job-a0010",
+      "request_id": "req-00082",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 111,
+      "at": "2026-12-04T09:30:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0017",
+      "request_id": "req-00083",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 112,
+      "at": "2026-12-04T09:30:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0026",
+      "request_id": "req-00083",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 113,
+      "at": "2026-12-04T10:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0139",
+      "request_id": null,
+      "event_id": "ev-h-0055",
+      "effect": false
+    },
+    {
+      "seq": 114,
+      "at": "2026-12-04T10:01:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0140",
+      "request_id": null,
+      "event_id": "ev-h-0056",
+      "effect": false
+    },
+    {
+      "seq": 115,
+      "at": "2026-12-04T15:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0143",
+      "request_id": null,
+      "event_id": "ev-h-0059",
+      "effect": false
+    },
+    {
+      "seq": 116,
+      "at": "2026-12-04T21:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0018",
+      "request_id": "req-00087",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 117,
+      "at": "2026-12-04T21:00:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0027",
+      "request_id": "req-00087",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 118,
+      "at": "2026-12-04T21:05:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0019",
+      "request_id": "req-00088",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 119,
+      "at": "2026-12-04T21:05:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0028",
+      "request_id": "req-00088",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 120,
+      "at": "2026-12-04T21:10:00-05:00",
+      "actor": "agent",
+      "action": "jobs.cancel",
+      "object_id": "job-a0018",
+      "request_id": "req-00089",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 121,
+      "at": "2026-12-04T21:10:00-05:00",
+      "actor": "agent",
+      "action": "notification.removed",
+      "object_id": "ntf-0027",
+      "request_id": "req-00089",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 122,
+      "at": "2026-12-05T08:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0144",
+      "request_id": null,
+      "event_id": "ev-h-0060",
+      "effect": false
+    },
+    {
+      "seq": 123,
+      "at": "2026-12-05T08:01:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0145",
+      "request_id": null,
+      "event_id": "ev-h-0061",
+      "effect": false
+    },
+    {
+      "seq": 124,
+      "at": "2026-12-05T09:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0146",
+      "request_id": null,
+      "event_id": "ev-h-0062",
+      "effect": false
+    },
+    {
+      "seq": 125,
+      "at": "2026-12-05T10:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0020",
+      "request_id": "req-00093",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 126,
+      "at": "2026-12-05T10:00:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0029",
+      "request_id": "req-00093",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 127,
+      "at": "2026-12-05T14:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0147",
+      "request_id": null,
+      "event_id": "ev-h-0063",
+      "effect": false
+    },
+    {
+      "seq": 128,
+      "at": "2026-12-06T03:00:00-05:00",
+      "actor": "event",
+      "action": "job.interrupted",
+      "object_id": "job-a0020",
+      "request_id": null,
+      "event_id": "ev-h-0076",
+      "effect": false
+    },
+    {
+      "seq": 129,
+      "at": "2026-12-06T03:00:00-05:00",
+      "actor": "event",
+      "action": "notification.removed",
+      "object_id": "ntf-0029",
+      "request_id": null,
+      "event_id": "ev-h-0076",
+      "effect": true
+    },
+    {
+      "seq": 130,
+      "at": "2026-12-06T03:00:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0030",
+      "request_id": null,
+      "event_id": "ev-h-0076",
+      "effect": true
+    },
+    {
+      "seq": 131,
+      "at": "2026-12-06T09:05:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0021",
+      "request_id": "req-00096",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 132,
+      "at": "2026-12-06T10:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0148",
+      "request_id": null,
+      "event_id": "ev-h-0064",
+      "effect": false
+    },
+    {
+      "seq": 133,
+      "at": "2026-12-06T10:01:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0149",
+      "request_id": null,
+      "event_id": "ev-h-0065",
+      "effect": false
+    },
+    {
+      "seq": 134,
+      "at": "2026-12-06T14:30:00-05:00",
+      "actor": "event",
+      "action": "result.invalidated",
+      "object_id": "job-0102",
+      "request_id": null,
+      "event_id": "ev-h-0077",
+      "effect": false
+    },
+    {
+      "seq": 135,
+      "at": "2026-12-06T14:30:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0031",
+      "request_id": null,
+      "event_id": "ev-h-0077",
+      "effect": true
+    },
+    {
+      "seq": 136,
+      "at": "2026-12-06T15:00:00-05:00",
+      "actor": "agent",
+      "action": "tables.revise",
+      "object_id": "tbl-0001.v2",
+      "request_id": "req-00100",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 137,
+      "at": "2026-12-06T15:05:00-05:00",
+      "actor": "agent",
+      "action": "tables.update",
+      "object_id": "tbl-0001.v2",
+      "request_id": "req-00101",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 138,
+      "at": "2026-12-06T15:10:00-05:00",
+      "actor": "agent",
+      "action": "tables.freeze",
+      "object_id": "tbl-0001.v2",
+      "request_id": "req-00102",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 139,
+      "at": "2026-12-06T15:10:00-05:00",
+      "actor": "agent",
+      "action": "table.superseded",
+      "object_id": "tbl-0001.v1",
+      "request_id": "req-00102",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 140,
+      "at": "2026-12-07T08:01:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0151",
+      "request_id": null,
+      "event_id": "ev-h-0067",
+      "effect": false
+    },
+    {
+      "seq": 141,
+      "at": "2026-12-07T09:30:00-05:00",
+      "actor": "agent",
+      "action": "tables.create",
+      "object_id": "tbl-0002.v1",
+      "request_id": "req-00104",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 142,
+      "at": "2026-12-07T09:35:00-05:00",
+      "actor": "agent",
+      "action": "tables.update",
+      "object_id": "tbl-0002.v1",
+      "request_id": "req-00105",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 143,
+      "at": "2026-12-07T09:40:00-05:00",
+      "actor": "agent",
+      "action": "tables.discard",
+      "object_id": "tbl-0002.v1",
+      "request_id": "req-00106",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 144,
+      "at": "2026-12-07T10:00:00-05:00",
+      "actor": "event",
+      "action": "result.invalidated",
+      "object_id": "job-0134",
+      "request_id": null,
+      "event_id": "ev-h-0078",
+      "effect": false
+    },
+    {
+      "seq": 145,
+      "at": "2026-12-07T11:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0152",
+      "request_id": null,
+      "event_id": "ev-h-0068",
+      "effect": false
+    },
+    {
+      "seq": 146,
+      "at": "2026-12-07T15:00:00-05:00",
+      "actor": "event",
+      "action": "protocol.proposed",
+      "object_id": "proto-lat-v1",
+      "request_id": null,
+      "event_id": "ev-h-0026",
+      "effect": false
+    },
+    {
+      "seq": 147,
+      "at": "2026-12-07T15:00:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0032",
+      "request_id": null,
+      "event_id": "ev-h-0026",
+      "effect": true
+    },
+    {
+      "seq": 148,
+      "at": "2026-12-08T10:00:00-05:00",
+      "actor": "agent",
+      "action": "tables.create",
+      "object_id": "tbl-0003.v1",
+      "request_id": "req-00110",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 149,
+      "at": "2026-12-08T10:05:00-05:00",
+      "actor": "agent",
+      "action": "tables.update",
+      "object_id": "tbl-0003.v1",
+      "request_id": "req-00111",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 150,
+      "at": "2026-12-08T12:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0155",
+      "request_id": null,
+      "event_id": "ev-h-0071",
+      "effect": false
+    },
+    {
+      "seq": 151,
+      "at": "2026-12-08T14:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0157",
+      "request_id": null,
+      "event_id": "ev-h-0073",
+      "effect": false
+    },
+    {
+      "seq": 152,
+      "at": "2026-12-08T21:30:00-05:00",
+      "actor": "event",
+      "action": "job.script_submitted",
+      "object_id": "job-a0022",
+      "request_id": null,
+      "event_id": "ev-h-0045",
+      "effect": false
+    },
+    {
+      "seq": 153,
+      "at": "2026-12-08T21:30:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0033",
+      "request_id": null,
+      "event_id": "ev-h-0045",
+      "effect": true
+    },
+    {
+      "seq": 154,
+      "at": "2026-12-08T22:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0023",
+      "request_id": "req-00115",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 155,
+      "at": "2026-12-08T22:00:00-05:00",
+      "actor": "agent",
+      "action": "notification.written",
+      "object_id": "ntf-0034",
+      "request_id": "req-00115",
+      "event_id": null,
+      "effect": true
+    },
+    {
+      "seq": 156,
+      "at": "2026-12-08T23:30:00-05:00",
+      "actor": "event",
+      "action": "job.script_submitted",
+      "object_id": "cfg-atlas-v2",
+      "request_id": null,
+      "event_id": "ev-h-0046",
+      "effect": false
+    },
+    {
+      "seq": 157,
+      "at": "2026-12-08T23:30:00-05:00",
+      "actor": "event",
+      "action": "notification.written",
+      "object_id": "ntf-0035",
+      "request_id": null,
+      "event_id": "ev-h-0046",
+      "effect": true
+    },
+    {
+      "seq": 158,
+      "at": "2026-12-09T07:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0156",
+      "request_id": null,
+      "event_id": "ev-h-0072",
+      "effect": false
+    },
+    {
+      "seq": 159,
+      "at": "2026-12-09T07:30:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0158",
+      "request_id": null,
+      "event_id": "ev-h-0074",
+      "effect": false
+    },
+    {
+      "seq": 160,
+      "at": "2026-12-09T08:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0153",
+      "request_id": null,
+      "event_id": "ev-h-0069",
+      "effect": false
+    },
+    {
+      "seq": 161,
+      "at": "2026-12-09T09:00:00-05:00",
+      "actor": "agent",
+      "action": "jobs.submit",
+      "object_id": "job-a0024",
+      "request_id": "req-00120",
+      "event_id": null,
+      "effect": false
+    },
+    {
+      "seq": 162,
+      "at": "2026-12-09T09:00:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0154",
+      "request_id": null,
+      "event_id": "ev-h-0070",
+      "effect": false
+    },
+    {
+      "seq": 163,
+      "at": "2026-12-09T09:10:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0150",
+      "request_id": null,
+      "event_id": "ev-h-0066",
+      "effect": false
+    },
+    {
+      "seq": 164,
+      "at": "2026-12-09T09:20:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0141",
+      "request_id": null,
+      "event_id": "ev-h-0057",
+      "effect": false
+    },
+    {
+      "seq": 165,
+      "at": "2026-12-09T09:21:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0142",
+      "request_id": null,
+      "event_id": "ev-h-0058",
+      "effect": false
+    },
+    {
+      "seq": 166,
+      "at": "2026-12-09T09:40:00-05:00",
+      "actor": "event",
+      "action": "job.recorded",
+      "object_id": "job-0159",
+      "request_id": null,
+      "event_id": "ev-h-0075",
+      "effect": false
+    }
+  ]
+}

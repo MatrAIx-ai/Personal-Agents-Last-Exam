@@ -1,0 +1,3282 @@
+{
+  "schema": "benchline.evaluation-coverage.v1",
+  "scope": "Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only the seven record kinds of the plan count, each on the date field of an act that happened. Planned times are listed apart. Activity rows are not counted, because each repeats an act that a counted record already dates.",
+  "reproduce": "node apps/benchline/dev/coverage.cjs",
+  "reproduce_note": "Run it from the repository root. With --check it compares with the committed report.",
+  "timezone": "America/New_York",
+  "window": {
+    "first": "2025-01-01",
+    "last": "2026-12-31"
+  },
+  "clock": "2026-12-31T23:00:00-05:00",
+  "clock_day": "2026-12-31",
+  "date_rule": "A timestamp counts on its calendar day in America/New_York after normalizing its UTC offset. A missing or invalid date is excluded and listed.",
+  "files": {
+    "apps/benchline/data/evaluation/seed.json": {
+      "bytes": 1569864,
+      "sha256": "af00b378279483e9b06d2e6c1270240da95a05f1cc05c8de0c77356c0347f54b"
+    },
+    "apps/benchline/data/evaluation/clock.json": {
+      "bytes": 50,
+      "sha256": "4a0a17ea549f275a693b1f7728c04cc3c0d318462bfcc1b1ca16d07dd162debc"
+    },
+    "apps/benchline/data/evaluation/dataset.json": {
+      "bytes": 2212,
+      "sha256": "d313098487e1a1d83cb26583e05f83b77c7c9ff6d355ef37b75f5ab2dd530798"
+    }
+  },
+  "generator": {
+    "tool": "dev/generate-dataset.cjs",
+    "version": "1.0.0",
+    "prng_seed": 20250101,
+    "stories": 640
+  },
+  "provenance": {
+    "dataset_id": "benchline-evaluation-2025-2026",
+    "source_ids": [
+      "evaluation-generator"
+    ],
+    "source_kinds": [
+      "synthetic"
+    ],
+    "real": 0,
+    "mixed": 0,
+    "synthetic": 1707,
+    "note": "Counts are of the counted rows. Every record is synthetic: Benchline models no real cluster or website, so there is no real source to collect or to anchor."
+  },
+  "app_records": {
+    "count": 2298,
+    "kinds": "configs, protocols, run_plans, jobs, tables, allocation_changes",
+    "dataset_expected": 2298
+  },
+  "not_counted": {
+    "activity": {
+      "field": "activity[].at",
+      "rows": 426,
+      "reason": "Each activity row repeats a write, an event or an effect that a counted record already dates."
+    },
+    "run_plans": {
+      "field": "run_plans[].set_at",
+      "rows": 307,
+      "reason": "A run plan is world data that the cluster gives, and the App never shows it."
+    }
+  },
+  "actual": {
+    "total_rows": 1725,
+    "counted_rows": 1707,
+    "global": {
+      "records": 1707,
+      "distinct_dates": 382,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-23"
+    },
+    "kinds": [
+      {
+        "kind": "jobs",
+        "date_field": "jobs[].submitted_at",
+        "counts": "the submission of a job, by the researcher, her script or a labmate. A submission is an act even when the job was held, cancelled or never ran.",
+        "rows": 1534,
+        "records": 1534,
+        "distinct_dates": 353,
+        "earliest": "2025-01-02",
+        "latest": "2026-12-23",
+        "excluded": 0
+      },
+      {
+        "kind": "protocol_versions",
+        "date_field": "protocols[].proposed_at",
+        "counts": "the proposal of a protocol version.",
+        "rows": 22,
+        "records": 16,
+        "distinct_dates": 16,
+        "earliest": "2025-06-23",
+        "latest": "2026-12-22",
+        "excluded": 6
+      },
+      {
+        "kind": "signoffs",
+        "date_field": "protocols[].signoffs[].at",
+        "counts": "a signature or a decline.",
+        "rows": 37,
+        "records": 25,
+        "distinct_dates": 25,
+        "earliest": "2025-06-24",
+        "latest": "2026-08-19",
+        "excluded": 12
+      },
+      {
+        "kind": "table_versions",
+        "date_field": "tables[].created_at",
+        "counts": "the creation of a results table version.",
+        "rows": 36,
+        "records": 36,
+        "distinct_dates": 25,
+        "earliest": "2025-03-07",
+        "latest": "2026-12-22",
+        "excluded": 0
+      },
+      {
+        "kind": "allocation_changes",
+        "date_field": "allocation_changes[].at",
+        "counts": "a change of the allocation or of a share.",
+        "rows": 12,
+        "records": 12,
+        "distinct_dates": 12,
+        "earliest": "2025-02-24",
+        "latest": "2026-12-07",
+        "excluded": 0
+      },
+      {
+        "kind": "result_dispositions",
+        "date_field": "jobs[].review.updated_at",
+        "counts": "the last tag, note or disposition of a result.",
+        "rows": 25,
+        "records": 25,
+        "distinct_dates": 25,
+        "earliest": "2025-02-14",
+        "latest": "2026-12-18",
+        "excluded": 0
+      },
+      {
+        "kind": "notifications",
+        "date_field": "notifications[].at",
+        "counts": "the release of a notification that was released by the clock and not removed.",
+        "rows": 59,
+        "records": 59,
+        "distinct_dates": 17,
+        "earliest": "2026-10-13",
+        "latest": "2026-12-23",
+        "excluded": 0
+      }
+    ],
+    "monthly": [
+      {
+        "month": "2025-01",
+        "records": 52,
+        "distinct_dates": 15,
+        "by_kind": {
+          "jobs": 52,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 0,
+          "allocation_changes": 0,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-02",
+        "records": 58,
+        "distinct_dates": 15,
+        "by_kind": {
+          "jobs": 54,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 0,
+          "allocation_changes": 1,
+          "result_dispositions": 3,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-03",
+        "records": 83,
+        "distinct_dates": 20,
+        "by_kind": {
+          "jobs": 78,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 2,
+          "allocation_changes": 0,
+          "result_dispositions": 3,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-04",
+        "records": 50,
+        "distinct_dates": 14,
+        "by_kind": {
+          "jobs": 48,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 1,
+          "allocation_changes": 0,
+          "result_dispositions": 1,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-05",
+        "records": 100,
+        "distinct_dates": 21,
+        "by_kind": {
+          "jobs": 95,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 3,
+          "allocation_changes": 1,
+          "result_dispositions": 1,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-06",
+        "records": 41,
+        "distinct_dates": 13,
+        "by_kind": {
+          "jobs": 36,
+          "protocol_versions": 1,
+          "signoffs": 2,
+          "table_versions": 2,
+          "allocation_changes": 0,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-07",
+        "records": 49,
+        "distinct_dates": 17,
+        "by_kind": {
+          "jobs": 43,
+          "protocol_versions": 2,
+          "signoffs": 4,
+          "table_versions": 0,
+          "allocation_changes": 0,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-08",
+        "records": 27,
+        "distinct_dates": 10,
+        "by_kind": {
+          "jobs": 25,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 1,
+          "allocation_changes": 1,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-09",
+        "records": 97,
+        "distinct_dates": 20,
+        "by_kind": {
+          "jobs": 88,
+          "protocol_versions": 1,
+          "signoffs": 1,
+          "table_versions": 3,
+          "allocation_changes": 1,
+          "result_dispositions": 3,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-10",
+        "records": 64,
+        "distinct_dates": 18,
+        "by_kind": {
+          "jobs": 60,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 2,
+          "allocation_changes": 0,
+          "result_dispositions": 2,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-11",
+        "records": 36,
+        "distinct_dates": 13,
+        "by_kind": {
+          "jobs": 33,
+          "protocol_versions": 1,
+          "signoffs": 0,
+          "table_versions": 0,
+          "allocation_changes": 1,
+          "result_dispositions": 1,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2025-12",
+        "records": 37,
+        "distinct_dates": 12,
+        "by_kind": {
+          "jobs": 36,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 1,
+          "allocation_changes": 0,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-01",
+        "records": 82,
+        "distinct_dates": 16,
+        "by_kind": {
+          "jobs": 78,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 3,
+          "allocation_changes": 1,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-02",
+        "records": 35,
+        "distinct_dates": 16,
+        "by_kind": {
+          "jobs": 23,
+          "protocol_versions": 3,
+          "signoffs": 6,
+          "table_versions": 2,
+          "allocation_changes": 0,
+          "result_dispositions": 1,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-03",
+        "records": 42,
+        "distinct_dates": 17,
+        "by_kind": {
+          "jobs": 36,
+          "protocol_versions": 2,
+          "signoffs": 4,
+          "table_versions": 0,
+          "allocation_changes": 0,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-04",
+        "records": 81,
+        "distinct_dates": 19,
+        "by_kind": {
+          "jobs": 74,
+          "protocol_versions": 1,
+          "signoffs": 2,
+          "table_versions": 1,
+          "allocation_changes": 1,
+          "result_dispositions": 2,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-05",
+        "records": 140,
+        "distinct_dates": 18,
+        "by_kind": {
+          "jobs": 135,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 3,
+          "allocation_changes": 1,
+          "result_dispositions": 1,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-06",
+        "records": 61,
+        "distinct_dates": 12,
+        "by_kind": {
+          "jobs": 57,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 2,
+          "allocation_changes": 0,
+          "result_dispositions": 2,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-07",
+        "records": 55,
+        "distinct_dates": 12,
+        "by_kind": {
+          "jobs": 54,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 1,
+          "allocation_changes": 0,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-08",
+        "records": 59,
+        "distinct_dates": 16,
+        "by_kind": {
+          "jobs": 47,
+          "protocol_versions": 4,
+          "signoffs": 6,
+          "table_versions": 1,
+          "allocation_changes": 0,
+          "result_dispositions": 1,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-09",
+        "records": 152,
+        "distinct_dates": 21,
+        "by_kind": {
+          "jobs": 149,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 1,
+          "allocation_changes": 2,
+          "result_dispositions": 0,
+          "notifications": 0
+        }
+      },
+      {
+        "month": "2026-10",
+        "records": 79,
+        "distinct_dates": 17,
+        "by_kind": {
+          "jobs": 64,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 2,
+          "allocation_changes": 0,
+          "result_dispositions": 2,
+          "notifications": 11
+        }
+      },
+      {
+        "month": "2026-11",
+        "records": 104,
+        "distinct_dates": 14,
+        "by_kind": {
+          "jobs": 76,
+          "protocol_versions": 0,
+          "signoffs": 0,
+          "table_versions": 0,
+          "allocation_changes": 1,
+          "result_dispositions": 0,
+          "notifications": 27
+        }
+      },
+      {
+        "month": "2026-12",
+        "records": 123,
+        "distinct_dates": 16,
+        "by_kind": {
+          "jobs": 93,
+          "protocol_versions": 1,
+          "signoffs": 0,
+          "table_versions": 5,
+          "allocation_changes": 1,
+          "result_dispositions": 2,
+          "notifications": 21
+        }
+      }
+    ],
+    "gaps": {
+      "months_without_records": [],
+      "days_in_window": 730,
+      "active_days": 382,
+      "inactive_days": 348,
+      "working_days_in_window": 487,
+      "active_working_days": 381,
+      "active_weekend_or_holiday_days": 1,
+      "longest_quiet_spans": [
+        {
+          "from": "2025-12-24",
+          "to": "2026-01-04",
+          "days": 12
+        },
+        {
+          "from": "2026-12-24",
+          "to": "2026-12-31",
+          "days": 8
+        },
+        {
+          "from": "2026-06-18",
+          "to": "2026-06-24",
+          "days": 7
+        },
+        {
+          "from": "2026-07-07",
+          "to": "2026-07-13",
+          "days": 7
+        },
+        {
+          "from": "2025-02-07",
+          "to": "2025-02-12",
+          "days": 6
+        },
+        {
+          "from": "2025-06-18",
+          "to": "2025-06-22",
+          "days": 5
+        },
+        {
+          "from": "2025-08-06",
+          "to": "2025-08-10",
+          "days": 5
+        },
+        {
+          "from": "2025-08-22",
+          "to": "2025-08-26",
+          "days": 5
+        },
+        {
+          "from": "2025-08-28",
+          "to": "2025-09-01",
+          "days": 5
+        },
+        {
+          "from": "2026-01-24",
+          "to": "2026-01-28",
+          "days": 5
+        }
+      ]
+    },
+    "exclusions": [
+      {
+        "kind": "protocol_versions",
+        "id": "proto-subj-v1",
+        "value": "2024-11-04T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "protocol_versions",
+        "id": "proto-sess-v1",
+        "value": "2024-11-07T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "protocol_versions",
+        "id": "proto-trial-v1",
+        "value": "2024-11-10T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "protocol_versions",
+        "id": "proto-lat-v1",
+        "value": "2024-11-13T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "protocol_versions",
+        "id": "proto-xfer-v1",
+        "value": "2024-11-16T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "protocol_versions",
+        "id": "proto-rob-v1",
+        "value": "2024-11-19T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-subj-v1 person-okafor",
+        "value": "2024-11-04T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-subj-v1 person-nadia",
+        "value": "2024-11-05T15:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-sess-v1 person-okafor",
+        "value": "2024-11-07T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-sess-v1 person-nadia",
+        "value": "2024-11-08T15:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-trial-v1 person-okafor",
+        "value": "2024-11-10T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-trial-v1 person-nadia",
+        "value": "2024-11-11T15:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-lat-v1 person-okafor",
+        "value": "2024-11-13T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-lat-v1 person-nadia",
+        "value": "2024-11-14T15:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-xfer-v1 person-okafor",
+        "value": "2024-11-16T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-xfer-v1 person-nadia",
+        "value": "2024-11-17T15:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-rob-v1 person-okafor",
+        "value": "2024-11-19T10:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      },
+      {
+        "kind": "signoffs",
+        "id": "proto-rob-v1 person-nadia",
+        "value": "2024-11-20T15:00:00-05:00",
+        "reason": "before 2025-01-01: the setup of the lab, before the window"
+      }
+    ],
+    "dates": {
+      "2025-01-02": [
+        "job-00001",
+        "job-00002",
+        "job-00003"
+      ],
+      "2025-01-07": [
+        "job-00004",
+        "job-00006",
+        "job-00007"
+      ],
+      "2025-01-08": [
+        "job-00005"
+      ],
+      "2025-01-09": [
+        "job-00008",
+        "job-00009",
+        "job-00010"
+      ],
+      "2025-01-13": [
+        "job-00011",
+        "job-00012",
+        "job-00013"
+      ],
+      "2025-01-14": [
+        "job-00014"
+      ],
+      "2025-01-15": [
+        "job-00015",
+        "job-00016",
+        "job-00018",
+        "job-a0001",
+        "job-a0002",
+        "job-a0003",
+        "job-a0004"
+      ],
+      "2025-01-16": [
+        "job-00017",
+        "job-00019",
+        "job-00021",
+        "job-00023"
+      ],
+      "2025-01-17": [
+        "job-a0005",
+        "job-a0006",
+        "job-a0007",
+        "job-00020"
+      ],
+      "2025-01-21": [
+        "job-00024",
+        "job-00025",
+        "job-00026",
+        "job-00022"
+      ],
+      "2025-01-22": [
+        "job-00027",
+        "job-00029",
+        "job-00030"
+      ],
+      "2025-01-24": [
+        "job-00028",
+        "job-00031",
+        "job-00032",
+        "job-00033"
+      ],
+      "2025-01-27": [
+        "job-00034",
+        "job-00035",
+        "job-00036",
+        "job-00037",
+        "job-00039",
+        "job-00038"
+      ],
+      "2025-01-29": [
+        "job-00040",
+        "job-00041",
+        "job-00042"
+      ],
+      "2025-01-31": [
+        "job-00043",
+        "job-00044",
+        "job-00045"
+      ],
+      "2025-02-03": [
+        "job-00046",
+        "job-00047",
+        "job-00048"
+      ],
+      "2025-02-04": [
+        "job-a0008",
+        "job-a0009",
+        "job-a0010"
+      ],
+      "2025-02-05": [
+        "job-00049",
+        "job-00050"
+      ],
+      "2025-02-06": [
+        "job-a0011"
+      ],
+      "2025-02-13": [
+        "job-00051",
+        "job-00052",
+        "job-00053"
+      ],
+      "2025-02-14": [
+        "job-00054",
+        "job-a0011"
+      ],
+      "2025-02-18": [
+        "job-00055",
+        "job-00056",
+        "job-00057"
+      ],
+      "2025-02-19": [
+        "job-00058"
+      ],
+      "2025-02-20": [
+        "job-00059",
+        "job-00060",
+        "job-00061"
+      ],
+      "2025-02-21": [
+        "job-a0012",
+        "job-a0013",
+        "job-a0014",
+        "job-00062",
+        "job-00063",
+        "job-a0010"
+      ],
+      "2025-02-24": [
+        "job-00064",
+        "job-00065",
+        "job-00066",
+        "job-00067",
+        "job-00068",
+        "job-00069",
+        "alc-0001"
+      ],
+      "2025-02-25": [
+        "job-a0015",
+        "job-a0016",
+        "job-a0017",
+        "job-a0018"
+      ],
+      "2025-02-26": [
+        "job-a0019",
+        "job-a0020",
+        "job-a0021",
+        "job-a0022"
+      ],
+      "2025-02-27": [
+        "job-00070",
+        "job-00074",
+        "job-00072",
+        "job-00076",
+        "job-00077",
+        "job-00078"
+      ],
+      "2025-02-28": [
+        "job-00071",
+        "job-00073",
+        "job-00075",
+        "job-00082",
+        "job-00083",
+        "job-00084",
+        "job-00079",
+        "job-00080",
+        "job-00081",
+        "job-a0022"
+      ],
+      "2025-03-03": [
+        "job-a0023",
+        "job-a0024",
+        "job-a0025"
+      ],
+      "2025-03-04": [
+        "job-00088",
+        "job-00085",
+        "job-00086",
+        "job-00087"
+      ],
+      "2025-03-05": [
+        "job-a0026",
+        "job-a0027",
+        "job-a0028",
+        "job-00089",
+        "job-00090",
+        "job-00091"
+      ],
+      "2025-03-06": [
+        "job-00092",
+        "job-00093",
+        "job-00094"
+      ],
+      "2025-03-07": [
+        "job-00095",
+        "job-00096",
+        "job-00097",
+        "tbl-0001.v1",
+        "tbl-0002.v1",
+        "job-a0021"
+      ],
+      "2025-03-10": [
+        "job-a0029"
+      ],
+      "2025-03-11": [
+        "job-00099",
+        "job-00102",
+        "job-00101",
+        "job-00098"
+      ],
+      "2025-03-12": [
+        "job-00107",
+        "job-00103",
+        "job-00104",
+        "job-00105",
+        "job-00106",
+        "job-00100"
+      ],
+      "2025-03-13": [
+        "job-a0030",
+        "job-a0031",
+        "job-a0032",
+        "job-00108",
+        "job-00109",
+        "job-00110"
+      ],
+      "2025-03-14": [
+        "job-a0033",
+        "job-a0034",
+        "job-a0035",
+        "job-a0036",
+        "job-a0037",
+        "job-a0038"
+      ],
+      "2025-03-17": [
+        "job-00111",
+        "job-00113",
+        "job-00112"
+      ],
+      "2025-03-18": [
+        "job-00114",
+        "job-00116",
+        "job-00115"
+      ],
+      "2025-03-19": [
+        "job-a0039",
+        "job-a0040",
+        "job-a0041",
+        "job-a0042",
+        "job-a0043",
+        "job-a0044",
+        "job-a0045"
+      ],
+      "2025-03-21": [
+        "job-a0046",
+        "job-00117",
+        "job-00118",
+        "job-00119",
+        "job-a0040"
+      ],
+      "2025-03-24": [
+        "job-00120",
+        "job-00121",
+        "job-00123"
+      ],
+      "2025-03-25": [
+        "job-00122"
+      ],
+      "2025-03-26": [
+        "job-00124",
+        "job-00125",
+        "job-00126"
+      ],
+      "2025-03-27": [
+        "job-00127",
+        "job-00129",
+        "job-00130",
+        "job-a0047",
+        "job-a0048",
+        "job-a0049"
+      ],
+      "2025-03-28": [
+        "job-00128",
+        "job-00131",
+        "job-00132",
+        "job-a0048"
+      ],
+      "2025-03-31": [
+        "job-a0050",
+        "job-a0051",
+        "job-a0052"
+      ],
+      "2025-04-01": [
+        "job-00133",
+        "job-00134",
+        "job-00135"
+      ],
+      "2025-04-02": [
+        "tbl-0003.v1"
+      ],
+      "2025-04-03": [
+        "job-a0053",
+        "job-00139",
+        "job-00141",
+        "job-00140",
+        "job-00136",
+        "job-00137",
+        "job-00138"
+      ],
+      "2025-04-04": [
+        "job-00142",
+        "job-00143",
+        "job-00144",
+        "job-a0053"
+      ],
+      "2025-04-08": [
+        "job-00145",
+        "job-00146",
+        "job-00147",
+        "job-a0054",
+        "job-a0055",
+        "job-a0056"
+      ],
+      "2025-04-10": [
+        "job-a0057",
+        "job-a0058",
+        "job-a0059"
+      ],
+      "2025-04-11": [
+        "job-a0060",
+        "job-a0061",
+        "job-a0062"
+      ],
+      "2025-04-14": [
+        "job-00148",
+        "job-00149",
+        "job-00150"
+      ],
+      "2025-04-17": [
+        "job-a0063",
+        "job-a0064",
+        "job-a0065"
+      ],
+      "2025-04-21": [
+        "job-00151",
+        "job-00152",
+        "job-00153"
+      ],
+      "2025-04-22": [
+        "job-a0066",
+        "job-a0067",
+        "job-a0068"
+      ],
+      "2025-04-24": [
+        "job-a0069",
+        "job-a0070",
+        "job-a0071",
+        "job-a0072"
+      ],
+      "2025-04-28": [
+        "job-a0073",
+        "job-00154",
+        "job-00155",
+        "job-00156"
+      ],
+      "2025-04-29": [
+        "job-00157",
+        "job-00158",
+        "job-00159"
+      ],
+      "2025-05-01": [
+        "job-00160",
+        "job-00161",
+        "job-00162",
+        "job-00163",
+        "job-00164",
+        "job-00165"
+      ],
+      "2025-05-02": [
+        "job-a0074",
+        "job-a0075",
+        "job-a0076",
+        "job-00166"
+      ],
+      "2025-05-05": [
+        "job-a0077",
+        "job-a0078",
+        "job-a0079",
+        "job-00167",
+        "job-00168",
+        "job-00169",
+        "alc-0002"
+      ],
+      "2025-05-06": [
+        "job-00170",
+        "job-00172",
+        "job-00171"
+      ],
+      "2025-05-07": [
+        "job-00173",
+        "job-00174",
+        "job-00175",
+        "job-00177",
+        "job-00176",
+        "job-a0080",
+        "job-a0081",
+        "job-a0082"
+      ],
+      "2025-05-08": [
+        "job-00178",
+        "job-00179",
+        "job-00181"
+      ],
+      "2025-05-09": [
+        "job-00180",
+        "job-00182",
+        "job-00183",
+        "job-00184",
+        "job-00185",
+        "job-00186",
+        "job-00187"
+      ],
+      "2025-05-12": [
+        "job-a0083",
+        "job-a0084",
+        "job-a0085",
+        "job-00188",
+        "job-00189"
+      ],
+      "2025-05-13": [
+        "job-00193",
+        "job-00195",
+        "job-00194",
+        "job-00190",
+        "job-00192",
+        "job-00191"
+      ],
+      "2025-05-14": [
+        "job-a0086",
+        "job-a0087",
+        "job-a0088"
+      ],
+      "2025-05-15": [
+        "job-a0089",
+        "job-a0090",
+        "job-a0091",
+        "job-00196",
+        "job-00198",
+        "job-00197"
+      ],
+      "2025-05-16": [
+        "job-a0092",
+        "job-a0093",
+        "job-a0094",
+        "job-a0095",
+        "tbl-0004.v1",
+        "tbl-0005.v1",
+        "tbl-0006.v1"
+      ],
+      "2025-05-19": [
+        "job-00199",
+        "job-00200",
+        "job-00201",
+        "job-a0096"
+      ],
+      "2025-05-20": [
+        "job-00202",
+        "job-00203",
+        "job-00204",
+        "job-00205",
+        "job-00207"
+      ],
+      "2025-05-21": [
+        "job-00206",
+        "job-00208",
+        "job-00209",
+        "job-00210"
+      ],
+      "2025-05-22": [
+        "job-a0097",
+        "job-a0098",
+        "job-a0099",
+        "job-00211",
+        "job-00212",
+        "job-00213"
+      ],
+      "2025-05-23": [
+        "job-00214",
+        "job-00216",
+        "job-a0099"
+      ],
+      "2025-05-27": [
+        "job-00217",
+        "job-00215"
+      ],
+      "2025-05-28": [
+        "job-a0100",
+        "job-a0101",
+        "job-a0102"
+      ],
+      "2025-05-29": [
+        "job-a0103",
+        "job-a0104",
+        "job-a0105",
+        "job-00218",
+        "job-00220",
+        "job-00219"
+      ],
+      "2025-05-30": [
+        "job-00221",
+        "job-00223"
+      ],
+      "2025-06-02": [
+        "job-00222",
+        "job-00224",
+        "tbl-0007.v1"
+      ],
+      "2025-06-03": [
+        "job-a0106",
+        "job-a0107",
+        "job-a0108",
+        "job-a0109",
+        "job-a0110"
+      ],
+      "2025-06-04": [
+        "tbl-0004.v2"
+      ],
+      "2025-06-05": [
+        "job-00225",
+        "job-00226",
+        "job-00227"
+      ],
+      "2025-06-09": [
+        "job-a0111"
+      ],
+      "2025-06-12": [
+        "job-00228",
+        "job-00229",
+        "job-00230"
+      ],
+      "2025-06-13": [
+        "job-00231",
+        "job-00232",
+        "job-00233"
+      ],
+      "2025-06-16": [
+        "job-00234",
+        "job-00235",
+        "job-00236"
+      ],
+      "2025-06-17": [
+        "job-a0112",
+        "job-a0113",
+        "job-a0114",
+        "job-00237",
+        "job-00238",
+        "job-00239"
+      ],
+      "2025-06-23": [
+        "job-00240",
+        "job-00241",
+        "job-00242",
+        "proto-subj-v2"
+      ],
+      "2025-06-24": [
+        "proto-subj-v2 person-nadia"
+      ],
+      "2025-06-25": [
+        "job-a0115",
+        "job-a0116",
+        "job-a0117",
+        "job-a0118",
+        "proto-subj-v2 person-okafor"
+      ],
+      "2025-06-27": [
+        "job-00243",
+        "job-00244",
+        "job-00245"
+      ],
+      "2025-07-02": [
+        "job-00246",
+        "job-00247"
+      ],
+      "2025-07-07": [
+        "job-00248",
+        "job-00249",
+        "job-00250",
+        "job-00251",
+        "job-00252",
+        "job-00253",
+        "proto-sess-v2"
+      ],
+      "2025-07-08": [
+        "job-00254",
+        "job-00255",
+        "job-00256",
+        "proto-sess-v2 person-nadia"
+      ],
+      "2025-07-09": [
+        "proto-sess-v2 person-okafor"
+      ],
+      "2025-07-10": [
+        "job-a0119",
+        "job-a0120",
+        "job-a0121"
+      ],
+      "2025-07-11": [
+        "job-00257",
+        "job-00258",
+        "job-00259"
+      ],
+      "2025-07-14": [
+        "job-00260",
+        "proto-xfer-v2"
+      ],
+      "2025-07-15": [
+        "proto-xfer-v2 person-nadia"
+      ],
+      "2025-07-16": [
+        "job-00261",
+        "job-00262",
+        "job-00263",
+        "proto-xfer-v2 person-okafor"
+      ],
+      "2025-07-17": [
+        "job-00264"
+      ],
+      "2025-07-21": [
+        "job-a0122",
+        "job-a0123",
+        "job-a0124"
+      ],
+      "2025-07-22": [
+        "job-a0125",
+        "job-a0126",
+        "job-a0127"
+      ],
+      "2025-07-23": [
+        "job-00265"
+      ],
+      "2025-07-24": [
+        "job-00266",
+        "job-00267"
+      ],
+      "2025-07-28": [
+        "job-a0128",
+        "job-a0129",
+        "job-a0130",
+        "job-00268",
+        "job-00269",
+        "job-00270"
+      ],
+      "2025-07-29": [
+        "job-a0131",
+        "job-a0132",
+        "job-a0133"
+      ],
+      "2025-07-30": [
+        "job-00271",
+        "job-00272",
+        "job-00273"
+      ],
+      "2025-08-01": [
+        "job-00274"
+      ],
+      "2025-08-04": [
+        "tbl-0008.v1"
+      ],
+      "2025-08-05": [
+        "job-00275",
+        "job-00276",
+        "job-00277"
+      ],
+      "2025-08-11": [
+        "job-00278",
+        "job-00279"
+      ],
+      "2025-08-12": [
+        "job-00280",
+        "job-00281",
+        "job-00282"
+      ],
+      "2025-08-14": [
+        "job-a0134",
+        "job-a0135",
+        "job-a0136"
+      ],
+      "2025-08-18": [
+        "job-a0137",
+        "job-00283",
+        "job-00285",
+        "job-00284",
+        "alc-0003"
+      ],
+      "2025-08-19": [
+        "job-00286",
+        "job-00287",
+        "job-00288"
+      ],
+      "2025-08-21": [
+        "job-00289",
+        "job-00290",
+        "job-00291"
+      ],
+      "2025-08-27": [
+        "job-00292",
+        "job-00293",
+        "job-00294"
+      ],
+      "2025-09-02": [
+        "job-00295",
+        "job-00296",
+        "job-00298"
+      ],
+      "2025-09-03": [
+        "job-00297",
+        "job-a0138",
+        "job-a0139",
+        "job-a0140",
+        "job-a0141"
+      ],
+      "2025-09-04": [
+        "job-00299"
+      ],
+      "2025-09-05": [
+        "job-00300",
+        "job-00302",
+        "job-00301",
+        "job-a0137"
+      ],
+      "2025-09-08": [
+        "alc-0004"
+      ],
+      "2025-09-09": [
+        "job-00303",
+        "job-00304",
+        "job-00305"
+      ],
+      "2025-09-11": [
+        "job-a0142",
+        "job-a0143",
+        "job-a0144"
+      ],
+      "2025-09-12": [
+        "job-00306",
+        "job-00307",
+        "job-00308",
+        "job-a0144"
+      ],
+      "2025-09-15": [
+        "job-a0145",
+        "job-00309",
+        "job-00310",
+        "job-00311",
+        "job-00312",
+        "job-00314",
+        "job-00313",
+        "proto-subj-v3"
+      ],
+      "2025-09-16": [
+        "job-00315",
+        "job-00316",
+        "job-00317",
+        "proto-subj-v3 person-nadia"
+      ],
+      "2025-09-17": [
+        "job-00318",
+        "job-00319",
+        "job-a0146",
+        "job-a0147",
+        "job-a0148",
+        "job-a0149"
+      ],
+      "2025-09-18": [
+        "job-00320",
+        "job-00321",
+        "job-00322",
+        "job-00323",
+        "job-00324",
+        "job-00326"
+      ],
+      "2025-09-19": [
+        "job-00327",
+        "job-00329",
+        "job-00328",
+        "job-00325",
+        "job-a0145"
+      ],
+      "2025-09-22": [
+        "job-00330",
+        "job-00331",
+        "job-00332",
+        "job-a0150",
+        "job-a0151",
+        "job-a0152"
+      ],
+      "2025-09-23": [
+        "job-00336",
+        "job-00337",
+        "job-00338",
+        "job-00333",
+        "job-00334",
+        "job-00335"
+      ],
+      "2025-09-24": [
+        "job-00342",
+        "job-00343",
+        "job-00344",
+        "job-00339",
+        "job-00340",
+        "job-00341"
+      ],
+      "2025-09-25": [
+        "job-a0153",
+        "job-a0154",
+        "job-a0155",
+        "job-a0156",
+        "job-a0157",
+        "job-a0158"
+      ],
+      "2025-09-26": [
+        "job-a0159",
+        "job-a0160",
+        "job-a0161",
+        "job-00345",
+        "job-00346",
+        "job-00348",
+        "tbl-0009.v1",
+        "tbl-0010.v1",
+        "tbl-0011.v1"
+      ],
+      "2025-09-29": [
+        "job-a0162",
+        "job-a0163",
+        "job-a0164",
+        "job-00349",
+        "job-00350",
+        "job-00351",
+        "job-a0165",
+        "job-00347"
+      ],
+      "2025-09-30": [
+        "job-00352",
+        "job-00353",
+        "job-00354"
+      ],
+      "2025-10-01": [
+        "job-a0166",
+        "job-a0167",
+        "job-a0168",
+        "job-00355"
+      ],
+      "2025-10-02": [
+        "job-a0169",
+        "job-a0170",
+        "job-a0171",
+        "job-00356",
+        "job-00357",
+        "job-00358",
+        "tbl-0012.v1"
+      ],
+      "2025-10-03": [
+        "job-a0171"
+      ],
+      "2025-10-07": [
+        "job-00359",
+        "job-00360",
+        "job-00361"
+      ],
+      "2025-10-08": [
+        "job-00362",
+        "job-00363",
+        "job-00364"
+      ],
+      "2025-10-09": [
+        "job-00366",
+        "job-00367",
+        "job-00368",
+        "job-00365"
+      ],
+      "2025-10-10": [
+        "job-00369",
+        "job-00370",
+        "job-00371"
+      ],
+      "2025-10-14": [
+        "job-a0172",
+        "job-a0173",
+        "job-a0174",
+        "job-00372",
+        "job-a0175"
+      ],
+      "2025-10-15": [
+        "job-a0176",
+        "job-a0177",
+        "job-a0178",
+        "job-a0179",
+        "tbl-0009.v2"
+      ],
+      "2025-10-20": [
+        "job-00373",
+        "job-00374",
+        "job-00375"
+      ],
+      "2025-10-22": [
+        "job-00376",
+        "job-00377",
+        "job-00378"
+      ],
+      "2025-10-23": [
+        "job-00381",
+        "job-00383",
+        "job-00384",
+        "job-00379",
+        "job-00380"
+      ],
+      "2025-10-24": [
+        "job-00382",
+        "job-a0174"
+      ],
+      "2025-10-27": [
+        "job-00385",
+        "job-00387",
+        "job-00386"
+      ],
+      "2025-10-28": [
+        "job-00388",
+        "job-00389",
+        "job-00390"
+      ],
+      "2025-10-29": [
+        "job-a0180",
+        "job-a0181",
+        "job-a0182"
+      ],
+      "2025-10-30": [
+        "job-a0183",
+        "job-a0184",
+        "job-a0185"
+      ],
+      "2025-10-31": [
+        "job-a0186",
+        "job-00391",
+        "job-00392",
+        "job-00393"
+      ],
+      "2025-11-03": [
+        "job-00394",
+        "job-00395",
+        "job-00396"
+      ],
+      "2025-11-04": [
+        "job-00397",
+        "job-00398",
+        "job-00399",
+        "proto-trial-v2"
+      ],
+      "2025-11-05": [
+        "job-00400",
+        "job-00403",
+        "job-00401"
+      ],
+      "2025-11-06": [
+        "job-00402"
+      ],
+      "2025-11-10": [
+        "job-00404"
+      ],
+      "2025-11-12": [
+        "job-00408",
+        "job-00409",
+        "job-00411",
+        "job-00405",
+        "job-00407",
+        "job-00406"
+      ],
+      "2025-11-13": [
+        "job-00410",
+        "job-00412",
+        "job-00413",
+        "job-00414"
+      ],
+      "2025-11-14": [
+        "job-a0186"
+      ],
+      "2025-11-17": [
+        "alc-0005"
+      ],
+      "2025-11-19": [
+        "job-a0187",
+        "job-a0188",
+        "job-a0189"
+      ],
+      "2025-11-21": [
+        "job-a0190",
+        "job-a0191"
+      ],
+      "2025-11-25": [
+        "job-a0192",
+        "job-00415",
+        "job-00416",
+        "job-00417"
+      ],
+      "2025-11-26": [
+        "job-a0193",
+        "job-a0194",
+        "job-a0195"
+      ],
+      "2025-12-01": [
+        "job-00421",
+        "job-00422",
+        "job-00423",
+        "job-00418",
+        "job-00419",
+        "job-00420"
+      ],
+      "2025-12-02": [
+        "job-00424",
+        "job-00425",
+        "job-00426",
+        "tbl-0013.v1"
+      ],
+      "2025-12-04": [
+        "job-a0196",
+        "job-a0197",
+        "job-a0198"
+      ],
+      "2025-12-05": [
+        "job-a0199",
+        "job-a0200",
+        "job-a0201"
+      ],
+      "2025-12-08": [
+        "job-a0202"
+      ],
+      "2025-12-09": [
+        "job-00427"
+      ],
+      "2025-12-12": [
+        "job-a0203",
+        "job-a0204",
+        "job-a0205"
+      ],
+      "2025-12-17": [
+        "job-a0206",
+        "job-a0207",
+        "job-a0208",
+        "job-a0209"
+      ],
+      "2025-12-18": [
+        "job-00428",
+        "job-00431",
+        "job-00429"
+      ],
+      "2025-12-19": [
+        "job-00432",
+        "job-00430"
+      ],
+      "2025-12-22": [
+        "job-00433"
+      ],
+      "2025-12-23": [
+        "job-00434",
+        "job-00436",
+        "job-00435",
+        "job-00437",
+        "job-00438",
+        "job-00439"
+      ],
+      "2026-01-05": [
+        "job-00444",
+        "job-00445",
+        "job-00446",
+        "job-00440",
+        "job-00441",
+        "job-00443",
+        "alc-0006"
+      ],
+      "2026-01-06": [
+        "job-00447",
+        "job-00448",
+        "job-00450",
+        "job-00442"
+      ],
+      "2026-01-07": [
+        "job-00452",
+        "job-00453",
+        "job-00455",
+        "job-00451",
+        "job-00449",
+        "job-00457",
+        "job-00458",
+        "job-00460"
+      ],
+      "2026-01-08": [
+        "job-00456",
+        "job-00454",
+        "job-00459",
+        "job-00464",
+        "job-00465",
+        "job-00466",
+        "job-00461",
+        "job-00462",
+        "job-00463"
+      ],
+      "2026-01-09": [
+        "job-00467",
+        "job-00468",
+        "job-00469",
+        "job-00470",
+        "job-00471",
+        "job-00472"
+      ],
+      "2026-01-12": [
+        "job-00474",
+        "job-00475",
+        "job-00477",
+        "job-00473",
+        "job-00478",
+        "job-00479",
+        "job-00480"
+      ],
+      "2026-01-13": [
+        "job-00476",
+        "job-00481",
+        "job-00482",
+        "job-00483"
+      ],
+      "2026-01-14": [
+        "job-00484",
+        "job-00486",
+        "job-00485"
+      ],
+      "2026-01-15": [
+        "job-00487",
+        "job-00488",
+        "job-00489"
+      ],
+      "2026-01-16": [
+        "job-00491",
+        "job-00494",
+        "job-00493",
+        "job-00495",
+        "job-00496",
+        "job-00497",
+        "tbl-0014.v1",
+        "tbl-0015.v1",
+        "tbl-0016.v1"
+      ],
+      "2026-01-20": [
+        "job-00492",
+        "job-00490",
+        "job-00498",
+        "job-00499",
+        "job-00500"
+      ],
+      "2026-01-21": [
+        "job-a0210",
+        "job-a0211"
+      ],
+      "2026-01-22": [
+        "job-00505",
+        "job-00506",
+        "job-00501",
+        "job-00503",
+        "job-00504"
+      ],
+      "2026-01-23": [
+        "job-00502",
+        "job-00507",
+        "job-00508",
+        "job-00509"
+      ],
+      "2026-01-29": [
+        "job-00510",
+        "job-00511",
+        "job-00512"
+      ],
+      "2026-01-30": [
+        "job-a0212",
+        "job-a0213",
+        "job-a0214"
+      ],
+      "2026-02-02": [
+        "tbl-0017.v1"
+      ],
+      "2026-02-03": [
+        "job-a0215"
+      ],
+      "2026-02-04": [
+        "tbl-0014.v2"
+      ],
+      "2026-02-05": [
+        "job-a0216",
+        "job-a0217",
+        "job-a0218",
+        "job-00513",
+        "job-00514",
+        "job-00515"
+      ],
+      "2026-02-06": [
+        "job-a0218"
+      ],
+      "2026-02-09": [
+        "proto-subj-v4"
+      ],
+      "2026-02-10": [
+        "job-a0219",
+        "proto-subj-v4 person-nadia"
+      ],
+      "2026-02-11": [
+        "proto-sess-v3",
+        "proto-subj-v4 person-okafor"
+      ],
+      "2026-02-12": [
+        "proto-sess-v3 person-nadia"
+      ],
+      "2026-02-13": [
+        "proto-sess-v3 person-okafor"
+      ],
+      "2026-02-17": [
+        "proto-rob-v2"
+      ],
+      "2026-02-18": [
+        "job-00516",
+        "proto-rob-v2 person-nadia"
+      ],
+      "2026-02-19": [
+        "job-00517",
+        "proto-rob-v2 person-okafor"
+      ],
+      "2026-02-20": [
+        "job-a0220",
+        "job-a0221",
+        "job-a0222"
+      ],
+      "2026-02-24": [
+        "job-00518",
+        "job-00519",
+        "job-00520"
+      ],
+      "2026-02-25": [
+        "job-a0223",
+        "job-a0224",
+        "job-a0225",
+        "job-00522",
+        "job-00524",
+        "job-00523",
+        "job-00521"
+      ],
+      "2026-03-02": [
+        "job-a0226",
+        "job-a0227",
+        "job-a0228"
+      ],
+      "2026-03-04": [
+        "job-00525",
+        "job-00526",
+        "job-00527"
+      ],
+      "2026-03-05": [
+        "job-00528",
+        "job-00530",
+        "job-00529"
+      ],
+      "2026-03-06": [
+        "job-a0229",
+        "job-a0230"
+      ],
+      "2026-03-09": [
+        "job-00531",
+        "job-00532",
+        "job-00533",
+        "proto-subj-v5"
+      ],
+      "2026-03-10": [
+        "proto-subj-v5 person-nadia"
+      ],
+      "2026-03-11": [
+        "proto-lat-v2",
+        "proto-subj-v5 person-okafor"
+      ],
+      "2026-03-12": [
+        "proto-lat-v2 person-nadia"
+      ],
+      "2026-03-13": [
+        "job-00534",
+        "job-00535",
+        "proto-lat-v2 person-okafor"
+      ],
+      "2026-03-17": [
+        "job-00536",
+        "job-00537"
+      ],
+      "2026-03-18": [
+        "job-00538",
+        "job-00539"
+      ],
+      "2026-03-19": [
+        "job-00540",
+        "job-00541",
+        "job-00544",
+        "job-00545",
+        "job-00543"
+      ],
+      "2026-03-23": [
+        "job-00542"
+      ],
+      "2026-03-26": [
+        "job-00546",
+        "job-00547"
+      ],
+      "2026-03-27": [
+        "job-00548",
+        "job-00550"
+      ],
+      "2026-03-30": [
+        "job-00549"
+      ],
+      "2026-03-31": [
+        "job-a0231",
+        "job-a0232",
+        "job-a0233",
+        "job-a0234",
+        "job-a0235"
+      ],
+      "2026-04-01": [
+        "job-a0236",
+        "job-00551",
+        "job-00554",
+        "job-00552"
+      ],
+      "2026-04-02": [
+        "job-a0237",
+        "job-a0238",
+        "job-a0239",
+        "job-00553",
+        "tbl-0018.v1"
+      ],
+      "2026-04-03": [
+        "job-00555",
+        "job-00557",
+        "job-00556",
+        "job-00559",
+        "job-00558",
+        "job-a0239"
+      ],
+      "2026-04-07": [
+        "job-00560",
+        "job-00561",
+        "job-00564",
+        "job-00563",
+        "job-00565",
+        "proto-trial-v3"
+      ],
+      "2026-04-08": [
+        "job-00562",
+        "job-a0240",
+        "job-a0241",
+        "job-a0242",
+        "proto-trial-v3 person-nadia"
+      ],
+      "2026-04-09": [
+        "job-00566",
+        "proto-trial-v3 person-okafor"
+      ],
+      "2026-04-10": [
+        "job-00567",
+        "job-00568",
+        "job-00570",
+        "job-00569",
+        "job-00571"
+      ],
+      "2026-04-13": [
+        "job-00572",
+        "job-00573",
+        "job-00574"
+      ],
+      "2026-04-14": [
+        "job-00575",
+        "job-00576",
+        "job-00578",
+        "job-00577",
+        "job-00579"
+      ],
+      "2026-04-15": [
+        "job-00580",
+        "job-00581",
+        "job-00582",
+        "job-00583",
+        "job-00584"
+      ],
+      "2026-04-16": [
+        "job-00585",
+        "job-00586"
+      ],
+      "2026-04-17": [
+        "job-a0238"
+      ],
+      "2026-04-20": [
+        "job-a0243",
+        "job-a0244",
+        "job-a0245",
+        "job-a0246",
+        "job-a0247",
+        "alc-0007"
+      ],
+      "2026-04-22": [
+        "job-00587",
+        "job-00588",
+        "job-00592",
+        "job-00589",
+        "job-00591"
+      ],
+      "2026-04-23": [
+        "job-00593",
+        "job-00594",
+        "job-00595",
+        "job-00596",
+        "job-00597",
+        "job-00590"
+      ],
+      "2026-04-24": [
+        "job-00598"
+      ],
+      "2026-04-28": [
+        "job-00599",
+        "job-00601",
+        "job-00600",
+        "job-00602",
+        "job-00603"
+      ],
+      "2026-04-29": [
+        "job-00604",
+        "job-00605",
+        "job-00607"
+      ],
+      "2026-04-30": [
+        "job-a0248",
+        "job-a0249",
+        "job-a0250",
+        "job-a0251",
+        "job-a0252",
+        "job-00606"
+      ],
+      "2026-05-01": [
+        "job-00608",
+        "job-00609",
+        "job-00610",
+        "job-00611",
+        "job-00612"
+      ],
+      "2026-05-04": [
+        "job-a0253",
+        "job-a0254",
+        "job-a0255",
+        "job-a0256",
+        "job-a0257",
+        "job-00613",
+        "job-00614",
+        "job-00617",
+        "job-00616",
+        "job-00618",
+        "alc-0008"
+      ],
+      "2026-05-05": [
+        "job-00615",
+        "job-00619",
+        "job-00620"
+      ],
+      "2026-05-06": [
+        "job-00621",
+        "job-00622",
+        "job-00624",
+        "job-00627",
+        "job-00625"
+      ],
+      "2026-05-07": [
+        "job-a0258",
+        "job-a0259",
+        "job-a0260",
+        "job-00628",
+        "job-00629",
+        "job-00630",
+        "job-00632",
+        "job-00631"
+      ],
+      "2026-05-08": [
+        "job-00633",
+        "job-00634",
+        "job-00636",
+        "job-00635",
+        "job-00637",
+        "job-a0261",
+        "job-a0262",
+        "job-a0263",
+        "job-00626",
+        "job-00623"
+      ],
+      "2026-05-11": [
+        "job-a0264",
+        "job-a0265",
+        "job-00643",
+        "job-00644",
+        "job-00646",
+        "job-00648",
+        "job-00649",
+        "job-00638",
+        "job-00639",
+        "job-00641",
+        "job-00640",
+        "job-00642"
+      ],
+      "2026-05-12": [
+        "job-a0266",
+        "job-a0267",
+        "job-00645",
+        "job-a0268",
+        "job-00650",
+        "job-00652",
+        "job-00651"
+      ],
+      "2026-05-13": [
+        "job-00658",
+        "job-00659",
+        "job-00660",
+        "job-00662",
+        "job-00661",
+        "job-00663",
+        "job-00664",
+        "job-00665",
+        "job-00647",
+        "job-00653",
+        "job-00654",
+        "job-00655",
+        "job-00656",
+        "job-00657"
+      ],
+      "2026-05-14": [
+        "job-00666",
+        "job-00667",
+        "job-00669",
+        "job-00670",
+        "job-00668",
+        "job-00671",
+        "job-00672",
+        "job-00673",
+        "job-00674",
+        "job-00676"
+      ],
+      "2026-05-15": [
+        "job-00677",
+        "job-00679",
+        "job-00675",
+        "job-00681",
+        "job-00683",
+        "job-00684",
+        "job-00686",
+        "job-00685",
+        "tbl-0019.v1",
+        "tbl-0020.v1",
+        "tbl-0021.v1"
+      ],
+      "2026-05-18": [
+        "job-00678",
+        "job-00680",
+        "job-00682",
+        "job-00687",
+        "job-00688",
+        "job-00689",
+        "job-00690",
+        "job-00691"
+      ],
+      "2026-05-19": [
+        "job-00692",
+        "job-00693",
+        "job-00694",
+        "job-a0269",
+        "job-a0270"
+      ],
+      "2026-05-20": [
+        "job-00700",
+        "job-00701",
+        "job-00702",
+        "job-00704",
+        "job-00703",
+        "job-00695",
+        "job-00696",
+        "job-00699",
+        "job-00697",
+        "job-00698"
+      ],
+      "2026-05-21": [
+        "job-00705",
+        "job-00706",
+        "job-00707",
+        "job-00709",
+        "job-00708"
+      ],
+      "2026-05-22": [
+        "job-a0271",
+        "job-a0272",
+        "job-a0273",
+        "job-00710",
+        "job-00711",
+        "job-00712",
+        "job-00714",
+        "job-00713"
+      ],
+      "2026-05-28": [
+        "job-00715",
+        "job-00716",
+        "job-00719",
+        "job-00717",
+        "job-00718"
+      ],
+      "2026-05-29": [
+        "job-00720",
+        "job-00721",
+        "job-a0273"
+      ],
+      "2026-06-02": [
+        "job-a0274",
+        "tbl-0022.v1"
+      ],
+      "2026-06-03": [
+        "job-00722",
+        "job-00723",
+        "job-00724",
+        "job-00725",
+        "job-00726",
+        "tbl-0019.v2"
+      ],
+      "2026-06-09": [
+        "job-00727",
+        "job-00728",
+        "job-00729",
+        "job-00730",
+        "job-00731"
+      ],
+      "2026-06-10": [
+        "job-00732",
+        "job-00735",
+        "job-00733",
+        "job-00734",
+        "job-00736",
+        "job-a0275",
+        "job-a0276",
+        "job-a0277",
+        "job-a0278"
+      ],
+      "2026-06-12": [
+        "job-00737",
+        "job-00739",
+        "job-00741",
+        "job-00740",
+        "job-00742",
+        "job-a0272"
+      ],
+      "2026-06-15": [
+        "job-00738"
+      ],
+      "2026-06-16": [
+        "job-a0279",
+        "job-a0280",
+        "job-a0281",
+        "job-a0282",
+        "job-a0283"
+      ],
+      "2026-06-17": [
+        "job-00743",
+        "job-00744",
+        "job-00745"
+      ],
+      "2026-06-25": [
+        "job-00746",
+        "job-00748",
+        "job-00747",
+        "job-00749",
+        "job-00750"
+      ],
+      "2026-06-26": [
+        "job-00753",
+        "job-00755",
+        "job-00754",
+        "job-00757",
+        "job-00758",
+        "job-00751",
+        "job-00752",
+        "job-a0283"
+      ],
+      "2026-06-29": [
+        "job-00756"
+      ],
+      "2026-06-30": [
+        "job-00759",
+        "job-00761",
+        "job-00763",
+        "job-00764",
+        "job-00765",
+        "job-00766",
+        "job-00769",
+        "job-00770",
+        "job-00767",
+        "job-00771"
+      ],
+      "2026-07-01": [
+        "job-00772",
+        "job-00773",
+        "job-00774",
+        "job-00775",
+        "job-00776",
+        "job-00760",
+        "job-00768",
+        "job-00762"
+      ],
+      "2026-07-02": [
+        "job-00777",
+        "job-00778",
+        "job-00780"
+      ],
+      "2026-07-06": [
+        "job-00779"
+      ],
+      "2026-07-14": [
+        "job-a0284",
+        "job-a0285",
+        "job-a0286",
+        "job-a0287",
+        "job-a0288",
+        "tbl-0023.v1"
+      ],
+      "2026-07-15": [
+        "job-00781",
+        "job-00782",
+        "job-00783",
+        "job-00786",
+        "job-00784"
+      ],
+      "2026-07-16": [
+        "job-00787",
+        "job-00788",
+        "job-00789",
+        "job-00791",
+        "job-00792",
+        "job-00785"
+      ],
+      "2026-07-17": [
+        "job-00790"
+      ],
+      "2026-07-20": [
+        "job-00793",
+        "job-00795",
+        "job-00797",
+        "job-00798",
+        "job-00796"
+      ],
+      "2026-07-21": [
+        "job-a0289",
+        "job-a0290",
+        "job-00794"
+      ],
+      "2026-07-23": [
+        "job-00799",
+        "job-00800",
+        "job-00802",
+        "job-00801",
+        "job-00803",
+        "job-00804",
+        "job-00805",
+        "job-00806",
+        "job-00807",
+        "job-00808",
+        "job-a0291"
+      ],
+      "2026-07-24": [
+        "job-00809",
+        "job-00810",
+        "job-00811"
+      ],
+      "2026-07-29": [
+        "job-00812",
+        "job-00813",
+        "job-00814"
+      ],
+      "2026-08-03": [
+        "job-00815",
+        "job-00817",
+        "job-00816",
+        "job-00818",
+        "job-00819",
+        "tbl-0024.v1"
+      ],
+      "2026-08-04": [
+        "job-00820",
+        "job-00821",
+        "job-00822",
+        "job-00823",
+        "job-00824"
+      ],
+      "2026-08-06": [
+        "job-00825",
+        "job-00826"
+      ],
+      "2026-08-07": [
+        "job-00827",
+        "job-00829",
+        "job-00828"
+      ],
+      "2026-08-10": [
+        "proto-subj-v6"
+      ],
+      "2026-08-11": [
+        "job-00830",
+        "job-00831",
+        "job-00834",
+        "job-00832",
+        "job-00835",
+        "proto-subj-v6 person-nadia"
+      ],
+      "2026-08-12": [
+        "job-00833",
+        "proto-sess-v4",
+        "proto-subj-v6 person-okafor"
+      ],
+      "2026-08-13": [
+        "proto-sess-v5",
+        "proto-sess-v5 person-nadia"
+      ],
+      "2026-08-14": [
+        "proto-sess-v5 person-okafor",
+        "job-a0291"
+      ],
+      "2026-08-17": [
+        "job-00841",
+        "job-00846",
+        "job-00843",
+        "job-00845",
+        "job-00847",
+        "job-00836",
+        "job-00837",
+        "job-00838",
+        "job-00839",
+        "job-00840",
+        "proto-xfer-v3"
+      ],
+      "2026-08-18": [
+        "job-00842",
+        "job-00844",
+        "proto-xfer-v3 person-nadia"
+      ],
+      "2026-08-19": [
+        "proto-xfer-v3 person-okafor"
+      ],
+      "2026-08-21": [
+        "job-00848",
+        "job-00849"
+      ],
+      "2026-08-27": [
+        "job-00850",
+        "job-00851",
+        "job-00852",
+        "job-00853",
+        "job-00854"
+      ],
+      "2026-08-28": [
+        "job-00855",
+        "job-00858",
+        "job-00856",
+        "job-00857",
+        "job-00860"
+      ],
+      "2026-08-31": [
+        "job-00861",
+        "job-00859"
+      ],
+      "2026-09-01": [
+        "job-a0292",
+        "job-a0293",
+        "job-a0294",
+        "job-a0295",
+        "job-a0296"
+      ],
+      "2026-09-02": [
+        "job-00862",
+        "job-00863",
+        "job-00864",
+        "job-00865",
+        "job-00867",
+        "job-00868",
+        "job-00869",
+        "job-00870"
+      ],
+      "2026-09-03": [
+        "job-00871",
+        "job-00873",
+        "job-00875",
+        "job-00874",
+        "job-00876",
+        "job-a0297",
+        "job-a0298",
+        "job-a0299",
+        "job-a0300",
+        "job-a0301",
+        "job-00866"
+      ],
+      "2026-09-04": [
+        "job-00872"
+      ],
+      "2026-09-08": [
+        "job-a0302",
+        "job-a0303",
+        "job-a0304",
+        "job-a0305",
+        "job-a0306"
+      ],
+      "2026-09-09": [
+        "job-00877",
+        "job-00878",
+        "job-00879",
+        "job-00881",
+        "job-00880"
+      ],
+      "2026-09-10": [
+        "job-00882",
+        "job-00883",
+        "job-00884",
+        "job-00885",
+        "job-00886",
+        "job-00887"
+      ],
+      "2026-09-11": [
+        "job-00888",
+        "job-00889",
+        "job-00890",
+        "job-00892",
+        "job-00893"
+      ],
+      "2026-09-14": [
+        "job-00891",
+        "job-00895",
+        "job-00896",
+        "job-00894",
+        "job-00897",
+        "job-00898",
+        "job-00899",
+        "job-00901",
+        "job-00900",
+        "job-00902"
+      ],
+      "2026-09-15": [
+        "job-a0307",
+        "job-a0308",
+        "job-a0309",
+        "job-00903",
+        "job-00904",
+        "job-00905",
+        "job-00908",
+        "job-00906",
+        "job-00907",
+        "alc-0009"
+      ],
+      "2026-09-16": [
+        "job-a0310",
+        "job-00914",
+        "job-00915",
+        "job-00917",
+        "job-00916",
+        "job-00918",
+        "job-00909",
+        "job-00910",
+        "job-00911",
+        "job-00913",
+        "job-00912"
+      ],
+      "2026-09-17": [
+        "job-00919",
+        "job-00920",
+        "job-00924",
+        "job-00922",
+        "job-00921",
+        "job-00925",
+        "job-00926",
+        "job-00927"
+      ],
+      "2026-09-18": [
+        "job-00933",
+        "job-00934",
+        "job-00935",
+        "job-00936",
+        "job-00937",
+        "job-00928",
+        "job-00929",
+        "job-00930",
+        "job-00931",
+        "job-00932",
+        "job-00923",
+        "alc-0010"
+      ],
+      "2026-09-21": [
+        "job-00939",
+        "job-00940",
+        "job-00941",
+        "job-00938"
+      ],
+      "2026-09-22": [
+        "job-00942",
+        "job-00943",
+        "job-00945",
+        "job-00944",
+        "job-00946",
+        "job-00947",
+        "job-00948",
+        "job-00950",
+        "job-00949",
+        "job-00951"
+      ],
+      "2026-09-23": [
+        "job-00952",
+        "job-00953",
+        "job-00954",
+        "job-00955",
+        "job-00956"
+      ],
+      "2026-09-24": [
+        "job-00957",
+        "job-00959",
+        "job-00958",
+        "job-00960",
+        "job-00961"
+      ],
+      "2026-09-25": [
+        "job-00962",
+        "job-00963",
+        "job-00964",
+        "job-00965",
+        "job-00966",
+        "tbl-0025.v1"
+      ],
+      "2026-09-28": [
+        "job-00967",
+        "job-00968",
+        "job-00970",
+        "job-00969",
+        "job-00971"
+      ],
+      "2026-09-29": [
+        "job-a0311",
+        "job-a0312",
+        "job-a0313",
+        "job-00972",
+        "job-00974",
+        "job-00975",
+        "job-00976",
+        "job-00977",
+        "job-a0314",
+        "job-a0315",
+        "job-a0316"
+      ],
+      "2026-09-30": [
+        "job-00978",
+        "job-00980",
+        "job-00981",
+        "job-00983",
+        "job-00982",
+        "job-00973",
+        "job-00984",
+        "job-00985",
+        "job-00986"
+      ],
+      "2026-10-01": [
+        "job-00979",
+        "job-00987",
+        "job-00988"
+      ],
+      "2026-10-02": [
+        "job-00989",
+        "job-00990",
+        "job-00992",
+        "job-00991",
+        "job-00993",
+        "tbl-0026.v1",
+        "job-a0316"
+      ],
+      "2026-10-07": [
+        "job-00994",
+        "job-00995",
+        "job-00996"
+      ],
+      "2026-10-08": [
+        "job-00997",
+        "job-00998",
+        "job-00999"
+      ],
+      "2026-10-13": [
+        "job-a0317",
+        "ntf-0367",
+        "ntf-0368"
+      ],
+      "2026-10-14": [
+        "tbl-0025.v2"
+      ],
+      "2026-10-16": [
+        "job-01000",
+        "job-01003",
+        "job-01001",
+        "job-01004",
+        "job-01002"
+      ],
+      "2026-10-19": [
+        "job-01005",
+        "job-01006",
+        "job-01009",
+        "job-01008",
+        "job-01011"
+      ],
+      "2026-10-20": [
+        "job-01007",
+        "job-01010"
+      ],
+      "2026-10-21": [
+        "job-01012",
+        "job-01013",
+        "job-01014",
+        "job-01015",
+        "job-01016"
+      ],
+      "2026-10-22": [
+        "job-a0318",
+        "job-a0319",
+        "job-a0320",
+        "job-a0321",
+        "job-a0322",
+        "job-01017",
+        "ntf-0369",
+        "ntf-0370",
+        "ntf-0371",
+        "ntf-0372",
+        "ntf-0373"
+      ],
+      "2026-10-23": [
+        "job-01018",
+        "job-01019",
+        "job-01020",
+        "job-a0322"
+      ],
+      "2026-10-26": [
+        "job-01021",
+        "job-01023"
+      ],
+      "2026-10-27": [
+        "job-01022",
+        "job-01024",
+        "job-01025",
+        "job-01026",
+        "job-01027",
+        "job-01028"
+      ],
+      "2026-10-28": [
+        "job-01029",
+        "job-a0323",
+        "job-a0324",
+        "job-a0325",
+        "job-a0326"
+      ],
+      "2026-10-29": [
+        "job-01030",
+        "job-01031",
+        "job-01032",
+        "job-01033",
+        "job-01034",
+        "ntf-0374",
+        "ntf-0375",
+        "ntf-0376",
+        "ntf-0377"
+      ],
+      "2026-10-30": [
+        "job-01035",
+        "job-01036",
+        "job-01037",
+        "job-01038",
+        "job-01039"
+      ],
+      "2026-11-02": [
+        "job-a0327",
+        "ntf-0378"
+      ],
+      "2026-11-05": [
+        "job-01040",
+        "job-01041",
+        "job-01042",
+        "job-01043",
+        "job-01044"
+      ],
+      "2026-11-09": [
+        "job-01045",
+        "job-01046",
+        "job-01047"
+      ],
+      "2026-11-10": [
+        "job-a0328",
+        "job-a0329",
+        "job-a0330",
+        "job-a0331",
+        "job-a0332",
+        "ntf-0383"
+      ],
+      "2026-11-11": [
+        "ntf-0379",
+        "ntf-0380",
+        "ntf-0381",
+        "ntf-0382"
+      ],
+      "2026-11-12": [
+        "job-a0333",
+        "job-a0334",
+        "job-a0335"
+      ],
+      "2026-11-13": [
+        "job-01048",
+        "job-01049",
+        "job-01050",
+        "job-01052",
+        "job-01051",
+        "job-01053",
+        "job-01055",
+        "job-01054",
+        "job-01057",
+        "job-01056",
+        "ntf-0384",
+        "ntf-0385",
+        "ntf-0386"
+      ],
+      "2026-11-18": [
+        "job-01058",
+        "job-01059",
+        "job-01061",
+        "job-01060",
+        "job-01062"
+      ],
+      "2026-11-19": [
+        "job-01063",
+        "job-01064",
+        "job-01065",
+        "job-01066"
+      ],
+      "2026-11-20": [
+        "job-a0336",
+        "job-a0337",
+        "job-a0338",
+        "job-a0339",
+        "job-a0340",
+        "job-01067",
+        "job-01068",
+        "job-01069",
+        "job-01071",
+        "job-01070",
+        "ntf-0387",
+        "ntf-0388",
+        "ntf-0389",
+        "ntf-0390",
+        "ntf-0391"
+      ],
+      "2026-11-23": [
+        "job-a0341",
+        "job-a0342",
+        "job-01077",
+        "job-01078",
+        "job-01082",
+        "job-01079",
+        "job-01080",
+        "job-01072",
+        "job-01075",
+        "job-01073",
+        "job-01074",
+        "job-01076",
+        "ntf-0392",
+        "ntf-0393"
+      ],
+      "2026-11-24": [
+        "job-a0343",
+        "job-a0344",
+        "job-a0345",
+        "job-a0346",
+        "job-a0347",
+        "job-01081",
+        "job-a0348",
+        "job-a0349",
+        "job-a0350",
+        "ntf-0395",
+        "ntf-0396",
+        "ntf-0397",
+        "ntf-0398",
+        "ntf-0399"
+      ],
+      "2026-11-25": [
+        "job-01083",
+        "job-01084",
+        "job-a0351",
+        "ntf-0400",
+        "ntf-0401",
+        "ntf-0402",
+        "ntf-0403"
+      ],
+      "2026-11-30": [
+        "job-a0352",
+        "job-01085",
+        "job-01086",
+        "job-01088",
+        "job-01087",
+        "job-01089",
+        "alc-0011",
+        "ntf-0404",
+        "ntf-0405"
+      ],
+      "2026-12-01": [
+        "job-01090",
+        "job-01091"
+      ],
+      "2026-12-02": [
+        "job-a0353",
+        "job-a0354",
+        "job-a0355",
+        "job-a0356",
+        "job-a0357",
+        "job-01092",
+        "job-01094",
+        "job-01093",
+        "job-01097",
+        "job-01096",
+        "tbl-0027.v1",
+        "ntf-0407",
+        "ntf-0408",
+        "ntf-0409",
+        "ntf-0410",
+        "ntf-0411"
+      ],
+      "2026-12-03": [
+        "job-a0358",
+        "job-a0359",
+        "job-a0360",
+        "job-a0361",
+        "job-01095",
+        "job-01098",
+        "job-01099",
+        "job-01100",
+        "job-01101",
+        "job-01102",
+        "ntf-0412",
+        "ntf-0413",
+        "ntf-0414",
+        "ntf-0415"
+      ],
+      "2026-12-04": [
+        "job-01103",
+        "job-01104",
+        "job-01105",
+        "job-01107",
+        "job-01106",
+        "tbl-0028.v1",
+        "tbl-0029.v1",
+        "tbl-0030.v1"
+      ],
+      "2026-12-07": [
+        "job-01108",
+        "job-01109",
+        "job-01111",
+        "job-01110",
+        "job-01112",
+        "alc-0012",
+        "ntf-0416"
+      ],
+      "2026-12-08": [
+        "job-01113",
+        "job-01114",
+        "job-01115",
+        "job-01118",
+        "job-01116",
+        "job-01119",
+        "job-01120",
+        "job-01121",
+        "job-01122",
+        "job-01123"
+      ],
+      "2026-12-09": [
+        "job-01117",
+        "job-01124",
+        "job-01126"
+      ],
+      "2026-12-10": [
+        "job-01125",
+        "job-01127",
+        "job-01128",
+        "job-01129",
+        "job-01130",
+        "job-01131",
+        "job-01136",
+        "job-01137",
+        "job-01132",
+        "job-01134",
+        "job-01133"
+      ],
+      "2026-12-11": [
+        "job-01135",
+        "job-01138",
+        "job-01139",
+        "job-01142",
+        "job-01140",
+        "job-01141",
+        "job-a0360"
+      ],
+      "2026-12-15": [
+        "job-01143",
+        "job-01144",
+        "job-01145",
+        "job-01146",
+        "job-01147"
+      ],
+      "2026-12-16": [
+        "job-01148",
+        "job-01149",
+        "job-01151",
+        "job-01150",
+        "job-01152"
+      ],
+      "2026-12-17": [
+        "job-01153",
+        "job-01154",
+        "job-01155",
+        "job-01158",
+        "job-01156"
+      ],
+      "2026-12-18": [
+        "job-a0359"
+      ],
+      "2026-12-21": [
+        "job-01157",
+        "job-01159",
+        "job-01160",
+        "job-01161",
+        "job-01162",
+        "job-01163"
+      ],
+      "2026-12-22": [
+        "job-a0362",
+        "job-a0363",
+        "job-a0364",
+        "job-a0365",
+        "job-a0366",
+        "proto-subj-v7",
+        "tbl-0031.v1",
+        "ntf-0422"
+      ],
+      "2026-12-23": [
+        "job-a0367",
+        "job-a0368",
+        "job-a0369",
+        "job-a0370",
+        "job-a0371",
+        "ntf-0417",
+        "ntf-0418",
+        "ntf-0419",
+        "ntf-0420",
+        "ntf-0421",
+        "ntf-0423",
+        "ntf-0424",
+        "ntf-0425",
+        "ntf-0426",
+        "ntf-0427"
+      ]
+    }
+  },
+  "scheduled": {
+    "note": "Not counted. These are planned times, or acts that did not happen at the time they name.",
+    "kinds": [
+      {
+        "kind": "respond_by",
+        "date_field": "protocols[].respond_by",
+        "note": "the deadline for answers of a proposed version.",
+        "rows": 2,
+        "listed": [
+          {
+            "id": "proto-trial-v2",
+            "value": "2025-11-14T10:20:00-05:00"
+          },
+          {
+            "id": "proto-subj-v7",
+            "value": "2027-01-01T11:30:00-05:00"
+          }
+        ]
+      },
+      {
+        "kind": "planned_runs",
+        "date_field": "jobs[].run.starts_at and .ends_at",
+        "note": "the planned start and end of a job that has not ended by the clock.",
+        "rows": 0,
+        "listed": []
+      },
+      {
+        "kind": "pending_notices",
+        "date_field": "notifications[].at",
+        "note": "a job.ended notice released after the clock.",
+        "rows": 0,
+        "listed": []
+      },
+      {
+        "kind": "removed_notices",
+        "date_field": "notifications[].at",
+        "note": "the intended release of a notice that a cancellation, a hold or an interruption removed. It was never released.",
+        "rows": 2,
+        "listed": [
+          {
+            "id": "ntf-0394",
+            "value": "2026-11-24T16:03:00-05:00"
+          },
+          {
+            "id": "ntf-0406",
+            "value": "2026-12-02T14:40:00-05:00"
+          }
+        ]
+      },
+      {
+        "kind": "never_ran",
+        "date_field": "jobs[].submitted_at",
+        "note": "a job that was held or cancelled before it started. Only its submission counts, as a job.",
+        "rows": 2,
+        "listed": [
+          {
+            "id": "job-a0309",
+            "value": "2026-09-15T08:02:00-04:00"
+          },
+          {
+            "id": "job-a0310",
+            "value": "2026-09-16T10:00:00-04:00"
+          }
+        ]
+      }
+    ]
+  },
+  "samples": [
+    {
+      "kind": "job",
+      "id": "job-00001",
+      "at": "2025-01-02T09:58:00-05:00",
+      "text": "person-tomas runs cfg-conformer-v1 seed 0 on 4 x gpu-h under proto-subj-v1 (labmate): completed accuracy 0.657."
+    },
+    {
+      "kind": "job",
+      "id": "job-00004",
+      "at": "2025-01-07T13:47:00-05:00",
+      "text": "person-farid runs cfg-tcn-v1 seed 0 on 2 x gpu-h under proto-subj-v1 (labmate): failed."
+    },
+    {
+      "kind": "job",
+      "id": "job-a0001",
+      "at": "2025-01-15T22:00:00-05:00",
+      "text": "person-nadia runs cfg-birch-abl-v5 seed 0 on 1 x gpu-a under no protocol (script): completed accuracy 0.617."
+    },
+    {
+      "kind": "job",
+      "id": "job-00034",
+      "at": "2025-01-27T09:05:00-05:00",
+      "text": "person-mei runs cfg-mae-b16-v5 seed 0 on 2 x gpu-a under proto-subj-v1 (labmate): completed accuracy 0.668."
+    },
+    {
+      "kind": "job",
+      "id": "job-00299",
+      "at": "2025-09-04T13:45:00-04:00",
+      "text": "person-ines runs cfg-eegnet-v1 seed 0 on 4 x cpu under proto-lat-v1 (labmate): completed latency_ms 33."
+    },
+    {
+      "kind": "job",
+      "id": "job-00013",
+      "at": "2025-01-13T18:01:00-05:00",
+      "text": "person-tomas runs cfg-conformer-v5 seed 2 on 4 x gpu-h under proto-subj-v1 (labmate): failed."
+    },
+    {
+      "kind": "job",
+      "id": "job-00021",
+      "at": "2025-01-16T12:53:00-05:00",
+      "text": "person-tomas runs cfg-conformer-v6 seed 1 on 1 x gpu-h under proto-subj-v1 (labmate): timed_out."
+    },
+    {
+      "kind": "job",
+      "id": "job-a0015",
+      "at": "2025-02-25T09:00:00-05:00",
+      "text": "person-nadia runs cfg-atlas-v1 seed 0 on 2 x gpu-a under proto-subj-v1 (agent): interrupted."
+    },
+    {
+      "kind": "job",
+      "id": "job-a0309",
+      "at": "2026-09-15T08:02:00-04:00",
+      "text": "person-nadia runs cfg-atlas-v14 seed 2 on 2 x gpu-h under proto-subj-v6 (agent): cancelled."
+    },
+    {
+      "kind": "protocol version",
+      "id": "proto-subj-v2",
+      "at": "2025-06-23T11:10:00-04:00",
+      "text": "person-mei proposes: Move to the dataset release eeg-subjects-2025.2, which fixes the subject labels. State: superseded."
+    },
+    {
+      "kind": "table version",
+      "id": "tbl-0001.v1",
+      "at": "2025-03-07T10:15:00-05:00",
+      "text": "Main results for the Spring workshop 2025, 3 rows, frozen."
+    },
+    {
+      "kind": "allocation change",
+      "id": "alc-0001",
+      "at": "2025-02-24T09:01:00-05:00",
+      "text": "7200 to 5900 GPU-hours: The department moved hours to the shared pool."
+    },
+    {
+      "kind": "config",
+      "id": "cfg-atlas-v13",
+      "at": "2026-12-22T08:08:00-05:00",
+      "text": "atlas on eeg-subjects-2026.2 / test-subjects, {\"lr\":0.00017,\"epochs\":180,\"depth\":12,\"warmup_steps\":500}"
+    }
+  ]
+}

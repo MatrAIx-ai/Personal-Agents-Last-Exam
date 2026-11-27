@@ -1,0 +1,81 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "benchline-minimal",
+  "version": "1.0.0",
+  "description": "Authored synthetic history of one researcher account in one fictional lab, for reproducible acceptance: 1 project with 3 partitions (two GPU rates and one free CPU partition), one current allocation period (December 2026, with the two earlier periods that older jobs name) and 2 earlier allocation changes in it, 6 people with shares, 12 configs in 4 families, 3 protocol lines with 7 versions in the 6 states, 60 jobs (24 of the account holder) in the 8 states, 34 results (3 excluded and 2 invalidated), 4 table versions (one in each state), 30 run plans and the 14 newest notifications. A development script replays the authored history from 2 November to 9 December 2026 once through the App. It is not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Authored synthetic records; no external collection. The lab, the people, the cluster, the datasets, the configs and the results are fictional. Public pages were read only for the shape of the workflows, and no text, data or brand was copied: Slurm's job submission and job states (https://slurm.schedmd.com/sbatch.html, https://slurm.schedmd.com/job_state_codes.html), Slurm's resource limits (https://slurm.schedmd.com/resource_limits.html) and MLflow Tracking (https://mlflow.org/docs/latest/ml/tracking/).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/benchline/dev/build-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "evaluation-generator",
+      "kind": "synthetic",
+      "description": "The source of the separate evaluation dataset in data/evaluation/. Its own dataset.json, passed to env.load_seed, names this same source ID in its record_source_ids, so every record of data/evaluation/seed.json comes from it. The records of this file's fixture come only from authored, so this source is declared here but not listed in record_source_ids above. Every record is synthetic: a scripted history of one fictional lab from 1 January 2025 to 31 December 2026, made from story templates with a seeded PRNG and replayed through the App. It is not part of the package fixture.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted replay of story templates with a seeded PRNG (mulberry32)",
+        "tool": "apps/benchline/dev/generate-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250101,
+        "parameters": {
+          "start": "2025-01-01T00:00:00-05:00",
+          "clock": "2026-12-31T23:00:00-05:00",
+          "timezone": "America/New_York",
+          "files": [
+            {
+              "name": "data/evaluation/seed.json",
+              "bytes": 1569864,
+              "sha256": "af00b378279483e9b06d2e6c1270240da95a05f1cc05c8de0c77356c0347f54b"
+            },
+            {
+              "name": "data/evaluation/clock.json",
+              "bytes": 50,
+              "sha256": "4a0a17ea549f275a693b1f7728c04cc3c0d318462bfcc1b1ca16d07dd162debc"
+            },
+            {
+              "name": "data/evaluation/dataset.json",
+              "bytes": 2212,
+              "sha256": "d313098487e1a1d83cb26583e05f83b77c7c9ff6d355ef37b75f5ab2dd530798"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps and account IDs. Records are configs, protocol versions, run plans, jobs, table versions and allocation changes."
+  ],
+  "expected_counts": {
+    "records": 115,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
