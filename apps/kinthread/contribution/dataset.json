@@ -1,0 +1,67 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "kinthread-minimal",
+  "version": "1.0.0",
+  "description": "Small synthetic Kinthread group used to boot the package. The evaluation history is synthetic and lives in the later partitions named by contribution/coverage-report.json: fixtures/a-family-care/later (a-family-care-later), fixtures/b-school-parents/later (b-school-parents-later), and fixtures/c-friends/later (c-friends-later).",
+  "record_source_ids": ["authored"],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records. No external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "a-family-care-later",
+      "kind": "synthetic",
+      "description": "Evaluation partition fixtures/a-family-care/later. Coverage report key a-family-care-later, including message.sent_at.",
+      "uri": "fixtures/a-family-care/later",
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {"method": "manual", "tool": "apps/kinthread/scripts/build-fixtures.cjs", "tool_version": "1.0.0", "seed": null, "parameters": {}}
+    },
+    {
+      "source_id": "b-school-parents-later",
+      "kind": "synthetic",
+      "description": "Evaluation partition fixtures/b-school-parents/later. Coverage report key b-school-parents-later, including message.sent_at.",
+      "uri": "fixtures/b-school-parents/later",
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {"method": "manual", "tool": "apps/kinthread/scripts/build-fixtures.cjs", "tool_version": "1.0.0", "seed": null, "parameters": {}}
+    },
+    {
+      "source_id": "c-friends-later",
+      "kind": "synthetic",
+      "description": "Evaluation partition fixtures/c-friends/later. Coverage report key c-friends-later, including message.sent_at.",
+      "uri": "fixtures/c-friends/later",
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {"method": "manual", "tool": "apps/kinthread/scripts/build-fixtures.cjs", "tool_version": "1.0.0", "seed": null, "parameters": {}}
+    }
+  ],
+  "transformations": ["Normalized timestamps and account ids."],
+  "expected_counts": {"records": 1, "assets": 0},
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism and provenance."
+  }
+}

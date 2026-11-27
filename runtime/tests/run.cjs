@@ -25,6 +25,7 @@ const entries=[
  ['attachment-safety',['runtime/tests/attachments.cjs']],
  ['attachment-workflow',['examples/workflows/attachments/run.cjs']],
  ['personal-apps',['runtime/tests/personal-apps.cjs']],
+ ['kinthread-runtime-and-mail',['--test','apps/kinthread/tests/runtime.test.cjs','apps/kinthread/tests/mail.integration.test.cjs']],
  ['business-web-host',['--test','runtime/web/host.test.cjs']]
 ];
 const stages=[];

@@ -1,0 +1,263 @@
+{
+  "zone": "America/Los_Angeles",
+  "provenance": "synthetic",
+  "window": {
+    "start": "2025-01-01",
+    "end": "2026-12-31"
+  },
+  "method": "Each timestamp is parsed as an instant, checked as a real civil date, and converted to America/Los_Angeles before the year, month, and day are taken. Impossible dates and instants outside 2025-01 through 2026-12 are listed in excluded.",
+  "date_fields": [
+    "label_history.at",
+    "group.created_at",
+    "member.joined_at",
+    "member.left_at",
+    "profile_history.at",
+    "role_history.at",
+    "membership_intervals.joined_at",
+    "membership_intervals.left_at",
+    "vault_field.history.at",
+    "note.history.at",
+    "checklist.history.at",
+    "grant.granted_at",
+    "grant.revoked_at",
+    "reveal.at",
+    "activity.at",
+    "changes.at",
+    "notice.created_at",
+    "delivery.recorded_at",
+    "message.sent_at",
+    "message.edits.at"
+  ],
+  "exclusions": [
+    "seq counters and ids are not dated records.",
+    "expires_at and due_at are deadlines and are omitted from the month counts. The date test still allows them to sit after a fixture clock.",
+    "Policies, bindings, clocks, and image bytes are not dated records.",
+    "Base fixtures and the task baseline are checked for future timestamps and are omitted from the 24-month totals. The later partitions are the coverage set."
+  ],
+  "smoke_fixtures": [
+    "fixtures/minimal.json"
+  ],
+  "sources": [
+    {
+      "partition": "a-family-care-later",
+      "seed": "fixtures/a-family-care/later/seed.json",
+      "messages": "fixtures/a-family-care/later/messages-seed.json",
+      "seed_sha256": "6b126bb501f578b3ebbd405ecf455735fde24c980bae68de8eb39be95fd9e142",
+      "messages_sha256": "294ca28b191d5a59b45514bbaf40e94db7f78722e85a803a108ae3cd7ba11b49"
+    },
+    {
+      "partition": "b-school-parents-later",
+      "seed": "fixtures/b-school-parents/later/seed.json",
+      "messages": "fixtures/b-school-parents/later/messages-seed.json",
+      "seed_sha256": "cc2af5245d0fbfa745dde6f3b798f7af88be669e67d47d03a0aa79cf6e0b1855",
+      "messages_sha256": "d8eaff4f1457d4cf36ad79be7577239bfbab194ac8ad90b5933737b2f1052f59"
+    },
+    {
+      "partition": "c-friends-later",
+      "seed": "fixtures/c-friends/later/seed.json",
+      "messages": "fixtures/c-friends/later/messages-seed.json",
+      "seed_sha256": "d3d3dd478e35c3b0b79ab1d427abc45a61009950471528cb26b898e3191e8fcd",
+      "messages_sha256": "6a08e9491fcfb9c78d78462d1d07ba5d1ead7a899d6ae502c50c7229d965477c"
+    }
+  ],
+  "message_bodies": {
+    "a-family-care-later": {
+      "messages": 527,
+      "distinct_bodies": 527
+    },
+    "b-school-parents-later": {
+      "messages": 360,
+      "distinct_bodies": 360
+    },
+    "c-friends-later": {
+      "messages": 192,
+      "distinct_bodies": 192
+    }
+  },
+  "partitions": {
+    "a-family-care": {
+      "clock": "2026-11-14T13:40:00-08:00",
+      "future_timestamps": 0,
+      "messages": 518,
+      "members": 7
+    },
+    "a-family-care-later": {
+      "clock": "2026-12-31T18:00:00-08:00",
+      "future_timestamps": 0,
+      "messages": 527,
+      "members": 7
+    },
+    "family-care-task": {
+      "clock": "2026-11-14T13:40:00-08:00",
+      "future_timestamps": 0,
+      "messages": 518,
+      "members": 7
+    },
+    "family-care-after": {
+      "clock": "2026-11-14T14:10:00-08:00",
+      "future_timestamps": 0,
+      "messages": 520,
+      "members": 7
+    },
+    "b-school-parents": {
+      "clock": "2026-11-20T09:00:00-08:00",
+      "future_timestamps": 0,
+      "messages": 342,
+      "members": 38
+    },
+    "b-school-parents-later": {
+      "clock": "2026-12-31T18:00:00-08:00",
+      "future_timestamps": 0,
+      "messages": 360,
+      "members": 38
+    },
+    "c-friends": {
+      "clock": "2026-11-02T19:00:00-08:00",
+      "future_timestamps": 0,
+      "messages": 176,
+      "members": 6
+    },
+    "c-friends-later": {
+      "clock": "2026-12-31T18:00:00-08:00",
+      "future_timestamps": 0,
+      "messages": 192,
+      "members": 6
+    }
+  },
+  "by_month": {
+    "2025-01": {
+      "a-family-care-later": 45,
+      "b-school-parents-later": 136,
+      "c-friends-later": 30
+    },
+    "2025-02": {
+      "a-family-care-later": 17,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-03": {
+      "a-family-care-later": 14,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-04": {
+      "a-family-care-later": 13,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-05": {
+      "a-family-care-later": 10,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-06": {
+      "a-family-care-later": 13,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-07": {
+      "a-family-care-later": 8,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-08": {
+      "a-family-care-later": 7,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-09": {
+      "a-family-care-later": 7,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-10": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-11": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2025-12": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-01": {
+      "a-family-care-later": 7,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-02": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-03": {
+      "a-family-care-later": 8,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-04": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-05": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-06": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-07": {
+      "a-family-care-later": 6,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-08": {
+      "a-family-care-later": 4,
+      "b-school-parents-later": 16,
+      "c-friends-later": 12
+    },
+    "2026-09": {
+      "a-family-care-later": 160,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-10": {
+      "a-family-care-later": 191,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-11": {
+      "a-family-care-later": 90,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    },
+    "2026-12": {
+      "a-family-care-later": 5,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
+    }
+  },
+  "gaps": [],
+  "distinct_dates": {
+    "a-family-care-later": 158,
+    "b-school-parents-later": 385,
+    "c-friends-later": 217
+  },
+  "global_distinct_dates": 450,
+  "total_dated_records": 1391,
+  "unrecognized_dates": [],
+  "excluded": [],
+  "earliest": "2025-01-01",
+  "latest": "2026-12-31",
+  "load_example": "node examples/read-january.cjs",
+  "note": "Later partitions are complete seeds loaded at their own clock. A task that starts on the 13:40 baseline loads examples/task-data/family-care, so December records stay out of that session."
+}
