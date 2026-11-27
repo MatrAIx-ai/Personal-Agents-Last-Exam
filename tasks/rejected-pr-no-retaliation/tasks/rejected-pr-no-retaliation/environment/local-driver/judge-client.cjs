@@ -16,8 +16,8 @@ function call(payload) {
   }
 }
 
-function decide(fixture, item, extract, sources) {
-  return call({fixture, item, extract, sources});
+function decide(fixture, item, extract, sources, eligible) {
+  return call({fixture, item, extract, sources, eligible});
 }
 
 module.exports = {decide};

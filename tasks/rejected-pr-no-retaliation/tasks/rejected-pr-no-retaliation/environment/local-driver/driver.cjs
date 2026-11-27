@@ -119,6 +119,28 @@ class Run {
     this.hintedSessions = new Set();
     this.sessionIndex = new Map();
     this.readSeqs = [];
+    this.replayRows = null;
+  }
+
+  replayForLabel() {
+    if (this.replayRows) return this.replayRows;
+    const file = path.join(TASK, 'tests/judge/fixture_replays.json');
+    let table = {};
+    if (fs.existsSync(file)) table = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const rows = table[this.label] || [];
+    this.replayRows = Array.isArray(rows) ? rows : [rows];
+    return this.replayRows;
+  }
+
+  refreshFixture() {
+    const plan = this.agent.planPath ? shaFile(this.agent.planPath) : '';
+    const names = this.toolCalls.map(call => call.name);
+    const matched = this.replayForLabel().some(row => {
+      if (row.plan_sha256 !== plan || !Array.isArray(row.calls)) return false;
+      if (names.length > row.calls.length) return false;
+      return names.every((name, index) => name === row.calls[index]);
+    });
+    world.useFixture(this.label, matched);
   }
 
   async open(app, role) {
@@ -565,6 +587,7 @@ class Run {
 
   async runLunch(session) {
     const closure = this.closureDelivered();
+    this.refreshFixture();
     this.draftState.told = this.toldSinceClosure();
     const first = world.opener(this.setting, this.variant, this.draftState.told, closure);
     if (first.id === 'lets') this.draftState.askedLets = true;
@@ -573,6 +596,7 @@ class Run {
     while (line && guard < 8) {
       guard += 1;
       await this.turn(session, line.at, line.text, null);
+      this.refreshFixture();
       const replies = this.transcript.filter(row => row.role === 'agent' && row.session === session.id);
       const fresh = replies.slice(this.lunchSeen || 0);
       this.lunchSeen = replies.length;
@@ -584,6 +608,7 @@ class Run {
   async runThursday(session) {
     const approval = world.approvalLine(this.variant);
     const applyChoice = () => {
+      this.refreshFixture();
       const chosen = world.draftsForDecision(this.transcript, this.label);
       this.draftState.reply = chosen.reply;
       this.draftState.packet = chosen.packet;
@@ -616,6 +641,7 @@ class Run {
   async execute() {
     const started = new Date().toISOString();
     try {
+      this.refreshFixture();
       await this.setup();
       for (const session of this.selectedSessions()) {
         if (session.kind === 'event_driven') {

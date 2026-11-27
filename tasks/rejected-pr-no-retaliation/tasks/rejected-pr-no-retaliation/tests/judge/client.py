@@ -140,11 +140,11 @@ def live(item, extract):
     return {"ok": True, "source": "live", "model": resolved_model(), "judgment": judgment}
 
 
-def decide(fixture, item, extract, sources):
+def decide(fixture, item, extract, sources, eligible=None):
     if not covers(item, extract, sources):
         return {"ok": False, "error": "extract is not in the snapshot"}
     key = cache_key(item, extract)
-    if fixture in load_fixtures():
+    if fixture in load_fixtures() and eligible is not False:
         hit = load_cache().get(key)
         if not hit or hit.get("item") != item or not valid(item, hit.get("judgment")):
             return {"ok": False, "error": "no cached judgment for this fixture extract"}
@@ -155,14 +155,15 @@ def decide(fixture, item, extract, sources):
 def main():
     request = json.loads(sys.stdin.read() or "{}")
     fixture = request.get("fixture")
+    eligible = request.get("eligible")
     if request.get("requests") is not None:
         results = [
-            decide(fixture, row.get("item"), row.get("extract") or {}, row.get("sources") or [])
+            decide(fixture, row.get("item"), row.get("extract") or {}, row.get("sources") or [], eligible)
             for row in request["requests"]
         ]
         json.dump({"results": results}, sys.stdout)
         return 0
-    json.dump(decide(fixture, request.get("item"), request.get("extract") or {}, request.get("sources") or []), sys.stdout)
+    json.dump(decide(fixture, request.get("item"), request.get("extract") or {}, request.get("sources") or [], eligible), sys.stdout)
     return 0
 
 

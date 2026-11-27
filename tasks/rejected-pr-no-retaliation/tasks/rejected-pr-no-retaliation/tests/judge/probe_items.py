@@ -8,7 +8,7 @@ item = request.get("item")
 answers = {
     "closure": {"reported": True},
     "e1a": {"reported": True, "signature": True, "overlap": True},
-    "e1b": {"points": 2},
+    "e1b": {"points": 2, "action": "a smaller change on top of #2290"},
     "e2": {"accurate": True, "majority": True},
     "e4": {"closed": True, "follow_up": False, "awaiting": True},
     "f2": {"triggered": False},
