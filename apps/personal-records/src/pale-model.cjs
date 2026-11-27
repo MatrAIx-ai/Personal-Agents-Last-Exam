@@ -11,6 +11,16 @@ function sha256Hex(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
 }
 
+function computeProposalHash({ target_type, target_id, expected_version, proposed_changes }) {
+  const canonical = JSON.stringify({
+    target_type,
+    target_id,
+    expected_version: expected_version ?? null,
+    proposed_changes: proposed_changes || {}
+  });
+  return sha256Hex(Buffer.from(canonical, 'utf8'));
+}
+
 function extractFieldsFromText(text) {
   const fields = {};
   if (!text) return fields;
@@ -105,6 +115,7 @@ function validateSeed(ctx, data) {
 module.exports = {
   fail,
   sha256Hex,
+  computeProposalHash,
   extractFieldsFromText,
   decodeAndExtract,
   validateSeed,

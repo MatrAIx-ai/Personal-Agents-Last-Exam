@@ -81,7 +81,7 @@ test('link_documents and create_evidence_claim validate targets and passage offs
   }, err => err.code === 'invalid_passage_reference');
 });
 
-test('propose_update and confirm_update apply approved mutations', () => {
+test('propose_update and confirm_update bind to hash/version and reject stale or replayed decisions', () => {
   const f = fixture();
   const prop = f.call('personal-records.propose_update', {
     target_type: 'document_metadata',
@@ -91,16 +91,63 @@ test('propose_update and confirm_update apply approved mutations', () => {
     rationale: 'Standardize title'
   });
   assert.equal(prop.proposal_status, 'PENDING');
+  assert.ok(/^[a-f0-9]{64}$/.test(prop.proposal_hash));
 
-  const confirmed = f.call('personal-records.confirm_update', {
-    proposal_id: prop.proposal_id,
-    decision: 'APPROVE'
+  // Negative case 1: mismatched proposal hash
+  assert.throws(() => {
+    f.call('personal-records.confirm_update', {
+      proposal_id: prop.proposal_id,
+      decision: 'APPROVE',
+      expected_proposal_hash: '0'.repeat(64)
+    });
+  }, err => err.code === 'proposal_mismatch');
+
+  // Negative case 2: stale target version after document version increments
+  const staleProp = f.call('personal-records.propose_update', {
+    target_type: 'document_metadata',
+    target_id: 'doc_payslip_nov2026',
+    expected_target_version: 1,
+    proposed_changes: { title: 'Should fail stale' },
+    rationale: 'Test stale version'
   });
-  assert.equal(confirmed.proposal_status, 'USER_CONFIRMED');
+  f.call('personal-records.create_version', {
+    document_id: 'doc_payslip_nov2026',
+    content_bytes: Buffer.from('Updated Nov Payslip', 'utf8').toString('base64'),
+    mime_type: 'text/plain',
+    expected_parent_version: 1
+  });
+  assert.throws(() => {
+    f.call('personal-records.confirm_update', {
+      proposal_id: staleProp.proposal_id,
+      decision: 'APPROVE',
+      expected_proposal_hash: staleProp.proposal_hash
+    });
+  }, err => err.code === 'stale_proposal_version');
+
+  // Trusted confirmation via event path (personal-records.confirm_decision)
+  f.event({
+    event_id: 'evt_confirm_1',
+    at: '2026-11-19T10:00:00Z',
+    operation: 'personal-records.confirm_decision',
+    payload: {
+      proposal_id: prop.proposal_id,
+      decision: 'APPROVE',
+      expected_proposal_hash: prop.proposal_hash,
+      expected_target_version: 1
+    }
+  });
 
   const doc = f.call('personal-records.get_document', { id: 'doc_payslip_dec2026' });
   assert.equal(doc.item.title, 'Acme Robotics Payslip (Dec 2026 - Verified)');
   assert.equal(doc.item.verification_state, 'USER_CONFIRMED');
+
+  // Negative case 3: replayed decision on already-resolved proposal
+  assert.throws(() => {
+    f.call('personal-records.confirm_update', {
+      proposal_id: prop.proposal_id,
+      decision: 'APPROVE'
+    });
+  }, err => err.code === 'invalid_state');
 });
 
 test('check_expiries and check_discrepancies evaluate virtual time and numeric deltas', () => {

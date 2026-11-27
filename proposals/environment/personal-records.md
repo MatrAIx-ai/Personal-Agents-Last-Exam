@@ -61,7 +61,15 @@ The environment enforces caller authorization at the handler level:
 | `platform.reset` | Platform API | Platform | Write | Resets database, blobs, and FTS indexes to baseline. Blocked from Agent. |
 | `platform.inject_event` | Platform API | Platform | Write | Injects a timestamped document intake or expiry check. Blocked from Agent. |
 
-- **Trusted Confirmation Path:** To prevent agents from approving their own proposals via the Web UI/MCP, `records.confirm_update` requires a trusted user session token issued by the test harness. Agent MCP processes are restricted to `records.propose_update`. Rejected or cancelled proposals mark the proposal record as `REJECTED`/`CANCELLED` and leave all underlying documents and claims completely unchanged. Stale confirmations (where the document version incremented while the proposal was pending) fail with `STALE_PROPOSAL_VERSION`.
+- **Trusted Confirmation Path & UI Boundaries:**
+  - **Agent-only boundary (`scenario` policy):** `personal-records.propose_update` is permitted and creates a `PENDING` proposal with a deterministic `proposal_hash` (SHA-256 of `{ target_type, target_id, expected_version, proposed_changes }`). Calls to `personal-records.confirm_update` by an Agent in `scenario` policy are rejected with `permission_denied`.
+  - **Independent User Decision:** Confirmed decisions are applied via `env.apply_event` (`operation: "personal-records.confirm_decision"`) or a separate trusted user session, bound to `proposal_id`, `expected_proposal_hash`, and `expected_target_version`. Stale edits return `stale_proposal_version`, hash mismatches return `proposal_mismatch`, and replayed confirmations on already-resolved proposals return `invalid_state`.
+  - **UI Distinction:** `app.json` declares `capabilities.ui: "reviewer renderer"` (`contribution/gui.json`, `audience: ["reviewer"]`). The interactive Web Host UI (`gui/host.html` + `gui/src/app.js` on `runtime/web/server.cjs`) uses `sandbox` policy for local interactive preview only (not as proof of independent user authority); `gui/index.html` + `scripts/run-gui.cjs` is a standalone local preview for the SQLite engine.
+
+- **v1 Delivery Scope vs. Mock-Only / Deferred Integrations:**
+  - **Delivered in Node 18 PALE package (`plugin.cjs`):** Document upload/versioning/SHA-256 deduplication, metadata & text search, directed document links, passage-anchored evidence claims, proposal/confirmation state machine (`propose_update`, `confirm_update`, `confirm_decision`), and virtual-time expiry/discrepancy checks.
+  - **Delivered in Standalone SQLite engine (`src/index.cjs`, Node 22.5+):** SQLite FTS5 index, filesystem `BlobStore`, optional `pdf-parse` extraction, and simulated peer adapters (`src/adapters.cjs` + `fixtures/peer-apps.json`).
+  - **Mock-only / Deferred in v1:** `app.json` declares `dependencies: []` and `real_delivery: false`. Calendar (`1.3.0`) and Contacts (`1.0.0`) lookups are simulated only in standalone tests and **deferred** from the Node 18 PALE runtime. Outbound Mail (`urn:pale:email-message:2`) is **deferred** (`messaging.publishes: []`; alerts are persisted locally in `data.notifications` as CloudEvent payloads without live router delivery). `personal-records.import_from_source` ingests caller-supplied `source_payload` in standalone runs and is verified against real `mail`/`files` packages when supplied via `--with`.
 
 #### State and lifecycle (required)
 - **Account and run isolation:** User libraries, document files, and metadata are partitioned strictly by `account_id` and benchmark run.
@@ -150,7 +158,8 @@ The environment enforces caller authorization at the handler level:
   - All temporal fields (`created_at`, `updated_at`, `valid_until`, `dispatched_at`, `history[].at`) use ISO 8601 timestamps evaluated strictly against `ctx.virtual_now`.
   - Provenance is tracked per document and per version (`source_type`, `source_reference`, `sha256`, `extraction_revision`, `extraction_source`) and declared in `apps/personal-records/contribution/dataset.json` (`dataset_id: "personal-records-synthetic-2025-2026"`, `source_id: "synthetic-generator"`, `license: "CC-BY-4.0"`, deterministic `seed: 42`).
 - **Actual Load & Query Verification:**
-  - Verified end-to-end via `env.load_seed` $\rightarrow$ `env.snapshot` $\rightarrow$ `personal-records.search` $\rightarrow$ `personal-records.get_document` in `node runtime/cli.cjs verify --app apps/personal-records` and `node --test tests/dataset.test.cjs`.
+  - `fixtures/minimal.json` provides the 3-document baseline smoke seed for `app:verify`.
+  - `node apps/personal-records/scripts/export-pale-seed.cjs --verify-load` converts the full 165-document `fixtures/corpus.json` (or 20-document `fixtures/truth.json` via `--truth`) into a `schemas/seed.schema.json`-valid bundle, loads it into PALE Core via `env.load_seed` (`loaded_objects: 165`), queries it via `personal-records.search`, and prints a reproducible monthly/category breakdown in `America/Los_Angeles`.
 
 ## 4. Construction plan and effort
 

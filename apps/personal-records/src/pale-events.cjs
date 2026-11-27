@@ -113,6 +113,17 @@ function applyEvent(ctx, data, event) {
     return out.data;
   }
 
+  if (op === 'personal-records.confirm_decision') {
+    const out = handleTool({ ...ctx, virtual_now: at, role: 'user' }, data, 'personal-records.confirm_update', {
+      proposal_id: payload.proposal_id,
+      decision: payload.decision,
+      expected_proposal_hash: payload.expected_proposal_hash,
+      expected_target_version: payload.expected_target_version,
+      rejection_reason: payload.rejection_reason
+    });
+    return out.data;
+  }
+
   fail('invalid_event', `Unsupported event operation: ${op}`);
 }
 

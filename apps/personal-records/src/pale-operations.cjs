@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
-const { fail, decodeAndExtract } = require('./pale-model.cjs');
+const { fail, decodeAndExtract, computeProposalHash } = require('./pale-model.cjs');
 
 function nextId(prefix, existing) {
   let n = existing.length + 1;
@@ -349,15 +349,23 @@ function handleTool(ctx, data, name, args) {
       }
 
       const proposalId = nextId('prop', data.proposals);
+      const expectedTargetVer = args.expected_target_version ?? null;
+      const proposalHash = computeProposalHash({
+        target_type: args.target_type,
+        target_id: args.target_id,
+        expected_version: expectedTargetVer,
+        proposed_changes: args.proposed_changes
+      });
       data.proposals.push({
         id: proposalId,
         account_id: accountId,
         caller_role: ctx.role || 'agent',
         target_type: args.target_type,
         target_id: args.target_id,
-        expected_version: args.expected_target_version ?? null,
+        expected_version: expectedTargetVer,
         proposed_changes: args.proposed_changes,
         rationale: args.rationale,
+        proposal_hash: proposalHash,
         status: 'PENDING',
         rejection_reason: null,
         created_at: now,
@@ -368,7 +376,8 @@ function handleTool(ctx, data, name, args) {
         data,
         result: {
           proposal_id: proposalId,
-          proposal_status: 'PENDING'
+          proposal_status: 'PENDING',
+          proposal_hash: proposalHash
         }
       };
     }
@@ -378,6 +387,13 @@ function handleTool(ctx, data, name, args) {
       if (!proposal) fail('not_found', `Proposal ${args.proposal_id} not found`);
       if (proposal.status !== 'PENDING') {
         fail('invalid_state', `Proposal ${args.proposal_id} is already ${proposal.status}`);
+      }
+      const expectedHash = proposal.proposal_hash || computeProposalHash(proposal);
+      if (args.expected_proposal_hash && args.expected_proposal_hash !== expectedHash) {
+        fail('proposal_mismatch', `Proposal hash mismatch for ${args.proposal_id}`);
+      }
+      if (args.expected_target_version !== undefined && proposal.expected_version !== null && args.expected_target_version !== proposal.expected_version) {
+        fail('stale_proposal_version', `Target version mismatch for ${args.proposal_id}`);
       }
 
       if (args.decision === 'REJECT' || args.decision === 'CANCEL') {
