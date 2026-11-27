@@ -1,0 +1,46 @@
+{
+  "schema": "submissiondesk.v1-evidence-index",
+  "recorded_at": "2026-11-21T22:43:51.283083+00:00",
+  "app_version": "0.1.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "tested_node": "v18.17.1",
+  "tested_os": "Windows",
+  "approved_proposal_commit": "ec0dfd8cd6f2550263e8566e7e51d5a6436dffe2",
+  "public_runtime_base_commit": "61b637164e4abddf81536bb48935cdb688a69ff1",
+  "app_package_sha256": "94382f4145e31e2671a4d549de6b45e69a17f1d83c5021e9ea395b193ae879c2",
+  "checks": {
+    "standalone_business": 27,
+    "public_app_verifier": 55,
+    "app_mcp_workflows": 67,
+    "pristine_base_verifier": 55
+  },
+  "package_results_passed": true,
+  "reference_suite": {
+    "status": "failed",
+    "passed_stages": 20,
+    "total_stages": 22,
+    "summary": "reference-suite.json",
+    "known_platform_failure": "The unchanged runtime App-diagnostics test requires POSIX mode 0600; this assertion fails on the Windows host. The same failure was reproduced from the pristine base runtime. No Core/runtime source was changed.",
+    "failed_stages": [
+      {
+        "name": "app-diagnostics",
+        "error": null,
+        "exit_code": 1
+      },
+      {
+        "name": "personal-apps",
+        "error": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "exit_code": null
+      }
+    ],
+    "timeout_note": "The personal-apps stage exceeded the shared runner 90-second timeout on Windows. This stage did not pass; no claim is made that it is an App regression or that the full public suite passed."
+  },
+  "official_ci": "Must inspect Linux Node 18/22 and base-runtime checks on the pushed implementation commit.",
+  "remaining": [
+    "Independent maintainer reproduction and acceptance",
+    "Human fixture/provenance review",
+    "Official PR CI on the implementation commit"
+  ],
+  "scope": "Runnable App v1 evidence only. No Task model run, deployed authentication, acceptance, merge or authorship credit claimed."
+}

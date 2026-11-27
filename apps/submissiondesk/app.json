@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "app_id": "submissiondesk",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Hanson Tang (@hansontang), repository PR #148"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "record.add",
+    "material.add",
+    "approval.reply"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none; approved MCP-only scope",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One account per App instance; use separate state roots/runs for other accounts.",
+    "Original UTF-8 text/JSON fixtures only; no file assets or live providers.",
+    "No mutable drafts, reopened withdrawals, policy/access-change event, outgoing notifications, GUI or automatic semantic approval."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

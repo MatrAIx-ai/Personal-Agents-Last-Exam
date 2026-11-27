@@ -1,0 +1,47 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "submissiondesk-reference",
+  "version": "0.1.0",
+  "description": "Original synthetic scholarly-submission workspace; three account seeds, not a model evaluation task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original invented people, records and venue rules. Python standard-library fixture authoring; no external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic authored fixture construction",
+        "tool": "Python standard library",
+        "tool_version": "3.12",
+        "seed": 0,
+        "parameters": {
+          "variants": 3
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Canonical UTF-8 JSON and explicit offset-bearing virtual timestamps; no real venue policies or private messages.",
+    "Identical-content bundles, repeated independent requests and receipt snapshots may be distinct valid business objects. Unique object IDs and reference/provenance integrity remain mandatory; no duplicate fixture padding."
+  ],
+  "expected_counts": {
+    "records": 19,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "allow",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
