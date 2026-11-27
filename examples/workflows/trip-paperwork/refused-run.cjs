@@ -10,11 +10,11 @@ async function run({open, sandbox, write, event, clock, equal, ok, T, letter, si
   await clock([infra], T.file_replaced);
   const [slot] = (await visaslot.call('visaslot.slots', {consulate_id:'de-chicago', from:'2027-03-31', to:'2027-03-31'})).slots;
   const booked = (await write(visaslot, infra, 'visaslot.book', {consulate_id:'de-chicago', slot_at:slot.slot_at, slot_version:slot.version})).appointment;
-  const filed = await write(visaslot, infra, 'visaslot.file.submit', {appointment_id:booked.id, documents:documents(T, letter, signature)});
+  const filed = await write(visaslot, infra, 'visaslot.file.submit', {id:booked.id, documents:documents(T, letter, signature)});
   equal('Refused run: the uncorrected letter is accepted on file but flagged before the appointment',
     [booked.id, filed.missing_if_held_now.map(m => m.rule)], ['appt-0331', ['name_matches_passport']]);
   await event(infra, held(T));
-  const file = await visaslot.call('visaslot.file.get', {appointment_id:booked.id});
+  const file = await visaslot.call('visaslot.file.get', {id:booked.id});
   equal('Refused run: held with the uncorrected letter, the appointment is refused on name_matches_passport only',
     [file.check.result, file.check.missing], ['refused', [{item:'invitation_letter', rule:'name_matches_passport', expected:'ZHAO Mingyu', found:'ZHOU Mingyu'}]]);
   ok('Refused run: the file points at the original ConfDesk letter', sources(file.file)[0] === 'confdesk:invitation_letter:letter-0388');

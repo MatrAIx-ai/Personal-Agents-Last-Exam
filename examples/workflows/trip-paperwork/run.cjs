@@ -130,7 +130,7 @@ async function run() {
     const competence = await visaslot.call('visaslot.competence', {trip});
     equal('Germany is the main destination (6 nights against 5)', [competence.main_country, competence.rule], ['DE', 'most_nights']);
     const french = (await visaslot.call('visaslot.appointments', {id:'appt-0324'})).item;
-    await write(visaslot, visaslotInfra, 'visaslot.cancel', {appointment_id:french.id, appointment_version:french.version});
+    await write(visaslot, visaslotInfra, 'visaslot.cancel', {id:french.id, appointment_version:french.version});
     const [slot] = (await visaslot.call('visaslot.slots', {consulate_id:'de-chicago', from:'2027-03-19', to:'2027-04-30'})).slots;
     const appointment = (await write(visaslot, visaslotInfra, 'visaslot.book', {consulate_id:'de-chicago', slot_at:slot.slot_at, slot_version:slot.version})).appointment;
     equal('The French booking is cancelled and the first German slot after the qual is booked',
@@ -184,7 +184,7 @@ async function run() {
     const firstLetter = await inMail('ConfDesk letter notice reaches Mail', await notify('confdesk', confdeskInfra, confdeskBridge, 'letter_issued', 'letter-0388'));
     ok('Mail shows the misspelled name in the letter', firstLetter.body.includes('ZHOU Mingyu'));
     await clock(all, T.first_file);
-    const firstFile = await write(visaslot, visaslotInfra, 'visaslot.file.submit', {appointment_id:appointment.id, documents:documents(T, original, signature)});
+    const firstFile = await write(visaslot, visaslotInfra, 'visaslot.file.submit', {id:appointment.id, documents:documents(T, original, signature)});
     equal('Registered with this letter, the file would fail the name rule if held now', firstFile.missing_if_held_now,
       [{item:'invitation_letter', rule:'name_matches_passport', expected:'ZHAO Mingyu', found:'ZHOU Mingyu'}]);
 
@@ -222,20 +222,20 @@ async function run() {
     // 6. Replace the visa file with the corrected letter, then the appointment is held as complete.
     await clock(all, T.file_replaced);
     const file = documents(T, corrected, signature);
-    const replaced = await write(visaslot, visaslotInfra, 'visaslot.file.submit', {appointment_id:appointment.id, documents:file});
+    const replaced = await write(visaslot, visaslotInfra, 'visaslot.file.submit', {id:appointment.id, documents:file});
     equal('The replacement file has nothing missing', [replaced.file.version, replaced.replaced_version, replaced.missing_if_held_now], [2, 1, []]);
     equal('Its sources are the ConfDesk letter, the Passage signature and the hotel reservations', sources(replaced.file),
       ['confdesk:invitation_letter:letter-0388-c1', 'passage:travel_signature:sig-0142', 'task-hotel:reservation:H-5521', 'task-hotel:reservation:H-5530']);
     const holdReceipt = await event(visaslotInfra, held(T));
     await clock(all, T.appointment);
-    const result = await visaslot.call('visaslot.file.get', {appointment_id:appointment.id});
+    const result = await visaslot.call('visaslot.file.get', {id:appointment.id});
     equal('visaslot.appointment.held: the appointment is complete', result.check,
       {appointment_id:'appt-0331', held_at:T.appointment, result:'complete', missing:[]});
     equal('The file is locked and the appointment held', [!!result.file.locked_at, (await visaslot.call('visaslot.appointments', {id:appointment.id})).item.status], [true, 'held']);
     const replay = await visaslotInfra.call('env.apply_event', {expected_version:await version(visaslotInfra), event:held(T)});
     ok('Replaying the hold returns the original receipt', replay.duplicate === true && replay.event_id === holdReceipt.event_id);
     equal('The file cannot be replaced after the hold', await attempt(visaslot, visaslotInfra, 'visaslot.file.submit',
-      {appointment_id:appointment.id, documents:file}), 'invalid_state');
+      {id:appointment.id, documents:file}), 'invalid_state');
 
     // 7. A second run registers the uncorrected letter and is refused.
     const refused = await require('./refused-run.cjs').run({open, sandbox, write, event, clock, equal, ok, T,

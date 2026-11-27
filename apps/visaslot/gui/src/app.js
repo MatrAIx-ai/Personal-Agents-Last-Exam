@@ -11,15 +11,15 @@ export const config={
  id:'visaslot',title:'VisaSlot',description:'Consulate appointments and the visa file for your Schengen trip.',
  list:'visaslot.appointments',collection:'items',listArgs:{},get:'visaslot.appointments',item:'item',
  heading:a=>nameOf(a.consulate_id),subtitle:a=>statusLabel[a.status]+' · '+a.slot_at+(a.file_version?' · file v'+a.file_version:' · no file'),
- labels:{consulate_id:'Consulate',slot_at:'Slot time',slot_version:'Slot version (from Find slots)',appointment_id:'Appointment',
+ labels:{consulate_id:'Consulate',slot_at:'Slot time',slot_version:'Slot version (from Find slots)',id:'Appointment',
   appointment_version:'Appointment version',from:'From (local date)',to:'To (local date)',category:'Visa category'},
  actions:[
   {label:'Book a slot',tool:'visaslot.book',primary:true,success:'Appointment booked.'},
   {label:'Find slots',tool:'visaslot.slots',defaults:{consulate_id:'de-chicago'}},
   {label:'Checklist',tool:'visaslot.checklist',defaults:{category:'business'}},
-  {label:'Reschedule',tool:'visaslot.reschedule',selected:true,available:a=>a.status==='booked',prefill:a=>({appointment_id:a.id,appointment_version:a.version}),success:'Appointment moved.'},
-  {label:'Cancel appointment',tool:'visaslot.cancel',selected:true,available:a=>a.status==='booked',prefill:a=>({appointment_id:a.id,appointment_version:a.version}),success:'Appointment cancelled.'},
-  {label:'Visa file',tool:'visaslot.file.get',selected:true,prefill:a=>({appointment_id:a.id})}
+  {label:'Reschedule',tool:'visaslot.reschedule',selected:true,available:a=>a.status==='booked',prefill:a=>({id:a.id,appointment_version:a.version}),success:'Appointment moved.'},
+  {label:'Cancel appointment',tool:'visaslot.cancel',selected:true,available:a=>a.status==='booked',prefill:a=>({id:a.id,appointment_version:a.version}),success:'Appointment cancelled.'},
+  {label:'Visa file',tool:'visaslot.file.get',selected:true,prefill:a=>({id:a.id})}
  ]
 };
 Object.assign(config,{

@@ -14,7 +14,7 @@ const competence = f.call('visaslot.competence', {trip:{stays:trip}});
 assert.deepEqual([competence.main_country, competence.rule], ['DE', 'most_nights']);
 
 const french = f.call('visaslot.appointments', {id:'appt-0324'}).item;
-const cancelled = f.call('visaslot.cancel', {appointment_id:french.id, appointment_version:french.version});
+const cancelled = f.call('visaslot.cancel', {id:french.id, appointment_version:french.version});
 const slots = f.call('visaslot.slots', {consulate_id:'de-chicago', from:'2027-03-19', to:'2027-04-30'}).slots;
 const booked = f.call('visaslot.book', {consulate_id:'de-chicago', slot_at:slots[0].slot_at, slot_version:slots[0].version}).appointment;
 assert.deepEqual([booked.id, booked.slot_at], ['appt-0331', '2027-03-31T09:00:00-05:00']);
@@ -26,12 +26,12 @@ const documents = name => ({
   travel:{enter_on:'2027-04-19', leave_on:'2027-04-30'}
 });
 f.ctx.virtual_now = '2027-03-08T18:00:00-06:00';
-const first = f.call('visaslot.file.submit', {appointment_id:booked.id, documents:documents('ZHOU Mingyu')});
+const first = f.call('visaslot.file.submit', {id:booked.id, documents:documents('ZHOU Mingyu')});
 f.ctx.virtual_now = '2027-03-26T19:00:00-05:00';
-const second = f.call('visaslot.file.submit', {appointment_id:booked.id, documents:documents('ZHAO Mingyu')});
+const second = f.call('visaslot.file.submit', {id:booked.id, documents:documents('ZHAO Mingyu')});
 f.event({event_id:'held-de-chi-20270331-0900', at:'2027-03-31T09:00:00-05:00', operation:'visaslot.appointment.held',
   payload:{consulate_id:'de-chicago', slot_at:'2027-03-31T09:00:00-05:00'}});
-const file = f.call('visaslot.file.get', {appointment_id:booked.id});
+const file = f.call('visaslot.file.get', {id:booked.id});
 assert.equal(file.check.result, 'complete');
 
 console.log(JSON.stringify({app:'visaslot', released:require('./scenario.json').payload, competence,

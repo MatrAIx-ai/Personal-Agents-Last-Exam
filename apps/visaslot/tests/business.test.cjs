@@ -33,7 +33,7 @@ const slotOf = (f, consulate, at) => f.data.slots.find(s => s.consulate_id === c
 const appointment = (f, id) => f.data.appointments.find(a => a.id === id);
 const book = (f, slot_at = DE_0331, consulate_id = 'de-chicago') =>
   f.call('visaslot.book', {consulate_id, slot_at, slot_version:slotVersion(f, consulate_id, slot_at)}).appointment;
-const submit = (f, appointment_id, docs = documents()) => f.call('visaslot.file.submit', {appointment_id, documents:docs});
+const submit = (f, id, docs = documents()) => f.call('visaslot.file.submit', {id, documents:docs});
 const tag = at => at.replace(/[^0-9]/g, '').slice(0, 12);
 const held = (slot_at = DE_0331, consulate_id = 'de-chicago', at = slot_at, event_id = 'held-' + consulate_id + '-' + tag(slot_at)) =>
   ({event_id, at, operation:'visaslot.appointment.held', payload:{consulate_id, slot_at}});
@@ -61,9 +61,9 @@ test('reads change nothing and show appointments, checklists and files', () => {
   assert.ok(!('file' in list.items[0]), 'scheduling views leave the documents to visaslot.file.get');
   assert.deepEqual(f.call('visaslot.appointments', {id:'appt-0324'}).item, list.items[1]);
   assert.throws(() => f.call('visaslot.appointments', {id:'appt-9999'}), code('not_found'));
-  const old = f.call('visaslot.file.get', {appointment_id:'appt-0612'});
+  const old = f.call('visaslot.file.get', {id:'appt-0612'});
   assert.deepEqual([old.appointment_status, old.file.version, old.history.length, old.missing_if_held_now, old.check.result], ['held', 2, 1, null, 'complete']);
-  assert.deepEqual(f.call('visaslot.file.get', {appointment_id:'appt-0324'}).missing_if_held_now,
+  assert.deepEqual(f.call('visaslot.file.get', {id:'appt-0324'}).missing_if_held_now,
     [{item:'visa_file', rule:'file_submitted', expected:'submitted', found:null}]);
   const list2 = f.call('visaslot.checklist', {category:'business'});
   assert.deepEqual(list2.items.find(i => i.item === 'invitation_letter').checked_by, ['name_matches_passport', 'letter_issued_by_appointment']);
@@ -143,12 +143,12 @@ test('reschedule moves the appointment and releases the old slot; stale versions
   const a = book(f, DE_0317);
   f.ctx.virtual_now = '2027-02-12T08:00:00-06:00';
   const v = slotVersion(f, 'de-chicago', DE_0331);
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:a.version + 1, slot_at:DE_0331, slot_version:v}), code('stale_version'));
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:a.version, slot_at:DE_0331, slot_version:v + 1}), code('stale_version'));
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:a.version, slot_at:DE_0317, slot_version:2}), code('invalid_arguments'));
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:a.version, slot_at:'2027-04-01T10:00:00-05:00', slot_version:2}), code('slot_unavailable'));
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:a.version, slot_at:FR_0407, slot_version:1}), code('not_found'));
-  const out = f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:1, slot_at:DE_0331, slot_version:v});
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:a.version + 1, slot_at:DE_0331, slot_version:v}), code('stale_version'));
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:a.version, slot_at:DE_0331, slot_version:v + 1}), code('stale_version'));
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:a.version, slot_at:DE_0317, slot_version:2}), code('invalid_arguments'));
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:a.version, slot_at:'2027-04-01T10:00:00-05:00', slot_version:2}), code('slot_unavailable'));
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:a.version, slot_at:FR_0407, slot_version:1}), code('not_found'));
+  const out = f.call('visaslot.reschedule', {id:a.id, appointment_version:1, slot_at:DE_0331, slot_version:v});
   assert.deepEqual([out.appointment.id, out.appointment.slot_at, out.appointment.version, out.appointment.status], ['appt-0317', DE_0331, 2, 'booked']);
   assert.deepEqual(out.appointment.history, [
     {at:'2027-02-10T09:00:00-06:00', status:'booked', slot_at:DE_0317, action:'booked'},
@@ -158,26 +158,26 @@ test('reschedule moves the appointment and releases the old slot; stale versions
   // The released slot can be booked again by anyone, at its new version.
   assert.ok(f.call('visaslot.slots', {consulate_id:'de-chicago', from:'2027-03-17', to:'2027-03-17'}).slots.some(s => s.version === 3));
   // The version read before the reschedule is now stale; after the slot starts nothing changes.
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:1, slot_at:DE_0406, slot_version:1}), code('stale_version'));
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:1, slot_at:DE_0406, slot_version:1}), code('stale_version'));
   f.ctx.virtual_now = DE_0331;
-  unchanged(f, () => f.call('visaslot.reschedule', {appointment_id:a.id, appointment_version:2, slot_at:DE_0406, slot_version:1}), code('invalid_state'));
+  unchanged(f, () => f.call('visaslot.reschedule', {id:a.id, appointment_version:2, slot_at:DE_0406, slot_version:1}), code('invalid_state'));
 });
 
 test('cancel releases the slot, needs the current version and closes when the slot starts', () => {
   const f = fixture();
-  unchanged(f, () => f.call('visaslot.cancel', {appointment_id:'appt-0324', appointment_version:2}), code('stale_version'));
-  const out = f.call('visaslot.cancel', {appointment_id:'appt-0324', appointment_version:1});
+  unchanged(f, () => f.call('visaslot.cancel', {id:'appt-0324', appointment_version:2}), code('stale_version'));
+  const out = f.call('visaslot.cancel', {id:'appt-0324', appointment_version:1});
   assert.deepEqual([out.appointment.status, out.appointment.version, out.appointment.cancellation], ['cancelled', 2,
     {by:'applicant', at:'2027-02-10T09:00:00-06:00', reason:null}]);
   assert.deepEqual(out.appointment.history.at(-1), {at:'2027-02-10T09:00:00-06:00', status:'cancelled', slot_at:'2027-03-24T09:00:00-05:00', action:'cancelled'});
   assert.deepEqual(out.released_slot, {consulate_id:'fr-chicago', slot_at:'2027-03-24T09:00:00-05:00', version:3});
-  unchanged(f, () => f.call('visaslot.cancel', {appointment_id:'appt-0324', appointment_version:2}), code('invalid_state'));
-  unchanged(f, () => f.call('visaslot.cancel', {appointment_id:'appt-0612', appointment_version:2}), code('invalid_state'));
+  unchanged(f, () => f.call('visaslot.cancel', {id:'appt-0324', appointment_version:2}), code('invalid_state'));
+  unchanged(f, () => f.call('visaslot.cancel', {id:'appt-0612', appointment_version:2}), code('invalid_state'));
   // Booking the same date again gets the next ID.
   assert.equal(book(f, '2027-03-24T09:00:00-05:00', 'fr-chicago').id, 'appt-0324-2');
   const g = fixture();
   g.ctx.virtual_now = '2027-03-24T09:00:00-05:00';
-  unchanged(g, () => g.call('visaslot.cancel', {appointment_id:'appt-0324', appointment_version:1}), code('invalid_state'));
+  unchanged(g, () => g.call('visaslot.cancel', {id:'appt-0324', appointment_version:1}), code('invalid_state'));
 });
 
 test('the visa file is replaced until the appointment starts and rejected after it starts', () => {
@@ -190,7 +190,7 @@ test('the visa file is replaced until the appointment starts and rejected after 
   f.ctx.virtual_now = '2027-03-31T08:59:59-05:00';
   const second = submit(f, 'appt-0331');
   assert.deepEqual([second.file.version, second.replaced_version, second.missing_if_held_now], [2, 1, []]);
-  const got = f.call('visaslot.file.get', {appointment_id:'appt-0331'});
+  const got = f.call('visaslot.file.get', {id:'appt-0331'});
   assert.deepEqual(got.history, [{version:1, submitted_at:'2027-03-10T09:00:00-06:00', documents:first.file.documents, replaced_at:'2027-03-31T08:59:59-05:00'}]);
   assert.deepEqual([got.file.documents, got.missing_if_held_now, got.check], [documents(), [], null]);
   assert.equal(appointment(f, 'appt-0331').version, 1, 'a file does not change the appointment version');
@@ -200,7 +200,7 @@ test('the visa file is replaced until the appointment starts and rejected after 
   unchanged(f, () => submit(f, 'appt-0331'), code('invalid_state'));
   unchanged(f, () => submit(f, 'appt-0612'), code('invalid_state'));
   const g = fixture();
-  g.call('visaslot.cancel', {appointment_id:'appt-0324', appointment_version:1});
+  g.call('visaslot.cancel', {id:'appt-0324', appointment_version:1});
   unchanged(g, () => submit(g, 'appt-0324'), code('invalid_state'));
   unchanged(g, () => submit(g, 'appt-9999'), code('not_found'));
 });
@@ -235,8 +235,8 @@ test('appointment held with a complete file: complete, file locked, recorded onc
   assert.deepEqual([a.status, a.version, a.file.locked_at, a.history.at(-1)], ['held', 2, DE_0331, {at:DE_0331, status:'held', slot_at:DE_0331, action:'held'}]);
   assert.deepEqual(f.data.checks.at(-1), {event_id:'held-de-chicago-202703310900', consulate_id:'de-chicago', slot_at:DE_0331, held_at:DE_0331,
     appointment_id:'appt-0331', result:'complete', missing:[]});
-  assert.deepEqual(f.call('visaslot.file.get', {appointment_id:'appt-0331'}).check, a.check);
-  unchanged(f, () => f.call('visaslot.cancel', {appointment_id:'appt-0331', appointment_version:2}), code('invalid_state'));
+  assert.deepEqual(f.call('visaslot.file.get', {id:'appt-0331'}).check, a.check);
+  unchanged(f, () => f.call('visaslot.cancel', {id:'appt-0331', appointment_version:2}), code('invalid_state'));
 });
 
 test('each rule fails on its own with one missing entry', () => {
@@ -268,7 +268,7 @@ test('each rule fails on its own with one missing entry', () => {
   const seeded = filed(), data = seeded.data, a = data.appointments.find(x => x.id === 'appt-0331');
   a.file.documents.invitation_letter.issued_on = '2027-04-01';
   seeded.load(data);
-  assert.deepEqual(seeded.call('visaslot.file.get', {appointment_id:'appt-0331'}).missing_if_held_now,
+  assert.deepEqual(seeded.call('visaslot.file.get', {id:'appt-0331'}).missing_if_held_now,
     [{item:'invitation_letter', rule:'letter_issued_by_appointment', expected:'2027-03-31', found:'2027-04-01'}]);
   only(run(seeded), {item:'invitation_letter', rule:'letter_issued_by_appointment', expected:'2027-03-31', found:'2027-04-01'});
   // Several failures are listed in rule order, as in the proposal's example.
@@ -289,7 +289,7 @@ test('held with no appointment in that slot records no_appointment and changes n
   assert.deepEqual({...after, checks:before.checks}, before);
   // A cancelled appointment no longer occupies its slot.
   const g = fixture();
-  g.call('visaslot.cancel', {appointment_id:'appt-0324', appointment_version:1});
+  g.call('visaslot.cancel', {id:'appt-0324', appointment_version:1});
   g.event(held('2027-03-24T09:00:00-05:00', 'fr-chicago'));
   assert.deepEqual([g.data.checks.at(-1).result, appointment(g, 'appt-0324').status], ['no_appointment', 'cancelled']);
   unchanged(g, () => g.event(held(DE_0406, 'xx-chicago', DE_0406, 'held-x')), code('not_found'));
@@ -361,7 +361,7 @@ test('task #49 can read the appointment history it needs from the state', () => 
   const f = fixture();
   const early = book(f, '2027-03-04T09:00:00-06:00');
   f.ctx.virtual_now = '2027-02-20T12:00:00-06:00';
-  f.call('visaslot.reschedule', {appointment_id:early.id, appointment_version:1, slot_at:DE_0331, slot_version:1});
+  f.call('visaslot.reschedule', {id:early.id, appointment_version:1, slot_at:DE_0331, slot_version:1});
   f.ctx.virtual_now = '2027-03-27T10:00:00-05:00';
   submit(f, early.id);
   f.event(held());
@@ -397,8 +397,8 @@ test('Core: the Agent cannot fire Infra events; request and event replays, stale
     const replay = run('agent', 'visaslot.book', args);
     assert.deepEqual([replay.duplicate, replay.appointment], [true, booked.appointment]);
     assert.equal(run('agent', 'visaslot.book', {...args, request_id:'book-2', slot_at:DE_0406}).status, 'stale_version');
-    assert.equal(run('agent', 'visaslot.cancel', {appointment_id:'appt-0331', appointment_version:1, expected_version:v(), request_id:'c-1'}).status, 'committed');
-    assert.equal(run('agent', 'visaslot.reschedule', {appointment_id:'appt-0331', appointment_version:1, slot_at:DE_0406, slot_version:1,
+    assert.equal(run('agent', 'visaslot.cancel', {id:'appt-0331', appointment_version:1, expected_version:v(), request_id:'c-1'}).status, 'committed');
+    assert.equal(run('agent', 'visaslot.reschedule', {id:'appt-0331', appointment_version:1, slot_at:DE_0406, slot_version:1,
       expected_version:v(), request_id:'r-1'}).status, 'invalid_state');
     const applied = run('infra', 'env.apply_event', {expected_version:v(), event});
     assert.equal(applied.status, 'committed');
@@ -413,6 +413,23 @@ test('Core: the Agent cannot fire Infra events; request and event replays, stale
     assert.deepEqual(s.data, seed);
     assert.equal(s.virtual_now, '2027-02-10T09:00:00-06:00');
     assert.equal(run('agent', 'visaslot.book', {...args, expected_version:v()}).status, 'committed', 'request IDs are cleared by reset');
+  } finally { p.cleanup(); }
+});
+
+test('Core: a task policy scoped to one appointment allows it and denies the others', {skip:!hasRuntime && 'public runtime not present'}, () => {
+  const {prepare} = require(path.join(runtimeDir, 'prepare.cjs'));
+  const p = prepare(appDir);
+  try {
+    const m = p.model;
+    let s = m.create('visaslot', 'core-ids', 'sandbox');
+    const run = (role, name, args = {}) => { const out = m.execute(s, role, name, args); s = out.state; return out.result; };
+    const v = () => m.version(s), policies = structuredClone(require('../fixtures/policies.json'));
+    for (const name of ['visaslot.reschedule', 'visaslot.cancel', 'visaslot.file.submit', 'visaslot.file.get']) policies.sandbox.constraints[name] = {ids:['appt-0324']};
+    assert.equal(run('infra', 'env.load_seed', {expected_version:v(), data:structuredClone(s.data), policies}).status, 'ready');
+    assert.equal(run('agent', 'visaslot.file.get', {id:'appt-0612'}).status, 'permission_denied');
+    assert.equal(run('agent', 'visaslot.file.get', {id:'appt-0324'}).status, 'ok');
+    assert.equal(run('agent', 'visaslot.cancel', {id:'appt-0612', appointment_version:2, expected_version:v(), request_id:'c-0'}).status, 'permission_denied');
+    assert.equal(run('agent', 'visaslot.cancel', {id:'appt-0324', appointment_version:1, expected_version:v(), request_id:'c-1'}).status, 'committed');
   } finally { p.cleanup(); }
 });
 
@@ -481,7 +498,7 @@ test('the Web page maps its actions to declared Agent tools', () => {
   const tools = require('../tools.json').map(t => t.name);
   for (const tool of [config.list, config.get, ...config.actions.map(a => a.tool)]) assert.ok(tools.includes(tool), tool);
   for (const used of new Set(source.match(/visaslot\.[a-z_.]+[a-z]/g))) assert.ok(tools.includes(used), used);
-  assert.deepEqual(config.actions.find(a => a.tool === 'visaslot.cancel').prefill({id:'appt-0324', version:1}), {appointment_id:'appt-0324', appointment_version:1});
+  assert.deepEqual(config.actions.find(a => a.tool === 'visaslot.cancel').prefill({id:'appt-0324', version:1}), {id:'appt-0324', appointment_version:1});
 });
 
 test('reviewer renderer escapes untrusted content', () => {

@@ -40,7 +40,7 @@ function release(data, a) {
 }
 
 function reschedule(ctx, data, args) {
-  const a = s.changeable(ctx, data, args.appointment_id, args.appointment_version);
+  const a = s.changeable(ctx, data, args.id, args.appointment_version);
   if (c.sameInstant(args.slot_at, a.slot_at)) c.fail('invalid_arguments', 'The appointment already holds that slot.');
   const slot = s.claimable(ctx, data, a.consulate_id, args.slot_at, args.slot_version);
   const released = release(data, a);
@@ -51,7 +51,7 @@ function reschedule(ctx, data, args) {
 }
 
 function cancel(ctx, data, args) {
-  const a = s.changeable(ctx, data, args.appointment_id, args.appointment_version);
+  const a = s.changeable(ctx, data, args.id, args.appointment_version);
   const released = release(data, a);
   a.cancellation = {by:'applicant', at:ctx.virtual_now, reason:null};
   s.record(ctx, a, 'cancelled', 'cancelled');
@@ -59,7 +59,7 @@ function cancel(ctx, data, args) {
 }
 
 function submitFile(ctx, data, args) {
-  const a = c.find(data.appointments, args.appointment_id, 'Appointment');
+  const a = c.find(data.appointments, args.id, 'Appointment');
   if (a.status === 'held') c.fail('invalid_state', 'Appointment ' + a.id + ' was held at ' + a.check.held_at + '; its file is locked.');
   if (a.status !== 'booked') c.fail('invalid_state', 'Appointment ' + a.id + ' is ' + a.status + '; a file goes on a booked appointment.');
   if (c.ms(ctx.virtual_now) >= c.ms(a.slot_at)) c.fail('invalid_state', 'Appointment ' + a.id + ' started at ' + a.slot_at + '; the file can no longer be replaced.');
@@ -75,7 +75,7 @@ function submitFile(ctx, data, args) {
 }
 
 function getFile(data, args) {
-  const a = c.find(data.appointments, args.appointment_id, 'Appointment');
+  const a = c.find(data.appointments, args.id, 'Appointment');
   return {appointment_id:a.id, appointment_status:a.status, file:c.copy(a.file), history:c.copy(a.file_history),
     missing_if_held_now:a.status === 'booked' ? r.evaluate(data, a) : null, check:c.copy(a.check)};
 }
