@@ -1,0 +1,213 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "signaldesk.post_usage"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "line_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "enum": [
+                    "domestic_data",
+                    "hotspot"
+                  ]
+                },
+                "amount_mb": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "occurred_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "line_id",
+                "kind",
+                "amount_mb",
+                "occurred_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "line_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "const": "roaming"
+                },
+                "amount_mb": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "occurred_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "destination": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "line_id",
+                "kind",
+                "amount_mb",
+                "occurred_at",
+                "destination"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "signaldesk.account_update"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "action": {
+                  "const": "cancel_pending_plan_change"
+                },
+                "plan_change_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "plan_change_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "action": {
+                  "const": "change_plan"
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "plan_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "action": {
+                  "const": "reschedule_pass"
+                },
+                "target_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "target_id",
+                "start"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "action": {
+                  "const": "cancel_pass"
+                },
+                "target_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "target_id"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

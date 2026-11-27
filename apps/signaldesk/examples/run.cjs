@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('node:assert/strict');
+const app=require('../plugin.cjs');
+const event=require('./account-update.json');
+const ctx={binding:require('../fixtures/binding.json'),virtual_now:event.at};
+const seed=require('../fixtures/build.cjs').fixture('pending');
+app.validateSeed(ctx,seed);
+const updated=app.applyEvent(ctx,structuredClone(seed),event);
+assert.equal(updated.pending,null);
+assert.equal(updated.plan_id,'family');
+console.log(JSON.stringify(updated.receipts.at(-1)));
