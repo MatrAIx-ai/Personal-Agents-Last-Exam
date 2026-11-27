@@ -1,0 +1,47 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "health-hub-personas",
+  "version": "1.0.0",
+  "description": "Deterministic synthetic wearable biometrics, workouts, goals, and routine templates starting 2025-01-01.",
+  "record_source_ids": [
+    "synthetic-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "synthetic-generator",
+      "kind": "synthetic",
+      "description": "Deterministically generated synthetic health records via scripts/generate_personas.cjs.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "scripts/generate_personas.cjs",
+        "tool_version": "1.0.0",
+        "seed": "health-hub-v1",
+        "parameters": {
+          "start_date": "2025-01-01",
+          "days": 365
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Generated 365 daily summaries per persona with explicit no_data device_not_worn gaps."
+  ],
+  "expected_counts": {
+    "records": 523,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

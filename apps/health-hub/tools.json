@@ -1,0 +1,382 @@
+[
+  {
+    "name": "health-hub.get_daily_summary",
+    "description": "Retrieve wearable daily sleep, strain, and recovery metrics for a specific date (YYYY-MM-DD).",
+    "read_only": true,
+    "scope": "health-hub:read",
+    "resource_target": "daily_summary",
+    "inputSchema": {
+      "type": "object",
+      "required": ["date"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "summary"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "summary": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_metrics",
+    "description": "List time-series metrics (sleep, recovery, strain, body_weight) across a date window.",
+    "read_only": true,
+    "scope": "health-hub:read",
+    "resource_target": "daily_summary",
+    "inputSchema": {
+      "type": "object",
+      "required": ["metric_type", "start_date", "end_date"],
+      "properties": {
+        "metric_type": { "type": "string", "enum": ["sleep", "recovery", "strain", "body_weight"] },
+        "start_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "end_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "metric_type", "series"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "metric_type": { "type": "string" },
+        "series": { "type": "array" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_workouts",
+    "description": "List workouts within an optional date range and optional status filter.",
+    "read_only": true,
+    "scope": "health-hub:read",
+    "resource_target": "workout",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start_date": { "type": "string" },
+        "end_date": { "type": "string" },
+        "status": { "type": "string", "enum": ["planned", "completed", "skipped", "cancelled"] }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "workouts"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "workouts": { "type": "array" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.plan_workout",
+    "description": "Schedule a new workout in 'planned' status.",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "workout",
+    "inputSchema": {
+      "type": "object",
+      "required": ["activity_type", "scheduled_at", "duration_minutes", "expected_version", "request_id"],
+      "properties": {
+        "activity_type": { "type": "string", "minLength": 1 },
+        "scheduled_at": { "type": "string", "minLength": 1 },
+        "duration_minutes": { "type": "number", "minimum": 1 },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "workout"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "workout": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.log_workout",
+    "description": "Log an already completed workout directly.",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "workout",
+    "inputSchema": {
+      "type": "object",
+      "required": ["activity_type", "duration_minutes", "perceived_exertion", "expected_version", "request_id"],
+      "properties": {
+        "activity_type": { "type": "string", "minLength": 1 },
+        "duration_minutes": { "type": "number", "minimum": 1 },
+        "perceived_exertion": { "type": "number", "minimum": 1, "maximum": 10 },
+        "avg_hr": { "type": "number" },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "workout"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "workout": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.update_workout",
+    "description": "Update a workout status or its recorded metrics.",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "workout",
+    "inputSchema": {
+      "type": "object",
+      "required": ["workout_id", "expected_version", "request_id"],
+      "properties": {
+        "workout_id": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["planned", "completed", "skipped", "cancelled"] },
+        "duration_minutes": { "type": "number", "minimum": 1 },
+        "perceived_exertion": { "type": "number", "minimum": 1, "maximum": 10 },
+        "avg_hr": { "type": "number" },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "workout"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "workout": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_goals",
+    "description": "List all active or past wellness and habit goals.",
+    "read_only": true,
+    "scope": "health-hub:read",
+    "resource_target": "goal",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["active", "achieved", "missed", "abandoned"] }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "goals"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "goals": { "type": "array" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.create_goal",
+    "description": "Create a new wellness target or habit goal.",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "goal",
+    "inputSchema": {
+      "type": "object",
+      "required": ["title", "metric_type", "target_value", "expected_version", "request_id"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "metric_type": { "type": "string", "minLength": 1 },
+        "target_value": { "type": "number" },
+        "due_date": { "type": "string" },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "goal"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "goal": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.update_goal",
+    "description": "Update goal status or target values.",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "goal",
+    "inputSchema": {
+      "type": "object",
+      "required": ["goal_id", "expected_version", "request_id"],
+      "properties": {
+        "goal_id": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["active", "achieved", "missed", "abandoned"] },
+        "target_value": { "type": "number" },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "goal"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "goal": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_routine_templates",
+    "description": "List reusable daily or weekly routine templates.",
+    "read_only": true,
+    "scope": "health-hub:read",
+    "resource_target": "routine_template",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["draft", "active", "archived"] }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "routine_templates"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "routine_templates": { "type": "array" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.create_routine_template",
+    "description": "Create a new routine template in 'draft' status.",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "routine_template",
+    "inputSchema": {
+      "type": "object",
+      "required": ["title", "blocks", "expected_version", "request_id"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["block_id", "name", "start_offset_minutes", "duration_minutes"],
+            "properties": {
+              "block_id": { "type": "string" },
+              "name": { "type": "string" },
+              "start_offset_minutes": { "type": "number", "minimum": 0 },
+              "duration_minutes": { "type": "number", "minimum": 1 }
+            }
+          }
+        },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "routine_template"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "routine_template": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.update_routine_template",
+    "description": "Update template component blocks or transition status (draft -> active -> archived).",
+    "read_only": false,
+    "scope": "health-hub:write",
+    "resource_target": "routine_template",
+    "inputSchema": {
+      "type": "object",
+      "required": ["routine_id", "expected_version", "request_id"],
+      "properties": {
+        "routine_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["draft", "active", "archived"] },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["block_id", "name", "start_offset_minutes", "duration_minutes"],
+            "properties": {
+              "block_id": { "type": "string" },
+              "name": { "type": "string" },
+              "start_offset_minutes": { "type": "number", "minimum": 0 },
+              "duration_minutes": { "type": "number", "minimum": 1 }
+            }
+          }
+        },
+        "expected_version": { "type": "object", "required": ["epoch", "revision"] },
+        "request_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "routine_template"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "routine_template": { "type": "object" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_notifications",
+    "description": "Retrieve notifications generated from wearable syncs and committed life events.",
+    "read_only": true,
+    "scope": "health-hub:read",
+    "resource_target": "notification",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "required": ["status", "app_id", "version", "notifications"],
+      "properties": {
+        "status": { "type": "string" },
+        "app_id": { "type": "string" },
+        "version": { "type": "object" },
+        "notifications": { "type": "array" }
+      }
+    }
+  }
+]
