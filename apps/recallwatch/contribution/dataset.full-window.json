@@ -1,0 +1,87 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "recallwatch-full-window",
+  "version": "1.0.0",
+  "description": "Full-window (2025-01-01 through 2026-12-31) synthetic evaluation corpus for RecallWatch (fixtures/full-window.json; 446 records across 318 distinct UTC dates and all 24 months; reproducible report in examples/coverage-report.cjs). Distinct from the 44-record smoke fixture (fixtures/minimal.json). Not an as-of snapshot at fixtures/clock.json (2026-11-18T09:00:00+00:00): includes 18 recall publications and 4 inventory creations dated after that clock instant; Tasks using this corpus for pre-session history must load a strict pre-session subset or stage later records via Infra events.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original synthetic recalls (332), household inventory items (76), watchlists (6), and claims (32) in fixtures/full-window.json (SHA-256 87832fedb1ed89a19db14c3a31ad45471f93685ea56a4d09721f2d152416d09e) spanning 2025-01-02 through 2026-12-27; zero scraped agency or third-party data.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "RecallWatch full-window fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "fixture_ref": "fixtures/full-window.json",
+          "coverage_report_ref": "examples/coverage-report.cjs",
+          "timezone": "UTC",
+          "window": "2025-01-01..2026-12-31"
+        }
+      }
+    },
+    {
+      "source_id": "synthetic-labels",
+      "kind": "synthetic",
+      "description": "Programmatically rendered original synthetic PNG product-label cards (320x180 RGB).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "RecallWatch PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 320,
+          "height": 180
+        }
+      }
+    },
+    {
+      "source_id": "ui-generated",
+      "kind": "synthetic",
+      "description": "Original synthetic 64x64 RecallWatch icon PNG.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "RecallWatch PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized offset-bearing ISO-8601 timestamps across 2025-01-01..2026-12-31 (UTC), lot codes, and shared account/person IDs; verified via examples/coverage-report.cjs (live env.load_seed + MCP queries)."
+  ],
+  "expected_counts": {
+    "records": 446,
+    "assets": 8
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Full-window Environment corpus (fixtures/full-window.json, verified by examples/coverage-report.cjs). At fixtures/clock.json (2026-11-18T09:00:00+00:00), 18 recalls and 4 inventory records are post-clock; Tasks must filter to strict pre-session history or stage later records as Infra events. Automated checks do not replace human review."
+  }
+}

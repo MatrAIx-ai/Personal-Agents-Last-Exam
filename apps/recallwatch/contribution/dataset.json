@@ -1,0 +1,82 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "recallwatch-minimal",
+  "version": "1.0.0",
+  "description": "44-record smoke fixture (fixtures/minimal.json) for fast RecallWatch unit and runtime verification. For the full 2025-01-01..2026-12-31 evaluation corpus (446 records across 318 distinct UTC dates), see contribution/dataset.full-window.json, fixtures/full-window.json, and examples/coverage-report.cjs.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original hand-authored synthetic product-safety recalls, household items, watchlists and claims spanning 2025-02-14 through 2026-11; zero scraped agency or third-party data.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "RecallWatch fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "synthetic-labels",
+      "kind": "synthetic",
+      "description": "Programmatically rendered original synthetic PNG product-label cards (320x180 RGB).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "RecallWatch PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 320,
+          "height": 180
+        }
+      }
+    },
+    {
+      "source_id": "ui-generated",
+      "kind": "synthetic",
+      "description": "Original synthetic 64x64 RecallWatch icon PNG.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "RecallWatch PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized offset-bearing ISO-8601 timestamps, lot codes, and shared account/person IDs."
+  ],
+  "expected_counts": {
+    "records": 44,
+    "assets": 8
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "44-record smoke fixture (fixtures/minimal.json) kept distinct from the full-window corpus declared in contribution/dataset.full-window.json (fixtures/full-window.json, report: examples/coverage-report.cjs). Automated checks do not replace human review of realism, variation and provenance."
+  }
+}

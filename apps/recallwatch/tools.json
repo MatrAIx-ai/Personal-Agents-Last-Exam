@@ -1,0 +1,3558 @@
+[
+  {
+    "name": "recallwatch.recall.search",
+    "description": "Search and filter recall advisories by query, UPC, brand, category, hazard, severity, status, or lot code without changing state.",
+    "read_only": true,
+    "scope": "recallwatch.recall.search",
+    "resource_target": "catalog",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "upc": {
+          "type": "string",
+          "pattern": "^[0-9]{8,14}$"
+        },
+        "brand": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "category": {
+          "enum": [
+            "snacks_groceries",
+            "baby_gear",
+            "otc_medicine",
+            "small_appliances",
+            "pet_food",
+            "toys"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "class_i",
+            "class_ii",
+            "class_iii"
+          ]
+        },
+        "hazard": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "status": {
+          "enum": [
+            "active",
+            "expanded",
+            "amended",
+            "closed"
+          ]
+        },
+        "lot_code": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "product_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "upc": {
+                "type": "string",
+                "pattern": "^[0-9]{8,14}$"
+              },
+              "category": {
+                "enum": [
+                  "snacks_groceries",
+                  "baby_gear",
+                  "otc_medicine",
+                  "small_appliances",
+                  "pet_food",
+                  "toys"
+                ]
+              },
+              "severity": {
+                "enum": [
+                  "class_i",
+                  "class_ii",
+                  "class_iii"
+                ]
+              },
+              "hazard": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "expanded",
+                  "amended",
+                  "closed"
+                ]
+              },
+              "affected_lots": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "maxItems": 200
+              },
+              "excluded_lots": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "maxItems": 200
+              },
+              "remedy_types": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "refund",
+                    "replacement",
+                    "repair_kit"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 3
+              },
+              "proof_required": {
+                "type": "boolean"
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "remedy_deadline_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "label_asset_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "id",
+              "brand",
+              "product_name",
+              "upc",
+              "category",
+              "severity",
+              "hazard",
+              "summary",
+              "status",
+              "affected_lots",
+              "excluded_lots",
+              "remedy_types",
+              "proof_required",
+              "published_at",
+              "updated_at",
+              "remedy_deadline_at",
+              "label_asset_id",
+              "history"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.recall.get",
+    "description": "Fetch full details for a single recall advisory, optionally checking whether a specific lot_code is affected and reporting missing optional label assets.",
+    "read_only": true,
+    "scope": "recallwatch.recall.get",
+    "resource_target": "catalog",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "lot_code": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "brand": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "product_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "upc": {
+              "type": "string",
+              "pattern": "^[0-9]{8,14}$"
+            },
+            "category": {
+              "enum": [
+                "snacks_groceries",
+                "baby_gear",
+                "otc_medicine",
+                "small_appliances",
+                "pet_food",
+                "toys"
+              ]
+            },
+            "severity": {
+              "enum": [
+                "class_i",
+                "class_ii",
+                "class_iii"
+              ]
+            },
+            "hazard": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "status": {
+              "enum": [
+                "active",
+                "expanded",
+                "amended",
+                "closed"
+              ]
+            },
+            "affected_lots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "maxItems": 200
+            },
+            "excluded_lots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "maxItems": 200
+            },
+            "remedy_types": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "refund",
+                  "replacement",
+                  "repair_kit"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "proof_required": {
+              "type": "boolean"
+            },
+            "published_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "remedy_deadline_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "label_asset_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            }
+          },
+          "required": [
+            "id",
+            "brand",
+            "product_name",
+            "upc",
+            "category",
+            "severity",
+            "hazard",
+            "summary",
+            "status",
+            "affected_lots",
+            "excluded_lots",
+            "remedy_types",
+            "proof_required",
+            "published_at",
+            "updated_at",
+            "remedy_deadline_at",
+            "label_asset_id",
+            "history"
+          ],
+          "additionalProperties": false
+        },
+        "lot_check": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "lot_code": {
+                  "type": "string"
+                },
+                "exposure_status": {
+                  "enum": [
+                    "unaffected",
+                    "matched_active",
+                    "matched_remedy_expired"
+                  ]
+                }
+              },
+              "required": [
+                "lot_code",
+                "exposure_status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "asset_warning": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item",
+        "lot_check",
+        "asset_warning"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.inventory.list",
+    "description": "List household registered items with computed exposure status; archived items require include_archived=true.",
+    "read_only": true,
+    "scope": "recallwatch.inventory.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "holder_person_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "include_archived": {
+          "type": "boolean"
+        },
+        "query": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "product_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "upc": {
+                "type": "string",
+                "pattern": "^[0-9]{8,14}$"
+              },
+              "category": {
+                "enum": [
+                  "snacks_groceries",
+                  "baby_gear",
+                  "otc_medicine",
+                  "small_appliances",
+                  "pet_food",
+                  "toys"
+                ]
+              },
+              "lot_code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "purchase_date": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              "holder_person_ref": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "location_note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "status": {
+                "enum": [
+                  "registered",
+                  "resolved",
+                  "archived"
+                ]
+              },
+              "disposal_note": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "brand",
+              "product_name",
+              "upc",
+              "category",
+              "lot_code",
+              "purchase_date",
+              "holder_person_ref",
+              "location_note",
+              "status",
+              "disposal_note",
+              "created_at",
+              "updated_at",
+              "history"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "exposures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "lot_code": {
+                "type": "string"
+              },
+              "item_status": {
+                "type": "string"
+              },
+              "exposure_status": {
+                "enum": [
+                  "unaffected",
+                  "matched_active",
+                  "matched_remedy_expired",
+                  "archived"
+                ]
+              },
+              "matched_recall_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "remedy_deadlines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "recall_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "remedy_deadline_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expired": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "recall_id",
+                    "remedy_deadline_at",
+                    "expired"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "item_id",
+              "lot_code",
+              "item_status",
+              "exposure_status",
+              "matched_recall_ids",
+              "remedy_deadlines"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "exposures"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.inventory.get",
+    "description": "Inspect one registered household product and its computed exposure against current recalls.",
+    "read_only": true,
+    "scope": "recallwatch.inventory.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "brand": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "product_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "upc": {
+              "type": "string",
+              "pattern": "^[0-9]{8,14}$"
+            },
+            "category": {
+              "enum": [
+                "snacks_groceries",
+                "baby_gear",
+                "otc_medicine",
+                "small_appliances",
+                "pet_food",
+                "toys"
+              ]
+            },
+            "lot_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "purchase_date": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            },
+            "holder_person_ref": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "location_note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "status": {
+              "enum": [
+                "registered",
+                "resolved",
+                "archived"
+              ]
+            },
+            "disposal_note": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "brand",
+            "product_name",
+            "upc",
+            "category",
+            "lot_code",
+            "purchase_date",
+            "holder_person_ref",
+            "location_note",
+            "status",
+            "disposal_note",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        },
+        "exposure": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "lot_code": {
+              "type": "string"
+            },
+            "item_status": {
+              "type": "string"
+            },
+            "exposure_status": {
+              "enum": [
+                "unaffected",
+                "matched_active",
+                "matched_remedy_expired",
+                "archived"
+              ]
+            },
+            "matched_recall_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "remedy_deadlines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "recall_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "remedy_deadline_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expired": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "recall_id",
+                  "remedy_deadline_at",
+                  "expired"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "item_id",
+            "lot_code",
+            "item_status",
+            "exposure_status",
+            "matched_recall_ids",
+            "remedy_deadlines"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item",
+        "exposure"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.inventory.register",
+    "description": "Register a household product with UPC, lot code, holder person_ref and location note.",
+    "read_only": false,
+    "scope": "recallwatch.inventory.register",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "brand": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "product_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "upc": {
+          "type": "string",
+          "pattern": "^[0-9]{8,14}$"
+        },
+        "category": {
+          "enum": [
+            "snacks_groceries",
+            "baby_gear",
+            "otc_medicine",
+            "small_appliances",
+            "pet_food",
+            "toys"
+          ]
+        },
+        "lot_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "purchase_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "holder_person_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "location_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "brand",
+        "product_name",
+        "upc",
+        "category",
+        "lot_code",
+        "purchase_date",
+        "holder_person_ref",
+        "location_note",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "exposure": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "lot_code": {
+              "type": "string"
+            },
+            "item_status": {
+              "type": "string"
+            },
+            "exposure_status": {
+              "enum": [
+                "unaffected",
+                "matched_active",
+                "matched_remedy_expired",
+                "archived"
+              ]
+            },
+            "matched_recall_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "remedy_deadlines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "recall_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "remedy_deadline_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expired": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "recall_id",
+                  "remedy_deadline_at",
+                  "expired"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "item_id",
+            "lot_code",
+            "item_status",
+            "exposure_status",
+            "matched_recall_ids",
+            "remedy_deadlines"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "exposure"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.inventory.update",
+    "description": "Update mutable fields (lot_code, location_note, holder_person_ref, disposal_note, status) of a registered household item.",
+    "read_only": false,
+    "scope": "recallwatch.inventory.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "lot_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "location_note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "holder_person_ref": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "disposal_note": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "status": {
+              "enum": [
+                "registered",
+                "resolved"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "exposure": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "lot_code": {
+              "type": "string"
+            },
+            "item_status": {
+              "type": "string"
+            },
+            "exposure_status": {
+              "enum": [
+                "unaffected",
+                "matched_active",
+                "matched_remedy_expired",
+                "archived"
+              ]
+            },
+            "matched_recall_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "remedy_deadlines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "recall_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "remedy_deadline_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expired": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "recall_id",
+                  "remedy_deadline_at",
+                  "expired"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "item_id",
+            "lot_code",
+            "item_status",
+            "exposure_status",
+            "matched_recall_ids",
+            "remedy_deadlines"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "exposure"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.inventory.archive",
+    "description": "Archive a returned or discarded household item so it is excluded from active exposure alerts.",
+    "read_only": false,
+    "scope": "recallwatch.inventory.archive",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "disposal_note": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.inventory.check_exposure",
+    "description": "Deterministically evaluate one household item or all active household items against current recalls using virtual time without mutating state.",
+    "read_only": true,
+    "scope": "recallwatch.inventory.check_exposure",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exposures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "lot_code": {
+                "type": "string"
+              },
+              "item_status": {
+                "type": "string"
+              },
+              "exposure_status": {
+                "enum": [
+                  "unaffected",
+                  "matched_active",
+                  "matched_remedy_expired",
+                  "archived"
+                ]
+              },
+              "matched_recall_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "remedy_deadlines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "recall_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "remedy_deadline_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expired": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "recall_id",
+                    "remedy_deadline_at",
+                    "expired"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "item_id",
+              "lot_code",
+              "item_status",
+              "exposure_status",
+              "matched_recall_ids",
+              "remedy_deadlines"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "evaluated_at",
+        "exposures"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.watchlist.list",
+    "description": "List household recall watchlist rules with effective active/paused state at current virtual time.",
+    "read_only": true,
+    "scope": "recallwatch.watchlist.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_deleted": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "brand": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "upc": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[0-9]{8,14}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "snacks_groceries",
+                      "baby_gear",
+                      "otc_medicine",
+                      "small_appliances",
+                      "pet_food",
+                      "toys"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hazard_tag": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "min_severity": {
+                "enum": [
+                  "class_i",
+                  "class_ii",
+                  "class_iii"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "muted",
+                  "paused",
+                  "deleted"
+                ]
+              },
+              "pause_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "delivery_mode": {
+                "enum": [
+                  "immediate",
+                  "digest"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "label",
+              "brand",
+              "upc",
+              "category",
+              "hazard_tag",
+              "min_severity",
+              "status",
+              "pause_until",
+              "delivery_mode",
+              "created_at",
+              "updated_at",
+              "history"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "effective_statuses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "effective_status": {
+                "enum": [
+                  "active",
+                  "muted",
+                  "paused",
+                  "deleted"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "effective_status"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "effective_statuses"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.watchlist.create",
+    "description": "Create a household recall alert watchlist rule scoped by brand, UPC, category or hazard_tag.",
+    "read_only": false,
+    "scope": "recallwatch.watchlist.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "brand": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upc": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{8,14}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "category": {
+          "anyOf": [
+            {
+              "enum": [
+                "snacks_groceries",
+                "baby_gear",
+                "otc_medicine",
+                "small_appliances",
+                "pet_food",
+                "toys"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hazard_tag": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "min_severity": {
+          "enum": [
+            "class_i",
+            "class_ii",
+            "class_iii"
+          ]
+        },
+        "delivery_mode": {
+          "enum": [
+            "immediate",
+            "digest"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "label",
+        "min_severity",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.watchlist.update",
+    "description": "Update, pause, mute, or resume an existing watchlist rule.",
+    "read_only": false,
+    "scope": "recallwatch.watchlist.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "min_severity": {
+              "enum": [
+                "class_i",
+                "class_ii",
+                "class_iii"
+              ]
+            },
+            "status": {
+              "enum": [
+                "active",
+                "muted",
+                "paused"
+              ]
+            },
+            "pause_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivery_mode": {
+              "enum": [
+                "immediate",
+                "digest"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.watchlist.delete",
+    "description": "Delete a watchlist rule; deleting an already-deleted rule with a new request fails with NOT_FOUND.",
+    "read_only": false,
+    "scope": "recallwatch.watchlist.delete",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.list",
+    "description": "List household remedy claims, optionally filtered by status, recall_id, or item_id.",
+    "read_only": true,
+    "scope": "recallwatch.claim.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "submitted",
+            "under_review",
+            "approved_refund",
+            "approved_replacement",
+            "approved_repair_kit",
+            "rejected",
+            "withdrawn"
+          ]
+        },
+        "recall_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "recall_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "lot_code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "remedy_type": {
+                "enum": [
+                  "refund",
+                  "replacement",
+                  "repair_kit"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "draft",
+                  "submitted",
+                  "under_review",
+                  "approved_refund",
+                  "approved_replacement",
+                  "approved_repair_kit",
+                  "rejected",
+                  "withdrawn"
+                ]
+              },
+              "proof_ref": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "file_ref",
+                          "asset_ref",
+                          "receipt_ref"
+                        ]
+                      },
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "version": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "id"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "recipient_person_ref": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "recipient_name": {
+                "type": "string",
+                "maxLength": 160
+              },
+              "shipping_address": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "payout_method": {
+                "type": "string",
+                "maxLength": 120
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "claim_receipt_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "decision_amount_cents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "decision_note": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "submitted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "recall_id",
+              "item_id",
+              "lot_code",
+              "remedy_type",
+              "status",
+              "proof_ref",
+              "recipient_person_ref",
+              "recipient_name",
+              "shipping_address",
+              "payout_method",
+              "notes",
+              "claim_receipt_id",
+              "decision_amount_cents",
+              "decision_note",
+              "created_at",
+              "updated_at",
+              "submitted_at",
+              "history"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.get",
+    "description": "Inspect a single remedy claim and its revision history.",
+    "read_only": true,
+    "scope": "recallwatch.claim.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "recall_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "lot_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "remedy_type": {
+              "enum": [
+                "refund",
+                "replacement",
+                "repair_kit"
+              ]
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "submitted",
+                "under_review",
+                "approved_refund",
+                "approved_replacement",
+                "approved_repair_kit",
+                "rejected",
+                "withdrawn"
+              ]
+            },
+            "proof_ref": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "file_ref",
+                        "asset_ref",
+                        "receipt_ref"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "version": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "recipient_person_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "recipient_name": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "shipping_address": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "payout_method": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "claim_receipt_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "decision_amount_cents": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "decision_note": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "submitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "recall_id",
+            "item_id",
+            "lot_code",
+            "remedy_type",
+            "status",
+            "proof_ref",
+            "recipient_person_ref",
+            "recipient_name",
+            "shipping_address",
+            "payout_method",
+            "notes",
+            "claim_receipt_id",
+            "decision_amount_cents",
+            "decision_note",
+            "created_at",
+            "updated_at",
+            "submitted_at",
+            "history"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.preview",
+    "description": "Check remedy eligibility (exact lot match, virtual-time deadline, proof_ref validity, duplicate active claim check) without mutating state.",
+    "read_only": true,
+    "scope": "recallwatch.claim.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recall_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "remedy_type": {
+          "enum": [
+            "refund",
+            "replacement",
+            "repair_kit"
+          ]
+        },
+        "proof_ref": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "file_ref",
+                    "asset_ref",
+                    "receipt_ref"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "version": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "recall_id",
+        "item_id",
+        "remedy_type"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lot_code": {
+          "type": "string"
+        },
+        "remedy_deadline_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "existing_claim_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "eligible",
+        "reasons",
+        "lot_code",
+        "remedy_deadline_at",
+        "evaluated_at",
+        "existing_claim_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.create_draft",
+    "description": "Create a new draft remedy claim for an item and recall; rejects duplicate active claims for the same item and recall.",
+    "read_only": false,
+    "scope": "recallwatch.claim.create_draft",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "recall_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "remedy_type": {
+          "enum": [
+            "refund",
+            "replacement",
+            "repair_kit"
+          ]
+        },
+        "proof_ref": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "file_ref",
+                    "asset_ref",
+                    "receipt_ref"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "version": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "recipient_person_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recipient_name": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "shipping_address": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "payout_method": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "recall_id",
+        "item_id",
+        "remedy_type",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.update_draft",
+    "description": "Update editable fields of a draft remedy claim before submission.",
+    "read_only": false,
+    "scope": "recallwatch.claim.update_draft",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "remedy_type": {
+              "enum": [
+                "refund",
+                "replacement",
+                "repair_kit"
+              ]
+            },
+            "proof_ref": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "file_ref",
+                        "asset_ref",
+                        "receipt_ref"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "version": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "recipient_person_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "recipient_name": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "shipping_address": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "payout_method": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.amend",
+    "description": "Amend shipping_address, recipient_name, recipient_person_ref, payout_method, proof_ref, or notes on a draft or submitted claim before fulfillment.",
+    "read_only": false,
+    "scope": "recallwatch.claim.amend",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "proof_ref": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "file_ref",
+                        "asset_ref",
+                        "receipt_ref"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "version": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "recipient_person_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "recipient_name": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "shipping_address": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "payout_method": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.submit",
+    "description": "Submit a draft remedy claim after validating lot match, virtual-time deadline (<= remedy_deadline_at), remedy option, and required proof_ref.",
+    "read_only": false,
+    "scope": "recallwatch.claim.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "claim_receipt_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "claim_receipt_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "recallwatch.claim.withdraw",
+    "description": "Withdraw a draft, submitted, or under_review claim before fulfillment.",
+    "read_only": false,
+    "scope": "recallwatch.claim.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "recallwatch"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

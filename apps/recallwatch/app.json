@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "recallwatch",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR #143 tagged app:recallwatch (@Hoyant-Su)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "recall.publish",
+    "recall.expand_lots",
+    "recall.amend_or_close",
+    "claim.decision"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Outbound channel.email publishing is invoked explicitly after commit via src/publisher.cjs and Messaging router; advancing virtual time does not automatically dispatch notifications.",
+    "Proof-of-purchase references validate identifier structure and optional version metadata without importing Files or performing OCR."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

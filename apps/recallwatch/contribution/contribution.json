@@ -1,0 +1,265 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "recallwatch",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "recallwatch.recall.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.recall.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.inventory.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.inventory.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.inventory.register",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.inventory.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.inventory.archive",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.inventory.check_exposure",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.watchlist.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.watchlist.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.watchlist.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.watchlist.delete",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.preview",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.create_draft",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.update_draft",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.amend",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.submit",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "recallwatch.claim.withdraw",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check returning Core stale_version",
+    "commit_confirmation": "Core status=committed + epoch/revision plus App-owned claim_receipt_id; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "recall.publish",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "recall.expand_lots",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "recall.amend_or_close",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "claim.decision",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": true,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "audio/mpeg",
+      "audio/wav",
+      "video/mp4",
+      "application/json",
+      "application/pdf",
+      "text/plain",
+      "text/calendar"
+    ],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}

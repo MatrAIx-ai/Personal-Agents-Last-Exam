@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:recallwatch:events:1",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "recall.publish"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "recall_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "brand": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "product_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "upc": {
+              "type": "string",
+              "pattern": "^[0-9]{8,14}$"
+            },
+            "category": {
+              "enum": [
+                "snacks_groceries",
+                "baby_gear",
+                "otc_medicine",
+                "small_appliances",
+                "pet_food",
+                "toys"
+              ]
+            },
+            "severity": {
+              "enum": [
+                "class_i",
+                "class_ii",
+                "class_iii"
+              ]
+            },
+            "hazard": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "affected_lots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "minItems": 1
+            },
+            "excluded_lots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              }
+            },
+            "remedy_types": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "refund",
+                  "replacement",
+                  "repair_kit"
+                ]
+              },
+              "minItems": 1
+            },
+            "proof_required": {
+              "type": "boolean"
+            },
+            "remedy_deadline_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "label_asset_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "recall_id",
+            "brand",
+            "upc",
+            "severity",
+            "hazard",
+            "affected_lots",
+            "remedy_types",
+            "remedy_deadline_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "recall.expand_lots"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "recall_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "added_lots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "minItems": 1
+            },
+            "remedy_deadline_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            }
+          },
+          "required": [
+            "recall_id",
+            "added_lots",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "recall.amend_or_close"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "recall_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "amended",
+                "closed"
+              ]
+            },
+            "excluded_lots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              }
+            },
+            "remedy_deadline_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 400
+            }
+          },
+          "required": [
+            "recall_id",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "claim.decision"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "claim_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "decision": {
+              "enum": [
+                "under_review",
+                "approved_refund",
+                "approved_replacement",
+                "approved_repair_kit",
+                "rejected"
+              ]
+            },
+            "amount_cents": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "claim_id",
+            "decision",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
