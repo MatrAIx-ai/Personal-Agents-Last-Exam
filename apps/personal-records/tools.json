@@ -453,7 +453,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "target_type": { "type": "string", "enum": ["document_metadata", "link", "claim", "document_version"] },
+        "target_type": { "type": "string", "enum": ["document_metadata", "claim"] },
         "target_id": { "type": "string", "minLength": 1 },
         "expected_target_version": { "type": "integer", "minimum": 1 },
         "proposed_changes": { "type": "object" },
@@ -469,7 +469,7 @@
         },
         "request_id": { "type": "string", "minLength": 1 }
       },
-      "required": ["target_type", "target_id", "proposed_changes", "rationale", "expected_version", "request_id"],
+      "required": ["target_type", "target_id", "expected_target_version", "proposed_changes", "rationale", "expected_version", "request_id"],
       "additionalProperties": false
     },
     "outputSchema": {

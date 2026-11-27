@@ -4,19 +4,34 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-function extractIsoDate(text, fallback = '2026-01-15T09:00:00-08:00') {
-  const m = String(text || '').match(/(?:Date|Period|Deposit Date|Effective Date|Issued):\s*(\d{4}-\d{2}(?:-\d{2})?)/i);
-  if (!m) return fallback;
-  const raw = m[1].length === 7 ? `${m[1]}-15` : m[1];
-  return `${raw}T09:00:00-08:00`;
-}
+const SYNTHETIC_INGESTION_AT = '2026-11-18T09:00:00-08:00';
 
-function monthKeyInTz(iso, timeZone = 'America/Los_Angeles') {
-  const d = new Date(iso);
-  const parts = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit' }).formatToParts(d);
-  const y = parts.find(p => p.type === 'year').value;
-  const m = parts.find(p => p.type === 'month').value;
-  return `${y}-${m}`;
+function parseRepresentedDate(text) {
+  const str = String(text || '');
+  const dayMatch = str.match(/(?:Date|Period|Deposit Date|Effective Date|Issued):\s*(\d{4}-\d{2}-\d{2})\b/i);
+  if (dayMatch) {
+    return {
+      value: dayMatch[1],
+      precision: 'day',
+      provenance: 'extracted_from_text',
+      month_key: dayMatch[1].slice(0, 7)
+    };
+  }
+  const monthMatch = str.match(/(?:Date|Period|Deposit Date|Effective Date|Issued):\s*(\d{4}-\d{2})\b/i);
+  if (monthMatch) {
+    return {
+      value: monthMatch[1],
+      precision: 'month',
+      provenance: 'extracted_from_text',
+      month_key: monthMatch[1]
+    };
+  }
+  return {
+    value: null,
+    precision: 'unresolved',
+    provenance: 'none_in_source_text',
+    month_key: null
+  };
 }
 
 function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', ownerPersonId = 'person-maya', timeZone = 'America/Los_Angeles' } = {}) {
@@ -24,19 +39,38 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
   const documents = [];
   const claims = [];
   const links = [];
-  const byMonth = {};
-  const byCategory = {};
+
+  const inWindowByMonth = {};
+  const preWindowByMonth = {};
+  const precisionCounts = { day: 0, month: 0, unresolved: 0 };
+  let inWindowCount = 0;
+  let preWindowCount = 0;
+  let unresolvedCount = 0;
 
   for (const [idx, item] of (raw.documents || []).entries()) {
     const id = item.fixture_id || `doc_${idx + 1}`;
     const text = item.content_text || '';
     const buf = Buffer.from(text, 'utf8');
     const sha256 = crypto.createHash('sha256').update(buf).digest('hex');
-    const createdAt = extractIsoDate(text);
-    const month = monthKeyInTz(createdAt, timeZone);
+    const rep = parseRepresentedDate(text);
 
-    byMonth[month] = (byMonth[month] || 0) + 1;
-    byCategory[item.category || 'other'] = (byCategory[item.category || 'other'] || 0) + 1;
+    precisionCounts[rep.precision] += 1;
+    if (rep.precision === 'unresolved') {
+      unresolvedCount += 1;
+    } else if (rep.month_key < '2025-01') {
+      preWindowCount += 1;
+      preWindowByMonth[rep.month_key] = (preWindowByMonth[rep.month_key] || 0) + 1;
+    } else if (rep.month_key <= '2026-12') {
+      inWindowCount += 1;
+      inWindowByMonth[rep.month_key] = (inWindowByMonth[rep.month_key] || 0) + 1;
+    }
+
+    // Separate represented document date from simulated ingestion timestamp.
+    // Only day-precision extracted dates map to an exact ISO timestamp; month-only
+    // and unresolved records use the explicit synthetic ingestion timestamp for
+    // Core schema fields while preserving exact represented_date + precision.
+    const ingestedAt = SYNTHETIC_INGESTION_AT;
+    const recordTimestamp = rep.precision === 'day' ? `${rep.value}T09:00:00-08:00` : ingestedAt;
 
     documents.push({
       id,
@@ -53,11 +87,18 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
         dataset_id: 'personal-records-synthetic-2025-2026',
         source_id: 'synthetic-generator',
         scenario_id: raw.scenario_id,
-        fixture_id: id
+        fixture_id: id,
+        represented_date: {
+          value: rep.value,
+          precision: rep.precision,
+          provenance: rep.provenance
+        },
+        ingested_at: ingestedAt,
+        ingestion_provenance: rep.precision === 'day' ? 'represented_day_anchor' : 'synthetic_ingestion_fallback'
       },
-      created_at: createdAt,
-      updated_at: createdAt,
-      history: [{ at: createdAt, action: 'seeded_from_corpus' }],
+      created_at: recordTimestamp,
+      updated_at: recordTimestamp,
+      history: [{ at: recordTimestamp, action: 'seeded_from_corpus' }],
       versions: [
         {
           version_number: 1,
@@ -70,7 +111,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
           extraction_source: 'UTF8_TEXT',
           raw_text: text,
           extracted_fields: item.expected_fields || {},
-          created_at: createdAt
+          created_at: recordTimestamp
         }
       ]
     });
@@ -88,7 +129,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
           cited_text: span.text,
           claim_text: `${span.label}: ${span.text}`,
           verification_state: 'INFERRED',
-          created_at: createdAt
+          created_at: recordTimestamp
         });
       }
     }
@@ -103,10 +144,12 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
         target_id: lnk.target_id,
         relationship_type: lnk.relationship_type,
         metadata: lnk.metadata || {},
-        created_at: '2026-11-18T09:00:00-08:00'
+        created_at: SYNTHETIC_INGESTION_AT
       });
     }
   }
+
+  const sortMap = obj => Object.fromEntries(Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)));
 
   return {
     data: {
@@ -129,8 +172,14 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
       documents: documents.length,
       claims: claims.length,
       links: links.length,
-      by_category: byCategory,
-      by_month: Object.fromEntries(Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b)))
+      date_coverage: {
+        in_window_2025_2026: inWindowCount,
+        pre_window_before_2025: preWindowCount,
+        unresolved_dates: unresolvedCount,
+        precision: precisionCounts
+      },
+      in_window_by_month: sortMap(inWindowByMonth),
+      pre_window_by_month: sortMap(preWindowByMonth)
     }
   };
 }

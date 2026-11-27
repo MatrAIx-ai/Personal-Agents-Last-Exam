@@ -16,50 +16,53 @@
 Build a personal document management and intelligence environment where users and agents store, organize, search, and manage important personal records with verifiable evidence attribution.
 
 Core workflows include:
-1. **Document intake & import:** Upload digital documents directly or import them from connected apps (`Mail`, `Files`). Supports PDFs, text, and common image formats in v1.
-2. **Organization & full-text search:** Categorize documents by person, organization, date, topic, and tags. Support SQLite FTS5 full-text and metadata search.
-3. **Information extraction & passage citation:** Extract structured fields (dates, amounts, counterparty names, policy numbers, terms) alongside stable passage anchors (line/character offset spans). Digital PDFs and text are extracted via lightweight local parsers (`pypdf` / `pdf-parse`), paired with deterministic pre-extracted fallback text in fixtures to eliminate heavy, nondeterministic runtime OCR dependencies.
-4. **Arbitrary document relationships:** Model relationships as an open, directed graph. Agents and users can connect any two documents with custom, configurable relationship strings (e.g., `supersedes`, `tax_supporting_document`, `receipt_for`, `amends`, `parent_contract`), directly supporting multi-document tasks like tax packets and evidentiary bundles.
-5. **Change & expiry tracking:** Track document validity and renewal dates evaluated strictly against virtual time (`ctx.virtual_now`). Identify material discrepancies across linked records (e.g., net pay differences across successive payslips).
-6. **Evidence tracking, verification & agent proposals:** Allow agents to cite exact document passages to support factual claims with explicit provenance (`INFERRED` vs. `USER_CONFIRMED`). Agents can draft proposed metadata, relationship links, or status updates, but high-consequence mutations (modifying confirmed records or deleting files) require explicit user approval via the Web UI.
+1. **Document intake & ingestion:** Upload digital documents directly (`personal-records.upload_document`) or ingest caller-supplied payloads (`personal-records.import_from_source`). Supports PDFs, text, and common image formats in v1. *(Live cross-App reads from `Mail` / `Files` are deferred from the Node 18 v1 package; see §3.)*
+2. **Organization & search:** Categorize documents by category, tags, and verification state. The Node 18 PALE package (`plugin.cjs`) provides deterministic token/metadata search over Core JSON state; the standalone Node 22.5+ engine (`src/index.cjs`) additionally provides SQLite FTS5 indexing.
+3. **Information extraction & passage citation:** Extract structured fields (dates, amounts, policy numbers) alongside stable passage anchors (character offset spans). Digital PDFs and text are extracted deterministically without heavy runtime OCR dependencies.
+4. **Arbitrary document relationships:** Model relationships as an open, directed graph (`supersedes`, `tax_supporting_document`, `receipt_for`, `amends`, `parent_contract`).
+5. **Change & expiry tracking:** Track document validity and renewal dates evaluated strictly against `ctx.virtual_now`, and flag material numerical discrepancies across linked records.
+6. **Evidence tracking, verification & trusted decisions:** Allow agents to cite exact document passages (`INFERRED` vs. `USER_CONFIRMED`) and draft proposals (`personal-records.propose_update`) for `document_metadata` or `claim` targets. Independent user decisions in v1 are applied strictly via the trusted Infra event `env.apply_event` (`personal-records.confirm_decision`), while `personal-records.confirm_update` is blocked in `scenario` (Agent-only) policy and exposed only in `sandbox` preview.
 
 The environment evaluates personal agents on retrieval precision, multi-document temporal reasoning, source attribution, uncertainty handling, and adherence to user confirmation boundaries.
 
 ## 3. Potential app connections
 
-### Connected workflows using public contracts
-All source app connections pin Mail/Calendar v1.3.0 and Files/Contacts v1.0.0 at `main 61b637164e4abddf81536bb48935cdb688a69ff1`. Infrastructure provides authorized caller bindings; entity extraction and matching remain internal to Personal Records.
+### Connected workflows (v1 scope vs. deferred)
+The Node 18 PALE v1 package (`app.json`) declares `dependencies: []` and `real_delivery: false`. Simulated peer-app tests in the standalone Node 22.5+ engine pin `Mail`/`Calendar` v1.3.0 and `Files`/`Contacts` v1.0.0 contracts, while live cross-App transport in the PALE runtime is **deferred** in v1:
 
-- **Internal personal apps (required):**
-  - **Mail (Optional package dependency):** Records imports attachments via `mail.get({ id })` and `mail.attachment.get({ id, asset_id })`. Records stores original bytes, MIME type, and SHA-256 hash. Missing or denied messages return `SOURCE_UNAVAILABLE`; Mail's business state remains unchanged.
-  - **Files (Optional package dependency):** Records ingests files via `files.read({ id, number? })` (where `number` is the optional file revision number). Records captures bytes, assigned `version_id`, and hash. Absent files return `SOURCE_NOT_FOUND`; Files state remains untouched.
-  - **Calendar (Optional package dependency):** Records reads contract milestones and tax dates via `calendar.list({ start?, end?, include_cancelled? })` to correlate expiry alerts. Read failures degrade gracefully without blocking ingestion.
-  - **Contacts (Optional package dependency):** Records correlates issuer names to stable entities via `contacts.list({ query?, include_inactive? })`. If contacts are absent or match is ambiguous, extracted counterparty strings are retained as raw text.
-  - **Outbound Mail Alerts (Receiver integration):** Outbound alerts are routed via Messaging's trusted `env.apply_event` targeting Mail using `urn:pale:email-message:2` with payload `urn:pale:email-payload:1`. Not an Agent-callable tool.
-
-- **Other apps and websites (required):**
-  - **Cloud storage, investment platforms, & e-sign platforms:** Simulated locally via static, deterministic synthetic intake fixtures and controlled local folder adapters. No live third-party network access.
+- **Mail / Files import (`personal-records.import_from_source`):**
+  - **Delivered in v1:** Accepts a caller-supplied `source_payload` (raw bytes, MIME type, filename, and source reference) and ingests it with SHA-256 deduplication.
+  - **Deferred in v1:** Live authorized retrieval from `Mail` (`mail.get`, `mail.attachment.get`) and `Files` (`files.read`) is simulated only in standalone adapter tests (`src/adapters.cjs` + `fixtures/peer-apps.json`) and deferred from the Node 18 PALE package until sibling `--with` integration is enabled.
+- **Calendar (`calendar.list`) & Contacts (`contacts.list`):**
+  - **Deferred in v1:** Simulated only in standalone Node 22.5+ adapter tests (`src/adapters.cjs`); not called by the Node 18 PALE package.
+- **Outbound Mail Alerts (`urn:pale:email-message:2`):**
+  - **Deferred in v1:** `contribution.json` declares `messaging.publishes: []` and `outbox_atomic_with_business_state: "unsupported"`. Expiry and discrepancy alerts persist CloudEvent-shaped notification records locally in `data.notifications` without live router delivery.
+- **Other apps and websites:**
+  - Simulated locally via static synthetic intake fixtures; no live third-party network access.
 
 ### Integration details
 
-#### Operations and access (required)
+#### Operations and access (v1 PALE contract)
 
-The environment enforces caller authorization at the handler level:
+The PALE Core runtime enforces caller authorization and optimistic concurrency (`expected_version`, `request_id`):
 
 | Operation | Mode | Caller | Access | Description / Outcome |
 | :--- | :--- | :--- | :--- | :--- |
-| `records.upload_document` | MCP / Web UI | Agent / User | Write | Ingests bytes, creates intake record. Returns `{ document_id, version: 1, hash }`. Duplicate hash returns existing ID (`DUPLICATE_DOCUMENT`). |
-| `records.import_from_source` | MCP / Web UI | Agent / User | Write | Calls `mail.attachment.get` or `files.read`. Ingests bytes without mutating source. Missing source returns `SOURCE_UNAVAILABLE`. |
-| `records.create_version` | MCP / Web UI | Agent / User | Write | Replaces or appends a document version. Success yields `version_number + 1`; invalid parent returns `NOT_FOUND`. |
-| `records.get_document` | MCP / Web UI | Agent / User | Read | Retrieves document metadata, versions, and extracted text/passages. Non-mutating. |
-| `records.search` | MCP / Web UI | Agent / User | Read | SQLite FTS5 full-text and metadata search. Non-mutating. |
-| `records.link_documents` | MCP / Web UI | Agent / User | Write | Creates directed link (`source_id`, `target_id`, `relationship_type`). Nonexistent target yields `LINK_TARGET_NOT_FOUND` (no state change). |
-| `records.create_evidence_claim` | MCP / Web UI | Agent / User | Write | Links a factual assertion to stable passage spans. Invalid span yields `INVALID_PASSAGE_REFERENCE`. |
-| `records.propose_update` | MCP | Agent | Write | Submits pending mutation. Returns `{ proposal_id, status: "PENDING" }`. Leaves base document unmutated. |
-| `records.confirm_update` | Trusted Session | User only | Write | Approves/rejects `proposal_id`. Caller must be authenticated user session token; Agent calls return `PERMISSION_DENIED`. |
-| `platform.seed_fixtures` | Platform API | Platform | Write | Loads initial scenario documents, extraction revisions, and ground truth. Blocked from Agent. |
-| `platform.reset` | Platform API | Platform | Write | Resets database, blobs, and FTS indexes to baseline. Blocked from Agent. |
-| `platform.inject_event` | Platform API | Platform | Write | Injects a timestamped document intake or expiry check. Blocked from Agent. |
+| `personal-records.upload_document` | MCP / Web Host | Agent / Preview | Write | Ingests base64 bytes, creates v1. Duplicate SHA-256 returns `duplicate_document`. |
+| `personal-records.import_from_source` | MCP / Web Host | Agent / Preview | Write | Ingests caller-supplied `source_payload` bytes. Missing payload returns `source_unavailable`. *(Live Mail/Files retrieval deferred.)* |
+| `personal-records.create_version` | MCP / Web Host | Agent / Preview | Write | Appends `version_number + 1`; stale parent returns `stale_version`, missing doc returns `not_found`. |
+| `personal-records.get_document` | MCP / Web Host | Agent / Preview | Read | Retrieves metadata, versions, extracted text, claims, and links. Non-mutating. |
+| `personal-records.search` | MCP / Web Host | Agent / Preview | Read | Searches titles, tags, categories, and extracted text. Non-mutating. |
+| `personal-records.list_proposals` | MCP / Web Host | Agent / Preview | Read | Lists proposals and their statuses. Non-mutating. |
+| `personal-records.list_links` | MCP / Web Host | Agent / Preview | Read | Lists directed document links. Non-mutating. |
+| `personal-records.link_documents` | MCP / Web Host | Agent / Preview | Write | Creates directed link (`source_id`, `target_id`, `relationship_type`). Missing target returns `link_target_not_found`. |
+| `personal-records.create_evidence_claim` | MCP / Web Host | Agent / Preview | Write | Binds assertion to exact `[start_offset, end_offset]` span. Invalid span returns `invalid_passage_reference`. |
+| `personal-records.propose_update` | MCP / Web Host | Agent / Preview | Write | Submits pending mutation for `document_metadata` or `claim` bound to `expected_target_version` and SHA-256 `proposal_hash`. Leaves target unmutated. |
+| `personal-records.confirm_update` | Sandbox Preview | Preview only | Write | **Denied** (`permission_denied`) in `scenario` (Agent-only) policy; enabled in `sandbox` for local Web Host preview only. |
+| `personal-records.check_expiries` | MCP / Web Host | Agent / Preview | Write | Evaluates `valid_until <= ctx.virtual_now + threshold_days` with 7-day suppression; stores local `EXPIRY_ALERT` in `data.notifications`. |
+| `personal-records.check_discrepancies` | MCP / Web Host | Agent / Preview | Write | Compares numerical extracted fields between two documents and stores local `DISCREPANCY_FLAG` if unconfirmed. |
+| `env.apply_event` (`personal-records.confirm_decision`) | Infra MCP | Infra / Harness | Admin | **Independent trusted decision path in v1.** Requires `proposal_id`, `expected_proposal_hash`, `expected_target_version`, and `decision`. |
+| `env.load_seed` / `env.reset` / `env.snapshot` | Infra MCP | Infra only | Admin | Standard PALE Core lifecycle operations; blocked from Agent MCP (`permission_denied`). |
 
 - **Trusted Confirmation Path & UI Boundaries:**
   - **Agent-only boundary (`scenario` policy):** `personal-records.propose_update` is permitted and creates a `PENDING` proposal with a deterministic `proposal_hash` (SHA-256 of `{ target_type, target_id, expected_version, proposed_changes }`). Calls to `personal-records.confirm_update` by an Agent in `scenario` policy are rejected with `permission_denied`.
@@ -113,8 +116,8 @@ The environment enforces caller authorization at the handler level:
     }
   }
   ```
-- **Outbound Notification Wire Format:**
-  Outbound alerts dispatched to Mail adhere to CloudEvent `urn:pale:email-message:2` with payload schema `urn:pale:email-payload:1`:
+- **Outbound Notification Wire Format (Local Record in v1; Live Delivery Deferred):**
+  Expiry and discrepancy alerts generate CloudEvent-shaped payloads (`type: "urn:pale:email-message:2"`) persisted locally in `data.notifications`. Live Messaging router dispatch to `Mail` is **deferred** in v1 (`real_delivery: false`, `messaging.publishes: []`).
   ```json
   {
     "specversion": "1.0",
@@ -151,15 +154,20 @@ The environment enforces caller authorization at the handler level:
 ### Environment Dataset Plan (#260)
 
 - **Deliverable Versioned 2025–2026 History:**
-  - `apps/personal-records/fixtures/corpus.json`: 165 deterministically generated synthetic documents spanning `2025-01-01` through `2026-12-31` across 8 personal administration domains (employment payslips, tax W-2/1040 filings, insurance policies, property leases, utility bills, healthcare EOBs, banking statements, legal notices).
+  - `apps/personal-records/fixtures/corpus.json`: 165 deterministically generated synthetic documents across 8 personal administration domains (employment payslips, tax W-2/1040 filings, insurance policies, property leases, utility bills, healthcare EOBs, banking statements, legal notices).
   - `apps/personal-records/fixtures/truth.json`: 20-document scenario slice ($\le 1\text{ MiB}$, $\le 64$ assets) with verified passage spans, directed link graphs, and discrepancy ground truth.
   - `apps/personal-records/fixtures/minimal.json`: 3-document baseline seed (`doc_payslip_nov2026`, `doc_payslip_dec2026`, `doc_auto_policy_2026`) with versioned history, `supersedes` link, passage claim, pending proposal, and `valid_until` expiry date.
-- **Dates & Provenance Reporting:**
-  - All temporal fields (`created_at`, `updated_at`, `valid_until`, `dispatched_at`, `history[].at`) use ISO 8601 timestamps evaluated strictly against `ctx.virtual_now`.
-  - Provenance is tracked per document and per version (`source_type`, `source_reference`, `sha256`, `extraction_revision`, `extraction_source`) and declared in `apps/personal-records/contribution/dataset.json` (`dataset_id: "personal-records-synthetic-2025-2026"`, `source_id: "synthetic-generator"`, `license: "CC-BY-4.0"`, deterministic `seed: 42`).
+- **Represented Document Dates vs. Simulated Ingestion (Provenance & Precision):**
+  - `scripts/export-pale-seed.cjs` separates **represented document dates** (`source_reference.represented_date = { value, precision, provenance }`) from **simulated ingestion timestamps** (`source_reference.ingested_at = "2026-11-18T09:00:00-08:00"`, `source_reference.ingestion_provenance`).
+  - Across the 165-document corpus in `America/Los_Angeles`: **124** documents have in-window `2025-01`–`2026-12` represented dates (spanning all 24 months), **16** are pre-window (`2024-01`, `2024-03`), and **25** have `precision: "unresolved"` (`value: null`, `provenance: "none_in_source_text"`).
+  - Month-only labels (`YYYY-MM`) are preserved at `precision: "month"` without fabricating a day-of-month, and unresolved dates retain `value: null` rather than pretending to be `2026-01-15`.
+  - **Which dated fields Tasks may use for strict pre-session history:**
+    - Use `created_at` / `versions[].created_at` / `history[].at` for **ingestion/version ordering** relative to `ctx.virtual_now`.
+    - Use `source_reference.represented_date.value` (only where `precision` is `"day"` or `"month"`) for **document-content dates**. Do not use `unresolved` records for strict pre-session document-date assertions.
+    - Use `valid_until` for **expiry/renewal evaluation** against `ctx.virtual_now`.
 - **Actual Load & Query Verification:**
   - `fixtures/minimal.json` provides the 3-document baseline smoke seed for `app:verify`.
-  - `node apps/personal-records/scripts/export-pale-seed.cjs --verify-load` converts the full 165-document `fixtures/corpus.json` (or 20-document `fixtures/truth.json` via `--truth`) into a `schemas/seed.schema.json`-valid bundle, loads it into PALE Core via `env.load_seed` (`loaded_objects: 165`), queries it via `personal-records.search`, and prints a reproducible monthly/category breakdown in `America/Los_Angeles`.
+  - `node apps/personal-records/scripts/export-pale-seed.cjs --verify-load` converts `fixtures/corpus.json` (or `fixtures/truth.json` via `--truth`) into a `schemas/seed.schema.json`-valid bundle, loads it into PALE Core via `env.load_seed` (`loaded_objects: 165`), queries it via `personal-records.search` (`query_payslip_total: 24`), and reports in-window, pre-window, and unresolved date counts separately in `America/Los_Angeles`.
 
 ## 4. Construction plan and effort
 
@@ -167,11 +175,11 @@ The environment enforces caller authorization at the handler level:
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | ---: |
-| Storage & Core MCP Backend | SQLite schema, FTS5 index, blob store, and MCP endpoints mapped to pinned tools; trusted user session gating. | MCP server passing local CRUD, FTS5 search, idempotency, and version conflict tests. | 5–7 |
-| Web UI (Web Host) | 6–8 responsive business views on `runtime/web`; distinct user confirmation modal. | Verified UI rendering, passage highlighting, and confirmation flows across major browsers via Playwright. | 4–6 |
-| App Integrations (Mail, Files, Contacts, Calendar) | Read adapters mapped to `mail.get`, `files.read`, `contacts.list`, `calendar.list`; CloudEvent outbound notification dispatch. | Integration tests verifying source byte/hash preservation and zero mutation on source apps. | 3–4 |
-| Synthetic Dataset & Ground Truth | Synthesize 150–250 realistic documents partitioned into $\le 1\text{ MiB}$ scenario slices with dual fallback/grading `truth.json`. | Coherent persona histories. Check duplicate detection, extraction consistency, and passage alignment. | 4–6 |
-| Platform Lifecycle & Reset Harness | `platform.seed`, `platform.reset`, event injection handlers, and Core replay compliance. | Reproducible reset tests verifying clean table/FTS restoration, baseline re-seeding, and deterministic state. | 3–5 |
+| Node 18 PALE Package & Core MCP | `plugin.cjs`, `service.cjs`, `tools.json`, `schemas/`, `env.apply_event` (`confirm_decision`) with hash/version binding. | `npm run app:verify -- --app apps/personal-records` + `tests/pale-runtime.test.cjs` (Agent/Infra MCP boundary). | 5–7 |
+| Standalone SQLite Engine (Node 22.5+) | `src/index.cjs` SQLite FTS5, filesystem `BlobStore`, `pdf-parse`, and simulated peer-app adapter tests. | `node --test tests/*.test.cjs` passing CRUD, FTS5 search, idempotency, and task trajectories. | 3–4 |
+| Web UI (Web Host & Reviewer Renderer) | `contribution/gui.json` (`reviewer renderer`), `gui/host.html` + `gui/src/app.js` on `runtime/web` (`sandbox` preview), standalone `gui/index.html`. | `runtime/web/host.test.cjs` boundary checks + interactive Web Host preview. | 4–6 |
+| Synthetic Dataset & Ground Truth | 165-doc `corpus.json`, 20-doc `truth.json`, and `scripts/export-pale-seed.cjs` Core seed converter. | `export-pale-seed.cjs --verify-load` loading 165 docs into Core with separated date provenance. | 4–6 |
+| Cross-App & Live Outbound Mail (Deferred in v1) | Live `Mail`/`Files`/`Calendar`/`Contacts` reads and Messaging `urn:pale:email-message:2` router delivery. | Deferred beyond v1 (`dependencies: []`, `real_delivery: false`); simulated in standalone tests only. | — |
 
 ### Milestones, owners, and dependencies (required)
 

@@ -337,19 +337,21 @@ function handleTool(ctx, data, name, args) {
     }
 
     case 'personal-records.propose_update': {
-      if (args.target_type === 'document_metadata' || args.target_type === 'document_version') {
+      if (args.target_type === 'document_metadata') {
         const doc = data.documents.find(d => d.id === args.target_id);
         if (!doc) fail('not_found', `Target document ${args.target_id} not found`);
       } else if (args.target_type === 'claim') {
         const claim = data.claims.find(c => c.id === args.target_id);
         if (!claim) fail('not_found', `Target claim ${args.target_id} not found`);
-      } else if (args.target_type === 'link') {
-        const link = data.links.find(l => l.id === args.target_id);
-        if (!link) fail('not_found', `Target link ${args.target_id} not found`);
+      } else {
+        fail('invalid_arguments', `Unsupported target_type in v1: ${args.target_type}`);
       }
 
       const proposalId = nextId('prop', data.proposals);
-      const expectedTargetVer = args.expected_target_version ?? null;
+      const expectedTargetVer = args.expected_target_version;
+      if (typeof expectedTargetVer !== 'number' || expectedTargetVer < 1) {
+        fail('invalid_arguments', 'expected_target_version is required to bind proposal to target revision');
+      }
       const proposalHash = computeProposalHash({
         target_type: args.target_type,
         target_id: args.target_id,
@@ -395,6 +397,29 @@ function handleTool(ctx, data, name, args) {
       if (args.expected_target_version !== undefined && proposal.expected_version !== null && args.expected_target_version !== proposal.expected_version) {
         fail('stale_proposal_version', `Target version mismatch for ${args.proposal_id}`);
       }
+      if (proposal.expected_version === null) {
+        fail('unbound_proposal', `Proposal ${args.proposal_id} is missing target version binding`);
+      }
+
+      // Validate target & version BEFORE any mutation (including REJECT/CANCEL or APPROVE)
+      let targetDoc = null;
+      let targetClaim = null;
+      if (proposal.target_type === 'document_metadata') {
+        targetDoc = data.documents.find(d => d.id === proposal.target_id);
+        if (!targetDoc) fail('not_found', `Target document ${proposal.target_id} not found`);
+        if (proposal.expected_version !== targetDoc.current_version_number) {
+          fail('stale_proposal_version', `Document version changed while proposal was pending`);
+        }
+      } else if (proposal.target_type === 'claim') {
+        targetClaim = data.claims.find(c => c.id === proposal.target_id);
+        if (!targetClaim) fail('not_found', `Target claim ${proposal.target_id} not found`);
+        targetDoc = data.documents.find(d => d.id === targetClaim.document_id);
+        if (!targetDoc || proposal.expected_version !== targetDoc.current_version_number) {
+          fail('stale_proposal_version', `Parent document version changed while claim proposal was pending`);
+        }
+      } else {
+        fail('invalid_state', `Unsupported target_type in v1: ${proposal.target_type}`);
+      }
 
       if (args.decision === 'REJECT' || args.decision === 'CANCEL') {
         const finalStatus = args.decision === 'REJECT' ? 'REJECTED' : 'CANCELLED';
@@ -412,25 +437,18 @@ function handleTool(ctx, data, name, args) {
 
       // APPROVE
       if (proposal.target_type === 'document_metadata') {
-        const doc = data.documents.find(d => d.id === proposal.target_id);
-        if (!doc) fail('not_found', `Target document ${proposal.target_id} not found`);
-        if (proposal.expected_version !== null && proposal.expected_version !== doc.current_version_number) {
-          fail('stale_proposal_version', `Document version changed while proposal was pending`);
-        }
         const changes = proposal.proposed_changes || {};
-        if (changes.title !== undefined) doc.title = changes.title;
-        if (changes.category !== undefined) doc.category = changes.category;
-        if (changes.tags !== undefined) doc.tags = changes.tags;
-        if (changes.valid_until !== undefined) doc.valid_until = changes.valid_until;
-        doc.verification_state = changes.verification_state || 'USER_CONFIRMED';
-        doc.updated_at = now;
-        doc.history.push({ at: now, action: `confirmed_${proposal.id}` });
+        if (changes.title !== undefined) targetDoc.title = changes.title;
+        if (changes.category !== undefined) targetDoc.category = changes.category;
+        if (changes.tags !== undefined) targetDoc.tags = changes.tags;
+        if (changes.valid_until !== undefined) targetDoc.valid_until = changes.valid_until;
+        targetDoc.verification_state = changes.verification_state || 'USER_CONFIRMED';
+        targetDoc.updated_at = now;
+        targetDoc.history.push({ at: now, action: `confirmed_${proposal.id}` });
       } else if (proposal.target_type === 'claim') {
-        const claim = data.claims.find(c => c.id === proposal.target_id);
-        if (!claim) fail('not_found', `Target claim ${proposal.target_id} not found`);
         const changes = proposal.proposed_changes || {};
-        if (changes.claim_text !== undefined) claim.claim_text = changes.claim_text;
-        claim.verification_state = changes.verification_state || 'USER_CONFIRMED';
+        if (changes.claim_text !== undefined) targetClaim.claim_text = changes.claim_text;
+        targetClaim.verification_state = changes.verification_state || 'USER_CONFIRMED';
       }
 
       proposal.status = 'USER_CONFIRMED';
