@@ -8,11 +8,11 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**223 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
+**224 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
-| Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
+| Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 9 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 8 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 2 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 7 |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**117 proposals.**
+**118 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-27 20:20:40 | [#289](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/289) · Envoy Rooms, using the public Rooms overview and employee booking guide as interaction references for inspecting room…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/289/files) | Work &amp; business | A resettable reservation portal for one employee at one fictional office. The agent can inspect room capacity, accessibility, built-in facilities and current availability; hold one room together with optional portable equipment; confirm a… | Design review | Review requested<br>@skyve2012 |  | [Billy1900](https://github.com/Billy1900) |  |
 | 2026-11-27 00:13:51 | [#278](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/278) · UnitHarbor, an independently branded synthetic storage customer website/app based on Public Storage's U.S. customer…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/278/files) | Home &amp; utilities | A resettable storage customer portal with Public Storage-like entry points: Find Storage → Reserve → Complete eRental → My Account / Storage Units / Payments → Move Out. A personal agent can select a suitable unit, complete online rental… | Design review | Review requested<br>@Jasonya |  | [Azen233](https://github.com/Azen233) |  |
 | 2026-11-27 00:12:04 | [#277](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/277) · ShipDesk, an independently branded synthetic sender portal based on the customer workflows of USPS Click-N-Ship.…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/277/files) | Shopping &amp; groceries | A resettable sender-facing browser App and MCP business interface for domestic parcel mailing. An agent prepares a shipment, compares services, buys and prints the right label, arranges pickup, and reconciles unused-postage refunds. Buying… | Design review | Commented |  | [Azen233](https://github.com/Azen233) |  |
 | 2026-11-26 20:46:59 | [#274](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/274) · Mendline, an original textile-repair customer portal inspired by Patagonia's public repair intake and Trace Creek's…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/274/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities | A complete customer-side repair workflow for clothing and household textiles, where “the same item” is not interchangeable with “a replacement that looks the same.” The environment tracks physical item/part identity, successive estimates… | Design review | Commented |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
