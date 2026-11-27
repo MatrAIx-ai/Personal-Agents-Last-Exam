@@ -1,0 +1,356 @@
+{
+  "package_sha256": "7518e3467fc950bcadf5f046c1b2dc96ace892e864e56c23ebbdea48ac34ba28",
+  "runtime_version": "1.6.0",
+  "node": "v22.16.0",
+  "at": "2026-11-27T22:31:02.133Z",
+  "checks": [
+    "Bundle held",
+    "Bundle confirmed",
+    "Outage commits",
+    "Current booking is disrupted",
+    "Entire bundle released",
+    "Replay returns original confirmation receipt",
+    "Replay marked duplicate",
+    "Stored receipt unchanged",
+    "Replay does not mutate data",
+    "Replay does not change version",
+    "Fresh read still disrupted",
+    "Unavailable replacement rejected",
+    "Failed replacement preserves disrupted state and allocation",
+    "Valid replacement commits",
+    "Replacement links old booking",
+    "Old booking superseded",
+    "Reload retains exactly one active linked booking",
+    "Reload retains forward link",
+    "No active abandoned hold",
+    "Outage replay is deduplicated",
+    "Outage replay does not duplicate notices",
+    "Stale write rejected",
+    "Request ID cannot be repurposed",
+    "Agent cannot inject outage",
+    "One competing writer commits",
+    "Other competing writer receives stale version",
+    "Replacement into competing hold fails",
+    "Confirmed original preserved on failure",
+    "Virtual clock advances",
+    "Expired hold ceases blocking without event",
+    "Expired confirmation rejected",
+    "Other run remains at its baseline",
+    "Reset commits",
+    "Reset restores baseline",
+    "Reset clears request receipts"
+  ],
+  "trace": [
+    {
+      "name": "holds.create",
+      "args": {
+        "room_id": "room-cedar",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "title": "Eight-person planning",
+        "start_at": "2026-12-08T22:00:00Z",
+        "end_at": "2026-12-08T23:00:00Z",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "request_id": "write-1"
+      },
+      "result": {
+        "item": {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Eight-person planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            }
+          ],
+          "status": "active",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "name": "holds.confirm",
+      "args": {
+        "id": "hold-1",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "request_id": "write-2"
+      },
+      "result": {
+        "item": {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Eight-person planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": null,
+          "replacement_id": null,
+          "past": false
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      }
+    },
+    {
+      "event": {
+        "event_id": "maintenance-1",
+        "at": "2026-12-08T18:00:00Z",
+        "operation": "spacebook.resource_block",
+        "payload": {
+          "block_id": "block-1",
+          "resource_id": "room-cedar",
+          "start_at": "2026-12-08T22:00:00Z",
+          "end_at": "2026-12-09T00:00:00Z",
+          "reason": "Projector maintenance"
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "maintenance-1",
+        "trace": {
+          "run_id": "integration",
+          "app_id": "spacebook",
+          "event_id": "maintenance-1",
+          "cloud_event": null,
+          "received_at": "2026-11-27T22:31:02.246Z",
+          "virtual_received_at": "2026-12-08T17:00:00Z",
+          "applied_at": "2026-12-08T18:00:00Z",
+          "processed_at": "2026-11-27T22:31:02.247Z"
+        },
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "holds.confirm replay",
+      "result": {
+        "item": {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Eight-person planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": null,
+          "replacement_id": null,
+          "past": false
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 2,
+          "revision": 2
+        },
+        "duplicate": true
+      },
+      "current": {
+        "id": "booking-1",
+        "owner_person_id": "person-maya",
+        "room_id": "room-cedar",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Eight-person planning",
+        "created_at": "2026-12-08T17:00:00.000Z",
+        "updated_at": "2026-12-08T18:00:00.000Z",
+        "history": [
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "confirmed",
+            "reason": ""
+          },
+          {
+            "at": "2026-12-08T18:00:00.000Z",
+            "action": "disrupted",
+            "reason": "Projector maintenance"
+          }
+        ],
+        "status": "disrupted",
+        "previous_id": null,
+        "replacement_id": null,
+        "past": false
+      }
+    },
+    {
+      "name": "bookings.replace",
+      "args": {
+        "id": "booking-1",
+        "room_id": "room-cedar",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "title": "Eight-person planning",
+        "start_at": "2026-12-08T22:00:00Z",
+        "end_at": "2026-12-08T23:00:00Z",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "request_id": "write-3"
+      },
+      "result": {
+        "status": "resource_unavailable",
+        "message": "A selected resource is no longer available.",
+        "applied": false,
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "bookings.replace",
+      "args": {
+        "room_id": "room-willow",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "title": "Eight-person planning",
+        "start_at": "2026-12-08T22:00:00Z",
+        "end_at": "2026-12-08T23:00:00Z",
+        "id": "booking-1",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "request_id": "write-4"
+      },
+      "result": {
+        "item": {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Eight-person planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": "booking-1",
+          "replacement_id": null,
+          "past": false
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 2,
+          "revision": 4
+        }
+      }
+    },
+    {
+      "name": "bookings.replace",
+      "args": {
+        "room_id": "room-maple",
+        "equipment_ids": [],
+        "title": "Eight-person planning",
+        "start_at": "2026-12-08T23:00:00Z",
+        "end_at": "2026-12-09T00:00:00Z",
+        "id": "booking-2",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 5
+        },
+        "request_id": "write-5"
+      },
+      "result": {
+        "status": "resource_unavailable",
+        "message": "Your active hold(s) hold-2 overlap this bundle. Replacement allocates resources directly and does not consume a hold. Release your overlapping hold before retrying replacement; read the current version after releasing.",
+        "applied": false,
+        "version": {
+          "epoch": 2,
+          "revision": 5
+        }
+      }
+    },
+    {
+      "name": "holds.confirm",
+      "args": {
+        "id": "hold-2",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 6
+        },
+        "request_id": "write-6"
+      },
+      "result": {
+        "status": "invalid_state",
+        "message": "Hold is no longer active.",
+        "applied": false,
+        "version": {
+          "epoch": 2,
+          "revision": 6
+        }
+      }
+    }
+  ],
+  "passed": true
+}

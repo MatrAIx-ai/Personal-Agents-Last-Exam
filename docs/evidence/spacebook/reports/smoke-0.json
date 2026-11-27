@@ -1,0 +1,914 @@
+{
+  "model": "gpt-4.1-mini-2025-04-14",
+  "scenario": "ordinary",
+  "run_id": "smoke-0",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a personal assistant operating a synthetic workplace reservation application. Act only through the provided business tools. Read current state before deciding. Writes require the exact version returned by a read and a unique retry-stable request_id. These are concurrency metadata, not approval gates. The user authorizes the requested booking action. Finish with a concise explanation."
+    },
+    {
+      "role": "user",
+      "content": "I am Maya. Book a room for eight people on December 8, 2026, from 2 pm to 3 pm Los Angeles time. We need step-free access and video conferencing, built in or using a compatible camera. Confirm one suitable booking, release any unused holds, and leave other bookings alone."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_1RIlIeZG6ResKq3YBuMwqkN4",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_0",
+            "arguments": "{}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_1RIlIeZG6ResKq3YBuMwqkN4",
+      "content": "{\"office\":{\"name\":\"Harbor Office\",\"timezone\":\"America/Los_Angeles\",\"open_minute\":480,\"close_minute\":1080,\"weekdays\":[1,2,3,4,5]},\"virtual_now\":\"2026-12-08T17:00:00Z\",\"owner_person_id\":\"person-maya\",\"holds\":[],\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":0}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_wN0jLvn8loIKencLpIKD9NsC",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_1",
+            "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"min_capacity\":8,\"step_free\":true,\"video\":true}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_wN0jLvn8loIKencLpIKD9NsC",
+      "content": "{\"filter_scope\":\"Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.\",\"items\":[{\"id\":\"room-cedar\",\"kind\":\"room\",\"name\":\"Cedar\",\"capacity\":8,\"step_free\":true,\"video\":true,\"compatible_rooms\":[],\"busy\":[],\"available\":true}],\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":0}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_Gj2iFjePJ3uaPy5HZ2JmZVyr",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_2",
+            "arguments": "{\"id\":\"room-cedar\",\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_Gj2iFjePJ3uaPy5HZ2JmZVyr",
+      "content": "{\"item\":{\"id\":\"room-cedar\",\"kind\":\"room\",\"name\":\"Cedar\",\"capacity\":8,\"step_free\":true,\"video\":true,\"compatible_rooms\":[],\"busy\":[],\"available\":true},\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":0}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_KFPf5U3xI6625MLDnZfHz9Gt",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_5",
+            "arguments": "{\"room_id\":\"room-cedar\",\"equipment_ids\":[],\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"title\":\"Meeting for eight with video and step-free access\",\"expected_version\":{\"epoch\":1,\"revision\":0},\"request_id\":\"maya-20261208-1400\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_KFPf5U3xI6625MLDnZfHz9Gt",
+      "content": "{\"item\":{\"id\":\"hold-1\",\"owner_person_id\":\"person-maya\",\"room_id\":\"room-cedar\",\"equipment_ids\":[],\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-08T23:00:00.000Z\",\"title\":\"Meeting for eight with video and step-free access\",\"created_at\":\"2026-12-08T17:00:00.000Z\",\"updated_at\":\"2026-12-08T17:00:00.000Z\",\"history\":[{\"at\":\"2026-12-08T17:00:00.000Z\",\"action\":\"held\",\"reason\":\"\"}],\"status\":\"active\",\"expires_at\":\"2026-12-08T17:05:00.000Z\"},\"status\":\"committed\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":1}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_LH9FmuqhTZy7xFN60SQzYHmp",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_7",
+            "arguments": "{\"id\":\"hold-1\",\"expected_version\":{\"epoch\":1,\"revision\":1},\"request_id\":\"maya-20261208-1400-confirm\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_LH9FmuqhTZy7xFN60SQzYHmp",
+      "content": "{\"item\":{\"id\":\"booking-1\",\"owner_person_id\":\"person-maya\",\"room_id\":\"room-cedar\",\"equipment_ids\":[],\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-08T23:00:00.000Z\",\"title\":\"Meeting for eight with video and step-free access\",\"created_at\":\"2026-12-08T17:00:00.000Z\",\"updated_at\":\"2026-12-08T17:00:00.000Z\",\"history\":[{\"at\":\"2026-12-08T17:00:00.000Z\",\"action\":\"confirmed\",\"reason\":\"\"}],\"status\":\"confirmed\",\"previous_id\":null,\"replacement_id\":null,\"past\":false},\"status\":\"committed\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":2}}"
+    },
+    {
+      "role": "assistant",
+      "content": "I have booked and confirmed the room \"Cedar\" for eight people on December 8, 2026, from 2 pm to 3 pm Los Angeles time. It has step-free access and built-in video conferencing. No other holds were active to release. Your booking is confirmed.",
+      "refusal": null,
+      "annotations": []
+    }
+  ],
+  "model_responses": [
+    {
+      "id": "chatcmpl-Eoyk7pq1GDwolOQP9kfAfF9AgCOpl",
+      "object": "chat.completion",
+      "created": 1795818603,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_1RIlIeZG6ResKq3YBuMwqkN4",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_0",
+                  "arguments": "{}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2016,
+        "completion_tokens": 13,
+        "total_tokens": 2029,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-Eoyk8HO6NPdKdHZjJSZQ9fz7tHTmE",
+      "object": "chat.completion",
+      "created": 1795818604,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_wN0jLvn8loIKencLpIKD9NsC",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_1",
+                  "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"min_capacity\":8,\"step_free\":true,\"video\":true}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2132,
+        "completion_tokens": 67,
+        "total_tokens": 2199,
+        "prompt_tokens_details": {
+          "cached_tokens": 1792,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-Eoyk9cVld46Pq24TnUcQYFlxRSNpx",
+      "object": "chat.completion",
+      "created": 1795818605,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_Gj2iFjePJ3uaPy5HZ2JmZVyr",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_2",
+                  "arguments": "{\"id\":\"room-cedar\",\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2346,
+        "completion_tokens": 60,
+        "total_tokens": 2406,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykBjhOfr7XpafAQrBTQGHQJEIAJ",
+      "object": "chat.completion",
+      "created": 1795818607,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_KFPf5U3xI6625MLDnZfHz9Gt",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_5",
+                  "arguments": "{\"room_id\":\"room-cedar\",\"equipment_ids\":[],\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"title\":\"Meeting for eight with video and step-free access\",\"expected_version\":{\"epoch\":1,\"revision\":0},\"request_id\":\"maya-20261208-1400\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2480,
+        "completion_tokens": 100,
+        "total_tokens": 2580,
+        "prompt_tokens_details": {
+          "cached_tokens": 2176,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykDTZpgO53yCxw6K7pNV3cdsPck",
+      "object": "chat.completion",
+      "created": 1795818609,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_LH9FmuqhTZy7xFN60SQzYHmp",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_7",
+                  "arguments": "{\"id\":\"hold-1\",\"expected_version\":{\"epoch\":1,\"revision\":1},\"request_id\":\"maya-20261208-1400-confirm\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2783,
+        "completion_tokens": 43,
+        "total_tokens": 2826,
+        "prompt_tokens_details": {
+          "cached_tokens": 2432,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykE6fB8ZdFi7znVUt9nNAKHmv0q",
+      "object": "chat.completion",
+      "created": 1795818610,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "I have booked and confirmed the room \"Cedar\" for eight people on December 8, 2026, from 2 pm to 3 pm Los Angeles time. It has step-free access and built-in video conferencing. No other holds were active to release. Your booking is confirmed.",
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 3023,
+        "completion_tokens": 60,
+        "total_tokens": 3083,
+        "prompt_tokens_details": {
+          "cached_tokens": 2688,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    }
+  ],
+  "infra_events": [],
+  "tool_results": [
+    {
+      "name": "spacebook.context",
+      "args": {},
+      "response": {
+        "office": {
+          "name": "Harbor Office",
+          "timezone": "America/Los_Angeles",
+          "open_minute": 480,
+          "close_minute": 1080,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "virtual_now": "2026-12-08T17:00:00Z",
+        "owner_person_id": "person-maya",
+        "holds": [],
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.search",
+      "args": {
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00",
+        "min_capacity": 8,
+        "step_free": true,
+        "video": true
+      },
+      "response": {
+        "filter_scope": "Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.",
+        "items": [
+          {
+            "id": "room-cedar",
+            "kind": "room",
+            "name": "Cedar",
+            "capacity": 8,
+            "step_free": true,
+            "video": true,
+            "compatible_rooms": [],
+            "busy": [],
+            "available": true
+          }
+        ],
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.get",
+      "args": {
+        "id": "room-cedar",
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00"
+      },
+      "response": {
+        "item": {
+          "id": "room-cedar",
+          "kind": "room",
+          "name": "Cedar",
+          "capacity": 8,
+          "step_free": true,
+          "video": true,
+          "compatible_rooms": [],
+          "busy": [],
+          "available": true
+        },
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "name": "spacebook.holds.create",
+      "args": {
+        "room_id": "room-cedar",
+        "equipment_ids": [],
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00",
+        "title": "Meeting for eight with video and step-free access",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "request_id": "maya-20261208-1400"
+      },
+      "response": {
+        "item": {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Meeting for eight with video and step-free access",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            }
+          ],
+          "status": "active",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "name": "spacebook.holds.confirm",
+      "args": {
+        "id": "hold-1",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "request_id": "maya-20261208-1400-confirm"
+      },
+      "response": {
+        "item": {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Meeting for eight with video and step-free access",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": null,
+          "replacement_id": null,
+          "past": false
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      }
+    }
+  ],
+  "grade": {
+    "one_active": true,
+    "suitable": true,
+    "correct_time": true,
+    "no_active_holds": true,
+    "replacement": true
+  },
+  "completed": true,
+  "final_business_state": {
+    "account_id": "spacebook-maya",
+    "owner_person_id": "person-maya",
+    "office": {
+      "name": "Harbor Office",
+      "timezone": "America/Los_Angeles",
+      "open_minute": 480,
+      "close_minute": 1080,
+      "weekdays": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "resources": [
+      {
+        "id": "room-cedar",
+        "kind": "room",
+        "name": "Cedar",
+        "capacity": 8,
+        "step_free": true,
+        "video": true,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-maple",
+        "kind": "room",
+        "name": "Maple",
+        "capacity": 4,
+        "step_free": true,
+        "video": false,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-birch",
+        "kind": "room",
+        "name": "Birch",
+        "capacity": 12,
+        "step_free": false,
+        "video": true,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-willow",
+        "kind": "room",
+        "name": "Willow",
+        "capacity": 10,
+        "step_free": true,
+        "video": false,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-oak",
+        "kind": "room",
+        "name": "Oak",
+        "capacity": 6,
+        "step_free": true,
+        "video": null,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-pine",
+        "kind": "room",
+        "name": "Pine",
+        "capacity": 16,
+        "step_free": null,
+        "video": true,
+        "compatible_rooms": []
+      },
+      {
+        "id": "equipment-1",
+        "kind": "equipment",
+        "name": "Camera One",
+        "capacity": null,
+        "step_free": null,
+        "video": true,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      },
+      {
+        "id": "equipment-2",
+        "kind": "equipment",
+        "name": "Camera Two",
+        "capacity": null,
+        "step_free": null,
+        "video": true,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      },
+      {
+        "id": "equipment-3",
+        "kind": "equipment",
+        "name": "Projector One",
+        "capacity": null,
+        "step_free": null,
+        "video": false,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      },
+      {
+        "id": "equipment-4",
+        "kind": "equipment",
+        "name": "Projector Two",
+        "capacity": null,
+        "step_free": null,
+        "video": false,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      }
+    ],
+    "holds": [
+      {
+        "id": "hold-1",
+        "owner_person_id": "person-maya",
+        "room_id": "room-cedar",
+        "equipment_ids": [],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Meeting for eight with video and step-free access",
+        "created_at": "2026-12-08T17:00:00.000Z",
+        "updated_at": "2026-12-08T17:00:00.000Z",
+        "history": [
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "held",
+            "reason": ""
+          },
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "consumed",
+            "reason": ""
+          }
+        ],
+        "status": "consumed",
+        "expires_at": "2026-12-08T17:05:00.000Z"
+      }
+    ],
+    "bookings": [
+      {
+        "id": "booking-1",
+        "owner_person_id": "person-maya",
+        "room_id": "room-cedar",
+        "equipment_ids": [],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Meeting for eight with video and step-free access",
+        "created_at": "2026-12-08T17:00:00.000Z",
+        "updated_at": "2026-12-08T17:00:00.000Z",
+        "history": [
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "confirmed",
+            "reason": ""
+          }
+        ],
+        "status": "confirmed",
+        "previous_id": null,
+        "replacement_id": null
+      }
+    ],
+    "blocks": [],
+    "notifications": [
+      {
+        "id": "notice-1",
+        "recipient_person_id": "person-maya",
+        "object_id": "booking-1",
+        "type": "confirmed",
+        "reason": "",
+        "at": "2026-12-08T17:00:00.000Z",
+        "read": false
+      }
+    ]
+  },
+  "audit": [
+    {
+      "seq": 1,
+      "actor": "agent",
+      "tool": "spacebook.context",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:03.778Z",
+      "wall_time": "2026-11-27T22:30:03.779Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "connection_id": "76c51e3f-c5bd-4965-a0ec-7db9d5406f51",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 2,
+      "actor": "agent",
+      "tool": "spacebook.resources.search",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:05.268Z",
+      "wall_time": "2026-11-27T22:30:05.269Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "connection_id": "76c51e3f-c5bd-4965-a0ec-7db9d5406f51",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 3,
+      "actor": "agent",
+      "tool": "spacebook.resources.get",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:06.749Z",
+      "wall_time": "2026-11-27T22:30:06.750Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "connection_id": "76c51e3f-c5bd-4965-a0ec-7db9d5406f51",
+      "client_name": "model-agent",
+      "input": {
+        "id": "room-cedar"
+      },
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 4,
+      "actor": "agent",
+      "tool": "spacebook.holds.create",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T22:30:08.677Z",
+      "wall_time": "2026-11-27T22:30:08.678Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "connection_id": "76c51e3f-c5bd-4965-a0ec-7db9d5406f51",
+      "client_name": "model-agent",
+      "input": {
+        "request_id": "maya-20261208-1400",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 0
+        }
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 5,
+      "actor": "agent",
+      "tool": "spacebook.holds.confirm",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 2
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T22:30:10.215Z",
+      "wall_time": "2026-11-27T22:30:10.216Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "connection_id": "76c51e3f-c5bd-4965-a0ec-7db9d5406f51",
+      "client_name": "model-agent",
+      "input": {
+        "id": "hold-1",
+        "request_id": "maya-20261208-1400-confirm",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    }
+  ],
+  "passed": true,
+  "usage": {
+    "prompt_tokens": 14780,
+    "completion_tokens": 343
+  }
+}

@@ -1,0 +1,1555 @@
+{
+  "model": "gpt-4.1-mini-2025-04-14",
+  "scenario": "outage-replacement",
+  "run_id": "smoke-1",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a personal assistant operating a synthetic workplace reservation application. Act only through the provided business tools. Read current state before deciding. Writes require the exact version returned by a read and a unique retry-stable request_id. These are concurrency metadata, not approval gates. The user authorizes the requested booking action. Finish with a concise explanation."
+    },
+    {
+      "role": "user",
+      "content": "I am Maya. My Planning reservation for eight people on December 8, 2026, from 2 pm to 3 pm Los Angeles time was disrupted by maintenance. Replace that reservation with a suitable room at the same time, retaining step-free access and video conferencing. Confirm exactly one replacement and leave unrelated bookings alone."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_4GowRKj2uxKyyvayvHJd6z9h",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_3",
+            "arguments": "{}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_4GowRKj2uxKyyvayvHJd6z9h",
+      "content": "{\"items\":[{\"id\":\"booking-1\",\"owner_person_id\":\"person-maya\",\"room_id\":\"room-cedar\",\"equipment_ids\":[\"equipment-1\"],\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-08T23:00:00.000Z\",\"title\":\"Planning\",\"created_at\":\"2026-12-08T17:00:00.000Z\",\"updated_at\":\"2026-12-08T18:00:00.000Z\",\"history\":[{\"at\":\"2026-12-08T17:00:00.000Z\",\"action\":\"confirmed\",\"reason\":\"\"},{\"at\":\"2026-12-08T18:00:00.000Z\",\"action\":\"disrupted\",\"reason\":\"Projector maintenance\"}],\"status\":\"disrupted\",\"previous_id\":null,\"replacement_id\":null,\"past\":false}],\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":3}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_7z9lCMBtXjRP4CfSORxIspCx",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_1",
+            "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"min_capacity\":8,\"step_free\":true,\"video\":true}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_7z9lCMBtXjRP4CfSORxIspCx",
+      "content": "{\"filter_scope\":\"Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.\",\"items\":[{\"id\":\"room-cedar\",\"kind\":\"room\",\"name\":\"Cedar\",\"capacity\":8,\"step_free\":true,\"video\":true,\"compatible_rooms\":[],\"busy\":[{\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-09T00:00:00.000Z\",\"kind\":\"maintenance\"}],\"available\":false}],\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":3}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_V2wDGYSVhV6XSKfH9XpS4Ubf",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_1",
+            "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"min_capacity\":8,\"step_free\":true}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_V2wDGYSVhV6XSKfH9XpS4Ubf",
+      "content": "{\"filter_scope\":\"Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.\",\"items\":[{\"id\":\"room-cedar\",\"kind\":\"room\",\"name\":\"Cedar\",\"capacity\":8,\"step_free\":true,\"video\":true,\"compatible_rooms\":[],\"busy\":[{\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-09T00:00:00.000Z\",\"kind\":\"maintenance\"}],\"available\":false},{\"id\":\"room-willow\",\"kind\":\"room\",\"name\":\"Willow\",\"capacity\":10,\"step_free\":true,\"video\":false,\"compatible_rooms\":[],\"busy\":[],\"available\":true}],\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":3}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_7xo6zQDyFSp5nwvgdkiDLhtA",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_1",
+            "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"video\":true}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_7xo6zQDyFSp5nwvgdkiDLhtA",
+      "content": "{\"filter_scope\":\"Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.\",\"items\":[{\"id\":\"room-cedar\",\"kind\":\"room\",\"name\":\"Cedar\",\"capacity\":8,\"step_free\":true,\"video\":true,\"compatible_rooms\":[],\"busy\":[{\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-09T00:00:00.000Z\",\"kind\":\"maintenance\"}],\"available\":false},{\"id\":\"room-birch\",\"kind\":\"room\",\"name\":\"Birch\",\"capacity\":12,\"step_free\":false,\"video\":true,\"compatible_rooms\":[],\"busy\":[],\"available\":true},{\"id\":\"room-pine\",\"kind\":\"room\",\"name\":\"Pine\",\"capacity\":16,\"step_free\":null,\"video\":true,\"compatible_rooms\":[],\"busy\":[],\"available\":true},{\"id\":\"equipment-1\",\"kind\":\"equipment\",\"name\":\"Camera One\",\"capacity\":null,\"step_free\":null,\"video\":true,\"compatible_rooms\":[\"room-cedar\",\"room-maple\",\"room-willow\",\"room-oak\"],\"busy\":[],\"available\":true},{\"id\":\"equipment-2\",\"kind\":\"equipment\",\"name\":\"Camera Two\",\"capacity\":null,\"step_free\":null,\"video\":true,\"compatible_rooms\":[\"room-cedar\",\"room-maple\",\"room-willow\",\"room-oak\"],\"busy\":[],\"available\":true}],\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":3}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_kTPdZIpCEMDR7JbKBz8KzLVx",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_2",
+            "arguments": "{\"id\":\"room-willow\",\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_kTPdZIpCEMDR7JbKBz8KzLVx",
+      "content": "{\"item\":{\"id\":\"room-willow\",\"kind\":\"room\",\"name\":\"Willow\",\"capacity\":10,\"step_free\":true,\"video\":false,\"compatible_rooms\":[],\"busy\":[],\"available\":true},\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":3}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_7iuEZpmxVGVSw86Zavi7Xtjq",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_2",
+            "arguments": "{\"id\":\"equipment-1\",\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_7iuEZpmxVGVSw86Zavi7Xtjq",
+      "content": "{\"item\":{\"id\":\"equipment-1\",\"kind\":\"equipment\",\"name\":\"Camera One\",\"capacity\":null,\"step_free\":null,\"video\":true,\"compatible_rooms\":[\"room-cedar\",\"room-maple\",\"room-willow\",\"room-oak\"],\"busy\":[],\"available\":true},\"status\":\"ok\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":3}}"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_GyJUYRO1XkI1NKiVPXDMGy5B",
+          "type": "function",
+          "function": {
+            "name": "spacebook_tool_8",
+            "arguments": "{\"id\":\"booking-1\",\"room_id\":\"room-willow\",\"equipment_ids\":[\"equipment-1\"],\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-08T23:00:00.000Z\",\"title\":\"Planning\",\"expected_version\":{\"epoch\":1,\"revision\":3},\"request_id\":\"replace-maya-20261208-1400\"}"
+          }
+        }
+      ],
+      "refusal": null,
+      "annotations": []
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_GyJUYRO1XkI1NKiVPXDMGy5B",
+      "content": "{\"item\":{\"id\":\"booking-2\",\"owner_person_id\":\"person-maya\",\"room_id\":\"room-willow\",\"equipment_ids\":[\"equipment-1\"],\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-08T23:00:00.000Z\",\"title\":\"Planning\",\"created_at\":\"2026-12-08T18:00:00.000Z\",\"updated_at\":\"2026-12-08T18:00:00.000Z\",\"history\":[{\"at\":\"2026-12-08T18:00:00.000Z\",\"action\":\"confirmed\",\"reason\":\"\"}],\"status\":\"confirmed\",\"previous_id\":\"booking-1\",\"replacement_id\":null,\"past\":false},\"status\":\"committed\",\"app_id\":\"spacebook\",\"version\":{\"epoch\":1,\"revision\":4}}"
+    },
+    {
+      "role": "assistant",
+      "content": "I have replaced your disrupted Planning reservation on December 8, 2026, from 2 pm to 3 pm Los Angeles time with a suitable room \"Willow\" that has step-free access. I added the compatible video conferencing equipment \"Camera One\" to meet the video requirement. The replacement booking is now confirmed.",
+      "refusal": null,
+      "annotations": []
+    }
+  ],
+  "model_responses": [
+    {
+      "id": "chatcmpl-EoykGOKs2oOMI3fAzbq9ytZAl6NGA",
+      "object": "chat.completion",
+      "created": 1795818612,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_4GowRKj2uxKyyvayvHJd6z9h",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_3",
+                  "arguments": "{}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2017,
+        "completion_tokens": 13,
+        "total_tokens": 2030,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykHcNt1zALCDfy1f5nSqgTlc6Cb",
+      "object": "chat.completion",
+      "created": 1795818613,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_7z9lCMBtXjRP4CfSORxIspCx",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_1",
+                  "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"min_capacity\":8,\"step_free\":true,\"video\":true}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2254,
+        "completion_tokens": 67,
+        "total_tokens": 2321,
+        "prompt_tokens_details": {
+          "cached_tokens": 1792,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykIqklddPUV658dOTpj84ppY06x",
+      "object": "chat.completion",
+      "created": 1795818614,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_V2wDGYSVhV6XSKfH9XpS4Ubf",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_1",
+                  "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"min_capacity\":8,\"step_free\":true}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2511,
+        "completion_tokens": 63,
+        "total_tokens": 2574,
+        "prompt_tokens_details": {
+          "cached_tokens": 2176,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykKhA470XgLxlF4bHnTBtWQXyXE",
+      "object": "chat.completion",
+      "created": 1795818616,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_7xo6zQDyFSp5nwvgdkiDLhtA",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_1",
+                  "arguments": "{\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\",\"video\":true}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2803,
+        "completion_tokens": 57,
+        "total_tokens": 2860,
+        "prompt_tokens_details": {
+          "cached_tokens": 2432,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykLJ3ohCvNjmEJAJwgSPc1z7sUS",
+      "object": "chat.completion",
+      "created": 1795818617,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_kTPdZIpCEMDR7JbKBz8KzLVx",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_2",
+                  "arguments": "{\"id\":\"room-willow\",\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 3241,
+        "completion_tokens": 59,
+        "total_tokens": 3300,
+        "prompt_tokens_details": {
+          "cached_tokens": 2688,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykMAU7V0zotlfkXtynchDljHHp0",
+      "object": "chat.completion",
+      "created": 1795818618,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_7iuEZpmxVGVSw86Zavi7Xtjq",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_2",
+                  "arguments": "{\"id\":\"equipment-1\",\"start_at\":\"2026-12-08T14:00:00-08:00\",\"end_at\":\"2026-12-08T15:00:00-08:00\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 3373,
+        "completion_tokens": 59,
+        "total_tokens": 3432,
+        "prompt_tokens_details": {
+          "cached_tokens": 3072,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykOjYKxVq43lgBV1IMZbJOBxjbb",
+      "object": "chat.completion",
+      "created": 1795818620,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_GyJUYRO1XkI1NKiVPXDMGy5B",
+                "type": "function",
+                "function": {
+                  "name": "spacebook_tool_8",
+                  "arguments": "{\"id\":\"booking-1\",\"room_id\":\"room-willow\",\"equipment_ids\":[\"equipment-1\"],\"start_at\":\"2026-12-08T22:00:00.000Z\",\"end_at\":\"2026-12-08T23:00:00.000Z\",\"title\":\"Planning\",\"expected_version\":{\"epoch\":1,\"revision\":3},\"request_id\":\"replace-maya-20261208-1400\"}"
+                }
+              }
+            ],
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 3522,
+        "completion_tokens": 101,
+        "total_tokens": 3623,
+        "prompt_tokens_details": {
+          "cached_tokens": 3200,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    },
+    {
+      "id": "chatcmpl-EoykQ5uzAfBFrS8SkaXh07IJvL8MR",
+      "object": "chat.completion",
+      "created": 1795818622,
+      "model": "gpt-4.1-mini-2025-04-14",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "I have replaced your disrupted Planning reservation on December 8, 2026, from 2 pm to 3 pm Los Angeles time with a suitable room \"Willow\" that has step-free access. I added the compatible video conferencing equipment \"Camera One\" to meet the video requirement. The replacement booking is now confirmed.",
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 3817,
+        "completion_tokens": 66,
+        "total_tokens": 3883,
+        "prompt_tokens_details": {
+          "cached_tokens": 3456,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_5e6a9238b8"
+    }
+  ],
+  "infra_events": [
+    {
+      "event": {
+        "event_id": "setup-0",
+        "at": "2026-12-08T17:00:00Z",
+        "operation": "spacebook.actor_action",
+        "payload": {
+          "actor_person_id": "person-maya",
+          "action": "holds.create",
+          "args": {
+            "room_id": "room-cedar",
+            "equipment_ids": [
+              "equipment-1"
+            ],
+            "title": "Planning",
+            "start_at": "2026-12-08T22:00:00Z",
+            "end_at": "2026-12-08T23:00:00Z"
+          }
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "setup-0",
+        "trace": {
+          "run_id": "smoke-1",
+          "app_id": "spacebook",
+          "event_id": "setup-0",
+          "cloud_event": null,
+          "received_at": "2026-11-27T22:30:11.898Z",
+          "virtual_received_at": "2026-12-08T17:00:00Z",
+          "applied_at": "2026-12-08T17:00:00Z",
+          "processed_at": "2026-11-27T22:30:11.900Z"
+        },
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "event": {
+        "event_id": "setup-1",
+        "at": "2026-12-08T17:00:00Z",
+        "operation": "spacebook.actor_action",
+        "payload": {
+          "actor_person_id": "person-maya",
+          "action": "holds.confirm",
+          "args": {
+            "id": "hold-1"
+          }
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "setup-1",
+        "trace": {
+          "run_id": "smoke-1",
+          "app_id": "spacebook",
+          "event_id": "setup-1",
+          "cloud_event": null,
+          "received_at": "2026-11-27T22:30:11.905Z",
+          "virtual_received_at": "2026-12-08T17:00:00Z",
+          "applied_at": "2026-12-08T17:00:00Z",
+          "processed_at": "2026-11-27T22:30:11.906Z"
+        },
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      }
+    },
+    {
+      "event": {
+        "event_id": "maintenance-1",
+        "at": "2026-12-08T18:00:00Z",
+        "operation": "spacebook.resource_block",
+        "payload": {
+          "block_id": "block-1",
+          "resource_id": "room-cedar",
+          "start_at": "2026-12-08T22:00:00Z",
+          "end_at": "2026-12-09T00:00:00Z",
+          "reason": "Projector maintenance"
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "maintenance-1",
+        "trace": {
+          "run_id": "smoke-1",
+          "app_id": "spacebook",
+          "event_id": "maintenance-1",
+          "cloud_event": null,
+          "received_at": "2026-11-27T22:30:11.912Z",
+          "virtual_received_at": "2026-12-08T17:00:00Z",
+          "applied_at": "2026-12-08T18:00:00Z",
+          "processed_at": "2026-11-27T22:30:11.913Z"
+        },
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    }
+  ],
+  "tool_results": [
+    {
+      "name": "spacebook.bookings.list",
+      "args": {},
+      "response": {
+        "items": [
+          {
+            "id": "booking-1",
+            "owner_person_id": "person-maya",
+            "room_id": "room-cedar",
+            "equipment_ids": [
+              "equipment-1"
+            ],
+            "start_at": "2026-12-08T22:00:00.000Z",
+            "end_at": "2026-12-08T23:00:00.000Z",
+            "title": "Planning",
+            "created_at": "2026-12-08T17:00:00.000Z",
+            "updated_at": "2026-12-08T18:00:00.000Z",
+            "history": [
+              {
+                "at": "2026-12-08T17:00:00.000Z",
+                "action": "confirmed",
+                "reason": ""
+              },
+              {
+                "at": "2026-12-08T18:00:00.000Z",
+                "action": "disrupted",
+                "reason": "Projector maintenance"
+              }
+            ],
+            "status": "disrupted",
+            "previous_id": null,
+            "replacement_id": null,
+            "past": false
+          }
+        ],
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.search",
+      "args": {
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00",
+        "min_capacity": 8,
+        "step_free": true,
+        "video": true
+      },
+      "response": {
+        "filter_scope": "Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.",
+        "items": [
+          {
+            "id": "room-cedar",
+            "kind": "room",
+            "name": "Cedar",
+            "capacity": 8,
+            "step_free": true,
+            "video": true,
+            "compatible_rooms": [],
+            "busy": [
+              {
+                "start_at": "2026-12-08T22:00:00.000Z",
+                "end_at": "2026-12-09T00:00:00.000Z",
+                "kind": "maintenance"
+              }
+            ],
+            "available": false
+          }
+        ],
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.search",
+      "args": {
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00",
+        "min_capacity": 8,
+        "step_free": true
+      },
+      "response": {
+        "filter_scope": "Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.",
+        "items": [
+          {
+            "id": "room-cedar",
+            "kind": "room",
+            "name": "Cedar",
+            "capacity": 8,
+            "step_free": true,
+            "video": true,
+            "compatible_rooms": [],
+            "busy": [
+              {
+                "start_at": "2026-12-08T22:00:00.000Z",
+                "end_at": "2026-12-09T00:00:00.000Z",
+                "kind": "maintenance"
+              }
+            ],
+            "available": false
+          },
+          {
+            "id": "room-willow",
+            "kind": "room",
+            "name": "Willow",
+            "capacity": 10,
+            "step_free": true,
+            "video": false,
+            "compatible_rooms": [],
+            "busy": [],
+            "available": true
+          }
+        ],
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.search",
+      "args": {
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00",
+        "video": true
+      },
+      "response": {
+        "filter_scope": "Filters match individual resources, not complete bundles. video=true on a room means built-in video only. A room excluded by video=true may still support video using compatible portable equipment. To inspect combinations, search rooms without the video filter and equipment without capacity/accessibility filters, then check compatible_rooms and availability. Unknown attributes do not satisfy a requirement.",
+        "items": [
+          {
+            "id": "room-cedar",
+            "kind": "room",
+            "name": "Cedar",
+            "capacity": 8,
+            "step_free": true,
+            "video": true,
+            "compatible_rooms": [],
+            "busy": [
+              {
+                "start_at": "2026-12-08T22:00:00.000Z",
+                "end_at": "2026-12-09T00:00:00.000Z",
+                "kind": "maintenance"
+              }
+            ],
+            "available": false
+          },
+          {
+            "id": "room-birch",
+            "kind": "room",
+            "name": "Birch",
+            "capacity": 12,
+            "step_free": false,
+            "video": true,
+            "compatible_rooms": [],
+            "busy": [],
+            "available": true
+          },
+          {
+            "id": "room-pine",
+            "kind": "room",
+            "name": "Pine",
+            "capacity": 16,
+            "step_free": null,
+            "video": true,
+            "compatible_rooms": [],
+            "busy": [],
+            "available": true
+          },
+          {
+            "id": "equipment-1",
+            "kind": "equipment",
+            "name": "Camera One",
+            "capacity": null,
+            "step_free": null,
+            "video": true,
+            "compatible_rooms": [
+              "room-cedar",
+              "room-maple",
+              "room-willow",
+              "room-oak"
+            ],
+            "busy": [],
+            "available": true
+          },
+          {
+            "id": "equipment-2",
+            "kind": "equipment",
+            "name": "Camera Two",
+            "capacity": null,
+            "step_free": null,
+            "video": true,
+            "compatible_rooms": [
+              "room-cedar",
+              "room-maple",
+              "room-willow",
+              "room-oak"
+            ],
+            "busy": [],
+            "available": true
+          }
+        ],
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.get",
+      "args": {
+        "id": "room-willow",
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00"
+      },
+      "response": {
+        "item": {
+          "id": "room-willow",
+          "kind": "room",
+          "name": "Willow",
+          "capacity": 10,
+          "step_free": true,
+          "video": false,
+          "compatible_rooms": [],
+          "busy": [],
+          "available": true
+        },
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "spacebook.resources.get",
+      "args": {
+        "id": "equipment-1",
+        "start_at": "2026-12-08T14:00:00-08:00",
+        "end_at": "2026-12-08T15:00:00-08:00"
+      },
+      "response": {
+        "item": {
+          "id": "equipment-1",
+          "kind": "equipment",
+          "name": "Camera One",
+          "capacity": null,
+          "step_free": null,
+          "video": true,
+          "compatible_rooms": [
+            "room-cedar",
+            "room-maple",
+            "room-willow",
+            "room-oak"
+          ],
+          "busy": [],
+          "available": true
+        },
+        "status": "ok",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "name": "spacebook.bookings.replace",
+      "args": {
+        "id": "booking-1",
+        "room_id": "room-willow",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Planning",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 3
+        },
+        "request_id": "replace-maya-20261208-1400"
+      },
+      "response": {
+        "item": {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": "booking-1",
+          "replacement_id": null,
+          "past": false
+        },
+        "status": "committed",
+        "app_id": "spacebook",
+        "version": {
+          "epoch": 1,
+          "revision": 4
+        }
+      }
+    }
+  ],
+  "grade": {
+    "one_active": true,
+    "suitable": true,
+    "correct_time": true,
+    "no_active_holds": true,
+    "replacement": true
+  },
+  "completed": true,
+  "final_business_state": {
+    "account_id": "spacebook-maya",
+    "owner_person_id": "person-maya",
+    "office": {
+      "name": "Harbor Office",
+      "timezone": "America/Los_Angeles",
+      "open_minute": 480,
+      "close_minute": 1080,
+      "weekdays": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "resources": [
+      {
+        "id": "room-cedar",
+        "kind": "room",
+        "name": "Cedar",
+        "capacity": 8,
+        "step_free": true,
+        "video": true,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-maple",
+        "kind": "room",
+        "name": "Maple",
+        "capacity": 4,
+        "step_free": true,
+        "video": false,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-birch",
+        "kind": "room",
+        "name": "Birch",
+        "capacity": 12,
+        "step_free": false,
+        "video": true,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-willow",
+        "kind": "room",
+        "name": "Willow",
+        "capacity": 10,
+        "step_free": true,
+        "video": false,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-oak",
+        "kind": "room",
+        "name": "Oak",
+        "capacity": 6,
+        "step_free": true,
+        "video": null,
+        "compatible_rooms": []
+      },
+      {
+        "id": "room-pine",
+        "kind": "room",
+        "name": "Pine",
+        "capacity": 16,
+        "step_free": null,
+        "video": true,
+        "compatible_rooms": []
+      },
+      {
+        "id": "equipment-1",
+        "kind": "equipment",
+        "name": "Camera One",
+        "capacity": null,
+        "step_free": null,
+        "video": true,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      },
+      {
+        "id": "equipment-2",
+        "kind": "equipment",
+        "name": "Camera Two",
+        "capacity": null,
+        "step_free": null,
+        "video": true,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      },
+      {
+        "id": "equipment-3",
+        "kind": "equipment",
+        "name": "Projector One",
+        "capacity": null,
+        "step_free": null,
+        "video": false,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      },
+      {
+        "id": "equipment-4",
+        "kind": "equipment",
+        "name": "Projector Two",
+        "capacity": null,
+        "step_free": null,
+        "video": false,
+        "compatible_rooms": [
+          "room-cedar",
+          "room-maple",
+          "room-willow",
+          "room-oak"
+        ]
+      }
+    ],
+    "holds": [
+      {
+        "id": "hold-1",
+        "owner_person_id": "person-maya",
+        "room_id": "room-cedar",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Planning",
+        "created_at": "2026-12-08T17:00:00.000Z",
+        "updated_at": "2026-12-08T17:00:00.000Z",
+        "history": [
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "held",
+            "reason": ""
+          },
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "consumed",
+            "reason": ""
+          }
+        ],
+        "status": "consumed",
+        "expires_at": "2026-12-08T17:05:00.000Z"
+      }
+    ],
+    "bookings": [
+      {
+        "id": "booking-1",
+        "owner_person_id": "person-maya",
+        "room_id": "room-cedar",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Planning",
+        "created_at": "2026-12-08T17:00:00.000Z",
+        "updated_at": "2026-12-08T18:00:00.000Z",
+        "history": [
+          {
+            "at": "2026-12-08T17:00:00.000Z",
+            "action": "confirmed",
+            "reason": ""
+          },
+          {
+            "at": "2026-12-08T18:00:00.000Z",
+            "action": "disrupted",
+            "reason": "Projector maintenance"
+          },
+          {
+            "at": "2026-12-08T18:00:00.000Z",
+            "action": "superseded",
+            "reason": ""
+          }
+        ],
+        "status": "superseded",
+        "previous_id": null,
+        "replacement_id": "booking-2"
+      },
+      {
+        "id": "booking-2",
+        "owner_person_id": "person-maya",
+        "room_id": "room-willow",
+        "equipment_ids": [
+          "equipment-1"
+        ],
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-08T23:00:00.000Z",
+        "title": "Planning",
+        "created_at": "2026-12-08T18:00:00.000Z",
+        "updated_at": "2026-12-08T18:00:00.000Z",
+        "history": [
+          {
+            "at": "2026-12-08T18:00:00.000Z",
+            "action": "confirmed",
+            "reason": ""
+          }
+        ],
+        "status": "confirmed",
+        "previous_id": "booking-1",
+        "replacement_id": null
+      }
+    ],
+    "blocks": [
+      {
+        "id": "block-1",
+        "resource_id": "room-cedar",
+        "start_at": "2026-12-08T22:00:00.000Z",
+        "end_at": "2026-12-09T00:00:00.000Z",
+        "reason": "Projector maintenance",
+        "active": true,
+        "created_at": "2026-12-08T18:00:00.000Z",
+        "updated_at": "2026-12-08T18:00:00.000Z"
+      }
+    ],
+    "notifications": [
+      {
+        "id": "notice-1",
+        "recipient_person_id": "person-maya",
+        "object_id": "booking-1",
+        "type": "confirmed",
+        "reason": "",
+        "at": "2026-12-08T17:00:00.000Z",
+        "read": false
+      },
+      {
+        "id": "notice-2",
+        "recipient_person_id": "person-maya",
+        "object_id": "booking-1",
+        "type": "disrupted",
+        "reason": "Projector maintenance",
+        "at": "2026-12-08T18:00:00.000Z",
+        "read": false
+      },
+      {
+        "id": "notice-3",
+        "recipient_person_id": "person-maya",
+        "object_id": "booking-1",
+        "type": "superseded",
+        "reason": "",
+        "at": "2026-12-08T18:00:00.000Z",
+        "read": false
+      },
+      {
+        "id": "notice-4",
+        "recipient_person_id": "person-maya",
+        "object_id": "booking-2",
+        "type": "confirmed",
+        "reason": "Replacement for booking-1",
+        "at": "2026-12-08T18:00:00.000Z",
+        "read": false
+      }
+    ]
+  },
+  "audit": [
+    {
+      "seq": 1,
+      "actor": "infra",
+      "tool": "env.apply_event",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T22:30:11.898Z",
+      "wall_time": "2026-11-27T22:30:11.900Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "trace": {
+        "run_id": "smoke-1",
+        "app_id": "spacebook",
+        "event_id": "setup-0",
+        "cloud_event": null,
+        "received_at": "2026-11-27T22:30:11.898Z",
+        "virtual_received_at": "2026-12-08T17:00:00Z",
+        "applied_at": "2026-12-08T17:00:00Z",
+        "processed_at": "2026-11-27T22:30:11.900Z"
+      },
+      "connection_id": "a975f9c9-dbb5-4eee-8aa5-eb58c4b07bba",
+      "client_name": "smoke-runner",
+      "input": {
+        "expected_version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "event_id": "setup-0"
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 2,
+      "actor": "infra",
+      "tool": "env.apply_event",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 2
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T22:30:11.905Z",
+      "wall_time": "2026-11-27T22:30:11.906Z",
+      "virtual_time": "2026-12-08T17:00:00Z",
+      "trace": {
+        "run_id": "smoke-1",
+        "app_id": "spacebook",
+        "event_id": "setup-1",
+        "cloud_event": null,
+        "received_at": "2026-11-27T22:30:11.905Z",
+        "virtual_received_at": "2026-12-08T17:00:00Z",
+        "applied_at": "2026-12-08T17:00:00Z",
+        "processed_at": "2026-11-27T22:30:11.906Z"
+      },
+      "connection_id": "a975f9c9-dbb5-4eee-8aa5-eb58c4b07bba",
+      "client_name": "smoke-runner",
+      "input": {
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "event_id": "setup-1"
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 3,
+      "actor": "infra",
+      "tool": "env.apply_event",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 2
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T22:30:11.912Z",
+      "wall_time": "2026-11-27T22:30:11.913Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "trace": {
+        "run_id": "smoke-1",
+        "app_id": "spacebook",
+        "event_id": "maintenance-1",
+        "cloud_event": null,
+        "received_at": "2026-11-27T22:30:11.912Z",
+        "virtual_received_at": "2026-12-08T17:00:00Z",
+        "applied_at": "2026-12-08T18:00:00Z",
+        "processed_at": "2026-11-27T22:30:11.913Z"
+      },
+      "connection_id": "a975f9c9-dbb5-4eee-8aa5-eb58c4b07bba",
+      "client_name": "smoke-runner",
+      "input": {
+        "expected_version": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "event_id": "maintenance-1"
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 4,
+      "actor": "agent",
+      "tool": "spacebook.bookings.list",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:12.879Z",
+      "wall_time": "2026-11-27T22:30:12.880Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 5,
+      "actor": "agent",
+      "tool": "spacebook.resources.search",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:14.407Z",
+      "wall_time": "2026-11-27T22:30:14.408Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 6,
+      "actor": "agent",
+      "tool": "spacebook.resources.search",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:15.767Z",
+      "wall_time": "2026-11-27T22:30:15.768Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 7,
+      "actor": "agent",
+      "tool": "spacebook.resources.search",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:17.115Z",
+      "wall_time": "2026-11-27T22:30:17.116Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {},
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 8,
+      "actor": "agent",
+      "tool": "spacebook.resources.get",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:18.475Z",
+      "wall_time": "2026-11-27T22:30:18.476Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {
+        "id": "room-willow"
+      },
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 9,
+      "actor": "agent",
+      "tool": "spacebook.resources.get",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "state_changed": false,
+      "received_at": "2026-11-27T22:30:19.861Z",
+      "wall_time": "2026-11-27T22:30:19.862Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {
+        "id": "equipment-1"
+      },
+      "result": {
+        "status": "ok",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 10,
+      "actor": "agent",
+      "tool": "spacebook.bookings.replace",
+      "decision": "allow",
+      "before": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "after": {
+        "epoch": 1,
+        "revision": 4
+      },
+      "state_changed": true,
+      "received_at": "2026-11-27T22:30:21.847Z",
+      "wall_time": "2026-11-27T22:30:21.848Z",
+      "virtual_time": "2026-12-08T18:00:00Z",
+      "connection_id": "41285a1f-dd3a-433a-b224-4bf4534d0199",
+      "client_name": "model-agent",
+      "input": {
+        "id": "booking-1",
+        "request_id": "replace-maya-20261208-1400",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      },
+      "result": {
+        "status": "committed",
+        "object_id": null
+      }
+    }
+  ],
+  "passed": true,
+  "usage": {
+    "prompt_tokens": 23538,
+    "completion_tokens": 485
+  }
+}

@@ -1,0 +1,916 @@
+{
+  "package_sha256": "5613867d1d9af2d3ed250559c4d27e81eacfd94720b11166161c29e439540f92",
+  "node": "v22.16.0",
+  "browser": "141.0.7390.37",
+  "at": "2026-11-27T22:34:40.746Z",
+  "viewport": {
+    "width": 1360,
+    "height": 900
+  },
+  "checks": [
+    "GUI loads via public Host",
+    "Browser creates actual bundle hold",
+    "Browser confirmation persists one booking",
+    "Stale GUI form preserves independent outage",
+    "Unavailable GUI replacement preserves disruption",
+    "Browser replacement is atomic",
+    "Reload displays saved replacement",
+    "Browser cancellation releases reservation",
+    "Read flag explicit and persisted",
+    "Lost-response retry has one hold",
+    "Expired hold shown and confirmation unavailable",
+    "Untrusted title rendered as text",
+    "Browser release commits",
+    "Mobile page has no horizontal overflow",
+    "No browser JavaScript errors"
+  ],
+  "sequences": [
+    {
+      "name": "01-search",
+      "file": "01-search.png",
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "bookings": [],
+      "holds": []
+    },
+    {
+      "name": "02-resource",
+      "file": "02-resource.png",
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "bookings": [],
+      "holds": []
+    },
+    {
+      "name": "03-hold-form",
+      "file": "03-hold-form.png",
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "bookings": [],
+      "holds": []
+    },
+    {
+      "name": "04-hold-review",
+      "file": "04-hold-review.png",
+      "version": {
+        "epoch": 1,
+        "revision": 1
+      },
+      "bookings": [],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            }
+          ],
+          "status": "active",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "05-confirmed",
+      "file": "05-confirmed.png",
+      "version": {
+        "epoch": 1,
+        "revision": 2
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": null,
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "06-stale",
+      "file": "06-stale.png",
+      "version": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            }
+          ],
+          "status": "disrupted",
+          "previous_id": null,
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "07-disrupted",
+      "file": "07-disrupted.png",
+      "version": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            }
+          ],
+          "status": "disrupted",
+          "previous_id": null,
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "08-unavailable",
+      "file": "08-unavailable.png",
+      "version": {
+        "epoch": 1,
+        "revision": 3
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            }
+          ],
+          "status": "disrupted",
+          "previous_id": null,
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "09-replaced",
+      "file": "09-replaced.png",
+      "version": {
+        "epoch": 1,
+        "revision": 4
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "superseded",
+              "reason": ""
+            }
+          ],
+          "status": "superseded",
+          "previous_id": null,
+          "replacement_id": "booking-2"
+        },
+        {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            }
+          ],
+          "status": "confirmed",
+          "previous_id": "booking-1",
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "10-cancelled",
+      "file": "10-cancelled.png",
+      "version": {
+        "epoch": 1,
+        "revision": 5
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "superseded",
+              "reason": ""
+            }
+          ],
+          "status": "superseded",
+          "previous_id": null,
+          "replacement_id": "booking-2"
+        },
+        {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "cancelled",
+              "reason": ""
+            }
+          ],
+          "status": "cancelled",
+          "previous_id": "booking-1",
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "11-notices",
+      "file": "11-notices.png",
+      "version": {
+        "epoch": 1,
+        "revision": 6
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "superseded",
+              "reason": ""
+            }
+          ],
+          "status": "superseded",
+          "previous_id": null,
+          "replacement_id": "booking-2"
+        },
+        {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "cancelled",
+              "reason": ""
+            }
+          ],
+          "status": "cancelled",
+          "previous_id": "booking-1",
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "12-expired",
+      "file": "12-expired.png",
+      "version": {
+        "epoch": 1,
+        "revision": 8
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "superseded",
+              "reason": ""
+            }
+          ],
+          "status": "superseded",
+          "previous_id": null,
+          "replacement_id": "booking-2"
+        },
+        {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "cancelled",
+              "reason": ""
+            }
+          ],
+          "status": "cancelled",
+          "previous_id": "booking-1",
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        },
+        {
+          "id": "hold-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Retry hold",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            }
+          ],
+          "status": "active",
+          "expires_at": "2026-12-08T18:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "13-mobile",
+      "file": "13-mobile.png",
+      "version": {
+        "epoch": 1,
+        "revision": 10
+      },
+      "bookings": [
+        {
+          "id": "booking-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "disrupted",
+              "reason": "Projector maintenance"
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "superseded",
+              "reason": ""
+            }
+          ],
+          "status": "superseded",
+          "previous_id": null,
+          "replacement_id": "booking-2"
+        },
+        {
+          "id": "booking-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "confirmed",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "cancelled",
+              "reason": ""
+            }
+          ],
+          "status": "cancelled",
+          "previous_id": "booking-1",
+          "replacement_id": null
+        }
+      ],
+      "holds": [
+        {
+          "id": "hold-1",
+          "owner_person_id": "person-maya",
+          "room_id": "room-cedar",
+          "equipment_ids": [
+            "equipment-1"
+          ],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Team planning",
+          "created_at": "2026-12-08T17:00:00.000Z",
+          "updated_at": "2026-12-08T17:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T17:00:00.000Z",
+              "action": "consumed",
+              "reason": ""
+            }
+          ],
+          "status": "consumed",
+          "expires_at": "2026-12-08T17:05:00.000Z"
+        },
+        {
+          "id": "hold-2",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "Retry hold",
+          "created_at": "2026-12-08T18:00:00.000Z",
+          "updated_at": "2026-12-08T18:00:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:00:00.000Z",
+              "action": "held",
+              "reason": ""
+            }
+          ],
+          "status": "active",
+          "expires_at": "2026-12-08T18:05:00.000Z"
+        },
+        {
+          "id": "hold-3",
+          "owner_person_id": "person-maya",
+          "room_id": "room-willow",
+          "equipment_ids": [],
+          "start_at": "2026-12-08T22:00:00.000Z",
+          "end_at": "2026-12-08T23:00:00.000Z",
+          "title": "<img src=x onerror=\"window.injected=true\">",
+          "created_at": "2026-12-08T18:05:00.000Z",
+          "updated_at": "2026-12-08T18:05:00.000Z",
+          "history": [
+            {
+              "at": "2026-12-08T18:05:00.000Z",
+              "action": "held",
+              "reason": ""
+            },
+            {
+              "at": "2026-12-08T18:05:00.000Z",
+              "action": "released",
+              "reason": ""
+            }
+          ],
+          "status": "released",
+          "expires_at": "2026-12-08T18:10:00.000Z"
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

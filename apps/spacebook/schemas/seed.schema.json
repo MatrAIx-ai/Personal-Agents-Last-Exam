@@ -1,0 +1,489 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "office": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "open_minute": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1439
+        },
+        "close_minute": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1440
+        },
+        "weekdays": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "maxItems": 7,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "name",
+        "timezone",
+        "open_minute",
+        "close_minute",
+        "weekdays"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "room",
+              "equipment"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "step_free": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "video": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "compatible_rooms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "capacity",
+          "step_free",
+          "video",
+          "compatible_rooms"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "holds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "owner_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "room_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "equipment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "reason": {
+                  "type": "string",
+                  "maxLength": 1000
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10000
+          },
+          "status": {
+            "enum": [
+              "active",
+              "consumed",
+              "released",
+              "expired",
+              "invalidated"
+            ]
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          }
+        },
+        "required": [
+          "id",
+          "owner_person_id",
+          "room_id",
+          "equipment_ids",
+          "start_at",
+          "end_at",
+          "title",
+          "created_at",
+          "updated_at",
+          "history",
+          "status",
+          "expires_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "bookings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "owner_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "room_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "equipment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "reason": {
+                  "type": "string",
+                  "maxLength": 1000
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10000
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "superseded",
+              "cancelled",
+              "disrupted"
+            ]
+          },
+          "previous_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "replacement_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "owner_person_id",
+          "room_id",
+          "equipment_ids",
+          "start_at",
+          "end_at",
+          "title",
+          "created_at",
+          "updated_at",
+          "history",
+          "status",
+          "previous_id",
+          "replacement_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "resource_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          }
+        },
+        "required": [
+          "id",
+          "resource_id",
+          "start_at",
+          "end_at",
+          "reason",
+          "active",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "recipient_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+          },
+          "read": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "recipient_person_id",
+          "object_id",
+          "type",
+          "reason",
+          "at",
+          "read"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "office",
+    "resources",
+    "holds",
+    "bookings",
+    "blocks",
+    "notifications"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: hold and confirm allocate the whole bundle; reads are pure
+ok 1 - hold and confirm allocate the whole bundle; reads are pure
+  ---
+  duration_ms: 13.534865
+  type: 'test'
+  ...
+# Subtest: conflicting bundle fails without partial allocation
+ok 2 - conflicting bundle fails without partial allocation
+  ---
+  duration_ms: 2.309542
+  type: 'test'
+  ...
+# Subtest: expired at equality without event; query does not mutate
+ok 3 - expired at equality without event; query does not mutate
+  ---
+  duration_ms: 1.876783
+  type: 'test'
+  ...
+# Subtest: hold expires at start when less than five minutes remain
+ok 4 - hold expires at start when less than five minutes remain
+  ---
+  duration_ms: 0.929755
+  type: 'test'
+  ...
+# Subtest: incompatible equipment, duplicates, unknown IDs and closed hours rejected
+ok 5 - incompatible equipment, duplicates, unknown IDs and closed hours rejected
+  ---
+  duration_ms: 1.923831
+  type: 'test'
+  ...
+# Subtest: adjacent intervals allowed
+ok 6 - adjacent intervals allowed
+  ---
+  duration_ms: 1.937877
+  type: 'test'
+  ...
+# Subtest: failed replacement preserves confirmed booking; same resources may be reused
+ok 7 - failed replacement preserves confirmed booking; same resources may be reused
+  ---
+  duration_ms: 4.941274
+  type: 'test'
+  ...
+# Subtest: outage releases whole bundle, replacement failure preserves disruption, unblock never resurrects
+ok 8 - outage releases whole bundle, replacement failure preserves disruption, unblock never resurrects
+  ---
+  duration_ms: 5.517079
+  type: 'test'
+  ...
+# Subtest: cancel and release are business-idempotent
+ok 9 - cancel and release are business-idempotent
+  ---
+  duration_ms: 4.226861
+  type: 'test'
+  ...
+# Subtest: other employee identity, title, IDs hidden; guessed booking cannot be read or cancelled
+ok 10 - other employee identity, title, IDs hidden; guessed booking cannot be read or cancelled
+  ---
+  duration_ms: 2.822368
+  type: 'test'
+  ...
+# Subtest: in-progress outage rejected without state changes
+ok 11 - in-progress outage rejected without state changes
+  ---
+  duration_ms: 1.71968
+  type: 'test'
+  ...
+# Subtest: unknown capability never matches a required facility
+ok 12 - unknown capability never matches a required facility
+  ---
+  duration_ms: 0.545017
+  type: 'test'
+  ...
+# Subtest: time zones and daylight saving use office-local hours
+ok 13 - time zones and daylight saving use office-local hours
+  ---
+  duration_ms: 1.442453
+  type: 'test'
+  ...
+# Subtest: expiry event persists history once; invalidation blocks confirmation
+ok 14 - expiry event persists history once; invalidation blocks confirmation
+  ---
+  duration_ms: 2.468408
+  type: 'test'
+  ...
+# Subtest: notice recipient binding and explicit read flag
+ok 15 - notice recipient binding and explicit read flag
+  ---
+  duration_ms: 2.075314
+  type: 'test'
+  ...
+# Subtest: malformed and conflicting historical seeds fail validation
+ok 16 - malformed and conflicting historical seeds fail validation
+  ---
+  duration_ms: 2.393518
+  type: 'test'
+  ...
+# Subtest: replacement reports an owned conflicting hold and succeeds after explicit release
+ok 17 - replacement reports an owned conflicting hold and succeeds after explicit release
+  ---
+  duration_ms: 3.145031
+  type: 'test'
+  ...
+# Subtest: history selection excludes future outcomes and retains complete replacement chains
+ok 18 - history selection excludes future outcomes and retains complete replacement chains
+  ---
+  duration_ms: 86.372463
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 120.723376

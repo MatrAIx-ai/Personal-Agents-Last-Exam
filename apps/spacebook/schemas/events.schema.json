@@ -1,0 +1,375 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+        },
+        "operation": {
+          "const": "spacebook.resource_block"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "block_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "resource_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "start_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+            },
+            "end_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "block_id",
+            "resource_id",
+            "start_at",
+            "end_at",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+        },
+        "operation": {
+          "const": "spacebook.resource_unblock"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "block_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "block_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+        },
+        "operation": {
+          "const": "spacebook.actor_action"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "action": {
+                  "const": "holds.create"
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "room_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "equipment_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "maxItems": 2,
+                      "uniqueItems": true
+                    },
+                    "start_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+                    },
+                    "end_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "room_id",
+                    "equipment_ids",
+                    "start_at",
+                    "end_at",
+                    "title"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "args"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "action": {
+                  "const": "holds.release"
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "args"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "action": {
+                  "const": "holds.confirm"
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "args"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "action": {
+                  "const": "bookings.replace"
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "room_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "equipment_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "maxItems": 2,
+                      "uniqueItems": true
+                    },
+                    "start_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+                    },
+                    "end_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "room_id",
+                    "equipment_ids",
+                    "start_at",
+                    "end_at",
+                    "title"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "args"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "actor_person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "action": {
+                  "const": "bookings.cancel"
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "actor_person_id",
+                "action",
+                "args"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Offset-qualified instant. Use local wall time with its UTC offset OR converted UTC with Z, never both conversions. For example 14:00-08:00 equals 22:00Z, not 22:00-08:00."
+        },
+        "operation": {
+          "const": "spacebook.expire_holds"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

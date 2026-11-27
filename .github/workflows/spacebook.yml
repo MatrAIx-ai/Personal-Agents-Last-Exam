@@ -1,0 +1,36 @@
+name: SpaceBook business and browser evidence
+on:
+  pull_request:
+    paths:
+      - 'apps/spacebook/**'
+      - '.github/workflows/spacebook.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  spacebook:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node apps/spacebook/scripts/contracts.cjs --check
+      - run: node apps/spacebook/scripts/dataset.cjs --check
+      - run: node --test apps/spacebook/tests/business.test.cjs apps/spacebook/tests/history.test.cjs
+      - run: node apps/spacebook/tests/reference-controls.cjs
+      - run: node apps/spacebook/tests/integration.cjs
+      - run: node apps/spacebook/tests/dataset.cjs
+      - run: node apps/spacebook/tests/browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spacebook-evidence
+          path: .artifacts/spacebook/
+          include-hidden-files: true

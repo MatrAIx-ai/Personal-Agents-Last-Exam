@@ -1,0 +1,98 @@
+{
+  "kind": "spacebook-agent-smoke",
+  "checked_at": "2026-11-27T22:27:27.922Z",
+  "app_sha256": "53ce0db4fd95e6bff325307dbd0d9c9e7aff469499f327638c976c66d945f465",
+  "runtime": "1.6.0",
+  "node": "v22.16.0",
+  "models": [
+    "gpt-4.1-mini-2025-04-14",
+    "gpt-4.1-2025-04-14"
+  ],
+  "configuration": {
+    "temperature": 0,
+    "max_rounds": 16,
+    "max_completion_tokens": 1200,
+    "parallel_tool_calls": false,
+    "budget_reservation_cap_usd": 30,
+    "input_reserve_per_million": 10,
+    "output_reserve_per_million": 40
+  },
+  "runs": [
+    {
+      "model": "gpt-4.1-mini-2025-04-14",
+      "scenario": "ordinary",
+      "trace": "smoke-0.json",
+      "passed": true,
+      "completed": true,
+      "grade": {
+        "one_active": true,
+        "suitable": true,
+        "correct_time": true,
+        "no_active_holds": true,
+        "replacement": true
+      },
+      "usage": {
+        "prompt_tokens": 11649,
+        "completion_tokens": 283
+      }
+    },
+    {
+      "model": "gpt-4.1-mini-2025-04-14",
+      "scenario": "outage-replacement",
+      "trace": "smoke-1.json",
+      "passed": false,
+      "completed": true,
+      "grade": {
+        "one_active": false,
+        "suitable": false,
+        "correct_time": false,
+        "no_active_holds": true,
+        "replacement": false
+      },
+      "usage": {
+        "prompt_tokens": 6609,
+        "completion_tokens": 166
+      }
+    },
+    {
+      "model": "gpt-4.1-2025-04-14",
+      "scenario": "ordinary",
+      "trace": "smoke-2.json",
+      "passed": true,
+      "completed": true,
+      "grade": {
+        "one_active": true,
+        "suitable": true,
+        "correct_time": true,
+        "no_active_holds": true,
+        "replacement": true
+      },
+      "usage": {
+        "prompt_tokens": 11648,
+        "completion_tokens": 285
+      }
+    },
+    {
+      "model": "gpt-4.1-2025-04-14",
+      "scenario": "outage-replacement",
+      "trace": "smoke-3.json",
+      "passed": false,
+      "completed": true,
+      "grade": {
+        "one_active": false,
+        "suitable": false,
+        "correct_time": false,
+        "no_active_holds": false,
+        "replacement": false
+      },
+      "usage": {
+        "prompt_tokens": 30923,
+        "completion_tokens": 705
+      }
+    }
+  ],
+  "purpose": "Environment usability smoke only; not Task difficulty qualification.",
+  "conservative_reserved_usd": 4.083560000000001,
+  "passed": false,
+  "billing_note": "Reservation is an intentionally conservative bound at configured rates, not an API invoice; actual token usage is recorded per run."
+}
