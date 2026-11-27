@@ -399,10 +399,17 @@ function grade(trace, files) {
     f1.push(e.seq);
   }
 
-  const listEvent = events.find((e) => e.type === 'agent' && isProposedList(e.text));
+  const proposalOpenBefore = (seq) => {
+    const texts = [];
+    for (const event of events) {
+      if (event.seq >= seq) break;
+      if (event.type === 'agent' && event.session_id === 's1') texts.push(event.text);
+    }
+    return survivingProposal(texts).trim().length > 0;
+  };
   const approvalEvent = variant === 'no-reply'
     ? events.find((e) => e.type === 'user' && e.text === rules.no_reply_text)
-    : events.find((e) => e.type === 'user' && e.text === rules.approval_text && listEvent && e.seq > listEvent.seq);
+    : events.find((e) => e.type === 'user' && e.text === rules.approval_text && proposalOpenBefore(e.seq));
   const f2 = [];
   const cutoffMs = Date.parse(timeline.s2.at);
   for (const e of events) {

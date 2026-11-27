@@ -163,7 +163,14 @@ function nameInText(text, needle) {
   return needle.length >= 4 && plain(text).includes(needle);
 }
 
-function senderInsideGroup(needle, members) {
+function namesCover(names, needle) {
+  return (names || []).some((name) => {
+    const item = plain(name);
+    return item.length >= 4 && (item === needle || item.includes(needle) || needle.includes(item));
+  });
+}
+
+function senderStaysInGroup(needle, members) {
   const inside = new Set(members.map((member) => member.id));
   let seen = false;
   for (const [id, sender] of Object.entries(loadLabels().senders || {})) {
@@ -175,11 +182,37 @@ function senderInsideGroup(needle, members) {
   return seen;
 }
 
+function statesNumber(sentence, n) {
+  const body = String(sentence);
+  const digits = String(n);
+  let from = 0;
+  while (from < body.length) {
+    const at = body.indexOf(digits, from);
+    if (at < 0) return false;
+    const before = at > 0 ? body[at - 1] : '';
+    const after = body[at + digits.length] || '';
+    if (!/\d/.test(before) && !/\d/.test(after)) return true;
+    from = at + 1;
+  }
+  return false;
+}
+
+function threadKeepOnly(text, needle, members) {
+  if (senderStaysInGroup(needle, members)) return false;
+  const hits = splitSentences(text).filter((sentence) => plain(sentence).includes(needle));
+  if (!hits.length) return false;
+  return hits.every((sentence) => {
+    const row = retailRow(sentence);
+    if (row && row.scope === 'subset' && row.n > 0 && statesNumber(sentence, row.n) && (namesCover(row.exclude, needle) || namesCover(row.include, needle))) return false;
+    return read('keep_replied', sentence).v === 'keep';
+  });
+}
+
 function matchedIds(text, names, members) {
   const ids = new Set();
   for (const wanted of names || []) {
     const needle = plain(wanted);
-    if (!nameInText(text, needle) || !senderInsideGroup(needle, members)) continue;
+    if (!nameInText(text, needle) || threadKeepOnly(text, needle, members)) continue;
     for (const member of members) {
       const sender = plain(member.name);
       if (sender && (sender.includes(needle) || needle.includes(sender))) ids.add(member.id);
@@ -231,7 +264,6 @@ function plain(text) {
   return String(text || '').toLowerCase().replace(/[\u2019']/g, "'").replace(/\s+/g, ' ').trim();
 }
 
-const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const MONTHS = {
   january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
   july: '07', august: '08', september: '09', october: '10', november: '11', december: '12'
@@ -268,15 +300,6 @@ function aboutSignature(sentence, mail) {
   return plain(mail.body).includes('signature request') && body.includes('signature') && tokens.some((token) => body.includes(token));
 }
 
-function weekdayAgrees(quote, iso) {
-  const body = plain(quote);
-  const named = WEEKDAYS.filter((name) => new RegExp('\\b' + name + '\\b').test(body));
-  if (!named.length) return true;
-  const parts = iso.split('-').map(Number);
-  const weekday = WEEKDAYS[new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay()];
-  return named.every((name) => name === weekday);
-}
-
 function deadlineState(text) {
   if (!text) return null;
   const row = read('deadline', text) || {};
@@ -287,7 +310,6 @@ function deadlineState(text) {
   if (!spanIn(text, quote) || !spanIn(text, document)) return null;
   const mail = mailSignature();
   if (!aboutSignature(sentenceWith(text, quote), mail)) return 'bad';
-  if (!weekdayAgrees(quote, date)) return 'bad';
   if (!mail.date || date !== mail.date) return 'bad';
   return 'ok';
 }
