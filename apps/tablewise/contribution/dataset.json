@@ -1,0 +1,46 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "tablewise-m1",
+  "version": "0.1.0",
+  "description": "Original fictional six-venue scene and monthly historical activity from 2025-01-01. Task-ready timeline starts 2026-01-01.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Deterministically authored synthetic restaurant scene and original electronic menus.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic script",
+        "tool": "Tablewise build-package.py",
+        "tool_version": "0.1.0",
+        "seed": 1,
+        "parameters": {
+          "scene": "m1"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "All prices and venues fictional; amounts are USD integer cents."
+  ],
+  "expected_counts": {
+    "records": 67,
+    "assets": 6
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

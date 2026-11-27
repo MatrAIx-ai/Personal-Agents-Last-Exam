@@ -1,0 +1,1097 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "overlap_policy": {
+      "enum": [
+        "strict_gap",
+        "bounded_overlap"
+      ]
+    },
+    "venues": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/venue"
+      },
+      "maxItems": 500
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/slot"
+      },
+      "maxItems": 500
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/plan"
+      },
+      "maxItems": 500
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/grant"
+      },
+      "maxItems": 500
+    },
+    "holds": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/hold"
+      },
+      "maxItems": 500
+    },
+    "previews": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/preview"
+      },
+      "maxItems": 500
+    },
+    "reservations": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/reservation"
+      },
+      "maxItems": 500
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/receipt"
+      },
+      "maxItems": 500
+    },
+    "inquiries": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/inquiry"
+      },
+      "maxItems": 500
+    },
+    "quotes": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/quote"
+      },
+      "maxItems": 500
+    },
+    "refunds": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/refund"
+      },
+      "maxItems": 500
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/notice"
+      },
+      "maxItems": 500
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/history"
+      },
+      "maxItems": 500
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "next_id",
+    "overlap_policy",
+    "venues",
+    "slots",
+    "plans",
+    "grants",
+    "holds",
+    "previews",
+    "reservations",
+    "receipts",
+    "inquiries",
+    "quotes",
+    "refunds",
+    "notices",
+    "history"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "version": {
+      "type": "object",
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "epoch",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "terms": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "menu_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "minimum_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "service_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "tax_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "deposit_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "late_fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "cancel_hours": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "revision",
+        "menu_cents",
+        "minimum_cents",
+        "service_bps",
+        "tax_bps",
+        "deposit_cents",
+        "late_fee_cents",
+        "cancel_hours",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "venue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "cuisine": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "neighborhood": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "max_party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "accessible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outdoor": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terms": {
+          "$ref": "seed.schema.json#/$defs/terms"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "cuisine",
+        "neighborhood",
+        "description",
+        "max_party_size",
+        "accessible",
+        "outdoor",
+        "terms"
+      ],
+      "additionalProperties": false
+    },
+    "slot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "starts_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "external_booked_seats": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "release_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "venue_id",
+        "starts_at",
+        "duration_minutes",
+        "capacity",
+        "external_booked_seats",
+        "release_at"
+      ],
+      "additionalProperties": false
+    },
+    "participant": {
+      "type": "object",
+      "properties": {
+        "person_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "status": {
+          "enum": [
+            "invited",
+            "accepted",
+            "pending",
+            "declined"
+          ]
+        },
+        "dietary_note": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "audience": {
+          "enum": [
+            "host",
+            "kitchen"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "person_id",
+        "name",
+        "status",
+        "dietary_note",
+        "audience",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/participant"
+          },
+          "maxItems": 500
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "active",
+            "historical"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "party_size",
+        "participants",
+        "revision",
+        "status",
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "grant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "venues": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 500
+        },
+        "date_from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "date_to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "max_party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_active_bookings": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_active_holds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_charge_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "max_deposit_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "max_fee_exposure_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked": {
+          "type": "boolean"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id",
+        "venues",
+        "date_from",
+        "date_to",
+        "max_party_size",
+        "max_active_bookings",
+        "max_active_holds",
+        "max_charge_cents",
+        "max_deposit_cents",
+        "max_fee_exposure_cents",
+        "expires_at",
+        "revoked",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "hold": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "slot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "held",
+            "released",
+            "consumed"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "slot_id",
+        "party_size",
+        "expires_at",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "cost": {
+      "type": "object",
+      "properties": {
+        "food_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "service_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "tax_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "total_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "deposit_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "food_cents",
+        "service_cents",
+        "tax_cents",
+        "total_cents",
+        "deposit_cents",
+        "balance_cents"
+      ],
+      "additionalProperties": false
+    },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "slot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "starts_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "terms": {
+          "$ref": "seed.schema.json#/$defs/terms"
+        },
+        "cost": {
+          "$ref": "seed.schema.json#/$defs/cost"
+        },
+        "free_cancel_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "slot_id",
+        "venue_id",
+        "starts_at",
+        "party_size",
+        "terms",
+        "cost",
+        "free_cancel_until"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "kind": {
+          "enum": [
+            "book",
+            "change",
+            "cancel"
+          ]
+        },
+        "reservation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reservation_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "hold_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "snapshot": {
+          "$ref": "seed.schema.json#/$defs/snapshot"
+        },
+        "charge_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "refund_due_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "used": {
+          "type": "boolean"
+        },
+        "deposit_credit_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "reservation_id",
+        "reservation_revision",
+        "hold_id",
+        "grant_id",
+        "snapshot",
+        "charge_cents",
+        "fee_cents",
+        "refund_due_cents",
+        "expires_at",
+        "used"
+      ],
+      "additionalProperties": false
+    },
+    "reservation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "confirmed",
+            "cancelled",
+            "attended",
+            "no_show"
+          ]
+        },
+        "snapshot": {
+          "$ref": "seed.schema.json#/$defs/snapshot"
+        },
+        "guaranteed_headcount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "confirmed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deposit_paid_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "refund_due_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "refund_paid_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/snapshot"
+          },
+          "maxItems": 500
+        },
+        "balance_due_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "id",
+        "plan_id",
+        "revision",
+        "status",
+        "snapshot",
+        "guaranteed_headcount",
+        "confirmed_at",
+        "cancelled_at",
+        "deposit_paid_cents",
+        "fee_cents",
+        "refund_due_cents",
+        "refund_paid_cents",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reservation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id",
+        "reservation_id",
+        "kind",
+        "at",
+        "text",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "inquiry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "menu_request": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "quoted"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "venue_id",
+        "plan_id",
+        "party_size",
+        "menu_request",
+        "status",
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "inquiry_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "guaranteed_headcount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dietary_reply": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id",
+        "inquiry_id",
+        "revision",
+        "available",
+        "guaranteed_headcount",
+        "minimum_cents",
+        "valid_until",
+        "dietary_reply",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "refund": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reservation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "reservation_id",
+        "amount_cents",
+        "source_ref",
+        "at"
+      ],
+      "additionalProperties": false
+    },
+    "notice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reservation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 5000
+        }
+      },
+      "required": [
+        "id",
+        "reservation_id",
+        "at",
+        "title",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "history": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id",
+        "plan_name",
+        "venue_id",
+        "date",
+        "party_size",
+        "total_cents",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

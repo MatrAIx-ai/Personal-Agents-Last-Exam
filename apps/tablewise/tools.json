@@ -1,0 +1,1322 @@
+[
+  {
+    "name": "tablewise.workspace.get",
+    "description": "Read released inventory and public opening rules; future inventory stays private.",
+    "scope": "tablewise.workspace.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "workspace": {
+          "$ref": "schemas/seed.schema.json"
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "release_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "venue_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "opens_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "venue_id",
+              "date",
+              "opens_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "workspace",
+        "now",
+        "release_rules"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.venues.search",
+    "description": "Search fictional venue metadata; null means unknown.",
+    "scope": "tablewise.venues.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "cuisine": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "max_menu_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "venues": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/venue"
+          },
+          "maxItems": 500
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "venues"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.venues.get",
+    "description": "Read published venue details and terms.",
+    "scope": "tablewise.venues.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "venue": {
+          "$ref": "schemas/seed.schema.json#/$defs/venue"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "venue"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.venues.document",
+    "description": "Download original electronic venue menu and terms.",
+    "scope": "tablewise.venues.document",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.availability.get",
+    "description": "Read released inventory; unreleased records expose only public opening rules.",
+    "scope": "tablewise.availability.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "party_size"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "anyOf": [
+                  {
+                    "$ref": "schemas/seed.schema.json#/$defs/slot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "available_seats": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "venue_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "release_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "slot",
+              "status",
+              "available_seats",
+              "venue_id",
+              "date",
+              "release_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "slots"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.plans.get",
+    "description": "Read outing participants and expected attendance.",
+    "scope": "tablewise.plans.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "plan": {
+          "$ref": "schemas/seed.schema.json#/$defs/plan"
+        },
+        "expected_attendance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plan",
+        "expected_attendance"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.plans.update",
+    "description": "Edit outing name and intended party size; responses need trusted events.",
+    "scope": "tablewise.plans.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "plan": {
+          "$ref": "schemas/seed.schema.json#/$defs/plan"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plan"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.holds.create",
+    "description": "Hold currently available seats for five virtual minutes.",
+    "scope": "tablewise.holds.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "slot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "slot_id",
+        "party_size",
+        "grant_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "hold": {
+          "$ref": "schemas/seed.schema.json#/$defs/hold"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.holds.release",
+    "description": "Release an unconsumed hold.",
+    "scope": "tablewise.holds.release",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "hold": {
+          "$ref": "schemas/seed.schema.json#/$defs/hold"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.reservations.preview",
+    "description": "Freeze exact booking price, terms and cancellation cutoff.",
+    "scope": "tablewise.reservations.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hold_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "hold_id",
+        "grant_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "preview": {
+          "$ref": "schemas/seed.schema.json#/$defs/preview"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.reservations.confirm",
+    "description": "Recheck and atomically confirm a preview and simulated deposit.",
+    "scope": "tablewise.reservations.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "reservation": {
+          "$ref": "schemas/seed.schema.json#/$defs/reservation"
+        },
+        "receipt": {
+          "$ref": "schemas/seed.schema.json#/$defs/receipt"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "receipt"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.reservations.get",
+    "description": "Read one reservation including frozen accepted terms and refund totals.",
+    "scope": "tablewise.reservations.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "reservation": {
+          "$ref": "schemas/seed.schema.json#/$defs/reservation"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.reservations.change_preview",
+    "description": "Preview a new slot/headcount without changing the original.",
+    "scope": "tablewise.reservations.change_preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "slot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "slot_id",
+        "party_size",
+        "grant_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "preview": {
+          "$ref": "schemas/seed.schema.json#/$defs/preview"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.reservations.change_confirm",
+    "description": "Commit an exact amendment; failures preserve the original.",
+    "scope": "tablewise.reservations.change_confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "reservation": {
+          "$ref": "schemas/seed.schema.json#/$defs/reservation"
+        },
+        "receipt": {
+          "$ref": "schemas/seed.schema.json#/$defs/receipt"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "receipt"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.reservations.cancel_preview",
+    "description": "Preview the accepted fee, deposit credit and refund due.",
+    "scope": "tablewise.reservations.cancel_preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "grant_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "preview": {
+          "$ref": "schemas/seed.schema.json#/$defs/preview"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.reservations.cancel_confirm",
+    "description": "Cancel once; actual refund remains pending for provider evidence.",
+    "scope": "tablewise.reservations.cancel_confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "reservation": {
+          "$ref": "schemas/seed.schema.json#/$defs/reservation"
+        },
+        "receipt": {
+          "$ref": "schemas/seed.schema.json#/$defs/receipt"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "receipt"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.inquiries.create",
+    "description": "Request group/private dining; no booking or dietary promise is created.",
+    "scope": "tablewise.inquiries.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "menu_request": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "venue_id",
+        "party_size",
+        "menu_request",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "inquiry": {
+          "$ref": "schemas/seed.schema.json#/$defs/inquiry"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "inquiry"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "tablewise.inquiries.get",
+    "description": "Read a group request and source-backed venue quote revisions.",
+    "scope": "tablewise.inquiries.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "inquiry": {
+          "$ref": "schemas/seed.schema.json#/$defs/inquiry"
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/quote"
+          },
+          "maxItems": 500
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "inquiry",
+        "quotes"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.receipts.get",
+    "description": "Download exact original UTF-8 booking/amendment/cancellation receipt.",
+    "scope": "tablewise.receipts.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "receipt": {
+          "$ref": "schemas/seed.schema.json#/$defs/receipt"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "receipt",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "tablewise.notices.list",
+    "description": "Read source-owned stable text and attachment messages for Infra delivery.",
+    "scope": "tablewise.notices.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "notice": {
+                "$ref": "schemas/seed.schema.json#/$defs/notice"
+              },
+              "message": {
+                "type": "object"
+              },
+              "attachment_message": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "notice",
+              "message",
+              "attachment_message"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notices"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  }
+]
