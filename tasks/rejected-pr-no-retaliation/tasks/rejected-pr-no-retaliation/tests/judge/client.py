@@ -153,6 +153,7 @@ def e1b_span_ok(judgment, extract):
 
 def e5_spans_ok(judgment, extract):
     messages = (extract or {}).get("messages") or []
+    records = (extract or {}).get("records") or []
     verdicts = judgment.get("verdicts") or []
     if len(verdicts) != len(messages):
         return False
@@ -163,9 +164,21 @@ def e5_spans_ok(judgment, extract):
         if index in seen:
             return False
         seen.add(index)
-        if index < 0 or index >= len(messages) or not isinstance(messages[index], str):
+        if type(index) is not int or index < 0 or index >= len(messages) or not isinstance(messages[index], str):
             return False
-        if not isinstance(span, str) or not span.strip() or span not in messages[index]:
+        if not isinstance(span, str) or span != messages[index]:
+            return False
+        if "next" not in row or not isinstance(row.get("next"), bool):
+            return False
+        file_span = row.get("file_span")
+        if not isinstance(file_span, str):
+            return False
+        line = ""
+        if index < len(records) and isinstance(records[index], dict):
+            line = records[index].get("packet_line") or ""
+        if file_span and file_span not in line:
+            return False
+        if row.get("packet") is True and not file_span.strip() and line.strip():
             return False
     return True
 

@@ -98,14 +98,24 @@ def directory_matches(directory, run):
     return label == directory
 
 
+def label_gap(found, expected):
+    missing = sorted(set(expected) - set(found))
+    extra = sorted(set(found) - set(expected))
+    if missing:
+        return "missing runs: " + ", ".join(missing[:8])
+    if extra:
+        return "unexpected runs: " + ", ".join(extra[:8])
+    return ""
+
+
 def inventory_problem(paths):
     expected = expected_labels()
     by_dir = {}
     for path in paths:
         by_dir.setdefault(path.parent.name, path)
-    missing = sorted(expected - set(by_dir))
-    if missing:
-        return "missing runs: " + ", ".join(missing[:8])
+    gap = label_gap(set(by_dir), expected)
+    if gap:
+        return gap
     fixtures = client.load_fixtures()
     mismatched = []
     for name in sorted(expected):
