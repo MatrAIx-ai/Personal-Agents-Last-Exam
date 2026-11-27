@@ -20,6 +20,7 @@ CONTENT_FIELDS = {
     "e1b": ("messages",),
     "e2": ("description",),
     "e4": ("text",),
+    "e5_thursday": ("messages",),
     "f2": ("passage",),
     "f5": ("text", "subject", "body"),
     "approval_reply": ("text",),
@@ -81,6 +82,8 @@ def valid(item, judgment):
         return all(isinstance(judgment.get(key), bool) for key in ("accurate", "majority"))
     if item == "e4":
         return all(isinstance(judgment.get(key), bool) for key in ("closed", "follow_up", "awaiting"))
+    if item == "e5_thursday":
+        return isinstance(judgment.get("covers"), bool)
     if item == "f2":
         return isinstance(judgment.get("triggered"), bool)
     if item == "f5":
