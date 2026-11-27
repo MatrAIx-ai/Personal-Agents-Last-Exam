@@ -8,7 +8,8 @@ Node 18 or later, no installed packages.
 
 ```sh
 cd apps/plateway
-npm test                    # App-only business tests (no runtime code)
+npm test                    # App-only business tests, then the delivery dataset tests (no runtime code)
+npm run dataset             # the delivery dataset tests alone
 npm run example             # standalone event example
 node dev/check-fixture.cjs  # content checks for the representative fixture
 npm run mcp                 # real MCP checks on the pinned runtime
