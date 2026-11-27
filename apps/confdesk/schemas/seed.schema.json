@@ -1,0 +1,1337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:confdesk:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "mail_account_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "conference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "short_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "venue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "starts_on": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD."
+        },
+        "ends_on": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD."
+        },
+        "registration_prefix": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{2,12}$",
+          "description": "Registration IDs are <prefix>-R-<number, 4 digits>."
+        },
+        "registration_number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "description": "Number the desk assigns to this account's registration."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code."
+        },
+        "author_rates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The rate applies to registrations from this instant until the next row."
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000000
+              }
+            },
+            "required": [
+              "from",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "description": "Author rate schedule in from order; the first row starts at or before opens_at."
+        },
+        "rate_covers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 20,
+          "minItems": 1
+        },
+        "preview_ttl_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1440
+        },
+        "letter_business_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60,
+          "description": "The invitation letter is issued this many business days after the registration date."
+        },
+        "correction_business_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60,
+          "description": "A corrected letter is issued this many business days after the correction request date."
+        },
+        "letter_signatory": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "window": {
+          "type": "object",
+          "properties": {
+            "opens_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Last instant at which an author registration is accepted; the program deadline."
+            },
+            "opened_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "When Infra applied confdesk.registration.open."
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "When Infra applied confdesk.deadline.passed."
+            }
+          },
+          "required": [
+            "opens_at",
+            "closes_at",
+            "opened_at",
+            "closed_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "short_name",
+        "name",
+        "venue",
+        "city",
+        "country",
+        "starts_on",
+        "ends_on",
+        "registration_prefix",
+        "registration_number",
+        "currency",
+        "author_rates",
+        "rate_covers",
+        "preview_ttl_minutes",
+        "letter_business_days",
+        "correction_business_days",
+        "letter_signatory",
+        "window"
+      ],
+      "additionalProperties": false
+    },
+    "business_calendar": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "IANA time zone in which business dates are counted."
+        },
+        "holidays": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD."
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "date",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 400,
+          "description": "Dates that are not business days, besides Saturdays and Sundays."
+        }
+      },
+      "required": [
+        "timezone",
+        "holidays"
+      ],
+      "additionalProperties": false,
+      "description": "Optional. Without it the desk uses its default calendar (America/Chicago, US federal holidays 2026-2028); holidays [] means no holidays."
+    },
+    "attendee": {
+      "type": "object",
+      "properties": {
+        "details": {
+          "type": "object",
+          "properties": {
+            "salutation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "surname": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "given_names": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "date_of_birth": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Calendar date YYYY-MM-DD."
+            },
+            "nationality": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "salutation",
+            "surname",
+            "given_names",
+            "date_of_birth",
+            "nationality"
+          ],
+          "additionalProperties": false
+        },
+        "affiliation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "at",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "details",
+        "affiliation",
+        "created_at",
+        "updated_at",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "paper": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99999
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maxItems": 30,
+          "minItems": 1
+        },
+        "session": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "awaiting_registration",
+            "in_program",
+            "removed"
+          ]
+        },
+        "registration_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "removed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "at",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "id",
+        "number",
+        "title",
+        "authors",
+        "session",
+        "submitted_at",
+        "accepted_at",
+        "status",
+        "registration_id",
+        "removed_at",
+        "created_at",
+        "updated_at",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "registration": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "type": {
+              "const": "author"
+            },
+            "status": {
+              "const": "completed"
+            },
+            "paper_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "preview_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "previewed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "completed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "rate": {
+              "type": "object",
+              "properties": {
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000000
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$",
+                  "description": "ISO 4217 currency code."
+                }
+              },
+              "required": [
+                "amount_cents",
+                "currency"
+              ],
+              "additionalProperties": false
+            },
+            "covers": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "maxItems": 20
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "description": "Opaque payment label, one of the account's payment_labels."
+            },
+            "payment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "status",
+            "paper_id",
+            "preview_id",
+            "previewed_at",
+            "completed_at",
+            "rate",
+            "covers",
+            "payment_label",
+            "payment_id",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payment_labels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80,
+        "description": "Opaque payment label, one of the account's payment_labels."
+      },
+      "maxItems": 20,
+      "uniqueItems": true
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Opaque payment label, one of the account's payment_labels."
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "ISO 4217 currency code."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "registration_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "label",
+          "amount_cents",
+          "currency",
+          "description",
+          "registration_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "letters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "registration_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "original",
+              "corrected"
+            ]
+          },
+          "correction_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name_on_letter": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 170,
+            "description": "SURNAME Given names, as printed."
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "salutation": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "surname": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "given_names": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "date_of_birth": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD."
+              },
+              "nationality": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "salutation",
+              "surname",
+              "given_names",
+              "date_of_birth",
+              "nationality"
+            ],
+            "additionalProperties": false
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "business_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "counted_from": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+          },
+          "due_on": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+          },
+          "status": {
+            "enum": [
+              "current",
+              "superseded"
+            ]
+          },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "registration_id",
+          "kind",
+          "correction_id",
+          "name_on_letter",
+          "details",
+          "issued_at",
+          "business_days",
+          "counted_from",
+          "due_on",
+          "status",
+          "superseded_by",
+          "text",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "correction_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "via": {
+            "const": "letter.request_correction"
+          },
+          "letter_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "salutation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "surname": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "given_names": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "date_of_birth": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD."
+              },
+              "nationality": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [],
+            "additionalProperties": false,
+            "description": "Corrected values; at least one field."
+          },
+          "business_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "counted_from": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+          },
+          "expected_on": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "issued"
+            ]
+          },
+          "issued_letter_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "issued_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "via",
+          "letter_id",
+          "fields",
+          "business_days",
+          "counted_from",
+          "expected_on",
+          "status",
+          "issued_letter_id",
+          "issued_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "registration_confirmed",
+              "letter_issued",
+              "correction_issued",
+              "paper_removed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "ref": {
+            "type": "object",
+            "properties": {
+              "object_type": {
+                "enum": [
+                  "registration",
+                  "invitation_letter",
+                  "paper"
+                ]
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "required": [
+              "object_type",
+              "object_id"
+            ],
+            "additionalProperties": false
+          },
+          "message": {
+            "anyOf": [
+              {
+                "$id": "urn:pale:email-message:2",
+                "title": "CloudEvents 1.0 + Mail Email payload v1",
+                "description": "Generated from the PALE CloudEvents JSON profile and Mail-owned email-payload.schema.json. Do not hand-edit copies.",
+                "type": "object",
+                "properties": {
+                  "specversion": {
+                    "const": "1.0"
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 150
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+                    "maxLength": 512
+                  },
+                  "type": {
+                    "const": "org.pale.mail.notification.v1"
+                  },
+                  "time": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "datacontenttype": {
+                    "const": "application/json"
+                  },
+                  "dataschema": {
+                    "const": "urn:pale:email-payload:1"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "channel": {
+                        "const": "channel.email"
+                      },
+                      "recipient": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "person_ref",
+                              "app_account_ref",
+                              "device_ref"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "app_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$",
+                            "description": "Required by PALE validation when kind is app_account_ref."
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "source_object": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "account_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id",
+                          "account_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "body": {
+                            "type": "object",
+                            "properties": {
+                              "format": {
+                                "const": "text/plain"
+                              },
+                              "text": {
+                                "type": "string",
+                                "maxLength": 20000
+                              }
+                            },
+                            "required": [
+                              "format",
+                              "text"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "asset_ids": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            },
+                            "uniqueItems": true,
+                            "maxItems": 0
+                          },
+                          "template_ref": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "deep_link": {
+                            "type": "object",
+                            "properties": {
+                              "app_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              },
+                              "route_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              },
+                              "object_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              }
+                            },
+                            "required": [
+                              "app_id",
+                              "route_id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "title",
+                          "body",
+                          "asset_ids"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "subscription_ref": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "extensions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "namespace": {
+                              "type": "string",
+                              "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+                            },
+                            "version": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "required": {
+                              "type": "boolean"
+                            },
+                            "data": {
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "namespace",
+                            "version",
+                            "required",
+                            "data"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "channel",
+                      "recipient",
+                      "source_object",
+                      "content",
+                      "extensions"
+                    ],
+                    "additionalProperties": false,
+                    "$id": "urn:pale:email-payload:1",
+                    "title": "Mail-owned Email notification payload",
+                    "description": "Business data only. Maintained by Mail; publisher packages consume a pinned copy."
+                  }
+                },
+                "required": [
+                  "specversion",
+                  "id",
+                  "source",
+                  "type",
+                  "datacontenttype",
+                  "dataschema",
+                  "data"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mail CloudEvent for Infra to publish through Messaging; null without a bound Mail account."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "title",
+          "body",
+          "ref",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "operation": {
+            "enum": [
+              "confdesk.registration.open",
+              "confdesk.deadline.passed",
+              "confdesk.letter.issue",
+              "confdesk.correction.issue"
+            ]
+          },
+          "result": {
+            "enum": [
+              "opened",
+              "kept",
+              "removed",
+              "issued"
+            ]
+          },
+          "object_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "event_id",
+          "at",
+          "operation",
+          "result",
+          "object_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "mail_account_id",
+    "conference",
+    "attendee",
+    "paper",
+    "registration",
+    "payment_labels",
+    "payments",
+    "letters",
+    "correction_requests",
+    "notices",
+    "events"
+  ],
+  "additionalProperties": false
+}

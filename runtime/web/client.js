@@ -219,14 +219,15 @@ export async function mount(config){
           args.request_id=pendingWrite.id;
         }
         const result=await call(action.tool,args);
-        if(result.file){const f=result.file;download(f.filename,f.mime_type,Uint8Array.from(atob(f.base64),c=>c.charCodeAt(0)));}
+        // Only a file that carries base64 (even an empty string for a zero-byte file) is a download; an App record named `file` is shown like any other result.
+        if(typeof result.file?.base64==='string'){const f=result.file;download(f.filename,f.mime_type,Uint8Array.from(atob(f.base64),c=>c.charCodeAt(0)));}
         if(result.text&&result.mime_type)download('event.ics',result.mime_type,result.text);
         if(action.exportResult)download(action.exportResult,'application/json',JSON.stringify(result,null,2));
         dialog.close();
         // Keep newly created or moved items visible in their destination folder.
         if(config.sectionAfter){const next=config.sectionAfter(action.tool,args,result,item,ui);if(next){section=next;sessionStorage.setItem(config.id+'-section',section);}}
         await refresh(result.id||item?.id);
-        if(!tool.inputSchema.properties.expected_version&&!result.file&&!result.text&&!action.exportResult){
+        if(!tool.inputSchema.properties.expected_version&&typeof result.file?.base64!=='string'&&!result.text&&!action.exportResult){
           const output=el('section',{class:'query-result'},el('h3',{},action.label));
           for(const [key,value]of Object.entries(result))if(!['status','version','app_id'].includes(key))output.append(el('h4',{},title(key)),el('pre',{},visibleValue(value)));
           detail.append(output);

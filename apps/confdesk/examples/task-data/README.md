@@ -1,0 +1,7 @@
+# Task data
+
+`seed.json` is a history seed at 2027-03-10T18:10:00-06:00 (load it with that `virtual_now`): the window opened at 2027-02-22T09:00:00-06:00, registration `SCDA27-R-0388` was completed at 09:05, letter `letter-0388` (ZHOU Mingyu) was issued at 2027-03-08T10:00:00-06:00, and correction `correction-0388-1` (surname ZHAO) is pending, due on 2027-03-26. It is what a Task would load to start a session after the correction request.
+
+Replace the seed, binding and policies together, then use `env.validate_bundle` and `env.load_seed`. These files are input examples; loading is an Infra operation. A Task supplies its own conference, window, rate schedule, attendee details (errors included), paper and any history (registration, payment, letters, corrections, notices with their Mail messages, applied event IDs). `validateSeed` checks that history against the desk rules. `mail_account_id` must be a bound Mail account of the attendee, or null (then notices carry no Mail message). Add `business_calendar` to replace the default calendar; `holidays: []` means Monday to Friday with no holidays.
+
+Scenario events supply their own content and virtual time; a runner chooses when to apply them. Compute each letter event's business days from `confdesk.registration.get` (`completed_at`) or `confdesk.letter.get` (`counted_from` and `expected_on` of a correction), with the rule and calendar from `confdesk.conference.get`.

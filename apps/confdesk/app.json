@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "confdesk",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:confdesk (proposal #192, @RuihongY)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "confdesk.registration.open",
+    "confdesk.deadline.passed",
+    "confdesk.letter.issue",
+    "confdesk.correction.issue"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app and reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "The registration window opens, the deadline is processed and letters are issued only when Infra applies their events; the App never schedules itself.",
+    "One conference, one attendee account and one accepted paper per seed; author registration only, no cancellation or refund.",
+    "Letters are structured text, not PDFs; there is no passport number on the letter.",
+    "Notices carry a Mail CloudEvent in state; Infra publishes them through Messaging.",
+    "Payment labels are opaque; the payment is recorded locally, not posted to a card App."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

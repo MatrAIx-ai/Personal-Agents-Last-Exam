@@ -1,0 +1,7 @@
+# Task data
+
+Replace the seed, binding and policies together, then use `env.validate_bundle` and `env.load_seed`. These files are input examples; loading is an Infra operation. A Task supplies its own student and I-20 (`documents`, exactly one), office name and IANA time zone, the processing rule (`rules.processing_business_days`, `rules.signature_validity_months`), an optional holiday table, and its history of requests, signatures and notices. Omit `holidays` to use the built-in default table (2026–2028); give `"holidays": []` for Monday to Friday with no holidays.
+
+Request IDs are `req-NNNN`; the App numbers a new request one above the highest on file, and the signature produced by `req-NNNN` is `sig-NNNN`. A history request must satisfy the rule: `submitted_on` is the office date of `submitted_at`, `due_on` is the Nth business day after it, and a processed request was processed on or after `due_on` with a signature whose `issued_at` equals `processed_at`. At most one request may be in processing. A notice's `message` must be the CloudEvent Passage would build for it (or `null`); the simplest way to produce history is to replay the tool and the event in a script, as the fixture was.
+
+Scenario events supply their own content and virtual time; a runner chooses when to apply them. Apply `passage.request.processed` at or after 00:00 office time on the request's `due_on`, with the counted business days and skipped holidays (see the README).

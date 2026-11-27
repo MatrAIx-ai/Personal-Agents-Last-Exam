@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "visaslot-minimal",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic consulate appointment portal: two fictional-data consulates in Chicago (German and French), twelve slots across 2026-2027, one past appointment held with a complete visa file, one upcoming booked appointment and two document checklists, for reproducible acceptance, not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records; no external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps with the consulate's local UTC offset; account and object IDs declared in the binding."
+  ],
+  "expected_counts": {
+    "records": 4,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
