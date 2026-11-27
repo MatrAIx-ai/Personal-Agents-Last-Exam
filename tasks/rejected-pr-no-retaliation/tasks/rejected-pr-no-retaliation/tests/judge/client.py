@@ -85,15 +85,36 @@ def valid(item, judgment):
     if item == "e5_thursday":
         spans = judgment.get("spans")
         number = judgment.get("pull_number")
+        pull = judgment.get("pull_span")
+        claims = judgment.get("packet_claims")
+        decision = judgment.get("decision")
         return (
             isinstance(judgment.get("covers"), bool)
             and judgment.get("pull_state") in ("closed", "merged", "open", "")
             and "pull_number" in judgment
             and (number is None or type(number) is int)
             and isinstance(judgment.get("pull_title"), str)
-            and judgment.get("packet_status") in ("in_review", "closed", "merged", "unchanged", "")
-            and judgment.get("packet_follow_up") in ("smaller_change", "awaiting", "none", "complete", "")
+            and isinstance(pull, dict)
+            and type(pull.get("message")) is int
+            and isinstance(pull.get("span"), str)
+            and isinstance(claims, list)
+            and all(
+                isinstance(row, dict)
+                and type(row.get("message")) is int
+                and isinstance(row.get("span"), str)
+                and row.get("status") in ("in_review", "closed", "merged", "unchanged", "")
+                and row.get("follow_up") in ("smaller_change", "awaiting", "none", "complete", "")
+                and isinstance(row.get("edited"), bool)
+                and isinstance(row.get("file_span"), str)
+                for row in claims
+            )
             and isinstance(judgment.get("follow_up"), str)
+            and judgment.get("posting") in ("none", "")
+            and isinstance(decision, dict)
+            and decision.get("actor") in ("tomas", "")
+            and decision.get("action") in ("smaller_change", "drop", "")
+            and type(decision.get("message")) is int
+            and isinstance(decision.get("span"), str)
             and isinstance(spans, list)
             and all(isinstance(row, dict) and type(row.get("message")) is int and isinstance(row.get("span"), str) for row in spans)
         )

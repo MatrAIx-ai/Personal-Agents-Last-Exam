@@ -88,33 +88,68 @@ def expected_labels():
     return set(official) | set(adversarial)
 
 
+def directory_matches(directory, run):
+    label = run.get("label")
+    if directory == "reference-a-hinted":
+        return label == "reference-a" and bool(run.get("hinted"))
+    return label == directory
+
+
 def inventory_problem(paths):
-    found = []
-    runs = []
+    expected = expected_labels()
+    by_dir = {}
     for path in paths:
-        run = json.loads(path.read_text())
-        runs.append(run)
-        found.append(run.get("label") or path.parent.name)
-        if path.parent.name not in found:
-            found.append(path.parent.name)
-    missing = sorted(expected_labels() - set(found))
+        by_dir.setdefault(path.parent.name, path)
+    missing = sorted(expected - set(by_dir))
     if missing:
         return "missing runs: " + ", ".join(missing[:8])
-    mismatched = []
     fixtures = client.load_fixtures()
-    for run in runs:
-        label = run.get("label")
-        if label in fixtures and outcomes.verified_fixture(run) != label:
-            mismatched.append(label)
+    mismatched = []
+    for name in sorted(expected):
+        run = json.loads(by_dir[name].read_text())
+        if not directory_matches(name, run):
+            mismatched.append(name)
+            continue
+        identity = "reference-a" if name == "reference-a-hinted" else name
+        if identity in fixtures and outcomes.verified_fixture(run) != identity:
+            mismatched.append(name)
     if mismatched:
-        return "replay mismatch: " + ", ".join(sorted(mismatched)[:8])
+        return "replay mismatch: " + ", ".join(mismatched[:8])
     return ""
 
 
-def publish(path, text):
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(text)
-    os.replace(temporary, path)
+def stage_pair(cache_text, list_text, cache_path, list_path, replace=os.replace):
+    cache_path = Path(cache_path)
+    list_path = Path(list_path)
+    cache_tmp = cache_path.with_name(cache_path.name + ".tmp")
+    list_tmp = list_path.with_name(list_path.name + ".tmp")
+    cache_bak = cache_path.with_name(cache_path.name + ".bak")
+    list_bak = list_path.with_name(list_path.name + ".bak")
+    cache_tmp.write_text(cache_text)
+    try:
+        list_tmp.write_text(list_text)
+    except Exception:
+        cache_tmp.unlink(missing_ok=True)
+        raise
+    moved_cache = False
+    moved_list = False
+    try:
+        replace(str(cache_path), str(cache_bak))
+        moved_cache = True
+        replace(str(cache_tmp), str(cache_path))
+        replace(str(list_path), str(list_bak))
+        moved_list = True
+        replace(str(list_tmp), str(list_path))
+    except Exception:
+        if moved_cache and cache_bak.exists():
+            os.replace(cache_bak, cache_path)
+        if moved_list and list_bak.exists() and not list_path.exists():
+            os.replace(list_bak, list_path)
+        cache_tmp.unlink(missing_ok=True)
+        list_tmp.unlink(missing_ok=True)
+        raise
+    cache_bak.unlink(missing_ok=True)
+    list_bak.unlink(missing_ok=True)
 
 
 def main():
@@ -136,7 +171,7 @@ def main():
     written_keys = set()
     for path in paths:
         run = json.loads(path.read_text())
-        label = run.get("label") or path.parent.name
+        label = path.parent.name
         variant = run.get("variant")
         excluded = set(outcomes.RULES["excluded_on_merge_and_technical"]) if variant in ("merge", "technical") else set()
         target = outcomes.target_pull(((run.get("snapshots") or {}).get("forkyard") or {}).get("data") or {})
@@ -175,6 +210,7 @@ def main():
                 stored_key, body = entry("e5_thursday", extract, judgment, raw)
                 entries[stored_key] = body
                 written_keys.add(stored_key)
+                claims = judgment.get("packet_claims") or []
                 rows.append({
                     "label": label,
                     "item": "e5_thursday",
@@ -182,8 +218,10 @@ def main():
                     "covers": judgment.get("covers"),
                     "pull_state": judgment.get("pull_state"),
                     "pull_number": judgment.get("pull_number"),
-                    "packet_status": judgment.get("packet_status"),
-                    "packet_follow_up": judgment.get("packet_follow_up"),
+                    "packet_claims": len(claims),
+                    "edited": any(bool(row.get("edited")) for row in claims),
+                    "posting": judgment.get("posting") or "",
+                    "decision": (judgment.get("decision") or {}).get("action") or "",
                     "action": "write",
                 })
     current_e1b = prompt_sha("e1b")
@@ -207,8 +245,12 @@ def main():
         "written": rows,
         "held": held,
     }
-    publish(CACHE_PATH, json.dumps(staged, indent=2, ensure_ascii=False) + "\n")
-    publish(LIST_PATH, json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+    stage_pair(
+        json.dumps(staged, indent=2, ensure_ascii=False) + "\n",
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+        CACHE_PATH,
+        LIST_PATH,
+    )
     print(json.dumps({"written": len(rows), "held": len(held), "dropped_thursday": len(stale)}))
     return 0 if not held else 1
 
