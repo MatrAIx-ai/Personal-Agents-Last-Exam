@@ -1,0 +1,4230 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "jurisdiction": {
+      "const": "CL-DEMO"
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/source"
+      },
+      "maxItems": 200
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/profile"
+      },
+      "maxItems": 200
+    },
+    "coverages": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/coverage"
+      },
+      "maxItems": 200
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/provider"
+      },
+      "maxItems": 200
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/grant"
+      },
+      "maxItems": 200
+    },
+    "previews": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/preview"
+      },
+      "maxItems": 200
+    },
+    "applications": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/application"
+      },
+      "maxItems": 200
+    },
+    "disclosures": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/disclosure"
+      },
+      "maxItems": 200
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/request"
+      },
+      "maxItems": 200
+    },
+    "quotes": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/quote"
+      },
+      "maxItems": 200
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/document"
+      },
+      "maxItems": 200
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/comparison"
+      },
+      "maxItems": 200
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/notice"
+      },
+      "maxItems": 200
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "jurisdiction",
+    "next_id",
+    "sources",
+    "profiles",
+    "coverages",
+    "providers",
+    "grants",
+    "previews",
+    "applications",
+    "disclosures",
+    "requests",
+    "quotes",
+    "documents",
+    "comparisons",
+    "notices"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "version": {
+      "type": "object",
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "epoch",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "facts": {
+          "type": "object",
+          "properties": {
+            "drivers": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "person_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "years_licensed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9000000000000
+                      },
+                      "accidents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9000000000000
+                      },
+                      "violations": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9000000000000
+                      },
+                      "excluded": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "person_id",
+                      "name",
+                      "years_licensed",
+                      "accidents",
+                      "violations",
+                      "excluded"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "vehicle": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "year": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "make": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "model": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "vin": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    }
+                  },
+                  "required": [
+                    "year",
+                    "make",
+                    "model",
+                    "vin"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "annual_mileage": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9000000000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "garaging": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "zip": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    }
+                  },
+                  "required": [
+                    "city",
+                    "state",
+                    "zip"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "vehicle_use": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "personal",
+                    "commute",
+                    "business"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ownership": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "owned",
+                    "financed",
+                    "leased"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "current_policy": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "ends_on": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    "continuous_months": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    "lapse_days": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    "lender_requirements": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      },
+                      "maxItems": 200
+                    }
+                  },
+                  "required": [
+                    "ends_on",
+                    "continuous_months",
+                    "lapse_days",
+                    "lender_requirements"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "monitoring_consent": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "at",
+        "title",
+        "facts"
+      ],
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "drivers": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "person_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "years_licensed": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9000000000000
+                          },
+                          "accidents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9000000000000
+                          },
+                          "violations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9000000000000
+                          },
+                          "excluded": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "person_id",
+                          "name",
+                          "years_licensed",
+                          "accidents",
+                          "violations",
+                          "excluded"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "vehicle": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "make": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "model": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "vin": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "year",
+                        "make",
+                        "model",
+                        "vin"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "annual_mileage": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "garaging": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "city": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "state": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "zip": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "city",
+                        "state",
+                        "zip"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "vehicle_use": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "personal",
+                        "commute",
+                        "business"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "ownership": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "owned",
+                        "financed",
+                        "leased"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "current_policy": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ends_on": {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        "continuous_months": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        "lapse_days": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        "lender_requirements": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "maxItems": 200
+                        }
+                      },
+                      "required": [
+                        "ends_on",
+                        "continuous_months",
+                        "lapse_days",
+                        "lender_requirements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "monitoring_consent": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "drivers",
+            "vehicle",
+            "annual_mileage",
+            "garaging",
+            "vehicle_use",
+            "ownership",
+            "current_policy",
+            "monitoring_consent"
+          ],
+          "additionalProperties": false
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "at",
+        "fields",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "starts_on": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "term_months": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "terms": {
+          "type": "object",
+          "properties": {
+            "bi_per_person_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "bi_per_accident_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "property_damage_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "collision_deductible_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "comprehensive_deductible_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "um_per_person_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "um_per_accident_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "medical_payments_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "rental_daily_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "rental_total_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "rental_days": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "roadside_limit_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "gap": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "pip": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "bi_per_person_cents",
+            "bi_per_accident_cents",
+            "property_damage_cents",
+            "collision_deductible_cents",
+            "comprehensive_deductible_cents",
+            "um_per_person_cents",
+            "um_per_accident_cents",
+            "medical_payments_cents",
+            "rental_daily_cents",
+            "rental_total_cents",
+            "rental_days",
+            "roadside_limit_cents",
+            "gap",
+            "pip"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "at",
+        "starts_on",
+        "term_months",
+        "source_ref",
+        "terms"
+      ],
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "legal_entity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "effective_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "required_fields": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "drivers",
+                    "vehicle",
+                    "annual_mileage",
+                    "garaging",
+                    "vehicle_use",
+                    "ownership",
+                    "current_policy",
+                    "monitoring_consent",
+                    "coverage"
+                  ]
+                },
+                "maxItems": 200
+              },
+              "base_premium_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "low_mileage_threshold": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "low_mileage_discount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "installment_fee_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "rental_available": {
+                "type": "boolean"
+              },
+              "collision_deductible_cents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ask_mileage": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "revision",
+              "published_at",
+              "effective_at",
+              "required_fields",
+              "base_premium_cents",
+              "low_mileage_threshold",
+              "low_mileage_discount_cents",
+              "installment_fee_cents",
+              "rental_available",
+              "collision_deductible_cents",
+              "ask_mileage"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "legal_entity",
+        "description",
+        "rules"
+      ],
+      "additionalProperties": false
+    },
+    "grant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "drivers",
+              "vehicle",
+              "annual_mileage",
+              "garaging",
+              "vehicle_use",
+              "ownership",
+              "current_policy",
+              "monitoring_consent",
+              "coverage"
+            ]
+          },
+          "maxItems": 200
+        },
+        "purpose": {
+          "const": "quote"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked": {
+          "type": "boolean"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id",
+        "provider_id",
+        "profile_revision",
+        "fields",
+        "purpose",
+        "expires_at",
+        "revoked",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "kind": {
+          "enum": [
+            "application",
+            "reply"
+          ]
+        },
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coverage_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rule_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "application_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "drivers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "years_licensed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "accidents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "violations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "excluded": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "name",
+                  "years_licensed",
+                  "accidents",
+                  "violations",
+                  "excluded"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            },
+            "vehicle": {
+              "type": "object",
+              "properties": {
+                "year": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "make": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "vin": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              },
+              "required": [
+                "year",
+                "make",
+                "model",
+                "vin"
+              ],
+              "additionalProperties": false
+            },
+            "annual_mileage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "garaging": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "zip": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              },
+              "required": [
+                "city",
+                "state",
+                "zip"
+              ],
+              "additionalProperties": false
+            },
+            "vehicle_use": {
+              "enum": [
+                "personal",
+                "commute",
+                "business"
+              ]
+            },
+            "ownership": {
+              "enum": [
+                "owned",
+                "financed",
+                "leased"
+              ]
+            },
+            "current_policy": {
+              "type": "object",
+              "properties": {
+                "ends_on": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "continuous_months": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9000000000000
+                },
+                "lapse_days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9000000000000
+                },
+                "lender_requirements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "maxItems": 200
+                }
+              },
+              "required": [
+                "ends_on",
+                "continuous_months",
+                "lapse_days",
+                "lender_requirements"
+              ],
+              "additionalProperties": false
+            },
+            "monitoring_consent": {
+              "type": "boolean"
+            },
+            "coverage": {
+              "type": "object",
+              "properties": {
+                "starts_on": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "term_months": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "terms": {
+                  "type": "object",
+                  "properties": {
+                    "bi_per_person_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "bi_per_accident_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "property_damage_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "collision_deductible_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "comprehensive_deductible_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "um_per_person_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "um_per_accident_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "medical_payments_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rental_daily_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rental_total_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rental_days": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "roadside_limit_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "gap": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "pip": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "bi_per_person_cents",
+                    "bi_per_accident_cents",
+                    "property_damage_cents",
+                    "collision_deductible_cents",
+                    "comprehensive_deductible_cents",
+                    "um_per_person_cents",
+                    "um_per_accident_cents",
+                    "medical_payments_cents",
+                    "rental_daily_cents",
+                    "rental_total_cents",
+                    "rental_days",
+                    "roadside_limit_cents",
+                    "gap",
+                    "pip"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "starts_on",
+                "term_months",
+                "terms"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "provider_id",
+        "profile_revision",
+        "coverage_revision",
+        "rule_revision",
+        "grant_id",
+        "application_id",
+        "application_revision",
+        "request_id",
+        "payload",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "application_version": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coverage_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rule_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "disclosure_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "queue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "revision",
+        "profile_revision",
+        "coverage_revision",
+        "rule_revision",
+        "disclosure_id",
+        "queue_id",
+        "submitted_at"
+      ],
+      "additionalProperties": false
+    },
+    "application": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "needs_info",
+            "quoted",
+            "declined",
+            "withdrawn"
+          ]
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/application_version"
+          },
+          "maxItems": 200
+        },
+        "withdrawn_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "provider_id",
+        "revision",
+        "status",
+        "versions",
+        "withdrawn_at"
+      ],
+      "additionalProperties": false
+    },
+    "disclosure": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coverage_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "purpose": {
+          "const": "quote"
+        },
+        "kind": {
+          "enum": [
+            "application",
+            "reply"
+          ]
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "drivers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "years_licensed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "accidents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "violations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "excluded": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "name",
+                  "years_licensed",
+                  "accidents",
+                  "violations",
+                  "excluded"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            },
+            "vehicle": {
+              "type": "object",
+              "properties": {
+                "year": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "make": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "vin": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              },
+              "required": [
+                "year",
+                "make",
+                "model",
+                "vin"
+              ],
+              "additionalProperties": false
+            },
+            "annual_mileage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "garaging": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "zip": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              },
+              "required": [
+                "city",
+                "state",
+                "zip"
+              ],
+              "additionalProperties": false
+            },
+            "vehicle_use": {
+              "enum": [
+                "personal",
+                "commute",
+                "business"
+              ]
+            },
+            "ownership": {
+              "enum": [
+                "owned",
+                "financed",
+                "leased"
+              ]
+            },
+            "current_policy": {
+              "type": "object",
+              "properties": {
+                "ends_on": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "continuous_months": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9000000000000
+                },
+                "lapse_days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9000000000000
+                },
+                "lender_requirements": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "maxItems": 200
+                }
+              },
+              "required": [
+                "ends_on",
+                "continuous_months",
+                "lapse_days",
+                "lender_requirements"
+              ],
+              "additionalProperties": false
+            },
+            "monitoring_consent": {
+              "type": "boolean"
+            },
+            "coverage": {
+              "type": "object",
+              "properties": {
+                "starts_on": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "term_months": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "terms": {
+                  "type": "object",
+                  "properties": {
+                    "bi_per_person_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "bi_per_accident_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "property_damage_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "collision_deductible_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "comprehensive_deductible_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "um_per_person_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "um_per_accident_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "medical_payments_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rental_daily_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rental_total_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rental_days": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "roadside_limit_cents": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "gap": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "pip": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "requested",
+                            "not_requested",
+                            "offered",
+                            "excluded",
+                            "not_offered",
+                            "unknown",
+                            "not_applicable"
+                          ]
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9000000000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "bi_per_person_cents",
+                    "bi_per_accident_cents",
+                    "property_damage_cents",
+                    "collision_deductible_cents",
+                    "comprehensive_deductible_cents",
+                    "um_per_person_cents",
+                    "um_per_accident_cents",
+                    "medical_payments_cents",
+                    "rental_daily_cents",
+                    "rental_total_cents",
+                    "rental_days",
+                    "roadside_limit_cents",
+                    "gap",
+                    "pip"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "starts_on",
+                "term_months",
+                "terms"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "application_id",
+        "application_revision",
+        "provider_id",
+        "profile_revision",
+        "coverage_revision",
+        "grant_id",
+        "purpose",
+        "kind",
+        "request_id",
+        "payload",
+        "at"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "drivers",
+              "vehicle",
+              "annual_mileage",
+              "garaging",
+              "vehicle_use",
+              "ownership",
+              "current_policy",
+              "monitoring_consent",
+              "coverage"
+            ]
+          },
+          "maxItems": 200
+        },
+        "question": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "reply_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "answered"
+          ]
+        },
+        "disclosure_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "display_status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id",
+        "provider_id",
+        "application_id",
+        "application_revision",
+        "fields",
+        "question",
+        "reply_by",
+        "status",
+        "disclosure_id",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "application_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coverage_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quote_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "quote_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "terms": {
+          "type": "object",
+          "properties": {
+            "starts_on": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "term_months": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "terms": {
+              "type": "object",
+              "properties": {
+                "bi_per_person_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "bi_per_accident_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "property_damage_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "collision_deductible_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "comprehensive_deductible_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "um_per_person_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "um_per_accident_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "medical_payments_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "rental_daily_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "rental_total_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "rental_days": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "roadside_limit_cents": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "gap": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "pip": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "requested",
+                        "not_requested",
+                        "offered",
+                        "excluded",
+                        "not_offered",
+                        "unknown",
+                        "not_applicable"
+                      ]
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "bi_per_person_cents",
+                "bi_per_accident_cents",
+                "property_damage_cents",
+                "collision_deductible_cents",
+                "comprehensive_deductible_cents",
+                "um_per_person_cents",
+                "um_per_accident_cents",
+                "medical_payments_cents",
+                "rental_daily_cents",
+                "rental_total_cents",
+                "rental_days",
+                "roadside_limit_cents",
+                "gap",
+                "pip"
+              ],
+              "additionalProperties": false
+            },
+            "stage": {
+              "enum": [
+                "conditional",
+                "written",
+                "estimate"
+              ]
+            },
+            "premium_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "fees_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "taxes_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            "installments_cents": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9000000000000
+              },
+              "maxItems": 200
+            },
+            "discounts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9000000000000
+                  },
+                  "status": {
+                    "enum": [
+                      "conditional",
+                      "applied",
+                      "not_applied"
+                    ]
+                  },
+                  "condition": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "source_ref": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  }
+                },
+                "required": [
+                  "name",
+                  "amount_cents",
+                  "status",
+                  "condition",
+                  "source_ref"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 5000
+              },
+              "maxItems": 200
+            }
+          },
+          "required": [
+            "starts_on",
+            "term_months",
+            "terms",
+            "stage",
+            "premium_cents",
+            "fees_cents",
+            "taxes_cents",
+            "total_cents",
+            "installments_cents",
+            "discounts",
+            "conditions"
+          ],
+          "additionalProperties": false
+        },
+        "document_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "terms_document_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "document_sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "display_status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id",
+        "provider_id",
+        "application_id",
+        "application_revision",
+        "profile_revision",
+        "coverage_revision",
+        "quote_id",
+        "quote_revision",
+        "issued_at",
+        "expires_at",
+        "source_ref",
+        "terms",
+        "document_id",
+        "terms_document_id",
+        "document_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "kind": {
+          "enum": [
+            "quote_pdf",
+            "quote_terms",
+            "declaration"
+          ]
+        },
+        "owner_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "mime_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "owner_id",
+        "source_ref",
+        "at",
+        "asset_id",
+        "sha256",
+        "mime_type",
+        "bytes"
+      ],
+      "additionalProperties": false
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "text",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "comparison_version": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "quote_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxItems": 200
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/note"
+          },
+          "maxItems": 200
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "quote_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "status": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              }
+            },
+            "required": [
+              "quote_id",
+              "status"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "revision",
+        "at",
+        "quote_ids",
+        "notes",
+        "statuses"
+      ],
+      "additionalProperties": false
+    },
+    "comparison": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/comparison_version"
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "versions"
+      ],
+      "additionalProperties": false
+    },
+    "notice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 5000
+        }
+      },
+      "required": [
+        "id",
+        "object_id",
+        "at",
+        "title",
+        "text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

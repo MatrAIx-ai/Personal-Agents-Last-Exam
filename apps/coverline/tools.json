@@ -1,0 +1,2406 @@
+[
+  {
+    "name": "coverline.workspace.get",
+    "description": "Read current observations and immutable history; no provider future-event queue.",
+    "scope": "coverline.workspace.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "workspace": {
+          "$ref": "schemas/seed.schema.json"
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "workspace",
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.profile.get",
+    "description": "Read immutable profile revisions and obtained sources.",
+    "scope": "coverline.profile.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/profile"
+          },
+          "maxItems": 200
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/source"
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "profiles",
+        "sources"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.profile.update",
+    "description": "Append source-backed profile facts; this never issues new disclosure consent.",
+    "scope": "coverline.profile.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "object",
+          "properties": {
+            "drivers": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "person_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "years_licensed": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9000000000000
+                          },
+                          "accidents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9000000000000
+                          },
+                          "violations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9000000000000
+                          },
+                          "excluded": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "person_id",
+                          "name",
+                          "years_licensed",
+                          "accidents",
+                          "violations",
+                          "excluded"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "vehicle": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "make": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "model": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "vin": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "year",
+                        "make",
+                        "model",
+                        "vin"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "annual_mileage": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "garaging": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "city": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "state": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "zip": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "city",
+                        "state",
+                        "zip"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "vehicle_use": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "personal",
+                        "commute",
+                        "business"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "ownership": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "owned",
+                        "financed",
+                        "leased"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "current_policy": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ends_on": {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        "continuous_months": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        "lapse_days": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9000000000000
+                        },
+                        "lender_requirements": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "maxItems": 200
+                        }
+                      },
+                      "required": [
+                        "ends_on",
+                        "continuous_months",
+                        "lapse_days",
+                        "lender_requirements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            },
+            "monitoring_consent": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "confirmed",
+                    "unknown"
+                  ]
+                },
+                "source_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "value",
+                "status",
+                "source_ref",
+                "observed_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "fields",
+        "source_ref",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "profile": {
+          "$ref": "schemas/seed.schema.json#/$defs/profile"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "profile"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.coverage.get",
+    "description": "Read requested coverage revisions separately from offered terms.",
+    "scope": "coverline.coverage.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "coverages": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/coverage"
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "coverages"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.coverage.update",
+    "description": "Append an explicit sourced coverage request.",
+    "scope": "coverline.coverage.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "starts_on": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "term_months": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "terms": {
+          "type": "object",
+          "properties": {
+            "bi_per_person_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "bi_per_accident_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "property_damage_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "collision_deductible_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "comprehensive_deductible_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "um_per_person_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "um_per_accident_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "medical_payments_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "rental_daily_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "rental_total_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "rental_days": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "roadside_limit_cents": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "gap": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "pip": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "requested",
+                    "not_requested",
+                    "offered",
+                    "excluded",
+                    "not_offered",
+                    "unknown",
+                    "not_applicable"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9000000000000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "status",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "bi_per_person_cents",
+            "bi_per_accident_cents",
+            "property_damage_cents",
+            "collision_deductible_cents",
+            "comprehensive_deductible_cents",
+            "um_per_person_cents",
+            "um_per_accident_cents",
+            "medical_payments_cents",
+            "rental_daily_cents",
+            "rental_total_cents",
+            "rental_days",
+            "roadside_limit_cents",
+            "gap",
+            "pip"
+          ],
+          "additionalProperties": false
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "starts_on",
+        "term_months",
+        "terms",
+        "source_ref",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "coverage": {
+          "$ref": "schemas/seed.schema.json#/$defs/coverage"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "coverage"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.providers.list",
+    "description": "Read published fictional provider requirements/rules.",
+    "scope": "coverline.providers.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "providers": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/provider"
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "providers"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.providers.get",
+    "description": "Read published fictional provider requirements/rules.",
+    "scope": "coverline.providers.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "provider": {
+          "$ref": "schemas/seed.schema.json#/$defs/provider"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.grants.list",
+    "description": "Read provider/field/purpose/profile-bound grants from trusted user decisions.",
+    "scope": "coverline.grants.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/grant"
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "grants"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.disclosures.preview",
+    "description": "Store the exact consented payload and immutable source revisions.",
+    "scope": "coverline.disclosures.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "drivers",
+              "vehicle",
+              "annual_mileage",
+              "garaging",
+              "vehicle_use",
+              "ownership",
+              "current_policy",
+              "monitoring_consent",
+              "coverage"
+            ]
+          },
+          "maxItems": 200
+        },
+        "application_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "information_request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "provider_id",
+        "grant_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "preview": {
+          "$ref": "schemas/seed.schema.json#/$defs/preview"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.applications.submit",
+    "description": "Commit one local provider queue entry and immutable disclosure.",
+    "scope": "coverline.applications.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "application": {
+          "$ref": "schemas/seed.schema.json#/$defs/application"
+        },
+        "disclosure": {
+          "$ref": "schemas/seed.schema.json#/$defs/disclosure"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "application",
+        "disclosure"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.applications.amend",
+    "description": "Commit an application revision through a current exact disclosure preview.",
+    "scope": "coverline.applications.amend",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "application": {
+          "$ref": "schemas/seed.schema.json#/$defs/application"
+        },
+        "disclosure": {
+          "$ref": "schemas/seed.schema.json#/$defs/disclosure"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "application",
+        "disclosure"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.quotes.requote",
+    "description": "Commit an application revision through a current exact disclosure preview.",
+    "scope": "coverline.quotes.requote",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "application": {
+          "$ref": "schemas/seed.schema.json#/$defs/application"
+        },
+        "disclosure": {
+          "$ref": "schemas/seed.schema.json#/$defs/disclosure"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "application",
+        "disclosure"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.applications.withdraw",
+    "description": "Withdraw while preserving all earlier disclosures and quotes.",
+    "scope": "coverline.applications.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "application": {
+          "$ref": "schemas/seed.schema.json#/$defs/application"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "application"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.requests.list",
+    "description": "Read provider questions and strict deadlines.",
+    "scope": "coverline.requests.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/request"
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "requests"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.requests.reply",
+    "description": "Commit exactly the question\u2019s fields under current consent and source versions.",
+    "scope": "coverline.requests.reply",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "preview_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "request": {
+          "$ref": "schemas/seed.schema.json#/$defs/request"
+        },
+        "disclosure": {
+          "$ref": "schemas/seed.schema.json#/$defs/disclosure"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "request",
+        "disclosure"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.quotes.list",
+    "description": "Read exact offer versions and derived expiry/history status.",
+    "scope": "coverline.quotes.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/quote"
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "quotes"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.quotes.get",
+    "description": "Read actual offered terms separately from the requested coverage.",
+    "scope": "coverline.quotes.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "quote": {
+          "$ref": "schemas/seed.schema.json#/$defs/quote"
+        },
+        "requested": {
+          "$ref": "schemas/seed.schema.json#/$defs/coverage"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "quote",
+        "requested"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.documents.get",
+    "description": "Download original PDF/JSON bytes under document-parent authority.",
+    "scope": "coverline.documents.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "document": {
+          "$ref": "schemas/seed.schema.json#/$defs/document"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "document",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.comparisons.create",
+    "description": "Pin actual quote versions and sourced notes.",
+    "scope": "coverline.comparisons.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "quote_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxItems": 200
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/note"
+          },
+          "maxItems": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "name",
+        "quote_ids",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "comparison": {
+          "$ref": "schemas/seed.schema.json#/$defs/comparison"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comparison"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.comparisons.update",
+    "description": "Append an optimistic comparison version without changing past collections.",
+    "scope": "coverline.comparisons.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "comparison_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quote_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxItems": 200
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/note"
+          },
+          "maxItems": 200
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "expected_version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "id",
+        "comparison_revision",
+        "quote_ids",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "comparison": {
+          "$ref": "schemas/seed.schema.json#/$defs/comparison"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comparison"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": false
+  },
+  {
+    "name": "coverline.comparisons.get",
+    "description": "Read all pinned collection revisions.",
+    "scope": "coverline.comparisons.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "comparison": {
+          "$ref": "schemas/seed.schema.json#/$defs/comparison"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comparison"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.comparisons.export",
+    "description": "Export a frozen manifest and exact original PDF/JSON bytes in a JSON bundle.",
+    "scope": "coverline.comparisons.export",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "file": {
+          "$ref": "schemas/attachment-transfer.schema.json"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  },
+  {
+    "name": "coverline.notices.list",
+    "description": "Read stable source-owned Mail envelopes for trusted routing.",
+    "scope": "coverline.notices.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "app_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "version": {
+          "$ref": "schemas/seed.schema.json#/$defs/version"
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "notice": {
+                "$ref": "schemas/seed.schema.json#/$defs/notice"
+              },
+              "message": {
+                "type": "object"
+              },
+              "attachment_message": {
+                "anyOf": [
+                  {
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "notice",
+              "message",
+              "attachment_message"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notices"
+      ],
+      "additionalProperties": false
+    },
+    "read_only": true
+  }
+]

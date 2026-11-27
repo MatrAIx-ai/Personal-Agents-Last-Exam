@@ -1,0 +1,3 @@
+'use strict';
+const assert=require('node:assert/strict'),m=require('../src/model.cjs'),{handleTool}=require('../src/operations.cjs');let data=structuredClone(require('../fixtures/minimal.json'));const ctx={virtual_now:'2026-11-24T09:00:00-08:00',binding:require('../fixtures/binding.json')};
+const read=handleTool(ctx,data,'coverline.quotes.list',{}).result;assert.equal(read.quotes[0].terms.total_cents,63000);const saved=handleTool(ctx,data,'coverline.comparisons.create',{name:'Renewal comparison',quote_ids:read.quotes.map(q=>q.id),notes:[]});data=saved.data;m.validateSeed(ctx,data);console.log(JSON.stringify({passed:true,comparison:saved.result.comparison.id,quote_totals:read.quotes.map(q=>q.terms.total_cents)}));
