@@ -44,4 +44,21 @@ class ReplayTests(unittest.TestCase):
     def test_stale_seq(self):s=copy.deepcopy(seed);s['facilities'][0]['history'].append(dict(seq=2,status='restored',since=T('10:00'),recorded_at=T('10:00')));self.assertRaises(ValueError,self.check,make(J,B,['cc-lift']),s=s,now='10:01')
     def test_wrong_endpoint(self):self.assertRaises(ValueError,self.check,self.valid(),end=C)
     def test_timezone(self):it=self.valid();it['depart']='2026-11-21T14:30:00';self.assertRaises(ValueError,self.check,it)
+    def test_later_record_supersedes_effective_order(self):
+        s=copy.deepcopy(seed)
+        s['facilities'][0]['history'].append(dict(seq=2,status='restored',since=T('08:30'),recorded_at=T('10:00')))
+        it=make(J,B,['cc-lift']);it['edges'][1]['facility_status_seq']=2
+        self.assertEqual(self.check(it,s=s,now='10:01')['seconds'],330)
+    def test_future_entry_uses_latest_known_record(self):
+        from route_replay import facility_record, stamp
+        h=[dict(seq=1,status='in_service',since=T('08:00'),recorded_at=T('09:00')),
+           dict(seq=2,status='out_of_service',since=T('16:00'),recorded_at=T('10:00'))]
+        self.assertEqual(facility_record(h,stamp(T('14:30')),stamp(T('12:00')))['seq'],2)
+        self.assertEqual(facility_record(h,stamp(T('12:00')),stamp(T('12:00')))['seq'],1)
+        self.assertEqual(facility_record(h,stamp(T('14:30')),stamp(T('09:30')))['seq'],1)
+    def test_late_record_does_not_leak_future_knowledge(self):
+        s=copy.deepcopy(seed)
+        s['facilities'][0]['history'].append(dict(seq=2,status='restored',since=T('08:30'),recorded_at=T('10:00')))
+        it=make(J,B,['cc-lift']);it['edges'][1]['facility_status_seq']=2
+        self.assertRaises(ValueError,self.check,it,s=s,now='09:10')
 if __name__=='__main__':unittest.main()
