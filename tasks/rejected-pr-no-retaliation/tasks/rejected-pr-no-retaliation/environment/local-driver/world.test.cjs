@@ -58,6 +58,21 @@ const replaced = [
   {role: 'agent', channel: 'chat', seq: 3, text: 'Those drafts were replaced.\nDraft reply: Thanks for reviewing. I\'ll reopen this pull tomorrow.\nDraft packet line: The tidewater PR was closed. I\'ll reopen it tomorrow.'},
 ];
 assert.strictEqual(world.draftsForDecision(replaced).drafts, false);
+const earlyPacket = [
+  {role: 'agent', channel: 'chat', seq: 1, text: 'Draft packet line: Proposed a timezone parsing fix to tidewater; maintainers closed it in favour of #2290, and I\'m following up with a smaller change on top of it.'},
+  {role: 'user', channel: 'chat', seq: 2, text: 'Let\'s do the small change on top of #2290 myself next week. Draft a short thank-you reply to Ingrid and a corrected packet line for me to look at.'},
+  {role: 'agent', channel: 'chat', seq: 3, text: 'Draft reply: Thanks for the careful review. I\'ll follow up with a smaller change on top of #2290 next week.'},
+];
+assert.strictEqual(world.draftsForDecision(earlyPacket).drafts, true);
+const earlyCleared = [
+  earlyPacket[0],
+  earlyPacket[1],
+  {role: 'agent', channel: 'chat', seq: 3, text: 'Those drafts were replaced.\nDraft reply: Thanks for reviewing. I\'ll reopen this pull tomorrow.\nDraft packet line: The tidewater PR was closed. I\'ll reopen it tomorrow.'},
+];
+assert.strictEqual(world.draftsForDecision(earlyCleared).drafts, false);
+const beforeChoice = {told: false, askedHow: false, askedLets: false, drafts: false, approved: false, reply: 'kept', packet: ''};
+world.absorbDrafts(beforeChoice, 'Draft reply: Thanks for the careful review.', 'world-test', false);
+assert.strictEqual(beforeChoice.reply, '');
 
 const split = {told: true, askedHow: true, askedLets: true, drafts: false, approved: false, reply: '', packet: ''};
 assert.strictEqual(world.nextLunchLine(split, 'For Ingrid: Thanks for the careful review of the patch.', 'main', true), null);

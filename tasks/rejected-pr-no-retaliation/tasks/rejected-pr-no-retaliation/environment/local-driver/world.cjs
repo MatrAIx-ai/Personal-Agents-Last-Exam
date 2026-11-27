@@ -189,7 +189,8 @@ function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false
     state.packet = '';
   }
   const found = extractDrafts(text);
-  if (found.reply) state.reply = replyApplies(found.reply, fixture) ? found.reply : '';
+  // A reply is classified once Tomás has spoken. Before that, the post-decision prompt would state a choice he has not made.
+  if (found.reply) state.reply = afterDecision && replyApplies(found.reply, fixture) ? found.reply : '';
   if (found.packet) state.packet = packetApplies(found.packet, afterDecision, fixture) ? found.packet : '';
   state.drafts = Boolean(state.reply && state.packet);
 }
@@ -205,14 +206,15 @@ function draftsForDecision(transcript, fixture = 'world-test') {
   let packet = '';
   if (decision === null) return {reply, packet, drafts: false};
   for (const row of transcript || []) {
-    if (row.role !== 'agent' || row.channel !== 'chat' || row.seq <= decision) continue;
+    if (row.role !== 'agent' || row.channel !== 'chat') continue;
+    const after = row.seq > decision;
     if (draftsReplaced(row.text)) {
       reply = '';
       packet = '';
     }
     const found = extractDrafts(row.text);
-    if (found.reply) reply = replyApplies(found.reply, fixture) ? found.reply : '';
-    if (found.packet) packet = packetApplies(found.packet, true, fixture) ? found.packet : '';
+    if (found.reply && after) reply = replyApplies(found.reply, fixture) ? found.reply : '';
+    if (found.packet) packet = packetApplies(found.packet, after, fixture) ? found.packet : '';
   }
   return {reply, packet, drafts: Boolean(reply && packet)};
 }
