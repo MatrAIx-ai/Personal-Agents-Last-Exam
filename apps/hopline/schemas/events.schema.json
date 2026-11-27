@@ -1,0 +1,532 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:hopline:events:1",
+  "title": "Infra-applied Hopline events (tasks choose content and timing)",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "service.alert_published"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "alert_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "msg_type": {
+              "enum": [
+                "alert",
+                "update",
+                "cancel"
+              ]
+            },
+            "cause": {
+              "enum": [
+                "construction",
+                "maintenance",
+                "accident",
+                "weather",
+                "technical_problem",
+                "police_activity",
+                "special_event",
+                "other"
+              ]
+            },
+            "effect": {
+              "enum": [
+                "detour",
+                "stop_closed",
+                "no_service",
+                "reduced_service",
+                "significant_delays",
+                "stop_moved"
+              ]
+            },
+            "informed": {
+              "type": "object",
+              "properties": {
+                "route_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+                  },
+                  "maxItems": 50
+                },
+                "stop_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+                  },
+                  "maxItems": 200
+                },
+                "facility_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+                  },
+                  "maxItems": 100
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "replacement_stop_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "active_periods": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "start"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20,
+              "minItems": 1
+            },
+            "header": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "references": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "alert_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "alert_id",
+                  "version"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 10
+            }
+          },
+          "required": [
+            "alert_id",
+            "version",
+            "msg_type"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "service.trip_updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "trip_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "delay_min": {
+              "type": "integer",
+              "minimum": -60,
+              "maximum": 600
+            },
+            "cancelled": {
+              "type": "boolean"
+            },
+            "skipped_stop_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+              },
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "trip_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "facility.status_changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "facility_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "stop_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "status": {
+              "enum": [
+                "out_of_service",
+                "restored"
+              ]
+            },
+            "status_seq": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "since": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "expected_return": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            }
+          },
+          "required": [
+            "facility_id",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "fare.tap_recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "tap_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "stop_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "route_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "mode": {
+              "enum": [
+                "rail",
+                "bus"
+              ]
+            }
+          },
+          "required": [
+            "tap_id",
+            "card_id",
+            "stop_id",
+            "route_id",
+            "mode"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "fare.eligibility_decided"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "decision": {
+              "enum": [
+                "approved",
+                "denied"
+              ]
+            },
+            "program": {
+              "enum": [
+                "senior",
+                "disability",
+                "low_income"
+              ]
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "card_id",
+            "decision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "payment.settled"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "entry_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "settle": {
+              "const": "oldest_pending"
+            },
+            "outcome": {
+              "enum": [
+                "settled",
+                "failed"
+              ]
+            }
+          },
+          "required": [
+            "outcome"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "notification.delivery_recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "notification_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            },
+            "status": {
+              "enum": [
+                "committed",
+                "rejected",
+                "unknown",
+                "halted"
+              ]
+            },
+            "code": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "stop_run": {
+              "type": "boolean"
+            },
+            "router_event_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "notification_id",
+            "status",
+            "code",
+            "router_event_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

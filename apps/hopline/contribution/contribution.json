@@ -1,0 +1,295 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "hopline",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "hopline.places.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.stops.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.routes.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.departures.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.trips.plan",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.alerts.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.alerts.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.saved.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.subscriptions.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.notifications.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.cards.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.cards.history",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.fares.products",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.saved.add",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.saved.remove",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.subscriptions.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.subscriptions.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.subscriptions.delete",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.notifications.acknowledge",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.cards.add_value",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.cards.set_autoreload",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.passes.purchase",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.passes.cancel",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.cards.report_lost",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "hopline.reduced_fare.apply",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "service.alert_published",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "service.trip_updated",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "facility.status_changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fare.tap_recorded",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fare.eligibility_decided",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "payment.settled",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "notification.delivery_recorded",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": true,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/mail-router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}

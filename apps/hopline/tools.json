@@ -1,0 +1,2392 @@
+[
+  {
+    "name": "hopline.places.search",
+    "description": "Find places and stops by name.",
+    "read_only": true,
+    "scope": "hopline.places.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 500
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "places",
+        "stops"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.stops.get",
+    "description": "A stop or station: entrances, platforms, pathways and each facility's status at as_of, with active alerts.",
+    "read_only": true,
+    "scope": "hopline.stops.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "stop_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "stop_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "stop": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "stop"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.routes.get",
+    "description": "A route: stop patterns, frequencies per service period, the trip ID rule and active alerts.",
+    "read_only": true,
+    "scope": "hopline.routes.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "route_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "route_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "route": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "route"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.departures.list",
+    "description": "Departures at a stop in a window: scheduled time, live estimate, cancelled or skipped, and the trip update behind it.",
+    "read_only": true,
+    "scope": "hopline.departures.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "stop_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "stop_id",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "stop_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "departures": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "stop_id",
+        "departures"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.trips.plan",
+    "description": "Up to three itineraries at the run's virtual time, with step-free routing, uses_estimates, blockers, the fare for a card, and the service state used. Each itinerary lists its edges (access links, pathways and rides with IDs and times) in order.",
+    "read_only": true,
+    "scope": "hopline.trips.plan",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "depart_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "arrive_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "step_free": {
+          "type": "boolean"
+        },
+        "max_walk_m": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "max_transfers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "avoid_modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "rail",
+              "bus"
+            ]
+          },
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "itineraries": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 3
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 100
+        },
+        "service_state": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "from",
+        "to",
+        "itineraries",
+        "blockers",
+        "service_state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.alerts.list",
+    "description": "Alerts with status derived at the virtual time, optionally for a route, stop, facility or status.",
+    "read_only": true,
+    "scope": "hopline.alerts.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "route_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "stop_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "status": {
+          "enum": [
+            "upcoming",
+            "active",
+            "ended",
+            "cancelled"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "alerts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.alerts.get",
+    "description": "One alert with its version chain, or one version.",
+    "read_only": true,
+    "scope": "hopline.alerts.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "alert_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "alert_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "alert": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.saved.list",
+    "description": "Saved places and saved commutes.",
+    "read_only": true,
+    "scope": "hopline.saved.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "saved": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/saved"
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "saved"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.subscriptions.list",
+    "description": "Subscriptions with their revisions.",
+    "read_only": true,
+    "scope": "hopline.subscriptions.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_deleted": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/subscription"
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "subscriptions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.notifications.list",
+    "description": "Notifications with delivery status as of the virtual time.",
+    "read_only": true,
+    "scope": "hopline.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "in_app",
+            "held_quiet_hours",
+            "pending_delivery",
+            "delivered",
+            "delivery_failed",
+            "withdrawn"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/notification"
+          },
+          "maxItems": 20000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "notifications"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.cards.get",
+    "description": "Cards with spendable balance, pending loads, passes, reduced-fare status and weekly cap progress at the virtual time.",
+    "read_only": true,
+    "scope": "hopline.cards.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "cards"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.cards.history",
+    "description": "Ledger entries and taps for a card in a window.",
+    "read_only": true,
+    "scope": "hopline.cards.history",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "card_id",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/ledger_entry"
+          },
+          "maxItems": 10000
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/tap"
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "card_id",
+        "entries",
+        "taps"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.fares.products",
+    "description": "Fares, transfer and cap rules, products and reduced-fare programs (catalog version).",
+    "read_only": true,
+    "scope": "hopline.fares.products",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "catalog_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "fares": {
+          "type": "object"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 10
+        },
+        "replacement_fee_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "reduced_fare_programs": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "senior",
+              "disability",
+              "low_income"
+            ]
+          },
+          "maxItems": 5
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "catalog_version",
+        "fares",
+        "products",
+        "replacement_fee_cents",
+        "reduced_fare_programs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.saved.add",
+    "description": "Save a place, or a commute between two saved places with days, a departure window and preferences (at most 20).",
+    "read_only": false,
+    "scope": "hopline.saved.add",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "place",
+            "commute"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "place_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "from_saved_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "to_saved_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "maxItems": 7,
+          "minItems": 1
+        },
+        "window": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "step_free": {
+          "type": "boolean"
+        },
+        "max_walk_m": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "max_transfers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "avoid_modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "rail",
+              "bus"
+            ]
+          },
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "kind",
+        "label",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "saved_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "saved_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.saved.remove",
+    "description": "Remove a saved place or commute that no subscription refers to.",
+    "read_only": false,
+    "scope": "hopline.saved.remove",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "saved_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "saved_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "saved_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "saved_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.subscriptions.create",
+    "description": "Subscribe to a route, stop, facility, saved commute or card (at most 25).",
+    "read_only": false,
+    "scope": "hopline.subscriptions.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "route",
+                "stop",
+                "facility",
+                "commute",
+                "card"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+            }
+          },
+          "required": [
+            "kind",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "window": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 7
+              },
+              "maxItems": 7
+            },
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "delay_threshold_min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 240
+        },
+        "low_balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "quiet_hours": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "urgent_override": {
+          "type": "boolean"
+        },
+        "delivery": {
+          "enum": [
+            "mail",
+            "in_app"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "target",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "subscription_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.subscriptions.update",
+    "description": "Change a subscription, or pause or resume it.",
+    "read_only": false,
+    "scope": "hopline.subscriptions.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "window": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "days": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 7
+                  },
+                  "maxItems": 7
+                },
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delay_threshold_min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 240
+        },
+        "low_balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "quiet_hours": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "urgent_override": {
+          "type": "boolean"
+        },
+        "delivery": {
+          "enum": [
+            "mail",
+            "in_app"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "paused"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "subscription_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "subscription_id",
+        "revision"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.subscriptions.delete",
+    "description": "Delete a subscription (kept as a tombstone with its revisions).",
+    "read_only": false,
+    "scope": "hopline.subscriptions.delete",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "subscription_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "subscription_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.notifications.acknowledge",
+    "description": "Mark a notification as read.",
+    "read_only": false,
+    "scope": "hopline.notifications.acknowledge",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "notification_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "acknowledged_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notification_id",
+        "acknowledged_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.cards.add_value",
+    "description": "Load value onto a card; it is pending, and spendable only once the payment settles.",
+    "read_only": false,
+    "scope": "hopline.cards.add_value",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "payment_method_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "card_id",
+        "amount_cents",
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "entry_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "spendable_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "pending_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "entry_id",
+        "spendable_cents",
+        "pending_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.cards.set_autoreload",
+    "description": "Set or clear (null) a card's autoreload rule; it is checked only after a charged tap.",
+    "read_only": false,
+    "scope": "hopline.cards.set_autoreload",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "rule": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "threshold_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "payment_method_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "card_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "autoreload": {
+          "anyOf": [
+            {
+              "$ref": "schemas/seed.schema.json#/$defs/autoreload"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "card_id",
+        "autoreload"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.passes.purchase",
+    "description": "Buy a monthly pass from the settled balance, for this month or a later one.",
+    "read_only": false,
+    "scope": "hopline.passes.purchase",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "product": {
+          "enum": [
+            "monthly"
+          ]
+        },
+        "start_month": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "card_id",
+        "product",
+        "start_month",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "pass_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "pass_id",
+        "balance_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.passes.cancel",
+    "description": "Cancel a pass before it starts, with a full refund.",
+    "read_only": false,
+    "scope": "hopline.passes.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pass_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "pass_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "pass_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "refund_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "pass_id",
+        "refund_cents",
+        "balance_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.cards.report_lost",
+    "description": "Block a card at once and issue a virtual replacement carrying its balance, pending loads, passes, reduced fare and cap progress; a $5.00 fee applies.",
+    "read_only": false,
+    "scope": "hopline.cards.report_lost",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "card_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "replacement_card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "fee_owed_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "card_id",
+        "replacement_card_id",
+        "fee_cents",
+        "fee_owed_cents",
+        "balance_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hopline.reduced_fare.apply",
+    "description": "Apply for a reduced fare (senior, disability or low_income); the decision arrives later.",
+    "read_only": false,
+    "scope": "hopline.reduced_fare.apply",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "program": {
+          "enum": [
+            "senior",
+            "disability",
+            "low_income"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        }
+      },
+      "required": [
+        "card_id",
+        "program",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "hopline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "application_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:~-]{0,149}$"
+        },
+        "application_status": {
+          "enum": [
+            "submitted"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "application_id",
+        "application_status"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

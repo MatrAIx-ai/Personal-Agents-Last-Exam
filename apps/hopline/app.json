@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "hopline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:hopline (@Oshikaka)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "service.alert_published",
+    "service.trip_updated",
+    "facility.status_changed",
+    "fare.tap_recorded",
+    "fare.eligibility_decided",
+    "payment.settled",
+    "notification.delivery_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "web",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic network, schedules, fares and riders only; GTFS and GTFS Realtime are format references, and no live feed is read.",
+    "Frequency-based schedules: trip instances are computed from frequencies with stable IDs; no stored timetable.",
+    "No global scheduler: time moves through events and Infra's env.advance_time, which runs no App code; time-based statuses are derived from the virtual time.",
+    "Subscriptions are evaluated only when a business event is applied, never on reads or clock movement.",
+    "The outbound Mail adapter is a standalone entry point invoked explicitly by the example and tests; without a caller, mail notifications stay pending_delivery.",
+    "Business web page served by the shared Web Host (gui/); MCP remains the Agent interface."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
