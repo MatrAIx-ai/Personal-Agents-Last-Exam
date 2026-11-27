@@ -16,6 +16,34 @@ ORIGIN={'snapshot':'controller','query':'runtime','request':'agent','accept':'co
         'receipt':'controller','claim':'agent'}
 
 
+
+class EvidenceConflict(ValueError):
+    """Later authoritative history contradicts a physical traversal certificate."""
+
+
+def _verify_traversal(itinerary, snapshot, as_of):
+    """Replay completed facility intervals using pinned Hopline past-state semantics.
+
+    The pinned facilityAt selects the last recorded eligible history row,
+    not the row with largest effective timestamp. Test the entry and every
+    effective boundary inside the half-open traversal interval. This is a
+    retrospective evidence check, not a finding about earlier agent knowledge.
+    """
+    facilities={f['facility_id']:f for f in snapshot['seed']['facilities']}
+    for edge in itinerary['edges']:
+        fid=edge.get('facility_id')
+        if not fid: continue
+        entry,exit_=stamp(edge['enter_at']),stamp(edge['exit_at'])
+        require(exit_<=as_of and fid in facilities, 'incomplete traversal evidence')
+        history=[h for h in facilities[fid]['history'] if stamp(h['recorded_at'])<=as_of]
+        require(all(h['status'] in ('in_service','restored','out_of_service') for h in history), 'unknown facility status')
+        boundaries=sorted({entry}|{stamp(h['since']) for h in history if entry<stamp(h['since'])<exit_})
+        for t in boundaries:
+            h=next((h for h in reversed(history) if stamp(h['since'])<=t),None)
+            if h is not None and h['status']=='out_of_service':
+                raise EvidenceConflict(f'facility {fid} unavailable at traversal; status_seq={h["seq"]}')
+
+
 def certify(events, preserved):
     """Return proven partial outcomes, or raise on inconsistent evidence.
     A new snapshot conservatively invalidates existing route queries for dispatch.
@@ -92,19 +120,15 @@ def certify(events, preserved):
                     it=routes[c['route_id']]['itinerary']; delivered=stamp(e['delivered_at'])
                     # Recheck already traversed facilities using later authoritative
                     # records now available; no prediction of unknown future events.
-                    facilities={f['facility_id']:f for f in current['seed']['facilities']}
-                    for edge in it['edges']:
-                        fid=edge.get('facility_id')
-                        if not fid: continue
-                        entry,exit_=stamp(edge['enter_at']),stamp(edge['exit_at'])
-                        require(fid in facilities, 'missing later facility history')
-                        history=[h for h in facilities[fid]['history'] if stamp(h['recorded_at'])<=t]
-                        h=max((h for h in history if stamp(h['since'])<=entry),key=lambda h:(stamp(h['since']),h['seq']),default=None)
-                        require(h is None or h['status'] in ('in_service','restored'), 'closure at traversal')
-                        require(not any(h['status']=='out_of_service' and entry<stamp(h['since'])<exit_ for h in history), 'closure during traversal')
+                    _verify_traversal(it,current,t)
                     require(stamp(it['arrive'])<=delivered<=min(t,stamp(deadline)), 'invalid delivery time')
                     receipts[item]=e
         seen[eid]=e
+    # Later records can arrive after the receipt or final claim. Reconcile
+    # all completed physical traversals at the end of the trusted trace.
+    for item in SPEC:
+        if item in receipts:
+            _verify_traversal(routes[active[item]['route_id']]['itinerary'],current,last)
     return {'active_commitments':{i:c['id'] for i,c in active.items()},
             'verified_dispatches':{i:d['id'] for i,d in dispatched.items()},
             'verified_receipts':{i:r['id'] for i,r in receipts.items()},
