@@ -1,0 +1,1751 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:homegrid:seed:1",
+  "title": "Homegrid account and world data",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "customer": {
+      "$ref": "seed.schema.json#/$defs/customer"
+    },
+    "preferences": {
+      "$ref": "seed.schema.json#/$defs/preferences"
+    },
+    "areas": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/area"
+      },
+      "maxItems": 100
+    },
+    "holidays": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "maxItems": 100
+    },
+    "premises": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/premise"
+      },
+      "maxItems": 1000
+    },
+    "capacity": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/capacity"
+      },
+      "maxItems": 5000
+    },
+    "stock": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/stock"
+      },
+      "maxItems": 100
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/service"
+      },
+      "maxItems": 1000
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/order"
+      },
+      "maxItems": 2000
+    },
+    "appointments": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/appointment"
+      },
+      "maxItems": 2000
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/equipment"
+      },
+      "maxItems": 1000
+    },
+    "outages": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/outage"
+      },
+      "maxItems": 1000
+    },
+    "advisories": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/advisory"
+      },
+      "maxItems": 1000
+    },
+    "reports": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/report"
+      },
+      "maxItems": 1000
+    },
+    "charges": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/charge"
+      },
+      "maxItems": 5000
+    },
+    "bills": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/bill"
+      },
+      "maxItems": 2000
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/payment"
+      },
+      "maxItems": 5000
+    },
+    "autopay": {
+      "type": "object",
+      "properties": {
+        "payment_method_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "payment_method_id"
+      ],
+      "additionalProperties": false
+    },
+    "arrangements": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/arrangement"
+      },
+      "maxItems": 100
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/notification"
+      },
+      "maxItems": 20000
+    },
+    "ignored_events": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/ignored_event"
+      },
+      "maxItems": 5000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "customer",
+    "preferences",
+    "areas",
+    "holidays",
+    "premises",
+    "capacity",
+    "stock",
+    "services",
+    "orders",
+    "appointments",
+    "equipment",
+    "outages",
+    "advisories",
+    "reports",
+    "charges",
+    "bills",
+    "payments",
+    "autopay",
+    "arrangements",
+    "notifications",
+    "ignored_events"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "external_ref": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "object_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "app_id",
+        "account_id",
+        "object_id"
+      ],
+      "additionalProperties": false
+    },
+    "payment_method": {
+      "type": "object",
+      "properties": {
+        "payment_method_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "last4": {
+          "type": "string",
+          "pattern": "^\\d{4}$"
+        },
+        "fails": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "payment_method_id",
+        "label",
+        "last4",
+        "fails"
+      ],
+      "additionalProperties": false
+    },
+    "customer": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "late_payments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxItems": 100
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/payment_method"
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "name",
+        "late_payments",
+        "payment_methods"
+      ],
+      "additionalProperties": false
+    },
+    "type_pref": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "delivery": {
+          "enum": [
+            "mail",
+            "in_app"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "delivery"
+      ],
+      "additionalProperties": false
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "quiet_hours": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "types": {
+          "type": "object",
+          "properties": {
+            "order": {
+              "$ref": "seed.schema.json#/$defs/type_pref"
+            },
+            "appointment": {
+              "$ref": "seed.schema.json#/$defs/type_pref"
+            },
+            "outage": {
+              "$ref": "seed.schema.json#/$defs/type_pref"
+            },
+            "advisory": {
+              "$ref": "seed.schema.json#/$defs/type_pref"
+            },
+            "billing": {
+              "$ref": "seed.schema.json#/$defs/type_pref"
+            }
+          },
+          "required": [
+            "order",
+            "appointment",
+            "outage",
+            "advisory",
+            "billing"
+          ],
+          "additionalProperties": false
+        },
+        "health": {
+          "type": "object",
+          "properties": {
+            "bypass_quiet_hours": {
+              "type": "boolean"
+            },
+            "delivery": {
+              "enum": [
+                "mail",
+                "in_app"
+              ]
+            }
+          },
+          "required": [
+            "bypass_quiet_hours",
+            "delivery"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "time_zone",
+        "quiet_hours",
+        "types",
+        "health"
+      ],
+      "additionalProperties": false
+    },
+    "area": {
+      "type": "object",
+      "properties": {
+        "area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "area_id",
+        "name",
+        "time_zone"
+      ],
+      "additionalProperties": false
+    },
+    "premise": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "internet_tech": {
+          "enum": [
+            "fiber",
+            "cable",
+            "none"
+          ]
+        },
+        "self_install": {
+          "type": "boolean"
+        },
+        "external_ref": {
+          "anyOf": [
+            {
+              "$ref": "seed.schema.json#/$defs/external_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "premise_id",
+        "address",
+        "area_id",
+        "internet_tech",
+        "self_install",
+        "external_ref"
+      ],
+      "additionalProperties": false
+    },
+    "capacity": {
+      "type": "object",
+      "properties": {
+        "area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "slot": {
+          "enum": [
+            "08-12",
+            "12-16",
+            "16-20"
+          ]
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "area_id",
+        "date",
+        "slot",
+        "capacity"
+      ],
+      "additionalProperties": false
+    },
+    "stock": {
+      "type": "object",
+      "properties": {
+        "area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "hotspots": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "area_id",
+        "hotspots"
+      ],
+      "additionalProperties": false
+    },
+    "test": {
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "speed_mbps": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "not_activated",
+                "outage",
+                "equipment_not_delivered"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outage_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "at",
+        "result",
+        "speed_mbps",
+        "reason",
+        "outage_id"
+      ],
+      "additionalProperties": false
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "status": {
+          "enum": [
+            "pending_start",
+            "active",
+            "pending_stop",
+            "stopped",
+            "install_failed"
+          ]
+        },
+        "start_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stop_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "activated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_test": {
+          "anyOf": [
+            {
+              "$ref": "seed.schema.json#/$defs/test"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "service_id",
+        "premise_id",
+        "service_type",
+        "plan_id",
+        "status",
+        "start_date",
+        "stop_date",
+        "activated_at",
+        "last_test"
+      ],
+      "additionalProperties": false
+    },
+    "order": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "enum": [
+            "start",
+            "stop",
+            "temporary_internet"
+          ]
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temp": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "to": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "scheduled",
+            "effective",
+            "cancelled"
+          ]
+        },
+        "needs": {
+          "enum": [
+            "none",
+            "technician",
+            "self_install"
+          ]
+        },
+        "deposit_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "price_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "at",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "order_id",
+        "transfer_id",
+        "type",
+        "premise_id",
+        "service_type",
+        "plan_id",
+        "date",
+        "temp",
+        "status",
+        "needs",
+        "deposit_cents",
+        "price_cents",
+        "created_at",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "appointment": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "slot": {
+          "enum": [
+            "08-12",
+            "12-16",
+            "16-20"
+          ]
+        },
+        "status": {
+          "enum": [
+            "booked",
+            "technician_en_route",
+            "arrived",
+            "completed",
+            "cancelled",
+            "missed_by_provider",
+            "no_access"
+          ]
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "at",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "appointment_id",
+        "order_id",
+        "date",
+        "slot",
+        "status",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "equipment": {
+      "type": "object",
+      "properties": {
+        "equipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "kind": {
+          "enum": [
+            "gateway",
+            "hotspot"
+          ]
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "order_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "ordered",
+            "shipped",
+            "delivered",
+            "in_use",
+            "return_due",
+            "returned"
+          ]
+        },
+        "return_due": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "return_method": {
+          "anyOf": [
+            {
+              "enum": [
+                "dropoff",
+                "prepaid_label"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "returned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "equipment_id",
+        "kind",
+        "premise_id",
+        "order_id",
+        "status",
+        "return_due",
+        "return_method",
+        "returned_at"
+      ],
+      "additionalProperties": false
+    },
+    "outage_version": {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "status": {
+          "enum": [
+            "started",
+            "etr_updated",
+            "restored"
+          ]
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "etr": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "seq",
+        "status",
+        "at",
+        "etr"
+      ],
+      "additionalProperties": false
+    },
+    "outage": {
+      "type": "object",
+      "properties": {
+        "outage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        },
+        "premise_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "maxItems": 1000,
+          "minItems": 1
+        },
+        "cause": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/outage_version"
+          },
+          "maxItems": 1000,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "outage_id",
+        "service_type",
+        "premise_ids",
+        "cause",
+        "versions"
+      ],
+      "additionalProperties": false
+    },
+    "advisory_version": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "msg_type": {
+          "enum": [
+            "issue",
+            "update",
+            "lift"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "boil_water",
+            "do_not_drink",
+            "planned_shutoff"
+          ]
+        },
+        "area_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "maxItems": 100
+        },
+        "premise_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "maxItems": 1000
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "planned_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "version",
+        "msg_type",
+        "kind",
+        "area_ids",
+        "premise_ids",
+        "effective_from",
+        "planned_end",
+        "instructions",
+        "issued_at"
+      ],
+      "additionalProperties": false
+    },
+    "advisory": {
+      "type": "object",
+      "properties": {
+        "advisory_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/advisory_version"
+          },
+          "maxItems": 1000,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "advisory_id",
+        "versions"
+      ],
+      "additionalProperties": false
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        },
+        "outage_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "linked",
+            "investigating"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "report_id",
+        "premise_id",
+        "service_type",
+        "outage_id",
+        "status",
+        "created_at",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "charge": {
+      "type": "object",
+      "properties": {
+        "charge_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "billed_in": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "charge_id",
+        "premise_id",
+        "kind",
+        "ref",
+        "description",
+        "amount_cents",
+        "created_at",
+        "billed_in"
+      ],
+      "additionalProperties": false
+    },
+    "ignored_event": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "bill_line": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "kind",
+        "description",
+        "amount_cents"
+      ],
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "kwh": {
+            "type": "number",
+            "minimum": 0
+          },
+          "gal": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    "bill": {
+      "type": "object",
+      "properties": {
+        "bill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "period": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "to": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        "closed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "due_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "usage": {
+          "$ref": "seed.schema.json#/$defs/usage"
+        },
+        "prior_balance_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/bill_line"
+          },
+          "maxItems": 100
+        },
+        "total_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "bill_id",
+        "premise_id",
+        "period",
+        "closed_at",
+        "due_date",
+        "usage",
+        "prior_balance_cents",
+        "lines",
+        "total_cents"
+      ],
+      "additionalProperties": false
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "payment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "payment_method_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scheduled_for": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "autopay_bill_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "scheduled",
+            "pending",
+            "settled",
+            "returned",
+            "skipped",
+            "cancelled"
+          ]
+        },
+        "resolved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "payment_id",
+        "amount_cents",
+        "payment_method_id",
+        "created_at",
+        "scheduled_for",
+        "autopay_bill_id",
+        "status",
+        "resolved_at"
+      ],
+      "additionalProperties": false
+    },
+    "arrangement": {
+      "type": "object",
+      "properties": {
+        "arrangement_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "bill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "installments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "due_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000
+              }
+            },
+            "required": [
+              "due_date",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 6,
+          "minItems": 2
+        }
+      },
+      "required": [
+        "arrangement_id",
+        "bill_id",
+        "created_at",
+        "installments"
+      ],
+      "additionalProperties": false
+    },
+    "notification": {
+      "type": "object",
+      "properties": {
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "type": {
+          "enum": [
+            "order",
+            "appointment",
+            "outage",
+            "advisory",
+            "billing"
+          ]
+        },
+        "trigger_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "version": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "id",
+            "version"
+          ],
+          "additionalProperties": false
+        },
+        "premise_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "health": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "release_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delivery": {
+          "enum": [
+            "mail",
+            "in_app"
+          ]
+        },
+        "status": {
+          "enum": [
+            "in_app",
+            "held_quiet_hours",
+            "pending_delivery",
+            "delivered",
+            "delivery_failed",
+            "withdrawn"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recipient_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "committed",
+                    "rejected",
+                    "unknown",
+                    "halted"
+                  ]
+                },
+                "code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stop_run": {
+                  "type": "boolean"
+                },
+                "router_event_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 150
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recorded_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "status",
+                "code",
+                "stop_run",
+                "router_event_id",
+                "recorded_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "acknowledged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "notification_id",
+        "type",
+        "trigger_key",
+        "source",
+        "premise_id",
+        "health",
+        "created_at",
+        "release_at",
+        "delivery",
+        "status",
+        "title",
+        "body",
+        "time",
+        "recipient_person_id",
+        "outcome",
+        "acknowledged_at"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
