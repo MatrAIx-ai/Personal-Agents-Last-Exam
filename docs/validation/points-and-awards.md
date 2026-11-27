@@ -9,7 +9,7 @@ Public runtime 1.6.0, Core API 1.2.0, Mail 1.3.0 (reference App, receiver of not
 | Command | Result |
 | --- | --- |
 | `node --test apps/waypoint/tests/business.test.cjs` | 18/18 tests pass |
-| `node --test apps/skyline/tests/business.test.cjs` | 32/32 tests pass |
+| `node --test apps/skyline/tests/business.test.cjs` | 33/33 tests pass |
 | `node --test apps/harbor/tests/business.test.cjs` | 27/27 tests pass |
 | `node apps/<id>/examples/run.cjs` for each | Runs: combine and transfers settled (Waypoint); credit, award ticketed with seats, schedule change (Skyline); credit, certificate and points stays (Harbor) |
 | `node runtime/cli.cjs verify --app apps/<id> --output .artifacts/<id>.json` | `passed: true`: Waypoint 40 checks, Skyline 39, Harbor 39 |

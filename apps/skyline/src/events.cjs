@@ -36,9 +36,14 @@ function sold(ctx, data, event) {
   const {flight_id, cabin, seats} = event.payload;
   const map = inv.flight(data, flight_id).cabins[cabin];
   if (!map) c.fail('invalid_event', 'This flight has no ' + cabin + ' cabin.');
-  map.saver_seats = seats === 'all' ? 0 : Math.max(0, map.saver_seats - seats);
+  // Outside customers buy saver seats, so those seats leave the seat map too: otherwise protected
+  // rebookings, which skip the saver check, could still fill a cabin that is sold out. Sold seats are
+  // taken from the back of the cabin (saver never exceeds the free seats).
+  const n = seats === 'all' ? map.saver_seats : Math.min(seats, map.saver_seats);
+  for (const seat of n ? inv.freeSeats(map).slice(-n) : []) inv.take(map, seat);
+  map.saver_seats -= n;
   data.inventory_revision++;
-  c.log(ctx, 'skyline.inventory_sold', {record_id:flight_id, saver_seats:map.saver_seats});
+  c.log(ctx, 'skyline.inventory_sold', {record_id:flight_id, saver_seats:map.saver_seats, seats_sold:n});
   return data;
 }
 

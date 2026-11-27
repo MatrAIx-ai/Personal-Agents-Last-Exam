@@ -510,6 +510,21 @@ test('inventory.sold reduces saver seats to a floor of zero', () => {
   unchanged(f, () => f.event(sell(1, 'PC11-2027-10-17', 'economy', 5)), code('invalid_event'));
 });
 
+test('seats sold to other customers leave the seat map, so a protected rebooking cannot oversell the cabin', () => {
+  const f = fixture();
+  const b = changed(f);
+  const data = f.data, map = data.flights.find(x => x.id === 'LK480-2027-10-22').cabins.business;
+  map.taken = map.seats.slice(0, map.seats.length - 2); map.saver_seats = 2; // two free seats, both saver
+  f.load(data);
+  const sell = (seats, n) => f.event({event_id:'sold-lk480-' + n, at:'2027-08-26T0' + (7 + n) + ':00:00-05:00', operation:'skyline.inventory.sold',
+    payload:{flight_id:'LK480-2027-10-22', cabin:'business', seats}});
+  sell(1, 1);
+  assert.deepEqual([free(f, 'LK480-2027-10-22'), cabin(f, 'LK480-2027-10-22').saver_seats], [[map.seats.at(-2)], 1]); // taken from the back
+  sell('all', 2);
+  assert.deepEqual([free(f, 'LK480-2027-10-22'), cabin(f, 'LK480-2027-10-22').saver_seats], [[], 0]);
+  unchanged(f, () => f.call('skyline.manage', {booking_id:b.id, action:'accept_alternative', alternative_id:'alt-next-day'}), code('seat_unavailable'));
+});
+
 test('seed validation rejects broken ledgers, times, seats and references', () => {
   const f = fixture();
   const mutate = fn => { const d = f.data; fn(d); return d; };

@@ -71,7 +71,7 @@ Every Infra event is `{event_id, at, operation, payload}`; `at` carries a UTC of
      "extensions": []}}}}
 ```
 
-`skyline.inventory.sold` (other customers buy saver seats; `seats` is a count or `"all"`, floored at zero):
+`skyline.inventory.sold` (other customers buy saver seats; `seats` is a count or `"all"`, floored at zero). The seats sold also leave the seat map, taken from the back of the cabin, so a protected rebooking (which skips the saver check) cannot fill a cabin that is sold out:
 
 ```json
 {"event_id": "sold-pc12-2027-10-21", "at": "2027-08-25T10:00:00-05:00", "operation": "skyline.inventory.sold",
