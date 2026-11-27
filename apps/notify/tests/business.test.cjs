@@ -31,8 +31,8 @@ test('reads are side-effect free and filter by status and time window', () => {
   const f = fixture(), before = f.data;
   assert.deepEqual(f.call('notify.reminder.list', {status:'scheduled'}).items.map(r => r.id), ['reminder-pantry', 'reminder-plants']);
   assert.deepEqual(f.call('notify.reminder.list', {from:'2026-11-18T18:00:00-08:00', to:'2026-11-19T00:00:00-08:00'}).items.map(r => r.id), ['reminder-plants']);
-  assert.deepEqual(f.call('notify.feed.list', {}).items.map(x => x.id), ['push-order-1', 'feed-review']);
-  assert.deepEqual(f.call('notify.feed.list', {unread_only:true}).items.map(x => x.id), ['push-order-1']);
+  assert.deepEqual(f.call('notify.feed.list', {}).items.map(x => x.id), ['push-order-1', 'push-bank-2', 'feed-review', 'push-bank-1', 'feed-rx']); // newest first, dismissed left out
+  assert.deepEqual(f.call('notify.feed.list', {unread_only:true}).items.map(x => x.id), ['push-order-1', 'push-bank-1']);
   assert.equal(f.call('notify.focus.get', {}).quiet_now, false);
   assert.deepEqual(f.data, before);
   assert.throws(() => f.call('notify.reminder.get', {id:'missing'}), code('not_found'));
@@ -242,10 +242,10 @@ test('seed validation rejects unbound accounts, bad zones, broken links and reve
   const mutate = fn => { const d = f.data; fn(d); return d; };
   assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.account_id = 'unbound'; })), /binding/);
   assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.device.timezone = 'Mars/Olympus'; })), /time zone/);
-  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.feed[0].source.reminder_id = 'reminder-pantry'; })), /did not produce|feed item/);
-  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.reminders[0].feed_item_id = null; })), /feed item/);
-  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.feed[1].source.account_id = 'stranger'; })), /bound to the device owner/);
-  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.reminders[1].history[0].at = '2099-01-01T00:00:00Z'; })), /history/);
+  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.feed.find(x => x.id === 'feed-review').source.reminder_id = 'reminder-pantry'; })), /did not produce|feed item/);
+  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.reminders.find(r => r.id === 'reminder-review').feed_item_id = null; })), /feed item/);
+  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.feed.find(x => x.id === 'push-order-1').source.account_id = 'stranger'; })), /bound to the device owner/);
+  assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.reminders.find(r => r.id === 'reminder-call').history[0].at = '2099-01-01T00:00:00Z'; })), /history/);
   assert.throws(() => plugin.validateSeed(f.ctx, mutate(d => { d.feed.push({...d.feed[1], account_id:d.account_id}); })), /Duplicate/);
 });
 
@@ -263,4 +263,11 @@ test('reviewer renderer escapes untrusted content', () => {
   const view = require('../gui/src/view.js');
   const html = view.render([{id:'test', title:'<img src=x onerror=alert(1)>', body:'<script>bad</script>'}]);
   assert.ok(!html.includes('<img')); assert.ok(!html.includes('<script>')); assert.ok(html.includes('&lt;'));
+});
+
+test('the example seed matches the approved plan: 5 reminders, 6 past feed items from 3 sources', () => {
+  const d = fixture().data;
+  const sources = new Set(d.feed.map(x => x.source.kind === 'reminder' ? 'reminder' : x.source.app_id));
+  assert.deepEqual([d.reminders.length, d.feed.length, [...sources].sort()], [5, 6, ['bank-alerts', 'order-notifier', 'reminder']]);
+  assert.ok(d.reminders.some(r => r.anchor) && d.reminders.some(r => r.status === 'silenced') && d.feed.some(x => x.dismissed_at));
 });

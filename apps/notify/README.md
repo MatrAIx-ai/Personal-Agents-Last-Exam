@@ -39,7 +39,7 @@ The App never schedules itself, and Core 1.2 exposes only its fixed Infra lifecy
 
 ## State and time
 
-`fixtures/minimal.json` is Maya's device: Sleep focus 22:30–07:00 daily, Work focus 13:00–15:00 on weekdays, four reminders (one delivered from a Calendar anchor, one cancelled, two scheduled) and two feed items (one read reminder, one push that arrived silently overnight). `fixtures/clock.json` is 2026-11-18 09:00 Pacific. Tasks replace these through `env.load_seed`, binding every App that will push to the device owner.
+`fixtures/minimal.json` is Maya's device: Sleep focus 22:30–07:00 daily, Work focus 13:00–15:00 on weekdays, five reminders (one delivered from a Calendar anchor, one silenced inside Work focus, one cancelled, two scheduled) and six past feed items from three sources: the two fired reminders, two order updates from `order-notifier` (one read and dismissed, one that arrived silently overnight) and two card alerts from `bank-alerts`. Both push senders are bound to Maya in `fixtures/binding.json`. `fixtures/clock.json` is 2026-11-18 09:00 Pacific. Tasks replace these through `env.load_seed`, binding every App that will push to the device owner.
 
 All writes use the run's virtual time, `expected_version` and `request_id`. Every reminder, feed item and the device keep an append-only `history`. `validateSeed` runs after every load, tool call and event and rejects a fired reminder without its matching feed item, a feed item that points at the wrong reminder, an anchor whose fire time disagrees with its event start, a push from an unbound sender, or reversed timelines. Diagnostics carry record IDs and step names only, never reminder or notification text.
 
