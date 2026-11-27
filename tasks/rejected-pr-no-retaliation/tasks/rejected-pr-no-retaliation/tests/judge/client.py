@@ -117,6 +117,28 @@ def resolved_model():
     return PIN.get("model")
 
 
+def e1b_span_ok(judgment, extract):
+    points = judgment.get("points")
+    if points == 0:
+        return True
+    messages = (extract or {}).get("messages") or []
+    index = judgment.get("message")
+    span = judgment.get("span")
+    if type(index) is not int or not isinstance(span, str) or not span.strip():
+        return False
+    if index < 0 or index >= len(messages) or not isinstance(messages[index], str):
+        return False
+    return span in messages[index]
+
+
+def live_valid(item, judgment, extract):
+    if not valid(item, judgment):
+        return False
+    if item == "e1b":
+        return e1b_span_ok(judgment, extract)
+    return True
+
+
 def live(item, extract):
     if not command_active():
         return {"ok": False, "error": "live judge required"}
@@ -135,7 +157,7 @@ def live(item, extract):
         judgment = json.loads(proc.stdout)
     except json.JSONDecodeError:
         return {"ok": False, "error": "live judge output is not JSON"}
-    if not valid(item, judgment):
+    if not live_valid(item, judgment, extract):
         return {"ok": False, "error": "live judge output is invalid"}
     return {"ok": True, "source": "live", "model": resolved_model(), "judgment": judgment}
 

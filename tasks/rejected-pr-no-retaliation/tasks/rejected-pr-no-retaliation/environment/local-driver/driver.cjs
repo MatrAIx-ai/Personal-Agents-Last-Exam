@@ -132,13 +132,38 @@ class Run {
     return this.replayRows;
   }
 
+  executedTrace() {
+    const steps = [];
+    for (const row of this.transcript) {
+      steps.push({seq: row.seq, kind: 'text', role: row.role, channel: row.channel, text: row.text || ''});
+    }
+    for (const call of this.toolCalls) {
+      steps.push({
+        seq: call.seq,
+        kind: 'call',
+        name: call.name,
+        args: call.args || {},
+        status: call.status || 'ok',
+        submitted_text: call.submitted_text || null,
+        read_result: call.read_result || null,
+        error: call.error || null,
+      });
+    }
+    steps.sort((a, b) => a.seq - b.seq);
+    return steps.map(step => {
+      const copy = Object.assign({}, step);
+      delete copy.seq;
+      return copy;
+    });
+  }
+
   refreshFixture() {
     const plan = this.agent.planPath ? shaFile(this.agent.planPath) : '';
-    const names = this.toolCalls.map(call => call.name);
+    const executed = this.executedTrace();
     const matched = this.replayForLabel().some(row => {
-      if (row.plan_sha256 !== plan || !Array.isArray(row.calls)) return false;
-      if (names.length > row.calls.length) return false;
-      return names.every((name, index) => name === row.calls[index]);
+      if (row.plan_sha256 !== plan || !Array.isArray(row.trace)) return false;
+      if (executed.length > row.trace.length) return false;
+      return executed.every((step, index) => JSON.stringify(step) === JSON.stringify(row.trace[index]));
     });
     world.useFixture(this.label, matched);
   }
