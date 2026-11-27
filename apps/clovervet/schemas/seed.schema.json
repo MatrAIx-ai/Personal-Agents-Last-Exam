@@ -1,0 +1,1145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:clovervet:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "branches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "fear_free_certified": {
+            "type": "boolean"
+          },
+          "cat_only_wing": {
+            "type": "boolean"
+          },
+          "late_cancel_fee_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "map_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "address",
+          "fear_free_certified",
+          "cat_only_wing",
+          "late_cancel_fee_cents",
+          "map_asset_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "branch_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "species_supported": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "dog",
+                "cat"
+              ]
+            },
+            "minItems": 1
+          },
+          "fear_free_certified": {
+            "type": "boolean"
+          },
+          "usda_accredited": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "branch_id",
+          "species_supported",
+          "fear_free_certified",
+          "usda_accredited"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "branch_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "vet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "visit_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "wellness_exam",
+                "vaccine_booster",
+                "sick_visit",
+                "dental_cleaning",
+                "travel_certificate_exam",
+                "urgent_triage"
+              ]
+            },
+            "minItems": 1
+          },
+          "fear_free_room": {
+            "type": "boolean"
+          },
+          "cat_only_slot": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "booked",
+              "disrupted"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "branch_id",
+          "vet_id",
+          "starts_at",
+          "ends_at",
+          "visit_types",
+          "fear_free_room",
+          "cat_only_slot",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "clearance_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "clearance_type": {
+            "enum": [
+              "boarding_stay",
+              "interstate_travel"
+            ]
+          },
+          "species": {
+            "enum": [
+              "dog",
+              "cat"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "required_vaccines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "vaccine_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                "min_waiting_days": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "vaccine_type",
+                "min_waiting_days"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "max_exam_age_days": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_days_before_departure": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "certificate_validity_days": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "clearance_type",
+          "species",
+          "label",
+          "required_vaccines",
+          "max_exam_age_days",
+          "max_days_before_departure",
+          "certificate_validity_days"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "species": {
+            "enum": [
+              "dog",
+              "cat"
+            ]
+          },
+          "breed": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "weight_kg": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 120
+          },
+          "microchip_id": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 40
+          },
+          "allergies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "handling_flags": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "fear_free_room",
+                "cat_only_slot",
+                "muzzle_preferred",
+                "split_vaccine_doses"
+              ]
+            }
+          },
+          "primary_branch_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "primary_vet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "last_exam_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exam_valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "transferred",
+              "deceased"
+            ]
+          },
+          "authorized_caretakers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "person_ref": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "scope": {
+                  "enum": [
+                    "pickup_only",
+                    "routine_visits",
+                    "emergency_authorized"
+                  ]
+                },
+                "emergency_cap_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "person_ref",
+                "scope",
+                "emergency_cap_cents"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "card_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "name",
+          "species",
+          "breed",
+          "weight_kg",
+          "microchip_id",
+          "allergies",
+          "handling_flags",
+          "primary_branch_id",
+          "primary_vet_id",
+          "last_exam_at",
+          "exam_valid_until",
+          "status",
+          "authorized_caretakers",
+          "notes",
+          "card_asset_id",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vaccinations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "vaccine_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "administered_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waiting_period_days": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "clinic_branch_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "lot_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "pet_id",
+          "vaccine_type",
+          "administered_at",
+          "expires_at",
+          "waiting_period_days",
+          "clinic_branch_id",
+          "lot_number",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "lab_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "panel_type": {
+            "enum": [
+              "heartworm_antigen",
+              "pre_anesthetic_bloodwork",
+              "fecal_parasite"
+            ]
+          },
+          "status": {
+            "enum": [
+              "negative",
+              "positive",
+              "cleared",
+              "abnormal"
+            ]
+          },
+          "collected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "pet_id",
+          "panel_type",
+          "status",
+          "collected_at",
+          "valid_until",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "clearances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "rule_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "clearance_type": {
+            "enum": [
+              "boarding_stay",
+              "interstate_travel"
+            ]
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "issued",
+              "expired",
+              "revoked"
+            ]
+          },
+          "stay_start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stay_end_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "issued_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requirement_ref": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "file_ref",
+                      "asset_ref"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "version": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "certificate_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "pet_id",
+          "rule_id",
+          "clearance_type",
+          "status",
+          "stay_start_at",
+          "stay_end_at",
+          "issued_at",
+          "valid_until",
+          "requirement_ref",
+          "certificate_asset_id",
+          "notes",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "appointments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "branch_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "vet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "visit_type": {
+            "enum": [
+              "wellness_exam",
+              "vaccine_booster",
+              "sick_visit",
+              "dental_cleaning",
+              "travel_certificate_exam",
+              "urgent_triage"
+            ]
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "scheduled",
+              "checked_in",
+              "completed",
+              "rescheduled",
+              "cancelled",
+              "no_show"
+            ]
+          },
+          "confirmation_code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "caretaker_person_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "penalty_free_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancellation_fee_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 600
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "pet_id",
+          "branch_id",
+          "vet_id",
+          "slot_id",
+          "visit_type",
+          "starts_at",
+          "ends_at",
+          "status",
+          "confirmation_code",
+          "caretaker_person_ref",
+          "penalty_free_until",
+          "cancellation_fee_cents",
+          "notes",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "prescriptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "medication_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "category": {
+            "enum": [
+              "heartworm_preventative",
+              "flea_tick",
+              "chronic_med",
+              "therapeutic_diet"
+            ]
+          },
+          "min_weight_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "max_weight_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "allergen_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "requires_heartworm_test": {
+            "type": "boolean"
+          },
+          "refills_remaining": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "pet_id",
+          "medication_name",
+          "category",
+          "min_weight_kg",
+          "max_weight_kg",
+          "allergen_tags",
+          "requires_heartworm_test",
+          "refills_remaining",
+          "expires_at",
+          "instructions",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "refill_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "prescription_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "status": {
+            "enum": [
+              "requested",
+              "vet_review",
+              "approved_pickup",
+              "approved_delivery",
+              "denied",
+              "cancelled"
+            ]
+          },
+          "fulfillment_mode": {
+            "enum": [
+              "clinic_pickup",
+              "home_delivery"
+            ]
+          },
+          "pickup_branch_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pickup_person_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shipping_address": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "refill_receipt_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "decision_note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 600
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "prescription_id",
+          "pet_id",
+          "status",
+          "fulfillment_mode",
+          "pickup_branch_id",
+          "pickup_person_ref",
+          "shipping_address",
+          "refill_receipt_id",
+          "decision_note",
+          "notes",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "branches",
+    "vets",
+    "slots",
+    "clearance_rules",
+    "pets",
+    "vaccinations",
+    "lab_results",
+    "clearances",
+    "appointments",
+    "prescriptions",
+    "refill_requests"
+  ],
+  "additionalProperties": false
+}

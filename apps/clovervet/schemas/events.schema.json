@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:clovervet:events:1",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "vet.vaccination_logged"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "pet_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "vaccine_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "administered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "waiting_period_days": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "clinic_branch_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "lot_number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "required": [
+            "pet_id",
+            "vaccine_type",
+            "administered_at",
+            "expires_at",
+            "waiting_period_days",
+            "clinic_branch_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "vet.lab_result_posted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "pet_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "panel_type": {
+              "enum": [
+                "heartworm_antigen",
+                "pre_anesthetic_bloodwork",
+                "fecal_parasite"
+              ]
+            },
+            "status": {
+              "enum": [
+                "negative",
+                "positive",
+                "cleared",
+                "abnormal"
+              ]
+            },
+            "valid_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            }
+          },
+          "required": [
+            "pet_id",
+            "panel_type",
+            "status",
+            "valid_until",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "vet.visit_outcome_logged"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "appointment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "outcome": {
+              "enum": [
+                "checked_in",
+                "completed",
+                "no_show"
+              ]
+            },
+            "exam_valid_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "recorded_weight_kg": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "appointment_id",
+            "outcome",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "prescription.decision"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "refill_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "decision": {
+              "enum": [
+                "vet_review",
+                "approved_pickup",
+                "approved_delivery",
+                "denied"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "refill_id",
+            "decision",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "clinic.schedule_disruption"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "branch_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "vet_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "affected_from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "affected_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "penalty_free_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            }
+          },
+          "required": [
+            "branch_id",
+            "affected_from",
+            "affected_until",
+            "penalty_free_until",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

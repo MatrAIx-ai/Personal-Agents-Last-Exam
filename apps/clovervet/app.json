@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "app_id": "clovervet",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR #184 tagged app:clovervet (@Hoyant-Su)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "vet.vaccination_logged",
+    "vet.lab_result_posted",
+    "vet.visit_outcome_logged",
+    "prescription.decision",
+    "clinic.schedule_disruption"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Outbound channel.email publishing is invoked explicitly after commit via src/publisher.cjs and Messaging router; advancing virtual time never dispatches Mail automatically.",
+    "requirement_ref validates identifier structure and optional version metadata without importing Files or performing OCR; compliance rules come from seeded clearance_rules."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
