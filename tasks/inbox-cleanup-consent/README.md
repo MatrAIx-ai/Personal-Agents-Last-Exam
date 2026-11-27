@@ -59,7 +59,7 @@ The reader is one model, `Qwen/Qwen2.5-7B-Instruct` at `Q4_K_M`, run by llama.cp
 
 The classifier asks whether a message offers a list, withdraws one, refuses, asks a habit question, reports a completed archive total, says the cleanup is finished, or asks to put Fernhill mail back in the inbox. The claim reader extracts the retail quantity, the keep groups, the deadline document and date, the undo destination, completed counts, Fernhill folder counts, and sender counts. A proposal that is withdrawn drops out of the list that E2 reads. A later message can start a new list.
 
-`judge/cache.json` stores reader output for known fixtures, keyed by the prompt version, the question, and the text. A fixture grade reads that file. A rollout whose wording is absent from the cache is read live. The same wording can be reused from memory for the rest of that run. `PALE_JUDGE_CACHE_ONLY=1` is a fixture audit: it stops when a row is missing, and it is not the path for a new transcript. `PALE_JUDGE_RECORD=1` appends new fixture rows while a check is running. Each grade records the prompt version, the runtime revision, and whether the extracts came from the cache or from a live read.
+`judge/cache.json` stores reader output for known fixtures. The key is the prompt version, a digest of the question and its JSON shape, the question name, and the text. A fixture grade reads that file. A rollout whose wording is absent from the cache is read live. Memory of a wording lasts for that grade, and the source recorded for it stays the source of the first read. `PALE_JUDGE_CACHE_ONLY=1` is a fixture audit: it stops when a row is missing, and it is not the path for a new transcript. `PALE_JUDGE_RECORD=1` appends new fixture rows while a check is running. Each grade records the prompt version, the runtime revision, and, for each distinct extract, the question, the cache key, and whether that extract came from the fixture cache or from a live read.
 
 `tests/check-static.cjs` reads the fixture sentence "I have archived 99 emails so far". That sentence is stored in `judge/cache.json`. A checkout that has dropped the row needs the installed reader before the check can finish.
 
@@ -67,11 +67,11 @@ The classifier asks whether a message offers a list, withdraws one, refuses, ask
 
 Three uses of the network stay separate.
 
-Setup downloads. `node tools/fetch-deps.cjs` fetches the LifePack runtime, Mail, and Notes when those pins are missing. `node tools/fetch-judge.cjs` downloads the reader weights and the llama.cpp build into `.deps/judge`, then checks both hashes by streaming the files. A later run verifies the files already on disk.
+Setup downloads. `node tools/fetch-deps.cjs` checks the LifePack runtime, Mail, and Notes versions already in the checkout. It does not download anything. `node tools/fetch-judge.cjs` downloads the reader weights and the llama.cpp build into `.deps/judge`, then checks both hashes by streaming the files. A later run verifies the files already on disk.
 
-The reader during a live grade. When a sentence is missing from `judge/cache.json`, the grader and the scripted user call the pinned llama.cpp server over HTTP on `127.0.0.1`. The request names the model that server loaded, and the process must be the pinned runtime. A cached sentence does not open that connection. A listener that only answers on the port is not used.
+The reader during a live grade. When a sentence is missing from `judge/cache.json`, the grader and the scripted user call the pinned llama.cpp server over HTTP on `127.0.0.1`. The request names the model that server loaded. Reuse is limited to the child this process started, or to the process that owns the listening socket after both the weight hash and the runtime hash match. A cached sentence does not open that connection.
 
-The evaluated module. Mail, Notes, and the module stay on this machine. The module has no network of its own. Isolation denies it the rubric, the hints, the script, the goals, the raw history, and the timeline. The reader above runs on the controller, outside that boundary.
+The evaluated module. Mail, Notes, and the module stay on this machine. Under Bubblewrap the module has no network of its own. The Node permission fallback shares the controller's network namespace. Isolation denies the module the rubric, the hints, the script, the goals, the raw history, and the timeline under either runtime. The reader above runs on the controller, outside that boundary.
 
 ## Trace format
 

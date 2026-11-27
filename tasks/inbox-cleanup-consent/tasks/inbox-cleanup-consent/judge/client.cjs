@@ -13,8 +13,11 @@ const prompts = require('./prompts.json');
 const cachePath = path.join(HERE, 'cache.json');
 const memory = new Map();
 const reads = [];
+const extracts = new Map();
 let cache = loadCache();
 let loadedModel = '';
+let spawnedPid = 0;
+let hashesChecked = false;
 
 function loadCache() {
   try {
@@ -28,8 +31,26 @@ function pause(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
+function promptDigest(task) {
+  const spec = prompts[String(task).split(':')[0]] || {};
+  return crypto.createHash('sha256').update(String(spec.system || '') + '\n' + JSON.stringify(spec.schema || {})).digest('hex').slice(0, 16);
+}
+
 function cacheKey(task, text) {
-  return crypto.createHash('sha256').update(model.prompt_version + '\n' + task + '\n' + String(text)).digest('hex');
+  return crypto.createHash('sha256').update(model.prompt_version + '\n' + promptDigest(task) + '\n' + task + '\n' + String(text)).digest('hex');
+}
+
+function fileSha256(file) {
+  const hash = crypto.createHash('sha256');
+  const fd = fs.openSync(file, 'r');
+  const buf = Buffer.alloc(1024 * 1024);
+  try {
+    let n = 0;
+    while ((n = fs.readSync(fd, buf, 0, buf.length, null)) > 0) hash.update(buf.subarray(0, n));
+  } finally {
+    fs.closeSync(fd);
+  }
+  return hash.digest('hex');
 }
 
 function weightsPath() {
@@ -47,21 +68,43 @@ function serverBin() {
   return path.join(runtimeDir(), 'llama-server');
 }
 
-function listener(port) {
+function socketOwner(port) {
+  const hex = Number(port).toString(16).toUpperCase().padStart(4, '0');
+  let inode = '';
+  for (const file of ['/proc/net/tcp', '/proc/net/tcp6']) {
+    let text = '';
+    try { text = fs.readFileSync(file, 'utf8'); } catch (err) { continue; }
+    for (const line of text.split('\n')) {
+      const cols = line.trim().split(/\s+/);
+      if (cols.length < 10) continue;
+      if (!String(cols[1] || '').toUpperCase().endsWith(':' + hex)) continue;
+      if (cols[3] !== '0A') continue;
+      inode = cols[9];
+    }
+  }
+  if (!inode || inode === '0') return 0;
   for (const pid of fs.readdirSync('/proc')) {
     if (!/^\d+$/.test(pid)) continue;
-    let cmd = '';
-    let exe = '';
-    try {
-      cmd = fs.readFileSync('/proc/' + pid + '/cmdline').toString('utf8').replace(/\0/g, ' ');
-      exe = fs.realpathSync('/proc/' + pid + '/exe');
-    } catch (err) {
-      continue;
+    let fds = [];
+    try { fds = fs.readdirSync('/proc/' + pid + '/fd'); } catch (err) { continue; }
+    for (const fd of fds) {
+      try {
+        if (fs.readlinkSync('/proc/' + pid + '/fd/' + fd) === 'socket:[' + inode + ']') return Number(pid);
+      } catch (err) {}
     }
-    if (!cmd.includes('llama-server') || !cmd.includes(String(port))) continue;
-    return {exe, cmd};
   }
-  return null;
+  return 0;
+}
+
+function installerHashesMatch() {
+  if (hashesChecked) return true;
+  const weights = weightsPath();
+  const archive = path.join(PACKAGE, '.deps/judge', model.runtime_asset);
+  if (!fs.existsSync(weights) || !fs.existsSync(archive)) return false;
+  if (fileSha256(weights) !== model.weights_sha256) return false;
+  if (fileSha256(archive) !== model.runtime_sha256) return false;
+  hashesChecked = true;
+  return true;
 }
 
 function loadedModels() {
@@ -87,8 +130,19 @@ function pinnedReady() {
     try { return fs.realpathSync(id) === weightFile; } catch (err) { return id === weightFile; }
   });
   if (!match) return false;
-  const owner = listener(model.port);
-  if (!owner || owner.exe !== binary || !owner.cmd.includes(model.weights_file)) return false;
+  const pid = socketOwner(model.port);
+  if (!pid) return false;
+  let exe = '';
+  let cmd = '';
+  try {
+    exe = fs.realpathSync('/proc/' + pid + '/exe');
+    cmd = fs.readFileSync('/proc/' + pid + '/cmdline').toString('utf8').replace(/\0/g, ' ');
+  } catch (err) {
+    return false;
+  }
+  if (exe !== binary || !cmd.includes(model.weights_file)) return false;
+  if (spawnedPid && pid !== spawnedPid && !installerHashesMatch()) return false;
+  if (!spawnedPid && !installerHashesMatch()) return false;
   loadedModel = match;
   return true;
 }
@@ -100,7 +154,7 @@ function ensureServer() {
   if (!fs.existsSync(bin) || !fs.existsSync(weights)) {
     throw new Error('The pinned reader is not installed. Run node tools/fetch-judge.cjs from the package root.');
   }
-  if (loadedModels().length || listener(model.port)) {
+  if (loadedModels().length || socketOwner(model.port)) {
     throw new Error('Port ' + model.port + ' is in use by a process other than the pinned reader.');
   }
   const child = spawn(bin, [
@@ -119,6 +173,7 @@ function ensureServer() {
     stdio: 'ignore',
     env: {...process.env, LD_LIBRARY_PATH: runtimeDir()}
   });
+  spawnedPid = child.pid;
   child.unref();
   for (let i = 0; i < 120; i += 1) {
     if (pinnedReady()) return;
@@ -146,7 +201,7 @@ function live(task, text) {
   if (!spec) throw new Error('unknown reader task ' + task);
   ensureServer();
   const system = spec.system.replace('GROUP', task.startsWith('keep:') ? task.slice(5) : '');
-  const max = task === 'senders' ? 1200 : task === 'deadline' ? 300 : 80;
+  const max = task === 'senders' ? 1200 : (task === 'deadline' || task === 'retail') ? 300 : 80;
   return post({
     model: loadedModel || model.id,
     temperature: model.temperature,
@@ -157,8 +212,8 @@ function live(task, text) {
   });
 }
 
-function remember(id, task, value) {
-  memory.set(id, value);
+function remember(id, task, value, source) {
+  memory.set(id, {value, source});
   if (process.env.PALE_JUDGE_RECORD === '1') {
     cache[id] = {task, value};
     const tmp = cachePath + '.tmp';
@@ -171,8 +226,15 @@ function note(source) {
   reads.push(source);
 }
 
+function noteExtract(id, task, source) {
+  if (extracts.has(id)) return;
+  extracts.set(id, {task, key: id, source});
+}
+
 function beginGrade() {
   reads.length = 0;
+  extracts.clear();
+  memory.clear();
 }
 
 function readerReport() {
@@ -187,25 +249,30 @@ function readerReport() {
     runtime_revision: model.runtime_revision,
     source,
     cache_reads: cacheReads,
-    live_reads: liveReads
+    live_reads: liveReads,
+    extracts: [...extracts.values()]
   };
 }
 
 function read(task, text) {
   const id = cacheKey(task, text);
   if (memory.has(id)) {
-    note('cache');
-    return memory.get(id);
+    const held = memory.get(id);
+    noteExtract(id, task, held.source);
+    note(held.source);
+    return held.value;
   }
   if (cache[id] && cache[id].value) {
-    memory.set(id, cache[id].value);
+    memory.set(id, {value: cache[id].value, source: 'cache'});
+    noteExtract(id, task, 'cache');
     note('cache');
     return cache[id].value;
   }
   if (process.env.PALE_JUDGE_CACHE_ONLY === '1') throw new Error('reader cache miss for ' + task);
   const value = live(task, text);
+  noteExtract(id, task, 'live');
   note('live');
-  remember(id, task, value);
+  remember(id, task, value, 'live');
   return value;
 }
 

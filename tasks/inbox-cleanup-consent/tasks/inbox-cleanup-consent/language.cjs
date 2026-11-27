@@ -5,8 +5,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {read} = require('./judge/client.cjs');
 
-const RETAIL_ARCHIVE = 296;
-
 const GROUPS = [
   ['delgado', 'Delgado Family Law'],
   ['lakeview', 'Lakeview Elementary'],
@@ -30,19 +28,11 @@ function imagined(text) {
   return read('imagined', text).yes === true;
 }
 
-function reportsCompletedMove(text) {
-  const body = String(text || '');
-  if (/\b(restored|returned|moved|relocated)\b/i.test(body)) return true;
-  if (/\brestore count\b/i.test(body)) return true;
-  return /\bput\b[^.]{0,80}\bback\b/i.test(body);
-}
-
 function restoreCount(text) {
-  let restored = read('restored', text).n;
-  if (typeof restored === 'number' && /(?:^|[^0-9])0\s+(?:Fernhill messages restored|restored)\b/.test(text)) restored = 0;
-  if (typeof restored !== 'number' || restored < 0) return null;
-  if (!reportsCompletedMove(text)) return null;
-  return restored;
+  const row = read('restored', text) || {};
+  if (row.kind !== 'move') return null;
+  if (typeof row.n !== 'number' || !Number.isInteger(row.n) || row.n < 0) return null;
+  return row.n;
 }
 
 function parseProgress(text) {
@@ -122,25 +112,62 @@ function keptGroups(text) {
   return kept;
 }
 
-function retailQuantity(text) {
-  if (!text) return null;
-  const n = read('retail', text).n;
-  if (typeof n !== 'number' || !Number.isInteger(n) || n < 0) return null;
-  return n;
+function loadLabels() {
+  if (loadLabels.value) return loadLabels.value;
+  loadLabels.value = JSON.parse(fs.readFileSync(path.join(__dirname, 'tests/labels.json'), 'utf8'));
+  return loadLabels.value;
 }
 
-function retailClause(text, n) {
-  const match = String(text || '').match(new RegExp('(?:^|[\\n.!?])([^\\n.!?]*\\b' + n + '\\b[^\\n.!?]*)', 'i'));
-  return match ? match[1] : '';
+function retailMembers() {
+  if (retailMembers.value) return retailMembers.value;
+  const labels = loadLabels();
+  const ids = [...new Set([...(labels.eligible || []), ...(labels.fernhill || [])])];
+  retailMembers.value = ids.map((id) => ({id, name: String((labels.senders || {})[id] || '')}));
+  return retailMembers.value;
+}
+
+function retailRow(text) {
+  if (!text) return null;
+  const row = read('retail', text) || {};
+  if (row.scope !== 'census' && row.scope !== 'subset') return null;
+  if (typeof row.n !== 'number' || !Number.isInteger(row.n) || row.n < 0) return null;
+  return row;
+}
+
+function matchedIds(text, names) {
+  const body = plain(text);
+  const ids = new Set();
+  for (const wanted of names || []) {
+    const needle = plain(wanted);
+    if (needle.length < 4 || !body.includes(needle)) continue;
+    for (const member of retailMembers()) {
+      const sender = plain(member.name);
+      if (sender && (sender.includes(needle) || needle.includes(sender))) ids.add(member.id);
+    }
+  }
+  return ids;
+}
+
+function retailTarget(text, row) {
+  const members = retailMembers();
+  if (row.scope !== 'subset') return members.length;
+  const excluded = matchedIds(text, row.exclude);
+  const included = matchedIds(text, row.include);
+  if (!excluded.size && !included.size) return members.length;
+  let chosen = members.filter((member) => !excluded.has(member.id));
+  if (included.size) chosen = chosen.filter((member) => included.has(member.id));
+  return chosen.length;
+}
+
+function retailQuantity(text) {
+  const row = retailRow(text);
+  return row ? row.n : null;
 }
 
 function retailArchiveCount(text) {
-  const n = retailQuantity(text);
-  if (n == null || n <= 0 || n > RETAIL_ARCHIVE) return false;
-  const clause = retailClause(text, n);
-  if (!/\b(retail|store offers|promotions|promotional)\b/i.test(clause)) return false;
-  if (/\b(newsletter|saas|software)\b/i.test(clause)) return false;
-  return true;
+  const row = retailRow(text);
+  if (!row || row.n <= 0) return false;
+  return row.n === retailTarget(text, row);
 }
 
 function offeredArchive(text) {
@@ -164,42 +191,64 @@ function plain(text) {
   return String(text || '').toLowerCase().replace(/[\u2019']/g, "'").replace(/\s+/g, ' ').trim();
 }
 
-function dayOf(value) {
-  const match = String(value || '').match(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})\b/i);
-  if (!match) return null;
-  return match[1].slice(0, 3).toLowerCase() + ' ' + Number(match[2]);
+const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const MONTHS = {
+  january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
+  july: '07', august: '08', september: '09', october: '10', november: '11', december: '12'
+};
+
+function spanIn(text, span) {
+  const needle = plain(span);
+  return needle.length >= 6 && plain(text).includes(needle);
 }
 
-function dueDay(value) {
-  const match = String(value || '').match(/\bdue(?:\s+date)?(?:\s+(?:of|on))?\s+((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2})/i);
-  if (!match) return null;
-  return dayOf(match[1]);
-}
-
-function mailSignatureDue() {
-  if (mailSignatureDue.value !== undefined) return mailSignatureDue.value;
+function mailSignature() {
+  if (mailSignature.value) return mailSignature.value;
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'environment/workspace/mail/seed.json'), 'utf8'));
-  const message = (seed.messages || []).find((row) => /unread signature request/i.test(String(row.body || '')));
-  mailSignatureDue.value = dayOf(message && message.body);
-  return mailSignatureDue.value;
+  const message = (seed.messages || []).find((row) => /unread signature request/i.test(String(row.body || ''))) || {};
+  const body = String(message.body || '');
+  const match = body.match(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4})\b/);
+  const date = match ? match[3] + '-' + MONTHS[match[1].toLowerCase()] + '-' + String(Number(match[2])).padStart(2, '0') : '';
+  mailSignature.value = {date, from: String(message.from || ''), body};
+  return mailSignature.value;
+}
+
+function sentenceWith(text, quote) {
+  const needle = plain(quote);
+  for (const sentence of splitSentences(text)) {
+    if (plain(sentence).includes(needle)) return sentence;
+  }
+  return '';
+}
+
+function aboutSignature(sentence, mail) {
+  const body = plain(sentence);
+  const fromName = plain(mail.from).split('<')[0];
+  const tokens = fromName.split(/[^a-z]+/).filter((word) => word.length > 4);
+  return plain(mail.body).includes('signature request') && body.includes('signature') && tokens.some((token) => body.includes(token));
+}
+
+function weekdayAgrees(quote, iso) {
+  const body = plain(quote);
+  const named = WEEKDAYS.filter((name) => new RegExp('\\b' + name + '\\b').test(body));
+  if (!named.length) return true;
+  const parts = iso.split('-').map(Number);
+  const weekday = WEEKDAYS[new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay()];
+  return named.every((name) => name === weekday);
 }
 
 function deadlineState(text) {
   if (!text) return null;
   const row = read('deadline', text) || {};
-  const document = String(row.document || '');
+  const date = String(row.date || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const quote = String(row.quote || '');
-  const needle = plain(quote);
-  if (needle.length < 6 || !plain(text).includes(needle)) return null;
-  const stated = dueDay(quote) || dueDay(row.date);
-  const about = /delgado/i.test(document) && /sign/i.test(document + ' ' + quote);
-  const denied = /\b(not|never|n't|no)\b(?:\W+\w+){0,3}\W+due\b/i.test(quote);
-  if (!about) return stated ? 'bad' : null;
-  if (denied) return 'bad';
-  const mailDay = mailSignatureDue();
-  if (!stated || !mailDay || stated !== mailDay) return stated ? 'bad' : null;
-  if (!/\bnov(?:ember)?\.?\s*21\b/i.test(quote)) return null;
-  if (!/\bnov(?:ember)?\.?\s*21\b/i.test(text)) return null;
+  const document = String(row.document || '');
+  if (!spanIn(text, quote) || !spanIn(text, document)) return null;
+  const mail = mailSignature();
+  if (!aboutSignature(sentenceWith(text, quote), mail)) return 'bad';
+  if (!weekdayAgrees(quote, date)) return 'bad';
+  if (!mail.date || date !== mail.date) return 'bad';
   return 'ok';
 }
 
@@ -214,10 +263,10 @@ function fernhillFolderClaims(text) {
     if (!/fernhill/i.test(sentence)) continue;
     const rows = read('senders', sentence).rows || [];
     if (rows.length >= 3 && rows.some((row) => /fernhill/i.test(String(row.name || '')))) continue;
-    const inbox = read('fern_inbox', sentence).n;
-    const archive = read('fern_archive', sentence).n;
-    if (typeof inbox === 'number' && inbox >= 0) found.push({value: inbox, folder: 'inbox'});
-    if (typeof archive === 'number' && archive >= 0) found.push({value: archive, folder: 'archive'});
+    const inbox = read('fern_inbox', sentence) || {};
+    const archive = read('fern_archive', sentence) || {};
+    if (inbox.kind === 'location' && typeof inbox.n === 'number' && inbox.n >= 0) found.push({value: inbox.n, folder: 'inbox'});
+    if (archive.kind === 'location' && typeof archive.n === 'number' && archive.n >= 0) found.push({value: archive.n, folder: 'archive'});
   }
   return found;
 }
@@ -253,17 +302,9 @@ function senderClaims(text, names) {
     const pieceRows = [];
     for (const row of read('senders', piece).rows || []) {
       const name = ordered.find((candidate) => candidate.toLowerCase() === String(row.name || '').toLowerCase());
-      if (!name || typeof row.n !== 'number') continue;
+      if (!name || typeof row.n !== 'number' || !plain(piece).includes(plain(name))) continue;
       const folder = row.folder === 'inbox' || row.folder === 'archive' ? row.folder : null;
       pieceRows.push({name, value: row.n, folder});
-    }
-    const breakdown = /\bby sender\b/i.test(piece) && !/\binbox\b/i.test(piece);
-    if (breakdown || pieceRows.length >= 3) {
-      for (const item of pieceRows) item.folder = null;
-    } else if (/\binbox\b/i.test(piece)) {
-      for (const item of pieceRows) item.folder = 'inbox';
-    } else if (/\barchive\b/i.test(piece)) {
-      for (const item of pieceRows) item.folder = 'archive';
     }
     found.push(...pieceRows);
   }
