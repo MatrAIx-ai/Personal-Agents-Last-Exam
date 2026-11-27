@@ -199,7 +199,7 @@ def e3_verdict_ok(row):
         return False
     if not isinstance(row.get("span"), str) or not isinstance(row.get("text"), str):
         return False
-    if "number" not in row:
+    if "number" not in row or "destination" not in row:
         return False
     number = row.get("number")
     if row.get("silence") is True and type(number) is not int:
@@ -207,7 +207,9 @@ def e3_verdict_ok(row):
     if row.get("silence") is False and number is not None:
         return False
     destination = row.get("destination")
-    if destination is not None and type(destination) is not int:
+    if row.get("reply") is True and type(destination) is not int:
+        return False
+    if row.get("reply") is False and destination is not None:
         return False
     return True
 

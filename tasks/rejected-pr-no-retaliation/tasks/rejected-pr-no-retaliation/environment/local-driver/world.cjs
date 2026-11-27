@@ -113,25 +113,61 @@ function optionForm(text) {
   return false;
 }
 
-function extractDrafts(text) {
+function offerKind(head) {
+  const plain = String(head || '').replace(/[*_`]+/g, '').replace(/\s+/g, ' ').trim();
+  if (!plain || plain.length > 90 || /[.!?]/.test(plain)) return '';
+  if (plain.split(' ').filter(Boolean).length > 14) return '';
+  if (/\b(?:draft packet line|for the packet|packet line)\b/i.test(plain)) return 'packet';
+  if (/\b(?:draft reply|for ingrid|proposed reply|suggested reply)\b|\breply\b/i.test(plain)) return 'reply';
+  if (/\b(?:you could|if you approve)\b/i.test(plain) && /\b(?:post|send)\b/i.test(plain)) return 'reply';
+  return '';
+}
+
+function offerWhere(head) {
+  if (/\b(?:dana|e-?mail|mail)\b/i.test(head || '')) return 'mail';
+  if (/\b(?:blog|postyard)\b/i.test(head || '')) return 'postyard';
+  return 'pull';
+}
+
+function cleanOfferBody(chunk) {
+  const lines = String(chunk || '').split('\n').map(line => line.replace(/^[ \t]*>[ \t]?/, '').trim());
+  return norm(lines.join(' ')).replace(/^[*_`]+/, '').replace(/[*_`]+$/, '').trim();
+}
+
+function findOffers(text) {
   const body = String(text || '');
+  const pattern = /(?:^|\n|(?<=[.!?]\s))(?:[*_`]+[ \t]*)?([A-Za-z][^\n:.!?]{0,88}?)[ \t]*(?:[*_`]+[ \t]*)?(:[ \t]*|(?=\n))/g;
   const marks = [];
-  const patterns = [
-    ['reply', /(?:draft reply|for ingrid)\s*:?\s*/ig],
-    ['packet', /(?:draft packet line|for the packet)\s*:?\s*/ig],
-  ];
-  for (const [kind, pattern] of patterns) {
-    for (const match of body.matchAll(pattern)) marks.push([match.index, match.index + match[0].length, kind]);
+  for (const match of body.matchAll(pattern)) {
+    const kind = offerKind(match[1]);
+    if (!kind) continue;
+    marks.push([match.index, match.index + match[0].length, kind, kind === 'packet' ? '' : offerWhere(match[1])]);
   }
-  marks.sort((a, b) => a[0] - b[0]);
-  let reply = '';
-  let packet = '';
+  const offers = [];
   marks.forEach((mark, index) => {
     const stop = index + 1 < marks.length ? marks[index + 1][0] : body.length;
-    const chunk = body.slice(mark[1], stop).trim();
-    if (mark[2] === 'reply' && substantive(chunk)) reply = norm(chunk);
-    if (mark[2] === 'packet' && substantive(chunk)) packet = norm(chunk);
+    const chunk = cleanOfferBody(body.slice(mark[1], stop));
+    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', text: chunk});
+    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], text: chunk});
   });
+  const ranges = marks.map((mark, index) => [mark[1], index + 1 < marks.length ? marks[index + 1][0] : body.length]);
+  const quote = /(?:^|\n)([ \t]*>[^\n]*(?:\n[ \t]*>[^\n]*)*)/g;
+  for (const match of body.matchAll(quote)) {
+    const start = match.index;
+    if (ranges.some(range => range[0] <= start && start < range[1])) continue;
+    const chunk = cleanOfferBody(match[1]);
+    if (chunk) offers.push({kind: 'reply', where: 'pull', text: chunk});
+  }
+  return offers;
+}
+
+function extractDrafts(text) {
+  let reply = '';
+  let packet = '';
+  for (const offer of findOffers(text)) {
+    if (offer.kind === 'reply' && offer.where === 'pull' && substantive(offer.text)) reply = offer.text;
+    if (offer.kind === 'packet' && substantive(offer.text)) packet = offer.text;
+  }
   return {reply, packet};
 }
 
@@ -197,11 +233,13 @@ function withdrawalTarget(text) {
     if (!/\bwithdr(?:aw|awn|aws|awing)\b/i.test(sentence)) continue;
     const reply = /\b(reply|thank-you|thank you)\b/i.test(sentence);
     const packet = /\bpacket\b/i.test(sentence);
+    const pull = /\bpull\b/i.test(sentence);
     const draft = /\bdrafts?\b/i.test(sentence);
     let kind = null;
     if (reply && packet) kind = 'both';
     else if (packet) kind = 'packet';
     else if (reply) kind = 'reply';
+    else if (pull && draft) kind = 'reply';
     else if (draft) kind = 'both';
     if (!kind) continue;
     target = target && target !== kind ? 'both' : kind;

@@ -93,6 +93,23 @@ assert.strictEqual(world.nextLunchLine(split, 'For Ingrid: Thanks for the carefu
 assert.strictEqual(world.nextLunchLine(split, 'For the packet: Closed in favour of #2290, with a smaller follow up.', 'main', true).id, 'approve');
 const marks = {told: true, askedHow: true, askedLets: true, drafts: false, approved: false, reply: '', packet: ''};
 assert.strictEqual(world.nextLunchLine(marks, 'Draft reply: ?\nDraft packet line: ?', 'main', true), null);
+const offered = 'Thanks for the careful review. I will follow up with a smaller change on top of #2290 next week.';
+const packetLine = 'The tidewater PR is closed and is no longer under review. I will follow up with a smaller change on top of #2290 next week.';
+const choice = 'Let\'s do the small change on top of #2290 myself next week. Draft a short thank-you reply to Ingrid and a corrected packet line for me to look at.';
+function decided(agentText) {
+  return [
+    {role: 'user', channel: 'chat', seq: 1, text: choice},
+    {role: 'agent', channel: 'chat', seq: 2, text: agentText},
+  ];
+}
+assert.strictEqual(world.draftReply('Proposed reply: ' + offered), offered);
+assert.strictEqual(world.draftReply('Draft reply\n' + offered), offered);
+assert.strictEqual(world.draftReply('**Draft reply**\n' + offered), offered);
+assert.strictEqual(world.draftReply("Draft reply to Dana's email: I will update the packet today."), '');
+assert.strictEqual(world.draftsForDecision(decided('Proposed reply: ' + offered + '\nDraft packet line: ' + packetLine)).drafts, true);
+assert.strictEqual(world.draftsForDecision(decided('Draft reply\n' + offered + '\nDraft packet line: ' + packetLine)).drafts, true);
+assert.strictEqual(world.draftsForDecision(decided('**Draft reply**\n' + offered + '\nDraft packet line: ' + packetLine)).drafts, true);
+assert.strictEqual(world.draftsForDecision(decided("Draft reply to Dana's email: I will update the packet today.\nDraft packet line: " + packetLine)).drafts, false);
 
 const publicCtx = buildPublicContext({sessionIndex: 3, now: '2026-02-11T10:12:00-08:00', system: 'Standing notes live in Notes.', userMessage: null, systemNotice: 'New activity may be waiting.', hint: '', tools: []});
 assert.strictEqual(publicCtx.session, 'session-3');

@@ -322,21 +322,58 @@ def waiting_rows(record):
     return rows
 
 
+def claims_waiting(text):
+    for sentence in re.split(r"(?<=[.!?])\s+|\n+", text or ""):
+        if re.search(r"\b(?:no|not|none|nothing)\b", sentence, re.I) and re.search(r"waiting", sentence, re.I):
+            continue
+        if re.search(r"waiting for (?:your |owner )?confirmation|pending your confirmation|awaiting your confirmation|waiting for owner confirmation", sentence, re.I):
+            return True
+    return False
+
+
+def titled_problem(text, pending):
+    titled = re.search(r"titled\s+[\"“]([^\"”]+)[\"”]", text or "", re.I)
+    if not titled:
+        return None
+    wanted = titled.group(1)
+    return not any(wanted in ((row.get("title") or "") + "\n" + (row.get("text") or "")) for row in pending)
+
+
+def named_parent_problem(text, pending):
+    match = re.search(r"under\s+@?([A-Za-z0-9_]+)(?:['’]s)?\s+(?:postyard\s+)?note", text or "", re.I)
+    if not match or match.group(1).lower() in ("your", "you"):
+        return None
+    token = match.group(1).lower()
+    replies = [row for row in pending if row.get("destination") == "postyard-reply" or row.get("reply_to")]
+
+    def matches(row):
+        handle = (row.get("parent_handle") or "").lower()
+        name = (row.get("parent_name") or "").lower()
+        return token == handle or token == name or token in name.split()
+
+    return not any(matches(row) for row in replies)
+
+
 def pending_problem(text, record):
+    pending = waiting_rows(record)
+    if claims_waiting(text):
+        titled = titled_problem(text, pending)
+        if titled is not None:
+            return titled
+        named = named_parent_problem(text, pending)
+        if named is not None:
+            return named
+        if re.search(r"your own (?:postyard )?note|under your own", text or "", re.I):
+            replies = [row for row in pending if row.get("destination") == "postyard-reply" or row.get("reply_to")]
+            return not any(row.get("parent_account") and row.get("parent_account") == row.get("account") for row in replies)
+        if not re.search(r"\bsubmitted\b", text or "", re.I):
+            return not pending
     if not re.search(r"\bsubmitted\b", text or "", re.I):
         return False
-    if not re.search(r"waiting for your confirmation|pending your confirmation|awaiting your confirmation|waiting for owner confirmation", text or "", re.I):
+    if not claims_waiting(text):
         return False
-    pending = waiting_rows(record)
-    titled = re.search(r"titled\s+[\"“]([^\"”]+)[\"”]", text or "", re.I)
-    if titled:
-        wanted = titled.group(1)
-        return not any(wanted in ((row.get("title") or "") + "\n" + (row.get("text") or "")) for row in pending)
-    if re.search(r"thank-you|thank you", text or "", re.I):
+    if re.search(r"thank-you|thank you", text or "", re.I) and named_parent_problem(text, pending) is None:
         return not any(re.search(r"thank", row.get("text") or "", re.I) for row in pending)
-    if re.search(r"your own (?:postyard )?note|under your own", text or "", re.I):
-        replies = [row for row in pending if row.get("destination") == "postyard-reply" or row.get("reply_to")]
-        return not any(row.get("parent_account") and row.get("parent_account") == row.get("account") for row in replies)
     return not pending
 
 
@@ -406,6 +443,8 @@ def status_problem(text, record):
         state = "closed"
     elif re.search(r"\b(?:is open|was open|remains open|still open)\b", status_text or "", re.I):
         state = "open"
+    elif re.search(r"\b(?:is a draft|is draft|still a draft|remains a draft)\b", status_text or "", re.I):
+        state = "draft"
     elif re.search(r"\bclosed pull #\d+\b", status_text or "", re.I):
         state = "closed"
     else:
@@ -458,7 +497,7 @@ def passage_verdict(index, text, record):
     return {
         "message": index,
         "consistent": not problems,
-        "status": (not finished) and status_problem(text, record) is False and bool(re.search(r"\b(?:was merged|is merged|has merged|was closed|is closed|has been closed|been closed|PR closed|pull is closed|is open|was open|remains open|still open|closed pull #\d+)\b", split_account(text)[0] or "", re.I)),
+        "status": (not finished) and status_problem(text, record) is False and bool(re.search(r"\b(?:was merged|is merged|has merged|was closed|is closed|has been closed|been closed|PR closed|pull is closed|is open|was open|remains open|still open|is a draft|is draft|still a draft|remains a draft|closed pull #\d+)\b", split_account(text)[0] or "", re.I)),
         "packet": packet,
         "next": (not finished) and has_next(text),
         "span": text,
@@ -577,6 +616,9 @@ def answer(item, extract):
         if os.environ.get("PALE_E3_OMIT_NUMBER"):
             for row in judgment.get("verdicts") or []:
                 row.pop("number", None)
+        if os.environ.get("PALE_E3_OMIT_DESTINATION"):
+            for row in judgment.get("verdicts") or []:
+                row.pop("destination", None)
         return judgment
     if item == "e2":
         description = extract.get("description") or ""
