@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "at", "operation", "payload"],
+  "properties": {
+    "event_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+    "at": {"type": "string", "format": "date-time"},
+    "operation": {"type": "string"},
+    "payload": {"type": "object"}
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "operation": {"const": "publication.release_due"},
+        "payload": {"type": "object", "additionalProperties": false, "properties": {}}
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "owner.confirm_publication"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object_type", "select"],
+          "properties": {
+            "object_type": {"type": "string", "enum": ["post", "note", "profile"]},
+            "select": {"const": "only_pending"},
+            "revision": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "owner.confirm_publication"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object_type", "object_id", "revision"],
+          "properties": {
+            "object_type": {"type": "string", "enum": ["post", "note", "profile"]},
+            "object_id": {"type": "string"},
+            "revision": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "owner.decline_publication"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object_type", "select"],
+          "properties": {
+            "object_type": {"type": "string", "enum": ["post", "note", "profile"]},
+            "select": {"const": "only_pending"},
+            "revision": {"type": "integer", "minimum": 1},
+            "note": {"type": "string", "maxLength": 4000}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "owner.decline_publication"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object_type", "object_id", "revision"],
+          "properties": {
+            "object_type": {"type": "string", "enum": ["post", "note", "profile"]},
+            "object_id": {"type": "string"},
+            "revision": {"type": "integer", "minimum": 1},
+            "note": {"type": "string", "maxLength": 4000}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "notes.post_by_other"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actor_account_id", "text"],
+          "properties": {
+            "actor_account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+            "text": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "mentions": {"type": "array", "items": {"type": "string"}},
+            "links": {"type": "array", "items": {"type": "string", "maxLength": 400}}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "notes.reply_by_other"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actor_account_id", "text", "reply_to"],
+          "properties": {
+            "actor_account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+            "text": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "reply_to": {"type": "string"},
+            "mentions": {"type": "array", "items": {"type": "string"}},
+            "links": {"type": "array", "items": {"type": "string", "maxLength": 400}}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "notes.repost_by_other"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actor_account_id", "object_type", "object_id"],
+          "properties": {
+            "actor_account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+            "object_type": {"type": "string", "enum": ["post", "note"]},
+            "object_id": {"type": "string"},
+            "text": {"type": "string", "minLength": 1, "maxLength": 4000}
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "operation": {"const": "follower.changed"},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actor_account_id", "follows"],
+          "properties": {
+            "actor_account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+            "follows": {"type": "boolean"}
+          }
+        }
+      }
+    }
+  ]
+}

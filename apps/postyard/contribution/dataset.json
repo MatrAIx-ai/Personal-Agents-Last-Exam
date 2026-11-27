@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "postyard-publishing",
+  "version": "1.0.0",
+  "description": "Synthetic Postyard records. The smoke fixture is small. Evaluation history for 2025-01-01 through 2026-12-31 lives in examples/task-data/rejected-pr and examples/dataset/later-2026. Every record is synthetic. There is no real Postyard site to anchor November 2026.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic people, posts and notes. No external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": "postyard-fixture-a",
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Timestamps are America/Los_Angeles offsets. Record bodies are unique aside from ids."
+  ],
+  "expected_counts": {
+    "records": 1,
+    "assets": 1
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism. The smoke fixture count is 1. The evaluation partitions are reported by scripts/coverage.cjs."
+  }
+}
