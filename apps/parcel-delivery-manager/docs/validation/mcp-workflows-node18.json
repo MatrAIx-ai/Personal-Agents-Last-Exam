@@ -1,0 +1,430 @@
+{
+  "schema": "parcel-delivery-manager.mcp-workflows.v1",
+  "app_id": "parcel-delivery-manager",
+  "app_version": "0.1.0",
+  "runtime_version": "1.6.0",
+  "node": "v18.20.8",
+  "checks": [
+    {
+      "name": "Scenario profile can preview",
+      "status": "passed"
+    },
+    {
+      "name": "Scenario profile cannot submit a change",
+      "status": "passed"
+    },
+    {
+      "name": "Denied write leaves no request",
+      "status": "passed"
+    },
+    {
+      "name": "Preview is a read: no version change",
+      "status": "passed"
+    },
+    {
+      "name": "Submission commits a pending request",
+      "status": "passed"
+    },
+    {
+      "name": "Committed state holds exactly the new pending request",
+      "status": "passed"
+    },
+    {
+      "name": "Identical retry returns the original receipt",
+      "status": "passed"
+    },
+    {
+      "name": "Retry has one business effect",
+      "status": "passed"
+    },
+    {
+      "name": "Same request ID with a changed payload is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Stale version cannot write",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent tools are exactly the declared business tools",
+      "status": "passed"
+    },
+    {
+      "name": "Carrier decision commits through Infra",
+      "status": "passed"
+    },
+    {
+      "name": "Agent reads the applied plan",
+      "status": "passed"
+    },
+    {
+      "name": "Cancelling after the decision is too_late",
+      "status": "passed"
+    },
+    {
+      "name": "Event for a superseded plan is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected event did not move the clock or data",
+      "status": "passed"
+    },
+    {
+      "name": "Infra advances the clock",
+      "status": "passed"
+    },
+    {
+      "name": "Advancing time changes no business record",
+      "status": "passed"
+    },
+    {
+      "name": "Pass is invalid at its exact expiry although no event ran",
+      "status": "passed"
+    },
+    {
+      "name": "Changes are refused after the deadline passes by the clock",
+      "status": "passed"
+    },
+    {
+      "name": "Parcel status is unchanged in the gap",
+      "status": "passed"
+    },
+    {
+      "name": "Authorizing a collector is refused after the deadline passes by the clock",
+      "status": "passed"
+    },
+    {
+      "name": "Creating an authorization in the gap fails with deadline_passed and writes nothing",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores business records",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the clock",
+      "status": "passed"
+    },
+    {
+      "name": "Pass is valid again after reset",
+      "status": "passed"
+    },
+    {
+      "name": "Grant preview is allowed and is a read",
+      "status": "passed"
+    },
+    {
+      "name": "Authorization commits and issues the collector a pass",
+      "status": "passed"
+    },
+    {
+      "name": "Retried authorization returns the original receipt",
+      "status": "passed"
+    },
+    {
+      "name": "One authorization and one pending request are committed",
+      "status": "passed"
+    },
+    {
+      "name": "Another account cannot be loaded for the delegate run without a trusted binding",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads the delegate run from history with its binding",
+      "status": "passed"
+    },
+    {
+      "name": "Collector sees only the authorized parcel, without tracking number or sender",
+      "status": "passed"
+    },
+    {
+      "name": "Collector retrieves their own pass",
+      "status": "passed"
+    },
+    {
+      "name": "Collector sees pickup details but no plan, recipient or timeline",
+      "status": "passed"
+    },
+    {
+      "name": "Collector cannot preview a change",
+      "status": "passed"
+    },
+    {
+      "name": "Collector cannot authorize anyone else",
+      "status": "passed"
+    },
+    {
+      "name": "Collector cannot revoke or see other parcels",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot name another person or account",
+      "status": "passed"
+    },
+    {
+      "name": "Another account cannot be loaded for the stranger run without a trusted binding",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads the stranger run from history with its binding",
+      "status": "passed"
+    },
+    {
+      "name": "Unauthorized person sees no parcel, pass or notice",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history containing a pending request and a live grant",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded grant is live",
+      "status": "passed"
+    },
+    {
+      "name": "Recipient revokes the authorization",
+      "status": "passed"
+    },
+    {
+      "name": "Recipient withdraws the pending request",
+      "status": "passed"
+    },
+    {
+      "name": "Cancel first: a later carrier approval cannot apply",
+      "status": "passed"
+    },
+    {
+      "name": "Deadline event before the deadline is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Pickup expiry starts the return",
+      "status": "passed"
+    },
+    {
+      "name": "Returning parcel refuses changes",
+      "status": "passed"
+    },
+    {
+      "name": "Submitting a change on a returning parcel fails with return_started",
+      "status": "passed"
+    },
+    {
+      "name": "Returning parcel cannot be collected",
+      "status": "passed"
+    },
+    {
+      "name": "Only the trusted completion event finishes the return",
+      "status": "passed"
+    },
+    {
+      "name": "Reset after these changes returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded history exactly",
+      "status": "passed"
+    },
+    {
+      "name": "Grant and pending request are live again after reset",
+      "status": "passed"
+    },
+    {
+      "name": "Exactly one of two concurrent collectors commits",
+      "status": "passed"
+    },
+    {
+      "name": "The other collector is rejected even with a fresh version",
+      "status": "passed"
+    },
+    {
+      "name": "Parcel was handed over once: one pass consumed, the other invalidated",
+      "status": "passed"
+    },
+    {
+      "name": "Collected parcel has no pass",
+      "status": "passed"
+    },
+    {
+      "name": "Host diagnostics record this App's steps for committed operations and events",
+      "status": "passed"
+    },
+    {
+      "name": "Diagnostics hold no pass code, address, name, tracking number or parcel description",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history with a task policy and no resource bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Write outside the permitted parcel is denied by Core",
+      "status": "passed"
+    },
+    {
+      "name": "Write on the permitted parcel commits",
+      "status": "passed"
+    },
+    {
+      "name": "Carrier applies the redirect",
+      "status": "passed"
+    },
+    {
+      "name": "Arrival makes the parcel ready",
+      "status": "passed"
+    },
+    {
+      "name": "Deadline is the arrival time plus the policy window",
+      "status": "passed"
+    },
+    {
+      "name": "A repeated arrival, with either epoch, is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "The pickup deadline was not extended",
+      "status": "passed"
+    },
+    {
+      "name": "Collection exactly at the deadline fails",
+      "status": "passed"
+    },
+    {
+      "name": "Collection one second before the deadline succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "01-normal-delivery: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "01-normal-delivery: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "01-normal-delivery: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "02-pending-changes: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "02-pending-changes: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "02-pending-changes: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "03-restricted-changes: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "03-restricted-changes: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "03-restricted-changes: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "04-redirect-readiness: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "04-redirect-readiness: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "04-redirect-readiness: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "05-delegation: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "05-delegation: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "05-delegation: delegate person-alex sees exactly S113",
+      "status": "passed"
+    },
+    {
+      "name": "05-delegation: delegate person-noor sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "05-delegation: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "06-failed-delivery: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "06-failed-delivery: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "06-failed-delivery: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "07-closure-relocation: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "07-closure-relocation: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "07-closure-relocation: delegate person-alex sees exactly S119",
+      "status": "passed"
+    },
+    {
+      "name": "07-closure-relocation: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    },
+    {
+      "name": "08-expiry-return: loads through Core for its recipient at the seed clock",
+      "status": "passed"
+    },
+    {
+      "name": "08-expiry-return: example schedule replays to the same outcome after reset to the loaded baseline",
+      "status": "passed"
+    },
+    {
+      "name": "08-expiry-return: unauthorized person-sam sees exactly nothing",
+      "status": "passed"
+    }
+  ],
+  "passed": true
+}

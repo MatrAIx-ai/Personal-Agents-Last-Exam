@@ -1,0 +1,3030 @@
+[
+  {
+    "name": "parcel-delivery-manager.shipments.list",
+    "description": "List parcels this person may see: their own parcels and parcels they are currently authorized to collect. Closed parcels (delivered, collected, returned) require include_closed. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.shipments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "include_closed": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "access": {
+                "enum": [
+                  "recipient",
+                  "delegate"
+                ]
+              },
+              "tracking_number": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sender_label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contents_label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "status": {
+                "enum": [
+                  "in_transit",
+                  "out_for_delivery",
+                  "attempt_failed",
+                  "at_pickup",
+                  "delivered",
+                  "collected",
+                  "returning",
+                  "returned"
+                ]
+              },
+              "plan_mode": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "home",
+                      "pickup",
+                      "hold"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "pickup_deadline": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "deadline_passed": {
+                "type": "boolean"
+              },
+              "has_pending_change": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "access",
+              "tracking_number",
+              "sender_label",
+              "contents_label",
+              "status",
+              "plan_mode",
+              "updated_at",
+              "pickup_deadline",
+              "deadline_passed",
+              "has_pending_change"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.shipments.get",
+    "description": "Read one parcel by its ID: physical status, current delivery plan, pending change, pickup readiness, deadlines and timeline. A delegate sees only the collection details of a parcel they are authorized for. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.shipments.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "shipment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "access": {
+              "enum": [
+                "recipient",
+                "delegate"
+              ]
+            },
+            "tracking_number": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "recipient_person_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sender_label": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "contents_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "policy_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "enum": [
+                "in_transit",
+                "out_for_delivery",
+                "attempt_failed",
+                "at_pickup",
+                "delivered",
+                "collected",
+                "returning",
+                "returned"
+              ]
+            },
+            "estimated_delivery": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "plan": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "mode": {
+                      "enum": [
+                        "home",
+                        "pickup",
+                        "hold"
+                      ]
+                    },
+                    "address_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "point_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivery_date": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "hold_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "mode",
+                    "address_id",
+                    "point_id",
+                    "delivery_date",
+                    "hold_until"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pending_change": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "shipment_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "reschedule",
+                        "address",
+                        "hold",
+                        "redirect",
+                        "home_delivery"
+                      ]
+                    },
+                    "requested_by_person_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "base_plan_revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "target": {
+                      "type": "object",
+                      "properties": {
+                        "mode": {
+                          "enum": [
+                            "home",
+                            "pickup",
+                            "hold"
+                          ]
+                        },
+                        "address_id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "point_id": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "delivery_date": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "hold_until": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "mode",
+                        "address_id",
+                        "point_id",
+                        "delivery_date",
+                        "hold_until"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "applied",
+                        "rejected",
+                        "cancelled"
+                      ]
+                    },
+                    "decided_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "history": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "action": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "action"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 1000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "shipment_id",
+                    "kind",
+                    "requested_by_person_id",
+                    "created_at",
+                    "updated_at",
+                    "base_plan_revision",
+                    "target",
+                    "status",
+                    "decided_at",
+                    "reason",
+                    "history"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pickup": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "point_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "ready_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "deadline": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "point_id",
+                    "epoch",
+                    "ready_at",
+                    "deadline"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "point": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "kind": {
+                      "enum": [
+                        "counter",
+                        "locker"
+                      ]
+                    },
+                    "address_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "time_zone": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "hours": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "weekday": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          },
+                          "opens": {
+                            "type": "string",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                          },
+                          "closes": {
+                            "type": "string",
+                            "pattern": "^(([01]\\d|2[0-3]):[0-5]\\d|24:00)$"
+                          }
+                        },
+                        "required": [
+                          "weekday",
+                          "opens",
+                          "closes"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 21
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "closed"
+                      ]
+                    },
+                    "accessible": {
+                      "type": "boolean"
+                    },
+                    "accepts_redirects": {
+                      "type": "boolean"
+                    },
+                    "status_note": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "open_now": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "kind",
+                    "address_text",
+                    "time_zone",
+                    "hours",
+                    "status",
+                    "accessible",
+                    "accepts_redirects",
+                    "status_note",
+                    "open_now"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "attempt": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "action_deadline": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "action_deadline"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "return_info": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "started_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 600
+                    },
+                    "completed_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "started_at",
+                    "reason",
+                    "completed_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "completed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deadlines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "pickup",
+                      "failure_action",
+                      "hold_end"
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "passed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "at",
+                  "passed"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 3
+            },
+            "timeline": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "at",
+                  "kind",
+                  "summary"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "access",
+            "tracking_number",
+            "recipient_person_id",
+            "sender_label",
+            "contents_label",
+            "policy_id",
+            "status",
+            "estimated_delivery",
+            "plan",
+            "pending_change",
+            "pickup",
+            "point",
+            "attempt",
+            "return_info",
+            "completed_at",
+            "deadlines",
+            "timeline",
+            "created_at",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "shipment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.options.get",
+    "description": "For the parcel with this ID, list the delivery changes its policy currently allows (reschedule, address, hold, pickup redirect, back to home delivery, delegation) with eligible dates, addresses and points, and a reason when a change is not allowed. Recipient only. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.options.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "shipment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "plan_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "cutoff_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reschedule": {
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "earliest_date": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "latest_date": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "allowed",
+                "reason",
+                "earliest_date",
+                "latest_date"
+              ],
+              "additionalProperties": false
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "address_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 200
+                }
+              },
+              "required": [
+                "allowed",
+                "reason",
+                "address_ids"
+              ],
+              "additionalProperties": false
+            },
+            "hold": {
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "latest_date": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "allowed",
+                "reason",
+                "latest_date"
+              ],
+              "additionalProperties": false
+            },
+            "redirect": {
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "point_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 100
+                }
+              },
+              "required": [
+                "allowed",
+                "reason",
+                "point_ids"
+              ],
+              "additionalProperties": false
+            },
+            "home_delivery": {
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "address_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 200
+                }
+              },
+              "required": [
+                "allowed",
+                "reason",
+                "address_ids"
+              ],
+              "additionalProperties": false
+            },
+            "delegation": {
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "latest_expires_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "allowed",
+                "reason",
+                "latest_expires_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "shipment_id",
+            "plan_revision",
+            "cutoff_at",
+            "reschedule",
+            "address",
+            "hold",
+            "redirect",
+            "home_delivery",
+            "delegation"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "options"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.addresses.list",
+    "description": "List this person's own saved delivery addresses with their label and whether each is verified or restricted for delivery. Address IDs returned by options.get refer to these. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.addresses.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "recipient_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "line1": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "line2": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "region": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "postal_code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "country": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "delivery_restricted": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "recipient_name",
+              "line1",
+              "line2",
+              "city",
+              "region",
+              "postal_code",
+              "country",
+              "verified",
+              "delivery_restricted"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.points.list",
+    "description": "Search the pickup-point directory with hours, accessibility and current status. open_only keeps points the carrier has not closed; open_now on each point says whether it is within its opening hours at the current time. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.points.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "accessible_only": {
+          "type": "boolean"
+        },
+        "open_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "kind": {
+                "enum": [
+                  "counter",
+                  "locker"
+                ]
+              },
+              "address_text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "time_zone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "hours": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "weekday": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 6
+                    },
+                    "opens": {
+                      "type": "string",
+                      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                    },
+                    "closes": {
+                      "type": "string",
+                      "pattern": "^(([01]\\d|2[0-3]):[0-5]\\d|24:00)$"
+                    }
+                  },
+                  "required": [
+                    "weekday",
+                    "opens",
+                    "closes"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 21
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "accessible": {
+                "type": "boolean"
+              },
+              "accepts_redirects": {
+                "type": "boolean"
+              },
+              "status_note": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "open_now": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "address_text",
+              "time_zone",
+              "hours",
+              "status",
+              "accessible",
+              "accepts_redirects",
+              "status_note",
+              "open_now"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.change.preview",
+    "description": "Check a proposed delivery change for the parcel with this ID against its current plan and policy, without changing anything. kind selects the change: reschedule (delivery_date), address (address_id, optional delivery_date), hold (hold_until), redirect (point_id) or home_delivery (address_id, optional delivery_date). Returns the effect and a confirmation value that change.submit requires; the confirmation becomes stale when the parcel changes. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.change.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "reschedule",
+            "address",
+            "hold",
+            "redirect",
+            "home_delivery"
+          ]
+        },
+        "delivery_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "point_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "hold_until": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "allowed": {
+              "type": "boolean"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "confirmation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "current_plan": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "mode": {
+                      "enum": [
+                        "home",
+                        "pickup",
+                        "hold"
+                      ]
+                    },
+                    "address_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "point_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivery_date": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "hold_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "mode",
+                    "address_id",
+                    "point_id",
+                    "delivery_date",
+                    "hold_until"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "proposed_plan": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "mode": {
+                      "enum": [
+                        "home",
+                        "pickup",
+                        "hold"
+                      ]
+                    },
+                    "address_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "point_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivery_date": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "hold_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mode",
+                    "address_id",
+                    "point_id",
+                    "delivery_date",
+                    "hold_until"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "allowed",
+            "reason",
+            "summary",
+            "confirmation",
+            "current_plan",
+            "proposed_plan"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.change.submit",
+    "description": "Submit a previewed delivery change for the parcel with this ID to the carrier, repeating the previewed fields and its confirmation. The request becomes pending; the delivery plan changes only when the carrier applies it.",
+    "read_only": false,
+    "scope": "parcel-delivery-manager.change.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "reschedule",
+            "address",
+            "hold",
+            "redirect",
+            "home_delivery"
+          ]
+        },
+        "delivery_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "point_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "hold_until": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "confirmation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "confirmation",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "change_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "change_status": {
+          "const": "pending"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "change_id",
+        "change_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.change.cancel",
+    "description": "Withdraw the pending delivery change with this change ID. Fails with too_late once the carrier has decided it.",
+    "read_only": false,
+    "scope": "parcel-delivery-manager.change.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "change_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "change_status": {
+          "const": "cancelled"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "change_id",
+        "change_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.changes.list",
+    "description": "List delivery change requests and their decisions, optionally for one parcel. Recipient only. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.changes.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "shipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "shipment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "reschedule",
+                  "address",
+                  "hold",
+                  "redirect",
+                  "home_delivery"
+                ]
+              },
+              "requested_by_person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "base_plan_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "target": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "enum": [
+                      "home",
+                      "pickup",
+                      "hold"
+                    ]
+                  },
+                  "address_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "point_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "delivery_date": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "hold_until": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "mode",
+                  "address_id",
+                  "point_id",
+                  "delivery_date",
+                  "hold_until"
+                ],
+                "additionalProperties": false
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "applied",
+                  "rejected",
+                  "cancelled"
+                ]
+              },
+              "decided_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "id",
+              "shipment_id",
+              "kind",
+              "requested_by_person_id",
+              "created_at",
+              "updated_at",
+              "base_plan_revision",
+              "target",
+              "status",
+              "decided_at",
+              "reason",
+              "history"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.collectors.list",
+    "description": "List the people this recipient has saved as trusted collectors. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.collectors.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "relationship": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "person_id",
+              "name",
+              "relationship"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.grants.list",
+    "description": "List collection authorizations on this person's own parcels with their status, or the current authorizations granted to this person as a collector. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.grants.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "shipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "shipment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "collector_person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "collector_name": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "point_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "pickup_epoch": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "revoked",
+                  "replaced",
+                  "expired",
+                  "invalidated",
+                  "consumed"
+                ]
+              },
+              "valid_now": {
+                "type": "boolean"
+              },
+              "ended_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "end_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "replaces_grant_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "shipment_id",
+              "collector_person_id",
+              "collector_name",
+              "point_id",
+              "pickup_epoch",
+              "created_at",
+              "expires_at",
+              "status",
+              "valid_now",
+              "ended_at",
+              "end_reason",
+              "replaces_grant_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.grant.preview",
+    "description": "Check whether a trusted collector can be authorized to collect the ready parcel with this ID until expires_at, optionally replacing an existing authorization. The authorization cannot outlast the pickup deadline or the policy maximum (latest_expires_at). Returns the limited access granted and a confirmation value that grant.create requires. Recipient only. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.grant.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "collector_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "replaces_grant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "collector_person_id",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "allowed": {
+              "type": "boolean"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "confirmation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "point_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expires_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "latest_expires_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "allowed",
+            "reason",
+            "summary",
+            "confirmation",
+            "point_id",
+            "expires_at",
+            "latest_expires_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.grant.create",
+    "description": "Authorize a trusted collector for the ready parcel with this ID at its current pickup point, or replace an existing authorization, repeating the previewed fields and its confirmation. Issues the collector their own pass. The collector can see only this parcel's pickup details and cannot change the parcel or authorize anyone else.",
+    "read_only": false,
+    "scope": "parcel-delivery-manager.grant.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "collector_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "replaces_grant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "confirmation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "collector_person_id",
+        "expires_at",
+        "confirmation",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "grant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "pass_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "grant_id",
+        "pass_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.grant.revoke",
+    "description": "Revoke the collection authorization with this grant ID and invalidate its pass at once. Fails with grant_not_active if it already ended.",
+    "read_only": false,
+    "scope": "parcel-delivery-manager.grant.revoke",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "grant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "grant_status": {
+          "const": "revoked"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "grant_id",
+        "grant_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.pass.get",
+    "description": "Show this person's current collection pass for the ready parcel with this ID (the recipient's own pass or a delegate's authorized pass). Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.pass.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "pass": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "shipment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "holder_person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "role": {
+              "enum": [
+                "recipient",
+                "delegate"
+              ]
+            },
+            "point_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "point_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "pickup_epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "code": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{4}-[A-Z0-9]{4}$"
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "valid_now": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "shipment_id",
+            "holder_person_id",
+            "role",
+            "point_id",
+            "point_name",
+            "pickup_epoch",
+            "code",
+            "issued_at",
+            "expires_at",
+            "valid_now"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "pass"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "parcel-delivery-manager.notices.list",
+    "description": "List in-app delivery notices for parcels this person can currently see, optionally for one parcel. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.notices.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "shipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "shipment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "audience": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 20,
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            },
+            "required": [
+              "id",
+              "shipment_id",
+              "at",
+              "type",
+              "audience",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

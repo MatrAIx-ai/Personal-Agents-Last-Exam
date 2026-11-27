@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "app_id": "parcel-delivery-manager",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Linqiang Guo (@pockyitachi); repository issue / PR tagged app:parcel-delivery-manager"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "carrier.change_resolved",
+    "carrier.transit_update",
+    "carrier.delivery_failed",
+    "carrier.delivered",
+    "carrier.pickup_ready",
+    "carrier.point_status",
+    "carrier.relocated",
+    "carrier.collected",
+    "carrier.deadline_reached",
+    "carrier.return_completed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "business web app on the shared Web Host",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One synthetic carrier with domestic parcels; no live carrier, merchant or identity verification.",
+    "Physical progress, carrier decisions and handoffs happen only through trusted Infra events."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
