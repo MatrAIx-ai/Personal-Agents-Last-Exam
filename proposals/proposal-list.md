@@ -8,16 +8,16 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**216 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**219 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 8 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 3 |
-| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 3 |
-| Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 19 |
-| Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 10 |
+| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 4 |
+| Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 20 |
+| Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 11 |
 
 Counts show pending requests, not accepted contributions or lifetime review totals. Submitted reviews leave the pending queue; multiple reviewers on one PR count separately.
 
@@ -151,10 +151,13 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**114 proposals.**
+**117 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-27 00:44:53 | [#281](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/281) · Run a frost watch on the orchard's own sensor history while the owner sleeps<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/281/files) | Weather &amp; outdoors<br>Also: Work &amp; business | Bhavna's clear-calm sensor history contradicts the assistant's approved frost note. Her private promise and recent run ledger then determine who can protect Block C while she sleeps. | Design review | Review requested<br>@Yeechin-is-here |  | [Anandb71](https://github.com/Anandb71) |  |
+| 2026-11-27 00:44:47 | [#280](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/280) · Clear an embargoed story in two parts: at the agency's lift, and at a source's approval<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/280/files) | News &amp; information<br>Also: Work &amp; business | The agency's written lift frees the on-record story, not a background cardiologist's sentence: her approval condition, set in Tarun's call note and her email, outlives both the lift and his "don't wait for me". | Design review | Review requested<br>@TianyuCodings |  | [Anandb71](https://github.com/Anandb71) |  |
+| 2026-11-27 00:44:39 | [#279](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/279) · Remind a choir's late payers without chasing the three its treasurer quietly carries<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/279/files) | Social &amp; communities<br>Also: Money &amp; insurance | Gauri’s note counts 28 payers for 31 singers, and her eleven reminder rounds never messaged three of them. The president’s list says eight owe; only her own history shows which three must not be chased. | Design review | Review requested<br>@haolun-wu |  | [Anandb71](https://github.com/Anandb71) |  |
 | 2026-11-26 20:47:47 | [#276](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/276) · Save a shared harvest for the meals the gardener actually cooks<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/276/files) | Food &amp; dining<br>Also: Social &amp; communities | Rae's “beans” histories refer to different stages and purposes. A smaller freezer requires preserving the meals Rae actually likes while separating seed obligations, a neighbor's food and accepted donations. | Design review | Review requested<br>@Yeechin-is-here |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
 | 2026-11-26 20:47:42 | [#275](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/275) · Repair a working quilt without replacing what its owner values in it<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/275/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities | Ruth wants worn material to stay in use in this quilt, although her clothing history favors invisible repairs. That preference must survive revised quotes and a misleading production map. | Design review | Review requested<br>@haolun-wu |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
 | 2026-11-26 18:06:44 | [#273](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273) · Keep an editable LaTeX proposal reflowing after a sponsor adds an annex<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273/files) | Work &amp; business | Anika keeps editing the source, so a neat PDF with frozen section pages is the wrong deliverable. Her earlier correction should survive content changes while a genuinely required annex still starts on a new page. | Design review | Review requested<br>@TianyuCodings |  | [SherylHYX](https://github.com/SherylHYX) |  |
