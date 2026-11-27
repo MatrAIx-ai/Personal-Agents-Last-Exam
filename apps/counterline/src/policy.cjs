@@ -15,12 +15,10 @@ const OPEN_COMMITMENTS = ['pending', 'partially_reported', 'reported_performed',
 
 // Requests the recognizer understands, matched anywhere in a message and answered in the order written.
 const PATTERNS = [
-  ['explain_terms', /\b((explain|clarify|walk me through)\b.{0,40}\b(terms?|conditions?|offers?|deal|credit|waiver)|(the|these|those|its|your) (terms|conditions)|terms and conditions|fine print|the catch|how does (that|this|the) (offer|credit|waiver) work)\b/i],
-  ['ask_for_better_offer', /\b(anything better|something better|better (offer|deal|option)|best (offer|deal|you can do)|anything (else|more)|other (offers?|options?)|improve (the|that|your) offer|more than that|do better|reason to reconsider|reconsider(ing)? (the|this|my) (card|account|membership|plan|service)|not worth (the|this|that) (fee|card|price))\b/i],
+  ['explain_terms', /\b((explain|clarify|walk me through)\b.{0,40}\b(terms?|conditions?|offers?|deal|credit|waiver)|(the|these|those|its|your|any) (terms|conditions)|(terms|conditions) (on|of|for) (it|that|this|the)|terms and conditions|fine print|the catch|how does (that|this|the) (offer|credit|waiver) work)\b/i],
+  ['ask_for_better_offer', /\b(anything better|something better|better (offer|deal|option)|best (offer|deal|you can do)|anything (else|more)|other (offers?|options?)|improve (the|that|your) offer|more than that|do better)\b/i],
   ['ask_status', /\b(status|check on|update on|where is|when will|still waiting|has (it|my|the|that)\b.{0,30}\b(posted|processed|arrived|gone through)|did (it|my|the|that)\b.{0,30}\bgo through)\b/i],
-  ['request_transfer', /\b(transfer|connect me|speak (to|with)|talk (to|with)|escalate|put me through|send me to)\b/i],
-  // Closing the account, never the chat ("close this chat" is end_chat).
-  ['consider_closing', /\b((clos(e|ing)|cancel(l?ing|led)?|shut(ting)? down|get(ting)? rid of)\s+(the |this |my |our )?(card|account|membership|plan|service)|(thinking|considering|think|thought) (about|of) (closing|cancell?ing|leaving|dropping) (it|the|this|my|our)\b)/i],
+  ['request_transfer', /\b(transfer(red|ring)?|connect me|speak (to|with)|talk (to|with)|escalate|put me through|send me to)\b/i],
   ['end_chat', /\b(that's all|that is all|end (the |this )?chat|close (the |this )?chat|goodbye|bye|nothing else|no further questions)\b/i]
 ];
 
@@ -52,12 +50,9 @@ function turn(c, at, speaker, text, source, recognized, rule) {
   c.transcript.push({ turn_id: `t-${String(c.transcript.length + 1).padStart(4, '0')}`, at, speaker, text, source, recognized, rule });
 }
 const say = (c, now, text, rule, recognized = []) => turn(c, now, 'representative', text, 'system', recognized, rule);
-// The provider's wording for the representative's lead lines (scripts lead-offers, lead-better, no-better,
-// lead-closing, no-closing, turn-limit).
+// The provider's wording for the representative's lead lines (scripts lead-offers, lead-better, no-better).
 // Wording can differ between providers or scripts; which offers appear never depends on it.
-const LINES = { 'lead-offers': 'Here is what I can offer.', 'lead-better': 'Here is what else I can offer.', 'no-better': 'That is the best offer I can make on this case.',
-  'lead-closing': 'If you are thinking about closing the account, here is what I can do.', 'no-closing': 'I have noted that you are thinking about closing the account.',
-  'turn-limit': 'I need to end this chat now. You can write again at any time.' };
+const LINES = { 'lead-offers': 'Here is what I can offer.', 'lead-better': 'Here is what else I can offer.', 'no-better': 'That is the best offer I can make on this case.' };
 const line = (data, id) => data.provider.scripts.find(s => s.script_id === id)?.text || LINES[id];
 
 function describe(o) {
@@ -109,16 +104,6 @@ function presentStage(data, c, now, stage, lead) {
   return 1;
 }
 
-// A request that opens a catalog stage (better, closing): the stage's offers with the provider's lead line,
-// or its "nothing more" line. Offers need identity first. Always one turn.
-function askStage(data, c, now, stage, lead, none, subject, rule, recognized) {
-  if (!mayOffer(data, c)) { say(c, now, `I need to verify your identity before I can look at ${subject}.`, rule('identity_first'), recognized); return 1; }
-  const shown = present(data, c, now, catalog(data, c, stage));
-  say(c, now, shown.length ? `${line(data, lead)} ${shown.map(describe).join(' ')}` : line(data, none), rule(shown.length ? 'presented' : 'none'), recognized);
-  if (shown.length) queueCopy(data, now, 'offer_presented', c, shown[0].offer_id, 'new offers in your case', shown.map(describe).join('\n'));
-  return 1;
-}
-
 // One representative answer per request. Returns the number of turns added.
 function perform(data, c, now, action, dept, recognized) {
   const p = data.provider;
@@ -129,8 +114,13 @@ function perform(data, c, now, action, dept, recognized) {
       say(c, now, offers.length ? offers.map(describe).join(' ') : 'There is no offer on this case right now.', rule(offers.length ? 'offers' : 'none'), recognized);
       return 1;
     }
-    case 'ask_for_better_offer':
-      return askStage(data, c, now, 'better', 'lead-better', 'no-better', 'offers', rule, recognized);
+    case 'ask_for_better_offer': {
+      if (!mayOffer(data, c)) { say(c, now, 'I need to verify your identity before I can look at offers.', rule('identity_first'), recognized); return 1; }
+      const shown = present(data, c, now, catalog(data, c, 'better'));
+      say(c, now, shown.length ? `${line(data, 'lead-better')} ${shown.map(describe).join(' ')}` : line(data, 'no-better'), rule(shown.length ? 'presented' : 'none'), recognized);
+      if (shown.length) queueCopy(data, now, 'offer_presented', c, shown[0].offer_id, 'new offers in your case', shown.map(describe).join('\n'));
+      return 1;
+    }
     case 'ask_status': {
       const mine = data.commitments.filter(m => m.account_ref === c.account_ref && OPEN_COMMITMENTS.includes(m.status));
       const titleOf = m => data.offers.find(o => o.offer_id === m.offer_id)?.title || m.kind.replace(/_/g, ' ');
@@ -154,8 +144,6 @@ function perform(data, c, now, action, dept, recognized) {
       say(c, now, `You are now chatting with ${dept.name} at ${p.name}.`, rule('done'), recognized);
       return 1 + presentStage(data, c, now, 'transfer', line(data, 'lead-offers'));
     }
-    case 'consider_closing':
-      return askStage(data, c, now, 'closing', 'lead-closing', 'no-closing', 'your account', rule, recognized);
     case 'end_chat':
       c.status = 'resolved';
       say(c, now, `Thanks for contacting ${p.name}. This chat is now closed; you can write again at any time.`, rule('resolved'), recognized);
@@ -165,19 +153,4 @@ function perform(data, c, now, action, dept, recognized) {
   }
 }
 
-// The provider may bound a chat: after max_customer_turns customer turns since the chat started (opened,
-// reopened, or written to again after it ended), the representative ends it with the turn-limit line.
-// Returns the number of turns added.
-const CHAT_ENDS = new Set(['end_chat:resolved', 'chat:turn_limit', 'case:reopened']);
-function limitTurns(data, c, now) {
-  const max = data.provider.max_customer_turns;
-  if (!max || !['open', 'escalated', 'waiting_on_customer'].includes(c.status)) return 0;
-  let n = 0;
-  for (let i = c.transcript.length - 1; i >= 0 && !(c.transcript[i].speaker === 'representative' && CHAT_ENDS.has(c.transcript[i].rule)); i--) if (c.transcript[i].speaker === 'customer') n++;
-  if (n < max) return 0;
-  c.status = 'resolved';
-  say(c, now, line(data, 'turn-limit'), 'chat:turn_limit');
-  return 1;
-}
-
-module.exports = { limitTurns, line, queueCopy, LABELS, recognize, department, availableActions, perform, present, presentStage, live, turn, say, describe, list };
+module.exports = { line, queueCopy, LABELS, recognize, department, availableActions, perform, present, presentStage, live, turn, say, describe, list };

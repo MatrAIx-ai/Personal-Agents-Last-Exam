@@ -149,19 +149,6 @@ async function main() {
     await advance('2026-12-05T10:00:00-05:00'); await refresh();
     await step('expired', 'Infra advances the clock past the new offer\'s 72-hour window, then Refresh', 'The offer reads expired and has no Accept button; no new commitment (still the one from step 4)', d => ({stored_state: d.offers.at(-1).state, commitments: d.commitments.length}), '.offer.expired');
 
-    // 3b. Considering closing: the closing stage, an account closure that is cancelled, then the chat's turn limit.
-    await begin('3b-closing', 'Considering closing: closing offers, a cancelled closure, a bounded chat', 'retention-closing.json',
-      {variant: {data: d => ({...d, provider: {...d.provider, max_customer_turns: 5}}), binding, note: 'max_customer_turns lowered from 12 to 5 to show the limit in a few steps'}});
-    await openCase('annual_fee', 'My annual fee posted. Can you help?'); await verify();
-    await send('Honestly, I might cancel my card.');
-    await step('closing-offers', 'Write that you might cancel the card', 'The provider\'s closing line, then the product change and the account closure; closing is not a quick action', async d => ({recognized: lastCase(d).transcript.filter(t => t.speaker === 'customer').at(-1).recognized, closing_offers: d.offers.filter(o => o.stage === 'closing').map(o => o.kind), quick_actions_on_page: await page.locator('[aria-label="Quick actions"] button').allTextContents()}), '.offer');
-    await page.locator('.offer', {hasText: 'Close the account'}).locator('button:has-text("Accept")').click(); await page.waitForSelector('dialog[open]');
-    await step('closure-summary', 'Click Accept on "Close the account"', 'A summary of what closing means; nothing is closed yet', d => ({commitments: d.commitments.length, confirmations: d.confirmations.length}));
-    await page.click('dialog button:has-text("Cancel")'); await idle();
-    await send('What are the terms?');
-    await send('Is there anything better?');
-    await step('turn-limit', 'Cancel, then write twice more (the fifth customer turn)', 'The last request is answered, then the representative ends the chat; no commitment exists', d => ({case_status: lastCase(d).status, last_rule: lastCase(d).transcript.at(-1).rule, commitments: d.commitments.length}), '.chat');
-
     // 4. Identity: only the ticked fields are sent; a pressure script asks for more; a mismatch.
     await begin('4-identity', 'Identity with only the chosen fields', 'retention-pressure.json');
     await openCase('annual_fee', 'My annual fee posted. Can you help?');

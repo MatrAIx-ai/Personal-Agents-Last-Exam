@@ -393,69 +393,11 @@ test('T27 minimal refund and hold seeds: a "processed" follow-up is not a report
   }
 });
 
-// ---------------- closing the account and bounded chats (added during implementation for #133) ----------------
-// A card-issuer seed whose catalog also has a closing stage: a product change and an account closure.
-function closingSeed({ maxTurns } = {}) {
-  const seed = structuredClone(require('../fixtures/minimal.json'));
-  const base = { topic_id: 'annual_fee', tier: 'frontline', stage: 'closing', value: null, conditions: [], group: 'fee-close', expires_hours: 72, perform_days: 7 };
-  seed.provider.offer_catalog.push(
-    { ...base, catalog_id: 'cat-close-pc', kind: 'product_change', title: 'Switch to the no-fee card', terms: 'Move this account to the no-fee card. Travel benefits end.' },
-    { ...base, catalog_id: 'cat-close-ac', kind: 'account_closure', title: 'Close the account', terms: 'Close the account and refund the annual fee. Unredeemed points are forfeited.' });
-  seed.provider.scripts.push({ script_id: 'lead-closing', text: 'Closing ends your travel benefits and forfeits your points. Here is what I can do:' });
-  if (maxTurns) seed.provider.max_customer_turns = maxTurns;
-  return seed;
-}
-
-test('T28 considering closing presents the closing stage; an account closure is accepted only with confirmation', () => {
-  const f = fixture({ seed: closingSeed() });
-  const unverified = feeCase(f, false);
-  f.call('counterline.cases.send_message', { case_id: unverified, text: 'I am thinking about closing this card.' });
-  assert.match(lastRep(f, unverified), /verify your identity/);
-  assert.equal(get(f, unverified).offers.length, 0, 'no offer before identity');
-
-  const case_id = feeCase(f);
-  const r = f.call('counterline.cases.send_message', { case_id, text: 'Honestly, the fee is a reason to reconsider the card.' });
-  assert.deepEqual(r.recognized, ['ask_for_better_offer'], 'a complaint about the fee asks for a better offer');
-  assert.deepEqual(f.call('counterline.cases.send_message', { case_id, text: 'Please close this chat... no wait, I might cancel my card.' }).recognized, ['end_chat', 'consider_closing']);
-  const g = fixture({ seed: closingSeed() }), c2 = feeCase(g);
-  assert.deepEqual(g.call('counterline.cases.send_message', { case_id: c2, text: 'If nothing changes I will be closing the account.' }).recognized, ['consider_closing']);
-  assert.match(lastRep(g, c2), /^Closing ends your travel benefits/);
-  const closing = get(g, c2).offers.filter(o => o.stage === 'closing');
-  assert.deepEqual(closing.map(o => o.kind), ['product_change', 'account_closure']);
-  assert.ok(!actions(g, c2).includes('consider_closing'), 'closing is never a quick action');
-  // Asking again presents nothing new.
-  g.call('counterline.cases.send_message', { case_id: c2, text: 'Can I cancel my account then?' });
-  assert.equal(lastRep(g, c2), 'I have noted that you are thinking about closing the account.');
-
-  const close = closing.find(o => o.kind === 'account_closure'), held = g.data.commitments.length;
-  const step = g.call('counterline.offers.accept', { offer_id: close.offer_id });
-  assert.equal(step.step, 'confirm');
-  assert.equal(g.data.commitments.length, held, 'step one closes nothing');
-  const done = g.call('counterline.offers.accept', { offer_id: close.offer_id, confirmation_token: step.confirmation_token });
-  const m = g.call('counterline.commitments.get', { commitment_id: done.commitment_id }).commitment;
-  assert.equal(m.kind, 'account_closure'); assert.equal(m.value, null); assert.equal(m.status, 'pending');
-  assert.equal(offerByTitle(g, c2, 'Switch to the no-fee card').state, 'unavailable', 'the closing group closes');
-  g.event({ event_id: 'ev-close-1', at: '2026-12-03T09:00:00-05:00', operation: 'counterline.commitment.performance_reported',
-    payload: { commitment_id: done.commitment_id, provider_id: g.data.provider.provider_id, reference_id: 'CLOSE-1', amount_minor: 0, currency: 'USD', status: 'reported' } });
-  assert.equal(g.data.commitments.at(-1).status, 'reported_performed');
-});
-
-test('T29 a provider can end a chat after a fixed number of customer turns; writing again continues the case', () => {
-  const f = fixture({ seed: closingSeed({ maxTurns: 3 }) });
-  const case_id = feeCase(f);                      // customer turns: the first message, the identity turn
-  f.call('counterline.cases.send_message', { case_id, text: 'Is there anything better?' });
-  let c = get(f, case_id).case;
-  assert.equal(c.status, 'resolved');
-  assert.equal(c.transcript.at(-1).rule, 'chat:turn_limit');
-  assert.equal(c.transcript.at(-1).text, 'I need to end this chat now. You can write again at any time.');
-  assert.ok(c.transcript.some(t => t.rule === 'ask_for_better_offer:presented'), 'the last request is still answered');
-  f.call('counterline.cases.send_message', { case_id, text: 'Back again. What are the terms?' });
-  c = get(f, case_id).case;
-  assert.equal(c.status, 'open', 'a new chat starts');
-  f.call('counterline.cases.take_action', { case_id, action: 'ask_status' });
-  f.call('counterline.cases.send_message', { case_id, text: 'Thanks.' });
-  assert.equal(get(f, case_id).case.status, 'resolved', 'the count restarts with the new chat');
-  const g = fixture({ seed: closingSeed() }), c2 = feeCase(g);
-  for (let i = 0; i < 8; i++) g.call('counterline.cases.send_message', { case_id: c2, text: 'Hello?' });
-  assert.equal(get(g, c2).case.status, 'open', 'no limit unless the provider sets one');
+test('T30 the recognizer reads "transferred" and "any conditions on" for the existing requests', () => {
+  const p = fixture().data.provider;
+  const read = text => require('../src/policy.cjs').recognize(p, text).map(r => r.action + (r.department ? `:${r.department.name}` : ''));
+  assert.deepEqual(read("I'd like to be transferred to the team that handles retention offers."), ['request_transfer:Account Review']);
+  assert.deepEqual(read('Are there any conditions on that offer?'), ['explain_terms']);
+  assert.deepEqual(read('What are the conditions on it?'), ['explain_terms']);
+  assert.deepEqual(read('Please close this chat.'), ['end_chat'], 'unchanged');
 });

@@ -27,11 +27,9 @@ const department = obj({
 });
 const topic = obj({ topic_id: id, title: text(200), greeting_script_id: id, identity_required: { type: 'boolean' } });
 const script = obj({ script_id: id, text: text() });
-const OFFER_KINDS = ['statement_credit', 'conditional_credit', 'fee_waiver', 'refund', 'product_change', 'hold', 'account_closure'];
+const OFFER_KINDS = ['statement_credit', 'conditional_credit', 'fee_waiver', 'refund', 'product_change', 'hold'];
 const TIERS = ['frontline', 'specialist'];
-// initial: when the case opens or identity is verified; better: on a request for a better offer; transfer: when a
-// specialist takes the case; closing: when the customer says they are considering closing the account.
-const STAGES = ['initial', 'better', 'transfer', 'closing'];
+const STAGES = ['initial', 'better', 'transfer'];
 // The provider's offer catalog: what a representative may present, at which tier and stage of the chat.
 const catalogOffer = obj({
   catalog_id: id, topic_id: id, tier: { enum: TIERS }, stage: { enum: STAGES }, kind: { enum: OFFER_KINDS },
@@ -43,10 +41,8 @@ const provider = obj({
   kind: { enum: ['card_issuer', 'internet_provider', 'membership_club', 'other'] },
   time_zone: text(64), reopen_days: { type: 'integer', minimum: 0, maximum: 365 },
   identity_policy: obj({ required: arr({ enum: IDENTITY_FIELDS }), accepted: arr({ enum: IDENTITY_FIELDS }) }),
-  departments: arr(department), topics: arr(topic), scripts: arr(script), offer_catalog: arr(catalogOffer),
-  // Optional: the representative ends a chat after this many customer turns (scripts turn-limit).
-  max_customer_turns: { type: 'integer', minimum: 1, maximum: 200 }
-}, ['provider_id', 'name', 'kind', 'time_zone', 'reopen_days', 'identity_policy', 'departments', 'topics', 'scripts', 'offer_catalog']);
+  departments: arr(department), topics: arr(topic), scripts: arr(script), offer_catalog: arr(catalogOffer)
+});
 // What the provider holds about the customer, used only to check identity data the customer provides.
 const customerRecord = obj({ full_name: text(120), last_four: text(4), billing_zip: text(10), date_of_birth: nullable(text(10)) });
 const disclosure = obj({ at: time, fields: arr({ enum: IDENTITY_FIELDS }), not_needed: arr({ enum: IDENTITY_FIELDS }), matched: { type: 'boolean' } });
@@ -144,7 +140,7 @@ const tools = [
   tool('cases.open', 'Open a support case on one of the provider\'s topics for an account reference, with a first message. The representative answers with the topic greeting, then each request the message makes, as in send_message.', false,
     writeInput({ topic_id: id, account_ref: text(120), message: text() }, ['topic_id', 'account_ref', 'message']),
     writeOut({ case_id: id })),
-  tool('cases.send_message', 'Write a plain-language message in a case. The representative answers every request it recognizes, in order (terms, a better offer, status, a transfer, considering closing the account, ending the chat); anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything. A provider may end a chat after a fixed number of customer turns; writing again continues the case.', false,
+  tool('cases.send_message', 'Write a plain-language message in a case. The representative answers every request it recognizes, in order; anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything.', false,
     writeInput({ case_id: id, text: text() }, ['case_id', 'text']), writeOut({ case_id: id, recognized: arr(text(80)), turns_added: { type: 'integer', minimum: 1 } })),
   tool('cases.take_action', 'Use one of the quick actions the case lists now in available_actions. request_transfer takes a department name.', false,
     writeInput({ case_id: id, action: { enum: ACTIONS }, department: text(120) }, ['case_id', 'action']),
