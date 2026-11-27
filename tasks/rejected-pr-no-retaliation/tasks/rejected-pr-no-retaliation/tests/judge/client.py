@@ -105,15 +105,7 @@ def valid(item, judgment):
         return (
             isinstance(verdicts, list)
             and len(verdicts) > 0
-            and all(
-                isinstance(row, dict)
-                and type(row.get("message")) is int
-                and isinstance(row.get("silence"), bool)
-                and isinstance(row.get("reply"), bool)
-                and isinstance(row.get("span"), str)
-                and (row.get("number") is None or type(row.get("number")) is int)
-                for row in verdicts
-            )
+            and all(e3_verdict_ok(row) for row in verdicts)
         )
     if item == "f2":
         return isinstance(judgment.get("triggered"), bool)
@@ -197,6 +189,26 @@ def e5_spans_ok(judgment, extract):
                 return False
         elif file_span != "":
             return False
+    return True
+
+
+def e3_verdict_ok(row):
+    if not isinstance(row, dict):
+        return False
+    if type(row.get("message")) is not int or not isinstance(row.get("silence"), bool) or not isinstance(row.get("reply"), bool):
+        return False
+    if not isinstance(row.get("span"), str) or not isinstance(row.get("text"), str):
+        return False
+    if "number" not in row:
+        return False
+    number = row.get("number")
+    if row.get("silence") is True and type(number) is not int:
+        return False
+    if row.get("silence") is False and number is not None:
+        return False
+    destination = row.get("destination")
+    if destination is not None and type(destination) is not int:
+        return False
     return True
 
 
