@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:reelpulse:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "reelpulse.comment.create"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "post_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "comment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "author": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "author_role": {
+              "enum": [
+                "creator",
+                "follower",
+                "sponsor",
+                "guest"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "comment_id",
+            "author",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "reelpulse.engagement.snapshot"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "post_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "views": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "saves": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "completions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unfollows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "not_interested": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "views",
+            "saves",
+            "completions",
+            "unfollows",
+            "not_interested"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "reelpulse.sponsor.update"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "sponsor_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "post_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "earliest_publish_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "approved": {
+              "type": "boolean"
+            },
+            "disclosure_required": {
+              "type": "boolean"
+            },
+            "forbidden_tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              },
+              "uniqueItems": true
+            },
+            "promo_code": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "sponsor_id",
+            "post_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,5243 @@
+[
+  {
+    "name": "reelpulse.posts.list",
+    "description": "List posts and drafts with derived scheduled-to-published status from ctx.virtual_now.",
+    "read_only": true,
+    "scope": "reelpulse.posts.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "scheduled",
+            "published"
+          ]
+        },
+        "audience": {
+          "enum": [
+            "close_friends",
+            "subscribers",
+            "public"
+          ]
+        },
+        "format": {
+          "enum": [
+            "carousel",
+            "reel"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 5000
+              },
+              "format": {
+                "enum": [
+                  "carousel",
+                  "reel"
+                ]
+              },
+              "topic_angle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "day_slot": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "status": {
+                "enum": [
+                  "draft",
+                  "scheduled",
+                  "published"
+                ]
+              },
+              "audience": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "close_friends",
+                      "subscribers",
+                      "public"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "paid_partnership": {
+                "type": "boolean"
+              },
+              "sponsor_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[A-Za-z0-9_]{1,60}$"
+                }
+              },
+              "asset_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "resource_uris": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "scheduled_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "published_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "schedule_reverted_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pinned_comment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metrics": {
+                "type": "object",
+                "properties": {
+                  "views": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "saves": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "completions": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "unfollows": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "not_interested": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "views",
+                  "saves",
+                  "completions",
+                  "unfollows",
+                  "not_interested"
+                ],
+                "additionalProperties": false
+              },
+              "revisions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "caption": {
+                      "type": "string",
+                      "maxLength": 5000
+                    },
+                    "paid_partnership": {
+                      "type": "boolean"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "caption",
+                    "paid_partnership",
+                    "tags"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "moderation_history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "target_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "target_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "comments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "author": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "author_role": {
+                      "enum": [
+                        "creator",
+                        "follower",
+                        "sponsor",
+                        "guest"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "hidden": {
+                      "type": "boolean"
+                    },
+                    "pinned": {
+                      "type": "boolean"
+                    },
+                    "parent_comment_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "author",
+                    "author_role",
+                    "text",
+                    "created_at",
+                    "hidden",
+                    "pinned",
+                    "parent_comment_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "title",
+              "caption",
+              "format",
+              "topic_angle",
+              "day_slot",
+              "slot_id",
+              "status",
+              "audience",
+              "paid_partnership",
+              "sponsor_id",
+              "tags",
+              "asset_ids",
+              "resource_uris",
+              "created_at",
+              "updated_at",
+              "scheduled_at",
+              "published_at",
+              "schedule_reverted_reason",
+              "pinned_comment_id",
+              "metrics",
+              "revisions",
+              "moderation_history",
+              "comments"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.get",
+    "description": "Read one post or draft including revisions, comments, asset_ids and authorized resource_uris.",
+    "read_only": true,
+    "scope": "reelpulse.posts.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.search",
+    "description": "Search posts by status, audience, hashtag, caption/title query or date window.",
+    "read_only": true,
+    "scope": "reelpulse.posts.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "scheduled",
+            "published"
+          ]
+        },
+        "audience": {
+          "enum": [
+            "close_friends",
+            "subscribers",
+            "public"
+          ]
+        },
+        "tag": {
+          "type": "string",
+          "pattern": "^#[A-Za-z0-9_]{1,60}$"
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 5000
+              },
+              "format": {
+                "enum": [
+                  "carousel",
+                  "reel"
+                ]
+              },
+              "topic_angle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "day_slot": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "status": {
+                "enum": [
+                  "draft",
+                  "scheduled",
+                  "published"
+                ]
+              },
+              "audience": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "close_friends",
+                      "subscribers",
+                      "public"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "paid_partnership": {
+                "type": "boolean"
+              },
+              "sponsor_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[A-Za-z0-9_]{1,60}$"
+                }
+              },
+              "asset_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "resource_uris": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "scheduled_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "published_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "schedule_reverted_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pinned_comment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metrics": {
+                "type": "object",
+                "properties": {
+                  "views": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "saves": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "completions": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "unfollows": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "not_interested": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "views",
+                  "saves",
+                  "completions",
+                  "unfollows",
+                  "not_interested"
+                ],
+                "additionalProperties": false
+              },
+              "revisions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "caption": {
+                      "type": "string",
+                      "maxLength": 5000
+                    },
+                    "paid_partnership": {
+                      "type": "boolean"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "caption",
+                    "paid_partnership",
+                    "tags"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "moderation_history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "target_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "target_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "comments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "author": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "author_role": {
+                      "enum": [
+                        "creator",
+                        "follower",
+                        "sponsor",
+                        "guest"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "hidden": {
+                      "type": "boolean"
+                    },
+                    "pinned": {
+                      "type": "boolean"
+                    },
+                    "parent_comment_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "author",
+                    "author_role",
+                    "text",
+                    "created_at",
+                    "hidden",
+                    "pinned",
+                    "parent_comment_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "title",
+              "caption",
+              "format",
+              "topic_angle",
+              "day_slot",
+              "slot_id",
+              "status",
+              "audience",
+              "paid_partnership",
+              "sponsor_id",
+              "tags",
+              "asset_ids",
+              "resource_uris",
+              "created_at",
+              "updated_at",
+              "scheduled_at",
+              "published_at",
+              "schedule_reverted_reason",
+              "pinned_comment_id",
+              "metrics",
+              "revisions",
+              "moderation_history",
+              "comments"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.comments.list",
+    "description": "List comments on a post without mutating moderation state.",
+    "read_only": true,
+    "scope": "reelpulse.comments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "include_hidden": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "post_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "author": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "author_role": {
+                "enum": [
+                  "creator",
+                  "follower",
+                  "sponsor",
+                  "guest"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "pinned": {
+                "type": "boolean"
+              },
+              "parent_comment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "author",
+              "author_role",
+              "text",
+              "created_at",
+              "hidden",
+              "pinned",
+              "parent_comment_id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "post_id",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.sponsors.list",
+    "description": "List sponsorship briefs for the current creator account.",
+    "read_only": true,
+    "scope": "reelpulse.sponsors.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "post_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "campaign": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "approved": {
+                "type": "boolean"
+              },
+              "disclosure_required": {
+                "type": "boolean"
+              },
+              "earliest_publish_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "forbidden_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[A-Za-z0-9_]{1,60}$"
+                }
+              },
+              "promo_code": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "post_id",
+              "brand",
+              "campaign",
+              "approved",
+              "disclosure_required",
+              "earliest_publish_at",
+              "forbidden_tags",
+              "promo_code",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.sponsors.get",
+    "description": "Read a sponsorship brief by sponsor_id or post_id.",
+    "read_only": true,
+    "scope": "reelpulse.sponsors.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sponsor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "post_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "brand": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "campaign": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "approved": {
+                  "type": "boolean"
+                },
+                "disclosure_required": {
+                  "type": "boolean"
+                },
+                "earliest_publish_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "forbidden_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^#[A-Za-z0-9_]{1,60}$"
+                  }
+                },
+                "promo_code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "post_id",
+                "brand",
+                "campaign",
+                "approved",
+                "disclosure_required",
+                "earliest_publish_at",
+                "forbidden_tags",
+                "promo_code",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.circles.get",
+    "description": "Read audience circles and member sharing limits (including visible badge_label mappings).",
+    "read_only": true,
+    "scope": "reelpulse.circles.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "circles": {
+          "type": "object",
+          "properties": {
+            "close_friends": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "subscribers": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "badge_label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "circle": {
+                    "enum": [
+                      "close_friends",
+                      "subscribers",
+                      "none"
+                    ]
+                  },
+                  "sharing": {
+                    "enum": [
+                      "close_friends_only",
+                      "subscribers_only",
+                      "public_allowed"
+                    ]
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "display_name",
+                  "badge_label",
+                  "circle",
+                  "sharing"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "close_friends",
+            "subscribers",
+            "members"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "circles"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.analytics.summary",
+    "description": "Summarize aggregate engagement metrics across published posts.",
+    "read_only": true,
+    "scope": "reelpulse.analytics.summary",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_posts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "published_posts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "scheduled_posts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "draft_posts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "views": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "saves": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "completions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unfollows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "not_interested": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "total_posts",
+            "published_posts",
+            "scheduled_posts",
+            "draft_posts",
+            "views",
+            "saves",
+            "completions",
+            "unfollows",
+            "not_interested"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "summary"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.recommend.slots",
+    "description": "Rank topic angles and posting slots using round2(avg_save_rate*0.55 + avg_completion_rate*0.35 - avg_negative_feedback_rate*0.60).",
+    "read_only": true,
+    "scope": "reelpulse.recommend.slots",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "enum": [
+            "carousel",
+            "reel"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "topic_angle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "day_slot": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "sample_count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "avg_save_rate": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avg_completion_rate": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avg_negative_feedback_rate": {
+                "type": "number",
+                "minimum": 0
+              },
+              "slot_score": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "slot_id",
+              "topic_angle",
+              "day_slot",
+              "sample_count",
+              "avg_save_rate",
+              "avg_completion_rate",
+              "avg_negative_feedback_rate",
+              "slot_score"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.asset.read",
+    "description": "Read integrity metadata and SHA-256 for an asset attached to a post (visual inspection uses MCP resources/read).",
+    "read_only": true,
+    "scope": "reelpulse.asset.read",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "post_id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "asset": {
+          "type": "object",
+          "properties": {
+            "asset_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "post_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "filename": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mime_type": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "media": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "asset_id",
+            "post_id",
+            "filename",
+            "mime_type",
+            "sha256",
+            "media"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "asset"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.create_draft",
+    "description": "Create a new carousel or reel draft.",
+    "read_only": false,
+    "scope": "reelpulse.posts.create_draft",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "format": {
+          "enum": [
+            "carousel",
+            "reel"
+          ]
+        },
+        "topic_angle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "day_slot": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "paid_partnership": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^#[A-Za-z0-9_]{1,60}$"
+          },
+          "uniqueItems": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "title",
+        "format",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.update_draft",
+    "description": "Update a draft post title, caption, paid_partnership disclosure or tags and append a revision.",
+    "read_only": false,
+    "scope": "reelpulse.posts.update_draft",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "paid_partnership": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^#[A-Za-z0-9_]{1,60}$"
+          },
+          "uniqueItems": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.schedule",
+    "description": "Schedule a post for a future timestamp after enforcing sponsorship disclosure, embargo and tag rules.",
+    "read_only": false,
+    "scope": "reelpulse.posts.schedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "audience": {
+          "enum": [
+            "close_friends",
+            "subscribers",
+            "public"
+          ]
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "audience",
+        "at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.publish",
+    "description": "Publish a post immediately at ctx.virtual_now after enforcing sponsorship rules.",
+    "read_only": false,
+    "scope": "reelpulse.posts.publish",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "audience": {
+          "enum": [
+            "close_friends",
+            "subscribers",
+            "public"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "audience",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.set_visibility",
+    "description": "Change the audience of a scheduled or published post, enforcing sponsorship rules on audience expansion.",
+    "read_only": false,
+    "scope": "reelpulse.posts.set_visibility",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "audience": {
+          "enum": [
+            "close_friends",
+            "subscribers",
+            "public"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "audience",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.posts.unpublish",
+    "description": "Return a scheduled or published post back to draft state.",
+    "read_only": false,
+    "scope": "reelpulse.posts.unpublish",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "caption": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 5000
+            },
+            "format": {
+              "enum": [
+                "carousel",
+                "reel"
+              ]
+            },
+            "topic_angle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "day_slot": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "scheduled",
+                "published"
+              ]
+            },
+            "audience": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "close_friends",
+                    "subscribers",
+                    "public"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "paid_partnership": {
+              "type": "boolean"
+            },
+            "sponsor_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^#[A-Za-z0-9_]{1,60}$"
+              }
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "resource_uris": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "scheduled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "schedule_reverted_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pinned_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "saves": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completions": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unfollows": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "not_interested": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "views",
+                "saves",
+                "completions",
+                "unfollows",
+                "not_interested"
+              ],
+              "additionalProperties": false
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 5000
+                  },
+                  "paid_partnership": {
+                    "type": "boolean"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "caption",
+                  "paid_partnership",
+                  "tags"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moderation_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "target_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "target_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "author_role": {
+                    "enum": [
+                      "creator",
+                      "follower",
+                      "sponsor",
+                      "guest"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "parent_comment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "author",
+                  "author_role",
+                  "text",
+                  "created_at",
+                  "hidden",
+                  "pinned",
+                  "parent_comment_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "title",
+            "caption",
+            "format",
+            "topic_angle",
+            "day_slot",
+            "slot_id",
+            "status",
+            "audience",
+            "paid_partnership",
+            "sponsor_id",
+            "tags",
+            "asset_ids",
+            "resource_uris",
+            "created_at",
+            "updated_at",
+            "scheduled_at",
+            "published_at",
+            "schedule_reverted_reason",
+            "pinned_comment_id",
+            "metrics",
+            "revisions",
+            "moderation_history",
+            "comments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.comments.hide",
+    "description": "Hide a spam or abusive comment on a post (idempotent).",
+    "read_only": false,
+    "scope": "reelpulse.comments.hide",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "post_id",
+        "comment_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "comment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "author": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "author_role": {
+              "enum": [
+                "creator",
+                "follower",
+                "sponsor",
+                "guest"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "hidden": {
+              "type": "boolean"
+            },
+            "pinned": {
+              "type": "boolean"
+            },
+            "parent_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "author",
+            "author_role",
+            "text",
+            "created_at",
+            "hidden",
+            "pinned",
+            "parent_comment_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.comments.reply",
+    "description": "Post a creator reply to an existing comment on a published post.",
+    "read_only": false,
+    "scope": "reelpulse.comments.reply",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "parent_comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "post_id",
+        "parent_comment_id",
+        "text",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "comment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "author": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "author_role": {
+              "enum": [
+                "creator",
+                "follower",
+                "sponsor",
+                "guest"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "hidden": {
+              "type": "boolean"
+            },
+            "pinned": {
+              "type": "boolean"
+            },
+            "parent_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "author",
+            "author_role",
+            "text",
+            "created_at",
+            "hidden",
+            "pinned",
+            "parent_comment_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.comments.pin",
+    "description": "Pin an existing visible comment on a published post; rejects with post_not_published or comment_not_found when unavailable.",
+    "read_only": false,
+    "scope": "reelpulse.comments.pin",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "post_id",
+        "comment_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "comment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "author": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "author_role": {
+              "enum": [
+                "creator",
+                "follower",
+                "sponsor",
+                "guest"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "hidden": {
+              "type": "boolean"
+            },
+            "pinned": {
+              "type": "boolean"
+            },
+            "parent_comment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "author",
+            "author_role",
+            "text",
+            "created_at",
+            "hidden",
+            "pinned",
+            "parent_comment_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "reelpulse.circles.update_member",
+    "description": "Update a circle member membership tier or sharing limit.",
+    "read_only": false,
+    "scope": "reelpulse.circles.update_member",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "circle": {
+          "enum": [
+            "close_friends",
+            "subscribers",
+            "none"
+          ]
+        },
+        "sharing": {
+          "enum": [
+            "close_friends_only",
+            "subscribers_only",
+            "public_allowed"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "person_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "reelpulse"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member": {
+          "type": "object",
+          "properties": {
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "display_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "badge_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "circle": {
+              "enum": [
+                "close_friends",
+                "subscribers",
+                "none"
+              ]
+            },
+            "sharing": {
+              "enum": [
+                "close_friends_only",
+                "subscribers_only",
+                "public_allowed"
+              ]
+            }
+          },
+          "required": [
+            "person_id",
+            "display_name",
+            "badge_label",
+            "circle",
+            "sharing"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

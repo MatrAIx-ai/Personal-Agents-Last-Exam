@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "reelpulse",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:reelpulse (@Aria068)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "reelpulse.comment.create",
+    "reelpulse.engagement.snapshot",
+    "reelpulse.sponsor.update"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "MCP only; no GUI, live social publishing, video playback, transcoding, DMs, or ad billing.",
+    "Visual privacy and disclosure inspection is an Agent action over MCP resources, not a server-side pixel classifier.",
+    "Scheduled posts derive published status from ctx.virtual_now on reads and event matching without a background timer."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

@@ -1,0 +1,512 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:reelpulse:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "timezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "circles": {
+      "type": "object",
+      "properties": {
+        "close_friends": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "uniqueItems": true
+        },
+        "subscribers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "uniqueItems": true
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "badge_label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "circle": {
+                "enum": [
+                  "close_friends",
+                  "subscribers",
+                  "none"
+                ]
+              },
+              "sharing": {
+                "enum": [
+                  "close_friends_only",
+                  "subscribers_only",
+                  "public_allowed"
+                ]
+              }
+            },
+            "required": [
+              "person_id",
+              "display_name",
+              "badge_label",
+              "circle",
+              "sharing"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "close_friends",
+        "subscribers",
+        "members"
+      ],
+      "additionalProperties": false
+    },
+    "sponsors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "post_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "campaign": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "disclosure_required": {
+            "type": "boolean"
+          },
+          "earliest_publish_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "forbidden_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^#[A-Za-z0-9_]{1,60}$"
+            },
+            "uniqueItems": true
+          },
+          "promo_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "post_id",
+          "brand",
+          "campaign",
+          "approved",
+          "disclosure_required",
+          "earliest_publish_at",
+          "forbidden_tags",
+          "promo_code",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "posts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "caption": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 5000
+          },
+          "format": {
+            "enum": [
+              "carousel",
+              "reel"
+            ]
+          },
+          "topic_angle": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "day_slot": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "scheduled",
+              "published"
+            ]
+          },
+          "audience": {
+            "anyOf": [
+              {
+                "enum": [
+                  "close_friends",
+                  "subscribers",
+                  "public"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paid_partnership": {
+            "type": "boolean"
+          },
+          "sponsor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^#[A-Za-z0-9_]{1,60}$"
+            },
+            "uniqueItems": true
+          },
+          "asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "uniqueItems": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schedule_reverted_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pinned_comment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "views": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "saves": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "completions": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unfollows": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "not_interested": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "views",
+              "saves",
+              "completions",
+              "unfollows",
+              "not_interested"
+            ],
+            "additionalProperties": false
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "caption": {
+                  "type": "string",
+                  "maxLength": 5000
+                },
+                "paid_partnership": {
+                  "type": "boolean"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "caption",
+                "paid_partnership",
+                "tags"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "moderation_history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "target_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "target_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "author": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "author_role": {
+                  "enum": [
+                    "creator",
+                    "follower",
+                    "sponsor",
+                    "guest"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "hidden": {
+                  "type": "boolean"
+                },
+                "pinned": {
+                  "type": "boolean"
+                },
+                "parent_comment_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "author",
+                "author_role",
+                "text",
+                "created_at",
+                "hidden",
+                "pinned",
+                "parent_comment_id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "title",
+          "caption",
+          "format",
+          "topic_angle",
+          "day_slot",
+          "slot_id",
+          "status",
+          "audience",
+          "paid_partnership",
+          "sponsor_id",
+          "tags",
+          "asset_ids",
+          "created_at",
+          "updated_at",
+          "scheduled_at",
+          "published_at",
+          "schedule_reverted_reason",
+          "pinned_comment_id",
+          "metrics",
+          "revisions",
+          "moderation_history",
+          "comments"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "timezone",
+    "circles",
+    "sponsors",
+    "posts"
+  ],
+  "additionalProperties": false
+}

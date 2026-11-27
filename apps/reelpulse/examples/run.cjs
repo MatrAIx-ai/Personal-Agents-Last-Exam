@@ -1,0 +1,12 @@
+'use strict';
+const assert = require('node:assert/strict');
+const app = require('../plugin.cjs');
+const seed = require('../fixtures/minimal.json');
+const event = require('./scenario.json');
+const ctx = { role: 'infra', virtual_now: event.at, binding: require('../fixtures/binding.json') };
+const after = app.applyEvent(ctx, structuredClone(seed), event);
+app.validateSeed(ctx, after);
+const updated = after.sponsors.find(s => s.id === event.payload.sponsor_id);
+assert.equal(updated.earliest_publish_at, event.payload.earliest_publish_at);
+assert.notDeepEqual(after, seed);
+console.log(JSON.stringify({ event_id: event.event_id, updated }));
