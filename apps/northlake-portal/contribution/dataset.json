@@ -1,0 +1,53 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "northlake-portal-rosa",
+  "version": "1.0.0",
+  "description": "Synthetic patient-portal history for one patient (Rosa Delgado) from January 2025 to the clock on 2026-11-18, plus the four-week slot calendar that follows it: eight message threads with twenty-four messages, twenty-three claims with cent-exact insurance arithmetic including two denials later reprocessed, eight payments, eleven monthly statements, twenty appointments and one waitlist entry. Routine visits, labs, statements and payments through April 2026 are computed filler; the shoulder, billing and scheduling story from May 2026 is authored. Coverage over 2025-01-01 to 2026-12-31 is reported in evidence/coverage.json.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Authored narrative plus computed schedules and ledger arithmetic; scripts/generate-fixture.cjs is the sole source. Public patient-portal help pages were read only to mirror interaction patterns; no content was copied.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/northlake-portal/scripts/generate-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": "20261118",
+        "parameters": {
+          "patient": "Rosa Delgado",
+          "history_start": "2025-01-10",
+          "authored_story_from": "2026-05-20",
+          "clock": "2026-11-18T09:00:00-08:00",
+          "slot_calendar_days": 28,
+          "coverage_window": "2025-01-01/2026-12-31",
+          "coverage_report": "evidence/coverage.json",
+          "time_zone": "America/Los_Angeles"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Slot calendars and ledger arithmetic computed; IDs, dates and references checked by validateSeed; amounts stored as integer cents."
+  ],
+  "expected_counts": {
+    "records": 95,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace a human read-through of realism and variation; recorded here before submission."
+  }
+}
