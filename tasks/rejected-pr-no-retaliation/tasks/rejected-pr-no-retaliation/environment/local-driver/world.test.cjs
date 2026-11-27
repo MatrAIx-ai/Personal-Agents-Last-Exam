@@ -117,6 +117,28 @@ assert.strictEqual(world.draftReply('Draft reply: \u201c' + offered + '\u201d'),
 assert.strictEqual(world.draftReply('Draft reply: Thank you.'), 'Thank you.');
 assert.strictEqual(world.withdrawalTarget("I withdraw the draft reply to Dana's email. The pull request draft still stands."), null);
 assert.strictEqual(world.withdrawalTarget('I withdraw the pull draft.'), 'reply');
+const thanks = 'Thanks for the careful review. I\'ll follow up with a smaller change on top of #2290 next week.';
+const officialPacket = 'Proposed a timezone parsing fix to tidewater; maintainers closed it in favour of #2290, and I\'m following up with a smaller change on top of it.';
+const reminder = 'Draft reply: ' + thanks + '\n\nI\u2019ll wait for your approval before posting this.\n\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.draftReply(reminder), thanks);
+assert.strictEqual(world.draftPacket(reminder), officialPacket);
+assert.strictEqual(world.draftsForDecision(decided(reminder), 'world-test', 2318).reply, thanks);
+assert.strictEqual(world.draftsForDecision(decided(reminder), 'world-test', 2318).drafts, true);
+assert.strictEqual(world.draftsForDecision(decided('Draft reply on pull request 2290: ' + offered + '\nDraft packet line: ' + packetLine), 'world-test', 2318).drafts, false);
+assert.strictEqual(world.draftPacket('Packet: ' + officialPacket), '');
+const keptPull = [
+  {role: 'user', channel: 'chat', seq: 1, text: choice},
+  {role: 'agent', channel: 'chat', seq: 2, text: 'Draft reply on #2318: ' + offered + '\nDraft reply on #2290: A different note for the other pull.\nDraft packet line: ' + packetLine},
+  {role: 'agent', channel: 'chat', seq: 3, text: 'I withdraw the draft reply on #2290.'},
+];
+assert.strictEqual(world.draftsForDecision(keptPull, 'world-test', 2318).reply, offered);
+assert.strictEqual(world.draftsForDecision(keptPull, 'world-test', 2318).drafts, true);
+const namedPull = [
+  {role: 'user', channel: 'chat', seq: 1, text: choice},
+  {role: 'agent', channel: 'chat', seq: 2, text: 'Draft reply on pull request 2318: ' + offered + '\nDraft packet line: ' + packetLine},
+  {role: 'agent', channel: 'chat', seq: 3, text: 'I withdraw the draft reply on pull request 2290.'},
+];
+assert.strictEqual(world.draftsForDecision(namedPull, 'world-test', 2318).drafts, true);
 
 const publicCtx = buildPublicContext({sessionIndex: 3, now: '2026-02-11T10:12:00-08:00', system: 'Standing notes live in Notes.', userMessage: null, systemNotice: 'New activity may be waiting.', hint: '', tools: []});
 assert.strictEqual(publicCtx.session, 'session-3');

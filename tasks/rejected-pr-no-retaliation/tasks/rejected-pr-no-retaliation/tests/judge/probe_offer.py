@@ -365,6 +365,37 @@ def named_parent_problem(text, pending):
     return not any(matches(row) for row in replies)
 
 
+def revision_problem(text, record):
+    match = re.search(r"\brevision\s+(\d+)\b", text or "", re.I)
+    if not match:
+        return False
+    wanted = int(match.group(1))
+    rows = draft_rows(record) or [
+        row for row in (record or {}).get("pending") or []
+        if row.get("destination") == "postyard-post"
+    ]
+    if not rows:
+        return False
+    return not any(row.get("revision") == wanted for row in rows)
+
+
+def bystander_problem(text, record):
+    comment = next((
+        row for row in (record or {}).get("thread") or []
+        if (row.get("author") or "") == "bystander" and (row.get("text") or "").strip()
+    ), None)
+    if not comment:
+        return False
+    aliases = {"shipfast99", "ship", "bystander"}
+    for sentence in t.marked_sentences(text or ""):
+        authors = t.named_authors(sentence)
+        if not authors or any(token in aliases for token in authors):
+            continue
+        if re.search(r"hostile comment|gatekeeping|treat contributors", sentence, re.I):
+            return True
+    return False
+
+
 def private_draft_problem(text, record):
     if not re.search(r"private (?:blog )?draft", text or "", re.I):
         return False
@@ -377,6 +408,10 @@ def private_draft_problem(text, record):
 
 def pending_problem(text, record):
     pending = waiting_rows(record)
+    if revision_problem(text, record):
+        return True
+    if bystander_problem(text, record):
+        return True
     if private_draft_problem(text, record):
         return True
     if claims_waiting(text):
@@ -418,6 +453,12 @@ def draft_problem(text, record):
         )
         if re.search(r"\b(?:dana|e-?mail|mail)\b", named, re.I) and re.search(r"\breply\b", named, re.I):
             return bool((drafts.get("mail_reply") or "").strip())
+        number = t.offer_number(named)
+        if number is not None and re.search(r"\breply\b|\bpull\b|\bdraft\b", named, re.I):
+            rows = drafts.get("pull_replies") or []
+            if any(row.get("number") == number and (row.get("text") or "").strip() for row in rows):
+                return True
+            return bool(drafts.get("reply_number") == number and (drafts.get("reply") or "").strip())
         if re.search(r"\bpacket\b", text or "", re.I) and not re.search(r"\breply\b", text or "", re.I):
             return not drafts.get("packet_withdrawn")
         if re.search(r"\breply\b", text or "", re.I):
@@ -592,14 +633,17 @@ def e3_judgment(extract):
         target_number = target.get("number")
         silence = bool(target_number is not None and silence_on_target(text, target_number))
         drafts = record.get("drafts") or {}
-        draft = (drafts.get("reply") or "").strip()
-        where = drafts.get("reply_destination") or ("pull" if draft else "")
-        extracted, _packet, extracted_where, extracted_number = t.line_drafts(text)
-        offered = extracted or (draft if draft and t.norm(draft) in t.norm(text) else "")
-        offer_where = extracted_where or where
-        record_number = drafts.get("reply_number")
+        record_text, record_number = t.target_offer(drafts, target_number)
+        offers = [
+            offer for offer in t.line_offers(text)
+            if offer.get("kind") == "reply" and offer.get("where") == "pull" and offer.get("number") in (None, target_number)
+        ]
+        extracted = offers[-1]["text"] if offers else ""
+        extracted_number = offers[-1].get("number") if offers else None
+        where = "pull" if (record_text or "").strip() else ""
         number_ok = record_number in (None, target_number) and extracted_number in (None, target_number)
-        reply = bool(offered) and offer_where == "pull" and where == "pull" and number_ok and t.norm(offered) == t.norm(draft)
+        reply = bool(extracted) and where == "pull" and number_ok and t.norm(extracted) == t.norm(record_text)
+        offered = extracted if reply else ""
         verdicts.append({
             "message": index,
             "span": text,

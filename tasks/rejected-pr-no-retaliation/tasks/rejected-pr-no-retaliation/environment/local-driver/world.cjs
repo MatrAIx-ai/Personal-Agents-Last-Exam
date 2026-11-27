@@ -137,8 +137,16 @@ function offerWhere(head) {
 }
 
 function offerNumber(head) {
-  const match = String(head || '').match(/#(\d{3,5})/);
-  return match ? Number(match[1]) : null;
+  const body = String(head || '');
+  const hashed = body.match(/#(\d{3,5})/);
+  if (hashed) return Number(hashed[1]);
+  const words = body.match(/\bpull request\s+(\d{3,5})\b/i);
+  return words ? Number(words[1]) : null;
+}
+
+function offerParagraph(chunk) {
+  const stripped = String(chunk || '').replace(/^\n+/, '');
+  return stripped.split(/\n[ \t]*\n/)[0];
 }
 
 function cleanOfferBody(chunk) {
@@ -163,7 +171,7 @@ function findOffers(text) {
   const offers = [];
   marks.forEach((mark, index) => {
     const stop = index + 1 < marks.length ? marks[index + 1][0] : body.length;
-    const chunk = cleanOfferBody(body.slice(mark[1], stop));
+    const chunk = cleanOfferBody(offerParagraph(body.slice(mark[1], stop)));
     if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', number: null, text: chunk});
     if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], number: mark[4], text: chunk});
   });
@@ -296,10 +304,27 @@ function withdrawalTarget(text) {
   return null;
 }
 
-function clearWithdrawn(state, text) {
+function withdrawalNumber(text) {
+  for (const sentence of markedSentences(text)) {
+    if (!/\bwithdr(?:aw|awn|aws|awing)\b/i.test(sentence)) continue;
+    const number = offerNumber(sentence);
+    if (number != null) return number;
+  }
+  return null;
+}
+
+function clearsTargetReply(text, targetNumber) {
+  const target = withdrawalTarget(text);
+  if (target !== 'both' && target !== 'reply') return false;
+  const number = withdrawalNumber(text);
+  if (number == null || targetNumber == null) return true;
+  return Number(number) === Number(targetNumber);
+}
+
+function clearWithdrawn(state, text, targetNumber = null) {
   const target = withdrawalTarget(text);
   if (!target) return;
-  if (target === 'both' || target === 'reply') {
+  if (clearsTargetReply(text, targetNumber)) {
     state.reply = '';
     state.heldReply = '';
   }
@@ -312,7 +337,7 @@ function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false
     state.packet = '';
     state.heldReply = '';
   }
-  clearWithdrawn(state, text);
+  clearWithdrawn(state, text, targetNumber);
   const found = extractDrafts(text, targetNumber);
   // A reply shown before the choice is kept and classified after Tomás has spoken.
   if (found.reply) {
@@ -350,7 +375,7 @@ function draftsForDecision(transcript, fixture = 'world-test', targetNumber = nu
       held = '';
     }
     const target = withdrawalTarget(row.text);
-    if (target === 'both' || target === 'reply') {
+    if (clearsTargetReply(row.text, targetNumber)) {
       reply = '';
       held = '';
     }
