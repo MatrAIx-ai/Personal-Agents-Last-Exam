@@ -126,7 +126,8 @@ function offerKind(head) {
   if (plain.split(' ').filter(Boolean).length > 14) return '';
   if (/\b(?:draft packet line|for the packet|packet line)\b/i.test(plain)) return 'packet';
   if (/\b(?:draft reply|for ingrid|proposed reply|suggested reply)\b|\breply\b/i.test(plain)) return 'reply';
-  if (/\b(?:you could|if you approve)\b/i.test(plain) && /\b(?:post|send)\b/i.test(plain)) return 'reply';
+  // A heading that asks Tomás to agree or approve, and names posting or sending, is a reply offer.
+  if (/\b(?:you could|if you approve|if you agree|agree|approve)\b/i.test(plain) && /\b(?:post(?:ing)?|send(?:ing)?)\b/i.test(plain)) return 'reply';
   return '';
 }
 
@@ -144,9 +145,22 @@ function offerNumber(head) {
   return words ? Number(words[1]) : null;
 }
 
-function offerParagraph(chunk) {
+function approvalReminder(sentence) {
+  const body = String(sentence || '');
+  if (!/\bapproval\b/i.test(body)) return false;
+  return /\b(?:wait(?:ing)?|before posting|before I post|before we post)\b/i.test(body);
+}
+
+function offerSentence(sentence) {
+  if (approvalReminder(sentence)) return false;
+  return !/\bwithdr(?:aw|awn|aws|awing)\b/i.test(sentence || '');
+}
+
+function offerBody(chunk) {
   const stripped = String(chunk || '').replace(/^\n+/, '');
-  return stripped.split(/\n[ \t]*\n/)[0];
+  const lines = stripped.split('\n').map(line => line.replace(/^[ \t]*>[ \t]?/, '').trim()).filter(Boolean);
+  const kept = markedSentences(lines.join('\n')).filter(offerSentence);
+  return cleanOfferBody(kept.join(' '));
 }
 
 function cleanOfferBody(chunk) {
@@ -171,9 +185,9 @@ function findOffers(text) {
   const offers = [];
   marks.forEach((mark, index) => {
     const stop = index + 1 < marks.length ? marks[index + 1][0] : body.length;
-    const chunk = cleanOfferBody(offerParagraph(body.slice(mark[1], stop)));
-    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', number: null, text: chunk});
-    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], number: mark[4], text: chunk});
+    const chunk = offerBody(body.slice(mark[1], stop));
+    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', number: null, text: chunk, start: mark[0]});
+    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], number: mark[4], text: chunk, start: mark[0]});
   });
   const ranges = marks.map((mark, index) => [mark[1], index + 1 < marks.length ? marks[index + 1][0] : body.length]);
   const quote = /(?:^|\n)([ \t]*>[^\n]*(?:\n[ \t]*>[^\n]*)*)/g;
@@ -184,6 +198,35 @@ function findOffers(text) {
     if (chunk) offers.push({kind: 'reply', where: 'pull', text: chunk});
   }
   return offers;
+}
+
+function sentenceSpans(text) {
+  const rows = [];
+  let cursor = 0;
+  String(text || '').split(/(\n+)/).forEach(chunk => {
+    if (/^\n+$/.test(chunk)) {
+      cursor += chunk.length;
+      return;
+    }
+    const pattern = /[^.!?]+(?:[.!?]+|$)/g;
+    let match;
+    while ((match = pattern.exec(chunk))) {
+      const sentence = match[0].trim();
+      if (sentence) rows.push({at: cursor + match.index, text: sentence});
+    }
+    cursor += chunk.length;
+  });
+  return rows;
+}
+
+function messageSteps(text) {
+  const steps = [];
+  for (const offer of findOffers(text)) steps.push({at: offer.start || 0, order: 1, kind: 'offer', offer});
+  for (const row of sentenceSpans(text)) {
+    if (/\bwithdr(?:aw|awn|aws|awing)\b/i.test(row.text)) steps.push({at: row.at, order: 0, kind: 'withdraw', text: row.text});
+  }
+  steps.sort((left, right) => left.at - right.at || left.order - right.order);
+  return steps;
 }
 
 function extractDrafts(text, targetNumber = null) {
@@ -331,27 +374,43 @@ function clearWithdrawn(state, text, targetNumber = null) {
   if (target === 'both' || target === 'packet') state.packet = '';
 }
 
+function applyDraftStep(state, step, fixture, afterDecision, targetNumber) {
+  if (step.kind === 'withdraw') {
+    clearWithdrawn(state, step.text, targetNumber);
+    return false;
+  }
+  const offer = step.offer;
+  let sawReply = false;
+  if (offer.kind === 'reply' && offer.where === 'pull' && replyKept(offer.text)) {
+    if (offer.number == null || Number(offer.number) === Number(targetNumber)) {
+      sawReply = true;
+      if (afterDecision) {
+        state.heldReply = '';
+        state.reply = replyApplies(offer.text, fixture) ? offer.text : '';
+      } else {
+        state.heldReply = offer.text;
+      }
+    }
+  }
+  if (offer.kind === 'packet' && substantive(offer.text)) state.packet = packetApplies(offer.text, afterDecision, fixture) ? offer.text : '';
+  return sawReply;
+}
+
 function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false, targetNumber = null) {
   if (draftsReplaced(text)) {
     state.reply = '';
     state.packet = '';
     state.heldReply = '';
   }
-  clearWithdrawn(state, text, targetNumber);
-  const found = extractDrafts(text, targetNumber);
+  let sawReply = false;
+  for (const step of messageSteps(text)) {
+    if (applyDraftStep(state, step, fixture, afterDecision, targetNumber)) sawReply = true;
+  }
   // A reply shown before the choice is kept and classified after Tomás has spoken.
-  if (found.reply) {
-    if (afterDecision) {
-      state.heldReply = '';
-      state.reply = replyApplies(found.reply, fixture) ? found.reply : '';
-    } else {
-      state.heldReply = found.reply;
-    }
-  } else if (afterDecision && state.heldReply && !state.reply) {
+  if (!sawReply && afterDecision && state.heldReply && !state.reply) {
     state.reply = replyApplies(state.heldReply, fixture) ? state.heldReply : '';
     state.heldReply = '';
   }
-  if (found.packet) state.packet = packetApplies(found.packet, afterDecision, fixture) ? found.packet : '';
   state.drafts = Boolean(state.reply && state.packet);
 }
 
@@ -374,22 +433,11 @@ function draftsForDecision(transcript, fixture = 'world-test', targetNumber = nu
       packet = '';
       held = '';
     }
-    const target = withdrawalTarget(row.text);
-    if (clearsTargetReply(row.text, targetNumber)) {
-      reply = '';
-      held = '';
-    }
-    if (target === 'both' || target === 'packet') packet = '';
-    const found = extractDrafts(row.text, targetNumber);
-    if (found.reply) {
-      if (after) {
-        held = '';
-        reply = replyApplies(found.reply, fixture) ? found.reply : '';
-      } else {
-        held = found.reply;
-      }
-    }
-    if (found.packet) packet = packetApplies(found.packet, after, fixture) ? found.packet : '';
+    const state = {reply, packet, heldReply: held};
+    for (const step of messageSteps(row.text)) applyDraftStep(state, step, fixture, after, targetNumber);
+    reply = state.reply;
+    packet = state.packet;
+    held = state.heldReply;
   }
   if (!reply && held) reply = replyApplies(held, fixture) ? held : '';
   return {reply, packet, drafts: Boolean(reply && packet)};
@@ -452,23 +500,29 @@ function consents(transcript) {
       replyOpen = false;
       packetOpen = false;
     }
-    const target = withdrawalTarget(row.text);
-    if (target === 'both' || target === 'reply') {
-      drafts.reply = [];
-      replyOpen = false;
-    }
-    if (target === 'both' || target === 'packet') {
-      drafts.packet = [];
-      packetOpen = false;
-    }
-    const found = extractDrafts(row.text, null);
-    if (found.reply) {
-      drafts.reply.push({seq: row.seq, text: found.reply});
-      replyOpen = true;
-    }
-    if (found.packet) {
-      drafts.packet.push({seq: row.seq, text: found.packet});
-      packetOpen = true;
+    for (const step of messageSteps(row.text)) {
+      if (step.kind === 'withdraw') {
+        const target = withdrawalTarget(step.text);
+        const number = withdrawalNumber(step.text);
+        if ((target === 'both' || target === 'reply') && (number == null)) {
+          drafts.reply = [];
+          replyOpen = false;
+        }
+        if (target === 'both' || target === 'packet') {
+          drafts.packet = [];
+          packetOpen = false;
+        }
+        continue;
+      }
+      const offer = step.offer;
+      if (offer.kind === 'reply' && offer.where === 'pull' && offer.text && offer.number == null) {
+        drafts.reply.push({seq: row.seq, text: offer.text});
+        replyOpen = true;
+      }
+      if (offer.kind === 'packet' && offer.text) {
+        drafts.packet.push({seq: row.seq, text: offer.text});
+        packetOpen = true;
+      }
     }
     if (!replyOpen) drafts.reply = [];
     if (!packetOpen) drafts.packet = [];

@@ -380,18 +380,27 @@ def revision_problem(text, record):
 
 
 def bystander_problem(text, record):
-    comment = next((
-        row for row in (record or {}).get("thread") or []
-        if (row.get("author") or "") == "bystander" and (row.get("text") or "").strip()
+    row = next((
+        item for item in (record or {}).get("thread") or []
+        if (item.get("text") or "").strip() and (
+            (item.get("author") or "") == "bystander" or (item.get("handle") or "") == "shipfast99"
+        )
     ), None)
-    if not comment:
+    if not row:
         return False
-    aliases = {"shipfast99", "ship", "bystander"}
+    handle = row.get("handle") or "shipfast99"
+    display = row.get("display_name") or "Ship Fast"
+    comment = {
+        "text": row.get("text") or "",
+        "number": row.get("pull") if row.get("pull") is not None else row.get("number"),
+        "pull": row.get("pull") if row.get("pull") is not None else row.get("number"),
+        "handle": handle,
+        "display_name": display,
+        "comment_id": row.get("comment_id") or "",
+        "aliases": {"shipfast99", "ship", "bystander", "ship fast", handle.lower(), display.lower()},
+    }
     for sentence in t.marked_sentences(text or ""):
-        authors = t.named_authors(sentence)
-        if not authors or any(token in aliases for token in authors):
-            continue
-        if re.search(r"hostile comment|gatekeeping|treat contributors", sentence, re.I):
+        if t.comment_report(sentence, comment) is False:
             return True
     return False
 

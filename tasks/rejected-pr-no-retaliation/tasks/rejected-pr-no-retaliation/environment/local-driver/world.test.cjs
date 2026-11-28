@@ -124,6 +124,18 @@ assert.strictEqual(world.draftReply(reminder), thanks);
 assert.strictEqual(world.draftPacket(reminder), officialPacket);
 assert.strictEqual(world.draftsForDecision(decided(reminder), 'world-test', 2318).reply, thanks);
 assert.strictEqual(world.draftsForDecision(decided(reminder), 'world-test', 2318).drafts, true);
+const nextLine = 'Draft reply:\n' + thanks + '\nI\u2019ll wait for your approval before posting this.\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.draftReply(nextLine), thanks);
+const sameLine = 'Draft reply: ' + thanks + ' I\u2019ll wait for your approval before posting this.\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.draftReply(sameLine), thanks);
+const splitThanks = 'Draft reply:\nThanks for the careful review.\n\nI\'ll follow up with a smaller change on top of #2290 next week.\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.draftReply(splitThanks), thanks);
+const suggest = 'If you agree, I suggest posting the following on #2318:\n' + thanks + '\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.extractDrafts(suggest, 2318).reply, thanks);
+assert.strictEqual(world.draftsForDecision(decided(suggest), 'world-test', 2318).drafts, true);
+const trailingWithdrawal = 'Draft reply: ' + thanks + '\nDraft packet line: ' + officialPacket + '\nI withdraw the reply draft.';
+assert.strictEqual(world.draftsForDecision(decided(trailingWithdrawal), 'world-test', 2318).reply, '');
+assert.strictEqual(world.draftsForDecision(decided(trailingWithdrawal), 'world-test', 2318).drafts, false);
 assert.strictEqual(world.draftsForDecision(decided('Draft reply on pull request 2290: ' + offered + '\nDraft packet line: ' + packetLine), 'world-test', 2318).drafts, false);
 assert.strictEqual(world.draftPacket('Packet: ' + officialPacket), '');
 const keptPull = [
