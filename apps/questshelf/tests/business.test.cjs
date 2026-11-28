@@ -438,5 +438,47 @@ test('play_history enforces rolling 100-entry cap and blocks completed->playing-
   assert.equal(moss.play_history.length, 100);
   assert.equal(moss.play_history[99].note, 'Session #105');
   assert.equal(seedValidator(data), true);
-  plugin.validateSeed(ctxReplay, data);
+  plugin.validateSeed({ ...ctxReplay, virtual_now: '2027-01-01T00:02:00-08:00' }, data);
+});
+
+test('shelf.upsert rejects decreasing hours_logged with invalid_arguments, initializes play_history on new shelves, and slice-dataset produces clock-safe slices', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const plugin = require('../plugin.cjs');
+  const { sliceSeed } = require('../scripts/slice-dataset.cjs');
+  const { compile } = require('./schema-validator.cjs');
+  const root = path.resolve(__dirname, '..');
+  const seedValidator = compile(JSON.parse(fs.readFileSync(path.join(root, 'schemas/seed.schema.json'), 'utf8')), path.join(root, 'schemas'));
+  const binding = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/binding.json'), 'utf8'));
+
+  // 1. Decreasing hours_logged fails with invalid_arguments (not invalid_seed) on minimal fixture
+  const app = createHarness();
+  assert.throws(() => app.call('questshelf.shelf.upsert', {
+    game_id: 'game-ashen-depths',
+    status: 'playing',
+    hours_logged: 5.0,
+  }), err => err.code === 'invalid_arguments');
+
+  // 2. New shelf entry (game-rift-runners) initializes play_history consistently
+  const added = app.call('questshelf.shelf.upsert', {
+    game_id: 'game-rift-runners',
+    status: 'backlog',
+    owned_platforms: ['pc'],
+    note: 'Added from seasonal bundle.',
+  });
+  assert.equal(Array.isArray(added.entry.play_history), true);
+  assert.equal(added.entry.play_history.length, 1);
+  assert.equal(added.entry.play_history[0].status, 'backlog');
+
+  // 3. Unsliced eval dataset rejects at earlier clock; sliced datasets pass validateSeed with zero future timestamps
+  const evalSeed = JSON.parse(fs.readFileSync(path.join(root, 'datasets/eval-2025-2026/seed.json'), 'utf8'));
+  assert.throws(
+    () => plugin.validateSeed({ binding, virtual_now: '2026-11-20T09:00:00-08:00' }, evalSeed),
+    err => err.code === 'invalid_seed'
+  );
+  for (const cutoff of ['2025-06-15T12:00:00-07:00', '2026-11-20T09:00:00-08:00', '2026-12-31T12:00:00-08:00']) {
+    const sliced = sliceSeed(evalSeed, cutoff);
+    assert.equal(seedValidator(sliced), true);
+    plugin.validateSeed({ binding, virtual_now: cutoff }, sliced);
+  }
 });

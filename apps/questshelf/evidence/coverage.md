@@ -5,11 +5,11 @@
 ## Scope & Provenance
 
 - **Dataset file:** `datasets/eval-2025-2026/seed.json`
-- **SHA-256:** `f6b18cf91eb70a9751a8f56605cf4650c73ce4eee9643b39955e842fa06adcdf`
+- **SHA-256:** `217ed2bdd2563986092f8528ea5b9dd9fc16f73bb315e7ca04a8e500d7c16a79`
 - **Provenance:** 100% synthetic (MIT); no scraped store data or real personal history; no real anchor required
 - **Declared time zone:** `America/Los_Angeles`
 - **Coverage window:** `2025-01-01` through `2026-12-31` (inclusive)
-- **Minimum recommended clock (`env.load_seed`):** `2026-12-31T23:00:00-08:00`
+- **Minimum recommended clock (`env.load_seed`):** `2026-12-31T12:00:00-08:00`
 - **Excluded fields (no double-counting):** `polls[].closes_at` (planned deadline) and 19 `shelves[].updated_at` mirrors already counted in `shelves[].play_history[].at`.
 - **Out-of-window / invalid timestamps:** `0` (invalid: `0`)
 
@@ -17,19 +17,19 @@
 
 | Scope | Timestamped events | Unique timestamps | Global deduplicated distinct dates | Earliest date | Latest date | Months covered | Gaps |
 | --- | ---: | ---: | ---: | --- | --- | --- | --- |
-| **User activity only** (play history, friend libraries, polls, preferences) | 165 | 165 | **126** | 2025-01-03 | 2026-12-30 | **24/24** | None |
-| **All sources** (user activity + catalog `games[].updated_at`) | 185 | 185 | **144** | 2025-01-03 | 2026-12-30 | **24/24** | None |
+| **User activity only** (play history, friend libraries, polls, preferences) | 175 | 175 | **126** | 2025-01-03 | 2026-12-30 | **24/24** | None |
+| **All sources** (user activity + catalog `games[].updated_at`) | 195 | 195 | **144** | 2025-01-03 | 2026-12-30 | **24/24** | None |
 
 ## Per-Source Breakdown
 
 | Source | Authoritative date field | Category | Events | Distinct dates | Provenance |
 | --- | --- | --- | ---: | ---: | --- |
-| `shelves.play_history.at` | `shelves[].play_history[].at` | user_activity | 72 | 71 | synthetic |
+| `shelves.play_history.at` | `shelves[].play_history[].at` | user_activity | 71 | 70 | synthetic |
 | `shelves.updated_at` | `shelves[].updated_at (only when no play_history match)` | user_activity | 0 | 0 | synthetic |
 | `friends.owned_games.added_at` | `friends[].owned_games[].added_at` | user_activity | 15 | 15 | synthetic |
-| `polls.created_at` | `polls[].created_at` | user_activity | 17 | 17 | synthetic |
-| `polls.votes.voted_at` | `polls[].votes[].voted_at` | user_activity | 44 | 32 | synthetic |
-| `polls.closed_at` | `polls[].closed_at` | user_activity | 16 | 16 | synthetic |
+| `polls.created_at` | `polls[].created_at` | user_activity | 19 | 19 | synthetic |
+| `polls.votes.voted_at` | `polls[].votes[].voted_at` | user_activity | 51 | 40 | synthetic |
+| `polls.closed_at` | `polls[].closed_at` | user_activity | 18 | 18 | synthetic |
 | `preferences.updated_at` | `preferences.updated_at` | user_activity | 1 | 1 | synthetic |
 | `games.updated_at` | `games[].updated_at` | catalog_metadata | 20 | 20 | synthetic |
 
@@ -38,27 +38,27 @@
 | Month | User-activity events | User-activity distinct dates | Catalog records | Total events | Total distinct dates | Real | Synthetic |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 2025-01 | 5 | 5 | 3 | 8 | 8 | 0 | 8 |
-| 2025-02 | 10 | 8 | 1 | 11 | 8 | 0 | 11 |
-| 2025-03 | 9 | 6 | 1 | 10 | 7 | 0 | 10 |
+| 2025-02 | 9 | 6 | 1 | 10 | 6 | 0 | 10 |
+| 2025-03 | 8 | 5 | 1 | 9 | 6 | 0 | 9 |
 | 2025-04 | 10 | 7 | 1 | 11 | 8 | 0 | 11 |
-| 2025-05 | 4 | 4 | 1 | 5 | 5 | 0 | 5 |
+| 2025-05 | 5 | 5 | 1 | 6 | 6 | 0 | 6 |
 | 2025-06 | 9 | 6 | 1 | 10 | 7 | 0 | 10 |
-| 2025-07 | 3 | 3 | 1 | 4 | 4 | 0 | 4 |
+| 2025-07 | 2 | 2 | 1 | 3 | 3 | 0 | 3 |
 | 2025-08 | 8 | 4 | 1 | 9 | 5 | 0 | 9 |
-| 2025-09 | 3 | 3 | 1 | 4 | 4 | 0 | 4 |
-| 2025-10 | 8 | 6 | 1 | 9 | 6 | 0 | 9 |
+| 2025-09 | 4 | 4 | 1 | 5 | 5 | 0 | 5 |
+| 2025-10 | 14 | 7 | 1 | 15 | 7 | 0 | 15 |
 | 2025-11 | 7 | 6 | 1 | 8 | 7 | 0 | 8 |
 | 2025-12 | 9 | 6 | 1 | 10 | 7 | 0 | 10 |
-| 2026-01 | 7 | 5 | 1 | 8 | 6 | 0 | 8 |
-| 2026-02 | 8 | 5 | 1 | 9 | 6 | 0 | 9 |
-| 2026-03 | 3 | 3 | 1 | 4 | 4 | 0 | 4 |
+| 2026-01 | 8 | 6 | 1 | 9 | 7 | 0 | 9 |
+| 2026-02 | 7 | 4 | 1 | 8 | 5 | 0 | 8 |
+| 2026-03 | 2 | 2 | 1 | 3 | 3 | 0 | 3 |
 | 2026-04 | 10 | 7 | 0 | 10 | 7 | 0 | 10 |
 | 2026-05 | 3 | 3 | 1 | 4 | 4 | 0 | 4 |
-| 2026-06 | 7 | 5 | 0 | 7 | 5 | 0 | 7 |
+| 2026-06 | 14 | 8 | 0 | 14 | 8 | 0 | 14 |
 | 2026-07 | 3 | 3 | 1 | 4 | 4 | 0 | 4 |
 | 2026-08 | 6 | 5 | 0 | 6 | 5 | 0 | 6 |
 | 2026-09 | 2 | 2 | 1 | 3 | 3 | 0 | 3 |
-| 2026-10 | 10 | 8 | 0 | 10 | 8 | 0 | 10 |
+| 2026-10 | 9 | 7 | 0 | 9 | 7 | 0 | 9 |
 | 2026-11 | 12 | 8 | 0 | 12 | 8 | 0 | 12 |
 | 2026-12 | 9 | 8 | 0 | 9 | 8 | 0 | 9 |
 

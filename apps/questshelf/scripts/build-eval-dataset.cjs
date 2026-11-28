@@ -5,8 +5,8 @@
  * Deterministic generator for QuestShelf's 2025-01-01..2026-12-31 synthetic evaluation
  * dataset (MIT License). Reads fixtures/minimal.json for the 20-game catalog and
  * constructs realistic, cross-record-consistent multi-year user activity:
- * shelf status transitions, play sessions matching co-op nights, completions, ratings,
- * drop reasons, friend library acquisitions, and 17 non-templated game-night polls.
+ * varied shelf arcs, play sessions aligned with co-op game nights, completions,
+ * ratings, drop reasons, friend library acquisitions, and 18 organic co-op polls.
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -90,28 +90,27 @@ const friends = [
   },
 ];
 
-// 3. Rich multi-year user shelf history (2025-01-03 through 2026-12-28)
-// Co-op titles (ember-kitchen, orbit-relay, neon-drift-99, boulder-league) stay active
-// and accumulate hours aligned with every won co-op poll night below.
+// 3. Varied multi-year user shelf history (2025-01-03 through 2026-12-28)
+// Naturalized arcs: several games start directly in `playing`, entry counts range 1..9,
+// completion hours span 0.88x..1.42x catalog main hours, and notes use natural language
+// without raw poll IDs.
 const shelves = [
   {
     game_id: 'game-pebble-harbor',
     owned_platforms: ['handheld', 'switch'],
     play_history: [
       { at: '2025-01-03T19:20:00-08:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Picked up during New Year eShop sale.' },
-      { at: '2025-01-11T21:10:00-08:00', status: 'playing', hours_logged: 1.5, rating: null, drop_reasons: [], note: 'Delivered first cliffside mail route; cozy pace.' },
-      { at: '2025-01-19T16:40:00-08:00', status: 'playing', hours_logged: 3.4, rating: null, drop_reasons: [], note: 'Finished lighthouse keeper letters on handheld.' },
-      { at: '2025-02-02T20:15:00-08:00', status: 'completed', hours_logged: 5.5, rating: 9.2, drop_reasons: [], note: 'Wrapped final harbor festival chapter; great big text.' },
+      { at: '2025-01-11T21:10:00-08:00', status: 'playing', hours_logged: 1.8, rating: null, drop_reasons: [], note: 'Delivered first cliffside mail route; cozy pace.' },
+      { at: '2025-01-19T16:40:00-08:00', status: 'playing', hours_logged: 3.9, rating: null, drop_reasons: [], note: 'Finished lighthouse keeper letters on handheld.' },
+      { at: '2025-02-02T20:15:00-08:00', status: 'completed', hours_logged: 6.8, rating: 9.2, drop_reasons: [], note: '100% side-parcel deliveries and final harbor festival.' }, // 1.36x main (5h)
     ],
   },
   {
     game_id: 'game-tiny-botanist',
     owned_platforms: ['handheld', 'switch'],
     play_history: [
-      { at: '2025-02-16T14:30:00-08:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Recommended by Lin for commuter puzzles.' },
-      { at: '2025-02-23T18:50:00-08:00', status: 'playing', hours_logged: 1.4, rating: null, drop_reasons: [], note: 'Crossbred first silver fern hybrid.' },
-      { at: '2025-03-08T11:20:00-08:00', status: 'playing', hours_logged: 2.9, rating: null, drop_reasons: [], note: 'Unlocked orchid greenhouse wing.' },
-      { at: '2025-03-22T19:45:00-07:00', status: 'completed', hours_logged: 4.3, rating: 9.4, drop_reasons: [], note: 'Completed all 40 beds; effortless handheld readability.' },
+      { at: '2025-02-16T18:50:00-08:00', status: 'playing', hours_logged: 1.4, rating: null, drop_reasons: [], note: 'Downloaded on Lin recommendation and crossbred first silver fern.' },
+      { at: '2025-03-22T19:45:00-07:00', status: 'completed', hours_logged: 3.6, rating: 9.4, drop_reasons: [], note: 'Breezed through all 40 greenhouse beds on commute rides.' }, // 0.90x main (4h)
     ],
   },
   {
@@ -128,17 +127,17 @@ const shelves = [
     owned_platforms: ['handheld', 'pc'],
     play_history: [
       { at: '2025-05-05T18:10:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Queued after finishing Tiny Botanist.' },
-      { at: '2025-05-17T09:40:00-07:00', status: 'playing', hours_logged: 2.0, rating: null, drop_reasons: [], note: 'Cleared coastal timber depot contracts.' },
-      { at: '2025-06-06T20:25:00-07:00', status: 'playing', hours_logged: 4.6, rating: null, drop_reasons: [], note: 'Solved dual-track bridge timing puzzle.' },
-      { at: '2025-06-21T17:15:00-07:00', status: 'completed', hours_logged: 7.4, rating: 8.8, drop_reasons: [], note: 'Main campaign done; clean crisp UI on train ride.' },
+      { at: '2025-05-17T09:40:00-07:00', status: 'playing', hours_logged: 2.2, rating: null, drop_reasons: [], note: 'Cleared coastal timber depot contracts.' },
+      { at: '2025-05-31T15:05:00-07:00', status: 'playing', hours_logged: 4.8, rating: null, drop_reasons: [], note: 'Rebuilt mountain freight loop for express timing.' },
+      { at: '2025-06-06T20:25:00-07:00', status: 'playing', hours_logged: 7.1, rating: null, drop_reasons: [], note: 'Solved dual-track bridge timing puzzle.' },
+      { at: '2025-06-21T17:15:00-07:00', status: 'completed', hours_logged: 9.8, rating: 8.8, drop_reasons: [], note: 'Finished main line plus extra harbor freight contracts.' }, // 1.40x main (7h)
     ],
   },
   {
     game_id: 'game-void-breaker',
     owned_platforms: ['pc'],
     play_history: [
-      { at: '2025-07-03T19:00:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Picked up to test new GPU.' },
-      { at: '2025-07-14T21:30:00-07:00', status: 'playing', hours_logged: 1.1, rating: null, drop_reasons: [], note: 'Cleared Floor 1 vault; camera bob feels aggressive.' },
+      { at: '2025-07-14T21:30:00-07:00', status: 'playing', hours_logged: 1.1, rating: null, drop_reasons: [], note: 'Booted right after installing to test GPU; camera bob feels aggressive.' },
       { at: '2025-07-26T22:10:00-07:00', status: 'dropped', hours_logged: 2.0, rating: 5.0, drop_reasons: ['first_person_motion_sickness'], note: 'Rapid dash turns still trigger motion sickness.' },
     ],
   },
@@ -149,7 +148,8 @@ const shelves = [
       { at: '2025-08-08T17:45:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Saving for August cabin trip.' },
       { at: '2025-08-19T20:30:00-07:00', status: 'playing', hours_logged: 2.3, rating: null, drop_reasons: [], note: 'Photographed glacial tarn wildlife on Switch.' },
       { at: '2025-09-07T15:10:00-07:00', status: 'playing', hours_logged: 5.1, rating: null, drop_reasons: [], note: 'Unlocked summit camp recipes.' },
-      { at: '2025-09-24T21:00:00-07:00', status: 'completed', hours_logged: 7.2, rating: 8.7, drop_reasons: [], note: 'Finished autumn ridge loop; super relaxing.' },
+      { at: '2025-09-14T19:20:00-07:00', status: 'playing', hours_logged: 6.4, rating: null, drop_reasons: [], note: 'Chasing dawn fog photo badge at Pine Overlook.' },
+      { at: '2025-09-24T21:00:00-07:00', status: 'completed', hours_logged: 8.4, rating: 8.7, drop_reasons: [], note: 'Wrapped autumn ridge loop and extra wildlife album.' }, // 1.20x main (7h)
     ],
   },
   {
@@ -157,7 +157,7 @@ const shelves = [
     owned_platforms: ['pc'],
     play_history: [
       { at: '2025-10-05T19:15:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Grabbed on Steam autumn promo.' },
-      { at: '2025-10-18T21:05:00-07:00', status: 'playing', hours_logged: 1.0, rating: null, drop_reasons: [], note: 'Tried two drift cups with Alex & Sam after poll-2025-10-drift-trial; way too frantic.' },
+      { at: '2025-10-18T21:05:00-07:00', status: 'playing', hours_logged: 1.0, rating: null, drop_reasons: [], note: 'Tried two drift cups with Alex & Sam; way too frantic after work.' },
       { at: '2025-10-25T16:40:00-07:00', status: 'backlog', hours_logged: 1.0, rating: null, drop_reasons: [], note: 'Shelved and muted arcade racers.' },
     ],
   },
@@ -166,27 +166,29 @@ const shelves = [
     owned_platforms: ['pc', 'switch'],
     play_history: [
       { at: '2025-03-14T18:20:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Bought for PC-PS5 co-op nights with Alex.' },
-      { at: '2025-03-21T21:30:00-07:00', status: 'playing', hours_logged: 1.5, rating: null, drop_reasons: [], note: 'First cross-play launch night with Alex (poll-2025-03-launch-night).' },
-      { at: '2025-04-26T21:20:00-07:00', status: 'playing', hours_logged: 3.0, rating: null, drop_reasons: [], note: 'Trio orbital rescue run with Alex & Sam (poll-2025-04-trio-relay).' },
-      { at: '2025-06-13T22:15:00-07:00', status: 'playing', hours_logged: 4.0, rating: null, drop_reasons: [], note: 'Second half of tie-breaker co-op night after Ember Kitchen.' },
-      { at: '2025-11-14T21:45:00-08:00', status: 'playing', hours_logged: 5.5, rating: null, drop_reasons: [], note: 'Cleared Sector 4 oxygen-leak emergency with Alex (poll-2025-11-sector4).' },
-      { at: '2026-01-31T14:20:00-08:00', status: 'playing', hours_logged: 6.3, rating: null, drop_reasons: [], note: 'Short solo/quickplay thruster drill after friends missed Jan poll.' },
-      { at: '2026-04-17T21:30:00-07:00', status: 'playing', hours_logged: 7.8, rating: null, drop_reasons: [], note: 'First 4-player cross-play run with Alex, Sam & Lin (poll-2026-04-four-player-orbit).' },
-      { at: '2026-10-09T21:25:00-07:00', status: 'playing', hours_logged: 9.2, rating: null, drop_reasons: [], note: 'Autumn trio rescue night with Alex & Sam (poll-2026-10-autumn-relay).' },
+      { at: '2025-03-21T21:30:00-07:00', status: 'playing', hours_logged: 1.5, rating: null, drop_reasons: [], note: 'First cross-play launch night with Alex.' },
+      { at: '2025-04-26T21:20:00-07:00', status: 'playing', hours_logged: 3.0, rating: null, drop_reasons: [], note: 'Trio orbital rescue run with Alex & Sam.' },
+      { at: '2025-06-13T22:15:00-07:00', status: 'playing', hours_logged: 4.0, rating: null, drop_reasons: [], note: 'Second half of our June double-header co-op evening.' },
+      { at: '2025-10-26T18:50:00-07:00', status: 'playing', hours_logged: 5.3, rating: null, drop_reasons: [], note: 'Sunday afternoon repair sprint with Alex & Sam.' },
+      { at: '2025-11-14T21:45:00-08:00', status: 'playing', hours_logged: 6.8, rating: null, drop_reasons: [], note: 'Cleared Sector 4 oxygen-leak emergency with Alex.' },
+      { at: '2026-01-31T14:20:00-08:00', status: 'playing', hours_logged: 7.6, rating: null, drop_reasons: [], note: 'Short quickplay thruster drill after friends got tied up.' },
+      { at: '2026-04-17T21:30:00-07:00', status: 'playing', hours_logged: 9.1, rating: null, drop_reasons: [], note: 'First 4-player cross-play run with Alex, Sam & Lin.' },
+      { at: '2026-06-28T17:10:00-07:00', status: 'playing', hours_logged: 10.4, rating: null, drop_reasons: [], note: 'Late-June Sunday rescue run with full crew.' },
+      { at: '2026-10-09T21:25:00-07:00', status: 'playing', hours_logged: 11.8, rating: null, drop_reasons: [], note: 'Autumn trio rescue night with Alex & Sam.' },
     ],
   },
   {
     game_id: 'game-ember-kitchen',
     owned_platforms: ['pc', 'switch'],
     play_history: [
-      { at: '2025-01-24T19:50:00-08:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Picked up for Friday party sessions.' },
-      { at: '2025-02-15T20:45:00-08:00', status: 'playing', hours_logged: 1.0, rating: null, drop_reasons: [], note: 'Opening bistro night with Sam (poll-2025-02-bistro-opener).' },
-      { at: '2025-06-13T20:30:00-07:00', status: 'playing', hours_logged: 2.0, rating: null, drop_reasons: [], note: 'Three-starred brick-oven flatbread rush during June tie-breaker night.' },
-      { at: '2025-08-22T20:15:00-07:00', status: 'playing', hours_logged: 3.0, rating: null, drop_reasons: [], note: 'Spontaneous Friday dinner rush with Alex (poll-2025-08-quick-friday).' },
-      { at: '2025-12-12T21:00:00-08:00', status: 'playing', hours_logged: 4.2, rating: null, drop_reasons: [], note: 'Holiday kitchen DLC night with full 4-player squad (poll-2025-12-four-chef).' },
-      { at: '2026-02-14T20:15:00-08:00', status: 'playing', hours_logged: 5.2, rating: null, drop_reasons: [], note: 'Cozy Switch trio session with Sam & Lin (poll-2026-02-switch-night).' },
-      { at: '2026-06-19T20:40:00-07:00', status: 'playing', hours_logged: 6.4, rating: null, drop_reasons: [], note: 'Beat pastry gauntlet with Alex & Lin (poll-2026-06-pastry-rush).' },
-      { at: '2026-11-06T20:55:00-08:00', status: 'playing', hours_logged: 7.5, rating: null, drop_reasons: [], note: 'Pre-holiday 4-player bistro session (poll-2026-11-preholiday-bistro).' },
+      { at: '2025-01-24T19:50:00-08:00', status: 'playing', hours_logged: 0.7, rating: null, drop_reasons: [], note: 'Tried solo tutorial shift right after buying for party nights.' },
+      { at: '2025-02-15T20:45:00-08:00', status: 'playing', hours_logged: 1.7, rating: null, drop_reasons: [], note: 'Opening Saturday bistro night with Sam.' },
+      { at: '2025-06-13T20:30:00-07:00', status: 'playing', hours_logged: 2.7, rating: null, drop_reasons: [], note: 'Three-starred brick-oven flatbread rush during double-header night.' },
+      { at: '2025-08-22T20:15:00-07:00', status: 'playing', hours_logged: 3.7, rating: null, drop_reasons: [], note: 'Spontaneous Friday dinner rush with Alex.' },
+      { at: '2025-12-12T21:00:00-08:00', status: 'playing', hours_logged: 4.9, rating: null, drop_reasons: [], note: 'Holiday kitchen DLC night with the full 4-player squad.' },
+      { at: '2026-02-14T20:15:00-08:00', status: 'playing', hours_logged: 5.9, rating: null, drop_reasons: [], note: 'Cozy Switch trio session with Sam & Lin.' },
+      { at: '2026-06-19T20:40:00-07:00', status: 'playing', hours_logged: 7.1, rating: null, drop_reasons: [], note: 'Beat pastry gauntlet with Alex & Lin.' },
+      { at: '2026-11-06T20:55:00-08:00', status: 'playing', hours_logged: 8.3, rating: null, drop_reasons: [], note: 'Pre-holiday 4-player bistro session.' },
     ],
   },
   {
@@ -197,17 +199,16 @@ const shelves = [
       { at: '2025-12-06T19:20:00-08:00', status: 'playing', hours_logged: 2.6, rating: null, drop_reasons: [], note: 'Completed Decks A and B without squad losses.' },
       { at: '2025-12-27T14:50:00-08:00', status: 'playing', hours_logged: 6.4, rating: null, drop_reasons: [], note: 'Heavy boarding mission over winter break.' },
       { at: '2026-01-10T18:40:00-08:00', status: 'playing', hours_logged: 9.8, rating: null, drop_reasons: [], note: 'Reached flagship engine bay.' },
-      { at: '2026-01-25T20:15:00-08:00', status: 'completed', hours_logged: 12.6, rating: 8.6, drop_reasons: [], note: 'Great crisp tactical grid; solid 45-min missions.' },
+      { at: '2026-01-17T21:05:00-08:00', status: 'playing', hours_logged: 13.5, rating: null, drop_reasons: [], note: 'Cleared bonus derelict cruiser missions.' },
+      { at: '2026-01-25T20:15:00-08:00', status: 'completed', hours_logged: 16.4, rating: 8.6, drop_reasons: [], note: 'Wrapped campaign plus bonus boarding skirmishes.' }, // 1.37x main (12h)
     ],
   },
   {
     game_id: 'game-velvet-cipher',
     owned_platforms: ['handheld', 'switch'],
     play_history: [
-      { at: '2026-02-07T13:15:00-08:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Grabbed for February flight.' },
-      { at: '2026-02-21T20:05:00-08:00', status: 'playing', hours_logged: 2.1, rating: null, drop_reasons: [], note: 'Solved dining-car cipher clue.' },
-      { at: '2026-03-07T16:30:00-08:00', status: 'playing', hours_logged: 4.5, rating: null, drop_reasons: [], note: 'Interrogated conductor in Car 4.' },
-      { at: '2026-03-20T21:10:00-07:00', status: 'completed', hours_logged: 6.2, rating: 9.0, drop_reasons: [], note: 'Clever finale twist; legible text offline.' },
+      { at: '2026-02-21T20:05:00-08:00', status: 'playing', hours_logged: 2.1, rating: null, drop_reasons: [], note: 'Started on February flight and solved dining-car cipher.' },
+      { at: '2026-03-20T21:10:00-07:00', status: 'completed', hours_logged: 5.3, rating: 9.0, drop_reasons: [], note: 'Crisp mystery finale; finished quickly without hints.' }, // 0.88x main (6h)
     ],
   },
   {
@@ -225,8 +226,8 @@ const shelves = [
     play_history: [
       { at: '2026-05-24T15:00:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Recommended by Sam for short deckbuilder runs.' },
       { at: '2026-06-05T19:40:00-07:00', status: 'playing', hours_logged: 3.1, rating: null, drop_reasons: [], note: 'Cleared Act 2 with frost-rune combo.' },
-      { at: '2026-07-12T17:20:00-07:00', status: 'playing', hours_logged: 6.8, rating: null, drop_reasons: [], note: 'Unlocked Ascension 2 sigils.' },
-      { at: '2026-07-29T20:50:00-07:00', status: 'completed', hours_logged: 10.2, rating: 9.1, drop_reasons: [], note: 'Beat final rune golem; crisp card legibility.' },
+      { at: '2026-07-12T17:20:00-07:00', status: 'playing', hours_logged: 8.4, rating: null, drop_reasons: [], note: 'Unlocked Ascension 2 sigils.' },
+      { at: '2026-07-29T20:50:00-07:00', status: 'completed', hours_logged: 14.2, rating: 9.1, drop_reasons: [], note: 'Beat final rune golem across three deck archetypes.' }, // 1.42x main (10h)
     ],
   },
   {
@@ -234,7 +235,7 @@ const shelves = [
     owned_platforms: ['pc'],
     play_history: [
       { at: '2026-08-06T18:30:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Steam key from sports bundle; no PC-PS5 cross-play.' },
-      { at: '2026-08-22T20:15:00-07:00', status: 'playing', hours_logged: 1.5, rating: null, drop_reasons: [], note: 'Played two PC-only arena matches with Sam (poll-2026-08-pc-boulder).' },
+      { at: '2026-08-22T20:15:00-07:00', status: 'playing', hours_logged: 1.5, rating: null, drop_reasons: [], note: 'Played two PC-only arena matches with Sam.' },
       { at: '2026-09-05T14:20:00-07:00', status: 'backlog', hours_logged: 1.5, rating: null, drop_reasons: [], note: 'Waiting to see if cross-play patch ever lands.' },
     ],
   },
@@ -259,15 +260,14 @@ const shelves = [
       { at: '2026-10-15T09:30:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Looks promising for upcoming flights.' },
       { at: '2026-11-22T15:10:00-08:00', status: 'playing', hours_logged: 2.2, rating: null, drop_reasons: [], note: 'Restored brass tidal gate on flight to Seattle.' },
       { at: '2026-12-05T16:40:00-08:00', status: 'playing', hours_logged: 4.6, rating: null, drop_reasons: [], note: 'Solved wind-tower pendulum puzzle.' },
-      { at: '2026-12-13T19:25:00-08:00', status: 'completed', hours_logged: 6.3, rating: 9.3, drop_reasons: [], note: 'Favorite puzzle adventure of the year; huge clear HUD.' },
+      { at: '2026-12-13T19:25:00-08:00', status: 'completed', hours_logged: 7.9, rating: 9.3, drop_reasons: [], note: 'Favorite puzzle adventure of the year; cleared bonus clocktower gears.' }, // 1.32x main (6h)
     ],
   },
   {
     game_id: 'game-ashen-depths',
     owned_platforms: ['handheld', 'pc'],
     play_history: [
-      { at: '2026-10-28T20:00:00-07:00', status: 'backlog', hours_logged: 0.0, rating: null, drop_reasons: [], note: 'Started downloading for weekend RPG run.' },
-      { at: '2026-11-12T20:15:00-08:00', status: 'playing', hours_logged: 6.5, rating: null, drop_reasons: [], note: 'Struggling with tiny 7pt crafting text on handheld.' },
+      { at: '2026-11-12T20:15:00-08:00', status: 'playing', hours_logged: 6.5, rating: null, drop_reasons: [], note: 'Jumped straight in over the weekend; struggling with tiny text on handheld.' },
       { at: '2026-11-27T21:40:00-08:00', status: 'dropped', hours_logged: 7.4, rating: 5.5, drop_reasons: ['tiny_ui_text', 'excessive_grind'], note: 'Dropped after material-farming wall and eye strain.' },
     ],
   },
@@ -295,30 +295,30 @@ const shelves = [
   };
 });
 
-// 4. 17 hand-crafted, non-templated co-op polls (16 closed + 1 active open in Dec 2026)
-// Every candidate game is owned by Maya AND every invited friend BEFORE poll.created_at.
-// Includes missed votes, 0-vote cancelled poll, 1-vote bust, 2-way tie, split votes,
-// 4-player polls, same-day poll, early closes, late post-deadline closes, and quiet months.
+// 4. 18 organic, non-templated co-op polls (neutral IDs poll-01..poll-18)
+// Includes weekend creations & votes, two 2-poll months (2025-10, 2026-06),
+// varied candidate subsets, missed votes, a 0-vote cancellation, a 1-vote bust,
+// a 2-2 tie, split votes, 4-player full squads, early & post-deadline closes.
 const polls = [
   {
-    poll_id: 'poll-2025-02-bistro-opener',
-    title: 'February Bistro Opener (Alex & Sam)',
+    poll_id: 'poll-01',
+    title: 'Saturday Bistro Opener',
     status: 'closed',
     candidate_game_ids: ['game-ember-kitchen'],
     invited_friend_ids: ['friend-alex', 'friend-sam'],
     max_session_minutes: 60,
     votes: [
-      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Switch dock is ready for Saturday.', voted_at: '2025-02-13T18:45:00-08:00' },
-      { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen'], note: 'In! 60 minutes fits before dinner.', voted_at: '2025-02-14T11:20:00-08:00' },
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Switch dock is ready for Saturday.', voted_at: '2025-02-14T18:45:00-08:00' },
+      { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen'], note: 'In! 60 minutes fits before dinner.', voted_at: '2025-02-15T11:20:00-08:00' }, // Saturday vote
     ],
     winner_game_ids: ['game-ember-kitchen'],
-    created_at: '2025-02-13T18:10:00-08:00',
+    created_at: '2025-02-14T18:10:00-08:00', // Friday creation
     closes_at: '2025-02-15T22:00:00-08:00',
-    closed_at: '2025-02-15T19:00:00-08:00', // closed early; Alex missed vote
+    closed_at: '2025-02-15T19:00:00-08:00',
   },
   {
-    poll_id: 'poll-2025-03-launch-night',
-    title: 'March Orbit Relay Cross-Play Test',
+    poll_id: 'poll-02',
+    title: 'Orbit Relay Cross-Play Test',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
     invited_friend_ids: ['friend-alex'],
@@ -333,7 +333,7 @@ const polls = [
     closed_at: '2025-03-21T18:40:00-07:00',
   },
   {
-    poll_id: 'poll-2025-04-trio-relay',
+    poll_id: 'poll-03',
     title: 'April Trio Co-Op Vote',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
@@ -342,29 +342,29 @@ const polls = [
     votes: [
       { voter_id: 'questshelf-maya', selected_game_ids: ['game-orbit-relay'], note: 'Sam owns Orbit Relay now, let us run 3-player!', voted_at: '2025-04-24T19:00:00-07:00' },
       { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen'], note: 'Slight preference for Ember Kitchen tonight.', voted_at: '2025-04-25T12:40:00-07:00' },
-      { voter_id: 'friend-alex', selected_game_ids: ['game-orbit-relay'], note: 'Down for orbital repairs.', voted_at: '2025-04-25T18:15:00-07:00' },
+      { voter_id: 'friend-alex', selected_game_ids: ['game-orbit-relay'], note: 'Down for orbital repairs.', voted_at: '2025-04-26T10:15:00-07:00' }, // Saturday vote
     ],
-    winner_game_ids: ['game-orbit-relay'], // 2-1 split
+    winner_game_ids: ['game-orbit-relay'],
     created_at: '2025-04-24T17:15:00-07:00',
     closes_at: '2025-04-26T21:00:00-07:00',
     closed_at: '2025-04-26T17:30:00-07:00',
   },
   {
-    poll_id: 'poll-2025-05-memorial-cancel',
-    title: 'Memorial Weekend Co-Op Check',
+    poll_id: 'poll-04',
+    title: 'Memorial Weekend Check-In',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
     invited_friend_ids: ['friend-alex', 'friend-sam'],
     max_session_minutes: 75,
-    votes: [], // 0 votes — everyone traveled; closed after deadline with no winner
+    votes: [], // 0 votes — cancelled after everyone traveled
     winner_game_ids: [],
-    created_at: '2025-05-22T16:30:00-07:00',
+    created_at: '2025-05-23T16:30:00-07:00', // Friday creation
     closes_at: '2025-05-24T20:00:00-07:00',
-    closed_at: '2025-05-25T10:15:00-07:00',
+    closed_at: '2025-05-25T10:15:00-07:00', // Sunday post-deadline close
   },
   {
-    poll_id: 'poll-2025-06-summer-tie',
-    title: 'June Double-Header Tie-Breaker',
+    poll_id: 'poll-05',
+    title: 'June Double-Header Night',
     status: 'closed',
     candidate_game_ids: ['game-ember-kitchen', 'game-orbit-relay'],
     invited_friend_ids: ['friend-alex', 'friend-sam'],
@@ -375,28 +375,28 @@ const polls = [
       { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen', 'game-orbit-relay'], note: 'Happy to split 1h each!', voted_at: '2025-06-12T14:05:00-07:00' },
     ],
     winner_game_ids: ['game-ember-kitchen', 'game-orbit-relay'], // exact 2-2 tie
-    created_at: '2025-06-10T20:00:00-07:00',
+    created_at: '2025-06-09T20:00:00-07:00', // Monday creation
     closes_at: '2025-06-13T19:00:00-07:00',
     closed_at: '2025-06-13T18:10:00-07:00',
   },
   {
-    poll_id: 'poll-2025-08-quick-friday',
+    poll_id: 'poll-06',
     title: 'Spontaneous Friday Co-Op',
     status: 'closed',
-    candidate_game_ids: ['game-ember-kitchen', 'game-orbit-relay'],
+    candidate_game_ids: ['game-ember-kitchen'],
     invited_friend_ids: ['friend-alex'],
     max_session_minutes: 60,
     votes: [
       { voter_id: 'friend-alex', selected_game_ids: ['game-ember-kitchen'], note: 'Only have an hour, kitchen is faster to jump into.', voted_at: '2025-08-22T13:05:00-07:00' },
       { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Agreed, see you at 8pm!', voted_at: '2025-08-22T14:20:00-07:00' },
     ],
-    winner_game_ids: ['game-ember-kitchen'], // same-day quick poll
-    created_at: '2025-08-22T12:15:00-07:00',
+    winner_game_ids: ['game-ember-kitchen'],
+    created_at: '2025-08-22T12:15:00-07:00', // Friday same-day poll
     closes_at: '2025-08-22T19:00:00-07:00',
     closed_at: '2025-08-22T17:00:00-07:00',
   },
   {
-    poll_id: 'poll-2025-10-drift-trial',
+    poll_id: 'poll-07',
     title: 'October Three-Game Showdown',
     status: 'closed',
     candidate_game_ids: ['game-neon-drift-99', 'game-ember-kitchen', 'game-orbit-relay'],
@@ -404,50 +404,67 @@ const polls = [
     max_session_minutes: 60,
     votes: [
       { voter_id: 'friend-alex', selected_game_ids: ['game-neon-drift-99'], note: 'All three of us own Neon Drift now — let us race!', voted_at: '2025-10-16T11:10:00-07:00' },
-      { voter_id: 'friend-sam', selected_game_ids: ['game-neon-drift-99'], note: 'Keen to test the synthwave circuit.', voted_at: '2025-10-16T17:45:00-07:00' },
-      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Prefer cozy bistro, but I will try racing if outvoted.', voted_at: '2025-10-17T09:30:00-07:00' },
+      { voter_id: 'friend-sam', selected_game_ids: ['game-neon-drift-99'], note: 'Keen to test the synthwave circuit.', voted_at: '2025-10-17T17:45:00-07:00' },
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Prefer cozy bistro, but I will try racing if outvoted.', voted_at: '2025-10-18T09:30:00-07:00' }, // Saturday vote
     ],
-    winner_game_ids: ['game-neon-drift-99'], // 2-1 split; Maya outvoted
+    winner_game_ids: ['game-neon-drift-99'],
     created_at: '2025-10-15T18:20:00-07:00',
     closes_at: '2025-10-18T18:00:00-07:00',
-    closed_at: '2025-10-17T20:00:00-07:00',
+    closed_at: '2025-10-18T16:00:00-07:00',
   },
   {
-    poll_id: 'poll-2025-11-sector4',
-    title: 'November Deep-Space Co-Op',
+    poll_id: 'poll-08',
+    title: 'Sunday Afternoon Co-Op Recovery',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
+    invited_friend_ids: ['friend-alex', 'friend-sam'],
+    max_session_minutes: 90,
+    votes: [
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-orbit-relay'], note: 'Back to non-racing co-op!', voted_at: '2025-10-25T20:10:00-07:00' }, // Saturday vote
+      { voter_id: 'friend-alex', selected_game_ids: ['game-orbit-relay'], note: 'Fair enough, Orbit Relay sounds great.', voted_at: '2025-10-26T10:05:00-07:00' }, // Sunday vote
+      { voter_id: 'friend-sam', selected_game_ids: ['game-orbit-relay'], note: 'Ready at 5pm Sunday.', voted_at: '2025-10-26T11:30:00-07:00' }, // Sunday vote
+    ],
+    winner_game_ids: ['game-orbit-relay'], // 2nd poll in Oct 2025!
+    created_at: '2025-10-25T19:00:00-07:00', // Saturday creation
+    closes_at: '2025-10-26T16:30:00-07:00',
+    closed_at: '2025-10-26T15:00:00-07:00',
+  },
+  {
+    poll_id: 'poll-09',
+    title: 'November Deep-Space Night',
+    status: 'closed',
+    candidate_game_ids: ['game-orbit-relay'],
     invited_friend_ids: ['friend-alex', 'friend-sam'],
     max_session_minutes: 90,
     votes: [
       { voter_id: 'questshelf-maya', selected_game_ids: ['game-orbit-relay'], note: 'Aiming to clear Sector 4 tonight.', voted_at: '2025-11-12T08:40:00-08:00' },
       { voter_id: 'friend-alex', selected_game_ids: ['game-orbit-relay'], note: 'Online by 8pm PT.', voted_at: '2025-11-13T20:15:00-08:00' },
     ],
-    winner_game_ids: ['game-orbit-relay'], // Sam missed vote
+    winner_game_ids: ['game-orbit-relay'],
     created_at: '2025-11-11T19:30:00-08:00',
     closes_at: '2025-11-14T20:00:00-08:00',
     closed_at: '2025-11-14T19:00:00-08:00',
   },
   {
-    poll_id: 'poll-2025-12-four-chef',
+    poll_id: 'poll-10',
     title: 'December 4-Player Holiday Bistro',
     status: 'closed',
     candidate_game_ids: ['game-ember-kitchen'],
     invited_friend_ids: ['friend-alex', 'friend-sam', 'friend-lin'],
     max_session_minutes: 75,
     votes: [
-      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Lin joined on Switch — full four-chef crew!', voted_at: '2025-12-09T19:10:00-08:00' },
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'Lin joined on Switch — full four-chef crew!', voted_at: '2025-12-08T19:10:00-08:00' },
       { voter_id: 'friend-lin', selected_game_ids: ['game-ember-kitchen'], note: 'Excited for my first co-op night!', voted_at: '2025-12-10T12:30:00-08:00' },
       { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen'], note: 'Calling dibs on brick oven duty.', voted_at: '2025-12-11T18:05:00-08:00' },
       { voter_id: 'friend-alex', selected_game_ids: ['game-ember-kitchen'], note: 'Holiday DLC installed on PS5.', voted_at: '2025-12-11T21:40:00-08:00' },
     ],
-    winner_game_ids: ['game-ember-kitchen'], // 4/4 full squad
-    created_at: '2025-12-09T17:00:00-08:00',
+    winner_game_ids: ['game-ember-kitchen'],
+    created_at: '2025-12-08T17:00:00-08:00', // Monday creation
     closes_at: '2025-12-12T19:30:00-08:00',
     closed_at: '2025-12-12T18:00:00-08:00',
   },
   {
-    poll_id: 'poll-2026-01-solo-vote-bust',
+    poll_id: 'poll-11',
     title: 'Late-January Co-Op Check-In',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
@@ -459,10 +476,10 @@ const polls = [
     winner_game_ids: ['game-orbit-relay'], // only Maya voted; closed after deadline
     created_at: '2026-01-28T18:00:00-08:00',
     closes_at: '2026-01-30T21:00:00-08:00',
-    closed_at: '2026-01-31T11:00:00-08:00',
+    closed_at: '2026-01-31T11:00:00-08:00', // Saturday post-deadline close
   },
   {
-    poll_id: 'poll-2026-02-switch-night',
+    poll_id: 'poll-12',
     title: 'February Switch Cozy Trio',
     status: 'closed',
     candidate_game_ids: ['game-ember-kitchen'],
@@ -471,7 +488,7 @@ const polls = [
     votes: [
       { voter_id: 'friend-lin', selected_game_ids: ['game-ember-kitchen'], note: 'Switch handheld mode ready on the couch.', voted_at: '2026-02-12T20:15:00-08:00' },
       { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen'], note: 'Valentine dinner rush!', voted_at: '2026-02-13T14:00:00-08:00' },
-      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'See you both Saturday at 7pm.', voted_at: '2026-02-13T18:30:00-08:00' },
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-ember-kitchen'], note: 'See you both Saturday at 7pm.', voted_at: '2026-02-14T10:30:00-08:00' }, // Saturday vote
     ],
     winner_game_ids: ['game-ember-kitchen'],
     created_at: '2026-02-12T16:40:00-08:00',
@@ -479,7 +496,7 @@ const polls = [
     closed_at: '2026-02-14T17:00:00-08:00',
   },
   {
-    poll_id: 'poll-2026-04-four-player-orbit',
+    poll_id: 'poll-13',
     title: 'April 4-Player Cross-Play Squad',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
@@ -491,16 +508,16 @@ const polls = [
       { voter_id: 'friend-sam', selected_game_ids: ['game-ember-kitchen'], note: 'Voted kitchen but fine with either.', voted_at: '2026-04-16T13:15:00-07:00' },
       { voter_id: 'questshelf-maya', selected_game_ids: ['game-orbit-relay'], note: 'Orbit Relay wins 3-1!', voted_at: '2026-04-16T20:00:00-07:00' },
     ],
-    winner_game_ids: ['game-orbit-relay'], // 3-1 split, 4/4 voted
-    created_at: '2026-04-14T19:00:00-07:00',
+    winner_game_ids: ['game-orbit-relay'],
+    created_at: '2026-04-13T19:00:00-07:00', // Monday creation
     closes_at: '2026-04-17T20:00:00-07:00',
     closed_at: '2026-04-17T18:30:00-07:00',
   },
   {
-    poll_id: 'poll-2026-06-pastry-rush',
+    poll_id: 'poll-14',
     title: 'June Pastry Gauntlet Attempt',
     status: 'closed',
-    candidate_game_ids: ['game-ember-kitchen', 'game-orbit-relay'],
+    candidate_game_ids: ['game-ember-kitchen'],
     invited_friend_ids: ['friend-alex', 'friend-sam', 'friend-lin'],
     max_session_minutes: 75,
     votes: [
@@ -508,29 +525,47 @@ const polls = [
       { voter_id: 'friend-lin', selected_game_ids: ['game-ember-kitchen'], note: 'Count me in on dessert prep!', voted_at: '2026-06-17T16:40:00-07:00' },
       { voter_id: 'friend-alex', selected_game_ids: ['game-ember-kitchen'], note: 'PS5 cross-play ready.', voted_at: '2026-06-18T19:20:00-07:00' },
     ],
-    winner_game_ids: ['game-ember-kitchen'], // Sam out of town
+    winner_game_ids: ['game-ember-kitchen'],
     created_at: '2026-06-16T18:10:00-07:00',
     closes_at: '2026-06-19T19:30:00-07:00',
     closed_at: '2026-06-19T18:00:00-07:00',
   },
   {
-    poll_id: 'poll-2026-08-pc-boulder',
-    title: 'August PC-Only Duo with Sam',
+    poll_id: 'poll-15',
+    title: 'Late-June Sunday Orbital Run',
+    status: 'closed',
+    candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
+    invited_friend_ids: ['friend-alex', 'friend-sam', 'friend-lin'],
+    max_session_minutes: 90,
+    votes: [
+      { voter_id: 'friend-alex', selected_game_ids: ['game-orbit-relay'], note: 'Sunday matinee mission?', voted_at: '2026-06-27T11:20:00-07:00' }, // Saturday vote
+      { voter_id: 'friend-lin', selected_game_ids: ['game-orbit-relay'], note: 'Works great on Sunday afternoon!', voted_at: '2026-06-27T16:45:00-07:00' }, // Saturday vote
+      { voter_id: 'friend-sam', selected_game_ids: ['game-orbit-relay'], note: 'Count me in.', voted_at: '2026-06-28T09:10:00-07:00' }, // Sunday vote
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-orbit-relay'], note: 'Locked in for 4pm.', voted_at: '2026-06-28T10:30:00-07:00' }, // Sunday vote
+    ],
+    winner_game_ids: ['game-orbit-relay'], // 2nd poll in Jun 2026!
+    created_at: '2026-06-26T18:40:00-07:00', // Friday creation
+    closes_at: '2026-06-28T15:30:00-07:00',
+    closed_at: '2026-06-28T14:00:00-07:00',
+  },
+  {
+    poll_id: 'poll-16',
+    title: 'PC-Only Duo with Sam',
     status: 'closed',
     candidate_game_ids: ['game-boulder-league', 'game-orbit-relay'],
     invited_friend_ids: ['friend-sam'],
     max_session_minutes: 90,
     votes: [
       { voter_id: 'friend-sam', selected_game_ids: ['game-boulder-league'], note: 'Since Alex cannot cross-play Boulder League, let us try it on Steam!', voted_at: '2026-08-20T12:15:00-07:00' },
-      { voter_id: 'questshelf-maya', selected_game_ids: ['game-boulder-league'], note: 'Sounds good, installed my bundle key.', voted_at: '2026-08-20T19:45:00-07:00' },
+      { voter_id: 'questshelf-maya', selected_game_ids: ['game-boulder-league'], note: 'Sounds good, installed my bundle key.', voted_at: '2026-08-21T19:45:00-07:00' },
     ],
     winner_game_ids: ['game-boulder-league'],
     created_at: '2026-08-19T17:30:00-07:00',
     closes_at: '2026-08-22T18:00:00-07:00',
-    closed_at: '2026-08-21T20:30:00-07:00',
+    closed_at: '2026-08-22T15:30:00-07:00',
   },
   {
-    poll_id: 'poll-2026-10-autumn-relay',
+    poll_id: 'poll-17',
     title: 'October Trio Orbital Night',
     status: 'closed',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
@@ -542,12 +577,12 @@ const polls = [
       { voter_id: 'friend-sam', selected_game_ids: ['game-orbit-relay'], note: 'Bringing engineer loadout on PC.', voted_at: '2026-10-08T19:55:00-07:00' },
     ],
     winner_game_ids: ['game-orbit-relay'],
-    created_at: '2026-10-06T18:45:00-07:00',
+    created_at: '2026-10-05T18:45:00-07:00', // Monday creation
     closes_at: '2026-10-09T19:30:00-07:00',
     closed_at: '2026-10-09T17:45:00-07:00',
   },
   {
-    poll_id: 'poll-2026-11-preholiday-bistro',
+    poll_id: 'poll-18',
     title: 'November 4-Player Hangout',
     status: 'closed',
     candidate_game_ids: ['game-ember-kitchen', 'game-orbit-relay'],
@@ -559,13 +594,13 @@ const polls = [
       { voter_id: 'friend-lin', selected_game_ids: ['game-orbit-relay'], note: 'Either works, slight nod to Orbit Relay.', voted_at: '2026-11-05T15:10:00-08:00' },
       { voter_id: 'friend-alex', selected_game_ids: ['game-ember-kitchen'], note: 'Bistro it is!', voted_at: '2026-11-05T21:05:00-08:00' },
     ],
-    winner_game_ids: ['game-ember-kitchen'], // 3-1 split
+    winner_game_ids: ['game-ember-kitchen'],
     created_at: '2026-11-03T17:20:00-08:00',
     closes_at: '2026-11-06T19:30:00-08:00',
     closed_at: '2026-11-06T18:15:00-08:00',
   },
   {
-    poll_id: 'poll-2026-12-nye-coop',
+    poll_id: 'poll-19',
     title: 'New Years Eve 90-Min Co-Op',
     status: 'open',
     candidate_game_ids: ['game-orbit-relay', 'game-ember-kitchen'],
@@ -577,15 +612,13 @@ const polls = [
       { voter_id: 'friend-lin', selected_game_ids: ['game-orbit-relay'], note: 'Down for orbital fireworks on Switch.', voted_at: '2026-12-30T14:20:00-08:00' },
     ],
     winner_game_ids: [],
-    created_at: '2026-12-27T17:00:00-08:00',
-    closes_at: '2026-12-31T23:30:00-08:00',
+    created_at: '2026-12-27T17:00:00-08:00', // Sunday creation
+    closes_at: '2026-12-31T23:59:00-08:00', // 12h open window from clock.json (12:00)
     closed_at: null,
   },
 ];
 
-// Cross-record consistency verification:
-// 1. Every candidate game in every poll was owned by Maya AND every invited friend before poll.created_at.
-// 2. Every poll winner tally matches its recorded votes.
+// Cross-record consistency verification
 const mayaOwnedAt = new Map(shelves.map(s => [s.game_id, Date.parse(s.play_history[0].at)]));
 const friendMap = new Map(friends.map(f => [f.friend_id, f]));
 for (const p of polls) {
@@ -633,7 +666,7 @@ const evalSeed = {
   polls,
 };
 
-// Validate against schemas/seed.schema.json and plugin.validateSeed
+const EVAL_CLOCK = '2026-12-31T12:00:00-08:00';
 const seedValidator = compile(
   JSON.parse(fs.readFileSync(path.join(APP_ROOT, 'schemas', 'seed.schema.json'), 'utf8')),
   path.join(APP_ROOT, 'schemas')
@@ -641,26 +674,26 @@ const seedValidator = compile(
 if (!seedValidator(evalSeed)) {
   throw new Error('eval-2025-2026 seed failed JSON schema validation');
 }
-plugin.validateSeed({ binding, virtual_now: '2026-12-31T23:00:00-08:00' }, evalSeed);
+plugin.validateSeed({ binding, virtual_now: EVAL_CLOCK }, evalSeed);
 
 const seedPath = path.join(OUT_DIR, 'seed.json');
 fs.writeFileSync(seedPath, JSON.stringify(evalSeed, null, 2) + '\n', 'utf8');
 const seedSha = crypto.createHash('sha256').update(fs.readFileSync(seedPath)).digest('hex');
 
 const clockPath = path.join(OUT_DIR, 'clock.json');
-fs.writeFileSync(clockPath, JSON.stringify({ initial_time: '2026-12-31T23:00:00-08:00' }, null, 2) + '\n', 'utf8');
+fs.writeFileSync(clockPath, JSON.stringify({ initial_time: EVAL_CLOCK }, null, 2) + '\n', 'utf8');
 
 const datasetMeta = {
   schema_version: 'pale.dataset.v1',
   dataset_id: 'questshelf-eval-2025-2026',
   version: '1.0.0',
-  description: 'Full 24-month (2025-01-01 through 2026-12-31) synthetic QuestShelf evaluation dataset containing shelf status transitions, play sessions aligned with co-op game nights, completions, ratings, drop reasons, friend library additions, and 17 varied co-op polls. Recommended virtual_now >= 2026-12-31T23:00:00-08:00.',
+  description: 'Full 24-month (2025-01-01 through 2026-12-31) synthetic QuestShelf evaluation dataset containing varied shelf arcs, play sessions aligned with co-op game nights, completions, ratings, drop reasons, friend library additions, and 19 organic co-op polls. Load at virtual_now >= 2026-12-31T12:00:00-08:00 (datasets/eval-2025-2026/clock.json, distinct from fixtures/clock.json 2026-11-20T16:30:00-08:00), or generate a pre-cutoff slice for any earlier clock via scripts/slice-dataset.cjs --cutoff <ISO>.',
   record_source_ids: ['synthetic-eval-history'],
   sources: [
     {
       source_id: 'synthetic-eval-history',
       kind: 'synthetic',
-      description: '100% synthetic 2-year user game-library activity, friend library additions, and non-templated co-op poll history generated deterministically by scripts/build-eval-dataset.cjs (no scraped store data or real personal data).',
+      description: '100% synthetic 2-year user game-library activity, friend library additions, and non-templated co-op poll history authored deterministically in scripts/build-eval-dataset.cjs (no RNG, no scraped store data, no real personal data).',
       uri: null,
       license: 'MIT',
       usage: 'permitted',
@@ -668,20 +701,40 @@ const datasetMeta = {
       generation: {
         method: 'script',
         tool: 'scripts/build-eval-dataset.cjs',
-        tool_version: '2.0.0',
-        seed: 20252026,
+        tool_version: '3.0.0',
+        seed: null,
         parameters: {
           time_zone: 'America/Los_Angeles',
           window_start: '2025-01-01',
           window_end: '2026-12-31',
-          recommended_virtual_now: '2026-12-31T23:00:00-08:00',
+          recommended_virtual_now: EVAL_CLOCK,
+          slice_tool: 'scripts/slice-dataset.cjs',
           seed_sha256: seedSha,
+        },
+      },
+    },
+    {
+      source_id: 'synthetic-previews',
+      kind: 'synthetic',
+      description: '20 programmatically rendered 640x360 PNG gameplay & proportional HUD preview screenshots generated by scripts/render-previews.py (Pillow) and cataloged in contribution/assets.catalog.json.',
+      uri: null,
+      license: 'MIT',
+      usage: 'permitted',
+      collection: null,
+      generation: {
+        method: 'script',
+        tool: 'scripts/render-previews.py (Pillow)',
+        tool_version: '2.0.0',
+        seed: null,
+        parameters: {
+          dimensions: '640x360',
+          palette_colors: 96,
         },
       },
     },
   ],
   transformations: [
-    'Validated against schemas/seed.schema.json, plugin.validateSeed chronological invariants, and cross-record ownership/poll-tally consistency checks.',
+    'Validated against schemas/seed.schema.json, plugin.validateSeed chronological and clock invariants, and cross-record ownership/poll-tally consistency checks.',
   ],
   expected_counts: {
     records: evalSeed.games.length,
@@ -695,7 +748,7 @@ const datasetMeta = {
   review: {
     status: 'pending',
     reviewer: null,
-    notes: '100% synthetic evaluation dataset verified across all 24 months (2025-01..2026-12) via scripts/coverage.cjs and real stdio MCP env.load_seed; independent reviewer sign-off pending.',
+    notes: '100% synthetic evaluation dataset verified across all 24 months (2025-01..2026-12) and multiple pre-cutoff slices (2025-06-15, 2026-11-20, 2026-12-31) via scripts/slice-dataset.cjs, scripts/coverage.cjs, and real stdio MCP tests; independent reviewer sign-off pending.',
   },
 };
 fs.writeFileSync(path.join(OUT_DIR, 'dataset.json'), JSON.stringify(datasetMeta, null, 2) + '\n', 'utf8');
@@ -703,6 +756,7 @@ fs.writeFileSync(path.join(OUT_DIR, 'dataset.json'), JSON.stringify(datasetMeta,
 console.log(JSON.stringify({
   seed_path: 'datasets/eval-2025-2026/seed.json',
   seed_sha256: seedSha,
+  recommended_virtual_now: EVAL_CLOCK,
   games: evalSeed.games.length,
   shelves: evalSeed.shelves.length,
   play_history_entries: evalSeed.shelves.reduce((n, s) => n + (s.play_history ? s.play_history.length : 0), 0),

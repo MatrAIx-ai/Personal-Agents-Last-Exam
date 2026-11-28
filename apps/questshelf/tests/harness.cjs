@@ -78,14 +78,20 @@ function createHarness() {
     },
     applyEvent(event) {
       if (!eventValidator(event)) throw new Error('Invalid event envelope');
+      const prevNow = virtual_now;
       const snapshot = structuredClone(data);
-      const nextData = plugin.applyEvent(ctx, snapshot, event);
-      if (!seedValidator(nextData)) throw new Error('Post-event state invalid');
-      plugin.validateSeed(ctx, nextData);
-      data = nextData;
-      virtual_now = event.at;
-      revision += 1;
-      return { status: 'committed', version: { epoch, revision } };
+      try {
+        virtual_now = event.at;
+        const nextData = plugin.applyEvent(ctx, snapshot, event);
+        if (!seedValidator(nextData)) throw new Error('Post-event state invalid');
+        plugin.validateSeed(ctx, nextData);
+        data = nextData;
+        revision += 1;
+        return { status: 'committed', version: { epoch, revision } };
+      } catch (err) {
+        virtual_now = prevNow;
+        throw err;
+      }
     },
   };
 }

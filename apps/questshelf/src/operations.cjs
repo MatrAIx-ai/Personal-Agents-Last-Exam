@@ -227,10 +227,21 @@ function handleTool(ctx, data, name, args) {
     if (args.status === 'backlog' && args.rating !== undefined && args.rating !== null) {
       fail('invalid_arguments', 'Cannot set a rating on a backlog entry.');
     }
+    if (existing && args.hours_logged !== undefined && args.hours_logged < existing.hours_logged) {
+      fail('invalid_arguments', `hours_logged (${args.hours_logged}) cannot decrease below current logged hours (${existing.hours_logged}).`);
+    }
 
     const MAX_PLAY_HISTORY = 100;
     let entry;
     if (existing) {
+      const prevSnapshot = {
+        at: existing.updated_at,
+        status: existing.status,
+        hours_logged: existing.hours_logged,
+        rating: existing.rating,
+        drop_reasons: copy(existing.drop_reasons),
+        note: existing.note,
+      };
       existing.status = args.status;
       existing.owned_platforms = copy(owned);
       if (args.hours_logged !== undefined) existing.hours_logged = args.hours_logged;
@@ -239,30 +250,45 @@ function handleTool(ctx, data, name, args) {
       existing.drop_reasons = args.status === 'dropped' ? dropReasons : [];
       if (args.note !== undefined) existing.note = args.note;
       existing.updated_at = ctx.virtual_now;
-      if (Array.isArray(existing.play_history)) {
-        if (existing.play_history.length >= MAX_PLAY_HISTORY) {
-          existing.play_history = existing.play_history.slice(-(MAX_PLAY_HISTORY - 1));
-        }
-        existing.play_history.push({
-          at: ctx.virtual_now,
-          status: existing.status,
-          hours_logged: existing.hours_logged,
-          rating: existing.rating,
-          drop_reasons: copy(existing.drop_reasons),
-          note: existing.note,
-        });
+      if (!Array.isArray(existing.play_history)) {
+        existing.play_history = [prevSnapshot];
       }
+      if (existing.play_history.length >= MAX_PLAY_HISTORY) {
+        existing.play_history = existing.play_history.slice(-(MAX_PLAY_HISTORY - 1));
+      }
+      existing.play_history.push({
+        at: ctx.virtual_now,
+        status: existing.status,
+        hours_logged: existing.hours_logged,
+        rating: existing.rating,
+        drop_reasons: copy(existing.drop_reasons),
+        note: existing.note,
+      });
       entry = existing;
     } else {
+      const initDropReasons = args.status === 'dropped' ? dropReasons : [];
+      const initHours = args.hours_logged !== undefined ? args.hours_logged : 0;
+      const initRating = args.rating !== undefined ? args.rating : null;
+      const initNote = args.note || '';
       entry = {
         game_id: args.game_id,
         status: args.status,
         owned_platforms: copy(owned),
-        hours_logged: args.hours_logged !== undefined ? args.hours_logged : 0,
-        rating: args.rating !== undefined ? args.rating : null,
-        drop_reasons: args.status === 'dropped' ? dropReasons : [],
-        note: args.note || '',
+        hours_logged: initHours,
+        rating: initRating,
+        drop_reasons: initDropReasons,
+        note: initNote,
         updated_at: ctx.virtual_now,
+        play_history: [
+          {
+            at: ctx.virtual_now,
+            status: args.status,
+            hours_logged: initHours,
+            rating: initRating,
+            drop_reasons: copy(initDropReasons),
+            note: initNote,
+          },
+        ],
       };
       data.shelves.push(entry);
     }

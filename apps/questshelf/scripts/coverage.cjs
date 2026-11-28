@@ -160,7 +160,7 @@ function computeCoverage(seedRelPath) {
     provenance: '100% synthetic (MIT); no scraped store data or real personal history; no real anchor required',
     counting_time_zone: TZ,
     coverage_window: { start: WINDOW_START, end: WINDOW_END },
-    recommended_virtual_now: '2026-12-31T23:00:00-08:00',
+    recommended_virtual_now: '2026-12-31T12:00:00-08:00',
     excluded_fields: [
       { field: 'polls[].closes_at', reason: 'Planned deadline, not an observed occurrence/activity timestamp.' },
       { field: 'shelves[].updated_at (when equal to last play_history[].at)', count_skipped: skippedDuplicateShelfUpdatedAt, reason: 'Already represented by the final play_history[].at entry; skipped to avoid double-counting.' },
