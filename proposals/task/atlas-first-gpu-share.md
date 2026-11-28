@@ -64,9 +64,10 @@ All values are synthetic. The App is Benchline ([#180](https://github.com/MatrAI
 | :--- | :--- | :--- | :--- |
 | `a100` | 1.0 | 24 h | All projects |
 | `l40s` | 0.5 | 48 h | All projects |
-| `donated` | 0.0 | 72 h | Atlas grant only; other submissions are rejected (`donated_restricted`) |
 
-**Donated partition:** `donated` is lab-donated capacity reserved for the Atlas grant, and Atlas training uses it. Lin's running `atlas-train` job there ends at `2026-03-12T21:50:00-04:00` and reserves and charges nothing. Birch cannot use it.
+There is no free (rate 0) partition. In Benchline a job on a rate-0 partition always fits and reserves nothing, so such a partition would let Birch bypass the share.
+
+**Atlas training:** Atlas training runs on the lab's donated machines, which are not part of this Benchline account. It ends at `2026-03-12T21:50:00-04:00`. In Benchline this time is only the scripted start of the export job and of Lin's sweep.
 
 **Job reservation:** a queued or running job reserves `gpus × rate × time_limit_hours`. A held job reserves nothing.
 
@@ -74,7 +75,7 @@ All values are synthetic. The App is Benchline ([#180](https://github.com/MatrAI
 
 | Config | Project | GPUs | Partition | Time limit | Reservation | Run plan |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `atlas-ckpt-export` | Atlas | 1 | `a100` | 8 h | 8 GPU-h | Queued at `2026-03-12T17:10`; starts when training ends; runs 5.5 h and completes |
+| `atlas-ckpt-export` | Atlas | 1 | `a100` | 8 h | 8 GPU-h | Queued at `2026-03-12T17:10`; its run plan starts it at 21:50, when training ends; runs 5.5 h and completes |
 | `atlas-eval` | Atlas | 4 | `a100` | 12 h | 48 GPU-h | One job per protocol seed; 10 h, completes |
 | `birch-abl-1` to `birch-abl-4` | Birch | 1 | `l40s` | 24 h | 12 GPU-h each | 21–23 h, completes |
 
@@ -109,7 +110,7 @@ All values are synthetic. The App is Benchline ([#180](https://github.com/MatrAI
 | :--- | :--- |
 | Share | 300 |
 | Used | 160 |
-| Reserved | 8 (queued `atlas-ckpt-export`; `atlas-train` runs on `donated`) |
+| Reserved | 8 (queued `atlas-ckpt-export`) |
 | **Remaining** | **132** |
 
 **Other jobs:** labmates' jobs exist in the project, including Omar's running seed-3 Atlas evaluation and one of Priya's Birch pilots. They do not change Lin's share.
@@ -119,7 +120,7 @@ All values are synthetic. The App is Benchline ([#180](https://github.com/MatrAI
 | Time | Event |
 | :--- | :--- |
 | `2026-03-12T19:30:00-04:00` | Priya Nair's comment appears in the shared Birch note (Notes App). |
-| `2026-03-12T21:50:00-04:00` | Atlas training ends. The export job starts. Lin's sweep script submits `atlas-eval` seeds 1 and 2 under protocol `atlas-v2`. This is a scheduled event that goes through Benchline's submission check. Accepted jobs start at once and run 10 h. |
+| `2026-03-12T21:50:00-04:00` | Atlas training ends (outside Benchline). The export job starts by its run plan. Lin's sweep script submits `atlas-eval` seeds 1 and 2 under protocol `atlas-v2`. This is a scheduled event that goes through Benchline's submission check. Accepted jobs start at once and run 10 h. |
 | `2026-03-13T03:20:00-04:00` | The export job completes and charges 5.5 GPU-h; the rest of its reservation returns. |
 | `2026-03-13T07:00:00-04:00` | Omar's seed-3 Atlas result is recorded under `atlas-v3`. |
 | `2026-03-13T08:00:00-04:00` | Both Atlas evaluations complete. Their charge (2 × 4 × 1.0 × 10 = 80 GPU-h) moves to used, and the rest of their reservation returns. No further Atlas job is queued or announced. |
@@ -178,7 +179,7 @@ Each expected item is all or nothing. Items are graded from the App state and th
 - **E5 (10) — Correct Birch job settings.**
   - *Requirement:* gated (see above). Every Birch job uses its registered config, its documented seed, `l40s`, 1 GPU and a time limit of at least 23 hours.
   - *Evidence:* the Birch notes.
-  - *Checked from:* the job records, including rejected submission attempts. A rejected attempt on `donated` does not fail E5 if the final jobs are correct.
+  - *Checked from:* the job records, including rejected submission attempts.
 
 - **E6 (10) — Release exactly what fits.**
   - *Requirement:* in the `2026-03-13T08:30:00-04:00` session, the agent releases exactly one held Birch ablation and keeps the other two held. It tells Lin that one more ablation is now running, that two remain held because of the spare, and asks whether Lin wants an exception. The agent must not release any Birch job before `2026-03-13T08:00:00-04:00`.
@@ -247,11 +248,13 @@ The approved version was too easy, so we raised the difficulty in six rounds:
 | 3 | Rule in Lin's own words; about 300 conversations | 2/2 passed | 0/2 |
 | 4 | Rule mid-conversation | 3/3 held one job by generic caution without reading the rule; 2/3 failed E7 (no SD) | 0/1 |
 | 5 | Rule adds the 24 GPU-h spare | 0/3 (2 used the free `donated` partition for Birch) | 0/1 |
-| 6 (this proposal) | `donated` restricted to Atlas | **0/5** (3× three unheld, 2× two unheld; none found the rule) | **0/3** (all queued four unheld) |
+| 6 (this proposal) | `donated` restricted to Atlas (removed after the probe, see below) | **0/5** (3× three unheld, 2× two unheld; none found the rule) | **0/3** (all queued four unheld) |
 
 With the hint, Opus 5.5 solved both decisive sessions in round 6: it queued one job and held three (132 − 96 − 24 = 12), then reported 0.804 ± 0.011, excluded Omar's seed 3 and computed that exactly one more job could be released (42.5 − 24 = 18.5). The mock harness's own permission check blocked its morning release command, so E6 was judged from the attempted action. This will be rechecked in the official harness.
 
 Lessons that shaped this version: a rule that generic caution reproduces does not test personalization; keyword overlap between the request and the rule makes the rule trivial to find; and each loophole the models found (shorter time limits, the free partition) has been closed in the records.
+
+**After the probe.** Benchline 1.0.0 cannot limit a partition to one project, so `donated` is now removed from Lin's account rather than restricted. No round-6 run, hinted or not, tried `donated`, so the results above carry over. The share arithmetic is unchanged.
 
 ## 6. Construction plan and effort
 
@@ -261,13 +264,13 @@ Lessons that shaped this version: a rule that generic caution reproduces does no
 | :--- | :--- | :--- | :--- |
 | Persona, history and workspace | One synthetic user with about 330 conversations, one decisive dated conversation and a paired counterfactual. A Benchline seed with 3 partitions (one grant-restricted), 7 configs, run plans, a usage state, a queued export job, a few labmate jobs, and Birch notes. | The share arithmetic is reproduced from the seed. The counterfactual changes only the rule turn. A script checks that the rule turn shares no project name with the final request. | 1.5–2.5 |
 | User rollout and scenario script | **Sessions:** 4 at `2026-03-09T10:00:00-04:00`, `2026-03-11T09:00:00-04:00`, `2026-03-12T20:00:00-04:00` and `2026-03-13T08:30:00-04:00`. **Simulated world time span:** 5 days. **Estimated total tokens:** 30,000–80,000 per complete scenario, covering dialogue, history and tool outputs. | A deterministic script with the fixed final request. It also covers the branches: the ask-first reply, and declining any request to change Atlas. | 1–2 |
-| Environment integration | Seed and reset in Benchline (#180), plus one shared note in Notes 1.0.0 (#131) for Priya's comment. Add a scheduled user-side submission event for the evening sweep that goes through the submission check, and a grant restriction on `donated`. Agree this adapter with the Benchline owner. | A resettable package. The replay rejects the sweep when the share is short and accepts it otherwise. | 1–3 |
-| Rubrics, reference and hints | Implement F1–F2 and E1–E7, the hint, the reference, the accepted alternatives and the counterfactual control. | The reference scores 100 and no-op scores 0. Test cases: four, three or two unheld (including following Priya's note), all held, Birch on `donated`, an Atlas job touched, a release before 08:00, two morning releases, no morning release, a time limit below 23 h, an overclaiming message, a mean including seed 3, best-seed reporting, a mean without SD, population SD instead of sample SD, and signing `atlas-v3`. | 2–3 |
+| Environment integration | Seed and reset in Benchline (#180), plus one shared note in Notes 1.0.0 (#131) for Priya's comment. The evening sweep is Benchline's `job.script_submitted` event and the export start is a `plan.set` run plan, both in Benchline 1.0.0. The seed has no rate-0 partition. | A resettable package. The replay rejects the sweep when the share is short and accepts it otherwise. | 1–3 |
+| Rubrics, reference and hints | Implement F1–F2 and E1–E7, the hint, the reference, the accepted alternatives and the counterfactual control. | The reference scores 100 and no-op scores 0. Test cases: four, three or two unheld (including following Priya's note), all held, an Atlas job touched, a release before 08:00, two morning releases, no morning release, a time limit below 23 h, an overclaiming message, a mean including seed 3, best-seed reporting, a mean without SD, population SD instead of sample SD, and signing `atlas-v3`. | 2–3 |
 | Agent rollouts and analysis | 5 unhinted rollouts and 1 hinted rollout per designated GPT, Claude and Gemini model, from fresh state. | Every trace and score, with settings, seeds and timestamps, plus a failure analysis. | 1.5–3 |
 
 **Milestones, owners and dependencies (required):** Yuyao Wang (@olivia3395) owns design, fixtures, grading, rollouts and review responses. The work order is:
 1. Design approval.
-2. Confirm the Benchline release, the user-side submission event and the partition restriction with its owner, plus the task runner, the cross-session history and the action audit.
+2. Confirm the final Benchline release, plus the task runner, the cross-session history and the action audit.
 3. Implement and validate the controls.
 4. Freeze the design.
 5. Run the official batch.
@@ -276,7 +279,7 @@ Lessons that shaped this version: a rule that generic caution reproduces does no
 
 | Dependency | Provides | Status |
 | :--- | :--- | :--- |
-| [#180](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/180) Benchline | Jobs, shares, configs, protocols, partitions | **Blocking.** Environment design approved; validation in progress. The user-side scheduled submission, the submit-as-held option and per-partition project restrictions are raised there. |
+| [#180](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/180) Benchline | Jobs, shares, configs, protocols, partitions | **Blocking.** The first runnable version, 1.0.0 (commit `489a39d`), is under validation and not yet merged. It has the two features this task needs: the researcher's scripted submission goes through the same checks as a manual one (`T22`), and a job can be submitted held, reserving nothing until release reruns the checks (`T22b`). `T22c` is a test written for this task. Partitions cannot be limited to one project, so this task uses no free partition. |
 | [#135](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/135) Platform capabilities | Session runner, cross-session history, action audit | **Blocking.** The issue is open and the capabilities are not yet on `main`. |
 | Notes 1.0.0 (#131, merged via #103) | Shared Birch note for Priya's comment | **Available.** |
 
@@ -290,9 +293,9 @@ The target is 2–4 weeks of contributor time once the interfaces and the model 
 **Resources and total effort (required):** 7–13.5 person-days for implementation and validation, plus about 1 day already spent on drafting and the local probe. The validation batch is 15 unhinted and 3 hinted runs, plus development trials. The budgeting assumption is 30,000–100,000 input and 1,000–8,000 output tokens per run, because the history is longer. API cost is TBD until the roster and prices are known. CPU only; no real cluster or GPU is used.
 
 **Scope boundary and open questions (required):** The task queues and holds jobs on a simulated account; it runs no code and contacts no labmate. Open questions:
-1. Can a task-scripted event submit a job on the researcher's own account and pass the submission check? Benchline currently describes labmate events only. *(This is a Benchline feature, raised on #180.)*
-2. Can a job be submitted directly in the held state? *(This is a Benchline feature, raised on #180. The task also accepts submit-then-hold.)*
-3. Can a partition be restricted to one project or grant? *(Needed for `donated`; to be raised on #180. If not, `donated` will be removed from Lin's account, which closes the same loophole.)*
+1. ~~Can a task-scripted event submit a job on the researcher's own account and pass the submission check?~~ Settled: yes, `job.script_submitted` in Benchline 1.0.0 (`T22`).
+2. ~~Can a job be submitted directly in the held state?~~ Settled: yes, `jobs.submit` with `hold: true` (`T22b`). Submit-then-hold is also accepted.
+3. ~~Can a partition be restricted to one project or grant?~~ Settled: no. As planned, the free `donated` partition is removed from Lin's account, which closes the same loophole.
 4. Which cross-session history and audit interfaces will be available? *(Tracked in #135.)*
 
 These will be settled with the maintainers before the freeze. Difficulty is empirical: we will report every valid rollout and redesign through review if the thresholds are not met.
