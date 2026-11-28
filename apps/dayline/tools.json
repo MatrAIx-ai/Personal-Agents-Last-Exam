@@ -1127,7 +1127,7 @@
   },
   {
     "name": "dayline.history.mark_read",
-    "description": "Record in the reader's private history that they have read an edition. Marking an edition that is already in the history changes nothing.",
+    "description": "Record in the reader's private history that they have read an edition. Marking an edition that is already in the history changes nothing. later_history_removed is null unless the loaded data holds an entry for this edition dated after the clock, which this change replaced; it then counts it by list.",
     "read_only": false,
     "scope": "dayline.history.mark_read",
     "resource_target": "current account",
@@ -1204,6 +1204,20 @@
         },
         "changed": {
           "type": "boolean"
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1212,14 +1226,15 @@
         "version",
         "edition_id",
         "read",
-        "changed"
+        "changed",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "dayline.saved.add",
-    "description": "Save an edition to the reader's private reading list. Returns only the edition ID and save status (never the headline). Saving an edition that is already saved leaves one entry.",
+    "description": "Save an edition to the reader's private reading list. Returns only the edition ID and save status (never the headline). Saving an edition that is already saved leaves one entry. later_history_removed is null unless the loaded data holds an entry for this edition dated after the clock, which this change replaced; it then counts it by list.",
     "read_only": false,
     "scope": "dayline.saved.add",
     "resource_target": "current account",
@@ -1296,6 +1311,20 @@
         },
         "changed": {
           "type": "boolean"
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1304,14 +1333,15 @@
         "version",
         "edition_id",
         "saved",
-        "changed"
+        "changed",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "dayline.saved.remove",
-    "description": "Remove an edition from the reader's private reading list. Fails if the edition is not on the list.",
+    "description": "Remove an edition from the reader's private reading list. Fails if the edition is not on the list. later_history_removed is null unless the loaded data holds an entry for this edition dated after the clock, which this change replaced; it then counts it by list.",
     "read_only": false,
     "scope": "dayline.saved.remove",
     "resource_target": "current account",
@@ -1388,6 +1418,20 @@
         },
         "changed": {
           "const": true
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1396,7 +1440,8 @@
         "version",
         "edition_id",
         "saved",
-        "changed"
+        "changed",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }

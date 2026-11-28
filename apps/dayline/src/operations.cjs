@@ -45,29 +45,36 @@ function read(ctx, stored, name, args) {
   }
 }
 
+// A seeded read or save of this edition dated after the clock, which a write replaces or removes. The
+// receipt counts it (it goes to the Agent); the diagnostics log keeps the stored entry.
+const later = (list, id, field, now) => list.filter(x => x.edition_id === id && c.instant(x[field]) > c.instant(now));
+const report = (name, entries) => (entries.length ? {[name]: entries} : null);
+const count = removed => removed && Object.fromEntries(Object.entries(removed).map(([k, v]) => [k, v.length]));
+
 function write(ctx, data, name, args) {
   if (!WRITES.has(name)) fail('unknown_tool', 'Unknown Dayline operation.');
   // An edition added after the run clock is not in Dayline yet, so it is not_found here too.
-  const idx = c.index(c.visible(data, ctx.virtual_now));
+  const idx = c.index(c.visible(data, ctx.virtual_now)), now = ctx.virtual_now;
   const e = c.edition(idx, args.edition_id), id = e.edition_id;
   if (name === 'dayline.history.mark_read') {
-    const changed = !idx.read.has(id);
+    const changed = !idx.read.has(id), removed = report('reading_history', changed ? later(data.reading_history, id, 'read_at', now) : []);
     // A seeded read dated after the clock is replaced: the reader has now read it.
-    if (changed) data.reading_history = [...data.reading_history.filter(h => h.edition_id !== id), {edition_id: id, read_at: ctx.virtual_now}];
-    log(ctx, 'dayline.history.mark_read', {edition_id: id, changed});
-    return {edition_id: id, read: true, changed};
+    if (changed) data.reading_history = [...data.reading_history.filter(h => h.edition_id !== id), {edition_id: id, read_at: now}];
+    log(ctx, 'dayline.history.mark_read', {edition_id: id, changed, later_history_removed: removed});
+    return {edition_id: id, read: true, changed, later_history_removed: count(removed)};
   }
   if (name === 'dayline.saved.add') {
-    const changed = !idx.saved.has(id);
-    if (changed) data.reading_list = [...data.reading_list.filter(s => s.edition_id !== id), {edition_id: id, saved_at: ctx.virtual_now}];
-    log(ctx, 'dayline.saved.add', {edition_id: id, changed});
-    return {edition_id: id, saved: true, changed};
+    const changed = !idx.saved.has(id), removed = report('reading_list', changed ? later(data.reading_list, id, 'saved_at', now) : []);
+    if (changed) data.reading_list = [...data.reading_list.filter(s => s.edition_id !== id), {edition_id: id, saved_at: now}];
+    log(ctx, 'dayline.saved.add', {edition_id: id, changed, later_history_removed: removed});
+    return {edition_id: id, saved: true, changed, later_history_removed: count(removed)};
   }
   if (name === 'dayline.saved.remove') {
     if (!idx.saved.has(id)) fail('not_found', 'Edition is not on the reading list.');
+    const removed = report('reading_list', later(data.reading_list, id, 'saved_at', now));
     data.reading_list = data.reading_list.filter(s => s.edition_id !== id);
-    log(ctx, 'dayline.saved.remove', {edition_id: id, changed: true});
-    return {edition_id: id, saved: false, changed: true};
+    log(ctx, 'dayline.saved.remove', {edition_id: id, changed: true, later_history_removed: removed});
+    return {edition_id: id, saved: false, changed: true, later_history_removed: count(removed)};
   }
 }
 

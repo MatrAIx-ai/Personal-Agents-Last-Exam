@@ -122,13 +122,13 @@ test('Spanish and English airport-strike editions trace back to one regional rep
 test('saving twice leaves one bookmark and the result never echoes the headline', () => {
   const f = fixture();
   const first = f.call('dayline.saved.add', {edition_id: 'gulls-recap-1'});
-  assert.deepEqual(first, {edition_id: 'gulls-recap-1', saved: true, changed: true});
+  assert.deepEqual(first, {edition_id: 'gulls-recap-1', saved: true, changed: true, later_history_removed: null});
   assert.doesNotMatch(JSON.stringify(first), /Ortega|5-4|Owls/);
-  assert.deepEqual(f.call('dayline.saved.add', {edition_id: 'gulls-recap-1'}), {edition_id: 'gulls-recap-1', saved: true, changed: false});
+  assert.deepEqual(f.call('dayline.saved.add', {edition_id: 'gulls-recap-1'}), {edition_id: 'gulls-recap-1', saved: true, changed: false, later_history_removed: null});
   const saved = f.call('dayline.saved.list', {}).entries;
   assert.deepEqual(saved.map(s => s.edition.edition_id), ['gulls-recap-1', 'postal-standard-1']);
   assert.equal(saved[0].saved_at, f.ctx.virtual_now);
-  assert.deepEqual(f.call('dayline.saved.remove', {edition_id: 'gulls-recap-1'}), {edition_id: 'gulls-recap-1', saved: false, changed: true});
+  assert.deepEqual(f.call('dayline.saved.remove', {edition_id: 'gulls-recap-1'}), {edition_id: 'gulls-recap-1', saved: false, changed: true, later_history_removed: null});
   unchanged(f, () => f.call('dayline.saved.remove', {edition_id: 'gulls-recap-1'}), /not on the reading list/);
   unchanged(f, () => f.call('dayline.saved.add', {edition_id: 'gulls-recap-9'}), /Edition does not exist/);
   assert.deepEqual(f.call('dayline.saved.list', {}).entries.map(s => s.edition.edition_id), ['postal-standard-1']);
@@ -136,8 +136,8 @@ test('saving twice leaves one bookmark and the result never echoes the headline'
 
 test('marking read is explicit and idempotent', () => {
   const f = fixture();
-  assert.deepEqual(f.call('dayline.history.mark_read', {edition_id: 'library-1'}), {edition_id: 'library-1', read: true, changed: true});
-  assert.deepEqual(f.call('dayline.history.mark_read', {edition_id: 'library-1'}), {edition_id: 'library-1', read: true, changed: false});
+  assert.deepEqual(f.call('dayline.history.mark_read', {edition_id: 'library-1'}), {edition_id: 'library-1', read: true, changed: true, later_history_removed: null});
+  assert.deepEqual(f.call('dayline.history.mark_read', {edition_id: 'library-1'}), {edition_id: 'library-1', read: true, changed: false, later_history_removed: null});
   const history = f.call('dayline.history.list', {}).entries;
   assert.equal(history[0].edition.edition_id, 'library-1'); assert.equal(history[0].read_at, f.ctx.virtual_now);
   assert.equal(history.filter(h => h.edition.edition_id === 'library-1').length, 1);
@@ -340,4 +340,31 @@ test('the evaluation dataset loads at any clock in its window and shows nothing 
   assert.deepEqual(local(atClock), require('../fixtures/minimal.json').front_pages[0].entries);
   assert.deepEqual(ids(atClock.call('dayline.history.list', {limit: 4}).entries.map(e => e.edition)),
     ['rail-wire-1', 'strike-standard-1', 'gulls-preview-1', 'budget-courier-0']);
+});
+
+// Later history replaced by a write at an earlier clock. Independent of src/operations.cjs: an entry is later
+// history when its own time lies after the clock. The receipt must count exactly the later entries the write
+// replaced or removed, and the diagnostics log must keep them as stored.
+test('a write at an earlier clock that replaces a seeded later read or save counts it in the receipt', () => {
+  const seed = require('../data/evaluation/seed.json'), binding = require('../data/evaluation/binding.json');
+  const run = (at, name, edition_id) => {
+    const f = fixture({seed, binding, virtual_now: at}), before = f.data, receipt = f.call(name, {edition_id}), after = f.data, lost = {};
+    for (const [list, field] of [['reading_history', 'read_at'], ['reading_list', 'saved_at']]) {
+      const kept = new Set(after[list].map(x => JSON.stringify(x)));
+      const gone = before[list].filter(x => !kept.has(JSON.stringify(x)) && Date.parse(x[field]) > Date.parse(at));
+      if (gone.length) lost[list] = gone;
+    }
+    const counts = Object.keys(lost).length ? Object.fromEntries(Object.entries(lost).map(([k, v]) => [k, v.length])) : null;
+    assert.deepEqual(receipt.later_history_removed, counts, 'the receipt counts the later entries replaced');
+    assert.deepEqual(f.logs.at(-1).details.later_history_removed, Object.keys(lost).length ? lost : null, 'the log keeps them as stored');
+    return {receipt, after, lost};
+  };
+  // The Feb. 5, 2025 business brief was read at 22:58; marking it read at noon replaces that later read.
+  const read = run('2025-02-05T12:00:00-08:00', 'dayline.history.mark_read', 'biz-20250205');
+  assert.deepEqual(read.lost.reading_history.map(h => h.read_at), ['2025-02-05T22:58:00-08:00']);
+  assert.equal(read.after.reading_history.find(h => h.edition_id === 'biz-20250205').read_at, '2025-02-05T12:00:00-08:00');
+  // The Mar. 11, 2025 transit story was saved the next morning; saving it at midnight replaces that save.
+  assert.deepEqual(run('2025-03-12T00:00:00-07:00', 'dayline.saved.add', 'transit-20250311-vote-valley').receipt.later_history_removed, {reading_list: 1});
+  // An edition never read before reports null.
+  assert.equal(run('2025-02-05T12:00:00-08:00', 'dayline.history.mark_read', 'snowpack-20250102').receipt.later_history_removed, null);
 });

@@ -57,10 +57,17 @@ const FULL = obj({...SUMMARY_FIELDS, text: text(20000), credits: arr(CREDIT, 20)
   read_at: nullable(TIME), saved_at: nullable(TIME)});
 const LIMIT = max => ({type: 'integer', minimum: 1, maximum: max});
 
+// Every write receipt: null, or how many stored entries dated after the clock the write replaced, by list.
+// Only counts, because the receipt goes to the Agent. This happens only when a seed that runs past its clock
+// is loaded early.
+const LATER = nullable({type: 'object', additionalProperties: {type: 'integer', minimum: 1}});
+const LATER_NOTE = ' later_history_removed is null unless the loaded data holds an entry for this edition dated after the clock, which this change replaced; it then counts it by list.';
 function tool(name, description, readOnly, input, output, required = Object.keys(input)) {
   const inputSchema = readOnly ? obj(input, required)
     : obj({...input, expected_version: VERSION, request_id: ID}, [...required, 'expected_version', 'request_id']);
-  const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output});
+  const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output,
+    ...(readOnly ? {} : {later_history_removed: LATER})});
+  if (!readOnly) description += LATER_NOTE;
   return {name, description, read_only: readOnly, scope: name, resource_target: 'current account', inputSchema, outputSchema};
 }
 
