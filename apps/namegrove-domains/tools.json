@@ -1,0 +1,1719 @@
+[
+  {
+    "name": "namegrove-domains.account.get",
+    "description": "Read safe synthetic contact labels, redacted payment choices and TLD policy/pricing options.",
+    "read_only": true,
+    "scope": "namegrove-domains.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "account": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "contact_profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        },
+        "tld_policies": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account",
+        "contact_profiles",
+        "payment_methods",
+        "tld_policies"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.search",
+    "description": "Search deterministic synthetic availability and disclose first-year, renewal and policy terms.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 63
+        },
+        "tlds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\.?[a-z][a-z0-9]{1,15}$"
+          }
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "query": {
+          "type": "string"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "query",
+        "results"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.quote.create",
+    "description": "Create a 15-minute registration quote binding price, policy, contact, privacy, payment and auto-renew choices.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.quote.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 253
+        },
+        "years": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "contact_profile_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "payment_method_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "privacy": {
+          "type": "boolean"
+        },
+        "auto_renew": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain",
+        "years",
+        "contact_profile_id",
+        "payment_method_id",
+        "privacy",
+        "auto_renew",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "quote": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "quote"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.quote.get",
+    "description": "Read one registration quote without changing it.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.quote.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "quote": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "quote"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.register",
+    "description": "Explicitly confirm an unused, unexpired quote. Concurrent claims and payment failures are atomic.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.register",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "quote_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "quote_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "quote_id",
+        "quote_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "charge": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "notification": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "domain",
+        "charge",
+        "notification"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.list",
+    "description": "List the portfolio, optionally filtering lifecycle state or action-needed records.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "statuses": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "active",
+              "expiring",
+              "expired_grace",
+              "redemption",
+              "transferred",
+              "deleted"
+            ]
+          }
+        },
+        "action_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domains"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.get",
+    "description": "Read one domain with safe contact/payment labels, charges, transfers and notifications; authorization hashes are redacted.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "contact": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "payment": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "charges": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        },
+        "transfers": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domain",
+        "contact",
+        "payment",
+        "charges",
+        "transfers",
+        "notifications"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.renew",
+    "description": "Renew an eligible active, expiring or grace-period domain using deterministic itemized pricing.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.renew",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "years": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "payment_method_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "domain_version",
+        "years",
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "charge": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "notification": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "domain",
+        "charge",
+        "notification"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.auto_renew.update",
+    "description": "Enable or disable auto-renew and select the saved synthetic payment method.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.auto_renew.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "payment_method_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "domain_version",
+        "enabled",
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "domain"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.notifications.list",
+    "description": "List in-App confirmations, reminders, failures and transfer notices with Mail reconciliation status.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "unread_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/domain.schema.json#/$defs/record"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notifications"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.notifications.get",
+    "description": "Read one in-App notification and its safe domain summary.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.notifications.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "notification": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notification",
+        "domain"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.dns.zone.get",
+    "description": "Read nameserver mode, hosted records and complete zone revision history.",
+    "read_only": true,
+    "scope": "namegrove-domains.dns.zone.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "zone": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domain",
+        "zone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.dns.nameservers.set",
+    "description": "Switch between hosted DNS and two-to-six validated custom nameservers using zone-version protection.",
+    "read_only": false,
+    "scope": "namegrove-domains.dns.nameservers.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "zone_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mode": {
+          "enum": [
+            "hosted",
+            "custom"
+          ]
+        },
+        "nameservers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 253
+          }
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "zone_version",
+        "mode",
+        "nameservers",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "zone": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domain_id",
+        "zone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.dns.record.create",
+    "description": "Create a validated hosted DNS record and a before/after zone revision.",
+    "read_only": false,
+    "scope": "namegrove-domains.dns.record.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "zone_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "record": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "A",
+                "AAAA",
+                "CNAME",
+                "MX",
+                "TXT",
+                "CAA"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 253
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "ttl": {
+              "type": "integer",
+              "minimum": 300,
+              "maximum": 86400
+            },
+            "priority": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "name",
+            "value",
+            "ttl",
+            "priority"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "zone_version",
+        "record",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "record": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "zone": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domain_id",
+        "record",
+        "zone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.dns.record.update",
+    "description": "Update one hosted DNS record with conflict and stale-zone protection.",
+    "read_only": false,
+    "scope": "namegrove-domains.dns.record.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "zone_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "record_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "record": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "A",
+                "AAAA",
+                "CNAME",
+                "MX",
+                "TXT",
+                "CAA"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 253
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "ttl": {
+              "type": "integer",
+              "minimum": 300,
+              "maximum": 86400
+            },
+            "priority": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 65535
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "name",
+            "value",
+            "ttl",
+            "priority"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "zone_version",
+        "record_id",
+        "record",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "record": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "zone": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domain_id",
+        "record",
+        "zone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.dns.record.delete",
+    "description": "Delete one hosted DNS record and retain an audit-friendly zone revision.",
+    "read_only": false,
+    "scope": "namegrove-domains.dns.record.delete",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "zone_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "record_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "zone_version",
+        "record_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "deleted_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "zone": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "domain_id",
+        "deleted_id",
+        "zone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.transfer.initiate",
+    "description": "Initiate an inbound transfer using a valid unexpired synthetic authorization code.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.transfer.initiate",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 253
+        },
+        "auth_code": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 80
+        },
+        "contact_profile_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "payment_method_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain",
+        "auth_code",
+        "contact_profile_id",
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "transfer": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "transfer"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.transfer.get",
+    "description": "Read transfer status and safe associated-domain state.",
+    "read_only": true,
+    "scope": "namegrove-domains.domain.transfer.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "transfer": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "$ref": "schemas/domain.schema.json#/$defs/record"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "transfer",
+        "domain"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.transfer.cancel",
+    "description": "Cancel a pending or approved transfer before its cutoff; outbound cancellation relocks and invalidates codes.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.transfer.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "transfer_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "transfer_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "transfer_id",
+        "transfer_version",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "transfer": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "transfer"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.transfer.unlock",
+    "description": "Unlock an eligible active domain after registration/transfer and expiration-proximity checks.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.transfer.unlock",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "domain_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "domain"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.transfer.auth_code.issue",
+    "description": "Issue a short-lived synthetic outbound code. Only its hash is stored; ordinary reads redact it.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.transfer.auth_code.issue",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "domain_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "auth_code": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "domain",
+        "auth_code",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.domain.transfer.approve",
+    "description": "Approve a matching pending outbound transfer with a current unused code.",
+    "read_only": false,
+    "scope": "namegrove-domains.domain.transfer.approve",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "domain_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "transfer_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "transfer_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "auth_code": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 80
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "domain_id",
+        "domain_version",
+        "transfer_id",
+        "transfer_version",
+        "auth_code",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "transfer": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "domain": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "transfer",
+        "domain"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.notification.email.prepare",
+    "description": "Prepare a complete Mail 1.3.0 channel.email CloudEvent. Unknown delivery blocks republishing.",
+    "read_only": false,
+    "scope": "namegrove-domains.notification.email.prepare",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "router_request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "router_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "notification": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        },
+        "message": {
+          "$ref": "schemas/router-message.schema.json"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "notification",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "namegrove-domains.notification.email.record",
+    "description": "Record delivered, rejected or unknown routing; unknown requires same-request reconciliation.",
+    "read_only": false,
+    "scope": "namegrove-domains.notification.email.record",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "router_request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "delivery_status": {
+          "enum": [
+            "delivered",
+            "rejected",
+            "unknown"
+          ]
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reconciled": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "router_request_id",
+        "delivery_status",
+        "receipt_id",
+        "reconciled",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "namegrove-domains"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "notification": {
+          "$ref": "schemas/domain.schema.json#/$defs/record"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "notification"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

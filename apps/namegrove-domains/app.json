@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "app_id": "namegrove-domains",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {"contact": "Repository issue / PR tagged app:namegrove-domains"},
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {"seed": "schemas/seed.schema.json", "state": "schemas/state.schema.json", "events": "schemas/events.schema.json"},
+  "fixtures": {"seed": "fixtures/minimal.json", "binding": "fixtures/binding.json", "policies": "fixtures/policies.json"},
+  "dependencies": [],
+  "event_types": ["domain.lifecycle_processed", "domain.payment_outcome_recorded", "domain.transfer_status_changed", "domain.registry_status_changed"],
+  "capabilities": {"modes": ["synthetic"], "resources": true, "ui": "business web app", "real_delivery": false},
+  "limitations": [
+    "Synthetic registrar, registry, DNS and payment behavior only; no real purchases, publication, DNSSEC, recovery, auctions, hosting, certificates or legal guidance.",
+    "Redemption and deletion are visible but read-only in v1.",
+    "Optional Mail delivery is separate from registrar commits and unknown acknowledgement requires reconciliation."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {"catalog": "contribution/assets.catalog.json", "directory": "assets"},
+  "contribution": "contribution/contribution.json"
+}

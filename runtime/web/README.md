@@ -1,6 +1,6 @@
 # Public business Web Host
 
-Seven Apps provide their own business pages/controllers in `gui/`: Mail, Calendar, Files, Messages, Notes, Tasks and Contacts. This shared Host serves those files and connects the page to a fixed **Agent** MCP process for one App/run. It contains no App-specific operation logic and exposes no management connection to the browser.
+Eight Apps provide their own business pages/controllers in `gui/`: Mail, Calendar, Files, Messages, Notes, Tasks, Contacts and Namegrove Domains. This shared Host serves those files and connects the page to a fixed **Agent** MCP process for one App/run. It contains no App-specific operation logic and exposes no management connection to the browser.
 
 ## Start an App
 
@@ -9,10 +9,10 @@ Node 18+ is sufficient to run the Host; no npm install is needed:
 ```sh
 node runtime/web/server.cjs --app mail --run web-demo --profile sandbox
 node runtime/web/server.cjs --app calendar --run web-demo --profile sandbox
-# Other --app values: files, messages, notes, tasks, contacts
+# Other --app values: files, messages, notes, tasks, contacts, namegrove-domains
 ```
 
-Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes all seven Apps. Each App still has separate state and can run independently.
+Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes all eight Apps. Each App still has separate state and can run independently.
 
 Only a **new** instance is initialized with the CLI-selected synthetic profile. `sandbox` enables declared business writes; use a fresh run with `--profile scenario` for restricted Task-like permissions. Starting a Host for existing state never resets that state or changes its policy. To load a real Task or inject a scenario, use the separate Infra MCP interface. There is no browser API for those operations.
 
@@ -58,7 +58,7 @@ The fixed Playwright dependency is only for browser tests; stdio and App-local t
 
 ## App-specific product views
 
-The Apps use distinct interfaces: Mail inbox/reader, Calendar month/agenda, Files folder browser, Messages conversations/composer, Notes paper/editor, Tasks checkable lists, and Contacts address book. Each `gui/src/app.js` supplies its navigation, filters, row/detail rendering and interaction choices. The shared client supplies transport, accessible DOM primitives, versioned writes and attachment rendering; it does not implement App business transitions.
+The Apps use distinct interfaces: Mail inbox/reader, Calendar month/agenda, Files folder browser, Messages conversations/composer, Notes paper/editor, Tasks checkable lists, Contacts address book, and Namegrove search/portfolio/DNS/transfer/notification views. Each `gui/src/app.js` supplies its navigation, filters, row/detail rendering and interaction choices. The shared client supplies transport, accessible DOM primitives, versioned writes and attachment rendering; it does not implement App business transitions.
 
 Folder names, conversation names and attachment filenames replace raw references where the authorized API provides those choices. New events without attachments remain valid. Person references without a directory lookup are readable labels derived from the reference, not independently resolved identity records. Refresh re-reads the App; it is not a background push subscription.
 
