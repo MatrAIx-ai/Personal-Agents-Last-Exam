@@ -11,12 +11,12 @@ Evidence index for the Stoopside delivery, following `docs/submission-evidence.m
 
 | Item | Value |
 | :--- | :--- |
-| App commit the screenshots were taken at | `4407162700354766d4e9256be4a7d58e19f1bb24` (clean tree for `gui/`, `src/`, `tools.json`, `fixtures/`); `gui/src/app.js` SHA-256 `6024a6045e6533752e47636d150819b93cecfb57e767f796f8e90feefba7c498`. Later commits on the branch change only documentation and evidence files. |
+| App commit the screenshots were taken at | `d017fb724afa79ac204741f343a3c84a4e4118ce` (clean tree for `gui/`, `src/`, `tools.json`, `fixtures/`); `gui/src/app.js` SHA-256 `440d073e3f40276c51fc8f9b2ca5d3cc90f02a721bdc46b843a04eab2a477f5a`. Later commits on the branch change only documentation and evidence files. |
 | Host | Public business Web Host `runtime/web/server.cjs` (last change `f2eb0396d590f36c139d96ac801c8106b8146ac2`, file SHA-256 `cf8f3b04...0572`), shared `style.css` and `client.js`; public runtime 1.6.0, Core API 1.2.0 |
 | Browser | Chromium 141.0.7390.37 (Playwright, headless), Node v24.10.0, macOS |
 | Viewport | 1280 x 800 (plus 390 x 844 for the narrow check) |
-| Run and account | run `web-checks`, profile `sandbox`, registry `web.registry.json` (clock 2027-03-01 09:00 EST), seed `fixtures/minimal.json` (Maple St, synthetic), account `st-dana` (Dana O., member `m-001`). Read-only run `web-checks-ro` (profile `scenario`). In-window run `web-checks-hillcrest` (`web.hillcrest.registry.json`, Hillcrest at 2026-11-18 09:00 PST). |
-| Reproduce | From the repository root, after `npm ci` and `npx playwright install chromium`: `node apps/stoopside/tests/web-checks.cjs --evidence` (78 checks; rewrites `screens/` and `screens/manifest.json`). Without `--evidence` it only runs the checks. |
+| Run and account | run `web-checks`, profile `sandbox`, registry `web.registry.json` (clock 2027-03-01 09:00 EST); Core starts the run from the manifest seed (Hillcrest) and Infra loads `fixtures/minimal.json` (Maple St, synthetic) at its clock with `env.load_seed`; account `st-dana` (Dana O., member `m-001`). Read-only run `web-checks-ro` (profile `scenario`). In-window run `web-checks-hillcrest` (`web.hillcrest.registry.json`, Hillcrest at 2026-11-18 09:00 PST). |
+| Reproduce | From the repository root, after `npm ci` and `npx playwright install chromium`: `node apps/stoopside/tests/web-checks.cjs --evidence` (85 checks; rewrites `screens/` and `screens/manifest.json`). Without `--evidence` it only runs the checks. |
 
 ## Delivery evidence index
 
@@ -32,7 +32,7 @@ Evidence index for the Stoopside delivery, following `docs/submission-evidence.m
 | 5. View-as | Required (workflow 5, selector on three pages) | No Meetup equivalent | [Sequence 8](#8-view-as): screens 03, 21 | `tests/business.test.cjs` (visibility table (f), `view_as` anchor); `tests/fixtures.test.cjs` (f), (g) | `visibility.view_as` answers equal the page for `m-027` (group), `m-016` (event), `m-013` (sheet) | N/A | Passed. |
 | Pages: errors, permissions and layout | Required (checklist section 3 and 4) | N/A | [Sequence 9](#9-not-found-read-only-narrow-and-in-window-run): screens 29 to 32 | `tests/web-checks.cjs`: no text below 12px on nine pages, no raw ISO times, 403 on a management call, no write control in the `scenario` profile, no overflow at 390 px, no JavaScript errors | N/A | N/A | Passed. |
 | Mail delivery (Messaging, `channel.email`) | Delivered optional (proposal section 3). Stoopside package at App commit `4407162`; Mail 1.3.0 at `examples/apps/mail` (tree `df8a8eac`, last change `3c91dba6`); Messaging `runtime/messaging` (last change `f47bf882`); contract `urn:pale:email-message:2`, payload `urn:pale:email-payload:1`, type `org.pale.mail.notification.v1`, receiver `mail.receive_notification`; direction Stoopside to Mail through `router.publish`; publisher `stoopside` account `st-dana`, recipient Mail account `mail-dana`, both owned by `person-dana-okafor`; Mail starts empty | N/A (no GUI flow; Mail's own GUI is not part of this delivery) | [Mail row](#10-mail-delivery) | `node apps/stoopside/examples/publish-to-mail.cjs` (PASS); `tests/replay-checks.cjs` (companion Mail seeds load and read back) | See [Mail row](#10-mail-delivery) and [sample output](mail-publish.sample.json) | N/A | Passed for local commit, receiver commit, rejection, duplicate and unknown. Recipient/business confirmation: N/A, the notices go to the user's own mailbox. |
-| Environment dataset coverage | Required (section 3) | N/A | N/A | `node scripts/coverage-report.cjs --check`; `tests/fixtures.test.cjs` (committed report matches a fresh run) | Seeds and Mail seeds hashed in `coverage.json` and `contribution/dataset.json` | [coverage.md](coverage.md): 585 global distinct dates, every month of 2025-2026 covered; Maple St is the full-window source | Passed for the counted data. All synthetic; human read pending. |
+| Environment dataset coverage | Required (section 3) | N/A | N/A | `node scripts/coverage-report.cjs --check`; `tests/fixtures.test.cjs` (committed report matches a fresh run) | Seeds and Mail seeds hashed in `coverage.json` and `contribution/dataset.json` | [coverage.md](coverage.md): 618 global distinct dates, every month of 2025-2026 covered; Maple St is the full-window source. Earlier in-window clocks: `scripts/generate-fixture.cjs --cutoff` (tested at six clocks); a load before a seed's history is refused | Passed for the counted data. All synthetic; human read pending. |
 
 ## Reference comparison
 
@@ -61,7 +61,7 @@ Each step names the control used, the expected and the observed result, and the 
 
 ### 1. Group discovery, join and leave
 
-1. Start: [01](screens/01-groups-discovery.png) `#/groups`. One card per group from `groups.list`, with member count and "Request pending" on the run club. Check: "group discovery shows a card for exactly the groups groups.list returns".
+1. Start: [01](screens/01-groups-discovery.png) `#/groups`. One card per group from `groups.list`, with member count and "Request pending" on the run club. Above them, "Waiting for your answer" lists Theo's pending swap ("Theo B. offers you snacks for your coffee urn and cups on Spring cleanup sign-ups. Answer by Tue, Mar 2, 2027, 5:30 PM EST."), linked to its sheet; it also lists waitlist places to claim and RSVPs to reconfirm when there are any. Checks: "group discovery shows a card for exactly the groups groups.list returns" and "the groups page lists what waits for the user".
 2. Open the block association: [02](screens/02-group-home.png). Hosts, upcoming event cards ("Wed, Mar 10, 2027, 7:00 PM to 8:30 PM EST", "4 of 10 places left"), posts newest first; Edit only on the user's own posts.
 3. Action: Leave group on the community garden. Intermediate: [27](screens/27-leave-confirm.png) inline confirmation that says RSVPs become no and slots are released; nothing written yet (checked).
 4. Result after confirming: receipt "You left Elm Ave Community Garden..." kept on the page; membership `left`. Then Join group: [28](screens/28-join-receipt.png), "You joined...", membership `member`.
@@ -75,14 +75,14 @@ Each step names the control used, the expected and the observed result, and the 
 ### 3. RSVP: pre-fill error, cancel and confirm
 
 1. Error path: `#/event/e-0125` (Book fair volunteers, no guests allowed), counts left empty, Preview RSVP. Observed: [06](screens/06-rsvp-error-guest-limit.png) next to the form: "Book fair volunteers allows at most 0 guests per RSVP. The 1 guest was pre-filled from your latest RSVP in this group for Pi Day bake sale, answered Sat, Mar 7, 2026, 8:15 PM EST (guests 1, children 2). Enter a smaller number of guests to continue." The page words tool errors in its own terms (no argument names, RSVP IDs or ISO dates; the code stays in a `data-error-code` attribute). State hash unchanged. This is review item 6.
-2. Start: [07](screens/07-rsvp-start.png) `#/event/e-0121`, no RSVP; time "Sat, Mar 20, 2027, 4:00 PM to 7:00 PM EST".
+2. Start: [07](screens/07-rsvp-start.png) `#/event/e-0121`, no RSVP; time "Sat, Mar 20, 2027, 4:00 PM to 7:00 PM EST". Bad input: guests -1, then 1.5, Preview: "Enter the number of guests as a whole number, 0 or more." next to the form, nothing written (browser check; no screenshot).
 3. Intermediate: Preview RSVP with empty counts: [08](screens/08-rsvp-preview-prefilled.png). Party of 4 and a note naming the Pi Day bake sale RSVP (guests 1, children 2); Confirm and Cancel. Cancel discards it; no RSVP is written (checked).
 4. Action: guests 0, children 0, Preview, Confirm RSVP. Result: [09](screens/09-rsvp-receipt.png) receipt kept after the re-render: "RSVP saved: Going, just you (1 place). Receipt st-notice-0001 for RSVP r-0511." Snapshot: `r-0511` yes, 0, 0. After a browser reload the page and `events.get` both show yes.
 5. Error after a result: guests 9, Preview. The earlier receipt is removed when the new action starts, and only the new `guest_limit_exceeded` error shows next to the form (a browser check; no screenshot).
 
 ### 4. Waitlist offer and claim
 
-1. Independent update: Infra applies `examples/scenario.json` (m-009 drops out of the full Spring potluck).
+1. Independent update: Infra applies `examples/maple-street-event.json` (m-009 drops out of the full Spring potluck).
 2. Start after refresh: [22](screens/22-waitlist-offer.png) "A place was offered to you for you and 1 guest (2 places). Claim by Sat, Mar 6, 2027, 6:20 PM EST."
 3. Intermediate: guests 1, children 0, Preview: [23](screens/23-waitlist-claim-preview.png) outcome "Claims the offered place".
 4. Result: [24](screens/24-waitlist-claim-receipt.png) "RSVP saved: Going, you and 1 guest (2 places). Receipt st-notice-0006 for RSVP r-0451." Snapshot: `r-0451` yes. The late-claim error (`claim_expired`) is covered by the business tests and the (a) anchors.
@@ -93,11 +93,11 @@ Each step names the control used, the expected and the observed result, and the 
 2. Intermediate: notify "Guests", Preview: [11](screens/11-change-preview-recipients.png) "Venue: Linden Park pavilion (was Elm Ave lot)", every open RSVP notified, 11 yes RSVPs must reconfirm, the 10 recipients by name; Confirm and Cancel.
 3. Result: [12](screens/12-change-receipt.png) on `#/event/e-0140`: "Change saved for Spring cleanup. 10 members notified by email. Receipt st-notice-0002." The receipt survives the hashchange re-render and a Refresh. Snapshot: 10 `event_changed` deliveries, equal to the preview.
 4. Stale path: preview a description change on `e-0130`; an independent MCP write (`events.preview_change` and `events.confirm_change` over MCP) renames the event; Confirm in the page: [13](screens/13-change-stale.png) `stale_version` next to the preview; the MCP title stays.
-5. Create and cancel: a new "Stoop sale" event is created from `#/change/new/g-block` (times stored as `-05:00`), then `#/change/cancel/<id>`: [25](screens/25-cancel-preview.png) says it cannot be undone and sheets lock; [26](screens/26-cancel-receipt.png) result, state `cancelled`.
+5. Create and cancel: a new "Stoop sale" event is created from `#/change/new/g-block` (times stored as `-05:00`), then `#/change/cancel/<id>`: [25](screens/25-cancel-preview.png) says it cannot be undone and sheets lock, and, since nobody has answered, "Nobody has an open RSVP, so no email goes out." (it no longer also says that every open RSVP is notified); [26](screens/26-cancel-receipt.png) result, state `cancelled`.
 
 ### 6. Post composer, audience and delete
 
-1. Error path: `#/compose/g-block`, text but no audience, Preview: [14](screens/14-post-audience-required.png) `audience_required`, worded "Choose who sees this post: the whole group, the event guests or the hosts."; nothing written.
+1. Error paths: `#/compose/g-block` with no text, Preview: "Write the post before you preview it." (browser check). Then text but no audience, Preview: [14](screens/14-post-audience-required.png) `audience_required`, worded "Choose who sees this post: the whole group, the event guests or the hosts."; nothing written.
 2. Intermediate: `#/compose/g-block/event/e-0130`, audience preset to the event's guests: [15](screens/15-post-preview-recipients.png) "A post to the guests of June social: planning meeting (moved indoors) (RSVP yes) and its hosts.", 5 named recipients.
 3. Result: [16](screens/16-post-receipt.png) on the group page: "Published. 5 members notified. Post p-0307." Snapshot: 5 deliveries, none to `m-027` (Wren Adeyemi, whose send-off it is).
 4. Delete: [17](screens/17-post-delete-confirm.png) inline confirmation; "Keep it" leaves the post published; confirming hides it and keeps its 5 deliveries.
@@ -120,7 +120,7 @@ Each step names the control used, the expected and the observed result, and the 
 - [30](screens/30-narrow-event.png) 390 px viewport, no horizontal overflow (four pages checked).
 - [32](screens/32-hillcrest-in-window.png) review item 10: a run at the Hillcrest clock, 2026-11-18 09:00 PST, inside the coverage window (`npm run web:hillcrest`, `web.hillcrest.registry.json`, `scripts/web-fixture.cjs`).
 
-**Why the default demo clock is 2027.** `web.registry.json` and the manifest seed start at the Maple St clock, 2027-03-01 09:00 EST, because the proposal's examples and the anchor tasks are set in March 2027 and Maple St's history must cover all of 2025 and 2026 before that clock. The Hillcrest run above is the in-window alternative.
+**Clocks.** The manifest seed is Hillcrest, at the shared registry time 2026-11-18 09:00 PST, and a seed never loads at a clock earlier than its history. The sequences above run on Maple St at its clock, 2027-03-01 09:00 EST, because the proposal's examples and anchor tasks are set in March 2027; Infra loads it into the run with `env.load_seed`. The Hillcrest run above is in the coverage window, and `scripts/generate-fixture.cjs --cutoff` builds any fixture at an earlier in-window clock (see the package README, Data).
 
 ### 10. Mail delivery
 
@@ -138,4 +138,4 @@ Recipient/business confirmation: **N/A**. Every notice goes to the user's own Ma
 
 ## Commands and results for this delivery
 
-See the PR description for the full reproduction table. Package tests: `cd apps/stoopside && npm test` (55 tests); browser: `node apps/stoopside/tests/web-checks.cjs` (78 checks); platform, replay and Mail scripts as listed in the App README.
+See the PR description for the full reproduction table. Package tests: `cd apps/stoopside && npm test` (61 tests); browser: `node apps/stoopside/tests/web-checks.cjs` (85 checks); platform, replay and Mail scripts as listed in the App README.

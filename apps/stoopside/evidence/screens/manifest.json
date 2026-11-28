@@ -1,8 +1,8 @@
 {
   "about": "Curated screenshots written by node apps/stoopside/tests/web-checks.cjs --evidence. Each step follows the check named in after_check.",
-  "app_commit": "4407162700354766d4e9256be4a7d58e19f1bb24",
+  "app_commit": "d017fb724afa79ac204741f343a3c84a4e4118ce",
   "app_tree_dirty": false,
-  "gui_app_js_sha256": "6024a6045e6533752e47636d150819b93cecfb57e767f796f8e90feefba7c498",
+  "gui_app_js_sha256": "440d073e3f40276c51fc8f9b2ca5d3cc90f02a721bdc46b843a04eab2a477f5a",
   "host": {
     "file": "runtime/web/server.cjs",
     "last_commit": "f2eb0396d590f36c139d96ac801c8106b8146ac2",
@@ -24,17 +24,17 @@
     "read_only_profile": "scenario",
     "registry": "apps/stoopside/web.registry.json",
     "clock": "2027-03-01T09:00:00-05:00",
-    "seed": "apps/stoopside/fixtures/minimal.json",
-    "seed_sha256": "9b526a347f2a49c634e8a2647e377d84430b322dc201cbe2c629d31d4a089b2e",
+    "seed": "apps/stoopside/fixtures/minimal.json (loaded with env.load_seed)",
+    "seed_sha256": "d6382c6b313fe2ec5ea6ba7c04e1e9572e632e22183e6cbbc83f4aa7df89c0c3",
     "account": "st-dana (Dana O., member m-001)"
   },
-  "checks": 78,
+  "checks": 85,
   "screens": [
     {
       "file": "01-groups-discovery.png",
-      "step": "Group discovery: start state, one card per group with member count and membership",
+      "step": "Group discovery: start state, what waits for the user (a pending swap), one card per group with member count and membership",
       "hash": "#/groups",
-      "after_check": "group cards show the member count and the user's membership from the tool"
+      "after_check": "the groups page lists what waits for the user, here the swap Theo proposed, linked to its sheet (follow-up review, minor)"
     },
     {
       "file": "02-group-home.png",
@@ -44,7 +44,7 @@
     },
     {
       "file": "03-view-as-group.png",
-      "step": "View-as on the group home: Bill H. (m-039) sees the group now; as-of time in EST",
+      "step": "View-as on the group home: Wren Adeyemi (m-027) sees the group now; as-of time in EST",
       "hash": "#/group/g-block",
       "after_check": "view-as on the group home shows the tool answer in the group's zone"
     },
@@ -80,7 +80,7 @@
     },
     {
       "file": "09-rsvp-receipt.png",
-      "step": "RSVP result: receipt kept on the page (RSVP r-0511, notice st-notice-0001); Your RSVP reads going, 1 place",
+      "step": "RSVP result: receipt kept on the page (RSVP r-1382, notice st-notice-0001); Your RSVP reads going, 1 place",
       "hash": "#/event/e-0121",
       "after_check": "the RSVP receipt stays on the page after the re-render and names the RSVP and its notice"
     },
@@ -176,9 +176,9 @@
     },
     {
       "file": "25-cancel-preview.png",
-      "step": "Event cancel preview: says it cannot be undone, sheets lock, every open RSVP is notified",
+      "step": "Event cancel preview: says it cannot be undone and sheets lock; nobody has an open RSVP, so no email goes out",
       "hash": "#/change/cancel/e-0141",
-      "after_check": "creating an event from the page stores the times in the group's offset"
+      "after_check": "the cancel preview of an event nobody answered says no email goes out, and nothing says otherwise (follow-up review, minor)"
     },
     {
       "file": "26-cancel-receipt.png",
