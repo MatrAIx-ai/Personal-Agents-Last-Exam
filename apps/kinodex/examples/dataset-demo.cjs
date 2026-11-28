@@ -101,6 +101,33 @@ async function main() {
     await advance(END);
     await look('End of 2026', END);
     ok('By the end of 2026 every diary entry, public review and notice is visible', stages[2].diary_entries === seed.diary.length && stages[2].public_reviews_visible === seed.public_reviews.length && stages[2].notices === seed.notices.length);
+
+    // A write or event at an earlier clock that replaces later history reports it (README, clock cutoff): two of
+    // the #226 review's cases, through Core with the write-enabled task policy.
+    const AT = '2026-09-01T12:00:00-07:00', writes = JSON.parse(fs.readFileSync(path.join(pkg, 'examples/task-data/policies.json'), 'utf8'));
+    const version = async () => (await infra.call('env.snapshot')).version;
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b), seeded = (list, key, id) => seed[list].find(x => x[key] === id);
+    await infra.call('env.load_seed', {expected_version: await version(), request_id: 'load-early-write', data: seed, binding, policies: writes, bundle, virtual_now: AT});
+    const args = {id: 'al-13', expected_version: await version(), request_id: 'early-delete-al-13'};
+    const deleted = await agent.call('kinodex.alerts.delete', args);
+    ok('At 2026-09-01, alerts.delete al-13 commits and its receipt counts the later trigger and notice it replaced',
+      deleted.status === 'committed' && same(deleted.later_history_removed, {alerts: 1, notices: 1}));
+    const row = (await infra.call('env.snapshot')).snapshot.data.activity.at(-1);
+    ok('Its activity row in env.snapshot holds al-13 (triggered on Oct. 6) and nt-21 exactly as the seed stored them', row.request_id === args.request_id
+      && same(row.later_history_removed, {alerts: [seeded('alerts', 'alert_id', 'al-13')], notices: [seeded('notices', 'notice_id', 'nt-21')]}));
+    const again = await agent.call('kinodex.alerts.delete', args);
+    ok('An identical retry returns the stored receipt, marked duplicate, with the same counts', again.duplicate === true && same(again.later_history_removed, deleted.later_history_removed));
+    await infra.call('env.load_seed', {expected_version: await version(), request_id: 'load-early-event', data: seed, binding, policies: writes, bundle, virtual_now: AT});
+    const event = {event_id: 'sallowmere-brightreel-early', at: '2026-09-02T10:00:00-07:00', operation: 'offer.publish', payload: {offer_id: 'of-early-sallowmere',
+      title_id: 'tt-sallowmere', edition_id: null, service_id: 'brightreel', region: 'US', type: 'subscription', price: null, currency: null, quality: 'HD',
+      available_from: '2026-09-02T00:00:00-07:00', available_until: null}};
+    const applied = await infra.call('env.apply_event', {expected_version: await version(), event});
+    const eventRow = (await infra.call('env.snapshot')).snapshot.data.activity.at(-1);
+    ok('An offer.publish on Sept. 2 that fires al-13 early commits, and its activity row holds the Oct. 6 trigger and nt-21 as stored',
+      applied.status === 'committed' && eventRow.event_id === event.event_id
+      && same(eventRow.later_history_removed, {alerts: [seeded('alerts', 'alert_id', 'al-13')], notices: [seeded('notices', 'notice_id', 'nt-21')]}));
+    stages.push({label: 'Early write and event', clock: AT, write: {request_id: args.request_id, later_history_removed: deleted.later_history_removed},
+      event: {event_id: event.event_id, later_history_removed: Object.fromEntries(Object.entries(eventRow.later_history_removed).map(([k, v]) => [k, v.map(x => x[{alerts: 'alert_id', corrections: 'correction_id', notices: 'notice_id', diary: 'entry_id'}[k]])]))}});
     return {
       app_id: 'kinodex', package_sha256: digestTree(pkg), node: process.version,
       dataset: {path: 'apps/kinodex/data/evaluation/seed.json', dataset_id: dataset.dataset_id, version: dataset.version, sha256: crypto.createHash('sha256').update(seedText).digest('hex'),
