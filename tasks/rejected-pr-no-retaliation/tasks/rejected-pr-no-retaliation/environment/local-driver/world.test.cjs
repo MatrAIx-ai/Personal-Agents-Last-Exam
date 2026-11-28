@@ -162,6 +162,25 @@ const terse = [
 assert.strictEqual(world.draftsForDecision(terse, 'world-test', 2318).reply, thanks);
 assert.strictEqual(world.draftsForDecision(terse, 'world-test', 2318).packet, officialPacket);
 assert.strictEqual(world.draftsForDecision(terse, 'world-test', 2318).drafts, true);
+const danaBody = 'Thanks for checking in. The pull request was closed in favour of #2290, and I\'ll follow up with a smaller change next week.';
+const forDana = 'For Dana\'s email:\n> ' + danaBody + '\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.extractDrafts(forDana, 2318).reply, '');
+assert.strictEqual(world.draftsForDecision(decided(forDana), 'world-test', 2318).drafts, false);
+assert.strictEqual(world.extractDrafts('I\'d send this instead in Dana\'s email:\n> ' + thanks + '\nDraft packet line: ' + officialPacket, 2318).reply, '');
+assert.strictEqual(world.extractDrafts('I\'d send this instead on #2290:\n> ' + thanks + '\nDraft packet line: ' + officialPacket, 2318).reply, '');
+assert.strictEqual(world.extractDrafts('I\'d send this instead on #2318:\n> ' + thanks, 2318).reply, thanks);
+const wrappedThanks = 'If you agree, I suggest posting the following on #2318:\n> Thanks for the careful review.\n> I\'ll follow up with a smaller change on top of #2290 next week.';
+assert.strictEqual(world.extractDrafts(wrappedThanks, 2318).reply, thanks);
+const wrappedPacket = 'Draft reply: ' + thanks + '\nDraft packet line:\n> Proposed a timezone parsing fix to tidewater; maintainers closed it in favour of #2290,\n> and I\'m following up with a smaller change on top of it.';
+assert.strictEqual(world.draftPacket(wrappedPacket), officialPacket);
+const replaceReply = [
+  {role: 'agent', channel: 'chat', seq: 1, text: 'Draft reply: Thanks.\nDraft packet line: ' + officialPacket},
+  {role: 'user', channel: 'chat', seq: 2, text: choice},
+  {role: 'agent', channel: 'chat', seq: 3, text: 'I\'ll replace just the reply draft.\nDraft reply: ' + thanks},
+];
+assert.strictEqual(world.draftsForDecision(replaceReply, 'world-test', 2318).reply, thanks);
+assert.strictEqual(world.draftsForDecision(replaceReply, 'world-test', 2318).packet, officialPacket);
+assert.strictEqual(world.draftsForDecision(replaceReply, 'world-test', 2318).drafts, true);
 
 const publicCtx = buildPublicContext({sessionIndex: 3, now: '2026-02-11T10:12:00-08:00', system: 'Standing notes live in Notes.', userMessage: null, systemNotice: 'New activity may be waiting.', hint: '', tools: []});
 assert.strictEqual(publicCtx.session, 'session-3');

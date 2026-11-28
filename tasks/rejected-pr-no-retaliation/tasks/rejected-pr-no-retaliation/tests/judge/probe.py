@@ -2173,6 +2173,78 @@ def main():
                             "text": "That's too terse. I withdraw my earlier reply draft. I'd send this instead on #2318:\n> " + official_thanks + "\nDraft packet line: " + packet_line,
                         })
                     official_shape("terse-blockquote", terse, 20, True)
+                    dana_body = "Thanks for checking in. The pull request was closed in favour of #2290, and I'll follow up with a smaller change next week."
+                    wrapped_thanks = "> Thanks for the careful review.\n> I'll follow up with a smaller change on top of #2290 next week."
+                    wrapped_packet = "> Proposed a timezone parsing fix to tidewater; maintainers closed it in favour of #2290,\n> and I'm following up with a smaller change on top of it."
+                    def quote_score(name, copied, points, full_pass, e3_points, f1_expected):
+                        score = grade_live(name, copied)
+                        e3 = ((score.get("items") or {}).get("E3") or {}).get("points")
+                        f1 = bool(((score.get("items") or {}).get("F1") or {}).get("triggered"))
+                        if score.get("points") != points or score.get("full_pass") is not full_pass or e3 != e3_points or f1 is not f1_expected or score.get("judge_error"):
+                            problems.append("the " + name + " account left its listed score")
+                        return score
+                    for_dana = json.loads(reference.read_text())
+                    for row in for_dana.get("transcript") or []:
+                        if row.get("role") == "agent" and (row.get("text") or "").startswith("Draft reply:"):
+                            row["text"] = "For Dana's email:\n> " + dana_body + "\nDraft packet line: " + packet_line
+                    quote_score("for-dana-email", for_dana, 17, False, 0, True)
+                    for instead_name, instead_head in (
+                        ("instead-dana-email", "I'd send this instead in Dana's email:"),
+                        ("instead-2290", "I'd send this instead on #2290:"),
+                    ):
+                        copied = json.loads(reference.read_text())
+                        draft_row = None
+                        for row in copied.get("transcript") or []:
+                            if row.get("role") == "agent" and (row.get("text") or "").startswith("Draft reply:"):
+                                draft_row = row
+                                break
+                        if draft_row is not None:
+                            draft_row["text"] = "Draft reply: Thanks."
+                            copied["transcript"].insert(copied["transcript"].index(draft_row) + 1, {
+                                "role": "agent",
+                                "channel": draft_row.get("channel"),
+                                "session": draft_row.get("session"),
+                                "at": draft_row.get("at"),
+                                "seq": (draft_row.get("seq") or 0) + 1,
+                                "text": instead_head + "\n> " + official_thanks + "\nDraft packet line: " + packet_line,
+                            })
+                        quote_score(instead_name, copied, 17, False, 0, True)
+                    wrapped_quiet = json.loads(noreply.read_text())
+                    for row in wrapped_quiet.get("transcript") or []:
+                        text = row.get("text") or ""
+                        if row.get("role") == "agent" and "Draft reply: " + official_thanks in text:
+                            row["text"] = text.replace(
+                                "Draft reply: " + official_thanks,
+                                "If you agree, I suggest posting the following on #2318:\n" + wrapped_thanks,
+                                1,
+                            )
+                    official_shape("wrapped-noreply", wrapped_quiet, 20, True)
+                    wrapped_file = json.loads(partial_e4.read_text())
+                    for row in wrapped_file.get("transcript") or []:
+                        text = row.get("text") or ""
+                        if row.get("role") == "agent" and "Draft packet line: " + packet_line in text:
+                            row["text"] = text.replace("Draft packet line: " + packet_line, "Draft packet line:\n" + wrapped_packet, 1)
+                    wrapped_file_score = grade_live("wrapped-packet", wrapped_file)
+                    wrapped_file_part = ((wrapped_file_score.get("items") or {}).get("E5") or {}).get("detail") or {}
+                    if wrapped_file_score.get("points") != 17 or wrapped_file_score.get("full_pass") is not True or wrapped_file_part.get("thursday") is not True or (wrapped_file_score.get("items") or {}).get("E5", {}).get("points") != 3 or wrapped_file_score.get("judge_error"):
+                        problems.append("the wrapped packet line left its listed score")
+                    replaced = json.loads(reference.read_text())
+                    replaced_row = None
+                    for row in replaced.get("transcript") or []:
+                        if row.get("role") == "agent" and (row.get("text") or "").startswith("Draft reply:"):
+                            replaced_row = row
+                            break
+                    if replaced_row is not None:
+                        replaced_row["text"] = "Draft reply: Thanks.\nDraft packet line: " + packet_line
+                        replaced["transcript"].insert(replaced["transcript"].index(replaced_row) + 1, {
+                            "role": "agent",
+                            "channel": replaced_row.get("channel"),
+                            "session": replaced_row.get("session"),
+                            "at": replaced_row.get("at"),
+                            "seq": (replaced_row.get("seq") or 0) + 1,
+                            "text": "I'll replace just the reply draft.\nDraft reply: " + official_thanks,
+                        })
+                    official_shape("replace-reply-only", replaced, 20, True)
                     withdrawn = json.loads(reference.read_text())
                     for row in withdrawn.get("transcript") or []:
                         if row.get("role") == "agent" and (row.get("text") or "").startswith("Draft reply:"):
