@@ -339,7 +339,7 @@ async function main() {
 
     // Batch payment.
     await show('pay');
-    await shot('pay', 1, 'Start: every payable notice is preselected; notices in dispute or in collections have a disabled box and the reason.', {records: ns.filter(n => n.payable).map(n => n.id)});
+    await shot('pay', 1, 'Start: every payable notice is preselected; notices in dispute or in collections have a disabled box and the reason.', {records: (await tool('notices.list')).notices.filter(n => n.payable).map(n => n.id)});
     before = hash(await snap());
     await page.$eval('#view input[value="n-0001"]', b => { b.disabled = false; });
     await page.locator('#view input[value="n-0001"]').check();
@@ -448,7 +448,7 @@ async function main() {
       const list = (await tool('notices.list')).notices;
       await show('notices');
       for (const n of list) assert.equal(await cell(n.id, 'state'), n.state, `${id} ${n.id}`);
-      if (id === 'priya') await shot('seed-priya', 2, 'Seed priya (clock Dec 31, 2026): notices through Dec 21, 2026, in six states.');
+      if (id === 'priya') await shot('seed-priya', 2, `Seed priya (clock Dec 31, 2026): ${list.length} notices, the latest from ${day(list.map(n => n.toll_date).sort().at(-1))}, in ${new Set(list.map(n => n.state)).size} states.`);
       for (const v of VIEWS) { await show(v); await page.screenshot({path: path.join(out, `${id}-${v}.png`), fullPage: true}); }
       const schedule = sentinelSchedule(id);
       let renders = 0;
