@@ -84,7 +84,7 @@ let data = {account_id: 'lanternbox-okoro', account: {owner_profile_id: 'prof-sa
   titles, progress: [], history: [], watchlist: [], devices: [], charges: [], notifications: [], activity: [], counters: {profile: 0, history: 0, charge: 0, notification: 0}};
 
 // ---- replay through the App ----
-let calls = 0, events = 0;
+let calls = 0, events = 0, schedule = null;   // schedule is set once the seed is finished: events are then kept instead of becoming history
 const rename = {};
 const ctx = (ms, role = 'agent') => ({app_id: APP, role, virtual_now: iso(ms), binding});
 function tool(ms, name, args) {
@@ -92,8 +92,9 @@ function tool(ms, name, args) {
   plugin.validateSeed(ctx(ms), out.data); data = out.data; return out.result;
 }
 function event(ms, name, payload) {
-  const e = {event_id: 'hist-ev-' + String(++events).padStart(4, '0'), at: iso(ms), operation: APP + '.' + name, payload};
-  const next = plugin.applyEvent(ctx(ms, 'infra'), structuredClone(data), e); plugin.validateSeed(ctx(ms), next); data = next;
+  const e = schedule ? {event_id: 'sch-lb-' + String(schedule.length + 1).padStart(3, '0'), at: iso(ms), operation: APP + '.' + name, payload}
+    : {event_id: 'hist-ev-' + String(++events).padStart(4, '0'), at: iso(ms), operation: APP + '.' + name, payload};
+  const next = plugin.applyEvent(ctx(ms, 'infra'), structuredClone(data), e); plugin.validateSeed(ctx(ms), next); data = next; if (schedule) schedule.push(e);
 }
 const queue = [];
 let order = 0;
@@ -185,6 +186,41 @@ data = JSON.parse(text);
 data.counters = {profile: 0, history: 0, charge: 0, notification: 0};
 plugin.validateSeed({app_id: APP, virtual_now: CLOCK, binding}, data);
 
+// ---- what happens after the clock: 18 November to 31 December 2026 ----
+// None of this is in the seed. Each record exists only once its event is applied, so nothing dated after the clock can be read before its time.
+// The events are built by applying them in order to a copy of the finished seed, with the same helpers as the history above.
+const seed = structuredClone(data);
+state = 0x2026c10c; schedule = [];
+const END = local(2026, 12, 31, 23, 59);
+for (let i = 0; i < 13; i++) session(evening(local(2026, 11, 18), local(2026, 12, 30), 19, 21), 'Sana');
+for (let i = 0; i < 11; i++) session(evening(local(2026, 11, 18), local(2026, 12, 30), 20, 22), 'Dele');
+for (let i = 0; i < 12; i++) session(evening(local(2026, 11, 19), local(2026, 12, 30), 15, 18), 'Timi');
+// Dele catches up with Harbor Lights; the household watches a film on New Year's Eve.
+watch(local(2026, 11, 21, 21, 15), 'Dele', 'ep-harbor-s2e04', 2880, {device: 'dev-dele-laptop'});
+watch(local(2026, 11, 22, 21, 10), 'Dele', 'ep-harbor-s2e05', 2820, {device: 'dev-dele-laptop'});
+watch(local(2026, 12, 31, 19, 30), 'Sana', T('Paper Kites').title_id, T('Paper Kites').runtime_seconds, {device: 'dev-livingroom-tv'});
+// Auntie Bisi visits over the holidays and finishes the last Night Bakers episode she started.
+const bakers = derive.playables(T('The Night Bakers'))[5];
+watch(local(2026, 12, 23, 14, 40), 'Auntie Bisi', bakers.playable_id, bakers.runtime_seconds, {partial: Math.round(bakers.runtime_seconds * 0.95 / 60) * 60});
+watch(local(2026, 12, 26, 15, 5), 'Auntie Bisi', bakers.playable_id, bakers.runtime_seconds);
+// The December charge, a new series season released weekly, a film added, an end date set, and a new device on 25 December.
+plan(local(2026, 12, 3, 4, 10), () => event(local(2026, 12, 3, 4, 10), 'billing.charged', {charge_id: 'chg-2026-12', period_start: data.account.paid_through, period_end: iso(local(2027, 1, 3)),
+  amount_cents: derive.account(data, iso(local(2026, 12, 3, 4, 10))).next_charge.amount_cents, result: 'paid'}));
+[['ep-ferry-s2e01', 'Winter Timetable', 2700], ['ep-ferry-s2e02', 'Lost Property', 2640], ['ep-ferry-s2e03', 'The Night Sailing', 2820], ['ep-ferry-s2e04', 'Ice Warning', 2760]].forEach(([playable_id, name, runtime_seconds], i) => {
+  const when = local(2026, 12, 4 + 7 * i, 3); plan(when, () => event(when, 'catalog.episode_released', {title_id: T('The Ferry Clerks').title_id, season: 2, episode: {playable_id, number: i + 1, name, runtime_seconds}})); });
+plan(local(2026, 12, 18, 3), () => event(local(2026, 12, 18, 3), 'catalog.title_added', {title: {title_id: 'ttl-snowed-in', kind: 'film', name: 'Snowed In at Quillby', maturity: '7+', genres: ['family', 'comedy'],
+  synopsis: 'The last train is cancelled, the village hall has one heater, and somebody has to judge the pudding contest.', available_from: iso(local(2026, 12, 18, 3)), runtime_seconds: 5520}}));
+plan(local(2026, 12, 8, 9), () => event(local(2026, 12, 8, 9), 'catalog.leaving_set', {title_id: T('A Map of Small Mercies').title_id, available_until: iso(local(2027, 1, 31, 23, 59))}));
+plan(local(2026, 12, 25, 10, 40), () => event(local(2026, 12, 25, 10, 40), 'device.signed_in', {device_id: 'dev-timi-tablet', name: 'Timi\'s new tablet', kind: 'tablet'}));
+while (queue.length) { queue.sort((a, b) => a.ms - b.ms || a.order - b.order); const next = queue.shift();
+  if (next.ms <= at(CLOCK) || next.ms > END) throw Error('A scheduled event falls outside 18 November to 31 December 2026: ' + iso(next.ms)); next.run(); }
+const after = data; data = seed;
+const laterEvents = schedule; schedule = null;
+if (laterEvents.some(e => at(e.at) <= at(CLOCK) || at(e.at) > END)) throw Error('A scheduled event is dated outside 18 November to 31 December 2026.');
+const summaryLater = {events: laterEvents.length, by_operation: count2(laterEvents.map(e => e.operation.slice(APP.length + 1))), first: laterEvents[0].at, last: laterEvents.at(-1).at,
+  history_added: after.history.length - seed.history.length, notifications_added: after.notifications.length - seed.notifications.length, activity_added: after.activity.length - seed.activity.length};
+function count2(rows) { return rows.reduce((m, r) => (m[r] = (m[r] || 0) + 1, m), {}); }
+
 const count = (rows, key) => rows.reduce((m, r) => (m[r[key]] = (m[r[key]] || 0) + 1, m), {});
 const summary = {plans: data.plans.length, profiles: data.profiles.map(p => p.profile_id + ':' + p.kind + ':' + p.maturity_ceiling), titles: count(data.titles, 'kind'), episodes: data.titles.flatMap(t => derive.playables(t)).filter(p => p.season !== null).length,
   ratings: count(data.titles, 'maturity'), with_end_date: data.titles.filter(t => t.available_until !== null).length, history: count(data.history, 'profile_id'), progress: count(data.progress, 'profile_id'), watchlist: count(data.watchlist, 'profile_id'),
@@ -192,11 +228,11 @@ const summary = {plans: data.plans.length, profiles: data.profiles.map(p => p.pr
   first_record: data.activity[0].at, last_record: data.activity.at(-1).at};
 const dataset = JSON.parse(fs.readFileSync(path.join(root, 'contribution/dataset.json'), 'utf8'));
 dataset.expected_counts = {records: plugin.records(data).length, assets: 0};
-const files = {'fixtures/minimal.json': JSON.stringify(data, null, 1) + '\n', 'contribution/dataset.json': JSON.stringify(dataset, null, 2) + '\n'};
+const files = {'fixtures/schedules/late-2026.json': JSON.stringify(laterEvents, null, 1) + '\n', 'fixtures/minimal.json': JSON.stringify(data, null, 1) + '\n', 'contribution/dataset.json': JSON.stringify(dataset, null, 2) + '\n'};
 let drift = false;
 for (const [name, body] of Object.entries(files)) {
-  const file = path.join(root, name);
+  const file = path.join(root, name); fs.mkdirSync(path.dirname(file), {recursive: true});
   if (process.argv.includes('--check')) { if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== body) { drift = true; console.error('Generated file drift: ' + name); } }
   else fs.writeFileSync(file, body);
 }
-if (drift) process.exitCode = 1; else console.log(JSON.stringify(summary, null, 1));
+if (drift) process.exitCode = 1; else console.log(JSON.stringify({...summary, scheduled_after_clock: summaryLater}, null, 1));
