@@ -507,7 +507,7 @@ async function eventPage(id) {
     if (mine && mine.answer !== 'no') answers.push(['no', mine.answer === 'offered' ? 'No, pass the place on' : 'No']);
     const form = el('form', {class: 'fields', 'data-form': 'rsvp'},
       field('Answer', select('answer', answers)),
-      field('Guests', input('guests', '', {type: 'number', min: 0, max: 20, placeholder: 'Pre-filled if empty'}), `Leave empty to pre-fill from your latest RSVP in this group. Up to ${plural(e.guest_limit, 'guest')}.`),
+      field('Guests', input('guests', '', {type: 'number', min: 0, max: 20, placeholder: 'Pre-filled if empty'}), `Leave empty to pre-fill from your latest RSVP in this group. ${e.guest_limit ? `Up to ${plural(e.guest_limit, 'guest')}.` : 'This event allows no guests.'}`),
       field('Children', input('children', '', {type: 'number', min: 0, max: 20, placeholder: 'Pre-filled if empty'}), 'Leave empty to pre-fill from your latest RSVP in this group.'));
     if (mine?.answer === 'expired') form.append(field('After an expired offer', select('rejoin_waitlist', [['', 'Do not rejoin'], ['true', 'Rejoin the back of the waitlist']])));
     const out = el('div'), slot = errorSlot();
