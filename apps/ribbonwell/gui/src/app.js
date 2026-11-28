@@ -135,7 +135,9 @@ async function showExchanges() {
       x.is_organizer && act('Run the draw', 'exchanges.draw', () => ({heading: 'Draw names for “' + x.name + '”?', note: 'A draw cannot be undone.', submit: 'Draw', build: () => ({name: 'exchanges.draw', args: {id: x.exchange_id}})})))));
 }
 async function showNotifications() {
-  const {notifications} = await call('notifications.list', {limit: 100});
+  // The log is read oldest first, 100 at a time, until all of it is here; it is shown newest first.
+  const notifications = [];
+  for (;;) { const part = await call('notifications.list', {limit: 100, offset: notifications.length}); notifications.push(...part.notifications); if (!part.notifications.length || notifications.length >= part.total) break; }
   collection.replaceChildren();
   put(detail, notifications.length ? [...notifications].reverse().map(n => card(el('p', {'data-notification-id': n.notification_id}, n.text), el('p', {class: 'muted'}, n.kind + ' · ' + when(n.at)))) : el('p', {class: 'empty'}, 'No notifications.'));
 }
