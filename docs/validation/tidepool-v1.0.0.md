@@ -4,7 +4,7 @@ Owner: @byshail. App `tidepool` 1.0.0 under `apps/tidepool/`; public runtime 1.6
 
 - **Plan.** It implements the plan in [PR #216](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/216), `proposals/environment/tidepool-audio.md` at `575bb90fec3e44be6a7f46ce66fe6a7577a1029f`. The assigned Track reviewer approved it for implementation on 2026-11-24 with `/approve-plan` for that commit at 07:05:26Z; the bot recorded the approval after a repeated command at 21:56:00Z.
 - **Proposal file.** Unchanged since that commit (blob `307acdf79525bccc546e772a7481c11c9301cfaa`).
-- **Package.** At commit `cf8982bcd04be0120030f0e7a5f7407ea9fd1c0e`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`). The second, `da7f538` (package `feec7df`), added the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260. This one answers the implementation review of 2026-11-28 ([below](#review-of-2026-11-28)).
+- **Package.** At commit `7fc8f06`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`). The second, `da7f538` (package `feec7df`), added the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260. This one (packages `cf8982b` and `7fc8f06`) answers the implementation review of 2026-11-28 ([below](#review-of-2026-11-28)).
 
 This document records implementation evidence; it claims no acceptance.
 
@@ -16,16 +16,16 @@ Checked on 2026-11-28 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 
 | Evidence | Result | What was exercised |
 | :--- | :--- | :--- |
-| App-only business tests, package alone | 32 passed, on both Node versions | A copy of `apps/tidepool/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core's handling of events and of `env.advance_time`: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical. |
+| App-only business tests, package alone | 33 passed, on both Node versions | A copy of `apps/tidepool/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core's handling of events and of `env.advance_time`: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical. |
 | Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs`, `dev/build-contracts.cjs` and `dev/build-dataset.cjs`, run in a copy, leave every committed file byte-identical: fixtures, example events, policies, task data, dataset counts, schemas and `tools.json`. |
 | Public App verifier | 50 checks passed, on both ([node22](tidepool/public-runtime.node22.json), [node18](tidepool/public-runtime.node18.json)) | An isolated package copy, then real MCP. Agent discovery shows no Infra tools. It covers published input and output of the 16 tools the default `scenario` profile lists, the Agent denied all seven Infra operations, history loading and rejection, the declared event with retry and conflict, reset, a separate run and a restarted process. |
 | CI job, reproduced | `tidepool: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job. It selected `tidepool` only (`full: false`). |
 | Real-MCP walkthrough | 158 checks passed, 304 calls traced, on both ([node22](tidepool/mcp-walkthrough.node22.json), [node18](tidepool/mcp-walkthrough.node18.json)) | What the verifier does not exercise for this App, across six loaded instances plus a default-policy one. Every call is joined to run, account, connection and request or event ID. See the list below this table. |
-| Evaluation dataset over real MCP | 91 checks passed, on both ([node22](tidepool/dataset-demo.node22.json), [node18](tidepool/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` as the bundle dataset in one `env.load_seed` request (434,421 bytes), queries it at early, dataset and end-of-2026 clocks with `env.advance_time`, and checks that nothing dated after the clock is visible and no record changes |
+| Evaluation dataset over real MCP | 95 checks passed, on both ([node22](tidepool/dataset-demo.node22.json), [node18](tidepool/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` as the bundle dataset in one `env.load_seed` request (434,421 bytes), queries it at early, dataset and end-of-2026 clocks with `env.advance_time`, and checks that nothing dated after the clock is visible and no record changes. A last stage reloads it at 2026-04-01 with the task policy and runs the #216 review's nine album downloads through Core, checking the ninth receipt's counts, its activity row in `env.snapshot` and an identical retry |
 | Dataset coverage | 454 distinct dates in 24 of 24 months ([coverage.json](tidepool/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](tidepool/reference-suite.node22.json), [node18](tidepool/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present. |
 | Independent base validator | Passed, 50 checks ([report](tidepool/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `tidepool` only. |
-| Package identity | `8f3cb44c96741ee25ce2a48f61c00b6c72a738cd68c2465b11218f692b809e8f` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `ec27307221f28e86a0c69c488a20a5577e75596b`. |
+| Package identity | `57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `1473c6bd84052d8510a0a2b59c436bb5cf256814`. |
 | Human review | Pending | Realism of the catalog, listening history and billing, including the generated dataset; that artists, shows, people and prices are fictional. |
 
 The walkthrough's instances:
@@ -97,7 +97,7 @@ Each row reads: starting state → action → observed result, then a control th
 
 ## Evaluation dataset and clock cutoff (added after plan approval, #260)
 
-The plan was approved on 2026-11-24; #260 published the Environment data rule on 2026-11-25. This scope was added after the plan was approved, for that rule (`docs/submission-evidence.md`, sections 3 and 4) and the reviewer's clock-gap finding on a sibling App. Tool schemas, error codes and events are unchanged.
+The plan was approved on 2026-11-24; #260 published the Environment data rule on 2026-11-25. This scope was added after the plan was approved, for that rule (`docs/submission-evidence.md`, sections 3 and 4) and the reviewer's clock-gap finding on a sibling App. Error codes and events are unchanged; the 2026-11-28 revision added `later_history_removed` to every write tool's output and as an optional activity-row field ([below](#review-of-2026-11-28)).
 
 **Clock cutoff** (`src/visible.cjs`):
 - Reads, writes and events see the data as of `ctx.virtual_now`. A record exists from the time it happened: an episode from `published_at`, an album and its tracks from the start of the release day (in the billing anchor's offset), a session from `ended_at`, a download from `requested_at`, a payment from `at`, a member from `joined_at`, and so on.
@@ -109,7 +109,7 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 - A write or event on a later record fails (`not_found`; `invalid_event` or `target_not_found` for events) and changes nothing.
 - Changed records replace their stored form, including a later stored record with the same key.
 - If later family records cannot coexist with a change (validation fails), the family is stored as it reads at the clock plus the change; later albums, tracks and episodes are kept.
-- Every later record that a change drops or replaces, in either case above, is reported: the change's activity row holds it as stored (`later_history_removed`, by family), and the write's receipt counts it per family; both are `null` otherwise (B31–B32, [below](#review-of-2026-11-28)).
+- Every later record that a change drops or replaces, in either case above, is reported: the change's activity row holds it as stored (`later_history_removed`, by family), and the write's receipt counts it per family; both are `null` otherwise (B31–B33, [below](#review-of-2026-11-28)).
 - Before the bound member's `joined_at`, every tool returns `not_found`.
 - The README carries the field table.
 
@@ -130,13 +130,13 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 
 | Command | Node 22.23.2 | Node 18.20.8 |
 | --- | --- | --- |
-| `npm test` (apps/tidepool) | 32 tests, 32 pass | 32 tests, 32 pass |
+| `npm test` (apps/tidepool) | 33 tests, 33 pass | 33 tests, 33 pass |
 | `node runtime/cli.cjs verify --app apps/tidepool` | passed, 50 checks | passed, 50 checks |
 | `npm run walkthrough` (apps/tidepool) | passed, 158 checks (same checks and reference replies as the v1.0.0 evidence) | passed, 158 checks (same) |
-| `node apps/tidepool/examples/dataset-demo.cjs` | 91 checks; one `env.load_seed` of 434,421 bytes, with `data/evaluation/dataset.json` as the bundle's `dataset` | 91 checks |
+| `node apps/tidepool/examples/dataset-demo.cjs` | 95 checks; one `env.load_seed` of 434,421 bytes, with `data/evaluation/dataset.json` as the bundle's `dataset` | 95 checks |
 | `node apps/tidepool/dev/build-dataset.cjs` twice | byte-identical output | — |
 
-All reports carry package sha256 `8f3cb44c96741ee25ce2a48f61c00b6c72a738cd68c2465b11218f692b809e8f`.
+All reports carry package sha256 `57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202`.
 
 New tests in `tests/business.test.cjs`:
 - *a seed loaded before its latest record shows only what existed at the clock* (Leila's task data on Oct. 1, 2026, then advanced to Nov. 24 with no data change; and on Feb. 1, 2026, before an album's release);
@@ -149,18 +149,21 @@ New tests in `tests/business.test.cjs`:
 - *at the dataset clock the fixture facts read the same for Priya and Sam*;
 - *the evaluation dataset loads at any clock in its window and shows nothing dated later* (2025-03-15, 2025-12-31, the dataset clock, 2026-12-31);
 - B31 *a write at an early clock that drops later family records reports each one in its receipt and activity row*;
-- B32 *every kind of early-clock collision reports the later record it replaced, and a plain write reports nothing*.
+- B32 *every kind of early-clock collision reports the later record it replaced, and a plain write reports nothing*;
+- B33 *an event at an early clock that replaces a later record keeps it in the event's activity row*.
 
-**Added scope against the approval baseline:** the dataset and its three scripts; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; and a larger package: 1,688,098 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
+**Added scope against the approval baseline:** the dataset and its three scripts; `later_history_removed` in every write receipt (counts) and as an optional activity-row field (the stored records), from the 2026-11-28 revision; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; and a larger package: 1,692,561 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
 
 ### Review of 2026-11-28
 
-The implementation review of `da7f538` asked for two must-fixes. Package `cf8982b` and this commit answer them; the approved proposal file is unchanged.
+The implementation review of `da7f538` asked for two must-fixes. Packages `cf8982b` and `7fc8f06` and this commit answer them; the approved proposal file is unchanged.
 
 - **Must fix 1: the cutoff fallback removed later records without reporting them.** `commit()` in `src/visible.cjs` now compares the stored data with the data it stores, after the merge-or-fallback decision. Every stored record that the clock view hid or showed in an earlier state, and that is no longer stored as it was, is reported. That covers the fallback and the two same-key paths: a later record replaced by the change, and a later active download or open invitation with the same key. The change's activity row holds those records as stored, by family, in `later_history_removed`; the write's receipt counts them per family; both are `null` otherwise. The receipt holds counts rather than IDs because it goes to the Agent, and the dropped records include other members' sessions and payments dated after the clock.
   - B31 is the review's repro: the full dataset at 2026-04-01 and albums added to Priya's phone. The ninth (`alb-copperleaf-1`) returns `later_history_removed: {devices: 6, sessions: 143, progress: 87, plays: 28, follows: 3, upnext: 2, downloads: 33, library: 8, playlists: 4, notifications: 14, billing.payments: 8}`, and its activity row holds those 336 records. Sessions go from 321 to 178, and Priya's history at the dataset clock is 157, which is 242 less the 85 reported sessions dated by then. The eight earlier downloads report `null`.
   - B32 covers the same-key paths (progress, a follow and Up Next replaced at the clock) and a plain write that reports `null`.
-  - Both tests check the report against an independent before/after diff, in which a record counts as later when it records a time after the clock.
+  - B33 covers an event: a `listening.record` at 2026-04-01 that finishes an episode whose progress the seed records on Apr. 2 keeps that progress row in the event's activity row.
+  - All three check the report against an independent before/after diff, in which a record counts as later when it records a time after the clock.
+  - The dataset demo's last stage runs the repro through Core with the task policy: a `committed` receipt with the counts above, the activity row in `env.snapshot` holding exactly those records as the seed stored them, and an identical retry returning the stored receipt marked duplicate.
   - The README describes the report and tells Task authors to start at or after the dataset clock, or stage later records as scenario events, when the Agent writes.
 - **Must fix 2: PR description.** Updated to the validation stage, with the progress boxes checked and a link to this report at the submitted commit.
 - **Should fix 3.** The README's dataset section states that there is no family history before 2026 and that a Task needing 2025 family records must supply them.
@@ -225,7 +228,7 @@ The suggestion to cover history from 2026-01-01 is followed.
 ## Package boundary
 
 - **Imports.** The package imports only Node built-ins and its own files. `service.cjs` is the provided launcher and the only file that loads the runtime.
-- **Diagnostics.** The optional diagnostics adapter carries IDs only and swallows its own errors, so it cannot change business results. It has no dedicated test.
+- **Diagnostics.** The optional diagnostics adapter carries IDs and counts only and swallows its own errors, so it cannot change business results. It has no dedicated test.
 - **Copies and discovery.** `tests/schema-validator.cjs` is a copy of the public validator. The walkthrough finds the runtime by walking up to the checkout, or through `PALE_RUNTIME_ROOT`.
 - **Scope.** Only `apps/tidepool/` and this report are added; no registry or runtime file is changed.
 

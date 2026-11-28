@@ -1,6 +1,6 @@
 {
   "app_id": "tidepool",
-  "package_sha256": "8f3cb44c96741ee25ce2a48f61c00b6c72a738cd68c2465b11218f692b809e8f",
+  "package_sha256": "57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202",
   "node": "v18.20.8",
   "dataset": {
     "path": "apps/tidepool/data/evaluation/seed.json",
@@ -385,10 +385,29 @@
         "published_at": "2026-12-24T05:00:00-08:00",
         "notes": "The chemistry behind weeknight cooking, explained while something is on the stove. This episode: roasting chestnuts without the bang. Tested in the studio kitchen on Tuesday, December 15, 2026, with Jonah Feld, a pastry chef."
       }
+    },
+    {
+      "label": "Early write",
+      "clock": "2026-04-01T12:00:00-07:00",
+      "request_id": "early-download-9",
+      "item_id": "alb-copperleaf-1",
+      "later_history_removed": {
+        "devices": 6,
+        "sessions": 143,
+        "progress": 87,
+        "plays": 28,
+        "follows": 3,
+        "upnext": 2,
+        "downloads": 33,
+        "library": 8,
+        "playlists": 4,
+        "notifications": 14,
+        "billing.payments": 8
+      }
     }
   ],
   "checks": {
-    "count": 91,
+    "count": 95,
     "passed": [
       "The bundle carries the dataset's own dataset.json with the matching record count (826)",
       "dataset.json records the seed's sha256",
@@ -480,7 +499,11 @@
       "End of 2026: history counts only sessions recorded by the clock",
       "End of 2026: notifications are dated at or before the clock",
       "By the end of 2026 every episode is visible",
-      "No session is recorded after the dataset clock"
+      "No session is recorded after the dataset clock",
+      "At 2026-04-01 the first eight album downloads commit and report no later history",
+      "The ninth (alb-copperleaf-1) commits and its receipt counts the later family records it dropped (143 sessions, 4 playlists, 8 payments)",
+      "Its activity row in env.snapshot holds exactly those records, each as the loaded seed stored it",
+      "An identical retry returns the stored receipt, marked duplicate, with the same counts"
     ]
   }
 }
