@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "pale.app-state.v1"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "package_version": {
+      "const": "1.0.0"
+    },
+    "core_api_version": {
+      "const": "1.2.0"
+    },
+    "app_id": {
+      "const": "larkfield-health"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[-a-zA-Z0-9_]{1,80}$"
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "profile": {
+      "type": "string"
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "virtual_now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "binding": {
+      "type": "object",
+      "properties": {
+        "people": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "person_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "person_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "accounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "string"
+              },
+              "account_id": {
+                "type": "string"
+              },
+              "owner_person_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "app_id",
+              "account_id",
+              "owner_person_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "objects": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "people",
+        "accounts",
+        "objects"
+      ],
+      "additionalProperties": false
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "allow": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "constraints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "allow",
+          "constraints"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "initial_data": {
+      "$ref": "seed.schema.json",
+      "properties": {
+        "approvals": {
+          "maxItems": 0
+        },
+        "issued": {
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,13}|100000000000000)$"
+          }
+        },
+        "claims": {
+          "items": {
+            "properties": {
+              "claim_version": {
+                "type": "integer",
+                "maximum": 9006099743113215
+              },
+              "received_seq": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,13}|100000000000000)$"
+              }
+            }
+          }
+        },
+        "eobs": {
+          "items": {
+            "properties": {
+              "posting_seq": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,13}|100000000000000)$"
+              }
+            }
+          }
+        },
+        "info_requests": {
+          "items": {
+            "properties": {
+              "request_version": {
+                "type": "integer",
+                "maximum": 9006099743113215
+              }
+            }
+          }
+        },
+        "pas": {
+          "items": {
+            "properties": {
+              "pa_version": {
+                "type": "integer",
+                "maximum": 9006099743113215
+              }
+            }
+          }
+        },
+        "appeals": {
+          "items": {
+            "properties": {
+              "appeal_version": {
+                "type": "integer",
+                "maximum": 9006099743113215
+              },
+              "filed_seq": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,13}|100000000000000)$"
+              }
+            }
+          }
+        },
+        "grants": {
+          "items": {
+            "properties": {
+              "grant_version": {
+                "type": "integer",
+                "maximum": 9006099743113215
+              }
+            }
+          }
+        },
+        "coverage": {
+          "items": {
+            "properties": {
+              "version": {
+                "type": "integer",
+                "maximum": 9006099743113215
+              }
+            }
+          }
+        }
+      }
+    },
+    "data": {
+      "$ref": "seed.schema.json"
+    },
+    "receipts": {
+      "type": "object"
+    },
+    "audit": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "resources": {
+      "$ref": "resources.schema.json"
+    },
+    "initial_resources": {
+      "$ref": "resources.schema.json"
+    },
+    "initial_virtual_now": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "schema",
+    "schema_version",
+    "package_version",
+    "core_api_version",
+    "app_id",
+    "run_id",
+    "epoch",
+    "revision",
+    "profile",
+    "next_id",
+    "virtual_now",
+    "binding",
+    "policies",
+    "initial_data",
+    "data",
+    "receipts",
+    "audit",
+    "resources",
+    "initial_resources"
+  ],
+  "additionalProperties": false
+}

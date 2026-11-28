@@ -1,0 +1,96 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "larkfield-health-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic Larkfield fixture for one household of three (the subscriber, a spouse and a child) on one invented employer EPO plan with plan years 2025 to 2027: six invented providers (two out of network), fourteen services with plain descriptions and fees, a task timeline in 2026 with sixteen claims, four prior authorizations, three appeals and the household's grants, and a generated history from 2025-01-01. For package validation and examples; not an evaluation task.",
+  "record_source_ids": [
+    "authored",
+    "generated-history"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Synthetic household, plan and benefit schedules for 2025 to 2027, providers, services and a fee schedule, and the task timeline (2026), authored for this package with AI assistance, checked by dev/check-fixture.cjs and reviewed by the contributor. The task timeline is a hand-written list of dated steps in dev/generate-history.cjs (opening on 2026-01-01 with a view grant that ends on 2026-04-01; sixteen claims cl-1 to cl-17 without cl-7, among them a New Year's Eve emergency at an out-of-network hospital posting to both plan years, an out-of-network scheduled ultrasound, other-coverage questions answered, and the two other-coverage questions on cl-4 left to expire, accident questions answered as accident and as work related, a physical therapy claim with a session after its authorization ended, three claims received and not yet reviewed and one waiting for accident answers at the clock; four prior authorizations pa-1, pa-2, pa-3 and pa-5, of which one pharmacy request denied, two physical therapy courses approved, one after an information request and one with an approved expedite, and one surgery request still pending, which becomes overdue on 2026-12-02 unless a Task acts before; three appeals, ap-1 upheld after an information request and a statement, ap-2 filed by the spouse under an act grant and overturned into EOB version 2, and ap-3 under review on the denied line ln-2) that the script replays through the App's own tools and events in one run with the history, in date order, so these records too are ones the App wrote. The two series share the plan-year accumulators, so history claims of 2026 count toward the same deductibles. The task timeline's run-issued IDs continue the runtime counters (ir-1 to ir-12, eob-1 to eob-13, ap-1 to ap-3, and the grant counter is set past the timeline's gr-1 and the example's gr-2), except its notices, which are numbered n-t1 onward outside the runtime notice series, as seeded notices are history, so the notices a run appends start at n-1. No patient or member data was collected; services carry plain descriptions and no billing codes.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Larkfield fixture authoring",
+        "tool_version": "1",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated-history",
+      "kind": "synthetic",
+      "description": "Synthetic claims history from 2025-01-01, opening with the subscriber's act grant to the spouse on that day, to the fixture clock: routine care for the household (primary care visits, a yearly physical or checkup, labs, specialist visits, nurse phone consultations and X-rays) at in-network providers, one to three visits a month in 2025 and one or two in 2026 to October, each billed a few days after the visit; three scripted history claims (an accident question on an X-ray left to expire, a scheduled ultrasound at an out-of-network hospital, and a child's emergency visit after a fall); a view grant from the spouse to the subscriber, later revoked; the plan's other-coverage and accident questions, answered by the member, by a guardian for the child or, for the subscriber, sometimes by the spouse under the act grant; and every EOB, accumulator posting, appeal window and notice those steps cause. IDs are in a separate h series (cl-h1, ir-h1, eob-h1, gr-h1, n-h1), outside the runtime counters. Produced deterministically by dev/generate-history.cjs, which replays the package's own tools and events with a fixed seed in one run with the task timeline, in date order, acting as the household member who makes each request with that person bound as the account holder, and checks every state with the App's validateSeed under that binding before and after each request and under the fixture's binding after each committed step; approvals used during the replay are not kept, because seeds carry none. Visit kinds, provider charges and answer times are constants in the script. Checked by dev/check-fixture.cjs, which also regenerates it byte for byte.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dev/generate-history.cjs",
+        "tool_version": "1",
+        "seed": "2025",
+        "parameters": {
+          "from": "2025-01-01",
+          "to": "2026-11-18T12:00:00-05:00",
+          "routine_until": "2026-10",
+          "routine_visits": "39",
+          "seed": "2025"
+        }
+      }
+    },
+    {
+      "source_id": "delivery-dataset",
+      "kind": "synthetic",
+      "description": "Synthetic full-window delivery dataset from 2025-01-01 to 2026-12-31 (America/New_York) generated for this package. It reuses the household, the plan with its 2025 to 2027 benefit years, the providers and the services authored for the fixture and generates every claim, information request, attestation, EOB, accumulator posting, prior authorization, appeal, appeal window, grant and notice; every record is synthetic and none was collected or observed, including those dated at or after the fixture clock 2026-11-18T12:00:00-05:00. dataset/generate.cjs replays the package's own tools as the household member who makes each request, with that person bound as the account holder (Jordan for his own and Riley's records and for Casey's while she gives him an act grant, Casey for her own and Riley's records and for Jordan's under his act grant), and its events as Infra (claims billed by the providers, PA submissions, documents and withdrawals from the providers, the plan's PA, expedite and appeal decisions and information requests, and Casey's grant changes), with a fixed seed, validating every state against the seed schema and validateSeed. A confirmation the person must give is replayed as preview, user.confirmed and confirm at one instant, and the used approval is not kept, because seeds carry none. A corrected claim's replay step names the claim it corrects, and each injury claim's step names its episode. The free texts the generator supplies (appeal statements and replies, expedite reasons and the plan's information requests) are parsed and checked against the records they name by dataset/notes.cjs. It writes dataset/base.json (the household, plan and catalog at 2025-01-01T00:00:00-05:00, with no records), dataset/replay.json (every committed step with its time) and dataset/full.json (the state at 2027-01-01T00:00:00-05:00), and regenerates them byte for byte with --check. At the fixture clock the household, plan, providers and services equal the fixture's; the records are their own sequence in the App's runtime ID series (cl-1, pa-1, ap-1, gr-1, n-1, ...) and do not include the fixture's history or task timeline, whose IDs (cl-7, pa-4, gr-2 and the others named by the proposal's example events) name different records. dataset/as-of.cjs selects the records dated before a first-session instant; dataset/coverage.cjs writes dataset/COVERAGE.json and dataset/COVERAGE.md. No code set is used: the services keep plain descriptions, with no procedure, diagnosis, drug or provider codes. The only real public facts used are the U.S. federal holidays of 2025 and 2026 as observed, with December 24, which set the business days of the providers and the plan, and the America/New_York daylight-saving rules; neither is stored as a record. There is no real health-plan record in the window: claims, EOBs, prior authorizations and appeals are a real member's protected health information, the reference product shows them only in a signed-in member account, and the approved proposal (PR #64, revision c0f566a3c5be418cd0c971d58e4144cb8085d25a, lines 6, 103 and 104) describes a synthetic plan with the reference site as a workflow reference only, excludes data collection and calls for no real member data. This is a stated gap, pending maintainer agreement.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dataset/generate.cjs",
+        "tool_version": "1",
+        "seed": "20250158",
+        "parameters": {
+          "from": "2025-01-01",
+          "to": "2026-12-31",
+          "time_zone": "America/New_York",
+          "seed": "20250158",
+          "care": "routine visits drawn per person and month (sick visits, more in winter and fewer for Riley in summer; nurse phone consultations; specialist visits; joint pain with an X-ray; ordered imaging, one in five at the out-of-network imaging center; injuries with a cause drawn per person), a yearly physical for each adult and a checkup for Riley, Jordan's visits every 12 to 14 weeks and a yearly lab visit for Casey, each billed 2 to 11 business days after the visit (a corrected claim, which names the claim it corrects, 8 business days after the appeal it answers); at most one sick visit and two office visits a month per member apart from injuries, office visits at least four days apart, a routine injury never within two weeks of an episode's injury, two routine injuries of one member more than 30 days apart and at most one a quarter; each claim's replay step names its kind of visit, an injury's episode and a therapy session's or request's course, and the check holds the replay to these limits, to providers that offer each service, to the yearly visits (one lab visit a year for Casey) and to one work-up or follow-up visit in the days before each semaglutide request",
+          "episodes": "Riley's ankle (2025) and knee (2026) physical therapy; Casey's scheduled ultrasound at the out-of-network imaging center; Casey's semaglutide prior authorization renewed every six months; Casey's knee (MRI, a surgery request withdrawn for therapy first, therapy, the knee locking, an expedited surgery request and appeal, the surgery, therapy after it, and her act grant to Jordan for the recovery); the winter-trip emergency at the out-of-network hospital on 2025-12-31 with a line on 2026-01-01; Riley's emergency on the 2026 summer trip billed without the emergency flag and then corrected; Jordan's work injury and back therapy; Jordan's act grant to Casey given on 2025-01-01 and extended in December 2025, and Casey's view grant to Jordan, revoked in September 2025",
+          "household_calendar": "trips 2025-07-12 to 2025-07-20, 2025-12-27 to 2026-01-03 and 2026-07-18 to 2026-07-26 (Jordan, Casey and Riley)",
+          "behaviour": "answers drawn per person: lag skewed short, an occasional late answer, and a chance to leave a question unanswered (other-coverage questions 0.1 for Jordan and 0.06 for Casey, accident questions 0.22 and 0.13, higher on trips and during Casey's recovery); appeals by denial type with per-person filing delays",
+          "plan_workload": "each busy period (the plan-year surge 01-02 to 03-15, summer staffing 06-15 to 08-31, holiday backlog 11-20 to 12-31) has a heavy or light backlog by a seeded draw per period, and a decision planned in it slips past its due date with chance 0.6 when heavy and 0.1 when light (0.03 otherwise; half of these for PA decisions); a decision that waits for requested documents follows them by some business days; every draw comes from a stream keyed by the encounter, PA or appeal it decides",
+          "base": "dataset/base.json",
+          "replay": "dataset/replay.json",
+          "end_state": "dataset/full.json",
+          "end_clock": "2027-01-01T00:00:00-05:00",
+          "reference_clock": "2026-11-18T12:00:00-05:00"
+        }
+      }
+    }
+  ],
+  "transformations": [],
+  "expected_counts": {
+    "records": 91,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation, benefit and fee levels, and notice wording."
+  }
+}

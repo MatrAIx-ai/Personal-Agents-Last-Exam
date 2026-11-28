@@ -1,0 +1,4835 @@
+{
+  "schema": "larkfield-health.coverage.v1",
+  "scope": "Environment dataset coverage of the Larkfield delivery dataset larkfield-delivery-2025-2026, whole window. Not a Task history report: a Task reports its own selection after its first-session cutoff (dataset/as-of.cjs).",
+  "dataset_id": "larkfield-delivery-2025-2026",
+  "time_zone": "America/New_York",
+  "window": {
+    "from": "2025-01-01",
+    "to": "2026-12-31"
+  },
+  "reference_clock": "2026-11-18T12:00:00-05:00",
+  "generator_seed": 20250158,
+  "reproduce": [
+    "node dataset/generate.cjs --check",
+    "node dataset/coverage.cjs --check"
+  ],
+  "counting": "Every timestamp is ISO 8601 with its offset; each is converted to its calendar date in America/New_York before counting. Date-only fields (a claim line's service_date, a PA's valid_from and valid_until) are not occurrence dates and are not counted. A date counts once however many records or sources fall on it. A required occurrence date (received_at, opened_at, issued_at, submitted_at, filed_at, notice_at, created_at or at) that is missing or not a valid ISO 8601 instant with the offset in force, and a record outside the window, is excluded from the count and listed by ID; processed_at, answered_at, attested_at, decided_at, overdue_at, expired_at, withdrawn_at and revoked_at are required only of records in the status that sets them, and a window's closing notice only when one was sent. There are none.",
+  "sources": [
+    {
+      "file": "dataset/base.json",
+      "role": "Seed at the window start 2025-01-01T00:00:00-05:00: the household, the plan with its 2025 to 2027 benefit years, the six providers and fourteen services of the fixture, coverage unknown for every member and year, accumulators at zero; no records.",
+      "kind": "synthetic",
+      "bytes": 7855,
+      "sha256": "d7deb1829271f8af7e4146242b8bfb001f371f87741d654df1c29c7a40da9b2d"
+    },
+    {
+      "file": "dataset/replay.json",
+      "role": "Every committed step in time order: the household members' tool calls and Infra events, each with its time.",
+      "kind": "synthetic",
+      "bytes": 59522,
+      "sha256": "bea1593e0d4d2a75aff56082f10f0e8cd0b9be51fc86a4e22d30304e2671e46c"
+    },
+    {
+      "file": "dataset/full.json",
+      "role": "Seed at 2027-01-01T00:00:00-05:00, the state after every step with the timers due before that instant committed: all records of the window.",
+      "kind": "synthetic",
+      "bytes": 437729,
+      "sha256": "83f79bcde0ef3d41cb5afb23dc82e97c7eea741fda7ce4886129f5089518e133"
+    }
+  ],
+  "method": [
+    {
+      "file": "dataset/lib.cjs",
+      "sha256": "7cf32455834f1d5030f4b093bc79281e4ba36d0838b3ae428c4d69d2280e68a3"
+    },
+    {
+      "file": "dataset/notes.cjs",
+      "sha256": "fcfc79aee5d2530f5b9a90d8cff9c14933bf4579e53b39aff9ef7e80585890ea"
+    },
+    {
+      "file": "dataset/generate.cjs",
+      "sha256": "b1e81569f9216337e3ee401002b2edad13425f2d3229f5eb8a7d86219b7bae0e"
+    },
+    {
+      "file": "dataset/as-of.cjs",
+      "sha256": "7346ec59012a0aa24ab4b5194f9b4f0ac6e045614380268415f2a2155ad4dcf6"
+    },
+    {
+      "file": "dataset/coverage.cjs",
+      "sha256": "3fdfe42edfa3d4ad531d1cfa939283956e89041a97164734c040b1aeab5ae9ab"
+    },
+    {
+      "file": "plugin.cjs",
+      "sha256": "19f2188d436be4cfa91cb456062aa7b918389392c660616f5dc594bba41ca420"
+    },
+    {
+      "file": "src/adjudication.cjs",
+      "sha256": "fca387a5ce4ad1b0a71939b2617e60843fa68c4d9eaf940cf513372612723491"
+    },
+    {
+      "file": "src/appeals.cjs",
+      "sha256": "848b8383edb5070ddf6dcb9959bf5d6c2826931263240fbdc6649599d76a4810"
+    },
+    {
+      "file": "src/approvals.cjs",
+      "sha256": "f97e90db88b7b7ca43595a136cb1f6ffa46383c763eea252ee5c76b152da0f88"
+    },
+    {
+      "file": "src/authority.cjs",
+      "sha256": "d31c35f7bc9d68c9b3d21bd12c562a325067a802872b3011b1411a034e27312d"
+    },
+    {
+      "file": "src/claims.cjs",
+      "sha256": "dbeb6395fff537186b063dfc4da08a0465c09c772319413f039ba325fc837acd"
+    },
+    {
+      "file": "src/confirm.cjs",
+      "sha256": "620c505627b3d0364241e4ea78dd4129f64afbb915e557449b6a38334342d4db"
+    },
+    {
+      "file": "src/coverage.cjs",
+      "sha256": "7cdada8fba7a738cdc0e9ddb830b826091f67b1617bb305c9c36ce10579124d4"
+    },
+    {
+      "file": "src/events.cjs",
+      "sha256": "05205caf4022eb857f90034bd164b96ec108c8182b54ff5c7884a7fa790df568"
+    },
+    {
+      "file": "src/grants.cjs",
+      "sha256": "bdf26ceb7dedec115245cdda4f5382369d7f103d5787c683bcec55aa831e8d0d"
+    },
+    {
+      "file": "src/guards.cjs",
+      "sha256": "3feefa7219f71a2c137ea5fc747eec69a91019d8c0c7ec28e2853429373baa0a"
+    },
+    {
+      "file": "src/model.cjs",
+      "sha256": "b093dd999d01fa8c14cb6e5cdde4a11b7e187947e57816a0a251a1806e7336f1"
+    },
+    {
+      "file": "src/notices.cjs",
+      "sha256": "d792efaa6797347c39f076f3bd6f50cd63f1e8d240cf6034d744d4832fe68a4c"
+    },
+    {
+      "file": "src/operations.cjs",
+      "sha256": "b631e577eb3628880b8a07889eb959e7fb4a7dc74acfbdbf047515e529f2fc3b"
+    },
+    {
+      "file": "src/pa.cjs",
+      "sha256": "f26a8cf18f26089a8b3b5fc945790d8e288d1d16c059dc0ef8054de6c36adfab"
+    },
+    {
+      "file": "src/time.cjs",
+      "sha256": "1dd606683b666e38842b70957d101114564e1e18aff58bd1ade068491fee5106"
+    },
+    {
+      "file": "src/timers.cjs",
+      "sha256": "ee1a65510185f52e0eae7b3cdfc7392fddd282e6709537654fd99aad061b5600"
+    },
+    {
+      "file": "src/tokens.cjs",
+      "sha256": "8324c1a58f2e4ecabc0fb72a40e25bb9e6bb38217925d31795273a1524be2ef9"
+    },
+    {
+      "file": "src/util.cjs",
+      "sha256": "2b2dbaa0f5930fb632a9de09052a0c81f5e4b661248fd628d93d7e38a06f94ad"
+    },
+    {
+      "file": "src/views.cjs",
+      "sha256": "09e3d7c22d6adad1654a16ef48f3f6343a2aceec913f1ad294e2450a6615ce48"
+    }
+  ],
+  "record_kinds": [
+    {
+      "kind": "claim",
+      "list": "claims",
+      "id": "claim_id",
+      "date_field": "received_at",
+      "source": "dataset/full.json",
+      "records": 97,
+      "distinct_dates": 92,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "claim_processing",
+      "list": "claims",
+      "id": "<claim id>/processed",
+      "date_field": "processed_at (processed claims)",
+      "source": "dataset/full.json",
+      "records": 96,
+      "distinct_dates": 91,
+      "earliest": "2025-01-21",
+      "latest": "2026-12-20"
+    },
+    {
+      "kind": "info_request",
+      "list": "info_requests",
+      "id": "info_request_id",
+      "date_field": "opened_at",
+      "source": "dataset/full.json",
+      "records": 27,
+      "distinct_dates": 15,
+      "earliest": "2025-01-13",
+      "latest": "2026-09-25"
+    },
+    {
+      "kind": "info_answer",
+      "list": "info_requests",
+      "id": "<request id>/answered",
+      "date_field": "answered_at (answered requests)",
+      "source": "dataset/full.json",
+      "records": 25,
+      "distinct_dates": 13,
+      "earliest": "2025-01-21",
+      "latest": "2026-09-27"
+    },
+    {
+      "kind": "info_expiry",
+      "list": "info_requests",
+      "id": "<request id>/expired",
+      "date_field": "expires_at (expired requests)",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 1,
+      "earliest": "2025-07-09",
+      "latest": "2025-07-09"
+    },
+    {
+      "kind": "attestation",
+      "list": "coverage",
+      "id": "<member id>:<plan year>",
+      "date_field": "attested_at (attested member-years)",
+      "source": "dataset/full.json",
+      "records": 6,
+      "distinct_dates": 5,
+      "earliest": "2025-01-21",
+      "latest": "2026-02-02"
+    },
+    {
+      "kind": "eob",
+      "list": "eobs",
+      "id": "eob_id",
+      "date_field": "issued_at",
+      "source": "dataset/full.json",
+      "records": 98,
+      "distinct_dates": 93,
+      "earliest": "2025-01-21",
+      "latest": "2026-12-20"
+    },
+    {
+      "kind": "pa",
+      "list": "pas",
+      "id": "pa_id",
+      "date_field": "submitted_at",
+      "source": "dataset/full.json",
+      "records": 10,
+      "distinct_dates": 10,
+      "earliest": "2025-05-21",
+      "latest": "2026-09-16"
+    },
+    {
+      "kind": "pa_info_request",
+      "list": "pas[].info_requests",
+      "id": "<pa id>/info-<n>",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2026-03-11",
+      "latest": "2026-05-12"
+    },
+    {
+      "kind": "pa_expedite",
+      "list": "pas[].expedite",
+      "id": "<pa id>/expedite",
+      "date_field": "requested_at",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2025-05-21",
+      "latest": "2026-04-24"
+    },
+    {
+      "kind": "pa_expedite_decision",
+      "list": "pas[].expedite",
+      "id": "<pa id>/expedite-decided",
+      "date_field": "decided_at (decided expedites)",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2025-05-22",
+      "latest": "2026-04-24"
+    },
+    {
+      "kind": "pa_decision",
+      "list": "pas",
+      "id": "<pa id>/decided",
+      "date_field": "decided_at (approved or denied PAs, also after expiry)",
+      "source": "dataset/full.json",
+      "records": 9,
+      "distinct_dates": 9,
+      "earliest": "2025-05-28",
+      "latest": "2026-09-17"
+    },
+    {
+      "kind": "pa_overdue",
+      "list": "pas",
+      "id": "<pa id>/overdue",
+      "date_field": "overdue_at (overdue PAs)",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2026-03-13",
+      "latest": "2026-05-26"
+    },
+    {
+      "kind": "pa_expiry",
+      "list": "pas",
+      "id": "<pa id>/expired",
+      "date_field": "expired_at (expired PAs)",
+      "source": "dataset/full.json",
+      "records": 8,
+      "distinct_dates": 8,
+      "earliest": "2025-07-01",
+      "latest": "2026-10-23"
+    },
+    {
+      "kind": "covered_submission",
+      "list": "pas[].covered_submissions",
+      "id": "pa_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2025-06-17",
+      "latest": "2026-06-23"
+    },
+    {
+      "kind": "appeal",
+      "list": "appeals",
+      "id": "appeal_id",
+      "date_field": "filed_at",
+      "source": "dataset/full.json",
+      "records": 5,
+      "distinct_dates": 5,
+      "earliest": "2025-07-08",
+      "latest": "2026-11-04"
+    },
+    {
+      "kind": "appeal_statement",
+      "list": "appeals[].statements",
+      "id": "<appeal id>/statement-<n>",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 7,
+      "distinct_dates": 7,
+      "earliest": "2025-07-08",
+      "latest": "2026-11-21"
+    },
+    {
+      "kind": "appeal_info_request",
+      "list": "appeals[].info_requests",
+      "id": "<appeal id>/info-<n>",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2025-07-21",
+      "latest": "2026-11-18"
+    },
+    {
+      "kind": "appeal_decision",
+      "list": "appeals",
+      "id": "<appeal id>/decided",
+      "date_field": "decided_at (upheld or overturned appeals)",
+      "source": "dataset/full.json",
+      "records": 4,
+      "distinct_dates": 4,
+      "earliest": "2025-08-07",
+      "latest": "2026-12-04"
+    },
+    {
+      "kind": "appeal_withdrawal",
+      "list": "appeals",
+      "id": "<appeal id>/withdrawn",
+      "date_field": "withdrawn_at (withdrawn appeals)",
+      "source": "dataset/full.json",
+      "records": 1,
+      "distinct_dates": 1,
+      "earliest": "2026-09-06",
+      "latest": "2026-09-06"
+    },
+    {
+      "kind": "appeal_overdue",
+      "list": "appeals",
+      "id": "<appeal id>/overdue",
+      "date_field": "overdue_at (overdue appeals)",
+      "source": "dataset/full.json",
+      "records": 1,
+      "distinct_dates": 1,
+      "earliest": "2025-09-10",
+      "latest": "2025-09-10"
+    },
+    {
+      "kind": "appeal_window",
+      "list": "windows",
+      "id": "<target type>:<target id>",
+      "date_field": "notice_at",
+      "source": "dataset/full.json",
+      "records": 8,
+      "distinct_dates": 8,
+      "earliest": "2025-07-04",
+      "latest": "2026-10-31"
+    },
+    {
+      "kind": "window_closing_notice",
+      "list": "windows",
+      "id": "<target type>:<target id>/closing",
+      "date_field": "closing.notice_at (closing notices sent)",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2026-01-28",
+      "latest": "2026-07-23"
+    },
+    {
+      "kind": "grant",
+      "list": "grants",
+      "id": "grant_id",
+      "date_field": "created_at",
+      "source": "dataset/full.json",
+      "records": 3,
+      "distinct_dates": 3,
+      "earliest": "2025-01-01",
+      "latest": "2026-04-27"
+    },
+    {
+      "kind": "grant_revocation",
+      "list": "grants",
+      "id": "<grant id>/revoked",
+      "date_field": "revoked_at (revoked grants)",
+      "source": "dataset/full.json",
+      "records": 1,
+      "distinct_dates": 1,
+      "earliest": "2025-09-07",
+      "latest": "2025-09-07"
+    },
+    {
+      "kind": "notice",
+      "list": "notices",
+      "id": "notice_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 322,
+      "distinct_dates": 125,
+      "earliest": "2025-01-13",
+      "latest": "2026-12-20"
+    },
+    {
+      "kind": "replay_step",
+      "source": "dataset/replay.json",
+      "list": "steps",
+      "id": "steps[].id",
+      "date_field": "at",
+      "records": 167,
+      "distinct_dates": 135,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-30"
+    }
+  ],
+  "exclusions": [
+    {
+      "records": "members[], providers[], services[] and plan.years in dataset/full.json",
+      "count": 26,
+      "reason": "Household, provider, service and benefit rows with no occurrence date; they are the fixture's and do not change in the window."
+    },
+    {
+      "records": "accumulators[] in dataset/full.json",
+      "count": 9,
+      "reason": "Running totals per member and plan year with no date; their changes are the EOB postings, which are dated."
+    },
+    {
+      "records": "coverage[] rows still unknown",
+      "count": 3,
+      "reason": "No attestation, so no date (the 2027 rows, and any member-year never answered)."
+    },
+    {
+      "records": "PA withdrawals",
+      "count": 1,
+      "reason": "The App records a withdrawn PA's status without a time; the withdrawal is the pa.withdrawn step in dataset/replay.json, counted there."
+    },
+    {
+      "records": "dataset/base.json",
+      "count": 0,
+      "reason": "Holds only the household, plan and catalog at the window start; no dated records."
+    },
+    {
+      "records": "approvals",
+      "count": 0,
+      "reason": "A confirmation (user.confirmed) is applied with the grant change, attestation, answer, filing or withdrawal it confirms and is not kept, because seeds carry no approvals; the confirmed step itself is in dataset/replay.json."
+    }
+  ],
+  "invalid_dates": 0,
+  "invalid": [],
+  "outside_window": 0,
+  "outside": [],
+  "totals": {
+    "records": 744,
+    "counted": 744,
+    "replay_steps": 167,
+    "app_records": 138,
+    "claims": 97,
+    "eobs": 98,
+    "pas": 10,
+    "appeals": 5,
+    "grants": 3,
+    "notices": 322
+  },
+  "distinct_dates": {
+    "coverage": 219,
+    "coverage_basis": "Counted over the records loaded into the App (dataset/full.json), which Agents and Infra read back.",
+    "coverage_note": "The global count over both sources adds 1 day on which the replay log holds steps but no App record is dated.",
+    "by_source": {
+      "dataset/full.json": 219,
+      "dataset/replay.json": 135
+    },
+    "by_kind": {
+      "claim": 92,
+      "claim_processing": 91,
+      "info_request": 15,
+      "info_answer": 13,
+      "info_expiry": 1,
+      "attestation": 5,
+      "eob": 93,
+      "pa": 10,
+      "pa_info_request": 2,
+      "pa_expedite": 2,
+      "pa_expedite_decision": 2,
+      "pa_decision": 9,
+      "pa_overdue": 2,
+      "pa_expiry": 8,
+      "covered_submission": 2,
+      "appeal": 5,
+      "appeal_statement": 7,
+      "appeal_info_request": 2,
+      "appeal_decision": 4,
+      "appeal_withdrawal": 1,
+      "appeal_overdue": 1,
+      "appeal_window": 8,
+      "window_closing_notice": 2,
+      "grant": 3,
+      "grant_revocation": 1,
+      "notice": 125,
+      "replay_step": 135
+    },
+    "global": 220
+  },
+  "earliest": "2025-01-01",
+  "latest": "2026-12-30",
+  "provenance": {
+    "real": 0,
+    "synthetic": 744,
+    "mixed": 0,
+    "note": "Every dated record and step is synthetic, written by the App while dataset/generate.cjs replayed it; none was collected or observed, including those dated at or after the reference clock. The three files are synthetic throughout: the household, plan, providers and services are the fixture's invented catalog.",
+    "code_sets": "None. Services keep the fixture's plain descriptions; no procedure, diagnosis, drug or provider code set (CPT, HCPCS, ICD-10, NDC, NPI or similar) appears or is used.",
+    "real_public_facts": [
+      {
+        "fact": "U.S. federal holidays of 2025 and 2026 as observed (5 U.S.C. 6103), plus December 24",
+        "dates": [
+          "2025-01-01",
+          "2025-01-20",
+          "2025-02-17",
+          "2025-05-26",
+          "2025-06-19",
+          "2025-07-04",
+          "2025-09-01",
+          "2025-10-13",
+          "2025-11-11",
+          "2025-11-27",
+          "2025-12-24",
+          "2025-12-25",
+          "2026-01-01",
+          "2026-01-19",
+          "2026-02-16",
+          "2026-05-25",
+          "2026-06-19",
+          "2026-07-03",
+          "2026-09-07",
+          "2026-10-12",
+          "2026-11-11",
+          "2026-11-26",
+          "2026-12-24",
+          "2026-12-25"
+        ],
+        "used_for": "The calendar of the providers' offices and the plan: visits, claim intake, PA submissions and plan decisions fall on weekdays outside these dates. Not stored in any record."
+      },
+      {
+        "fact": "America/New_York daylight-saving rules from the IANA time zone database, as Node.js applies them",
+        "used_for": "The offset of every timestamp; the App's own time functions use the same rules."
+      }
+    ],
+    "app_policy": "The deadline lengths (3-day review, 45-day request expiry, 15-day PA decision, 30- and 60-day appeal decisions, 72-hour expedite, 180-day appeal window) are the App's policy, modelled on U.S. employer-plan rules as the approved proposal states; they are business logic, not data, and the dataset only follows them."
+  },
+  "partitions": [
+    {
+      "partition": "synthetic, dated before the reference clock",
+      "from": "2025-01-01T00:00:00-05:00",
+      "to": "2026-11-18T12:00:00-05:00",
+      "records": 720,
+      "replay_steps": 160
+    },
+    {
+      "partition": "synthetic, dated at or after the reference clock: generated, never observed",
+      "from": "2026-11-18T12:00:00-05:00",
+      "to": "2027-01-01T00:00:00-05:00",
+      "records": 24,
+      "replay_steps": 7
+    }
+  ],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "claims": 4,
+      "claim_processings": 3,
+      "info_requests": 5,
+      "info_answers": 3,
+      "info_expirys": 0,
+      "attestations": 2,
+      "eobs": 3,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 16,
+      "replay_steps": 7,
+      "records": 37,
+      "distinct_dates": 8,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 37
+    },
+    {
+      "month": "2025-02",
+      "claims": 2,
+      "claim_processings": 3,
+      "info_requests": 1,
+      "info_answers": 3,
+      "info_expirys": 0,
+      "attestations": 1,
+      "eobs": 3,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 9,
+      "replay_steps": 4,
+      "records": 23,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 23
+    },
+    {
+      "month": "2025-03",
+      "claims": 2,
+      "claim_processings": 2,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 2,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 5,
+      "replay_steps": 2,
+      "records": 11,
+      "distinct_dates": 4,
+      "distinct_dates_with_replay_log": 4,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 11
+    },
+    {
+      "month": "2025-04",
+      "claims": 3,
+      "claim_processings": 3,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 3,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 7,
+      "replay_steps": 3,
+      "records": 16,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 16
+    },
+    {
+      "month": "2025-05",
+      "claims": 2,
+      "claim_processings": 1,
+      "info_requests": 2,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 1,
+      "pas": 1,
+      "pa_info_requests": 0,
+      "pa_expedites": 1,
+      "pa_expedite_decisions": 1,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 12,
+      "replay_steps": 6,
+      "records": 22,
+      "distinct_dates": 4,
+      "distinct_dates_with_replay_log": 4,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 22
+    },
+    {
+      "month": "2025-06",
+      "claims": 3,
+      "claim_processings": 2,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 2,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 1,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 5,
+      "replay_steps": 4,
+      "records": 13,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 13
+    },
+    {
+      "month": "2025-07",
+      "claims": 4,
+      "claim_processings": 6,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 2,
+      "attestations": 0,
+      "eobs": 6,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 1,
+      "covered_submissions": 0,
+      "appeals": 2,
+      "appeal_statements": 3,
+      "appeal_info_requests": 1,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 2,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 27,
+      "replay_steps": 8,
+      "records": 54,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 54
+    },
+    {
+      "month": "2025-08",
+      "claims": 2,
+      "claim_processings": 2,
+      "info_requests": 2,
+      "info_answers": 2,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 2,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 1,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 1,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 13,
+      "replay_steps": 5,
+      "records": 25,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 25
+    },
+    {
+      "month": "2025-09",
+      "claims": 1,
+      "claim_processings": 1,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 2,
+      "pas": 1,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 1,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 1,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 1,
+      "notices": 11,
+      "replay_steps": 5,
+      "records": 20,
+      "distinct_dates": 7,
+      "distinct_dates_with_replay_log": 7,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 20
+    },
+    {
+      "month": "2025-10",
+      "claims": 5,
+      "claim_processings": 4,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 4,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 7,
+      "replay_steps": 5,
+      "records": 20,
+      "distinct_dates": 8,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 20
+    },
+    {
+      "month": "2025-11",
+      "claims": 2,
+      "claim_processings": 3,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 3,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 7,
+      "replay_steps": 2,
+      "records": 15,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 15
+    },
+    {
+      "month": "2025-12",
+      "claims": 4,
+      "claim_processings": 4,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 4,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 10,
+      "replay_steps": 5,
+      "records": 22,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 22
+    },
+    {
+      "month": "2026-01",
+      "claims": 6,
+      "claim_processings": 2,
+      "info_requests": 6,
+      "info_answers": 4,
+      "info_expirys": 0,
+      "attestations": 1,
+      "eobs": 2,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 1,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 23,
+      "replay_steps": 9,
+      "records": 45,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 10,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 45
+    },
+    {
+      "month": "2026-02",
+      "claims": 9,
+      "claim_processings": 10,
+      "info_requests": 5,
+      "info_answers": 5,
+      "info_expirys": 0,
+      "attestations": 2,
+      "eobs": 10,
+      "pas": 3,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 1,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 32,
+      "replay_steps": 19,
+      "records": 78,
+      "distinct_dates": 18,
+      "distinct_dates_with_replay_log": 18,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 78
+    },
+    {
+      "month": "2026-03",
+      "claims": 6,
+      "claim_processings": 9,
+      "info_requests": 1,
+      "info_answers": 3,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 9,
+      "pas": 1,
+      "pa_info_requests": 1,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 2,
+      "pa_overdues": 1,
+      "pa_expirys": 2,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 23,
+      "replay_steps": 14,
+      "records": 58,
+      "distinct_dates": 17,
+      "distinct_dates_with_replay_log": 18,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 58
+    },
+    {
+      "month": "2026-04",
+      "claims": 5,
+      "claim_processings": 5,
+      "info_requests": 2,
+      "info_answers": 2,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 5,
+      "pas": 1,
+      "pa_info_requests": 0,
+      "pa_expedites": 1,
+      "pa_expedite_decisions": 1,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 1,
+      "appeal_statements": 1,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 1,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 1,
+      "window_closing_notices": 0,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 16,
+      "replay_steps": 14,
+      "records": 44,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 44
+    },
+    {
+      "month": "2026-05",
+      "claims": 7,
+      "claim_processings": 7,
+      "info_requests": 2,
+      "info_answers": 2,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 7,
+      "pas": 1,
+      "pa_info_requests": 1,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 1,
+      "pa_expirys": 2,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 21,
+      "replay_steps": 12,
+      "records": 51,
+      "distinct_dates": 17,
+      "distinct_dates_with_replay_log": 17,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 51
+    },
+    {
+      "month": "2026-06",
+      "claims": 3,
+      "claim_processings": 2,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 2,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 1,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 4,
+      "replay_steps": 5,
+      "records": 13,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 13
+    },
+    {
+      "month": "2026-07",
+      "claims": 4,
+      "claim_processings": 4,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 4,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 1,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 1,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 9,
+      "replay_steps": 4,
+      "records": 23,
+      "distinct_dates": 9,
+      "distinct_dates_with_replay_log": 9,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 23
+    },
+    {
+      "month": "2026-08",
+      "claims": 8,
+      "claim_processings": 9,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 9,
+      "pas": 1,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 1,
+      "appeal_statements": 1,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 2,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 25,
+      "replay_steps": 11,
+      "records": 57,
+      "distinct_dates": 19,
+      "distinct_dates_with_replay_log": 19,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 57
+    },
+    {
+      "month": "2026-09",
+      "claims": 6,
+      "claim_processings": 5,
+      "info_requests": 1,
+      "info_answers": 1,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 5,
+      "pas": 1,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 1,
+      "pa_overdues": 0,
+      "pa_expirys": 1,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 1,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 14,
+      "replay_steps": 10,
+      "records": 36,
+      "distinct_dates": 14,
+      "distinct_dates_with_replay_log": 14,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 36
+    },
+    {
+      "month": "2026-10",
+      "claims": 2,
+      "claim_processings": 3,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 3,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 1,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 1,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 7,
+      "replay_steps": 2,
+      "records": 17,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 17
+    },
+    {
+      "month": "2026-11",
+      "claims": 4,
+      "claim_processings": 4,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 4,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 1,
+      "appeal_statements": 2,
+      "appeal_info_requests": 1,
+      "appeal_decisions": 0,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 13,
+      "replay_steps": 7,
+      "records": 29,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 10,
+      "records_after_reference_clock": 9,
+      "real": 0,
+      "synthetic": 29
+    },
+    {
+      "month": "2026-12",
+      "claims": 3,
+      "claim_processings": 2,
+      "info_requests": 0,
+      "info_answers": 0,
+      "info_expirys": 0,
+      "attestations": 0,
+      "eobs": 3,
+      "pas": 0,
+      "pa_info_requests": 0,
+      "pa_expedites": 0,
+      "pa_expedite_decisions": 0,
+      "pa_decisions": 0,
+      "pa_overdues": 0,
+      "pa_expirys": 0,
+      "covered_submissions": 0,
+      "appeals": 0,
+      "appeal_statements": 0,
+      "appeal_info_requests": 0,
+      "appeal_decisions": 1,
+      "appeal_withdrawals": 0,
+      "appeal_overdues": 0,
+      "appeal_windows": 0,
+      "window_closing_notices": 0,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 6,
+      "replay_steps": 4,
+      "records": 15,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 15,
+      "real": 0,
+      "synthetic": 15
+    }
+  ],
+  "months_without_claims": [],
+  "household": {
+    "trips": [
+      {
+        "from": "2025-07-12",
+        "to": "2025-07-20",
+        "people": [
+          "m-1",
+          "m-2",
+          "m-3"
+        ],
+        "what": "family summer trip"
+      },
+      {
+        "from": "2025-12-27",
+        "to": "2026-01-03",
+        "people": [
+          "m-1",
+          "m-2",
+          "m-3"
+        ],
+        "what": "winter visit to family near Cindervale"
+      },
+      {
+        "from": "2026-07-18",
+        "to": "2026-07-26",
+        "people": [
+          "m-1",
+          "m-2",
+          "m-3"
+        ],
+        "what": "family summer trip near Cindervale"
+      }
+    ],
+    "plan_backlog": {
+      "periods": [
+        {
+          "from": "2025-01-02",
+          "to": "2025-03-15",
+          "what": "plan-year surge",
+          "severity": "heavy",
+          "chance": 0.6
+        },
+        {
+          "from": "2025-06-15",
+          "to": "2025-08-31",
+          "what": "summer staffing",
+          "severity": "heavy",
+          "chance": 0.6
+        },
+        {
+          "from": "2025-11-20",
+          "to": "2025-12-31",
+          "what": "holiday backlog",
+          "severity": "heavy",
+          "chance": 0.6
+        },
+        {
+          "from": "2026-01-02",
+          "to": "2026-03-15",
+          "what": "plan-year surge",
+          "severity": "light",
+          "chance": 0.1
+        },
+        {
+          "from": "2026-06-15",
+          "to": "2026-08-31",
+          "what": "summer staffing",
+          "severity": "heavy",
+          "chance": 0.6
+        },
+        {
+          "from": "2026-11-20",
+          "to": "2026-12-31",
+          "what": "holiday backlog",
+          "severity": "heavy",
+          "chance": 0.6
+        }
+      ],
+      "usual": 0.03,
+      "pa_factor": 0.5
+    },
+    "grants": [
+      {
+        "grant_id": "gr-1",
+        "member_id": "m-1",
+        "grantee_id": "m-2",
+        "scope": "act",
+        "created_at": "2025-01-01T13:00:00-05:00",
+        "expires_at": "2027-01-01T00:00:00-05:00",
+        "status": "active",
+        "revoked_at": null,
+        "changed_by": "account holder"
+      },
+      {
+        "grant_id": "gr-2",
+        "member_id": "m-2",
+        "grantee_id": "m-1",
+        "scope": "view",
+        "created_at": "2025-02-18T22:16:00-05:00",
+        "expires_at": null,
+        "status": "revoked",
+        "revoked_at": "2025-09-07T14:10:00-04:00",
+        "changed_by": "event"
+      },
+      {
+        "grant_id": "gr-3",
+        "member_id": "m-2",
+        "grantee_id": "m-1",
+        "scope": "act",
+        "created_at": "2026-04-27T12:17:00-04:00",
+        "expires_at": "2026-06-26T00:00:00-04:00",
+        "status": "active",
+        "revoked_at": null,
+        "changed_by": "event"
+      }
+    ],
+    "prior_authorizations": [
+      {
+        "pa_id": "pa-1",
+        "member_id": "m-3",
+        "provider_id": "pv-3",
+        "service_id": "svc-physical-therapy",
+        "status": "expired",
+        "submitted_at": "2025-05-21T10:00:00-04:00",
+        "due_at": "2025-06-05T23:59:00-04:00",
+        "decided_at": "2025-05-28T13:39:00-04:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 8,
+          "valid_from": "2025-05-24",
+          "valid_until": "2025-06-27"
+        },
+        "approved": {
+          "units": 8,
+          "valid_from": "2025-05-28",
+          "valid_until": "2025-07-01"
+        },
+        "units_used": 8,
+        "info_requests": [],
+        "expedite": "denied (requested 2025-05-21T21:24:00-04:00)",
+        "covered_submissions": [
+          "pa-2 4 units at 2025-06-17T08:22:00-04:00"
+        ],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-3",
+        "member_id": "m-2",
+        "provider_id": "pv-1",
+        "service_id": "svc-semaglutide-1",
+        "status": "expired",
+        "submitted_at": "2025-09-25T14:55:00-04:00",
+        "due_at": "2025-10-10T23:59:00-04:00",
+        "decided_at": "2025-09-26T10:35:00-04:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 6,
+          "valid_from": "2025-09-28",
+          "valid_until": "2026-03-28"
+        },
+        "approved": {
+          "units": 6,
+          "valid_from": "2025-09-28",
+          "valid_until": "2026-03-28"
+        },
+        "units_used": 0,
+        "info_requests": [],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-4",
+        "member_id": "m-3",
+        "provider_id": "pv-3",
+        "service_id": "svc-physical-therapy",
+        "status": "expired",
+        "submitted_at": "2026-02-11T13:54:00-05:00",
+        "due_at": "2026-02-26T23:59:00-05:00",
+        "decided_at": "2026-02-12T15:46:00-05:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 6,
+          "valid_from": "2026-02-14",
+          "valid_until": "2026-03-13"
+        },
+        "approved": {
+          "units": 6,
+          "valid_from": "2026-02-14",
+          "valid_until": "2026-03-13"
+        },
+        "units_used": 6,
+        "info_requests": [],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-5",
+        "member_id": "m-2",
+        "provider_id": "pv-2",
+        "service_id": "svc-arthroscopy",
+        "status": "withdrawn",
+        "submitted_at": "2026-02-20T09:19:00-05:00",
+        "due_at": "2026-03-07T23:59:00-05:00",
+        "decided_at": null,
+        "overdue_at": null,
+        "requested": {
+          "units": 1,
+          "valid_from": "2026-03-06",
+          "valid_until": "2026-04-20"
+        },
+        "approved": null,
+        "units_used": 0,
+        "info_requests": [],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-6",
+        "member_id": "m-2",
+        "provider_id": "pv-3",
+        "service_id": "svc-physical-therapy",
+        "status": "expired",
+        "submitted_at": "2026-02-26T15:25:00-05:00",
+        "due_at": "2026-03-13T23:59:00-04:00",
+        "decided_at": "2026-03-16T12:04:00-04:00",
+        "overdue_at": "2026-03-13T23:59:00-04:00",
+        "requested": {
+          "units": 12,
+          "valid_from": "2026-02-28",
+          "valid_until": "2026-04-24"
+        },
+        "approved": {
+          "units": 12,
+          "valid_from": "2026-03-16",
+          "valid_until": "2026-05-10"
+        },
+        "units_used": 10,
+        "info_requests": [],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-7",
+        "member_id": "m-2",
+        "provider_id": "pv-1",
+        "service_id": "svc-semaglutide-1",
+        "status": "expired",
+        "submitted_at": "2026-03-09T12:14:00-04:00",
+        "due_at": "2026-03-24T23:59:00-04:00",
+        "decided_at": "2026-03-18T12:20:00-04:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 6,
+          "valid_from": "2026-03-14",
+          "valid_until": "2026-09-11"
+        },
+        "approved": {
+          "units": 6,
+          "valid_from": "2026-03-18",
+          "valid_until": "2026-09-15"
+        },
+        "units_used": 0,
+        "info_requests": [
+          "2026-03-11T10:38:00-04:00 Chart notes with the weight history and the treatments tried before"
+        ],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-8",
+        "member_id": "m-2",
+        "provider_id": "pv-2",
+        "service_id": "svc-arthroscopy",
+        "status": "expired",
+        "submitted_at": "2026-04-24T09:23:00-04:00",
+        "due_at": "2026-04-27T12:54:00-04:00",
+        "decided_at": "2026-04-27T11:15:00-04:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 1,
+          "valid_from": "2026-04-24",
+          "valid_until": "2026-05-24"
+        },
+        "approved": {
+          "units": 1,
+          "valid_from": "2026-04-27",
+          "valid_until": "2026-05-27"
+        },
+        "units_used": 1,
+        "info_requests": [],
+        "expedite": "approved (requested 2026-04-24T12:54:00-04:00)",
+        "covered_submissions": [],
+        "appeals": [
+          "ap-3 overturned (expedited)"
+        ]
+      },
+      {
+        "pa_id": "pa-9",
+        "member_id": "m-2",
+        "provider_id": "pv-3",
+        "service_id": "svc-physical-therapy",
+        "status": "expired",
+        "submitted_at": "2026-05-11T12:30:00-04:00",
+        "due_at": "2026-05-26T23:59:00-04:00",
+        "decided_at": "2026-06-01T15:25:00-04:00",
+        "overdue_at": "2026-05-26T23:59:00-04:00",
+        "requested": {
+          "units": 12,
+          "valid_from": "2026-05-12",
+          "valid_until": "2026-06-29"
+        },
+        "approved": {
+          "units": 12,
+          "valid_from": "2026-06-01",
+          "valid_until": "2026-07-19"
+        },
+        "units_used": 11,
+        "info_requests": [
+          "2026-05-12T10:46:00-04:00 Notes from the initial evaluation"
+        ],
+        "expedite": null,
+        "covered_submissions": [
+          "pa-10 4 units at 2026-06-23T08:58:00-04:00"
+        ],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-11",
+        "member_id": "m-2",
+        "provider_id": "pv-1",
+        "service_id": "svc-semaglutide-1",
+        "status": "approved",
+        "submitted_at": "2026-08-19T16:22:00-04:00",
+        "due_at": "2026-09-03T23:59:00-04:00",
+        "decided_at": "2026-08-25T15:15:00-04:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 6,
+          "valid_from": "2026-08-26",
+          "valid_until": "2027-02-23"
+        },
+        "approved": {
+          "units": 6,
+          "valid_from": "2026-08-26",
+          "valid_until": "2027-02-23"
+        },
+        "units_used": 0,
+        "info_requests": [],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      },
+      {
+        "pa_id": "pa-12",
+        "member_id": "m-1",
+        "provider_id": "pv-3",
+        "service_id": "svc-physical-therapy",
+        "status": "expired",
+        "submitted_at": "2026-09-16T12:37:00-04:00",
+        "due_at": "2026-10-01T23:59:00-04:00",
+        "decided_at": "2026-09-17T11:41:00-04:00",
+        "overdue_at": null,
+        "requested": {
+          "units": 8,
+          "valid_from": "2026-09-19",
+          "valid_until": "2026-10-23"
+        },
+        "approved": {
+          "units": 8,
+          "valid_from": "2026-09-19",
+          "valid_until": "2026-10-23"
+        },
+        "units_used": 5,
+        "info_requests": [],
+        "expedite": null,
+        "covered_submissions": [],
+        "appeals": []
+      }
+    ],
+    "appeals": [
+      {
+        "appeal_id": "ap-1",
+        "member_id": "m-2",
+        "target": "claim:cl-17",
+        "expedited": false,
+        "filed_at": "2025-07-08T22:05:00-04:00",
+        "filed_by": "m-2",
+        "due_at": "2025-09-06T23:59:00-04:00",
+        "status": "upheld",
+        "decided_at": "2025-08-07T15:39:00-04:00",
+        "withdrawn_at": null,
+        "overdue": false,
+        "statements": [
+          "2025-07-08T22:05:00-04:00 m-2: Quarrowby Family Medicine ordered the scan at the visit on June 10, 2025, and Quillmont Imaging Center had the first opening: the abdominal ultrasound on June 24, 2025. Nobody told us it was out of network. Please cover it at the in-network level.",
+          "2025-07-22T12:44:00-04:00 m-2: The order from Quarrowby Family Medicine, written at the visit on June 10, 2025, asks for the scan within three weeks; Quillmont Imaging Center was the first place that could do it in time."
+        ],
+        "info_requests": [
+          "2025-07-21T12:21:00-04:00 The order from the doctor who requested the abdominal ultrasound"
+        ]
+      },
+      {
+        "appeal_id": "ap-2",
+        "member_id": "m-3",
+        "target": "claim:cl-13",
+        "expedited": false,
+        "filed_at": "2025-07-12T12:24:00-04:00",
+        "filed_by": "m-2",
+        "due_at": "2025-09-10T23:59:00-04:00",
+        "status": "overturned",
+        "decided_at": "2025-09-17T11:28:00-04:00",
+        "withdrawn_at": null,
+        "overdue": true,
+        "statements": [
+          "2025-07-12T12:24:00-04:00 m-2: We missed the accident questions for the specialist office visit on May 19, 2025 and the X-ray, two views on May 19, 2025 at Kestrel Valley Orthopedics; it happened during a game and was an accident. Please process these lines."
+        ],
+        "info_requests": []
+      },
+      {
+        "appeal_id": "ap-3",
+        "member_id": "m-2",
+        "target": "pa:pa-8",
+        "expedited": true,
+        "filed_at": "2026-04-25T10:21:00-04:00",
+        "filed_by": "m-2",
+        "due_at": "2026-04-28T10:21:00-04:00",
+        "status": "overturned",
+        "decided_at": "2026-04-27T11:15:00-04:00",
+        "withdrawn_at": null,
+        "overdue": false,
+        "statements": [
+          "2026-04-25T10:21:00-04:00 m-2: My knee locks and I cannot straighten it. The surgeon at Kestrel Valley Orthopedics saw me on April 23, 2026 and wants to operate as soon as possible. Please approve the surgery urgently."
+        ],
+        "info_requests": []
+      },
+      {
+        "appeal_id": "ap-4",
+        "member_id": "m-3",
+        "target": "claim:cl-75",
+        "expedited": false,
+        "filed_at": "2026-08-18T19:07:00-04:00",
+        "filed_by": "m-1",
+        "due_at": "2026-10-17T23:59:00-04:00",
+        "status": "withdrawn",
+        "decided_at": null,
+        "withdrawn_at": "2026-09-06T17:07:00-04:00",
+        "overdue": false,
+        "statements": [
+          "2026-08-18T19:07:00-04:00 m-1: Riley was seen in the emergency department at Cindervale Medical Center while we were away from home: the emergency department visit on July 25, 2026. It was an emergency visit, so please cover it at the in-network level."
+        ],
+        "info_requests": []
+      },
+      {
+        "appeal_id": "ap-5",
+        "member_id": "m-1",
+        "target": "claim:cl-90",
+        "expedited": false,
+        "filed_at": "2026-11-04T20:00:00-05:00",
+        "filed_by": "m-1",
+        "due_at": "2027-01-03T23:59:00-05:00",
+        "status": "overturned",
+        "decided_at": "2026-12-04T11:35:00-05:00",
+        "withdrawn_at": null,
+        "overdue": false,
+        "statements": [
+          "2026-11-04T20:00:00-05:00 m-1: The therapy session on October 26, 2026 was moved from October 19, 2026 because the clinic rescheduled it; the authorization for the course still had sessions left. Please cover it as part of the approved course.",
+          "2026-11-21T11:51:00-05:00 m-1: Fernhollow Physical Therapy moved the session of October 19, 2026 to October 26, 2026; the authorization ended on October 23, 2026."
+        ],
+        "info_requests": [
+          "2026-11-18T13:58:00-05:00 The therapy clinic's schedule showing the moved session"
+        ]
+      }
+    ],
+    "measures": {
+      "methods": {
+        "answer_days": "Days from an information request's opening to its answer: (answered_at minus opened_at) in elapsed milliseconds divided by 86,400,000, over answered requests; requests that expired are counted separately and are not part of the distribution.",
+        "pa_decision_days": "Days from a PA's submission to the plan's first decision on it: (the first decision minus submitted_at) in elapsed milliseconds divided by 86,400,000, where the first decision is a denied PA's denial_notice_at, which a later appeal does not change, and otherwise an approved PA's decided_at; a withdrawn PA has no decision.",
+        "appeal_decision_days": "Days from an appeal's filing to its decision: (decided_at minus filed_at) in elapsed milliseconds divided by 86,400,000, over decided appeals; withdrawn and open appeals are listed by status.",
+        "out_of_pocket": "Each member's deductible and out-of-pocket amounts per plan year are the App's accumulators in dataset/full.json, compared with that year's individual limits; family totals are the sums over the enrolled members."
+      },
+      "answer_days": {
+        "count": 25,
+        "min": 1.8,
+        "median": 2.9,
+        "max": 42.8,
+        "expired": 2,
+        "by_type": {
+          "other_coverage": {
+            "count": 10,
+            "min": 1.9,
+            "median": 2.5,
+            "max": 42.5
+          },
+          "accident": {
+            "count": 15,
+            "min": 1.8,
+            "median": 3.9,
+            "max": 42.8
+          }
+        }
+      },
+      "pa_decision_days": {
+        "count": 9,
+        "min": 0.3,
+        "median": 6,
+        "max": 21.1,
+        "overdue": [
+          "pa-6",
+          "pa-9"
+        ]
+      },
+      "appeal_decision_days": {
+        "count": 4,
+        "min": 2,
+        "median": 29.7,
+        "max": 67,
+        "overdue": [
+          "ap-2"
+        ],
+        "by_status": {
+          "upheld": 1,
+          "overturned": 3,
+          "withdrawn": 1,
+          "under_review": 0,
+          "info_requested": 0
+        }
+      },
+      "out_of_pocket": [
+        {
+          "member_id": "m-1",
+          "plan_year": 2025,
+          "deductible": "$430.40 of $1250.00",
+          "out_of_pocket": "$630.40 of $3500.00",
+          "deductible_met": false,
+          "out_of_pocket_max_reached": false
+        },
+        {
+          "member_id": "m-1",
+          "plan_year": 2026,
+          "deductible": "$428.04 of $1500.00",
+          "out_of_pocket": "$1004.04 of $4000.00",
+          "deductible_met": false,
+          "out_of_pocket_max_reached": false
+        },
+        {
+          "member_id": "m-2",
+          "plan_year": 2025,
+          "deductible": "$247.64 of $1250.00",
+          "out_of_pocket": "$489.64 of $3500.00",
+          "deductible_met": false,
+          "out_of_pocket_max_reached": false
+        },
+        {
+          "member_id": "m-2",
+          "plan_year": 2026,
+          "deductible": "$1500.00 of $1500.00",
+          "out_of_pocket": "$4000.00 of $4000.00",
+          "deductible_met": true,
+          "out_of_pocket_max_reached": true
+        },
+        {
+          "member_id": "m-3",
+          "plan_year": 2025,
+          "deductible": "$187.87 of $1250.00",
+          "out_of_pocket": "$941.87 of $3500.00",
+          "deductible_met": false,
+          "out_of_pocket_max_reached": false
+        },
+        {
+          "member_id": "m-3",
+          "plan_year": 2026,
+          "deductible": "$450.27 of $1500.00",
+          "out_of_pocket": "$1254.27 of $4000.00",
+          "deductible_met": false,
+          "out_of_pocket_max_reached": false
+        }
+      ]
+    }
+  },
+  "gaps": [
+    {
+      "kind": "real_data_anchor",
+      "period": "2026-11",
+      "status": "stated gap, pending maintainer agreement",
+      "reason": "There is no real health-plan record to collect: claims, EOBs, prior authorizations and appeals are a real member's protected health information, the reference product shows them only inside a signed-in member account, and the approved proposal (PR #64, https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/c0f566a3c5be418cd0c971d58e4144cb8085d25a/proposals/environment/larkfield-health.md at the approved revision) describes a synthetic plan with the reference site as a workflow reference only (line 6), excludes data collection (line 103: \"N/A: no crawling or copied content; record public workflow references\") and calls for synthetic data with no real people, brands or member data (line 104). No real data anchors November 2026 or any other month; every dated record of the window is synthetic."
+    },
+    {
+      "kind": "mail_history",
+      "status": "stated gap",
+      "reason": "The 322 notices are in the App's own notice log only; the dataset holds no Mail history for them. Mail is optional, and the Mail sender treats notices present in a loaded seed as history."
+    },
+    {
+      "kind": "unused_authorizations",
+      "status": "stated gap",
+      "service_id": "svc-semaglutide-1",
+      "pa_ids": [
+        "pa-3",
+        "pa-7",
+        "pa-11"
+      ],
+      "reason": "Casey's semaglutide 1 mg weekly pen authorizations pa-3 (6 units, 2025-09-28 to 2026-03-28), pa-7 (6 units, 2026-03-18 to 2026-09-15) and pa-11 (6 units, 2026-08-26 to 2027-02-23) are approved and never used: each ends with 0 units used, and no claim line bills svc-semaglutide-1. The service is a pharmacy item and the catalogue has no pharmacy among its providers, so the authorization is never used in this App; each request follows a visit at Quarrowby Family Medicine, which bills the visit, not the medicine, and the dataset invents no pharmacy claims."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-01-02",
+      "to": "2025-01-09",
+      "days": 8,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: no claim arrives before it in the window, the next on 2025-01-10, and 2 service dates inside it were billed after it.",
+      "last_claim_before": null,
+      "next_claim": "2025-01-10"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-02-01",
+      "to": "2025-02-12",
+      "days": 12,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-01-28, the next on 2025-02-13, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2025-01-28",
+      "next_claim": "2025-02-13"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-02-26",
+      "to": "2025-03-13",
+      "days": 16,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-02-19, the next on 2025-03-14, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2025-02-19",
+      "next_claim": "2025-03-14"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-03-24",
+      "to": "2025-04-03",
+      "days": 11,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-03-20, the next on 2025-04-04, and 2 service dates inside it were billed after it.",
+      "last_claim_before": "2025-03-20",
+      "next_claim": "2025-04-04"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-04-14",
+      "to": "2025-04-21",
+      "days": 8,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-04-10, the next on 2025-04-22, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2025-04-10",
+      "next_claim": "2025-04-22"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-04-26",
+      "to": "2025-05-20",
+      "days": 25,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-04-22, the next on 2025-05-22, and 2 service dates inside it were billed after it.",
+      "last_claim_before": "2025-04-22",
+      "next_claim": "2025-05-22"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-05-29",
+      "to": "2025-06-15",
+      "days": 18,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-05-22, the next on 2025-06-16, and 5 service dates inside it were billed after it.",
+      "last_claim_before": "2025-05-22",
+      "next_claim": "2025-06-16"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-06-21",
+      "to": "2025-06-29",
+      "days": 9,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-06-17, the next on 2025-06-30, and 3 service dates inside it were billed after it.",
+      "last_claim_before": "2025-06-17",
+      "next_claim": "2025-06-30"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-08-16",
+      "to": "2025-09-06",
+      "days": 22,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-08-05, the next on 2025-09-24, and no visit falls inside it.",
+      "last_claim_before": "2025-08-05",
+      "next_claim": "2025-09-24"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-10-07",
+      "to": "2025-10-19",
+      "days": 13,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-10-03, the next on 2025-10-20, and 2 service dates inside it were billed after it.",
+      "last_claim_before": "2025-10-03",
+      "next_claim": "2025-10-20"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-11-16",
+      "to": "2025-12-01",
+      "days": 16,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-11-12, the next on 2025-12-02, and 2 service dates inside it were billed after it.",
+      "last_claim_before": "2025-11-12",
+      "next_claim": "2025-12-02"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-12-20",
+      "to": "2026-01-08",
+      "days": 20,
+      "reason": "Overlaps the winter visit to family near Cindervale (2025-12-27 to 2026-01-03), when the household has no scheduled care. No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2025-12-16, the next on 2026-01-09, and 3 service dates inside it were billed after it.",
+      "last_claim_before": "2025-12-16",
+      "next_claim": "2026-01-09"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-01-18",
+      "to": "2026-01-25",
+      "days": 8,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-01-14, the next on 2026-01-26, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2026-01-14",
+      "next_claim": "2026-01-26"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-03-21",
+      "to": "2026-03-27",
+      "days": 7,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-03-17, the next on 2026-04-02, and 3 service dates inside it were billed after it.",
+      "last_claim_before": "2026-03-17",
+      "next_claim": "2026-04-02"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-06-02",
+      "to": "2026-06-22",
+      "days": 21,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-05-28, the next on 2026-06-23, and 6 service dates inside it were billed after it.",
+      "last_claim_before": "2026-05-28",
+      "next_claim": "2026-06-23"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-10-12",
+      "to": "2026-10-22",
+      "days": 11,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-10-08, the next on 2026-10-28, and 2 service dates inside it were billed after it.",
+      "last_claim_before": "2026-10-08",
+      "next_claim": "2026-10-28"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-11-24",
+      "to": "2026-12-03",
+      "days": 10,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-11-20, the next on 2026-12-04, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2026-11-20",
+      "next_claim": "2026-12-04"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-12-08",
+      "to": "2026-12-16",
+      "days": 9,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-12-04, the next on 2026-12-17, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2026-12-04",
+      "next_claim": "2026-12-17"
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-12-21",
+      "to": "2026-12-29",
+      "days": 9,
+      "reason": "No claim arrives and no review, request, decision, notice or household action falls in these days: the last claim before it arrived on 2026-12-17, the next on 2026-12-30, and 1 service date inside it was billed after it.",
+      "last_claim_before": "2026-12-17",
+      "next_claim": "2026-12-30"
+    }
+  ],
+  "dates": {
+    "2025-01-01": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-01-10": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-01-13": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-01-16": {
+      "records": 2,
+      "claims": 2,
+      "replay_steps": 2
+    },
+    "2025-01-19": {
+      "records": 10,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-01-21": {
+      "records": 14,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2025-01-28": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-01-31": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-02-13": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-02-16": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-02-18": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-02-19": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-02-22": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-02-25": {
+      "records": 12,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-03-14": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-03-17": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-03-20": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-03-23": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-04-04": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-04-07": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-04-10": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-04-13": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-04-22": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-04-25": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-05-21": {
+      "records": 2,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2025-05-22": {
+      "records": 3,
+      "claims": 2,
+      "replay_steps": 3
+    },
+    "2025-05-25": {
+      "records": 13,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-05-28": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-06-16": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-06-17": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2025-06-19": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-06-20": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-06-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-07-01": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-07-03": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-07-04": {
+      "records": 7,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-07-08": {
+      "records": 5,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2025-07-09": {
+      "records": 11,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-07-11": {
+      "records": 6,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-07-12": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-07-14": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-07-21": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-07-22": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-07-28": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-07-31": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-08-04": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-08-05": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-08-07": {
+      "records": 9,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-08-08": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-08-15": {
+      "records": 9,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2025-09-07": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-09-10": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-09-17": {
+      "records": 8,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-09-24": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-09-25": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-09-26": {
+      "records": 2,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-09-27": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-10-03": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-10-06": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-10-20": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-10-21": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-10-23": {
+      "records": 4,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-10-24": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-10-26": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-10-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-11-02": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-11-06": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-11-09": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-11-12": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-11-15": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-12-02": {
+      "records": 2,
+      "claims": 2,
+      "replay_steps": 2
+    },
+    "2025-12-05": {
+      "records": 10,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2025-12-12": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-12-15": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2025-12-16": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2025-12-19": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-01-09": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-01-12": {
+      "records": 16,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-01-14": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-01-15": {
+      "records": 10,
+      "claims": 0,
+      "replay_steps": 3
+    },
+    "2026-01-17": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-01-26": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-01-28": {
+      "records": 4,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-01-29": {
+      "records": 4,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-01-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-01-31": {
+      "records": 2,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-02-01": {
+      "records": 12,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-02-02": {
+      "records": 8,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-02-07": {
+      "records": 9,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2026-02-09": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-02-11": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-02-12": {
+      "records": 9,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-02-13": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-02-14": {
+      "records": 2,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-02-15": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-02-16": {
+      "records": 8,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-02-19": {
+      "records": 5,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-02-20": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-02-22": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-02-23": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-02-25": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-02-26": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-02-27": {
+      "records": 2,
+      "claims": 2,
+      "replay_steps": 2
+    },
+    "2026-02-28": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-02": {
+      "records": 6,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-03-03": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-03-04": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-03-05": {
+      "records": 6,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-03-06": {
+      "records": 9,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-03-07": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-08": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-09": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-03-11": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-03-12": {
+      "records": 0,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-03-13": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-16": {
+      "records": 3,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-03-17": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-03-18": {
+      "records": 2,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-03-19": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-20": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-28": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-03-31": {
+      "records": 7,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2026-04-02": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-04-05": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-04-07": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-04-10": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-04-17": {
+      "records": 2,
+      "claims": 2,
+      "replay_steps": 2
+    },
+    "2026-04-20": {
+      "records": 11,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-04-22": {
+      "records": 7,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2026-04-23": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-04-24": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 4
+    },
+    "2026-04-25": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-04-26": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-04-27": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 2
+    },
+    "2026-05-04": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-05-05": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-05-06": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-05-07": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-08": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-09": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-10": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-11": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-05-12": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-05-14": {
+      "records": 6,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-15": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-18": {
+      "records": 7,
+      "claims": 1,
+      "replay_steps": 3
+    },
+    "2026-05-21": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-26": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-05-27": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-05-28": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-05-31": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-06-01": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-06-23": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-06-24": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-06-26": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-06-27": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-06-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-07-03": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-07-09": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-07-12": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-07-19": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-07-22": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-07-23": {
+      "records": 4,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-07-25": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-07-26": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-07-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-02": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-07": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-10": {
+      "records": 9,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-13": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-14": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-16": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-17": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-18": {
+      "records": 6,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-08-19": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-08-20": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-21": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-23": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-25": {
+      "records": 2,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-08-26": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-27": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-28": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-08-29": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-30": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-08-31": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-09-03": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-09-06": {
+      "records": 6,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-09-09": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-09-10": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-09-12": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-09-13": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-09-15": {
+      "records": 2,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-09-16": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-09-17": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-09-18": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-09-22": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-09-25": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-09-27": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-09-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-10-03": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-10-08": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-10-11": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-10-23": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-10-28": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-10-31": {
+      "records": 7,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-11-04": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-11-06": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-11-09": {
+      "records": 5,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-11-12": {
+      "records": 5,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-11-13": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-11-16": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-11-18": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-11-20": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-11-21": {
+      "records": 1,
+      "claims": 0,
+      "replay_steps": 1
+    },
+    "2026-11-23": {
+      "records": 4,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-12-04": {
+      "records": 7,
+      "claims": 1,
+      "replay_steps": 2
+    },
+    "2026-12-07": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-12-17": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    },
+    "2026-12-20": {
+      "records": 3,
+      "claims": 0,
+      "replay_steps": 0
+    },
+    "2026-12-30": {
+      "records": 1,
+      "claims": 1,
+      "replay_steps": 1
+    }
+  },
+  "representative": [
+    {
+      "example": "first claim of the window",
+      "claim_id": "cl-1",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2025-01-10T15:42:00-05:00",
+      "status": "processed",
+      "requests": [
+        "ir-1 other_coverage ln-1 answered none",
+        "ir-2 other_coverage ln-2 answered none"
+      ],
+      "eobs": [
+        "v1 2025-02-25T12:18:00-05:00: ln-1 office-visit 2025-01-06 paid $155.00, member $25.00 copay; ln-2 lab-panel 2025-01-06 paid $0.00, member $91.38 deductible $91.38"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-1 notice.info_requested to m-2",
+        "n-2 notice.info_requested to m-2",
+        "n-22 notice.eob_available to m-1",
+        "n-23 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "last claim of the window",
+      "claim_id": "cl-97",
+      "member": "m-1 Jordan Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2026-12-30T10:31:00-05:00",
+      "status": "received",
+      "requests": [],
+      "eobs": [],
+      "appeals": [],
+      "notices": []
+    },
+    {
+      "example": "first claim after the reference clock",
+      "claim_id": "cl-94",
+      "member": "m-1 Jordan Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2026-11-20T10:47:00-05:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-11-23T23:59:00-05:00: ln-1 office-visit 2026-11-18 paid $155.00, member $25.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-315 notice.eob_available to m-1",
+        "n-316 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "accident questions left to expire, appealed and overturned into EOB version 2",
+      "claim_id": "cl-13",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-2 Kestrel Valley Orthopedics",
+      "received_at": "2025-05-22T15:35:00-04:00",
+      "status": "processed",
+      "requests": [
+        "ir-7 accident ln-1 expired",
+        "ir-8 accident ln-2 expired"
+      ],
+      "eobs": [
+        "v1 2025-07-09T23:59:00-04:00: ln-1 specialist-visit 2025-05-19 denied missing_information; ln-2 xray 2025-05-19 denied missing_information",
+        "v2 2025-09-17T11:28:00-04:00: ln-1 specialist-visit 2025-05-19 paid $255.00, member $45.00 copay; ln-2 xray 2025-05-19 paid $0.00, member $119.63 deductible $119.63"
+      ],
+      "appeals": [
+        "ap-2 overturned (filed 2025-07-12T12:24:00-04:00 by m-2)"
+      ],
+      "notices": [
+        "n-41 notice.info_requested to m-1",
+        "n-42 notice.info_requested to m-2",
+        "n-43 notice.info_requested to m-3",
+        "n-44 notice.info_requested to m-1",
+        "n-45 notice.info_requested to m-2",
+        "n-46 notice.info_requested to m-3",
+        "n-64 notice.eob_available to m-1",
+        "n-65 notice.eob_available to m-2",
+        "n-66 notice.eob_available to m-3",
+        "n-67 notice.claim_denied to m-1",
+        "n-68 notice.claim_denied to m-2",
+        "n-69 notice.claim_denied to m-3",
+        "n-98 notice.eob_available to m-1",
+        "n-99 notice.eob_available to m-2",
+        "n-100 notice.eob_available to m-3"
+      ]
+    },
+    {
+      "example": "work injury denied as another party's",
+      "claim_id": "cl-21",
+      "member": "m-1 Jordan Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2025-08-04T14:02:00-04:00",
+      "status": "processed",
+      "requests": [
+        "ir-9 accident ln-1 answered work_related",
+        "ir-10 accident ln-2 answered work_related"
+      ],
+      "eobs": [
+        "v1 2025-08-15T21:39:00-04:00: ln-1 office-visit 2025-07-30 denied other_party_liable; ln-2 wound-repair 2025-07-30 denied other_party_liable"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-84 notice.info_requested to m-1",
+        "n-85 notice.info_requested to m-2",
+        "n-86 notice.info_requested to m-1",
+        "n-87 notice.info_requested to m-2",
+        "n-91 notice.eob_available to m-1",
+        "n-92 notice.eob_available to m-2",
+        "n-93 notice.claim_denied to m-1",
+        "n-94 notice.claim_denied to m-2",
+        "n-148 notice.appeal_window_closing to m-1",
+        "n-149 notice.appeal_window_closing to m-2"
+      ]
+    },
+    {
+      "example": "scheduled imaging out of network, denied and appealed",
+      "claim_id": "cl-17",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-5 Quillmont Imaging Center",
+      "received_at": "2025-07-01T08:08:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2025-07-04T23:59:00-04:00: ln-1 ultrasound 2025-06-24 denied out_of_network"
+      ],
+      "appeals": [
+        "ap-1 upheld (filed 2025-07-08T22:05:00-04:00 by m-2)"
+      ],
+      "notices": [
+        "n-58 notice.eob_available to m-1",
+        "n-59 notice.eob_available to m-2",
+        "n-60 notice.claim_denied to m-1",
+        "n-61 notice.claim_denied to m-2"
+      ]
+    },
+    {
+      "example": "emergency billed without the emergency flag, appeal withdrawn after the corrected claim",
+      "claim_id": "cl-75",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-6 Cindervale Medical Center",
+      "received_at": "2026-08-07T12:29:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-08-10T23:59:00-04:00: ln-1 er-visit 2026-07-25 denied out_of_network"
+      ],
+      "appeals": [
+        "ap-4 withdrawn (filed 2026-08-18T19:07:00-04:00 by m-1)"
+      ],
+      "notices": [
+        "n-260 notice.eob_available to m-1",
+        "n-261 notice.eob_available to m-2",
+        "n-262 notice.eob_available to m-3",
+        "n-263 notice.claim_denied to m-1",
+        "n-264 notice.claim_denied to m-2",
+        "n-265 notice.claim_denied to m-3"
+      ]
+    },
+    {
+      "example": "therapy session after the authorization ended, appealed",
+      "claim_id": "cl-90",
+      "member": "m-1 Jordan Hale",
+      "provider": "pv-3 Fernhollow Physical Therapy",
+      "received_at": "2026-10-28T15:23:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-10-31T23:59:00-04:00: ln-1 physical-therapy 2026-10-14 paid $115.00, member $35.00 copay; ln-2 physical-therapy 2026-10-21 paid $115.00, member $35.00 copay; ln-3 physical-therapy 2026-10-26 denied prior_auth_missing",
+        "v2 2026-12-04T11:35:00-05:00: ln-1 physical-therapy 2026-10-14 paid $115.00, member $35.00 copay; ln-2 physical-therapy 2026-10-21 paid $115.00, member $35.00 copay; ln-3 physical-therapy 2026-10-26 paid $115.00, member $35.00 copay"
+      ],
+      "appeals": [
+        "ap-5 overturned (filed 2026-11-04T20:00:00-05:00 by m-1)"
+      ],
+      "notices": [
+        "n-300 notice.eob_available to m-1",
+        "n-301 notice.eob_available to m-2",
+        "n-302 notice.claim_denied to m-1",
+        "n-303 notice.claim_denied to m-2",
+        "n-317 notice.eob_available to m-1",
+        "n-318 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "surgery",
+      "claim_id": "cl-66",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-4 Wrenmoor Community Hospital",
+      "received_at": "2026-05-18T11:38:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-05-21T23:59:00-04:00: ln-1 arthroscopy 2026-05-01 paid $6400.00, member $1600.00 coinsurance $1600.00; ln-2 specialist-visit 2026-05-01 paid $250.00, member $50.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-239 notice.eob_available to m-1",
+        "n-240 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "physical therapy session reaching Casey Hale's out-of-pocket maximum for 2026",
+      "claim_id": "cl-68",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-3 Fernhollow Physical Therapy",
+      "received_at": "2026-06-23T14:54:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-06-26T23:59:00-04:00: ln-1 physical-therapy 2026-06-08 paid $115.00, member $35.00 copay; ln-2 physical-therapy 2026-06-10 paid $115.00, member $35.00 copay; ln-3 physical-therapy 2026-06-15 paid $122.91, member $27.09 copay; ln-4 physical-therapy 2026-06-17 paid $150.00, member $0.00"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-247 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "one claim posting to two plan years",
+      "claim_id": "cl-36",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-6 Cindervale Medical Center",
+      "received_at": "2026-01-14T09:32:00-05:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-01-17T23:59:00-05:00: ln-1 er-visit 2025-12-31 paid $2000.00, member $200.00 copay; ln-2 lab-panel 2026-01-01 paid $0.00, member $91.38 deductible $91.38"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-145 notice.eob_available to m-1",
+        "n-146 notice.eob_available to m-2",
+        "n-147 notice.eob_available to m-3"
+      ]
+    },
+    {
+      "example": "emergency at an out-of-network hospital, paid at in-network cost sharing",
+      "claim_id": "cl-82",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-6 Cindervale Medical Center",
+      "received_at": "2026-08-28T13:25:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2026-08-31T23:59:00-04:00: ln-1 er-visit 2026-07-25 paid $1950.00, member $250.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-280 notice.eob_available to m-1",
+        "n-281 notice.eob_available to m-2",
+        "n-282 notice.eob_available to m-3"
+      ]
+    },
+    {
+      "example": "other coverage answered as secondary",
+      "claim_id": "cl-35",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-2 Kestrel Valley Orthopedics",
+      "received_at": "2026-01-09T09:59:00-05:00",
+      "status": "processed",
+      "requests": [
+        "ir-11 other_coverage ln-1 answered other_secondary",
+        "ir-12 accident ln-1 answered accident",
+        "ir-13 other_coverage ln-2 answered other_secondary",
+        "ir-14 accident ln-2 answered accident"
+      ],
+      "eobs": [
+        "v1 2026-01-15T22:09:00-05:00: ln-1 specialist-visit 2026-01-05 paid $250.00, member $50.00 copay; ln-2 xray 2026-01-05 paid $0.00, member $119.63 deductible $119.63"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-130 notice.info_requested to m-1",
+        "n-131 notice.info_requested to m-2",
+        "n-132 notice.info_requested to m-3",
+        "n-133 notice.info_requested to m-1",
+        "n-134 notice.info_requested to m-2",
+        "n-135 notice.info_requested to m-3",
+        "n-136 notice.info_requested to m-1",
+        "n-137 notice.info_requested to m-2",
+        "n-138 notice.info_requested to m-3",
+        "n-139 notice.info_requested to m-1",
+        "n-140 notice.info_requested to m-2",
+        "n-141 notice.info_requested to m-3",
+        "n-142 notice.eob_available to m-1",
+        "n-143 notice.eob_available to m-2",
+        "n-144 notice.eob_available to m-3"
+      ]
+    },
+    {
+      "example": "accident questions answered as not an accident",
+      "claim_id": "cl-42",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-2 Kestrel Valley Orthopedics",
+      "received_at": "2026-02-11T16:50:00-05:00",
+      "status": "processed",
+      "requests": [
+        "ir-19 accident ln-1 answered not_accident"
+      ],
+      "eobs": [
+        "v1 2026-02-19T12:20:00-05:00: ln-1 specialist-visit 2026-02-04 paid $250.00, member $50.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-170 notice.info_requested to m-2",
+        "n-178 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "routine office visit paid with a copay",
+      "claim_id": "cl-4",
+      "member": "m-1 Jordan Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2025-01-28T08:12:00-05:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2025-01-31T23:59:00-05:00: ln-1 office-visit 2025-01-21 paid $155.00, member $25.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-15 notice.eob_available to m-1",
+        "n-16 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "nurse phone consultation priced below the copay",
+      "claim_id": "cl-19",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2025-07-11T09:34:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2025-07-14T23:59:00-04:00: ln-1 phone-consult 2025-07-03 paid $0.00, member $22.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-76 notice.eob_available to m-1",
+        "n-77 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "lab work toward the deductible",
+      "claim_id": "cl-11",
+      "member": "m-1 Jordan Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2025-04-22T09:46:00-04:00",
+      "status": "processed",
+      "requests": [],
+      "eobs": [
+        "v1 2025-04-25T23:59:00-04:00: ln-1 office-visit 2025-04-17 paid $155.00, member $25.00 copay; ln-2 lab-panel 2025-04-17 paid $0.00, member $91.38 deductible $91.38"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-36 notice.eob_available to m-1",
+        "n-37 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "coinsurance after the deductible was met",
+      "claim_id": "cl-64",
+      "member": "m-2 Casey Hale",
+      "provider": "pv-2 Kestrel Valley Orthopedics",
+      "received_at": "2026-05-11T14:31:00-04:00",
+      "status": "processed",
+      "requests": [
+        "ir-25 accident ln-1 answered not_accident",
+        "ir-26 accident ln-2 answered not_accident"
+      ],
+      "eobs": [
+        "v1 2026-05-18T21:09:00-04:00: ln-1 specialist-visit 2026-04-30 paid $250.00, member $50.00 copay; ln-2 xray 2026-04-30 paid $95.70, member $23.93 coinsurance $23.93"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-231 notice.info_requested to m-1",
+        "n-232 notice.info_requested to m-2",
+        "n-233 notice.info_requested to m-1",
+        "n-234 notice.info_requested to m-2",
+        "n-237 notice.eob_available to m-1",
+        "n-238 notice.eob_available to m-2"
+      ]
+    },
+    {
+      "example": "other-coverage questions answered on the first claim of a year",
+      "claim_id": "cl-2",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-1 Quarrowby Family Medicine",
+      "received_at": "2025-01-16T08:31:00-05:00",
+      "status": "processed",
+      "requests": [
+        "ir-3 other_coverage ln-1 answered none"
+      ],
+      "eobs": [
+        "v1 2025-01-21T21:32:00-05:00: ln-1 office-visit 2025-01-09 paid $155.00, member $25.00 copay"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-3 notice.info_requested to m-1",
+        "n-4 notice.info_requested to m-2",
+        "n-5 notice.info_requested to m-3",
+        "n-12 notice.eob_available to m-1",
+        "n-13 notice.eob_available to m-2",
+        "n-14 notice.eob_available to m-3"
+      ]
+    },
+    {
+      "example": "accident questions answered as an accident",
+      "claim_id": "cl-44",
+      "member": "m-3 Riley Hale",
+      "provider": "pv-2 Kestrel Valley Orthopedics",
+      "received_at": "2026-02-13T12:09:00-05:00",
+      "status": "processed",
+      "requests": [
+        "ir-20 accident ln-1 answered accident",
+        "ir-21 accident ln-2 answered accident"
+      ],
+      "eobs": [
+        "v1 2026-03-31T20:13:00-04:00: ln-1 specialist-visit 2026-02-09 paid $250.00, member $50.00 copay; ln-2 xray 2026-02-09 paid $0.00, member $119.63 deductible $119.63"
+      ],
+      "appeals": [],
+      "notices": [
+        "n-172 notice.info_requested to m-1",
+        "n-173 notice.info_requested to m-2",
+        "n-174 notice.info_requested to m-3",
+        "n-175 notice.info_requested to m-1",
+        "n-176 notice.info_requested to m-2",
+        "n-177 notice.info_requested to m-3",
+        "n-205 notice.eob_available to m-1",
+        "n-206 notice.eob_available to m-2",
+        "n-207 notice.eob_available to m-3"
+      ]
+    }
+  ],
+  "loading": {
+    "interface": "Real Core 1.6.0 over MCP stdio: Infra loads each selection with env.load_seed (data, virtual_now and provenance bundle) and reads env.snapshot; the Agent, bound as the account holder m-1, reads larkfield-health.members.list, claims.list, claims.get for every listed claim, pa.list, appeals.list, grants.list and plan.get; the first staged event, if any, is applied with env.apply_event.",
+    "runtime": "1.6.0",
+    "instants": [
+      {
+        "as_of": "2025-07-09T23:59:00.001-04:00",
+        "seed_id": "larkfield-delivery-asof-20250710T035900.001Z-1a72fe8abcd9",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 45,
+          "bundle_dataset_id": "larkfield-delivery-asof-20250710T035900.001Z-1a72fe8abcd9",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2025-07-09T23:59:00.001-04:00",
+        "steps_applied": 29,
+        "steps_withheld": 138,
+        "timers_committed": 2,
+        "claims_in_selection": 18,
+        "claims_listed_by_agent": 18,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "m-1 self",
+          "m-2 view",
+          "m-3 guardian"
+        ],
+        "pas_listed": 1,
+        "appeals_listed": 1,
+        "grants_listed": 2,
+        "plan_year_read": 2025,
+        "accumulators_read": [
+          "m-1 $282.76",
+          "m-2 $191.38",
+          "m-3 $369.12"
+        ],
+        "latest_received_at": "2025-07-08T12:58:00-04:00",
+        "open_items": [
+          "claim:cl-18 received",
+          "appeal:ap-1 under_review",
+          "claim:cl-13 appealable until 2026-01-05T23:59:00-05:00",
+          "grant:gr-1 act grant to m-2 in force until 2026-01-01T00:00:00-05:00",
+          "grant:gr-2 view grant to m-1 in force"
+        ],
+        "open_seen_by_agent": [
+          "appeal:ap-1",
+          "claim:cl-18"
+        ],
+        "open_items_match_core": true,
+        "read_back": {
+          "claims": 18,
+          "claim_processings": 17,
+          "info_requests": 8,
+          "info_answers": 6,
+          "info_expirys": 2,
+          "attestations": 3,
+          "eobs": 17,
+          "pas": 1,
+          "pa_info_requests": 0,
+          "pa_expedites": 1,
+          "pa_expedite_decisions": 1,
+          "pa_decisions": 1,
+          "pa_overdues": 0,
+          "pa_expirys": 1,
+          "covered_submissions": 1,
+          "appeals": 1,
+          "appeal_statements": 1,
+          "appeal_info_requests": 0,
+          "appeal_decisions": 0,
+          "appeal_withdrawals": 0,
+          "appeal_overdues": 0,
+          "appeal_windows": 2,
+          "window_closing_notices": 0,
+          "grants": 2,
+          "grant_revocations": 0,
+          "notices": 69
+        },
+        "monthly_read_back_matches_selection": true,
+        "staged_events_available": 92,
+        "first_staged_event": {
+          "event_id": "larkfield-delivery-s-30",
+          "at": "2025-07-11T09:34:00-04:00",
+          "operation": "claim.received",
+          "status": "committed",
+          "target_after": "claim cl-19 received"
+        }
+      },
+      {
+        "as_of": "2026-01-01T00:00:00-05:00",
+        "seed_id": "larkfield-delivery-asof-20260101T050000.000Z-742f699bfdc0",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 63,
+          "bundle_dataset_id": "larkfield-delivery-asof-20260101T050000.000Z-742f699bfdc0",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-01-01T00:00:00-05:00",
+        "steps_applied": 56,
+        "steps_withheld": 111,
+        "timers_committed": 3,
+        "claims_in_selection": 34,
+        "claims_listed_by_agent": 24,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "m-1 self",
+          "m-3 guardian"
+        ],
+        "pas_listed": 1,
+        "appeals_listed": 1,
+        "grants_listed": 1,
+        "plan_year_read": 2026,
+        "accumulators_read": [
+          "m-1 $0.00",
+          "m-3 $0.00"
+        ],
+        "latest_received_at": "2025-12-16T11:01:00-05:00",
+        "open_items": [
+          "claim:cl-21 appealable until 2026-02-11T23:59:00-05:00",
+          "grant:gr-1 act grant to m-2 in force until 2027-01-01T00:00:00-05:00"
+        ],
+        "open_seen_by_agent": [],
+        "open_items_match_core": true,
+        "read_back": {
+          "claims": 34,
+          "claim_processings": 34,
+          "info_requests": 10,
+          "info_answers": 8,
+          "info_expirys": 2,
+          "attestations": 3,
+          "eobs": 35,
+          "pas": 2,
+          "pa_info_requests": 0,
+          "pa_expedites": 1,
+          "pa_expedite_decisions": 1,
+          "pa_decisions": 2,
+          "pa_overdues": 0,
+          "pa_expirys": 1,
+          "covered_submissions": 1,
+          "appeals": 2,
+          "appeal_statements": 3,
+          "appeal_info_requests": 1,
+          "appeal_decisions": 2,
+          "appeal_withdrawals": 0,
+          "appeal_overdues": 1,
+          "appeal_windows": 3,
+          "window_closing_notices": 0,
+          "grants": 2,
+          "grant_revocations": 1,
+          "notices": 129
+        },
+        "monthly_read_back_matches_selection": true,
+        "staged_events_available": 72,
+        "first_staged_event": {
+          "event_id": "larkfield-delivery-s-57",
+          "at": "2026-01-09T09:59:00-05:00",
+          "operation": "claim.received",
+          "status": "committed",
+          "target_after": "claim cl-35 received"
+        }
+      },
+      {
+        "as_of": "2026-11-18T12:00:00-05:00",
+        "seed_id": "larkfield-delivery-asof-20261118T170000.000Z-bb3befaaf9c2",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 134,
+          "bundle_dataset_id": "larkfield-delivery-asof-20261118T170000.000Z-bb3befaaf9c2",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-11-18T12:00:00-05:00",
+        "steps_applied": 160,
+        "steps_withheld": 7,
+        "timers_committed": 1,
+        "claims_in_selection": 93,
+        "claims_listed_by_agent": 57,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "m-1 self",
+          "m-3 guardian"
+        ],
+        "pas_listed": 3,
+        "appeals_listed": 3,
+        "grants_listed": 1,
+        "plan_year_read": 2026,
+        "accumulators_read": [
+          "m-1 $944.04",
+          "m-3 $1254.27"
+        ],
+        "latest_received_at": "2026-11-13T12:03:00-05:00",
+        "open_items": [
+          "appeal:ap-5 under_review",
+          "claim:cl-74 appealable until 2027-01-29T23:59:00-05:00",
+          "claim:cl-75 appealable until 2027-02-06T23:59:00-05:00",
+          "grant:gr-1 act grant to m-2 in force until 2027-01-01T00:00:00-05:00"
+        ],
+        "open_seen_by_agent": [
+          "appeal:ap-5"
+        ],
+        "open_items_match_core": true,
+        "read_back": {
+          "claims": 93,
+          "claim_processings": 93,
+          "info_requests": 27,
+          "info_answers": 25,
+          "info_expirys": 2,
+          "attestations": 6,
+          "eobs": 94,
+          "pas": 10,
+          "pa_info_requests": 2,
+          "pa_expedites": 2,
+          "pa_expedite_decisions": 2,
+          "pa_decisions": 9,
+          "pa_overdues": 2,
+          "pa_expirys": 8,
+          "covered_submissions": 2,
+          "appeals": 5,
+          "appeal_statements": 6,
+          "appeal_info_requests": 1,
+          "appeal_decisions": 3,
+          "appeal_withdrawals": 1,
+          "appeal_overdues": 1,
+          "appeal_windows": 8,
+          "window_closing_notices": 2,
+          "grants": 3,
+          "grant_revocations": 1,
+          "notices": 312
+        },
+        "monthly_read_back_matches_selection": true,
+        "staged_events_available": 5,
+        "first_staged_event": {
+          "event_id": "larkfield-delivery-s-161",
+          "at": "2026-11-18T13:58:00-05:00",
+          "operation": "appeal.info_requested",
+          "status": "committed",
+          "target_after": "appeal ap-5 info_requested"
+        }
+      },
+      {
+        "as_of": "2026-12-15T00:00:00-05:00",
+        "seed_id": "larkfield-delivery-asof-20261215T050000.000Z-fa7490dfaa97",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 136,
+          "bundle_dataset_id": "larkfield-delivery-asof-20261215T050000.000Z-fa7490dfaa97",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-12-15T00:00:00-05:00",
+        "steps_applied": 165,
+        "steps_withheld": 2,
+        "timers_committed": 1,
+        "claims_in_selection": 95,
+        "claims_listed_by_agent": 58,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "m-1 self",
+          "m-3 guardian"
+        ],
+        "pas_listed": 3,
+        "appeals_listed": 3,
+        "grants_listed": 1,
+        "plan_year_read": 2026,
+        "accumulators_read": [
+          "m-1 $1004.04",
+          "m-3 $1254.27"
+        ],
+        "latest_received_at": "2026-12-04T10:41:00-05:00",
+        "open_items": [
+          "claim:cl-74 appealable until 2027-01-29T23:59:00-05:00",
+          "claim:cl-75 appealable until 2027-02-06T23:59:00-05:00",
+          "grant:gr-1 act grant to m-2 in force until 2027-01-01T00:00:00-05:00"
+        ],
+        "open_seen_by_agent": [],
+        "open_items_match_core": true,
+        "read_back": {
+          "claims": 95,
+          "claim_processings": 95,
+          "info_requests": 27,
+          "info_answers": 25,
+          "info_expirys": 2,
+          "attestations": 6,
+          "eobs": 97,
+          "pas": 10,
+          "pa_info_requests": 2,
+          "pa_expedites": 2,
+          "pa_expedite_decisions": 2,
+          "pa_decisions": 9,
+          "pa_overdues": 2,
+          "pa_expirys": 8,
+          "covered_submissions": 2,
+          "appeals": 5,
+          "appeal_statements": 7,
+          "appeal_info_requests": 2,
+          "appeal_decisions": 4,
+          "appeal_withdrawals": 1,
+          "appeal_overdues": 1,
+          "appeal_windows": 8,
+          "window_closing_notices": 2,
+          "grants": 3,
+          "grant_revocations": 1,
+          "notices": 321
+        },
+        "monthly_read_back_matches_selection": true,
+        "staged_events_available": 2,
+        "first_staged_event": {
+          "event_id": "larkfield-delivery-s-166",
+          "at": "2026-12-17T12:39:00-05:00",
+          "operation": "claim.received",
+          "status": "committed",
+          "target_after": "claim cl-96 received"
+        }
+      },
+      {
+        "as_of": "2027-01-01T00:00:00-05:00",
+        "seed_id": "larkfield-delivery-asof-20270101T050000.000Z-804b325bb2f3",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 138,
+          "bundle_dataset_id": "larkfield-delivery-asof-20270101T050000.000Z-804b325bb2f3",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2027-01-01T00:00:00-05:00",
+        "steps_applied": 167,
+        "steps_withheld": 0,
+        "timers_committed": 0,
+        "claims_in_selection": 97,
+        "claims_listed_by_agent": 59,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "m-1 self",
+          "m-3 guardian"
+        ],
+        "pas_listed": 3,
+        "appeals_listed": 3,
+        "grants_listed": 1,
+        "plan_year_read": 2027,
+        "accumulators_read": [
+          "m-1 $0.00",
+          "m-3 $0.00"
+        ],
+        "latest_received_at": "2026-12-30T10:31:00-05:00",
+        "open_items": [
+          "claim:cl-97 received",
+          "claim:cl-74 appealable until 2027-01-29T23:59:00-05:00",
+          "claim:cl-75 appealable until 2027-02-06T23:59:00-05:00"
+        ],
+        "open_seen_by_agent": [
+          "claim:cl-97"
+        ],
+        "open_items_match_core": true,
+        "read_back": {
+          "claims": 97,
+          "claim_processings": 96,
+          "info_requests": 27,
+          "info_answers": 25,
+          "info_expirys": 2,
+          "attestations": 6,
+          "eobs": 98,
+          "pas": 10,
+          "pa_info_requests": 2,
+          "pa_expedites": 2,
+          "pa_expedite_decisions": 2,
+          "pa_decisions": 9,
+          "pa_overdues": 2,
+          "pa_expirys": 8,
+          "covered_submissions": 2,
+          "appeals": 5,
+          "appeal_statements": 7,
+          "appeal_info_requests": 2,
+          "appeal_decisions": 4,
+          "appeal_withdrawals": 1,
+          "appeal_overdues": 1,
+          "appeal_windows": 8,
+          "window_closing_notices": 2,
+          "grants": 3,
+          "grant_revocations": 1,
+          "notices": 322
+        },
+        "monthly_read_back_matches_selection": true,
+        "staged_events_available": 0,
+        "first_staged_event": null,
+        "monthly_read_back": {
+          "2025-01": {
+            "claims": 4,
+            "claim_processings": 3,
+            "info_requests": 5,
+            "info_answers": 3,
+            "info_expirys": 0,
+            "attestations": 2,
+            "eobs": 3,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 16
+          },
+          "2025-02": {
+            "claims": 2,
+            "claim_processings": 3,
+            "info_requests": 1,
+            "info_answers": 3,
+            "info_expirys": 0,
+            "attestations": 1,
+            "eobs": 3,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 9
+          },
+          "2025-03": {
+            "claims": 2,
+            "claim_processings": 2,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 2,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 5
+          },
+          "2025-04": {
+            "claims": 3,
+            "claim_processings": 3,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 3,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 7
+          },
+          "2025-05": {
+            "claims": 2,
+            "claim_processings": 1,
+            "info_requests": 2,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 1,
+            "pas": 1,
+            "pa_info_requests": 0,
+            "pa_expedites": 1,
+            "pa_expedite_decisions": 1,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 12
+          },
+          "2025-06": {
+            "claims": 3,
+            "claim_processings": 2,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 2,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 1,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 5
+          },
+          "2025-07": {
+            "claims": 4,
+            "claim_processings": 6,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 2,
+            "attestations": 0,
+            "eobs": 6,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 1,
+            "covered_submissions": 0,
+            "appeals": 2,
+            "appeal_statements": 3,
+            "appeal_info_requests": 1,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 2,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 27
+          },
+          "2025-08": {
+            "claims": 2,
+            "claim_processings": 2,
+            "info_requests": 2,
+            "info_answers": 2,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 2,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 1,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 1,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 13
+          },
+          "2025-09": {
+            "claims": 1,
+            "claim_processings": 1,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 2,
+            "pas": 1,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 1,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 1,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 1,
+            "notices": 11
+          },
+          "2025-10": {
+            "claims": 5,
+            "claim_processings": 4,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 4,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 7
+          },
+          "2025-11": {
+            "claims": 2,
+            "claim_processings": 3,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 3,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 7
+          },
+          "2025-12": {
+            "claims": 4,
+            "claim_processings": 4,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 4,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 10
+          },
+          "2026-01": {
+            "claims": 6,
+            "claim_processings": 2,
+            "info_requests": 6,
+            "info_answers": 4,
+            "info_expirys": 0,
+            "attestations": 1,
+            "eobs": 2,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 1,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 23
+          },
+          "2026-02": {
+            "claims": 9,
+            "claim_processings": 10,
+            "info_requests": 5,
+            "info_answers": 5,
+            "info_expirys": 0,
+            "attestations": 2,
+            "eobs": 10,
+            "pas": 3,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 1,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 32
+          },
+          "2026-03": {
+            "claims": 6,
+            "claim_processings": 9,
+            "info_requests": 1,
+            "info_answers": 3,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 9,
+            "pas": 1,
+            "pa_info_requests": 1,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 2,
+            "pa_overdues": 1,
+            "pa_expirys": 2,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 23
+          },
+          "2026-04": {
+            "claims": 5,
+            "claim_processings": 5,
+            "info_requests": 2,
+            "info_answers": 2,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 5,
+            "pas": 1,
+            "pa_info_requests": 0,
+            "pa_expedites": 1,
+            "pa_expedite_decisions": 1,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 1,
+            "appeal_statements": 1,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 1,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 1,
+            "window_closing_notices": 0,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 16
+          },
+          "2026-05": {
+            "claims": 7,
+            "claim_processings": 7,
+            "info_requests": 2,
+            "info_answers": 2,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 7,
+            "pas": 1,
+            "pa_info_requests": 1,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 1,
+            "pa_expirys": 2,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 21
+          },
+          "2026-06": {
+            "claims": 3,
+            "claim_processings": 2,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 2,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 1,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 4
+          },
+          "2026-07": {
+            "claims": 4,
+            "claim_processings": 4,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 4,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 1,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 1,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 9
+          },
+          "2026-08": {
+            "claims": 8,
+            "claim_processings": 9,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 9,
+            "pas": 1,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 1,
+            "appeal_statements": 1,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 2,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 25
+          },
+          "2026-09": {
+            "claims": 6,
+            "claim_processings": 5,
+            "info_requests": 1,
+            "info_answers": 1,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 5,
+            "pas": 1,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 1,
+            "pa_overdues": 0,
+            "pa_expirys": 1,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 1,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 14
+          },
+          "2026-10": {
+            "claims": 2,
+            "claim_processings": 3,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 3,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 1,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 1,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 7
+          },
+          "2026-11": {
+            "claims": 4,
+            "claim_processings": 4,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 4,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 1,
+            "appeal_statements": 2,
+            "appeal_info_requests": 1,
+            "appeal_decisions": 0,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 13
+          },
+          "2026-12": {
+            "claims": 3,
+            "claim_processings": 2,
+            "info_requests": 0,
+            "info_answers": 0,
+            "info_expirys": 0,
+            "attestations": 0,
+            "eobs": 3,
+            "pas": 0,
+            "pa_info_requests": 0,
+            "pa_expedites": 0,
+            "pa_expedite_decisions": 0,
+            "pa_decisions": 0,
+            "pa_overdues": 0,
+            "pa_expirys": 0,
+            "covered_submissions": 0,
+            "appeals": 0,
+            "appeal_statements": 0,
+            "appeal_info_requests": 0,
+            "appeal_decisions": 1,
+            "appeal_withdrawals": 0,
+            "appeal_overdues": 0,
+            "appeal_windows": 0,
+            "window_closing_notices": 0,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 6
+          }
+        }
+      }
+    ]
+  }
+}

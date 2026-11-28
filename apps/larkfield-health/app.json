@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "app_id": "larkfield-health",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:larkfield-health"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "claim.received",
+    "pa.submitted",
+    "pa.info_requested",
+    "pa.info_provided",
+    "pa.decided",
+    "pa.withdrawn",
+    "pa.expedite_decided",
+    "appeal.info_requested",
+    "appeal.decided",
+    "grant.changed",
+    "user.confirmed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic household, plan, providers, services and fees only; no real people, brands, billing codes or member data.",
+    "The App records facts, statuses, amounts and consequences; it does not decide medical necessity, rank options or say what the right action is.",
+    "Member-facing business GUI on the shared local Web Host (gui/); claims, prior authorizations and plan decisions arrive as scenario events, and there are no provider or plan screens.",
+    "Time is the environment's: no clock event and no scheduler. Claim review, request expiry, PA validity, decision due dates and the window-closing notice are due times on each record, applied from the supplied virtual time.",
+    "Pharmacy claims belong to Mendwell Pharmacy and are refused here; pharmacy prior authorizations are recorded.",
+    "Approvals (user.confirmed) come from Infra, never from the page: the GUI shows a waiting state until Refresh finds the approval.",
+    "No attachments or media: resources are not used."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

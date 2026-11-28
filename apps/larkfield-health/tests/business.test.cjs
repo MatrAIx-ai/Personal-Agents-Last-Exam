@@ -1,0 +1,17 @@
+'use strict';
+require('./t00-skeleton.test.cjs');
+require('./t02-model.test.cjs');
+require('./t02b-model-rules.test.cjs');
+require('./t02c-clauses.test.cjs');
+require('./t02d-ordering.test.cjs');
+require('./t03-authority.test.cjs');
+require('./t03b-notices.test.cjs');
+require('./t04-adjudication.test.cjs');
+require('./t05-claims.test.cjs');
+require('./t06-pa.test.cjs');
+require('./t09-appeals.test.cjs');
+require('./t15-grants.test.cjs');
+require('./t17-confirms.test.cjs');
+require('./t18-matrices.test.cjs');
+require('./t11b-mail-message.test.cjs');
+require('./t30-fixture.test.cjs');

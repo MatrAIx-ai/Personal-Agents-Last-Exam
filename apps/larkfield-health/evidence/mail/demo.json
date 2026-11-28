@@ -1,0 +1,2967 @@
+{
+  "schema": "larkfield.mail-demonstration.v1",
+  "captured_on": "2026-11-28",
+  "command": "node apps/larkfield-health/evidence/tools/mail.cjs",
+  "node": "v25.8.1",
+  "larkfield_load_digest": "db75f49f9d2ea12b684a61936484aba4000c61756e42595db80cf137d54d9445",
+  "host": {
+    "runtime_version": "1.6.0",
+    "runtime_tree_sha256": "a1325458390f5a1b474a8598c663c35160a53ac30dce7afac4646587a3e889a3",
+    "files": {
+      "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+      "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+      "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+      "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+      "apps.registry.json": "ee01e14d13c2a089d9da7152cec5fb19736e72278ca74aa94e2f458e1810db13"
+    }
+  },
+  "participants": {
+    "larkfield": {
+      "version": "1.0.0",
+      "publishes": [
+        {
+          "channel": "channel.email",
+          "schema_id": "urn:pale:email-message:2",
+          "schema_ref": "schemas/router-message.schema.json",
+          "status": "implemented",
+          "event_type": "org.pale.mail.notification.v1",
+          "payload_schema_id": "urn:pale:email-payload:1"
+        }
+      ]
+    },
+    "sender": "apps/larkfield-health/infra/sender.cjs (run by Infra)",
+    "mail": {
+      "version": "1.3.0",
+      "package_sha256": "ba9112331a30880cc6e679447f6dfe17936a59d9c26eea02610e6c3abf696ebd",
+      "receives": [
+        {
+          "channel": "channel.email",
+          "schema_id": "urn:pale:email-message:2",
+          "schema_ref": "schemas/router-message.schema.json",
+          "status": "implemented",
+          "mcp_tool": "env.apply_event",
+          "operation": "mail.receive_notification",
+          "event_type": "org.pale.mail.notification.v1",
+          "payload_schema_id": "urn:pale:email-payload:1"
+        }
+      ]
+    },
+    "wire_schema": {
+      "id": "urn:pale:email-message:2",
+      "sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0",
+      "identical_in": {
+        "runtime": true,
+        "mail": true
+      }
+    },
+    "payload_schema": {
+      "id": "urn:pale:email-payload:1",
+      "sha256": "8cec4c19e42dc9c027b84798984a7950471457195e606e7583fe9f00cf635795"
+    },
+    "runtime": {
+      "version": "1.6.0"
+    },
+    "router": {
+      "grants": [
+        {
+          "app_id": "mail",
+          "account_id": "mail-m-1",
+          "channel": "channel.email"
+        },
+        {
+          "app_id": "mail",
+          "account_id": "mail-m-2",
+          "channel": "channel.email"
+        }
+      ],
+      "publisher_account": "larkfield-m-1"
+    },
+    "mail_accounts": [
+      {
+        "app_id": "mail",
+        "account_id": "mail-m-1",
+        "owner_person_id": "m-1"
+      },
+      {
+        "app_id": "mail",
+        "account_id": "mail-m-2",
+        "owner_person_id": "m-2"
+      }
+    ]
+  },
+  "gui": {
+    "run": "mail-gui-demo",
+    "browser": "chromium 141.0.7390.37",
+    "viewport": "1280x900",
+    "locale": "en-US",
+    "browser_timezone": "America/New_York",
+    "initial": {
+      "larkfield": {
+        "run_id": "mail-gui-demo",
+        "account_id": "larkfield-m-1",
+        "owner_person_id": "m-1",
+        "version": "2.0",
+        "virtual_now": "2026-11-18T09:00:00-08:00",
+        "notices_in_log": 201,
+        "seed_id": "larkfield-household-1"
+      },
+      "mail": [
+        {
+          "account_id": "mail-m-1",
+          "owner_person_id": "m-1",
+          "address": "mail-m-1@pale.example",
+          "run_id": "mail-gui-demo",
+          "version": "2.0",
+          "records": 0
+        },
+        {
+          "account_id": "mail-m-2",
+          "owner_person_id": "m-2",
+          "address": "mail-m-2@pale.example",
+          "run_id": "mail-gui-demo",
+          "version": "2.0",
+          "records": 0
+        }
+      ]
+    },
+    "steps": [
+      {
+        "step": 1,
+        "app": "Larkfield (Infra clock and events, then GUI Refresh)",
+        "action": "Infra moves the clock to 1 December 09:00, past the reviews of cl-15, cl-16 and cl-17 and the expiry of cl-13's questions already scheduled in the fixture, and applies the proposal's example events ev-1 (claim.received cl-7) and ev-2 (pa.submitted pa-4 for Riley); Refresh; Prior authorizations → pa-4",
+        "expected": "pa-4 pending with its decision due; explanation-of-benefits, information-request, claim-denied and decision-overdue entries in Larkfield's log",
+        "observed": {
+          "infra": [
+            "env.advance_time to 2026-12-01T09:00:00-05:00 committed",
+            "claim.received cl-7 (ev-1) committed",
+            "pa.submitted pa-4 (ev-2) committed"
+          ],
+          "pa": "pa-4 pending",
+          "pending": [
+            "n-1 notice.eob_available to m-1",
+            "n-2 notice.eob_available to m-2",
+            "n-3 notice.eob_available to m-3",
+            "n-4 notice.info_requested to m-1",
+            "n-5 notice.info_requested to m-2",
+            "n-6 notice.info_requested to m-3",
+            "n-7 notice.info_requested to m-1",
+            "n-8 notice.info_requested to m-2",
+            "n-9 notice.info_requested to m-3",
+            "n-10 notice.eob_available to m-1",
+            "n-11 notice.eob_available to m-2",
+            "n-12 notice.eob_available to m-1",
+            "n-13 notice.eob_available to m-2",
+            "n-14 notice.claim_denied to m-1",
+            "n-15 notice.claim_denied to m-2"
+          ]
+        },
+        "version": "2.3",
+        "screenshot": "gui/01-larkfield-pa-submitted.png"
+      },
+      {
+        "step": 2,
+        "app": "Larkfield (Infra events, then GUI)",
+        "action": "Infra applies ev-3 (pa.info_requested) and ev-4 (pa.info_provided) and moves the clock to 3 December 11:30; Refresh; pa-4 → reason → Ask for expedited review",
+        "expected": "The expedite request is recorded with its reason",
+        "observed": {
+          "infra": [
+            "pa.info_requested pa-4 (ev-3) committed",
+            "pa.info_provided pa-4 (ev-4) committed",
+            "env.advance_time to 2026-12-03T11:30:00-05:00 committed"
+          ],
+          "pa": "pa-4 pending, expedite open"
+        },
+        "version": "2.7",
+        "screenshot": "gui/02-larkfield-expedite.png"
+      },
+      {
+        "step": 3,
+        "app": "Larkfield (Infra events, then GUI)",
+        "action": "Infra applies ev-5 (expedite approved) and pa.decided denying pa-4; Refresh; pa-4 → statement → Preview appeal; Infra applies user.confirmed by Jordan; Refresh; Confirm",
+        "expected": "pa-4 denied; the appeal on it filed from the page, with its decision due",
+        "observed": {
+          "infra": [
+            "pa.expedite_decided approved (ev-5) committed",
+            "pa.decided pa-4 denied committed",
+            "user.confirmed by m-1 committed"
+          ],
+          "pa": "pa-4 denied, expedite approved",
+          "appeal": "ap-4 under_review, due 2027-01-03T23:59:00-05:00"
+        },
+        "version": "2.11",
+        "screenshot": "gui/03-larkfield-appeal-filed.png"
+      },
+      {
+        "step": 4,
+        "app": "Larkfield (Infra events and clock, then GUI Refresh)",
+        "action": "Infra applies ev-8 (appeal.info_requested on ap-3), moves the clock to 3 April 2027, past the closing notice of cl-14's appeal window, and applies appeal.decided overturning ap-3 on 5 April; Refresh; Appeals → ap-3",
+        "expected": "ap-3 overturned; entries of all 9 notice kinds in Larkfield's log, waiting for the sender",
+        "observed": {
+          "infra": [
+            "appeal.info_requested ap-3 (ev-8) committed",
+            "env.advance_time to 2027-04-03T09:00:00-04:00 committed",
+            "appeal.decided ap-3 overturned (ev-9, at 5 April 2027) committed"
+          ],
+          "pending": [
+            "n-1 notice.eob_available to m-1",
+            "n-2 notice.eob_available to m-2",
+            "n-3 notice.eob_available to m-3",
+            "n-4 notice.info_requested to m-1",
+            "n-5 notice.info_requested to m-2",
+            "n-6 notice.info_requested to m-3",
+            "n-7 notice.info_requested to m-1",
+            "n-8 notice.info_requested to m-2",
+            "n-9 notice.info_requested to m-3",
+            "n-10 notice.eob_available to m-1",
+            "n-11 notice.eob_available to m-2",
+            "n-12 notice.eob_available to m-1",
+            "n-13 notice.eob_available to m-2",
+            "n-14 notice.claim_denied to m-1",
+            "n-15 notice.claim_denied to m-2",
+            "n-16 notice.decision_overdue to m-2",
+            "n-17 notice.pa_decision to m-1",
+            "n-18 notice.pa_decision to m-2",
+            "n-19 notice.pa_decision to m-3",
+            "n-20 notice.appeal_received to m-1",
+            "n-21 notice.appeal_received to m-2",
+            "n-22 notice.appeal_received to m-3",
+            "n-23 notice.info_requested to m-1",
+            "n-24 notice.info_requested to m-2",
+            "n-25 notice.info_requested to m-3",
+            "n-26 notice.appeal_info_requested to m-1",
+            "n-27 notice.appeal_info_requested to m-2",
+            "n-28 notice.appeal_info_requested to m-3",
+            "n-29 notice.decision_overdue to m-1",
+            "n-30 notice.decision_overdue to m-2",
+            "n-31 notice.decision_overdue to m-3",
+            "n-32 notice.decision_overdue to m-1",
+            "n-33 notice.decision_overdue to m-2",
+            "n-34 notice.decision_overdue to m-3",
+            "n-35 notice.eob_available to m-1",
+            "n-36 notice.eob_available to m-2",
+            "n-37 notice.eob_available to m-3",
+            "n-38 notice.claim_denied to m-1",
+            "n-39 notice.claim_denied to m-2",
+            "n-40 notice.claim_denied to m-3",
+            "n-41 notice.eob_available to m-1",
+            "n-42 notice.eob_available to m-2",
+            "n-43 notice.eob_available to m-3",
+            "n-44 notice.claim_denied to m-1",
+            "n-45 notice.claim_denied to m-2",
+            "n-46 notice.claim_denied to m-3",
+            "n-47 notice.appeal_window_closing to m-1",
+            "n-48 notice.appeal_window_closing to m-2",
+            "n-49 notice.appeal_window_closing to m-3",
+            "n-50 notice.eob_available to m-1",
+            "n-51 notice.eob_available to m-2",
+            "n-52 notice.eob_available to m-3",
+            "n-53 notice.appeal_decision to m-1",
+            "n-54 notice.appeal_decision to m-2",
+            "n-55 notice.appeal_decision to m-3"
+          ]
+        },
+        "version": "2.14",
+        "screenshot": "gui/04-larkfield-appeal-decided.png"
+      },
+      {
+        "step": 5,
+        "app": "Messaging and Mail (Infra runs the sender; Mail GUI)",
+        "action": "Infra runs infra/sender.cjs: one Router session per recipient Mail account (mail-m-1 for Jordan, mail-m-2 for Casey), each with its grant from infra/router.config.example.json; then Jordan's Mail inbox is opened on Mail's own Web Host page",
+        "expected": "Every entry whose recipient may still see the member delivered to that person's Mail account with a committed receipt; entries for Riley, a minor without a Mail account (no_mail_account), and entries whose recipient lost access to the member before the sender ran (access_changed: Casey's act grant for Jordan's records ended on 1 January 2027) stay in Larkfield's log; Larkfield's state unchanged by publishing",
+        "observed": {
+          "status": "published",
+          "receipts": 36,
+          "held": [
+            "n-3 no_mail_account",
+            "n-6 no_mail_account",
+            "n-9 no_mail_account",
+            "n-11 access_changed",
+            "n-13 access_changed",
+            "n-15 access_changed",
+            "n-19 no_mail_account",
+            "n-22 no_mail_account",
+            "n-25 no_mail_account",
+            "n-28 no_mail_account",
+            "n-31 no_mail_account",
+            "n-34 no_mail_account",
+            "n-37 no_mail_account",
+            "n-40 no_mail_account",
+            "n-43 no_mail_account",
+            "n-46 no_mail_account",
+            "n-49 no_mail_account",
+            "n-52 no_mail_account",
+            "n-55 no_mail_account"
+          ],
+          "larkfield_version": "2.14 → 2.14",
+          "mail_records": {
+            "mail-m-1": 19,
+            "mail-m-2": 17
+          }
+        },
+        "version": "2.14",
+        "screenshot": "gui/05-mail-inbox.png"
+      },
+      {
+        "step": 6,
+        "app": "Mail (GUI and Agent MCP)",
+        "action": "Open the “Appeal received” message in Mail; read it through Mail's Agent tool mail.get",
+        "expected": "The notice text as Larkfield wrote it, from the Larkfield sender address to mail-m-1",
+        "observed": {
+          "record_id": "router-7ce971c43425779fd2d4742d1614ba4d",
+          "status": "ok",
+          "subject": "Appeal received",
+          "from": "larkfield-health@pale.example",
+          "to": [
+            "mail-m-1@pale.example"
+          ],
+          "folder": "inbox",
+          "received_at": "2027-04-05T09:00:00-04:00",
+          "body": "Appeal ap-4 of prior authorization pa-4 for member m-3 was received; a decision is due by 2027-01-03 at 23:59 Eastern Time.",
+          "body_matches_notice": true
+        },
+        "version": "2.14",
+        "screenshot": "gui/06-mail-appeal-received.png"
+      },
+      {
+        "step": 7,
+        "app": "Mail (GUI and Agent MCP)",
+        "action": "Open the “Appeal window closing” message in Mail; read it through Mail's Agent tool mail.get",
+        "expected": "The notice text as Larkfield wrote it, from the Larkfield sender address to mail-m-1",
+        "observed": {
+          "record_id": "router-51572ab7c3a5577690ce45053a0ff915",
+          "status": "ok",
+          "subject": "Appeal window closing",
+          "from": "larkfield-health@pale.example",
+          "to": [
+            "mail-m-1@pale.example"
+          ],
+          "folder": "inbox",
+          "received_at": "2027-04-05T09:00:00-04:00",
+          "body": "The appeal window for claim cl-14 (member m-3) closes on 2027-04-16 at 23:59 Eastern Time.",
+          "body_matches_notice": true
+        },
+        "version": "2.14",
+        "screenshot": "gui/07-mail-appeal-window-closing.png"
+      }
+    ],
+    "stages": {
+      "local_commit": {
+        "app": "larkfield-health",
+        "notices": [
+          {
+            "id": "n-1",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-15",
+            "at": "2026-11-19T23:59:00-05:00"
+          },
+          {
+            "id": "n-2",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-15",
+            "at": "2026-11-19T23:59:00-05:00"
+          },
+          {
+            "id": "n-3",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-15",
+            "at": "2026-11-19T23:59:00-05:00"
+          },
+          {
+            "id": "n-4",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "info_request ir-13",
+            "at": "2026-11-20T23:59:00-05:00"
+          },
+          {
+            "id": "n-5",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "info_request ir-13",
+            "at": "2026-11-20T23:59:00-05:00"
+          },
+          {
+            "id": "n-6",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "info_request ir-13",
+            "at": "2026-11-20T23:59:00-05:00"
+          },
+          {
+            "id": "n-7",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "info_request ir-14",
+            "at": "2026-11-20T23:59:00-05:00"
+          },
+          {
+            "id": "n-8",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "info_request ir-14",
+            "at": "2026-11-20T23:59:00-05:00"
+          },
+          {
+            "id": "n-9",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "info_request ir-14",
+            "at": "2026-11-20T23:59:00-05:00"
+          },
+          {
+            "id": "n-10",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-1",
+            "member_id": "m-1",
+            "subject": "claim cl-17",
+            "at": "2026-11-21T23:59:00-05:00"
+          },
+          {
+            "id": "n-11",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-2",
+            "member_id": "m-1",
+            "subject": "claim cl-17",
+            "at": "2026-11-21T23:59:00-05:00"
+          },
+          {
+            "id": "n-12",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-1",
+            "member_id": "m-1",
+            "subject": "claim cl-13",
+            "at": "2026-11-29T23:59:00-05:00"
+          },
+          {
+            "id": "n-13",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-2",
+            "member_id": "m-1",
+            "subject": "claim cl-13",
+            "at": "2026-11-29T23:59:00-05:00"
+          },
+          {
+            "id": "n-14",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-1",
+            "member_id": "m-1",
+            "subject": "claim cl-13",
+            "at": "2026-11-29T23:59:00-05:00"
+          },
+          {
+            "id": "n-15",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-2",
+            "member_id": "m-1",
+            "subject": "claim cl-13",
+            "at": "2026-11-29T23:59:00-05:00"
+          },
+          {
+            "id": "n-16",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-2",
+            "member_id": "m-2",
+            "subject": "pa pa-5",
+            "at": "2026-12-02T23:59:00-05:00"
+          },
+          {
+            "id": "n-17",
+            "kind": "notice.pa_decision",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "pa pa-4",
+            "at": "2026-12-04T10:00:00-05:00"
+          },
+          {
+            "id": "n-18",
+            "kind": "notice.pa_decision",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "pa pa-4",
+            "at": "2026-12-04T10:00:00-05:00"
+          },
+          {
+            "id": "n-19",
+            "kind": "notice.pa_decision",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "pa pa-4",
+            "at": "2026-12-04T10:00:00-05:00"
+          },
+          {
+            "id": "n-20",
+            "kind": "notice.appeal_received",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "appeal ap-4",
+            "at": "2026-12-04T10:30:00-05:00"
+          },
+          {
+            "id": "n-21",
+            "kind": "notice.appeal_received",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "appeal ap-4",
+            "at": "2026-12-04T10:30:00-05:00"
+          },
+          {
+            "id": "n-22",
+            "kind": "notice.appeal_received",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "appeal ap-4",
+            "at": "2026-12-04T10:30:00-05:00"
+          },
+          {
+            "id": "n-23",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "info_request ir-15",
+            "at": "2026-12-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-24",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "info_request ir-15",
+            "at": "2026-12-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-25",
+            "kind": "notice.info_requested",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "info_request ir-15",
+            "at": "2026-12-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-26",
+            "kind": "notice.appeal_info_requested",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2026-12-07T09:00:00-05:00"
+          },
+          {
+            "id": "n-27",
+            "kind": "notice.appeal_info_requested",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2026-12-07T09:00:00-05:00"
+          },
+          {
+            "id": "n-28",
+            "kind": "notice.appeal_info_requested",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2026-12-07T09:00:00-05:00"
+          },
+          {
+            "id": "n-29",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2026-12-28T23:59:00-05:00"
+          },
+          {
+            "id": "n-30",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2026-12-28T23:59:00-05:00"
+          },
+          {
+            "id": "n-31",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2026-12-28T23:59:00-05:00"
+          },
+          {
+            "id": "n-32",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "appeal ap-4",
+            "at": "2027-01-03T23:59:00-05:00"
+          },
+          {
+            "id": "n-33",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "appeal ap-4",
+            "at": "2027-01-03T23:59:00-05:00"
+          },
+          {
+            "id": "n-34",
+            "kind": "notice.decision_overdue",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "appeal ap-4",
+            "at": "2027-01-03T23:59:00-05:00"
+          },
+          {
+            "id": "n-35",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-16",
+            "at": "2027-01-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-36",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-16",
+            "at": "2027-01-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-37",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-16",
+            "at": "2027-01-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-38",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-16",
+            "at": "2027-01-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-39",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-16",
+            "at": "2027-01-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-40",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-16",
+            "at": "2027-01-04T23:59:00-05:00"
+          },
+          {
+            "id": "n-41",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-7",
+            "at": "2027-01-18T23:59:00-05:00"
+          },
+          {
+            "id": "n-42",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-7",
+            "at": "2027-01-18T23:59:00-05:00"
+          },
+          {
+            "id": "n-43",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-7",
+            "at": "2027-01-18T23:59:00-05:00"
+          },
+          {
+            "id": "n-44",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-7",
+            "at": "2027-01-18T23:59:00-05:00"
+          },
+          {
+            "id": "n-45",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-7",
+            "at": "2027-01-18T23:59:00-05:00"
+          },
+          {
+            "id": "n-46",
+            "kind": "notice.claim_denied",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-7",
+            "at": "2027-01-18T23:59:00-05:00"
+          },
+          {
+            "id": "n-47",
+            "kind": "notice.appeal_window_closing",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-14",
+            "at": "2027-04-02T23:59:00-04:00"
+          },
+          {
+            "id": "n-48",
+            "kind": "notice.appeal_window_closing",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-14",
+            "at": "2027-04-02T23:59:00-04:00"
+          },
+          {
+            "id": "n-49",
+            "kind": "notice.appeal_window_closing",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-14",
+            "at": "2027-04-02T23:59:00-04:00"
+          },
+          {
+            "id": "n-50",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "claim cl-14",
+            "at": "2027-04-05T09:00:00-04:00"
+          },
+          {
+            "id": "n-51",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "claim cl-14",
+            "at": "2027-04-05T09:00:00-04:00"
+          },
+          {
+            "id": "n-52",
+            "kind": "notice.eob_available",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "claim cl-14",
+            "at": "2027-04-05T09:00:00-04:00"
+          },
+          {
+            "id": "n-53",
+            "kind": "notice.appeal_decision",
+            "recipient_id": "m-1",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2027-04-05T09:00:00-04:00"
+          },
+          {
+            "id": "n-54",
+            "kind": "notice.appeal_decision",
+            "recipient_id": "m-2",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2027-04-05T09:00:00-04:00"
+          },
+          {
+            "id": "n-55",
+            "kind": "notice.appeal_decision",
+            "recipient_id": "m-3",
+            "member_id": "m-3",
+            "subject": "appeal ap-3",
+            "at": "2027-04-05T09:00:00-04:00"
+          }
+        ],
+        "larkfield_version": "2.14"
+      },
+      "receiver_commit": {
+        "receipts": [
+          {
+            "notice_id": "n-1",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-1",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-4ed954da08945381d2ced513569dd1cf",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-11-19T23:59:00-05:00",
+            "mail_version": "2.2"
+          },
+          {
+            "notice_id": "n-2",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-2",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-d04b3e9dca174f2e2804b7a2c5311653",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-11-19T23:59:00-05:00",
+            "mail_version": "2.2"
+          },
+          {
+            "notice_id": "n-4",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-4",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-8cda52d0d5de29f31a533baa22ba8669",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-11-20T23:59:00-05:00",
+            "mail_version": "2.3"
+          },
+          {
+            "notice_id": "n-5",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-5",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-8aede0957d9086f3eac627630a1a80e8",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-11-20T23:59:00-05:00",
+            "mail_version": "2.3"
+          },
+          {
+            "notice_id": "n-7",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-7",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-ea0973070112059f40f47835c4dfad54",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-11-20T23:59:00-05:00",
+            "mail_version": "2.4"
+          },
+          {
+            "notice_id": "n-8",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-8",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-ed0c239caf4ab949885d907958758e72",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-11-20T23:59:00-05:00",
+            "mail_version": "2.4"
+          },
+          {
+            "notice_id": "n-10",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-10",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-d86d88b253195d8541150d9bc4e0737f",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-11-21T23:59:00-05:00",
+            "mail_version": "2.5"
+          },
+          {
+            "notice_id": "n-12",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-12",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-e5f6bbb3f90d9f4606b1609b9febccf8",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-11-29T23:59:00-05:00",
+            "mail_version": "2.6"
+          },
+          {
+            "notice_id": "n-14",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-14",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-bf29da8c2ec28cedf27389f5472197d1",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-11-29T23:59:00-05:00",
+            "mail_version": "2.7"
+          },
+          {
+            "notice_id": "n-16",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-16",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-ea84cfc5118b0028f6a39a23754fe653",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-12-02T23:59:00-05:00",
+            "mail_version": "2.5"
+          },
+          {
+            "notice_id": "n-17",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-17",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-e9c53f645b7d2f360a8c2538ccc0f13e",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-12-04T10:00:00-05:00",
+            "mail_version": "2.8"
+          },
+          {
+            "notice_id": "n-18",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-18",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-72a6817442cd2a78650fc70a22c980b1",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-12-04T10:00:00-05:00",
+            "mail_version": "2.6"
+          },
+          {
+            "notice_id": "n-20",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-20",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-7ce971c43425779fd2d4742d1614ba4d",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-12-04T10:30:00-05:00",
+            "mail_version": "2.9"
+          },
+          {
+            "notice_id": "n-21",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-21",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-721d1100f4f2b089304f9da498069bcc",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-12-04T10:30:00-05:00",
+            "mail_version": "2.7"
+          },
+          {
+            "notice_id": "n-23",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-23",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-923479d60b094a127dbab4b792a7b2bd",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-12-04T23:59:00-05:00",
+            "mail_version": "2.10"
+          },
+          {
+            "notice_id": "n-24",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-24",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-2a5d644201c84ec040cb87d68ae35516",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-12-04T23:59:00-05:00",
+            "mail_version": "2.8"
+          },
+          {
+            "notice_id": "n-26",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-26",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-b7932b3780a7d4c8d764ff11c2e53b57",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-12-07T09:00:00-05:00",
+            "mail_version": "2.11"
+          },
+          {
+            "notice_id": "n-27",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-27",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-2d13452e7a7af9fb9ca580dd2fefcc63",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-12-07T09:00:00-05:00",
+            "mail_version": "2.9"
+          },
+          {
+            "notice_id": "n-29",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-29",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-7c226d88213d24b95297b7ecca4ccef9",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2026-12-28T23:59:00-05:00",
+            "mail_version": "2.12"
+          },
+          {
+            "notice_id": "n-30",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-30",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-8b637c9df68b989f60fdc7435b580557",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2026-12-28T23:59:00-05:00",
+            "mail_version": "2.10"
+          },
+          {
+            "notice_id": "n-32",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-32",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-92036226ce95b25b11a0b0d2f49ee639",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-01-03T23:59:00-05:00",
+            "mail_version": "2.13"
+          },
+          {
+            "notice_id": "n-33",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-33",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-274c48a950f51f0e5acc46dc99c08f6c",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-01-03T23:59:00-05:00",
+            "mail_version": "2.11"
+          },
+          {
+            "notice_id": "n-35",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-35",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-c196a09c547deb4d2551d430d0c3920d",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-01-04T23:59:00-05:00",
+            "mail_version": "2.14"
+          },
+          {
+            "notice_id": "n-36",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-36",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-0c8c3bc46c999f00996664108adfe188",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-01-04T23:59:00-05:00",
+            "mail_version": "2.12"
+          },
+          {
+            "notice_id": "n-38",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-38",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-eae3e1da1bbd6bfbcd03dfb1ad807a18",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-01-04T23:59:00-05:00",
+            "mail_version": "2.15"
+          },
+          {
+            "notice_id": "n-39",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-39",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-7bd10fe254ed0fe30ada1a15f985586b",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-01-04T23:59:00-05:00",
+            "mail_version": "2.13"
+          },
+          {
+            "notice_id": "n-41",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-41",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-d1b285df48726991c8995d2e5c2e755e",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-01-18T23:59:00-05:00",
+            "mail_version": "2.16"
+          },
+          {
+            "notice_id": "n-42",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-42",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-812bf2718382e2baf3dd874847298902",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-01-18T23:59:00-05:00",
+            "mail_version": "2.14"
+          },
+          {
+            "notice_id": "n-44",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-44",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-894ec44e01f263b7b2ab7533de80707b",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-01-18T23:59:00-05:00",
+            "mail_version": "2.17"
+          },
+          {
+            "notice_id": "n-45",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-45",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-682498cac2ae0e6d189d93ca9e7a5bd4",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-01-18T23:59:00-05:00",
+            "mail_version": "2.15"
+          },
+          {
+            "notice_id": "n-47",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-47",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-51572ab7c3a5577690ce45053a0ff915",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-04-02T23:59:00-04:00",
+            "mail_version": "2.18"
+          },
+          {
+            "notice_id": "n-48",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-48",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-e6ef27c9e788ac37d46c9fab3f5dc706",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-04-02T23:59:00-04:00",
+            "mail_version": "2.16"
+          },
+          {
+            "notice_id": "n-50",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-50",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-9ff23689231e775b4775c72852b16be7",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-04-05T09:00:00-04:00",
+            "mail_version": "2.19"
+          },
+          {
+            "notice_id": "n-51",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-51",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-ba8812c0923638f733cbc343b5990309",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-04-05T09:00:00-04:00",
+            "mail_version": "2.17"
+          },
+          {
+            "notice_id": "n-53",
+            "recipient_id": "m-1",
+            "request_id": "e2-n-53",
+            "account_id": "mail-m-1",
+            "status": "committed",
+            "event_id": "router-75d7dc5cb6c6aa2d491e559844741e4f",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-1"
+            },
+            "cloud_event_time": "2027-04-05T09:00:00-04:00",
+            "mail_version": "2.20"
+          },
+          {
+            "notice_id": "n-54",
+            "recipient_id": "m-2",
+            "request_id": "e2-n-54",
+            "account_id": "mail-m-2",
+            "status": "committed",
+            "event_id": "router-53bc86dc80c7b843a5e72151532de8a8",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-m-2"
+            },
+            "cloud_event_time": "2027-04-05T09:00:00-04:00",
+            "mail_version": "2.18"
+          }
+        ],
+        "held": [
+          {
+            "notice_id": "n-3",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-6",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-9",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-11",
+            "recipient_id": "m-2",
+            "reason": "access_changed"
+          },
+          {
+            "notice_id": "n-13",
+            "recipient_id": "m-2",
+            "reason": "access_changed"
+          },
+          {
+            "notice_id": "n-15",
+            "recipient_id": "m-2",
+            "reason": "access_changed"
+          },
+          {
+            "notice_id": "n-19",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-22",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-25",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-28",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-31",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-34",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-37",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-40",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-43",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-46",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-49",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-52",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          },
+          {
+            "notice_id": "n-55",
+            "recipient_id": "m-3",
+            "reason": "no_mail_account"
+          }
+        ],
+        "mail_event_status": [
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-4ed954da08945381d2ced513569dd1cf",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-d04b3e9dca174f2e2804b7a2c5311653",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-8cda52d0d5de29f31a533baa22ba8669",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-8aede0957d9086f3eac627630a1a80e8",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-ea0973070112059f40f47835c4dfad54",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-ed0c239caf4ab949885d907958758e72",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-d86d88b253195d8541150d9bc4e0737f",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-e5f6bbb3f90d9f4606b1609b9febccf8",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-bf29da8c2ec28cedf27389f5472197d1",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-ea84cfc5118b0028f6a39a23754fe653",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-e9c53f645b7d2f360a8c2538ccc0f13e",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-72a6817442cd2a78650fc70a22c980b1",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-7ce971c43425779fd2d4742d1614ba4d",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-721d1100f4f2b089304f9da498069bcc",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-923479d60b094a127dbab4b792a7b2bd",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-2a5d644201c84ec040cb87d68ae35516",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-b7932b3780a7d4c8d764ff11c2e53b57",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-2d13452e7a7af9fb9ca580dd2fefcc63",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-7c226d88213d24b95297b7ecca4ccef9",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-8b637c9df68b989f60fdc7435b580557",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-92036226ce95b25b11a0b0d2f49ee639",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-274c48a950f51f0e5acc46dc99c08f6c",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-c196a09c547deb4d2551d430d0c3920d",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-0c8c3bc46c999f00996664108adfe188",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-eae3e1da1bbd6bfbcd03dfb1ad807a18",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-7bd10fe254ed0fe30ada1a15f985586b",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-d1b285df48726991c8995d2e5c2e755e",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-812bf2718382e2baf3dd874847298902",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-894ec44e01f263b7b2ab7533de80707b",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-682498cac2ae0e6d189d93ca9e7a5bd4",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-51572ab7c3a5577690ce45053a0ff915",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-e6ef27c9e788ac37d46c9fab3f5dc706",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-9ff23689231e775b4775c72852b16be7",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-ba8812c0923638f733cbc343b5990309",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-1",
+            "event_id": "router-75d7dc5cb6c6aa2d491e559844741e4f",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-m-2",
+            "event_id": "router-53bc86dc80c7b843a5e72151532de8a8",
+            "status": "committed"
+          }
+        ],
+        "records": {
+          "mail-m-1": [
+            {
+              "id": "router-4ed954da08945381d2ced513569dd1cf",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-1"
+            },
+            {
+              "id": "router-8cda52d0d5de29f31a533baa22ba8669",
+              "subject": "Information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-4"
+            },
+            {
+              "id": "router-ea0973070112059f40f47835c4dfad54",
+              "subject": "Information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-7"
+            },
+            {
+              "id": "router-d86d88b253195d8541150d9bc4e0737f",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-10"
+            },
+            {
+              "id": "router-e5f6bbb3f90d9f4606b1609b9febccf8",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-12"
+            },
+            {
+              "id": "router-bf29da8c2ec28cedf27389f5472197d1",
+              "subject": "Claim denied",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-14"
+            },
+            {
+              "id": "router-e9c53f645b7d2f360a8c2538ccc0f13e",
+              "subject": "Prior authorization decision",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-17"
+            },
+            {
+              "id": "router-7ce971c43425779fd2d4742d1614ba4d",
+              "subject": "Appeal received",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-20"
+            },
+            {
+              "id": "router-923479d60b094a127dbab4b792a7b2bd",
+              "subject": "Information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-23"
+            },
+            {
+              "id": "router-b7932b3780a7d4c8d764ff11c2e53b57",
+              "subject": "Appeal information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-26"
+            },
+            {
+              "id": "router-7c226d88213d24b95297b7ecca4ccef9",
+              "subject": "Decision overdue",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-29"
+            },
+            {
+              "id": "router-92036226ce95b25b11a0b0d2f49ee639",
+              "subject": "Decision overdue",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-32"
+            },
+            {
+              "id": "router-c196a09c547deb4d2551d430d0c3920d",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-35"
+            },
+            {
+              "id": "router-eae3e1da1bbd6bfbcd03dfb1ad807a18",
+              "subject": "Claim denied",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-38"
+            },
+            {
+              "id": "router-d1b285df48726991c8995d2e5c2e755e",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-41"
+            },
+            {
+              "id": "router-894ec44e01f263b7b2ab7533de80707b",
+              "subject": "Claim denied",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-44"
+            },
+            {
+              "id": "router-51572ab7c3a5577690ce45053a0ff915",
+              "subject": "Appeal window closing",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-47"
+            },
+            {
+              "id": "router-9ff23689231e775b4775c72852b16be7",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-50"
+            },
+            {
+              "id": "router-75d7dc5cb6c6aa2d491e559844741e4f",
+              "subject": "Appeal decision",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-53"
+            }
+          ],
+          "mail-m-2": [
+            {
+              "id": "router-d04b3e9dca174f2e2804b7a2c5311653",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-2"
+            },
+            {
+              "id": "router-8aede0957d9086f3eac627630a1a80e8",
+              "subject": "Information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-5"
+            },
+            {
+              "id": "router-ed0c239caf4ab949885d907958758e72",
+              "subject": "Information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-8"
+            },
+            {
+              "id": "router-ea84cfc5118b0028f6a39a23754fe653",
+              "subject": "Decision overdue",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-16"
+            },
+            {
+              "id": "router-72a6817442cd2a78650fc70a22c980b1",
+              "subject": "Prior authorization decision",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-18"
+            },
+            {
+              "id": "router-721d1100f4f2b089304f9da498069bcc",
+              "subject": "Appeal received",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-21"
+            },
+            {
+              "id": "router-2a5d644201c84ec040cb87d68ae35516",
+              "subject": "Information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-24"
+            },
+            {
+              "id": "router-2d13452e7a7af9fb9ca580dd2fefcc63",
+              "subject": "Appeal information requested",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-27"
+            },
+            {
+              "id": "router-8b637c9df68b989f60fdc7435b580557",
+              "subject": "Decision overdue",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-30"
+            },
+            {
+              "id": "router-274c48a950f51f0e5acc46dc99c08f6c",
+              "subject": "Decision overdue",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-33"
+            },
+            {
+              "id": "router-0c8c3bc46c999f00996664108adfe188",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-36"
+            },
+            {
+              "id": "router-7bd10fe254ed0fe30ada1a15f985586b",
+              "subject": "Claim denied",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-39"
+            },
+            {
+              "id": "router-812bf2718382e2baf3dd874847298902",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-42"
+            },
+            {
+              "id": "router-682498cac2ae0e6d189d93ca9e7a5bd4",
+              "subject": "Claim denied",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-45"
+            },
+            {
+              "id": "router-e6ef27c9e788ac37d46c9fab3f5dc706",
+              "subject": "Appeal window closing",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-48"
+            },
+            {
+              "id": "router-ba8812c0923638f733cbc343b5990309",
+              "subject": "Explanation of benefits available",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-51"
+            },
+            {
+              "id": "router-53bc86dc80c7b843a5e72151532de8a8",
+              "subject": "Appeal decision",
+              "folder": "inbox",
+              "received_at": "2027-04-05T09:00:00-04:00",
+              "thread_id": "e2-n-54"
+            }
+          ]
+        },
+        "readback": [
+          {
+            "notice_id": "n-1",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-1",
+            "record_id": "router-4ed954da08945381d2ced513569dd1cf",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-2",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-2",
+            "record_id": "router-d04b3e9dca174f2e2804b7a2c5311653",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-4",
+            "kind": "notice.info_requested",
+            "account_id": "mail-m-1",
+            "record_id": "router-8cda52d0d5de29f31a533baa22ba8669",
+            "subject": "Information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-5",
+            "kind": "notice.info_requested",
+            "account_id": "mail-m-2",
+            "record_id": "router-8aede0957d9086f3eac627630a1a80e8",
+            "subject": "Information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-7",
+            "kind": "notice.info_requested",
+            "account_id": "mail-m-1",
+            "record_id": "router-ea0973070112059f40f47835c4dfad54",
+            "subject": "Information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-8",
+            "kind": "notice.info_requested",
+            "account_id": "mail-m-2",
+            "record_id": "router-ed0c239caf4ab949885d907958758e72",
+            "subject": "Information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-10",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-1",
+            "record_id": "router-d86d88b253195d8541150d9bc4e0737f",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-12",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-1",
+            "record_id": "router-e5f6bbb3f90d9f4606b1609b9febccf8",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-14",
+            "kind": "notice.claim_denied",
+            "account_id": "mail-m-1",
+            "record_id": "router-bf29da8c2ec28cedf27389f5472197d1",
+            "subject": "Claim denied",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-16",
+            "kind": "notice.decision_overdue",
+            "account_id": "mail-m-2",
+            "record_id": "router-ea84cfc5118b0028f6a39a23754fe653",
+            "subject": "Decision overdue",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-17",
+            "kind": "notice.pa_decision",
+            "account_id": "mail-m-1",
+            "record_id": "router-e9c53f645b7d2f360a8c2538ccc0f13e",
+            "subject": "Prior authorization decision",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-18",
+            "kind": "notice.pa_decision",
+            "account_id": "mail-m-2",
+            "record_id": "router-72a6817442cd2a78650fc70a22c980b1",
+            "subject": "Prior authorization decision",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-20",
+            "kind": "notice.appeal_received",
+            "account_id": "mail-m-1",
+            "record_id": "router-7ce971c43425779fd2d4742d1614ba4d",
+            "subject": "Appeal received",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-21",
+            "kind": "notice.appeal_received",
+            "account_id": "mail-m-2",
+            "record_id": "router-721d1100f4f2b089304f9da498069bcc",
+            "subject": "Appeal received",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-23",
+            "kind": "notice.info_requested",
+            "account_id": "mail-m-1",
+            "record_id": "router-923479d60b094a127dbab4b792a7b2bd",
+            "subject": "Information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-24",
+            "kind": "notice.info_requested",
+            "account_id": "mail-m-2",
+            "record_id": "router-2a5d644201c84ec040cb87d68ae35516",
+            "subject": "Information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-26",
+            "kind": "notice.appeal_info_requested",
+            "account_id": "mail-m-1",
+            "record_id": "router-b7932b3780a7d4c8d764ff11c2e53b57",
+            "subject": "Appeal information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-27",
+            "kind": "notice.appeal_info_requested",
+            "account_id": "mail-m-2",
+            "record_id": "router-2d13452e7a7af9fb9ca580dd2fefcc63",
+            "subject": "Appeal information requested",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-29",
+            "kind": "notice.decision_overdue",
+            "account_id": "mail-m-1",
+            "record_id": "router-7c226d88213d24b95297b7ecca4ccef9",
+            "subject": "Decision overdue",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-30",
+            "kind": "notice.decision_overdue",
+            "account_id": "mail-m-2",
+            "record_id": "router-8b637c9df68b989f60fdc7435b580557",
+            "subject": "Decision overdue",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-32",
+            "kind": "notice.decision_overdue",
+            "account_id": "mail-m-1",
+            "record_id": "router-92036226ce95b25b11a0b0d2f49ee639",
+            "subject": "Decision overdue",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-33",
+            "kind": "notice.decision_overdue",
+            "account_id": "mail-m-2",
+            "record_id": "router-274c48a950f51f0e5acc46dc99c08f6c",
+            "subject": "Decision overdue",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-35",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-1",
+            "record_id": "router-c196a09c547deb4d2551d430d0c3920d",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-36",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-2",
+            "record_id": "router-0c8c3bc46c999f00996664108adfe188",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-38",
+            "kind": "notice.claim_denied",
+            "account_id": "mail-m-1",
+            "record_id": "router-eae3e1da1bbd6bfbcd03dfb1ad807a18",
+            "subject": "Claim denied",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-39",
+            "kind": "notice.claim_denied",
+            "account_id": "mail-m-2",
+            "record_id": "router-7bd10fe254ed0fe30ada1a15f985586b",
+            "subject": "Claim denied",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-41",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-1",
+            "record_id": "router-d1b285df48726991c8995d2e5c2e755e",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-42",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-2",
+            "record_id": "router-812bf2718382e2baf3dd874847298902",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-44",
+            "kind": "notice.claim_denied",
+            "account_id": "mail-m-1",
+            "record_id": "router-894ec44e01f263b7b2ab7533de80707b",
+            "subject": "Claim denied",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-45",
+            "kind": "notice.claim_denied",
+            "account_id": "mail-m-2",
+            "record_id": "router-682498cac2ae0e6d189d93ca9e7a5bd4",
+            "subject": "Claim denied",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-47",
+            "kind": "notice.appeal_window_closing",
+            "account_id": "mail-m-1",
+            "record_id": "router-51572ab7c3a5577690ce45053a0ff915",
+            "subject": "Appeal window closing",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-48",
+            "kind": "notice.appeal_window_closing",
+            "account_id": "mail-m-2",
+            "record_id": "router-e6ef27c9e788ac37d46c9fab3f5dc706",
+            "subject": "Appeal window closing",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-50",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-1",
+            "record_id": "router-9ff23689231e775b4775c72852b16be7",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-51",
+            "kind": "notice.eob_available",
+            "account_id": "mail-m-2",
+            "record_id": "router-ba8812c0923638f733cbc343b5990309",
+            "subject": "Explanation of benefits available",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-53",
+            "kind": "notice.appeal_decision",
+            "account_id": "mail-m-1",
+            "record_id": "router-75d7dc5cb6c6aa2d491e559844741e4f",
+            "subject": "Appeal decision",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-54",
+            "kind": "notice.appeal_decision",
+            "account_id": "mail-m-2",
+            "record_id": "router-53bc86dc80c7b843a5e72151532de8a8",
+            "subject": "Appeal decision",
+            "body_matches_notice": true
+          }
+        ]
+      },
+      "business_confirmation": "Not claimed. A committed Mail record shows delivery into the recipient's Mail account, not that the person read or acted on it."
+    },
+    "retry": {
+      "status": "published",
+      "receipts": [
+        {
+          "request_id": "e2-n-1",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-4ed954da08945381d2ced513569dd1cf"
+        },
+        {
+          "request_id": "e2-n-2",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-d04b3e9dca174f2e2804b7a2c5311653"
+        },
+        {
+          "request_id": "e2-n-4",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-8cda52d0d5de29f31a533baa22ba8669"
+        },
+        {
+          "request_id": "e2-n-5",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-8aede0957d9086f3eac627630a1a80e8"
+        },
+        {
+          "request_id": "e2-n-7",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-ea0973070112059f40f47835c4dfad54"
+        },
+        {
+          "request_id": "e2-n-8",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-ed0c239caf4ab949885d907958758e72"
+        },
+        {
+          "request_id": "e2-n-10",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-d86d88b253195d8541150d9bc4e0737f"
+        },
+        {
+          "request_id": "e2-n-12",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-e5f6bbb3f90d9f4606b1609b9febccf8"
+        },
+        {
+          "request_id": "e2-n-14",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-bf29da8c2ec28cedf27389f5472197d1"
+        },
+        {
+          "request_id": "e2-n-16",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-ea84cfc5118b0028f6a39a23754fe653"
+        },
+        {
+          "request_id": "e2-n-17",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-e9c53f645b7d2f360a8c2538ccc0f13e"
+        },
+        {
+          "request_id": "e2-n-18",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-72a6817442cd2a78650fc70a22c980b1"
+        },
+        {
+          "request_id": "e2-n-20",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-7ce971c43425779fd2d4742d1614ba4d"
+        },
+        {
+          "request_id": "e2-n-21",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-721d1100f4f2b089304f9da498069bcc"
+        },
+        {
+          "request_id": "e2-n-23",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-923479d60b094a127dbab4b792a7b2bd"
+        },
+        {
+          "request_id": "e2-n-24",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-2a5d644201c84ec040cb87d68ae35516"
+        },
+        {
+          "request_id": "e2-n-26",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-b7932b3780a7d4c8d764ff11c2e53b57"
+        },
+        {
+          "request_id": "e2-n-27",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-2d13452e7a7af9fb9ca580dd2fefcc63"
+        },
+        {
+          "request_id": "e2-n-29",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-7c226d88213d24b95297b7ecca4ccef9"
+        },
+        {
+          "request_id": "e2-n-30",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-8b637c9df68b989f60fdc7435b580557"
+        },
+        {
+          "request_id": "e2-n-32",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-92036226ce95b25b11a0b0d2f49ee639"
+        },
+        {
+          "request_id": "e2-n-33",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-274c48a950f51f0e5acc46dc99c08f6c"
+        },
+        {
+          "request_id": "e2-n-35",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-c196a09c547deb4d2551d430d0c3920d"
+        },
+        {
+          "request_id": "e2-n-36",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-0c8c3bc46c999f00996664108adfe188"
+        },
+        {
+          "request_id": "e2-n-38",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-eae3e1da1bbd6bfbcd03dfb1ad807a18"
+        },
+        {
+          "request_id": "e2-n-39",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-7bd10fe254ed0fe30ada1a15f985586b"
+        },
+        {
+          "request_id": "e2-n-41",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-d1b285df48726991c8995d2e5c2e755e"
+        },
+        {
+          "request_id": "e2-n-42",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-812bf2718382e2baf3dd874847298902"
+        },
+        {
+          "request_id": "e2-n-44",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-894ec44e01f263b7b2ab7533de80707b"
+        },
+        {
+          "request_id": "e2-n-45",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-682498cac2ae0e6d189d93ca9e7a5bd4"
+        },
+        {
+          "request_id": "e2-n-47",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-51572ab7c3a5577690ce45053a0ff915"
+        },
+        {
+          "request_id": "e2-n-48",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-e6ef27c9e788ac37d46c9fab3f5dc706"
+        },
+        {
+          "request_id": "e2-n-50",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-9ff23689231e775b4775c72852b16be7"
+        },
+        {
+          "request_id": "e2-n-51",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-ba8812c0923638f733cbc343b5990309"
+        },
+        {
+          "request_id": "e2-n-53",
+          "account_id": "mail-m-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-75d7dc5cb6c6aa2d491e559844741e4f"
+        },
+        {
+          "request_id": "e2-n-54",
+          "account_id": "mail-m-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-53bc86dc80c7b843a5e72151532de8a8"
+        }
+      ],
+      "mail_records": {
+        "mail-m-1": 19,
+        "mail-m-2": 17
+      }
+    },
+    "page_errors": 0
+  },
+  "refusal": {
+    "run": "mail-refusal-demo",
+    "condition": "The Router session for mail-m-1 is configured without the grant for that account (allowed_recipients empty); mail-m-2 keeps its grant",
+    "action": "Infra applies appeal.info_requested on Riley's appeal ap-3, which writes an entry for each guardian, Jordan (m-1) and Casey (m-2), and for Riley (m-3); Infra aligns the Mail clocks to Larkfield's (adapter.align), records both Apps' state, and runs the sender once",
+    "aligned": {
+      "status": "aligned",
+      "virtual_now": "2026-11-18T09:00:00-08:00"
+    },
+    "pending": [
+      "n-1 notice.appeal_info_requested to m-1",
+      "n-2 notice.appeal_info_requested to m-2",
+      "n-3 notice.appeal_info_requested to m-3"
+    ],
+    "status": "partial",
+    "refused": [
+      {
+        "notice_id": "n-1",
+        "account_id": "mail-m-1",
+        "code": "recipient_not_authorized"
+      }
+    ],
+    "receipts": [
+      {
+        "notice_id": "n-1",
+        "recipient_id": "m-1",
+        "request_id": "e2-n-1",
+        "account_id": "mail-m-1",
+        "status": "rejected",
+        "code": "recipient_not_authorized",
+        "event_id": null,
+        "target": null,
+        "cloud_event_time": null,
+        "mail_version": null
+      },
+      {
+        "notice_id": "n-2",
+        "recipient_id": "m-2",
+        "request_id": "e2-n-2",
+        "account_id": "mail-m-2",
+        "status": "committed",
+        "event_id": "router-3ce24fbf11f874d333cfbb3441d3b29b",
+        "target": {
+          "app_id": "mail",
+          "account_id": "mail-m-2"
+        },
+        "cloud_event_time": "2026-11-18T12:00:00-05:00",
+        "mail_version": "2.2"
+      }
+    ],
+    "held": [
+      {
+        "notice_id": "n-3",
+        "recipient_id": "m-3",
+        "reason": "no_mail_account"
+      }
+    ],
+    "larkfield": {
+      "before": "2.1",
+      "after": "2.1",
+      "state_sha256_before": "42403be02a2e73fc9082c89caec549090a387d29640941ed9a72e9947cc7e42b",
+      "state_sha256_after": "42403be02a2e73fc9082c89caec549090a387d29640941ed9a72e9947cc7e42b"
+    },
+    "mail": {
+      "before": {
+        "mail-m-1": {
+          "version": "2.1",
+          "records": 0,
+          "state_sha256": "0cba7735b6ccf2bfe048891a6f309ce3b2b3ef387e2caaed9a3727b636ee147a"
+        },
+        "mail-m-2": {
+          "version": "2.1",
+          "records": 0,
+          "state_sha256": "99d7c3aa218958bfc073b8d6da289579daf9bba5e7441872a974ffac34a8038f"
+        }
+      },
+      "after": {
+        "mail-m-1": {
+          "version": "2.1",
+          "records": 0,
+          "state_sha256": "0cba7735b6ccf2bfe048891a6f309ce3b2b3ef387e2caaed9a3727b636ee147a"
+        },
+        "mail-m-2": {
+          "version": "2.2",
+          "records": 1,
+          "state_sha256": "82714c84ba1fb6eefea8f7f00f3f59258cbbe263d6e94165d36c70d2cb9fa576"
+        }
+      }
+    },
+    "routers_halted": {
+      "mail-m-1": false,
+      "mail-m-2": false
+    }
+  },
+  "integration": {
+    "command": "node apps/larkfield-health/tests/mail.integration.cjs --report FILE",
+    "receiver": "mail 1.3.0",
+    "runtime": "1.6.0",
+    "node": "v25.8.1",
+    "checks": [
+      {
+        "name": "Mail 1.3.0 is the receiver",
+        "status": "passed"
+      },
+      {
+        "name": "The package wire schema is byte-identical to the runtime contract",
+        "status": "passed"
+      },
+      {
+        "name": "The package wire schema is byte-identical to Mail's receive schema",
+        "status": "passed"
+      },
+      {
+        "name": "Each Mail account's seed and binding were loaded and checked before its Router session started",
+        "status": "passed"
+      },
+      {
+        "name": "One Router session per adult Mail account, each with its own grant and a digest namespace shared by its Mail state",
+        "status": "passed"
+      },
+      {
+        "name": "Both receiver namespaces share one Router state directory and run, one session file each",
+        "status": "passed"
+      },
+      {
+        "name": "Only entries appended in the current epoch are pending: the current notice IDs minus snapshot.initial_data.notices",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-2 (notice.pa_decision to m-1) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-3 (notice.pa_decision to m-2) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-4 (notice.pa_decision to m-3) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "One occurrence is delivered to the two eligible inboxes, each committed in its own session",
+        "status": "passed"
+      },
+      {
+        "name": "The minor's own entry, with no Mail account bound, stays in the log",
+        "status": "passed"
+      },
+      {
+        "name": "The Router audit shows each request ID and CloudEvents ID built from the Larkfield epoch and the notice ID",
+        "status": "passed"
+      },
+      {
+        "name": "Both Mail clocks were advanced with env.advance_time to Larkfield's time before delivery",
+        "status": "passed"
+      },
+      {
+        "name": "Each inbox holds one message whose record matches its receipt, received at the aligned time",
+        "status": "passed"
+      },
+      {
+        "name": "The delivered notice reads back in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "The receipt keeps the notice time as the CloudEvents time",
+        "status": "passed"
+      },
+      {
+        "name": "Publishing leaves Larkfield unchanged",
+        "status": "passed"
+      },
+      {
+        "name": "A same-session retry returns each original receipt unchanged, marked duplicate",
+        "status": "passed"
+      },
+      {
+        "name": "A retry creates no second record: one message per inbox",
+        "status": "passed"
+      },
+      {
+        "name": "Two simultaneous passes on the run are serialized: both complete as duplicates and neither session halts",
+        "status": "passed"
+      },
+      {
+        "name": "A Larkfield reset leaves both inboxes unchanged record for record",
+        "status": "passed"
+      },
+      {
+        "name": "The reset moves Larkfield's clock back to its loaded time, not the fixture clock",
+        "status": "passed"
+      },
+      {
+        "name": "After the reset the lagging Larkfield clock is advanced to the Mail clocks",
+        "status": "passed"
+      },
+      {
+        "name": "After the reset each eligible inbox gets exactly one new message whose ID carries the new epoch",
+        "status": "passed"
+      },
+      {
+        "name": "The earlier records are unchanged after the new delivery",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail-bound minor and both guardians each receive one message for the minor's notice",
+        "status": "passed"
+      },
+      {
+        "name": "Each record matches its receipt: record ID, event ID and message ID",
+        "status": "passed"
+      },
+      {
+        "name": "Account IDs with a colon or a dot get digest namespaces used by both their Mail state and their Router sessions, and both are delivered",
+        "status": "passed"
+      },
+      {
+        "name": "A revocation queued through adapter.exclusive while the first publish was in flight lands before the next check, and the viewer's entry is not sent",
+        "status": "passed"
+      },
+      {
+        "name": "The revoked viewer keeps only the guardian copy, and the member gets both of theirs",
+        "status": "passed"
+      },
+      {
+        "name": "A Larkfield reset between two publishes stops the pass before the next one",
+        "status": "passed"
+      },
+      {
+        "name": "The new epoch has no pending entry, so nothing more is delivered and nothing halts",
+        "status": "passed"
+      },
+      {
+        "name": "A viewer revoked in the event that commits the due notice keeps the log entry written at the timer instant",
+        "status": "passed"
+      },
+      {
+        "name": "That viewer gets no Mail for it while the eligible member gets one message and receipt",
+        "status": "passed"
+      },
+      {
+        "name": "A viewer revoked at the exact instant of the timer notice keeps the log entry written at the timer instant",
+        "status": "passed"
+      },
+      {
+        "name": "That viewer gets no Mail for it while the eligible member gets one message and receipt",
+        "status": "passed"
+      },
+      {
+        "name": "A session built for another run and a hand-assembled session are refused before any clock alignment or publish",
+        "status": "passed"
+      },
+      {
+        "name": "Nothing reaches the other run's inboxes and the source clock keeps its own time",
+        "status": "passed"
+      },
+      {
+        "name": "A session is never built around another run's Router",
+        "status": "passed"
+      },
+      {
+        "name": "Without a granted session for one account its entry stays in the log while the other inbox still receives its own",
+        "status": "passed"
+      },
+      {
+        "name": "A publish the Router does not authorize is refused before dispatch; the pass continues without halting",
+        "status": "passed"
+      },
+      {
+        "name": "A refusal before dispatch creates no Mail record and leaves both sessions available",
+        "status": "passed"
+      },
+      {
+        "name": "A session whose Router serves an incompatible contract is held before routing and the other account is still served",
+        "status": "passed"
+      },
+      {
+        "name": "An incompatible contract creates no receiver record and halts nothing",
+        "status": "passed"
+      },
+      {
+        "name": "With two granted accounts for one person, the sole compatible route is used instead of being held as ambiguous",
+        "status": "passed"
+      },
+      {
+        "name": "A Router whose contract is known to be incompatible stays excluded while it is also unreachable, so the sole compatible inbox still gets the notice",
+        "status": "passed"
+      },
+      {
+        "name": "A real receiver_rejected from Mail in one session stops the run and the adapter halts",
+        "status": "passed"
+      },
+      {
+        "name": "The peer session shares the halt and refuses with run_halted",
+        "status": "passed"
+      },
+      {
+        "name": "The halted adapter refuses with run_halted without calling either Router",
+        "status": "passed"
+      },
+      {
+        "name": "A fresh adapter for the run in the same Infra process refuses at once with the original cause",
+        "status": "passed"
+      },
+      {
+        "name": "No inbox gains a record and Larkfield keeps its commit",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail reset between a publish and its retry is detected against the checked epoch before any clock change or publish, and every session halts",
+        "status": "passed"
+      },
+      {
+        "name": "Nothing new is delivered: the reset inbox stays empty and the peer keeps only its earlier record",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail reset after the check is refused by the Router with receiver_lifecycle_changed; the adapter halts and the peer session reports run_halted",
+        "status": "passed"
+      },
+      {
+        "name": "A publish whose Router reply is lost is unknown and halts the adapter",
+        "status": "passed"
+      },
+      {
+        "name": "Infra's stop mechanism then halts every session of the run, and the adapter verifies it",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation finds the dispatched message by its derived event ID in the dispatch epoch and reports committed",
+        "status": "passed"
+      },
+      {
+        "name": "The run stays halted after reconciliation",
+        "status": "passed"
+      },
+      {
+        "name": "Without a shared stop mechanism the adapter refuses to start",
+        "status": "passed"
+      },
+      {
+        "name": "When the stop mechanism fails the halt is reported unverified, never healthy",
+        "status": "passed"
+      },
+      {
+        "name": "A fresh adapter for that run in the same Infra process still refuses, so nothing more is published there",
+        "status": "passed"
+      },
+      {
+        "name": "A recipient with two granted Mail accounts is ambiguous: a Router unreachable for one pass, alternating, never turns the entry into a delivery",
+        "status": "passed"
+      },
+      {
+        "name": "The eligible peer gets exactly one message with a matching receipt",
+        "status": "passed"
+      },
+      {
+        "name": "A closed Mail client for one of the two keeps the entry waiting too",
+        "status": "passed"
+      },
+      {
+        "name": "An entry sent while only one inbox had a session stays with that inbox once the second session exists",
+        "status": "passed"
+      },
+      {
+        "name": "With that inbox's Router paused the retry waits instead of switching to the other inbox",
+        "status": "passed"
+      },
+      {
+        "name": "Once it is back the retry returns the original receipt; the notice exists in exactly one inbox",
+        "status": "passed"
+      },
+      {
+        "name": "A Router discovery that times out returns a resumable setup instead of a stranded Router",
+        "status": "passed"
+      },
+      {
+        "name": "A second session for that account cannot be opened in the run",
+        "status": "passed"
+      },
+      {
+        "name": "Resuming the setup on the same Router delivers the pending notice",
+        "status": "passed"
+      },
+      {
+        "name": "A disconnected Router fails discovery for its own session only; the other inbox is still served",
+        "status": "passed"
+      },
+      {
+        "name": "A Router built for another inbox of the same owner cannot be seen before dispatch; its receipt is caught and every session halts",
+        "status": "passed"
+      },
+      {
+        "name": "Through a spawned Router whose receiver replies after the acknowledgement deadline, the Router records the receiver's acknowledgement as lost",
+        "status": "passed"
+      },
+      {
+        "name": "The adapter reports the publish as unknown and halts, and verifies the halt only once Mail holds the late receive",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation by the derived event ID in the dispatch run, account and epoch reports committed only because the receipt and the record agree",
+        "status": "passed"
+      },
+      {
+        "name": "The lost publish left exactly one record, in mail-m-1 only",
+        "status": "passed"
+      },
+      {
+        "name": "The peer session reports halted and refuses with run_halted",
+        "status": "passed"
+      },
+      {
+        "name": "The run stays halted after reconciliation",
+        "status": "passed"
+      },
+      {
+        "name": "Larkfield stays committed after an unknown acknowledgement",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation is never committed for another event ID, another message, another publisher or another account",
+        "status": "passed"
+      },
+      {
+        "name": "After a receiver reset the unknown outcome reconciles as indeterminate, never committed",
+        "status": "passed"
+      },
+      {
+        "name": "Across spawned Router sessions the shared lock admits one dispatch at a time: while A is held by its receiver, B is refused with concurrent_dispatch and the run stops",
+        "status": "passed"
+      },
+      {
+        "name": "After a concurrent dispatch both sessions report halted, the adapter refuses, and the peer inbox gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "A publish whose Router request times out halts at once, before any probe, and its outcome is unknown",
+        "status": "passed"
+      },
+      {
+        "name": "The delayed request reaches a halted Router and is refused, so the revoked viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "The queued revocation commits only after the Router settled the delayed request",
+        "status": "passed"
+      },
+      {
+        "name": "When the publish times out, the Router is done with the request while its receive is still unconfirmed in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "When the publish times out, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+        "status": "passed"
+      },
+      {
+        "name": "When the publish times out, the viewer gets the notice before the queued revocation commits, never after it",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router replies that its receiver did not confirm, the Router is done with the request while its receive is still unconfirmed in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router replies that its receiver did not confirm, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router replies that its receiver did not confirm, the viewer gets the notice before the queued revocation commits, never after it",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router is killed while its receiver holds the delivery, the Router is done with the request while its receive is still unconfirmed in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router is killed while its receiver holds the delivery, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router is killed while its receiver holds the delivery, the viewer gets the notice before the queued revocation commits, never after it",
+        "status": "passed"
+      },
+      {
+        "name": "A receive still queued in Mail when the adapter fences arrives after the revocation, is refused as stale, and the viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "Closing a Router that still answers ends or orphans its Mail receiver inside the transaction and leaves that Mail instance unusable",
+        "status": "passed"
+      },
+      {
+        "name": "Closing a Router that still answers leaves the run halted: send() is still pending with the publish lock held, the queued revocation has not run, the targeted notice n-5 is absent from the viewer's inbox, which is unchanged since before that publish (it holds only the earlier n-2), and status() shows the halt without stop_verified",
+        "status": "passed"
+      },
+      {
+        "name": "Killing a Router ends or orphans its Mail receiver inside the transaction and leaves that Mail instance unusable",
+        "status": "passed"
+      },
+      {
+        "name": "Killing a Router leaves the run halted: send() is still pending with the publish lock held, the queued revocation has not run, the targeted notice n-5 is absent from the viewer's inbox, which is unchanged since before that publish (it holds only the earlier n-2), and status() shows the halt without stop_verified",
+        "status": "passed"
+      },
+      {
+        "name": "When Infra closes the live Router during settlement, the sender writes nothing more to it and keeps running",
+        "status": "passed"
+      },
+      {
+        "name": "Closing is not an exit: the lock is kept until the Router process has exited, and the revocation commits after it",
+        "status": "passed"
+      },
+      {
+        "name": "After the exit Mail settles the dispatch, and the viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "A fence whose acknowledgement is lost is retried with the same request and target, and Mail returns the stored receipt",
+        "status": "passed"
+      },
+      {
+        "name": "So the viewer's Mail clock moves by exactly 1 ms and the viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "The review notice of m-2 goes to m-1 only through the view grant, and to m-2 as member",
+        "status": "passed"
+      },
+      {
+        "name": "With the view grant live at dispatch, the adult grantee receives the other adult's notice and the member theirs",
+        "status": "passed"
+      },
+      {
+        "name": "The review notice of m-2 goes to m-1 only through the act grant, and to m-2 as member",
+        "status": "passed"
+      },
+      {
+        "name": "With the act grant live at dispatch, the adult grantee receives the other adult's notice and the member theirs",
+        "status": "passed"
+      },
+      {
+        "name": "The review notice of m-2 goes to m-1 only through the view grant, and to m-2 as member",
+        "status": "passed"
+      },
+      {
+        "name": "With the clock at the view grant's exact expiry before dispatch, the grantee's entry stays in the log and the member still gets theirs",
+        "status": "passed"
+      },
+      {
+        "name": "The review notice of m-2 goes to m-1 only through the act grant, and to m-2 as member",
+        "status": "passed"
+      },
+      {
+        "name": "With the clock at the act grant's exact expiry before dispatch, the grantee's entry stays in the log and the member still gets theirs",
+        "status": "passed"
+      },
+      {
+        "name": "Without a bound Mail account nothing is published",
+        "status": "passed"
+      },
+      {
+        "name": "No Mail record is created and the entries stay in the Larkfield log",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail instance whose seed is not loaded fails the receiver check",
+        "status": "passed"
+      },
+      {
+        "name": "A session opened before its Mail seed was loaded cannot be reopened for that account in the run",
+        "status": "passed"
+      }
+    ]
+  }
+}

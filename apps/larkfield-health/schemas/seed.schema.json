@@ -1,0 +1,1698 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Larkfield Health Plan seed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "seed_id",
+    "account_id",
+    "owner_person_id",
+    "time_zone",
+    "plan",
+    "members",
+    "providers",
+    "services",
+    "coverage",
+    "claims",
+    "info_requests",
+    "eobs",
+    "accumulators",
+    "pas",
+    "appeals",
+    "windows",
+    "grants",
+    "approvals",
+    "notices",
+    "issued"
+  ],
+  "properties": {
+    "seed_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+    },
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+    },
+    "time_zone": {
+      "const": "America/New_York"
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "years": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "deductible": {
+                "type": "object",
+                "properties": {
+                  "individual_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "family_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "individual_cents",
+                  "family_cents"
+                ],
+                "additionalProperties": false
+              },
+              "oop_max": {
+                "type": "object",
+                "properties": {
+                  "individual_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "family_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "individual_cents",
+                  "family_cents"
+                ],
+                "additionalProperties": false
+              },
+              "coinsurance_pct": {
+                "const": 20
+              },
+              "copays": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              }
+            },
+            "required": [
+              "deductible",
+              "oop_max",
+              "coinsurance_pct",
+              "copays"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "pa_services": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "plan_id",
+        "name",
+        "years",
+        "pa_services"
+      ],
+      "additionalProperties": false
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "relation": {
+            "enum": [
+              "self",
+              "spouse",
+              "child",
+              "other"
+            ]
+          },
+          "birth_date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "is_minor": {
+            "type": "boolean"
+          },
+          "guardian_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "uniqueItems": true
+          },
+          "enrolled_years": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 2000,
+              "maximum": 2199
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "member_id",
+          "name",
+          "relation",
+          "birth_date",
+          "is_minor",
+          "guardian_ids",
+          "enrolled_years"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "kind": {
+            "enum": [
+              "clinic",
+              "hospital",
+              "imaging",
+              "therapy",
+              "pharmacy",
+              "prescriber"
+            ]
+          },
+          "in_network": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider_id",
+          "name",
+          "kind",
+          "in_network"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "service_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "category": {
+            "enum": [
+              "office",
+              "specialist",
+              "imaging",
+              "therapy",
+              "emergency",
+              "lab",
+              "surgery",
+              "pharmacy"
+            ]
+          },
+          "fee_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "service_id",
+          "description",
+          "category",
+          "fee_cents"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "plan_year": {
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2199
+          },
+          "status": {
+            "enum": [
+              "unknown",
+              "none",
+              "other_secondary",
+              "other_primary"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "attested_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "member_id",
+          "plan_year",
+          "status",
+          "version",
+          "attested_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "claim_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "received_seq": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,14})$"
+          },
+          "review_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "received",
+              "pending_info",
+              "processed"
+            ]
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "position": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "service_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "service_date": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "units": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "billed_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "emergency": {
+                  "type": "boolean"
+                },
+                "possible_accident": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "line_id",
+                "position",
+                "service_id",
+                "service_date",
+                "units",
+                "billed_cents",
+                "emergency",
+                "possible_accident"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "processed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "claim_id",
+          "claim_version",
+          "member_id",
+          "provider_id",
+          "received_at",
+          "received_seq",
+          "review_at",
+          "status",
+          "lines",
+          "processed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "info_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "info_request_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "request_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "enum": [
+              "other_coverage",
+              "accident"
+            ]
+          },
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "line_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "plan_year": {
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2199
+          },
+          "opened_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "answered",
+              "expired"
+            ]
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "other_secondary",
+                  "other_primary",
+                  "not_accident",
+                  "accident",
+                  "work_related"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "answered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "info_request_id",
+          "request_version",
+          "type",
+          "claim_id",
+          "line_id",
+          "plan_year",
+          "opened_at",
+          "expires_at",
+          "status",
+          "answer",
+          "answered_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "eobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eob_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "posting_seq": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,14})$"
+          },
+          "reason": {
+            "enum": [
+              "initial",
+              "appeal"
+            ]
+          },
+          "appeal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ledger_before": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "member": {
+                  "type": "object",
+                  "properties": {
+                    "deductible_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "oop_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "deductible_cents",
+                    "oop_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                "family": {
+                  "type": "object",
+                  "properties": {
+                    "deductible_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "oop_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "deductible_cents",
+                    "oop_cents"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "member",
+                "family"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "status": {
+                  "enum": [
+                    "paid",
+                    "denied"
+                  ]
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "out_of_network",
+                        "prior_auth_missing",
+                        "other_party_liable",
+                        "missing_information"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "allowed_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "copay_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "deductible_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "coinsurance_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "member_cost_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "plan_paid_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "not_allowed_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "pa_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pa_units": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000
+                }
+              },
+              "required": [
+                "line_id",
+                "status",
+                "reason",
+                "allowed_cents",
+                "copay_cents",
+                "deductible_cents",
+                "coinsurance_cents",
+                "member_cost_cents",
+                "plan_paid_cents",
+                "not_allowed_cents",
+                "pa_id",
+                "pa_units"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "postings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "member_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "plan_year": {
+                  "type": "integer",
+                  "minimum": 2000,
+                  "maximum": 2199
+                },
+                "deductible_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "oop_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "member_id",
+                "plan_year",
+                "deductible_cents",
+                "oop_cents"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "eob_id",
+          "claim_id",
+          "version",
+          "issued_at",
+          "posting_seq",
+          "reason",
+          "appeal_id",
+          "ledger_before",
+          "lines",
+          "postings"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "accumulators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "plan_year": {
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2199
+          },
+          "deductible_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "oop_cents": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "member_id",
+          "plan_year",
+          "deductible_cents",
+          "oop_cents"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pa_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "pa_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "service_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "info_requested",
+              "approved",
+              "denied",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requested": {
+            "type": "object",
+            "properties": {
+              "units": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "valid_from": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              "valid_until": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              }
+            },
+            "required": [
+              "units",
+              "valid_from",
+              "valid_until"
+            ],
+            "additionalProperties": false
+          },
+          "approved": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "units": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "valid_from": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                  },
+                  "valid_until": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                  }
+                },
+                "required": [
+                  "units",
+                  "valid_from",
+                  "valid_until"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approved_after_post": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]{0,14})$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "units_used": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "info_requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "expedite": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "requested_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "open",
+                      "approved",
+                      "denied"
+                    ]
+                  },
+                  "decided_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "requested_at",
+                  "reason",
+                  "status",
+                  "decided_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "overdue_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expired_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "denial_notice_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "covered_submissions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pa_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "provider_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "units": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "valid_from": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "valid_until": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "pa_id",
+                "provider_id",
+                "units",
+                "valid_from",
+                "valid_until",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "pa_id",
+          "pa_version",
+          "member_id",
+          "provider_id",
+          "service_id",
+          "status",
+          "submitted_at",
+          "requested",
+          "approved",
+          "approved_after_post",
+          "units_used",
+          "info_requests",
+          "expedite",
+          "due_at",
+          "overdue",
+          "overdue_at",
+          "decided_at",
+          "expired_at",
+          "denial_notice_at",
+          "covered_submissions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "appeals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "appeal_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "appeal_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "claim",
+                  "pa"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "lines": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expedited": {
+            "type": "boolean"
+          },
+          "filed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "filed_seq": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,14})$"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "overdue_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "under_review",
+              "info_requested",
+              "upheld",
+              "overturned",
+              "withdrawn"
+            ]
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "by": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at",
+                "by",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "info_requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "lines": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "units": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "valid_until": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "lines",
+                  "units",
+                  "valid_until"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "appeal_id",
+          "appeal_version",
+          "member_id",
+          "target",
+          "lines",
+          "expedited",
+          "filed_at",
+          "filed_seq",
+          "due_at",
+          "overdue",
+          "overdue_at",
+          "status",
+          "statements",
+          "info_requests",
+          "decided_at",
+          "outcome",
+          "withdrawn_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "claim",
+                  "pa"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "notice_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closing": {
+            "type": "object",
+            "properties": {
+              "due_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "done": {
+                "type": "boolean"
+              },
+              "notice_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "due_at",
+              "done",
+              "notice_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "target",
+          "notice_at",
+          "ends_at",
+          "closing"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "grant_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "grant_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "grantor_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "grantee_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "scope": {
+            "enum": [
+              "view",
+              "act"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "revoked"
+            ]
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "grant_id",
+          "grant_version",
+          "member_id",
+          "grantor_id",
+          "grantee_id",
+          "scope",
+          "created_at",
+          "expires_at",
+          "status",
+          "revoked_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^tok-[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "const": "cob"
+                  },
+                  "kind": {
+                    "const": "coverage"
+                  },
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}:[0-9]{4}$"
+                  }
+                },
+                "required": [
+                  "action",
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "grant",
+                      "revoke",
+                      "info",
+                      "file",
+                      "withdraw"
+                    ]
+                  },
+                  "kind": {
+                    "enum": [
+                      "pair",
+                      "grant",
+                      "request",
+                      "claim",
+                      "pa",
+                      "appeal"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                  }
+                },
+                "required": [
+                  "action",
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "confirmed_by": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "approval_id",
+          "token",
+          "subject",
+          "confirmed_by",
+          "confirmed_at",
+          "used_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "notice_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "kind": {
+            "enum": [
+              "notice.eob_available",
+              "notice.info_requested",
+              "notice.claim_denied",
+              "notice.pa_decision",
+              "notice.appeal_received",
+              "notice.appeal_info_requested",
+              "notice.appeal_decision",
+              "notice.appeal_window_closing",
+              "notice.decision_overdue"
+            ]
+          },
+          "recipient_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "subject": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "claim",
+                  "info_request",
+                  "pa",
+                  "appeal"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "notice_id",
+          "kind",
+          "recipient_id",
+          "subject",
+          "member_id",
+          "at",
+          "title",
+          "body",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "issued": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]{0,14})$"
+      }
+    }
+  }
+}

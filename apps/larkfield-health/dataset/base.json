@@ -1,0 +1,367 @@
+{
+  "seed_id": "larkfield-delivery-base",
+  "account_id": "larkfield-m-1",
+  "owner_person_id": "m-1",
+  "time_zone": "America/New_York",
+  "plan": {
+    "plan_id": "plan-epo",
+    "name": "Larkfield EPO Plan",
+    "years": {
+      "2025": {
+        "deductible": {
+          "individual_cents": 125000,
+          "family_cents": 250000
+        },
+        "oop_max": {
+          "individual_cents": 350000,
+          "family_cents": 700000
+        },
+        "coinsurance_pct": 20,
+        "copays": {
+          "office": 2500,
+          "specialist": 4500,
+          "therapy": 3000,
+          "emergency": 20000
+        }
+      },
+      "2026": {
+        "deductible": {
+          "individual_cents": 150000,
+          "family_cents": 300000
+        },
+        "oop_max": {
+          "individual_cents": 400000,
+          "family_cents": 800000
+        },
+        "coinsurance_pct": 20,
+        "copays": {
+          "office": 2500,
+          "specialist": 5000,
+          "therapy": 3500,
+          "emergency": 25000
+        }
+      },
+      "2027": {
+        "deductible": {
+          "individual_cents": 160000,
+          "family_cents": 320000
+        },
+        "oop_max": {
+          "individual_cents": 420000,
+          "family_cents": 840000
+        },
+        "coinsurance_pct": 20,
+        "copays": {
+          "office": 3000,
+          "specialist": 5000,
+          "therapy": 3500,
+          "emergency": 27500
+        }
+      }
+    },
+    "pa_services": [
+      "svc-physical-therapy",
+      "svc-arthroscopy",
+      "svc-semaglutide-1"
+    ]
+  },
+  "members": [
+    {
+      "member_id": "m-1",
+      "name": "Jordan Hale",
+      "relation": "self",
+      "birth_date": "1984-03-12",
+      "is_minor": false,
+      "guardian_ids": [],
+      "enrolled_years": [
+        2025,
+        2026,
+        2027
+      ]
+    },
+    {
+      "member_id": "m-2",
+      "name": "Casey Hale",
+      "relation": "spouse",
+      "birth_date": "1986-09-02",
+      "is_minor": false,
+      "guardian_ids": [],
+      "enrolled_years": [
+        2025,
+        2026,
+        2027
+      ]
+    },
+    {
+      "member_id": "m-3",
+      "name": "Riley Hale",
+      "relation": "child",
+      "birth_date": "2015-05-20",
+      "is_minor": true,
+      "guardian_ids": [
+        "m-1",
+        "m-2"
+      ],
+      "enrolled_years": [
+        2025,
+        2026,
+        2027
+      ]
+    }
+  ],
+  "providers": [
+    {
+      "provider_id": "pv-1",
+      "name": "Quarrowby Family Medicine",
+      "kind": "prescriber",
+      "in_network": true
+    },
+    {
+      "provider_id": "pv-2",
+      "name": "Kestrel Valley Orthopedics",
+      "kind": "clinic",
+      "in_network": true
+    },
+    {
+      "provider_id": "pv-3",
+      "name": "Fernhollow Physical Therapy",
+      "kind": "therapy",
+      "in_network": true
+    },
+    {
+      "provider_id": "pv-4",
+      "name": "Wrenmoor Community Hospital",
+      "kind": "hospital",
+      "in_network": true
+    },
+    {
+      "provider_id": "pv-5",
+      "name": "Quillmont Imaging Center",
+      "kind": "imaging",
+      "in_network": false
+    },
+    {
+      "provider_id": "pv-6",
+      "name": "Cindervale Medical Center",
+      "kind": "hospital",
+      "in_network": false
+    }
+  ],
+  "services": [
+    {
+      "service_id": "svc-office-visit",
+      "description": "Primary care office visit",
+      "category": "office",
+      "fee_cents": 18000
+    },
+    {
+      "service_id": "svc-phone-consult",
+      "description": "Nurse phone consultation",
+      "category": "office",
+      "fee_cents": 2200
+    },
+    {
+      "service_id": "svc-specialist-visit",
+      "description": "Specialist office visit",
+      "category": "specialist",
+      "fee_cents": 30000
+    },
+    {
+      "service_id": "svc-knee-mri",
+      "description": "MRI of the knee",
+      "category": "imaging",
+      "fee_cents": 150000
+    },
+    {
+      "service_id": "svc-xray",
+      "description": "X-ray, two views",
+      "category": "imaging",
+      "fee_cents": 11963
+    },
+    {
+      "service_id": "svc-ultrasound",
+      "description": "Abdominal ultrasound",
+      "category": "imaging",
+      "fee_cents": 42000
+    },
+    {
+      "service_id": "svc-physical-therapy",
+      "description": "Physical therapy session",
+      "category": "therapy",
+      "fee_cents": 15000
+    },
+    {
+      "service_id": "svc-lab-panel",
+      "description": "Basic metabolic lab panel",
+      "category": "lab",
+      "fee_cents": 9138
+    },
+    {
+      "service_id": "svc-lipid-panel",
+      "description": "Cholesterol lab panel",
+      "category": "lab",
+      "fee_cents": 6488
+    },
+    {
+      "service_id": "svc-strep-test",
+      "description": "Rapid strep test",
+      "category": "lab",
+      "fee_cents": 3412
+    },
+    {
+      "service_id": "svc-er-visit",
+      "description": "Emergency department visit",
+      "category": "emergency",
+      "fee_cents": 220000
+    },
+    {
+      "service_id": "svc-wound-repair",
+      "description": "Simple wound repair",
+      "category": "surgery",
+      "fee_cents": 38000
+    },
+    {
+      "service_id": "svc-arthroscopy",
+      "description": "Knee arthroscopy",
+      "category": "surgery",
+      "fee_cents": 800000
+    },
+    {
+      "service_id": "svc-semaglutide-1",
+      "description": "Semaglutide 1 mg weekly pen, four-week supply",
+      "category": "pharmacy",
+      "fee_cents": 99800
+    }
+  ],
+  "coverage": [
+    {
+      "member_id": "m-1",
+      "plan_year": 2025,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-1",
+      "plan_year": 2026,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-1",
+      "plan_year": 2027,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-2",
+      "plan_year": 2025,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-2",
+      "plan_year": 2026,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-2",
+      "plan_year": 2027,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-3",
+      "plan_year": 2025,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-3",
+      "plan_year": 2026,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    },
+    {
+      "member_id": "m-3",
+      "plan_year": 2027,
+      "status": "unknown",
+      "version": 0,
+      "attested_at": null
+    }
+  ],
+  "claims": [],
+  "info_requests": [],
+  "eobs": [],
+  "accumulators": [
+    {
+      "member_id": "m-1",
+      "plan_year": 2025,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-1",
+      "plan_year": 2026,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-1",
+      "plan_year": 2027,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-2",
+      "plan_year": 2025,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-2",
+      "plan_year": 2026,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-2",
+      "plan_year": 2027,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-3",
+      "plan_year": 2025,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-3",
+      "plan_year": 2026,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    },
+    {
+      "member_id": "m-3",
+      "plan_year": 2027,
+      "deductible_cents": 0,
+      "oop_cents": 0
+    }
+  ],
+  "pas": [],
+  "appeals": [],
+  "windows": [],
+  "grants": [],
+  "approvals": [],
+  "notices": [],
+  "issued": {}
+}

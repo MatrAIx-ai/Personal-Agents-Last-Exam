@@ -1,0 +1,357 @@
+{
+  "schema": "larkfield.gui-evidence.v1",
+  "captured_on": "2026-11-28",
+  "command": "node apps/larkfield-health/evidence/tools/gui.cjs",
+  "rendering": "Chromium launched with --disable-gpu --num-raster-threads=1 --disable-partial-raster so repeated captures rasterize the same pixels; screenshots are taken with animations disabled",
+  "request_ids": "The page draws its request IDs from crypto.randomUUID; the capture replaces that function in each page of the browser context with a counter kept in a cookie of the page's origin (web-evidence-0001, …), so IDs are stable between runs and across reloads and tabs; the browser storage that tests/web.browser.cjs checks stays untouched. The GUI source is unchanged.",
+  "confirmations": "Confirmations are applied with dev/confirm.cjs, as tests/web.browser.cjs does; that helper draws its Infra event ID at random, so the recorded call shows a note in place of the ID (it is not stored in the App's data).",
+  "focus": "In each screenshot the element the step checks is outlined in orange, a style added for the screenshot only.",
+  "app": "larkfield-health",
+  "app_version": "1.0.0",
+  "app_load_digest": {
+    "sha256": "db75f49f9d2ea12b684a61936484aba4000c61756e42595db80cf137d54d9445",
+    "files": 47,
+    "includes": [
+      "app.json",
+      "contribution",
+      "fixtures",
+      "gui",
+      "infra",
+      "plugin.cjs",
+      "schemas",
+      "service.cjs",
+      "src",
+      "tools.json"
+    ],
+    "excludes": [
+      {
+        "name": "README.md",
+        "why": "documentation"
+      },
+      {
+        "name": "LICENSE",
+        "why": "licence text"
+      },
+      {
+        "name": "package.json",
+        "why": "npm scripts for the tests"
+      },
+      {
+        "name": "dataset",
+        "why": "the delivery dataset, reaching Core only as an env.load_seed selection"
+      },
+      {
+        "name": "dev",
+        "why": "fixture and history generators, fixture checker and the confirmation helper"
+      },
+      {
+        "name": "evidence",
+        "why": "this evidence"
+      },
+      {
+        "name": "examples",
+        "why": "the standalone event example"
+      },
+      {
+        "name": "tests",
+        "why": "tests"
+      }
+    ],
+    "algorithm": "SHA-256 over each file's package-relative path, a NUL byte and its bytes, in path order (the verifier's digestTree applied to the included files)",
+    "command": "node apps/larkfield-health/evidence/tools/digest.cjs"
+  },
+  "host": {
+    "runtime_version": "1.6.0",
+    "runtime_tree_sha256": "a1325458390f5a1b474a8598c663c35160a53ac30dce7afac4646587a3e889a3",
+    "files": {
+      "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+      "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+      "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+      "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+      "apps.registry.json": "ee01e14d13c2a089d9da7152cec5fb19736e72278ca74aa94e2f458e1810db13"
+    },
+    "server": "runtime/web/server.cjs (shared public Web Host)",
+    "registry": "apps.registry.json"
+  },
+  "core_api_version": "1.2.0",
+  "node": "v25.8.1",
+  "playwright": "1.56.1",
+  "browser": "chromium 141.0.7390.37",
+  "viewport": {
+    "desktop": "1280x900",
+    "phone": "390x844 in the steps that check the narrow layout"
+  },
+  "browser_timezone": "Asia/Tokyo",
+  "browser_locale": "en-US",
+  "runs": [
+    "larkfield-health-web",
+    "larkfield-health-web-restricted"
+  ],
+  "profile": "sandbox",
+  "account": {
+    "app_account": "larkfield-m-1",
+    "owner_person": "m-1",
+    "time_zone": "America/New_York",
+    "seed_id": "larkfield-household-1",
+    "synthetic": true
+  },
+  "start_virtual_time": "2026-11-18T09:00:00-08:00",
+  "steps_from": "The steps are those of tests/web.browser.cjs, run unchanged inside the recorder: each step's action, expected result and checks come from that file, and every check it passes is listed with the step.",
+  "inspector": "Infra MCP client on the same run (env.snapshot), as in tests/web.browser.cjs",
+  "agent_reads_and_writes": "Agent calls of the test go through the Web Host's own business client (the session the page uses), called in-process; reads are summarized to identifiers, states and the fields the checks use, writes are listed raw",
+  "checks_passed": 178,
+  "evidence_only_checks": 3,
+  "run_level_checks": [
+    {
+      "run": "larkfield-health-web",
+      "check": "No JavaScript errors and no console or CSP errors beyond the induced network failures and refusals",
+      "when": "checked by tests/web/harness.cjs after the last step of the run, over the whole run, so it belongs to no step"
+    },
+    {
+      "run": "larkfield-health-web-restricted",
+      "check": "No JavaScript errors and no console or CSP errors beyond the induced refusals",
+      "when": "checked by tests/web/harness.cjs after the last step of the run, over the whole run, so it belongs to no step"
+    }
+  ],
+  "recorder_probes": [
+    {
+      "probe": "outside-step page read",
+      "does": "After a sequence closes and before the next one begins, the page sends larkfield-health.members.list",
+      "stopped_with": "Recorder error: larkfield-health.members.list (page read) dispatched with no active step (after sequence probe closed)"
+    },
+    {
+      "probe": "outside-step second-Agent call",
+      "does": "After a sequence closes and before the next one begins, the second Agent client calls larkfield-health.members.list",
+      "stopped_with": "Recorder error: larkfield-health.members.list (second Agent read) dispatched with no active step (after sequence probe closed)",
+      "sent": false
+    },
+    {
+      "probe": "refusal caught after the last sequence",
+      "does": "After the last sequence closes the page sends larkfield-health.members.list, then an Infra read is refused and the caller catches the refusal; the teardown check must still report both",
+      "stopped_with": "Recorder error: env.snapshot (Infra inspector read) dispatched after the last sequence closed; larkfield-health.members.list (page read) dispatched after the last sequence closed",
+      "caught_by_the_caller": true,
+      "still_reported_at_teardown": 2
+    },
+    {
+      "probe": "forced call concurrent with a preview",
+      "does": "A route holds a preview and a forced larkfield-health.pa.request_expedite call until both are in flight; inside a step both are recorded once each, and after the next step is frozen both stop the script",
+      "stopped_with": "Recorder error: larkfield-health.appeals.withdraw.preview (page preview) dispatched after probe step 2 was frozen; larkfield-health.pa.request_expedite (forced call) dispatched after probe step 2 was frozen",
+      "held_until_both_arrived": true,
+      "in_flight_together": true,
+      "recorded_in_open_step": [
+        "forced call",
+        "preview"
+      ]
+    },
+    {
+      "probe": "forced token moved to another call",
+      "does": "The page moves the header token issued for a forced larkfield-health.pa.request_expedite call onto a preview, so the write leaves without it",
+      "stopped_with": "Recorder error: the forced call larkfield-health.pa.request_expedite was not seen leaving the page; the forced-call token probe-1 was sent with larkfield-health.appeals.withdraw.preview and other arguments than the larkfield-health.pa.request_expedite call it was issued for",
+      "classified_as_forced": 0
+    },
+    {
+      "probe": "state change between the check and the freeze",
+      "does": "The page commits larkfield-health.appeals.add_statement while the step's check runs",
+      "stopped_with": "Recorder error: probe step 1: the App's version changed between the step's check and its freeze",
+      "step_recorded": false
+    },
+    {
+      "probe": "write during the step's preparation",
+      "does": "After the step is frozen and while it waits before the screenshot, the page sends larkfield-health.appeals.add_statement",
+      "stopped_with": "Recorder error: larkfield-health.appeals.add_statement (page write) dispatched after probe step 1 was frozen",
+      "step_recorded": false
+    },
+    {
+      "probe": "write after the screenshot",
+      "does": "Right after the step's screenshot the page sends larkfield-health.appeals.add_statement",
+      "stopped_with": "Recorder error: larkfield-health.appeals.add_statement (page write) dispatched after probe step 1 was frozen",
+      "frozen_write_set": 0,
+      "frozen_version_kept": true
+    },
+    {
+      "probe": "duplicate terminal event",
+      "does": "A preview finishes and its requestfinished event is delivered a second time",
+      "stopped_with": "Recorder error: larkfield-health.appeals.withdraw.preview (page preview), started in probe step 1, received a second terminal outcome (reply after reply)",
+      "outcomes_seen": 2,
+      "kept_outcome": "reply"
+    },
+    {
+      "probe": "failure after headers",
+      "does": "A preview is answered with HTTP 200 headers and the start of a JSON body, then the connection closes",
+      "stopped_with": "Recorder error: larkfield-health.appeals.withdraw.preview (page preview), started in probe step 1, failed after its headers (HTTP 200): net::ERR_CONTENT_LENGTH_MISMATCH",
+      "outcomes_seen": 1,
+      "recorded": {
+        "http": 200,
+        "result": null,
+        "failure": "net::ERR_CONTENT_LENGTH_MISMATCH"
+      }
+    },
+    {
+      "probe": "request during sealing",
+      "does": "A preview delayed 600 ms is sent during the capture, and a second one delayed 1200 ms is sent 150 ms into sealing",
+      "stopped_with": "Recorder error: larkfield-health.appeals.withdraw.preview (page preview) dispatched after probe step 1 was frozen; larkfield-health.appeals.withdraw.preview (page preview) dispatched while probe step 1 was being sealed",
+      "replies_in_before_sealed": 2
+    },
+    {
+      "probe": "call after the last sequence",
+      "does": "Inside a step the second Agent client adds a statement to ap-3 and asks for the withdrawal preview of ap-3; after the last sequence closes the page sends the same preview, which succeeds",
+      "stopped_with": "Recorder error: larkfield-health.appeals.withdraw.preview (page preview) dispatched after the last sequence closed",
+      "recorded_reply": "HTTP 200, the withdrawal preview of ap-3 with its token, identical to the App's answer to the same preview through the second Agent client"
+    },
+    {
+      "probe": "second Agent close fails once",
+      "does": "Closing the second Agent client fails the first time; the caller catches the failure, later checks must still report it, and a second close must reach the same client",
+      "stopped_with": "Recorder error: closing the second Agent client failed: injected close failure",
+      "still_reported_after_the_catch": true,
+      "closed_on_retry": true
+    },
+    {
+      "probe": "cleanup after a failed step",
+      "does": "The cleanup used by every probe and by the probe suite runs three steps; the first throws and the third reports something left open",
+      "stopped_with": "Cleanup problems: first: injected failure; third: left open",
+      "steps_attempted": 3
+    },
+    {
+      "probe": "barrier waits for both distinct calls",
+      "does": "Two previews reach the overlap barrier first; it must stay closed until the forced larkfield-health.pa.request_expedite call arrives",
+      "stopped_with": "The barrier stayed closed with two previews held, and opened when the forced write arrived",
+      "held_before_the_forced_write": 2
+    },
+    {
+      "probe": "late reply",
+      "does": "A preview is delayed 1500 ms and the step allows 300 ms for outstanding replies",
+      "stopped_with": "Recorder error: still outstanding after 300 ms: larkfield-health.appeals.withdraw.preview (page preview), started in probe step 1",
+      "reply_recorded_under_its_request": true
+    },
+    {
+      "probe": "second-Agent call after the screenshot",
+      "does": "Right after the step's screenshot the second Agent client calls larkfield-health.members.list",
+      "stopped_with": "Recorder error: larkfield-health.members.list (second Agent read) dispatched after probe step 1 was frozen",
+      "sent": false
+    },
+    {
+      "probe": "failure the test did not cause",
+      "does": "A preview is sent on to a server that closes the connection without any reply; no route of the test drops it and no failure was declared",
+      "stopped_with": "Recorder error: larkfield-health.appeals.withdraw.preview (page preview), started in probe step 1, failed before any reply: net::ERR_EMPTY_RESPONSE"
+    },
+    {
+      "probe": "drops made by test routes",
+      "does": "A route of the test aborts a preview before forwarding it, and another fetches the reply to larkfield-health.members.list from the Web Host and then aborts it; neither was declared beforehand",
+      "stopped_with": "No stop: both drops are listed with the cause the recorder saw (route.abort, with or without route.fetch first) and reached_host",
+      "listed": [
+        "larkfield-health.appeals.withdraw.preview (reached_host false)",
+        "larkfield-health.members.list (reached_host true)"
+      ]
+    },
+    {
+      "probe": "induced drop",
+      "does": "The step declares that the next larkfield-health.members.list is dropped on purpose; a route drops it and a preview goes through",
+      "stopped_with": "No stop: the declared drop is listed with its failure and cause, and the preview with its reply",
+      "listed": [
+        "larkfield-health.members.list (induced: net::ERR_FAILED)",
+        "larkfield-health.appeals.withdraw.preview (HTTP 200)"
+      ]
+    },
+    {
+      "probe": "induced failure that never happened",
+      "does": "The step declares an induced drop of larkfield-health.members.list that no route performs",
+      "stopped_with": "Reported at teardown: an induced failure (declared but never performed) never happened"
+    },
+    {
+      "probe": "second tab outside a step",
+      "does": "After a sequence closes, a second tab opened in the same browser context sends larkfield-health.members.list",
+      "stopped_with": "Recorder error: larkfield-health.members.list (page read) dispatched with no active step (after sequence probe closed)",
+      "watched_tabs": 2
+    },
+    {
+      "probe": "refused page read",
+      "does": "The page reads larkfield-health.members.list, which Larkfield answers with status ok, and larkfield-health.claims.get for a claim that does not exist, which Larkfield refuses",
+      "stopped_with": "No stop: the refused read is listed with its HTTP status, Larkfield's status and version; the read answered with status ok is owned but not listed",
+      "listed": [
+        "larkfield-health.claims.get (HTTP 200, not_found)"
+      ]
+    },
+    {
+      "probe": "reply supplied by the test",
+      "does": "A route answers larkfield-health.appeals.add_statement itself with a committed receipt for a later version, so the call never reaches the Web Host",
+      "stopped_with": "No stop: the reply is listed as injected, and the App's version is unchanged",
+      "injected": "supplied by the test with Playwright route.fulfill, not by the App: the call never reached the Web Host, so nothing in this reply was committed"
+    },
+    {
+      "probe": "reply relayed by the test",
+      "does": "A route fetches the Web Host's reply to larkfield-health.appeals.withdraw.preview and passes it on unchanged, then fetches the reply to larkfield-health.members.list and replaces its body",
+      "stopped_with": "No stop: the passed-on reply is listed as relayed, the changed one as altered",
+      "listed": [
+        "larkfield-health.appeals.withdraw.preview (relayed)",
+        "larkfield-health.members.list (altered)"
+      ]
+    },
+    {
+      "probe": "assertion failure inside a probe",
+      "does": "A probe opens an HTTP server, a route and a second Agent client, then fails an assertion",
+      "stopped_with": "deliberate assertion failure inside a probe",
+      "closed_in_finally": [
+        "HTTP server (no longer listening)",
+        "route (removed, and a request afterwards no longer reaches it)",
+        "second Agent client (its process exited)",
+        "browser page (closed)"
+      ]
+    },
+    {
+      "probe": "probe failure with an Agent close that fails once",
+      "does": "A probe fails an assertion while closing its second Agent client fails once",
+      "stopped_with": "deliberate assertion failure inside a probe (cleanup also failed: second Agent client: close failed 1 time (Recorder error: closing the second Agent client failed: injected close failure))",
+      "second_agent_exited": true
+    },
+    {
+      "probe": "probe failure with an Agent close that keeps failing",
+      "does": "A probe fails an assertion while closing its second Agent client fails every time",
+      "stopped_with": "deliberate assertion failure inside a probe (cleanup also failed: second Agent client: close failed 3 times (Recorder error: closing the second Agent client failed: injected close failure); second Agent client: killed after 3 failed closes)",
+      "second_agent_exited": true
+    }
+  ],
+  "trace": "Every call is owned when it is sent, by the step open at that moment: page reads and tool discovery in every tab of the browser context, page writes and previews, forced calls, Agent reads and writes through the Host's business client, Infra events, clock moves, seed loads, confirmations applied by dev/confirm.cjs and the inspector's own snapshot reads. A step opens when the previous one is sealed or its sequence begins, and its action runs inside it. A call sent with no owner stops the script, and a reply never changes ownership. A step is frozen before anything is taken from it: the recorder reads the version, runs the check, waits until nothing the step owns is outstanding and reads the App's state, and stops if the version changed since before the check; observations, version and virtual time come from that frozen state, the wait and scrolling before the screenshot come after it, and a call sent after the freeze stops the script and cannot count toward submits. Each call has exactly one terminal outcome, the reply or a failure with its HTTP status and error; a failure or a second outcome stops the script, except a failure induced by the test: a connection the step declared beforehand as dropped on purpose by the evidence harness, or a request a route of the test aborted with Playwright route.abort, which the recorder sees when it happens; such a failure is listed with its cause and with reached_host (false when the call was dropped before it reached the Web Host, true when it was dropped after Larkfield committed it), and an induced failure that never happens is reported at teardown. A forced call carries a header token bound to the exact tool and arguments it was issued for; a token sent with any other call stops the script. Recorder errors are append-only, so a stop that a caller catches is still reported at teardown. Listed: page writes and previews with their raw arguments and raw reply (HTTP status and JSON body), unshortened; page reads answered with an HTTP status other than 200 or a status other than ok (a refusal, a record not visible to the account, a tool the policy omits), with their raw reply, which carries Larkfield's status and version; tool discoveries answered with an HTTP status other than 200; page reads and discoveries dropped on purpose; Agent writes and previews, Infra events, clock moves and forced calls raw, except the host wall-clock fields received_at and processed_at in Infra event receipts and the random event ID of dev/confirm.cjs, replaced by notes so repeated captures are identical; Agent reads summarized; seed loads by file name and the tools a policy omits. Not listed, but owned and waited for: page reads answered with HTTP 200 and status ok and tool discoveries answered with HTTP 200 (what the page loads at start, after each action and on Refresh), and the inspector's env.snapshot reads (their content is the step's observed state). A reply the test supplies or changes with Playwright (route.fulfill) is listed whatever its status and labelled: injected when the test built it and the call never reached the Web Host, so nothing in it was committed; relayed when it is the Web Host's own reply passed on unchanged; altered when the test changed it. A step counts as submitting only when it lists a write or forced call that reached the Web Host: an injected write, and a write dropped before it reached the Web Host (reached_host false), do not count. Before capturing, gui.cjs runs the recorder probes in evidence/tools/probes.cjs (recorder_probes); each makes the recorder stop with its exact expected message or shows the declared outcome.",
+  "console_errors": {
+    "seen": 39,
+    "unexpected": [],
+    "page_errors": []
+  },
+  "outline_check": {
+    "rule": "Every step names the element it checks; it must be on the page and on screen, and after the screenshot the PNG is decoded and points every 3 px along each side of the outline (3 px wide, drawn just inside the element's edge so that a scrolling parent cannot clip it), leaving out 12 px at each rounded corner, are sampled: at least one side must have 8 or more points inside the image, 80% or more of them in the outline colour #d9480f (each channel within 24); a side can be off screen or covered by a neighbouring pane when the element is larger than the view",
+    "screenshots_checked": 93,
+    "all_four_sides_drawn": 64,
+    "fewer_sides_drawn": [
+      "01-w0-page/01-open-the-page.png (top, left, right)",
+      "01-w0-page/02-every-section-at-1280-and-390-pixels.png (top, right)",
+      "01-w0-page/03-what-a-first-time-user-needs-explained.png (top, left, right)",
+      "02-claims-lines/01-a-claim-shows-each-service-line-with-its-outcome.png (top, left, right)",
+      "03-eob-versions/01-both-explanations-of-benefits-are-listed-the-new.png (top, left, right)",
+      "05-w2-claims-info/08-a-lost-reply-retried.png (top, left, right)",
+      "06-w1-grants/01-an-unknown-member-id-is-named-as-such.png (top, bottom)",
+      "06-w1-grants/09-a-change-that-changes-nothing.png (top, bottom)",
+      "07-w3-pa/03-the-plan-grants-the-expedite-then-denies-the-pa.png (top, left, right)",
+      "07-w3-pa/06-file-the-expedited-appeal.png (top, bottom)",
+      "08-w4-appeals/02-a-host-timeout-after-the-commit.png (top, left, right)",
+      "08-w4-appeals/07-a-lost-reply-with-the-following-refresh-failing.png (top, bottom)",
+      "08-w4-appeals/08-dismissing-the-banner-while-larkfield-is-unreach.png (top, bottom)",
+      "08-w4-appeals/09-a-lost-reply-and-a-refresh-refused-by-the-host.png (top, bottom)",
+      "08-w4-appeals/10-withdraw-the-appeal.png (top, left, right)",
+      "08-w4-appeals/11-refile-across-a-reload.png (top, left, right)",
+      "09-w5-visibility/03-revoked-between-the-list-and-the-detail-read-wit.png (top, bottom)",
+      "09-w5-visibility/04-revoked-between-two-reads-of-one-refresh.png (top, left, right)",
+      "09-w5-visibility/06-revoked-with-the-shell-s-roster-read-succeeding-.png (top, left, right)",
+      "09-w5-visibility/08-revoked-between-the-roster-and-the-claims-read-w.png (top, left, right)",
+      "09-w5-visibility/10-an-older-pa-list-answer-released-after-a-newer-r.png (top, left, right)",
+      "09-w5-visibility/14-a-committed-retry-about-records-later-hidden.png (top, bottom)",
+      "11-w9-two-questions/01-two-claims-whose-ids-could-be-confused.png (top, left, right)",
+      "11-w9-two-questions/06-confirm-answers-the-question-it-was-made-for.png (top, bottom)",
+      "12-w7-coverage/04-confirm-the-answer.png (top, bottom)",
+      "12-w7-coverage/05-larkfield-decides-whether-the-appeal-window-is-s.png (top, bottom)",
+      "12-w7-coverage/06-casey-s-2027-coverage-answer-reduced-to-view-dur.png (top, left, right)",
+      "13-w8-platform/01-direct-infra-requests-are-refused.png (top, right)",
+      "14-restricted/06-a-policy-without-plan-get.png (top, left, right)"
+    ]
+  },
+  "screenshots": 93,
+  "sequences": 14
+}
