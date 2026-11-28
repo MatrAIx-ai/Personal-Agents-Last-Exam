@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict'),path=require('node:path');
+const {applyEvent,handleTool,validateSeed}=require('../plugin.cjs');
+const d=structuredClone(require('../fixtures/minimal.json'));
+const binding=require('../fixtures/binding.json');
+const event=require('./scenario.json');
+const ctx={binding,role:'infra',virtual_now:event.at};
+validateSeed(ctx,d);
+assert.equal(d.libraries[0].grants.find(g=>g.principal_id==='b').role,'viewer');
+applyEvent(ctx,d,event);
+assert.equal(d.libraries[0].grants.find(g=>g.principal_id==='b').role,'editor');
+const result=handleTool({...ctx,role:'agent'},d,'library.import',{library_id:'group-1',catalog_id:'catalog-18'});
+assert.equal(result.result.record.title,'Synthetic Survey');
+console.log('Synthetic permission transition and catalog import succeeded in App handlers.');
