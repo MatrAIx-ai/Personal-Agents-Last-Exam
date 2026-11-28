@@ -50,10 +50,49 @@ def pieces(value):
     return []
 
 
+def assembled_quotes(source):
+    """Bodies of blockquotes whose line offsets still sit in this one record."""
+    body = str(source or "")
+    found = []
+    pattern = re.compile(r"(?:^|\n)([ \t]*>[^\n]*(?:\n[ \t]*>[^\n]*)*)")
+    for match in pattern.finditer(body):
+        raw = match.group(1)
+        origin = match.start(1)
+        spans = []
+        cursor = 0
+        lines = raw.split("\n")
+        for index, line in enumerate(lines):
+            marker = re.match(r"^[ \t]*>([ \t]?)", line)
+            if not marker:
+                spans = []
+                break
+            spans.append((origin + cursor + marker.end(), origin + cursor + len(line)))
+            cursor += len(line) + (0 if index + 1 == len(lines) else 1)
+        if not spans:
+            continue
+        parts = []
+        previous = None
+        valid = True
+        for start, end in spans:
+            if start < 0 or end > len(body) or start > end:
+                valid = False
+                break
+            if previous is not None and not re.fullmatch(r"[\s>]*", body[previous:start] or ""):
+                valid = False
+                break
+            parts.append(body[start:end].strip())
+            previous = end
+        if valid and parts:
+            found.append(norm(" ".join(parts)))
+    return found
+
+
 def covers(item, extract, sources):
     if item not in CONTENT_FIELDS:
         return False
-    blobs = [norm(str(source)) for source in (sources or []) if str(source or "").strip()]
+    raw_sources = [str(source) for source in (sources or []) if str(source or "").strip()]
+    blobs = [norm(source) for source in raw_sources]
+    assemblies = [piece for source in raw_sources for piece in assembled_quotes(source)]
     found = False
     for field in CONTENT_FIELDS[item]:
         if field not in extract:
@@ -61,7 +100,7 @@ def covers(item, extract, sources):
         for piece in pieces(extract[field]):
             found = True
             wanted = norm(piece)
-            if not any(wanted in blob for blob in blobs):
+            if not any(wanted in blob for blob in blobs) and wanted not in assemblies:
                 return False
     return found
 

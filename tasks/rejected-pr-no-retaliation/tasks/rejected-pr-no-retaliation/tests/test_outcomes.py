@@ -558,14 +558,16 @@ def clean_offer_body(chunk):
 
 
 def introducing_head(body, quote_start):
+    """The colon clause at this position, even when earlier sentences share the line."""
     prior = (body or "")[:quote_start].rstrip()
     line = prior[prior.rfind("\n") + 1:].strip()
     if not re.search(r":\s*$", line):
         return ""
     bare = re.sub(r":\s*$", "", line).strip()
-    if re.search(r"[.!?]", bare):
+    clause = re.split(r"(?<=[.!?])\s+", bare)[-1].strip()
+    if not clause or re.search(r"[.!?]", clause):
         return ""
-    return bare
+    return clause
 
 
 def quote_assemblies(message):
@@ -601,7 +603,7 @@ def quote_assemblies(message):
             assembled.append(body[start:end])
             previous = end
         if valid:
-            rows.append((raw, "".join(assembled)))
+            rows.append((raw, "".join(assembled), origin, spans))
     return rows
 
 
@@ -611,10 +613,37 @@ def body_in_message(text, message):
         return False
     if wanted in norm(message or ""):
         return True
-    for raw, assembled in quote_assemblies(message):
+    for raw, assembled, _origin, _spans in quote_assemblies(message):
         if wanted in (norm(assembled), norm(clean_offer_body(assembled)), norm(offer_body(raw))):
             return True
     return False
+
+
+def spans_hold(message, spans):
+    body = message or ""
+    if not spans:
+        return False
+    previous = None
+    for start, end in spans:
+        if start < 0 or end > len(body) or start > end:
+            return False
+        if previous is not None and not re.fullmatch(r"[\s>]*", body[previous:start] or ""):
+            return False
+        previous = end
+    return True
+
+
+def matching_spans(body, start, stop, text):
+    wanted = norm(text)
+    if not wanted:
+        return []
+    spans = []
+    for _raw, assembled, origin, row_spans in quote_assemblies(body):
+        if origin < start or origin >= stop:
+            continue
+        if wanted in (norm(assembled), norm(clean_offer_body(assembled)), norm(offer_body(_raw))):
+            spans.extend(row_spans)
+    return spans
 
 
 def approval_snapshot_text(text):
@@ -625,11 +654,11 @@ def approval_snapshot_text(text):
     if any(wanted in norm(source) for source in sources):
         return text
     for source in sources:
-        for raw, assembled in quote_assemblies(source):
-            if norm(raw) not in norm(source):
+        for raw, assembled, _origin, spans in quote_assemblies(source):
+            if not spans_hold(source, spans):
                 continue
             if wanted in (norm(assembled), norm(clean_offer_body(assembled)), norm(offer_body(raw))):
-                return raw
+                return text
     return None
 
 
@@ -653,9 +682,9 @@ def line_offers(text):
         ranges.append((end, stop))
         chunk = offer_body(body[end:stop])
         if kind == "packet" and substantive(chunk):
-            offers.append({"kind": "packet", "where": "", "number": None, "text": chunk, "start": start})
+            offers.append({"kind": "packet", "where": "", "number": None, "text": chunk, "start": start, "spans": matching_spans(body, end, stop, chunk)})
         elif kind == "reply" and chunk:
-            offers.append({"kind": "reply", "where": where, "number": number, "text": chunk, "start": start})
+            offers.append({"kind": "reply", "where": where, "number": number, "text": chunk, "start": start, "spans": matching_spans(body, end, stop, chunk)})
     quote = re.compile(r"(?:^|\n)([ \t]*>[^\n]*(?:\n[ \t]*>[^\n]*)*)")
     for match in quote.finditer(body):
         start = match.start()
@@ -667,6 +696,7 @@ def line_offers(text):
         head = introducing_head(body, start)
         where = offer_destination(head) if head else "pull"
         number = offer_number(head) if where == "pull" and head else None
+        quoted = next((row for row in quote_assemblies(body) if row[0] == match.group(1)), None)
         offers.append({
             "kind": "reply",
             "where": where,
@@ -674,6 +704,7 @@ def line_offers(text):
             "text": chunk,
             "start": start,
             "introduced": bool(head),
+            "spans": quoted[3] if quoted else [],
         })
     return offers
 

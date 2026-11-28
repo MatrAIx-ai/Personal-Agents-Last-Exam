@@ -200,12 +200,15 @@ function cleanOfferBody(chunk) {
 }
 
 function introducingHead(body, quoteStart) {
+  // The heading is the colon clause at this position, even when earlier
+  // sentences share the line. A line that does not end in a colon introduces nothing.
   const prior = String(body || '').slice(0, quoteStart).replace(/\s+$/, '');
   const line = prior.slice(prior.lastIndexOf('\n') + 1).trim();
   if (!/:\s*$/.test(line)) return '';
   const bare = line.replace(/:\s*$/, '').trim();
-  if (/[.!?]/.test(bare)) return '';
-  return bare;
+  const clause = (bare.split(/(?<=[.!?])\s+/).pop() || '').trim();
+  if (!clause || /[.!?]/.test(clause)) return '';
+  return clause;
 }
 
 function quoteAssemblies(message) {
@@ -243,22 +246,51 @@ function quoteAssemblies(message) {
       assembled += body.slice(start, end);
       previous = end;
     }
-    if (valid) rows.push({raw, assembled});
+    if (valid) rows.push({raw, assembled, origin, spans});
   }
   return rows;
 }
 
-function snapshotText(text, message) {
+function spansHold(message, spans) {
+  const body = String(message || '');
+  if (!spans || !spans.length) return false;
+  let previous = null;
+  for (const [start, end] of spans) {
+    if (start < 0 || end > body.length || start > end) return false;
+    if (previous !== null && !/^[\s>]*$/.test(body.slice(previous, start))) return false;
+    previous = end;
+  }
+  return true;
+}
+
+function assembledBody(message, spans) {
+  return cleanOfferBody(spans.map(([start, end]) => String(message).slice(start, end)).join('\n'));
+}
+
+function matchingSpans(body, start, stop, text) {
+  const wanted = norm(text);
+  if (!wanted) return [];
+  const spans = [];
+  for (const row of quoteAssemblies(body)) {
+    if (row.origin < start || row.origin >= stop) continue;
+    const cleaned = norm(cleanOfferBody(row.assembled));
+    if (cleaned === wanted || norm(row.assembled) === wanted || norm(offerBody(row.raw)) === wanted) spans.push(...row.spans);
+  }
+  return spans;
+}
+
+function snapshotText(text, message, spans) {
+  // The approval text is the assembled body. A wrapped quotation is covered
+  // when each quoted line's offsets still sit in the originating message.
   const body = String(text || '');
   if (!norm(body)) return '';
   const source = message == null ? '' : String(message);
   if (!source || norm(source).includes(norm(body))) return body;
+  if (spansHold(source, spans) && norm(assembledBody(source, spans)) === norm(body)) return body;
   for (const row of quoteAssemblies(source)) {
-    const cleaned = cleanOfferBody(row.assembled);
-    const quoted = norm(offerBody(row.raw));
-    if (norm(row.assembled) === norm(body) || norm(cleaned) === norm(body) || quoted === norm(body)) {
-      if (norm(source).includes(norm(row.raw))) return row.raw;
-    }
+    if (!spansHold(source, row.spans)) continue;
+    const cleaned = norm(cleanOfferBody(row.assembled));
+    if (cleaned === norm(body) || norm(row.assembled) === norm(body) || norm(offerBody(row.raw)) === norm(body)) return body;
   }
   return '';
 }
@@ -277,8 +309,8 @@ function findOffers(text) {
   marks.forEach((mark, index) => {
     const stop = index + 1 < marks.length ? marks[index + 1][0] : body.length;
     const chunk = offerBody(body.slice(mark[1], stop));
-    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', number: null, text: chunk, start: mark[0]});
-    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], number: mark[4], text: chunk, start: mark[0]});
+    if (mark[2] === 'packet' && substantive(chunk)) offers.push({kind: 'packet', where: '', number: null, text: chunk, start: mark[0], spans: matchingSpans(body, mark[1], stop, chunk)});
+    if (mark[2] === 'reply' && chunk) offers.push({kind: 'reply', where: mark[3], number: mark[4], text: chunk, start: mark[0], spans: matchingSpans(body, mark[1], stop, chunk)});
   });
   const ranges = marks.map((mark, index) => [mark[1], index + 1 < marks.length ? marks[index + 1][0] : body.length]);
   const quote = /(?:^|\n)([ \t]*>[^\n]*(?:\n[ \t]*>[^\n]*)*)/g;
@@ -290,7 +322,8 @@ function findOffers(text) {
     const head = introducingHead(body, start);
     const where = head ? offerWhere(head) : 'pull';
     const number = where === 'pull' && head ? offerNumber(head) : null;
-    offers.push({kind: 'reply', where, number, text: chunk, start, introduced: Boolean(head)});
+    const quoted = quoteAssemblies(body).find(row => row.origin === start || row.raw === match[1]);
+    offers.push({kind: 'reply', where, number, text: chunk, start, introduced: Boolean(head), spans: quoted ? quoted.spans : []});
   }
   return offers;
 }
@@ -380,12 +413,12 @@ function contraryAction(text) {
   });
 }
 
-function replyApplies(text, fixture = 'world-test', message = null) {
+function replyApplies(text, fixture = 'world-test', message = null, spans = null) {
   const body = String(text || '');
   if (!body.trim()) return false;
-  const send = snapshotText(body, message);
+  const send = snapshotText(body, message, spans);
   if (!send) return false;
-  const source = message != null && norm(String(message)).includes(norm(send)) ? String(message) : send;
+  const source = message != null ? String(message) : send;
   return judged(fixture, 'approval_reply', {text: send}, [source]).applies;
 }
 
@@ -396,12 +429,12 @@ function packetDescribesDecision(text) {
   return closed && follow;
 }
 
-function packetApplies(text, afterDecision, fixture = 'world-test', message = null) {
+function packetApplies(text, afterDecision, fixture = 'world-test', message = null, spans = null) {
   const body = String(text || '');
   if (!body.trim()) return false;
-  const send = snapshotText(body, message);
+  const send = snapshotText(body, message, spans);
   if (!send) return false;
-  const source = message != null && norm(String(message)).includes(norm(send)) ? String(message) : send;
+  const source = message != null ? String(message) : send;
   return judged(fixture, 'approval_packet', {text: send, after_decision: !!afterDecision}, [source]).applies;
 }
 
@@ -481,9 +514,14 @@ function clearWithdrawn(state, text, targetNumber = null) {
   if (!target) return;
   if (clearsTargetReply(text, targetNumber)) {
     state.reply = '';
+    state.replySpans = [];
     state.heldReply = '';
+    state.heldSpans = [];
   }
-  if (target === 'both' || target === 'packet') state.packet = '';
+  if (target === 'both' || target === 'packet') {
+    state.packet = '';
+    state.packetSpans = [];
+  }
 }
 
 function applyDraftStep(state, step, afterDecision, targetNumber) {
@@ -491,11 +529,14 @@ function applyDraftStep(state, step, afterDecision, targetNumber) {
     const scope = replacementScope(step.text);
     if (scope === 'both' || scope === 'reply') {
       state.reply = '';
+      state.replySpans = [];
       state.heldReply = '';
+      state.heldSpans = [];
       state.pendingReply = false;
     }
     if (scope === 'both' || scope === 'packet') {
       state.packet = '';
+      state.packetSpans = [];
       state.pendingPacket = false;
     }
     return false;
@@ -514,7 +555,9 @@ function applyDraftStep(state, step, afterDecision, targetNumber) {
   const aimedAtTarget = offer.where === 'pull' && (offer.number == null || Number(offer.number) === Number(targetNumber));
   if (offer.kind === 'reply' && offer.introduced && !aimedAtTarget) {
     state.reply = '';
+    state.replySpans = [];
     state.heldReply = '';
+    state.heldSpans = [];
     state.pendingReply = false;
   }
   if (offer.kind === 'reply' && offer.where === 'pull' && replyKept(offer.text)) {
@@ -522,27 +565,30 @@ function applyDraftStep(state, step, afterDecision, targetNumber) {
       sawReply = true;
       if (afterDecision) {
         state.heldReply = '';
+        state.heldSpans = [];
         state.reply = offer.text;
+        state.replySpans = offer.spans || [];
         state.pendingReply = true;
       } else {
         state.heldReply = offer.text;
+        state.heldSpans = offer.spans || [];
         state.pendingReply = false;
       }
     }
   }
   if (offer.kind === 'packet' && substantive(offer.text)) {
     state.packet = offer.text;
+    state.packetSpans = offer.spans || [];
     state.pendingPacket = true;
   }
   return sawReply;
 }
 
 function commitDrafts(state, fixture, afterDecision, message) {
-  // Judge only a span that survived the rest of this message, and only a span
-  // that is still in that message. A wrapped quotation is judged from its raw
-  // lines; the stored body stays the quoted characters.
-  if (state.pendingReply && state.reply) state.reply = replyApplies(state.reply, fixture, message) ? state.reply : '';
-  if (state.pendingPacket && state.packet) state.packet = packetApplies(state.packet, afterDecision, fixture, message) ? state.packet : '';
+  // Judge the assembled body, and only when its quoted-line offsets still sit
+  // in this message. The stored draft stays that body.
+  if (state.pendingReply && state.reply) state.reply = replyApplies(state.reply, fixture, message, state.replySpans) ? state.reply : '';
+  if (state.pendingPacket && state.packet) state.packet = packetApplies(state.packet, afterDecision, fixture, message, state.packetSpans) ? state.packet : '';
   state.pendingReply = false;
   state.pendingPacket = false;
 }
@@ -554,8 +600,10 @@ function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false
   }
   // A reply shown before the choice is kept and classified after Tomás has spoken.
   if (!sawReply && afterDecision && state.heldReply && !state.reply) {
-    state.reply = replyApplies(state.heldReply, fixture) ? state.heldReply : '';
+    state.reply = replyApplies(state.heldReply, fixture, null, state.heldSpans) ? state.heldReply : '';
+    state.replySpans = state.heldSpans || [];
     state.heldReply = '';
+    state.heldSpans = [];
   }
   commitDrafts(state, fixture, afterDecision, text);
   state.drafts = Boolean(state.reply && state.packet);
@@ -568,7 +616,7 @@ function decisionSeq(transcript) {
 
 function draftsForDecision(transcript, fixture = 'world-test', targetNumber = null) {
   const decision = decisionSeq(transcript);
-  const state = {reply: '', packet: '', heldReply: '', pendingReply: false, pendingPacket: false};
+  const state = {reply: '', packet: '', heldReply: '', replySpans: [], packetSpans: [], heldSpans: [], pendingReply: false, pendingPacket: false};
   if (decision === null) return {reply: '', packet: '', drafts: false};
   for (const row of transcript || []) {
     if (row.role !== 'agent' || row.channel !== 'chat') continue;

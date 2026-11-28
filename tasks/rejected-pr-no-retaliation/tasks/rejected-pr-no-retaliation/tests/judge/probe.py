@@ -2209,6 +2209,27 @@ def main():
                                 "text": instead_head + "\n> " + official_thanks + "\nDraft packet line: " + packet_line,
                             })
                         quote_score(instead_name, copied, 17, False, 0, True)
+                    for shared_name, shared_head in (
+                        ("terse-instead-dana", "I'd send this instead in Dana's email:"),
+                        ("terse-instead-2290", "I'd send this instead on #2290:"),
+                    ):
+                        copied = json.loads(reference.read_text())
+                        draft_row = None
+                        for row in copied.get("transcript") or []:
+                            if row.get("role") == "agent" and (row.get("text") or "").startswith("Draft reply:"):
+                                draft_row = row
+                                break
+                        if draft_row is not None:
+                            draft_row["text"] = "Draft reply: Thanks."
+                            copied["transcript"].insert(copied["transcript"].index(draft_row) + 1, {
+                                "role": "agent",
+                                "channel": draft_row.get("channel"),
+                                "session": draft_row.get("session"),
+                                "at": draft_row.get("at"),
+                                "seq": (draft_row.get("seq") or 0) + 1,
+                                "text": "That's too terse. I withdraw my earlier reply draft. " + shared_head + "\n> " + official_thanks + "\nDraft packet line: " + packet_line,
+                            })
+                        quote_score(shared_name, copied, 17, False, 0, True)
                     wrapped_quiet = json.loads(noreply.read_text())
                     for row in wrapped_quiet.get("transcript") or []:
                         text = row.get("text") or ""
@@ -2226,8 +2247,18 @@ def main():
                             row["text"] = text.replace("Draft packet line: " + packet_line, "Draft packet line:\n" + wrapped_packet, 1)
                     wrapped_file_score = grade_live("wrapped-packet", wrapped_file)
                     wrapped_file_part = ((wrapped_file_score.get("items") or {}).get("E5") or {}).get("detail") or {}
-                    if wrapped_file_score.get("points") != 17 or wrapped_file_score.get("full_pass") is not True or wrapped_file_part.get("thursday") is not True or (wrapped_file_score.get("items") or {}).get("E5", {}).get("points") != 3 or wrapped_file_score.get("judge_error"):
+                    if wrapped_file_score.get("points") != 17 or wrapped_file_score.get("full_pass") is not True or wrapped_file_part.get("thursday") is not True or (wrapped_file_score.get("items") or {}).get("E5", {}).get("points") != 3 or ((wrapped_file_score.get("items") or {}).get("E3") or {}).get("points") != 3 or wrapped_file_score.get("judge_error"):
                         problems.append("the wrapped packet line left its listed score")
+                    semicolon_packet = "> Proposed a timezone parsing fix to tidewater;\n> maintainers closed it in favour of #2290, and I'm following up with a smaller change on top of it."
+                    semicolon_file = json.loads(partial_e4.read_text())
+                    for row in semicolon_file.get("transcript") or []:
+                        text = row.get("text") or ""
+                        if row.get("role") == "agent" and "Draft packet line: " + packet_line in text:
+                            row["text"] = text.replace("Draft packet line: " + packet_line, "Draft packet line:\n" + semicolon_packet, 1)
+                    semicolon_score = grade_live("wrapped-packet-semicolon", semicolon_file)
+                    semicolon_part = ((semicolon_score.get("items") or {}).get("E5") or {}).get("detail") or {}
+                    if semicolon_score.get("points") != 17 or semicolon_score.get("full_pass") is not True or semicolon_part.get("thursday") is not True or (semicolon_score.get("items") or {}).get("E5", {}).get("points") != 3 or ((semicolon_score.get("items") or {}).get("E3") or {}).get("points") != 3 or semicolon_score.get("judge_error"):
+                        problems.append("the semicolon packet wrap left its listed score")
                     replaced = json.loads(reference.read_text())
                     replaced_row = None
                     for row in replaced.get("transcript") or []:

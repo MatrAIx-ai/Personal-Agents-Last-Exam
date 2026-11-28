@@ -169,10 +169,29 @@ assert.strictEqual(world.draftsForDecision(decided(forDana), 'world-test', 2318)
 assert.strictEqual(world.extractDrafts('I\'d send this instead in Dana\'s email:\n> ' + thanks + '\nDraft packet line: ' + officialPacket, 2318).reply, '');
 assert.strictEqual(world.extractDrafts('I\'d send this instead on #2290:\n> ' + thanks + '\nDraft packet line: ' + officialPacket, 2318).reply, '');
 assert.strictEqual(world.extractDrafts('I\'d send this instead on #2318:\n> ' + thanks, 2318).reply, thanks);
+const sharedDana = 'That\'s too terse. I withdraw my earlier reply draft. I\'d send this instead in Dana\'s email:\n> ' + thanks + '\nDraft packet line: ' + officialPacket;
+const sharedPull = 'That\'s too terse. I withdraw my earlier reply draft. I\'d send this instead on #2290:\n> ' + thanks + '\nDraft packet line: ' + officialPacket;
+assert.strictEqual(world.extractDrafts(sharedDana, 2318).reply, '');
+assert.strictEqual(world.extractDrafts(sharedPull, 2318).reply, '');
+assert.strictEqual(world.draftPacket(sharedDana), officialPacket);
+assert.strictEqual(world.draftsForDecision([
+  {role: 'agent', channel: 'chat', seq: 1, text: 'Draft reply: Thanks.'},
+  {role: 'user', channel: 'chat', seq: 2, text: choice},
+  {role: 'agent', channel: 'chat', seq: 3, text: sharedDana},
+], 'world-test', 2318).drafts, false);
+assert.strictEqual(world.draftsForDecision([
+  {role: 'agent', channel: 'chat', seq: 1, text: 'Draft reply: Thanks.'},
+  {role: 'user', channel: 'chat', seq: 2, text: choice},
+  {role: 'agent', channel: 'chat', seq: 3, text: sharedPull},
+], 'world-test', 2318).drafts, false);
 const wrappedThanks = 'If you agree, I suggest posting the following on #2318:\n> Thanks for the careful review.\n> I\'ll follow up with a smaller change on top of #2290 next week.';
 assert.strictEqual(world.extractDrafts(wrappedThanks, 2318).reply, thanks);
 const wrappedPacket = 'Draft reply: ' + thanks + '\nDraft packet line:\n> Proposed a timezone parsing fix to tidewater; maintainers closed it in favour of #2290,\n> and I\'m following up with a smaller change on top of it.';
 assert.strictEqual(world.draftPacket(wrappedPacket), officialPacket);
+const semicolonPacket = 'Draft reply: ' + thanks + '\nDraft packet line:\n> Proposed a timezone parsing fix to tidewater;\n> maintainers closed it in favour of #2290, and I\'m following up with a smaller change on top of it.';
+assert.strictEqual(world.draftPacket(semicolonPacket), officialPacket);
+assert.strictEqual(world.draftsForDecision(decided(semicolonPacket), 'world-test', 2318).packet, officialPacket);
+assert.strictEqual(world.draftsForDecision(decided(semicolonPacket), 'world-test', 2318).drafts, true);
 const replaceReply = [
   {role: 'agent', channel: 'chat', seq: 1, text: 'Draft reply: Thanks.\nDraft packet line: ' + officialPacket},
   {role: 'user', channel: 'chat', seq: 2, text: choice},
