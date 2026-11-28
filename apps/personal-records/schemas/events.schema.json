@@ -83,7 +83,22 @@
             "source": { "type": "string" },
             "source_account": { "type": "string" },
             "message_id": { "type": "string" },
-            "asset_id": { "type": "string" }
+            "asset_id": { "type": "string" },
+            "represented_date": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    { "type": "string" },
+                    { "type": "null" }
+                  ]
+                },
+                "precision": { "type": "string", "enum": ["day", "month", "unresolved"] },
+                "provenance": { "type": "string", "minLength": 1 }
+              },
+              "required": ["value", "precision", "provenance"],
+              "additionalProperties": false
+            }
           },
           "additionalProperties": true
         }

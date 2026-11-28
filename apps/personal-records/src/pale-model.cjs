@@ -51,6 +51,45 @@ function computeTargetStateHash(targetType, target, parentDoc) {
 
 const VALID_CATEGORIES = ['tax', 'employment', 'insurance', 'property', 'utilities', 'healthcare', 'banking', 'legal', 'other'];
 const VALID_VERIFICATION_STATES = ['INFERRED', 'USER_CONFIRMED', 'SUPERSEDED'];
+const STRICT_DATE_TIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+function isStrictDateTime(value) {
+  if (typeof value !== 'string' || !STRICT_DATE_TIME_RE.test(value)) return false;
+  const ms = Date.parse(value);
+  if (!Number.isFinite(ms)) return false;
+  // Reject calendar overflows like 2026-02-30
+  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  return utc.getUTCFullYear() === y && utc.getUTCMonth() === m - 1 && utc.getUTCDate() === d;
+}
+
+function validateRepresentedDate(rep) {
+  if (!rep || typeof rep !== 'object' || Array.isArray(rep)) {
+    fail('invalid_event', 'represented_date must be an object');
+  }
+  if (!['day', 'month', 'unresolved'].includes(rep.precision)) {
+    fail('invalid_event', 'represented_date.precision must be day, month, or unresolved');
+  }
+  if (typeof rep.provenance !== 'string' || !rep.provenance.trim()) {
+    fail('invalid_event', 'represented_date.provenance must be a nonempty string');
+  }
+  if (rep.precision === 'day') {
+    if (typeof rep.value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(rep.value) || !isStrictDateTime(`${rep.value}T00:00:00Z`)) {
+      fail('invalid_event', 'represented_date.value must be a valid YYYY-MM-DD date for day precision');
+    }
+  } else if (rep.precision === 'month') {
+    if (typeof rep.value !== 'string' || !/^\d{4}-\d{2}$/.test(rep.value)) {
+      fail('invalid_event', 'represented_date.value must be YYYY-MM for month precision');
+    }
+    const monthNum = Number(rep.value.slice(5, 7));
+    if (monthNum < 1 || monthNum > 12) {
+      fail('invalid_event', 'represented_date.value month out of range');
+    }
+  } else if (rep.value !== null) {
+    fail('invalid_event', 'represented_date.value must be null when precision is unresolved');
+  }
+  return { value: rep.value, precision: rep.precision, provenance: rep.provenance };
+}
 
 function validateProposedChanges(targetType, proposedChanges) {
   const allowedFields = {
@@ -78,8 +117,8 @@ function validateProposedChanges(targetType, proposedChanges) {
     if ('tags' in proposedChanges && (!Array.isArray(proposedChanges.tags) || proposedChanges.tags.some(t => typeof t !== 'string'))) {
       fail('invalid_arguments', 'tags must be an array of strings');
     }
-    if ('valid_until' in proposedChanges && proposedChanges.valid_until !== null && (typeof proposedChanges.valid_until !== 'string' || !Number.isFinite(Date.parse(proposedChanges.valid_until)))) {
-      fail('invalid_arguments', 'valid_until must be an ISO 8601 date-time string or null');
+    if ('valid_until' in proposedChanges && proposedChanges.valid_until !== null && !isStrictDateTime(proposedChanges.valid_until)) {
+      fail('invalid_arguments', 'valid_until must be a valid RFC 3339 / ISO 8601 date-time with timezone or null');
     }
     if ('verification_state' in proposedChanges && !VALID_VERIFICATION_STATES.includes(proposedChanges.verification_state)) {
       fail('invalid_arguments', `verification_state must be one of [${VALID_VERIFICATION_STATES.join(', ')}]`);
@@ -188,6 +227,8 @@ function validateSeed(ctx, data) {
 module.exports = {
   fail,
   sha256Hex,
+  isStrictDateTime,
+  validateRepresentedDate,
   computeProposalHash,
   computeTargetStateHash,
   validateProposedChanges,

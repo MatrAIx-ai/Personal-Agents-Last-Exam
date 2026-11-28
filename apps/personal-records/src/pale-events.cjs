@@ -1,5 +1,5 @@
 'use strict';
-const { fail, decodeAndExtract } = require('./pale-model.cjs');
+const { fail, decodeAndExtract, validateRepresentedDate } = require('./pale-model.cjs');
 const { handleTool } = require('./pale-operations.cjs');
 
 function applyEvent(ctx, data, event) {
@@ -66,6 +66,10 @@ function applyEvent(ctx, data, event) {
     if (data.documents.some(d => d.id === id)) {
       fail('invalid_event', `Document ${id} already exists`);
     }
+    const representedDate = payload.represented_date !== undefined
+      ? validateRepresentedDate(payload.represented_date)
+      : null;
+
     data.documents.push({
       id,
       account_id: data.account_id,
@@ -81,7 +85,10 @@ function applyEvent(ctx, data, event) {
         source: payload.source || null,
         source_account: payload.source_account || null,
         message_id: payload.message_id || null,
-        asset_id: payload.asset_id || null
+        asset_id: payload.asset_id || null,
+        ...(representedDate ? { represented_date: representedDate } : {}),
+        ingested_at: at,
+        ingestion_provenance: 'event_availability'
       },
       created_at: at,
       updated_at: at,

@@ -18,11 +18,20 @@ function handleTool(ctx, data, name, args) {
       const limit = args.limit ?? 20;
       const offset = args.offset ?? 0;
 
+      const validBeforeMs = args.valid_before ? Date.parse(args.valid_before) : null;
+      const validAfterMs = args.valid_after ? Date.parse(args.valid_after) : null;
+
       const filtered = data.documents.filter(doc => {
         if (args.category && doc.category !== args.category) return false;
         if (args.verification_state && doc.verification_state !== args.verification_state) return false;
-        if (args.valid_before && (!doc.valid_until || doc.valid_until > args.valid_before)) return false;
-        if (args.valid_after && (!doc.valid_until || doc.valid_until < args.valid_after)) return false;
+        if (validBeforeMs !== null) {
+          const docValidMs = doc.valid_until ? Date.parse(doc.valid_until) : NaN;
+          if (!Number.isFinite(docValidMs) || docValidMs > validBeforeMs) return false;
+        }
+        if (validAfterMs !== null) {
+          const docValidMs = doc.valid_until ? Date.parse(doc.valid_until) : NaN;
+          if (!Number.isFinite(docValidMs) || docValidMs < validAfterMs) return false;
+        }
         if (q) {
           const latest = doc.versions.find(v => v.version_number === doc.current_version_number) || doc.versions[doc.versions.length - 1];
           const haystack = [
@@ -485,14 +494,16 @@ function handleTool(ctx, data, name, args) {
       const thresholdDays = args.threshold_days ?? 30;
       const suppressDays = args.suppress_days ?? 7;
       const vNowMs = Date.parse(now);
-      const thresholdIso = new Date(vNowMs + thresholdDays * 86400000).toISOString();
-      const suppressIso = new Date(vNowMs - suppressDays * 86400000).toISOString();
+      const thresholdMs = vNowMs + thresholdDays * 86400000;
+      const suppressMs = vNowMs - suppressDays * 86400000;
 
       const dispatched = [];
       for (const doc of data.documents) {
-        if (!doc.valid_until || doc.valid_until > thresholdIso) continue;
+        if (!doc.valid_until) continue;
+        const validUntilMs = Date.parse(doc.valid_until);
+        if (!Number.isFinite(validUntilMs) || validUntilMs > thresholdMs) continue;
         const recent = data.notifications.find(
-          n => n.document_id === doc.id && n.notification_type === 'EXPIRY_ALERT' && n.dispatched_at >= suppressIso
+          n => n.document_id === doc.id && n.notification_type === 'EXPIRY_ALERT' && Date.parse(n.dispatched_at) >= suppressMs
         );
         if (recent) continue;
 

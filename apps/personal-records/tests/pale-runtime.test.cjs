@@ -28,7 +28,10 @@ test('Public Agent/Infra MCP confirmation boundary with persisted readback, both
       { title: '' },
       { category: 'bogus_category' },
       { tags: 'not-an-array' },
-      { verification_state: 'INVALID_STATE' }
+      { verification_state: 'INVALID_STATE' },
+      { valid_until: '2026-12-01' },
+      { valid_until: 'Dec 1, 2026' },
+      { valid_until: '2026-02-30T10:00:00Z' }
     ]) {
       const badProp = await agent.call('personal-records.propose_update', {
         target_type: 'document_metadata',
@@ -242,6 +245,59 @@ test('Public Agent/Infra MCP confirmation boundary with persisted readback, both
     assert.equal(staleB.status, 'stale_proposal_version');
     const novAfter = await agent.call('personal-records.get_document', { id: 'doc_payslip_nov2026' });
     assert.equal(novAfter.item.title, 'Nov Payslip Edit A');
+  } finally {
+    await Promise.allSettled([infra?.close(), agent?.close()]);
+    prep.cleanup();
+    fs.rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
+test('Public Agent/Infra MCP staged payslip delivery preserves represented_date and event availability', async () => {
+  const { convertFixtureToPaleSeed } = require('../scripts/export-pale-seed.cjs');
+  const converted = convertFixtureToPaleSeed(path.resolve(__dirname, '../fixtures/corpus.json'));
+  const stagedPayslip = converted.staged_events.find(e => e.payload.id === 'doc_emp_payslip_2026_11');
+  assert.ok(stagedPayslip, 'Expected staged Nov 28 payslip event');
+
+  const prep = prepare(path.resolve(__dirname, '..'));
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pale-pr-staged-'));
+  let infra, agent;
+  try {
+    infra = new Client('personal-records', 'infra', 'mcp-staged', stateDir, 'test-infra', { registry: prep.registry, initialProfile: 'scenario' });
+    agent = new Client('personal-records', 'agent', 'mcp-staged', stateDir, 'test-agent', { registry: prep.registry });
+    await infra.initialize();
+    await agent.initialize();
+
+    const s0 = await infra.call('env.snapshot');
+    const loaded = await infra.call('env.load_seed', {
+      expected_version: s0.version,
+      request_id: 'load-corpus-pre-session',
+      data: converted.data,
+      binding: converted.binding
+    });
+    assert.equal(loaded.status, 'ready');
+
+    // Before delivery: exact-ID read via Agent MCP returns not_found
+    const before = await agent.call('personal-records.get_document', { id: 'doc_emp_payslip_2026_11' });
+    assert.equal(before.status, 'not_found');
+
+    // Deliver staged payslip via Infra env.apply_event at its simulated availability
+    const delivered = await infra.call('env.apply_event', {
+      expected_version: loaded.version,
+      event: stagedPayslip
+    });
+    assert.equal(delivered.status, 'committed');
+
+    // After delivery: public Agent MCP readback shows distinct represented_date and event availability
+    const after = await agent.call('personal-records.get_document', { id: 'doc_emp_payslip_2026_11' });
+    assert.equal(after.status, 'ok');
+    assert.equal(after.item.created_at, stagedPayslip.at);
+    assert.equal(after.item.source_reference.ingested_at, stagedPayslip.at);
+    assert.equal(after.item.source_reference.ingestion_provenance, 'event_availability');
+    assert.deepEqual(after.item.source_reference.represented_date, {
+      value: '2026-11-28',
+      precision: 'day',
+      provenance: 'extracted_from_text'
+    });
   } finally {
     await Promise.allSettled([infra?.close(), agent?.close()]);
     prep.cleanup();
