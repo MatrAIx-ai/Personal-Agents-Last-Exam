@@ -109,7 +109,7 @@ async function smallText(page) {
     await go('#/site/cf-B10/2027-06-25/2027-06-26', 'site');
     await otherWrite('cart.hold', {site_id: 'cf-B10', arrival: '2027-06-25', departure: '2027-06-26'});
     await page.locator('[data-action=hold]').click();
-    record('A hold from a page another session changed is refused with stale_version, shown next to the button with reload guidance',
+    record('A hold from a page another session changed is refused with stale_version, shown next to the button with a Refresh control',
       await inlineError('[aria-label=Booking]') === 'stale_version' && (await page.locator('#status').getAttribute('data-error-code')) === 'stale_version');
     await page.reload(); await page.locator('#page[data-page=site]').waitFor(); await idle();
     record('After a reload the night shows as in someone\'s cart and the hold is disabled with that reason',
@@ -212,9 +212,9 @@ async function smallText(page) {
     await go('#/account', 'account');
     await otherWrite('companions.save', {companion_id: 'comp-0003', default_party: false});
     await page.locator('[data-card-id=card-dana-visa] [data-action=set-default]').click();
-    record('A write from a page another session changed shows stale_version with reload guidance', await inlineError() === 'stale_version' &&
-      (await page.locator('.sb-error[data-error-code=stale_version]').innerText()).includes('Reload the page'));
-    await page.reload(); await page.locator('#page[data-page=account]').waitFor(); await idle();
+    record('A write from a page another session changed shows stale_version with a Refresh control', await inlineError() === 'stale_version' &&
+      (await page.locator('.sb-error[data-error-code=stale_version]').innerText()).includes('Refresh to see the latest state'));
+    await page.locator('[data-action=refresh]').click(); await page.locator('.sb-error').waitFor({state: 'detached'}); await idle();
     await page.locator('[data-card-id=card-dana-visa] [data-action=set-default]').click();
     record('Make default changes the wallet through wallet.set_default and the receipt stays visible', (await flash('success')).includes('Visa ending 4417') && (await snapshot()).wallet.default_card_id === 'card-dana-visa');
     const gear = page.locator('form[data-equipment-form=new]');

@@ -233,7 +233,7 @@ const ERROR_TITLE={site_taken:'Those nights are no longer available.',site_close
 function errorBox(e){
   const code=e.code||'request_failed';
   return el('div',{class:'sb-error',role:'alert','data-error-code':code},el('strong',{},ERROR_TITLE[code]||'That did not work.'),' ',e.message&&e.message!==code?e.message:'',
-    code==='stale_version'?' Reload the page to see the latest state, then try again.':'',el('code',{},code));
+    code==='stale_version'?el('span',{},' Refresh to see the latest state, then try again. ',button('Refresh',()=>{flash=null;ok('Refreshed.');render();},{'data-action':'refresh'})):'',el('code',{},code));
 }
 function showError(e,at){
   status.dataset.error='true';status.dataset.errorCode=e.code||'request_failed';status.textContent=(e.code?e.code+': ':'')+e.message;
@@ -395,12 +395,18 @@ const pages={
       field(el('span',{},icon('occupancy'),' Use my usual party ('+(party.map(c=>c.display_name).join(', ')||'nobody')+')'),useSaved,'check wide'),el('div',{class:'wide sb-row'},el('small',{},'Or choose companions:'),...picks),
       field('Additional guests',guests),field(el('span',{},icon('pets'),' Pets'),pets),
       has('switchback.reservations.preview')?el('button',{type:'submit',class:'primary','data-action':'preview'},p?'Preview again':'Preview booking'):readOnly('Previewing a booking'));
+    // Keep what the user chose when the page re-renders (after a preview, Back or Refresh).
+    const prev=checkout.args||{};
+    occupant.value=prev.primary_occupant_id||'';gear.value=prev.equipment_id===null?'none':prev.equipment_id||'';card.value=prev.card_id||'';
+    guests.value=prev.additional_guests||0;pets.value=prev.pets||0;
+    if(prev.companion_ids){useSaved.checked=false;for(const l of picks){const i=l.querySelector('input');i.checked=prev.companion_ids.includes(i.value);}}
     form.addEventListener('submit',e=>{e.preventDefault();act(form.querySelector('[type=submit]'),async()=>{
       const args={hold_id:h.id,additional_guests:Number(guests.value),pets:Number(pets.value)};
       if(occupant.value)args.primary_occupant_id=occupant.value;
       if(gear.value)args.equipment_id=gear.value==='none'?null:gear.value;
       if(card.value)args.card_id=card.value;
       if(!useSaved.checked)args.companion_ids=picks.map(l=>l.querySelector('input')).filter(i=>i.checked).map(i=>i.value);
+      checkout.args=args;
       checkout.preview=(await write('switchback.reservations.preview',args)).preview;ok('Preview ready.');await render();
     },{errorAt:formErrors});});
     const release=has('switchback.cart.release')?button('Release hold',async e=>{

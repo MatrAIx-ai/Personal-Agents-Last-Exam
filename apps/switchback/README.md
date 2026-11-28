@@ -2,7 +2,9 @@
 
 Switchback is a resettable campground reservation App with synthetic data, built for the approved proposal in [#25](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/25) ([`proposals/environment/switchback.md`](../../proposals/environment/switchback.md)). Its workflows follow Recreation.gov's public pages; the $10 change fee is modelled on its [rules page](https://www.recreation.gov/rules-reservation-policies). The 15-minute cart hold, release schedule, refund ladders, cutoffs and alert effects are Switchback's own rules; `contribution/dataset.json` lists each rule with its source and access date. A booking can check out cleanly and still be wrong for the people going, and the end state shows which happened.
 
-This is **M2**: workflows 1-4 through MCP tools and nine pages on the public business Web Host, per-facility policy records, three reset fixtures with default scenario schedules, reset, business tests, checks (a) to (e) and (g), and a publisher script that delivers notices to real Mail. Check (f), the independent reproduction, follows in M3 (see [Remaining work](#remaining-work)).
+This is **M2 with the delivery evidence** of `docs/submission-evidence.md` (#260): workflows 1-4 through MCP tools and nine pages on the public business Web Host, per-facility policy records, three reset fixtures with default scenario schedules, reset, business tests, checks (a) to (e) and (g), and a publisher script that delivers notices to real Mail. Check (f), the independent reproduction, and the human read-through of the fixtures are still open (see [Remaining work](#remaining-work)).
+
+**Evidence:** [`evidence/README.md`](evidence/README.md) is the delivery evidence index: Recreation.gov reference screenshots, the ordered GUI sequences for every workflow with their error, cancel and stale paths ([`evidence/sequences.md`](evidence/sequences.md)), the Mail dependency row, and the dataset coverage report ([`evidence/coverage.md`](evidence/coverage.md)).
 
 ## Run it
 
@@ -20,9 +22,16 @@ node apps/switchback/tests/platform-checks.cjs   # (c), (g), retries and stale v
 node apps/switchback/tests/schedule-checks.cjs   # (d) and (e)
 node apps/switchback/examples/publish-to-mail.cjs
 
+# Dataset coverage (also checked by npm test)
+node apps/switchback/scripts/coverage-report.cjs --check
+
 # Pages
 node apps/switchback/examples/web-demo.cjs --fixture minimal
 npm ci && npx playwright install chromium && node apps/switchback/tests/browser.cjs
+
+# Evidence screenshots (rewrite evidence/screens and evidence/sequences.md; reference pages need network)
+node apps/switchback/evidence/capture.cjs
+node apps/switchback/evidence/capture-reference.cjs
 ```
 
 ## Workflows
@@ -66,10 +75,13 @@ Confirmations, changes, cancellations, closures, alerts, no-show releases and po
 
 No host-side publisher exists on main, so the package ships one: [`examples/publish-to-mail.cjs`](examples/publish-to-mail.cjs). The proposal's `app:verify --with examples/apps/mail` command also passes (see below), but it only adds Mail to the assembly and does not start Messaging.
 
+**Required public dependencies of the publisher.** Besides this package it needs, from the public checkout: the pinned runtime (`runtime/`, including `runtime/messaging/`), Mail 1.3.0 (`examples/apps/mail/`) and the repository-level Mail registry [`examples/registry.mail.json`](../../examples/registry.mail.json), which both the script and the Messaging config ([`examples/messaging/config.json`](examples/messaging/config.json), field `registry`) name. A copy holding only this package, the runtime and Mail fails until that registry file is present. The App itself (tools, pages, checks) needs none of them.
+
 - **What it does:** applies the example closure event through real Core, starts Messaging with `runtime/messaging/service.cjs --publisher switchback` and the trusted config in [`examples/messaging/config.json`](examples/messaging/config.json), calls `router.publish` for each stored notice, and reads each one back with Mail's own `mail.get` using `receipt.event_id`.
 - **When it runs:** after the write or event that creates the notices and before the next `env.advance_time`, because Messaging delivers at the receiver's current virtual time.
 - **Which notices are new:** it offers every stored notice in creation order, with the notice ID as both `request_id` and CloudEvents `id`. Messaging keeps the receipts, so a notice it already delivered returns `duplicate: true` with its original `event_id` and Mail does not change.
-- **Outcomes it shows:** a committed delivery read back from Mail; a retry that is deduplicated; and a rejection before delivery, staged with a config that has no grant for the recipient ([`config-no-grant.json`](examples/messaging/config-no-grant.json)), which returns `recipient_not_authorized` and leaves both Mail and Switchback unchanged. In the reference router a refusal by Mail itself halts the run, so the rejected case uses a missing grant.
+- **Outcomes it shows:** a committed delivery read back from Mail; a retry that is deduplicated; a rejection before delivery, staged with a config that has no grant for the recipient ([`config-no-grant.json`](examples/messaging/config-no-grant.json)), which returns `recipient_not_authorized` and leaves both Mail and Switchback unchanged (in the reference router a refusal by Mail itself halts the run, so the rejected case uses a missing grant); and an **unknown acknowledgement**: Mail commits the message but the reply to Messaging is lost. That case is staged the way `runtime/messaging/tests/test_time_trace.cjs` stages it, without changing `runtime/`: the script runs the reference router in-process and makes its receiver call throw after Mail's `env.apply_event` returns. Messaging answers `unknown` (`receiver_unconfirmed`, `stop_run: true`, the attempted `event_id`, no commit time) and halts the run, so the next publish is refused with `run_halted`. The publisher stops offering notices and reconciles from Mail's own records instead of retrying: Mail's Infra `env.event_status` shows the event committed once and `mail.get` returns the message, while Switchback still holds its notice and business result. As the proposal says, such a run is stopped for reconciliation and not scored.
+- **Evidence output:** `--evidence FILE` writes the result as JSON: App and Mail versions, the `router.publish` request (notice ID as `request_id` and CloudEvents `id`), each receipt and the Mail message read back. Recipient or business confirmation is not applicable: the notices go to the account holder's own Mail account.
 
 `node runtime/cli.cjs verify --app apps/switchback --with examples/apps/mail` (or `npm run app:verify -- --app apps/switchback --with examples/apps/mail`) runs the public verifier with Mail 1.3.0 added to the assembly, as the proposal names it. It checks that Switchback loads and runs next to Mail; it does not start Messaging or deliver anything. The publisher script above is the delivery proof.
 
@@ -89,7 +101,17 @@ Nine pages, declared with the optional `pale.web` extension in [`contribution/gu
 | Account and wallet | `#/account` | `account.get`, `wallet.list`, `wallet.set_default`, `equipment.save`, `companions.save` |
 | Policy | `#/policy/<facility>` | `policy.get` |
 
-Each page renders what its tools return. The controller has no business rules and no browser store: it keeps only the route, the last search form and the hold or preview a checkout write just returned. Writes carry the version the page last read and a request ID that a retry reuses. A refused call shows its error code (for example `site_taken`, `preview_stale`, `permission_denied`). Checkout starts from the saved defaults by leaving those fields out, so the tool's own pre-fill applies and the stale card and trailer show on the preview.
+Each page renders what its tools return. The controller has no business rules and no browser store: it keeps only the route, the last search form, the hold, preview and form choices of the current checkout, and the outcome of the last action. Writes carry the version the page last read and a request ID that a retry reuses. Checkout starts from the saved defaults by leaving those fields out, so the tool's own pre-fill applies and the stale card and trailer show on the preview, with no warning (the routine path is meant to check out cleanly).
+
+The pages follow the reference product's layout where it fits the workflow (compared screen by screen in [`evidence/README.md`](evidence/README.md)), without copying its branding:
+
+- **Readable records.** Campground and site names lead; reservation, hold and payment IDs are secondary. Dates read as "Fri, Jun 18, 2027" and times as "Fri, Jun 18, 2027, 9:00 PM (UTC-07:00)" in the facility's fixed offset, with the zone shown. Search results are an availability matrix with a legend (A available, R reserved, H in someone's cart, X closed, NR not yet released, P already past).
+- **Previews as sentences.** Booking, change and cancellation previews read as labelled sentences and a refund table, each with a way back (Back to details, Discard change, Keep reservation). Discarding a change releases its hold.
+- **Outcomes that stay.** A receipt (reservation, amount, payment ID) or an error stays on the page where the user acted until the next action: errors sit next to the form or button that caused them, and the status line repeats them. A `stale_version` error offers a Refresh that re-reads the page and keeps the checkout in progress.
+- **Confirmations.** Releasing a hold, removing a companion and filing a late-arrival notice ask first in a dialog. Booking, changing and cancelling confirm only from a preview.
+- **No control that is certain to fail.** Holding nights that are reserved, closed, past or not yet released, confirming with an expired card, and changing a stay in a period that does not allow changes are disabled or replaced with the reason. Write controls the run's permission profile does not list are hidden, with a note (the `browse` profile hides the confirms and Make default; the read-only `scenario` profile hides every write), and the Host refuses a direct request for them.
+- **Missing records.** An unknown ID shows a Not found page that replaces the previous content and title.
+- **Text size.** App text is 12px or more and body text 14px; the Host's shared status line and sidebar footer are raised to 13px.
 
 The 15 icons are 24x24 PNG files drawn from simple shapes by [`gui/icons.cjs`](gui/icons.cjs), self-made and dedicated to the public domain (CC0 1.0). The GUI content policy disables SVG and the Host's image policy allows `blob:` but not `data:` URLs, so the PNG bytes are embedded in `app.js` and turned into `blob:` URLs in the browser. `node gui/icons.cjs --check` and a business test confirm the embedded bytes match the drawing code. Styles that `/shared/style.css` lacks are added as a constructed stylesheet, which the Host's style policy allows.
 
@@ -102,7 +124,9 @@ node apps/switchback/examples/web-demo.cjs --fixture high-country --until 2026-0
 
 Open the access link it prints. The clock needs care. Core starts a new instance at the registry's `initial_time`, and the shared `apps.registry.json` uses 2026-11-18 for every App, while the minimal fixture's clock is 2027-05-20 (and the other fixtures have their own). At 2026-11-18 the June 2027 nights are unreleased and the seeded upcoming stays read as months away. So the script starts the Host, then acts as the trusted Infra caller: it loads the chosen fixture with `env.load_seed` at that fixture's clock, which also makes that clock the reset point. It loads only when the run is not already at that fixture's baseline (or with `--reload`), so restarting keeps earlier changes. `--until` applies the fixture's default schedule up to that instant and advances the clock. When `apps.registry.json` has no Switchback entry the script uses a disposable registry whose `initial_time` is `fixtures/clock.json`. Starting the Host directly (`node runtime/web/server.cjs --app switchback`) works too, but then the clock is 2026-11-18 until Infra moves it.
 
-The Host's own permissions apply: it offers only the `sandbox` and `scenario` profiles. The browser test, [`tests/browser.cjs`](tests/browser.cjs), drives all four workflows through the pages and compares them with the same tools and Infra snapshots (27 checks: search results, night states, stale defaults on the preview, booking, change fee, cancel refund, late arrival, an alert invisible until Infra applies it, wallet and equipment writes, policy text, icons, 390 px layout, no console or content-policy errors). Screenshots go to `.artifacts/web/switchback/`.
+The Host's own permissions apply: it offers only the `sandbox` and `scenario` profiles; Infra can reset a run to `browse` or `full`. The browser test, [`tests/browser.cjs`](tests/browser.cjs), drives all four workflows through the pages and compares them with the same tools and Infra snapshots (54 checks: search results and the availability matrix, night states, disabled holds with reasons, a stale page refused with `stale_version` and its Refresh, stale defaults on the preview, Back, Discard and Keep, an expired card, booking with the receipt kept visible, change fee, cancel refund, the late-arrival dialog, an alert invisible until Infra applies it, wallet, equipment and companion writes with the removal dialog, policy text, Not found, 12px text on every page, the `browse` and read-only profiles and a direct forbidden write, icons, 390 px layout, no console or content-policy errors). Screenshots go to `.artifacts/web/switchback/`. The curated, annotated sequences in `evidence/` come from [`evidence/capture.cjs`](evidence/capture.cjs), which checks each step the same way.
+
+**A run inside 2025-2026.** The minimal fixture's clock (2027-05-20) follows the proposal's examples, which are set in June 2027. `--fixture desert-rivers` (clock 2026-10-02) and `--fixture high-country` (clock 2026-06-12) start the pages inside the dataset window; sequence S12 in the evidence books a stay at the desert-rivers clock.
 
 ## Time
 
@@ -150,14 +174,17 @@ Fixture checks, in `tests/fixture-checks.cjs` (run by `npm test` and so by the v
 | (a) Anchor runs: the reference passes every check; do-nothing fails exactly the checks that need a write; each wrong run fails exactly its declared checks | `tests/business.test.cjs`, `tests/scenarios.cjs`, `tests/checks.cjs` | `npm test` |
 | (b) Mutation: 26 single-field mutants of the five reference end states; each fails its own check and only its listed derived checks; checks no mutant fails are reported (none) | `tests/mutation-checks.cjs` | `npm test` |
 | Fixtures and schedules, as listed under Data | `tests/fixture-checks.cjs` | `npm test` |
+| Dataset coverage: the committed `evidence/coverage.*` match a fresh run of `scripts/coverage-report.cjs`; no fixture has an empty month before its clock | `tests/fixture-checks.cjs` | `npm test` |
+| Coverage loading: each fixture loaded with `env.load_seed` returns every counted reservation, payment and alert, with its counted date, through the Agent tools | `tests/platform-checks.cjs` | real Core |
 | (c) Reset: 20 resets after the minimal fixture's anchor runs (audit exported first), and 20 per larger fixture after schedule events and Agent writes; each restores the loaded hash and clock with no outgoing notice left | `tests/platform-checks.cjs` | real Core |
 | (d) Replay: each of the three schedules applied once with the clock jumping event to event and one `env.advance_time` jump to the end, once in six-hour `env.advance_time` steps with Agent reads between; same state hash, notices and Agent view | `tests/schedule-checks.cjs` | real Core |
 | (e) Hidden values: an observer reads the Agent tools every 12 hours; no output shows an alert, update, cancellation, closure, check-in or claimed night before its event; copies differing only in the claim-times file (all claims redrawn, or one late claim redrawn) give identical traces until the first differing claim; the page files hold no scheduled value | `tests/schedule-checks.cjs` | tool handlers |
 | (g) Permissions: `browse` leaves the three confirms and `wallet.set_default` out of discovery and refuses each with `permission_denied`, hash and version unchanged; `full` lists them and each commits | `tests/platform-checks.cjs` | real Core |
 | Retries, stale versions and consumed previews | `tests/platform-checks.cjs` | real Core |
-| Pages against the tools, in Chromium | `tests/browser.cjs` | Web Host |
+| Pages against the tools, in Chromium (54 checks) | `tests/browser.cjs` | Web Host |
+| Ordered GUI sequences for every workflow, each step checked against the tools or a snapshot | `evidence/capture.cjs` | Web Host |
 | Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart), alone and with Mail in the assembly | `node runtime/cli.cjs verify` | real Core |
-| Delivery to real Mail through Messaging: committed and read back, retried, rejected for a missing grant | `examples/publish-to-mail.cjs` | Messaging |
+| Delivery to real Mail through Messaging: committed and read back, retried, rejected for a missing grant, unknown acknowledgement halting the run and reconciled from Mail | `examples/publish-to-mail.cjs` | Messaging |
 | (f) Independent reproduction by a second person | | M3 |
 
 (e) runs the tool handlers directly rather than through Core, so the 2,500 reads per trace take seconds; the first probe of each trace compares both paths. Core adds only the status and version fields to those outputs.
@@ -165,8 +192,17 @@ Fixture checks, in `tests/fixture-checks.cjs` (run by `npm test` and so by the v
 ## Remaining work
 
 - Check (f), an independent reproduction from a clean checkout by someone who did not implement the flows: M3.
-- A recorded human read-through of the three fixtures (the proposal's data deliverable); `dataset.json` review status stays `pending` until then.
+- A recorded human read-through of the three fixtures by the author (the proposal's data deliverable, including the fixed text written with AI assistance); `dataset.json` review status stays `pending` until then.
+- The `apps.registry.json` entry: adding Switchback trips `runtime/tests/clock.test.cjs:64` (`m.configs.size === 7`), which is outside this package. The one-entry change is ready and waits on the maintainers' answer in #25.
 
 ## Dependencies
 
 Public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0. `required_apps` is empty: the package runs with only its own files and the runtime. Mail 1.3.0 is an optional publish target; Calendar 1.3.0 is used only through its own Agent tools.
+
+| Dependency | Needed for | Required? |
+| :--- | :--- | :--- |
+| Public runtime 1.6.0 (`runtime/`) | everything except `npm test` | required |
+| Mail 1.3.0 (`examples/apps/mail/`) | the Mail publisher and `verify --with examples/apps/mail` | optional (workflows 1-4 complete without it) |
+| `examples/registry.mail.json` (repository level) | the Mail publisher and `evidence/capture.cjs` (sequence S9) | required public dependency of those two scripts |
+| Playwright with Chromium (repository dev dependency) | `tests/browser.cjs`, `evidence/capture*.cjs` | required for the browser checks only |
+| Python 3 with Pillow | shrinking evidence PNGs in `evidence/capture*.cjs` | optional (without it the PNGs are left uncompressed) |
