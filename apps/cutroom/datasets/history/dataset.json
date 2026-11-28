@@ -1,0 +1,63 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "cutroom-history",
+  "version": "2.0.0",
+  "description": "CutRoom delivery evaluation dataset covering 2025-01-01 through 2026-12-31. Fully synthetic; see evidence/coverage.md.",
+  "record_source_ids": [
+    "synthetic"
+  ],
+  "sources": [
+    {
+      "source_id": "synthetic",
+      "kind": "synthetic",
+      "description": "Procedurally generated studio history (2025-01..2026-12) from an authored episode plan, plus the authored CutRoom evaluation fixtures. No real people, channels or external records.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "procedural",
+        "tool": "apps/cutroom/scripts/build-history.cjs",
+        "tool_version": "2.0.0",
+        "seed": 239,
+        "parameters": {
+          "window_start": "2025-01-01",
+          "window_end": "2026-12-31",
+          "timezone": "America/Los_Angeles",
+          "clock": "2026-11-19T18:00:00Z",
+          "plan": "apps/cutroom/scripts/history-episodes.json",
+          "images": "apps/cutroom/scripts/render.py",
+          "cadence": "up to two planned episodes a month on varying days; release 6-11 days after kickoff at varying times, plus authored delays",
+          "exceptions": {
+            "planned_slots": 48,
+            "skipped": 3,
+            "delayed": 5,
+            "unlisted": 2,
+            "pulled": 1,
+            "ab_tested": 12
+          },
+          "load_clock": {
+            "default_virtual_now": "2026-11-19T18:00:00Z",
+            "minimum_virtual_now": "2026-11-19T08:15:00Z",
+            "rule": "env.load_seed rejects (invalid_seed) a virtual_now earlier than any stored past fact (published_at, note at/resolved_at, A/B result at, guest and license history, override at). Schedules and license expiries are plans and may point forward."
+          }
+        }
+      }
+    }
+  ],
+  "transformations": [],
+  "expected_counts": {
+    "records": 51,
+    "assets": 48
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Independent human review of realism and provenance pending."
+  }
+}

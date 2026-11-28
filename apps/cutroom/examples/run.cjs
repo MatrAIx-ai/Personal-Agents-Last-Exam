@@ -1,0 +1,11 @@
+'use strict';
+const assert = require('node:assert/strict');
+const app = require('../plugin.cjs');
+let data = structuredClone(require('../fixtures/minimal.json'));
+const event = require('./scenario.json');
+const ctx = {virtual_now:event.at,binding:require('../fixtures/binding.json')};
+data = app.applyEvent(ctx,data,event);
+app.validateSeed(ctx,data);
+const {result} = app.handleTool(ctx,data,'cutroom.projects.audit_clearance',{id:'ep14'});
+assert.ok(result.blockers.some(b=>b.code==='missing_guest_release'));
+console.log(JSON.stringify(result));
