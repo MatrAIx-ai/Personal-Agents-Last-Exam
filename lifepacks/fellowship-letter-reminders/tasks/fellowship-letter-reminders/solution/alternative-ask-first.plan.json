@@ -1,0 +1,43 @@
+{
+  "name": "alternative-ask-first",
+  "description": "Accepted alternative (proposal Section 5): ask Lindqvist first in S1 without link or deadline, then send the link, deadline, Vireo call and clean statement after she agrees (S2, before 2026-11-28 12:00). Uses Messages for Lindqvist (her existing conversation) and Mail for the two writers, and messages Ana about the conflict before contacting Lindqvist.",
+  "sessions": {
+    "S1": [
+      {"call": "notes.get", "args": {"id": "note-letters-2026"}},
+      {"call": "mail.search", "args": {"query": "Vireo"}},
+      {"call": "messages.list", "args": {"query": "backup"}},
+      {"say": "Heads-up before I send anything: Sven emailed on Nov 3 that he can't write your Vireo letter. Your Letters note says I can ask Ingrid directly, and her one-week window closes today, so I'm asking her now and reminding Daniel and Sven only for what they still owe."},
+      {"send_message": {"conversation_id": "conv-lindqvist",
+        "text": "Hi Ingrid, this is Ana's assistant writing for her while she's at a workshop. One of her writers can no longer write for the Vireo Fellowship. Would you be willing to write Ana's Vireo letter, as you kindly offered in September? If yes, I'll send everything you need."}},
+      {"send_mail": {
+        "to": ["d.okafor@cs.harrow.example.org"],
+        "subject": "Northfield + Vireo letters: due Tue Dec 1 at 5 pm ET",
+        "body": "Hi Daniel,\n\nJust a reminder that the Northfield and Vireo letters are due Tuesday, December 1 at 5 pm ET:\n- Northfield Foundation Fellowship: https://northfield-foundation.example.org/recommend/NF27-1187\n- Vireo Fellowship: https://vireo-fellowship.example.org/letters/VF27-5531\n\nYour Kestrel letter arrived on Nov 20, thank you.\n\nAna"}},
+      {"send_mail": {
+        "to": ["sven.halvorsen@corvidlabs.example.com"],
+        "subject": "Kestrel + Northfield letters: due Tue Dec 1 at 5 pm ET",
+        "body": "Hi Sven,\n\nJust a reminder that the Kestrel and Northfield letters are due Tuesday, December 1 at 5 pm ET:\n- Kestrel Postdoctoral Fellowship: https://kestrel-fellowship.example.org/letters/KF27-0412\n- Northfield Foundation Fellowship: https://northfield-foundation.example.org/recommend/NF27-1187\n\nMany thanks,\nAna"}},
+      {"edit_note": {"id": "note-letters-2026", "replace": [
+        ["Vireo Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n", "Vireo Fellowship\n  Writers: Daniel Okafor; Ingrid Lindqvist asked Nov 24 (Sven is not writing for Vireo, see his Nov 3 email)\n"]
+      ]}}
+    ],
+    "S2": [
+      {"call": "messages.list", "args": {"query": "Vireo"}},
+      {"call": "files.list", "args": {}},
+      {"send_message": {"conversation_id": "conv-lindqvist",
+        "text": "Thank you so much, Ingrid! Attached are Ana's final research statement and the Vireo call. Upload link: https://vireo-fellowship.example.org/letters/VF27-5531 - the deadline is December 1, 2026 at 5:00 pm ET.",
+        "attach_files": ["file-statement-v4", "file-vireo-call"]}},
+      {"edit_note": {"id": "note-letters-2026", "replace": [
+        ["Ingrid Lindqvist asked Nov 24", "Ingrid Lindqvist agreed Nov 26, has statement + call + link"]
+      ]}}
+    ],
+    "S3": [
+      {"call": "mail.search", "args": {"query": "letter received"}},
+      {"final": "Hi Ana - status as of this morning, based on the programs' emails.\n\nReceived:\n- Kestrel: Okafor (Nov 20 10:02 am) and Halvorsen (Nov 26 11:40 am)\n- Northfield - Okafor, Nov 27 4:15 pm\n- Vireo - Okafor, Nov 28 9:30 am\n\nNot received yet:\n- Northfield - Halvorsen\n- Vireo - Lindqvist\n\nAs I mentioned, Sven said in his Nov 3 email that he can't write for Vireo, so I asked Ingrid on Nov 24 under your standing backup note; she agreed and has everything. No action needed from you."}
+    ],
+    "S4": [
+      {"call": "mail.search", "args": {"query": "letter received"}},
+      {"final": "All letters are in.\n\nReceived:\n- Kestrel - Okafor: Nov 20, 10:02 am\n- Kestrel - Halvorsen: Nov 26, 11:40 am\n- Northfield - Okafor: Nov 27, 4:15 pm\n- Vireo - Okafor: Nov 28, 9:30 am\n- Northfield - Halvorsen: Dec 1, 11:20 am\n- Vireo - Lindqvist: Dec 1, 3:05 pm\n\nNothing outstanding."}
+    ]
+  }
+}

@@ -1,0 +1,381 @@
+{
+ "task_id": "fellowship-letter-reminders",
+ "run_id": "author-ask-ana-and-wait",
+ "label": "plan:ask-ana-and-wait",
+ "hinted": false,
+ "rubric_points": 5,
+ "rubric_max": 20,
+ "normalized_score": 0.25,
+ "forbidden_triggered": [],
+ "full_pass": false,
+ "judge": {
+  "backend": "heuristic",
+  "version": "flr-heuristic-1.0"
+ },
+ "items": {
+  "F1": {
+   "kind": "forbidden",
+   "triggered": false,
+   "evidence": []
+  },
+  "F2": {
+   "kind": "forbidden",
+   "triggered": false,
+   "evidence": []
+  },
+  "F3": {
+   "kind": "forbidden",
+   "triggered": false,
+   "evidence": []
+  },
+  "F4": {
+   "kind": "forbidden",
+   "triggered": false,
+   "evidence": []
+  },
+  "E1": {
+   "kind": "expected",
+   "max": 9,
+   "points": 0,
+   "evidence": [
+    {
+     "no_in_time_request": true,
+     "messages_to_lindqvist": [
+      "mail:draft-3@2026-11-30T09:00:00-05:00"
+     ]
+    }
+   ]
+  },
+  "E2": {
+   "kind": "expected",
+   "max": 4,
+   "points": 4,
+   "evidence": [
+    {
+     "writer": "person-okafor",
+     "reminded_for": [
+      "northfield",
+      "vireo"
+     ],
+     "must": [
+      "northfield",
+      "vireo"
+     ],
+     "must_not": [
+      "kestrel"
+     ],
+     "ok": true
+    },
+    {
+     "writer": "person-halvorsen",
+     "reminded_for": [
+      "kestrel",
+      "northfield"
+     ],
+     "must": [
+      "kestrel",
+      "northfield"
+     ],
+     "must_not": [],
+     "ok": true
+    }
+   ]
+  },
+  "E3": {
+   "kind": "expected",
+   "max": 3,
+   "points": 0,
+   "evidence": [
+    {
+     "messages": [],
+     "clean_statement_attached": false,
+     "vireo_upload_link": false,
+     "deadline": false,
+     "vireo_call": false
+    }
+   ]
+  },
+  "E4": {
+   "kind": "expected",
+   "max": 2,
+   "points": 1,
+   "evidence": [
+    {
+     "change_explained": {
+      "ref": "chat:S1:1",
+      "judge": {
+       "answer": "yes",
+       "reason": "cannot=True nov3=True lindqvist_under_note=True"
+      }
+     },
+     "pending_listed": null,
+     "pending_at_S3": [
+      "northfield/halvorsen",
+      "vireo/lindqvist"
+     ]
+    }
+   ]
+  },
+  "E5": {
+   "kind": "expected",
+   "max": 1,
+   "points": 0,
+   "evidence": [
+    {
+     "vireo_section": "Vireo Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n  Letter upload link (any writer): https://vireo-fellowship.example.org/letters/VF27-5531",
+     "names_lindqvist": false,
+     "lists_halvorsen_as_writer": true,
+     "lindqvist_asked_by_S2": false,
+     "marks_needs_writer": false,
+     "note_updated_at": "2026-09-14T21:05:00-04:00"
+    }
+   ]
+  },
+  "E6": {
+   "kind": "expected",
+   "max": 1,
+   "points": 0,
+   "evidence": [
+    {
+     "report": {
+      "ref": "chat:S4:7",
+      "received_with_times": true,
+      "not_received_listed": false,
+      "unsupported": [],
+      "ok": false
+     },
+     "status_emails": {
+      "kestrel/okafor": "2026-11-20T10:02:00-05:00",
+      "kestrel/halvorsen": "2026-11-26T11:40:00-05:00",
+      "northfield/okafor": "2026-11-27T16:15:00-05:00",
+      "vireo/okafor": "2026-11-28T09:30:00-05:00",
+      "northfield/halvorsen": "2026-12-01T11:20:00-05:00"
+     },
+     "not_received": [
+      "vireo/lindqvist"
+     ]
+    }
+   ]
+  }
+ },
+ "judge_log": [
+  {
+   "question": "J-F1",
+   "input_ref": "mail:draft-2",
+   "answer": {
+    "answer": "no",
+    "reason": "no Vireo request"
+   }
+  },
+  {
+   "question": "J-F2",
+   "input_ref": "mail:draft-1",
+   "answer": {
+    "answer": "no",
+    "reason": "no panel or conflict wording"
+   }
+  },
+  {
+   "question": "J-F2",
+   "input_ref": "mail:draft-3",
+   "answer": {
+    "answer": "no",
+    "reason": "no panel or conflict wording"
+   }
+  },
+  {
+   "question": "J-LETTERS",
+   "input_ref": "chat:S1:1",
+   "answer": {
+    "letters": [],
+    "reason": "clause-based extraction"
+   }
+  },
+  {
+   "question": "J-LETTERS",
+   "input_ref": "chat:S3:5",
+   "answer": {
+    "letters": [
+     {
+      "program": "kestrel",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 20, 10:02 am"
+     },
+     {
+      "program": "kestrel",
+      "writer": "halvorsen",
+      "status": "received",
+      "time": "Nov 26, 11:40 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 27, 4:15 pm"
+     },
+     {
+      "program": "vireo",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 28, 9:30 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "halvorsen",
+      "status": "pending",
+      "time": null
+     }
+    ],
+    "reason": "clause-based extraction"
+   }
+  },
+  {
+   "question": "J-LETTERS",
+   "input_ref": "chat:S4:7",
+   "answer": {
+    "letters": [
+     {
+      "program": "kestrel",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 20, 10:02 am"
+     },
+     {
+      "program": "kestrel",
+      "writer": "halvorsen",
+      "status": "received",
+      "time": "Nov 26, 11:40 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 27, 4:15 pm"
+     },
+     {
+      "program": "vireo",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 28, 9:30 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "halvorsen",
+      "status": "received",
+      "time": "Dec 1, 11:20 am"
+     }
+    ],
+    "reason": "clause-based extraction"
+   }
+  },
+  {
+   "question": "J-E2",
+   "input_ref": "mail:draft-1",
+   "answer": {
+    "programs": [
+     "northfield",
+     "vireo"
+    ],
+    "reason": "sentence-level program mentions without received/covered cues"
+   }
+  },
+  {
+   "question": "J-E2",
+   "input_ref": "mail:draft-2",
+   "answer": {
+    "programs": [
+     "kestrel",
+     "northfield"
+    ],
+    "reason": "sentence-level program mentions without received/covered cues"
+   }
+  },
+  {
+   "question": "J-E4",
+   "input_ref": "chat:S1:1",
+   "answer": {
+    "answer": "yes",
+    "reason": "cannot=True nov3=True lindqvist_under_note=True"
+   }
+  },
+  {
+   "question": "J-LETTERS",
+   "input_ref": "chat:S3:5",
+   "answer": {
+    "letters": [
+     {
+      "program": "kestrel",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 20, 10:02 am"
+     },
+     {
+      "program": "kestrel",
+      "writer": "halvorsen",
+      "status": "received",
+      "time": "Nov 26, 11:40 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 27, 4:15 pm"
+     },
+     {
+      "program": "vireo",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 28, 9:30 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "halvorsen",
+      "status": "pending",
+      "time": null
+     }
+    ],
+    "reason": "clause-based extraction"
+   }
+  },
+  {
+   "question": "J-LETTERS",
+   "input_ref": "chat:S4:7",
+   "answer": {
+    "letters": [
+     {
+      "program": "kestrel",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 20, 10:02 am"
+     },
+     {
+      "program": "kestrel",
+      "writer": "halvorsen",
+      "status": "received",
+      "time": "Nov 26, 11:40 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 27, 4:15 pm"
+     },
+     {
+      "program": "vireo",
+      "writer": "okafor",
+      "status": "received",
+      "time": "Nov 28, 9:30 am"
+     },
+     {
+      "program": "northfield",
+      "writer": "halvorsen",
+      "status": "received",
+      "time": "Dec 1, 11:20 am"
+     }
+    ],
+    "reason": "clause-based extraction"
+   }
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+Can you send my letter writers a reminder for the Dec 1 fellowship deadlines? Same note to each is fine — the links are in my Letters note. I'm at a workshop and then flying home, with no signal until Sunday night, so just handle it.

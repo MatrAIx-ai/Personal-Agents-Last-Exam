@@ -1,0 +1,17 @@
+{
+  "schema": "pale.lifepack.workspace-meta.local-stand-in.v1",
+  "task_id": "fellowship-letter-reminders",
+  "start": {"kind": "initial", "virtual_now": "2026-11-24T09:10:00-05:00", "timezone": "America/New_York"},
+  "runtime": {"public_runtime": "1.6.0", "core_api": "1.2.0", "requires": "env.advance_time (Infra)"},
+  "registry": "apps.registry.json (repository root)",
+  "apps": [
+    {"app_id": "mail", "version": "1.3.0", "path": "examples/apps/mail", "account_id": "mail-ana", "seed": "mail/seed.json", "binding": "mail/binding.json", "policies": "mail/policies.json", "bundle": "mail/bundle.json", "records": 16, "assets": 2},
+    {"app_id": "messages", "version": "1.0.0", "path": "apps/messages", "account_id": "messages-ana", "seed": "messages/seed.json", "binding": "messages/binding.json", "policies": "messages/policies.json", "bundle": "messages/bundle.json", "records": 4, "assets": 0},
+    {"app_id": "notes", "version": "1.0.0", "path": "apps/notes", "account_id": "notes-ana", "seed": "notes/seed.json", "binding": "notes/binding.json", "policies": "notes/policies.json", "bundle": "notes/bundle.json", "records": 2, "assets": 0},
+    {"app_id": "files", "version": "1.0.0", "path": "apps/files", "account_id": "files-ana", "seed": "files/seed.json", "binding": "files/binding.json", "policies": "files/policies.json", "bundle": "files/bundle.json", "records": 4, "assets": 3},
+    {"app_id": "contacts", "version": "1.0.0", "path": "apps/contacts", "account_id": "contacts-ana", "seed": "contacts/seed.json", "binding": "contacts/binding.json", "policies": "contacts/policies.json", "bundle": "contacts/bundle.json", "records": 5, "assets": 0}
+  ],
+  "load": "Infra env.load_seed per App with {data: seed, binding, policies, bundle, virtual_now: start.virtual_now, request_id: 'flr-seed'}; the agent connects with the 'scenario' profile, whose allow-list is the task permission set. env.reset restores this baseline.",
+  "generated_by": "tools/build_workspace.py (deterministic; --check verifies the committed files)",
+  "agent_workspace": "None shipped (no portable memory seed). An adapter may give the agent an empty environment/workspace/agent/ directory that persists across S1-S4."
+}
