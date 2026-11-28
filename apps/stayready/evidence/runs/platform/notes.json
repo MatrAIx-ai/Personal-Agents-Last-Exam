@@ -1,0 +1,182 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "notes",
+  "app_version": "1.0.0",
+  "package_sha256": "6e46775ee19f559163864fe1251f4b3cd06bf8aa638c0ccc1dc403c7f0e1908a",
+  "node": "v22.23.5",
+  "verified_at": "2026-11-28T12:54:05.556Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for notes.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for notes.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for notes.attachment.read",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: standalone seed, list, get and search are side-effect free\nok 1 - standalone seed, list, get and search are side-effect free\n  ---\n  duration_ms: 1.391208\n  type: 'test'\n  ...\n# Subtest: unknown IDs, fields and malformed history do not change data\nok 2 - unknown IDs, fields and malformed history do not change data\n  ---\n  duration_ms: 0.452167\n  type: 'test'\n  ...\n# Subtest: scenario updates preserve history; attempted replacement cannot erase it\nok 3 - scenario updates preserve history; attempted replacement cannot erase it\n  ---\n  duration_ms: 0.454334\n  type: 'test'\n  ...\n# Subtest: optional diagnostics cannot change business results\nok 4 - optional diagnostics cannot change business results\n  ---\n  duration_ms: 0.378625\n  type: 'test'\n  ...\n# Subtest: reviewer renderer escapes untrusted content\nok 5 - reviewer renderer escapes untrusted content\n  ---\n  duration_ms: 0.184375\n  type: 'test'\n  ...\n# Subtest: notes preserve content revisions, tags and explicit archive/trash behavior\nok 6 - notes preserve content revisions, tags and explicit archive/trash behavior\n  ---\n  duration_ms: 0.604292\n  type: 'test'\n  ...\n# Subtest: note attachment bytes are tied to their parent\nok 7 - note attachment bytes are tied to their parent\n  ---\n  duration_ms: 0.605042\n  type: 'test'\n  ...\n1..7\n# tests 7\n# suites 0\n# pass 7\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 36.804541\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"app\": \"notes\",\n  \"before\": {\n    \"account_id\": \"notes-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"notes\": [\n      {\n        \"id\": \"note-groceries\",\n        \"account_id\": \"notes-maya\",\n        \"created_at\": \"2026-11-17T08:00:00-08:00\",\n        \"updated_at\": \"2026-11-17T08:00:00-08:00\",\n        \"history\": [\n          {\n            \"at\": \"2026-11-17T08:00:00-08:00\",\n            \"action\": \"seeded\"\n          }\n        ],\n        \"title\": \"Dinner preferences\",\n        \"body\": \"Vegetarian dinner for four. Check pantry before buying.\",\n        \"tags\": [\n          \"home\"\n        ],\n        \"pinned\": true,\n        \"archived\": false,\n        \"trashed\": false,\n        \"attachments\": [],\n        \"revisions\": []\n      }\n    ]\n  },\n  \"after\": {\n    \"account_id\": \"notes-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"notes\": [\n      {\n        \"id\": \"note-groceries\",\n        \"account_id\": \"notes-maya\",\n        \"created_at\": \"2026-11-17T08:00:00-08:00\",\n        \"updated_at\": \"2026-11-18T09:05:00-08:00\",\n        \"history\": [\n          {\n            \"at\": \"2026-11-17T08:00:00-08:00\",\n            \"action\": \"seeded\"\n          },\n          {\n            \"at\": \"2026-11-18T09:05:00-08:00\",\n            \"action\": \"scenario_update\"\n          }\n        ],\n        \"title\": \"Dinner preferences\",\n        \"body\": \"Vegetarian dinner for four. Check pantry before buying. (updated by scenario)\",\n        \"tags\": [\n          \"home\"\n        ],\n        \"pinned\": true,\n        \"archived\": false,\n        \"trashed\": false,\n        \"attachments\": [],\n        \"revisions\": [\n          {\n            \"at\": \"2026-11-17T08:00:00-08:00\",\n            \"title\": \"Dinner preferences\",\n            \"body\": \"Vegetarian dinner for four. Check pantry before buying.\"\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}

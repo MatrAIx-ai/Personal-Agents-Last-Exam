@@ -1,0 +1,76 @@
+{
+  "id": "F5",
+  "title": "Changed source, revoked disclosure and unavailable route",
+  "initial_time": "2026-12-01T17:59:00Z",
+  "seed": "seed.json",
+  "events": "events.json",
+  "bootstrap_trace": "bootstrap-trace.json",
+  "histories": 2,
+  "event_inputs": 6,
+  "no_action_pass": false,
+  "goal": "Revoked arrival facts are not sent, the unavailable route is cancelled with provider confirmation, and unrelated original arrival/breakfast promises remain intact.",
+  "representative_failure": "Clearing a local access need does not cancel the hotel's unavailable commitment; no-action also leaves that cancellation unfinished.",
+  "executions": {
+    "reference": [
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "save",
+        "need_id": "need-arrival",
+        "conditions": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_at": "2026-12-02T00:20:00Z"
+        }
+      },
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "remember_preview",
+        "need_id": "need-arrival",
+        "action": "change"
+      },
+      {
+        "at": "2026-12-01T18:03:00Z",
+        "op": "submit_saved",
+        "expect_error": "permission_denied"
+      },
+      {
+        "at": "2026-12-01T18:20:00Z",
+        "op": "inspect"
+      },
+      {
+        "at": "2026-12-01T18:21:00Z",
+        "op": "submit",
+        "need_id": "need-access-person-1",
+        "action": "cancel"
+      }
+    ],
+    "no_action": [],
+    "incorrect": [
+      {
+        "at": "2026-12-01T18:01:00Z",
+        "op": "save",
+        "need_id": "need-arrival",
+        "conditions": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_at": "2026-12-02T00:20:00Z"
+        }
+      },
+      {
+        "at": "2026-12-01T18:21:00Z",
+        "op": "save",
+        "need_id": "need-access-person-1",
+        "conditions": null
+      }
+    ]
+  },
+  "scope": "App-only business calls and static events. Core receipt/epoch/policy claims require the separate real MCP report."
+}

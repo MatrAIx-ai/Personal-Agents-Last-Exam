@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "steps": [
+    "Independent order publisher sends PDF and ICS through Messaging",
+    "Mail commits notification and authorized attachment bytes together",
+    "Agent reads exact attachment bytes from Mail",
+    "Agent imports the ICS into Calendar and attaches the receipt",
+    "Repeated notification has one effect"
+  ],
+  "mail_id": "router-6230528148716e0ed3117b2c4b48cfcd",
+  "calendar_id": "evt-import-1",
+  "files": [
+    {
+      "filename": "receipt.pdf",
+      "mime_type": "application/pdf",
+      "sha256": "ab273047ad26ddbcea27c2c0376322483c2ff92fa8a18c72118916e706a2ebb5"
+    },
+    {
+      "filename": "delivery.ics",
+      "mime_type": "text/calendar",
+      "sha256": "307ae96944f776eb702dad0b7f592b1ec932243c554123dd6c7bec23dd741dc8"
+    }
+  ],
+  "receipt": {
+    "received_at": "2026-11-28T12:54:04.392Z",
+    "status": "committed",
+    "run_id": "attachment-demo",
+    "source_app": "delivery",
+    "channel": "channel.email.attachments",
+    "target": {
+      "app_id": "mail",
+      "account_id": "mail-maya"
+    },
+    "cloud_event": {
+      "source": "urn:pale:app:delivery:account:delivery-maya",
+      "id": "order-with-files",
+      "type": "org.pale.mail.attachments.v1",
+      "time": "2026-11-15T09:00:00-08:00"
+    },
+    "event_id": "router-6230528148716e0ed3117b2c4b48cfcd",
+    "version": {
+      "epoch": 1,
+      "revision": 1
+    },
+    "applied_at": "2026-11-15T09:00:00-08:00",
+    "committed_at": "2026-11-28T12:54:04.427Z",
+    "receiver_trace": {
+      "run_id": "attachment-demo",
+      "app_id": "mail",
+      "event_id": "router-6230528148716e0ed3117b2c4b48cfcd",
+      "cloud_event": {
+        "source": "urn:pale:app:delivery:account:delivery-maya",
+        "id": "order-with-files",
+        "type": "org.pale.mail.attachments.v1",
+        "time": "2026-11-15T09:00:00-08:00"
+      },
+      "received_at": "2026-11-28T12:54:04.413Z",
+      "virtual_received_at": "2026-11-15T09:00:00-08:00",
+      "applied_at": "2026-11-15T09:00:00-08:00",
+      "processed_at": "2026-11-28T12:54:04.417Z"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "stayready-minimal",
+  "version": "0.1.0",
+  "description": "Runtime baseline (20 records) and the delivered 96-scenario synthetic evaluation library coexist. The formal full-library declaration is ../datasets/declaration.json and its loadable seed index is ../datasets/manifest.json. Top-level expected_counts describes only the runtime-loaded baseline, as required by the public bundle contract.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records; no external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "StayReady fixture authoring",
+        "tool_version": "0.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "authored-scenario-library",
+      "kind": "synthetic",
+      "description": "Delivered evaluation dataset stayready-evaluation-2025-2026: 96 scenarios and 3264 synthetic records; no real guest records or real-data anchor.",
+      "uri": "../datasets/declaration.json",
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "Deterministic authored variation in local dates, arrival/check-in times, observation and reply lead times, companion assignments and 2–4 causal request/acknowledgment/reply histories per run, executed through the public plugin.",
+        "tool": "scripts/generate-dataset.cjs + public StayReady plugin",
+        "tool_version": "2.0.0",
+        "seed": null,
+        "parameters": {
+          "dataset_id": "stayready-evaluation-2025-2026",
+          "declaration": "../datasets/declaration.json",
+          "manifest": "../datasets/manifest.json",
+          "expected_counts": {
+            "scenarios": 96,
+            "records": 3264,
+            "assets": 0
+          },
+          "timezone": "Europe/London"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps and account IDs; records and assets declared separately."
+  ],
+  "expected_counts": {
+    "records": 20,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

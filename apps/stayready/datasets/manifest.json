@@ -1,0 +1,3741 @@
+{
+  "dataset_id": "stayready-evaluation-2025-2026",
+  "version": "2.0.0",
+  "timezone": "Europe/London",
+  "coverage_window": {
+    "from": "2025-01-01",
+    "through": "2026-12-31"
+  },
+  "expected_counts": {
+    "scenarios": 96,
+    "records": 3264,
+    "assets": 0
+  },
+  "generation": {
+    "method": "Deterministic authored variation in local dates, arrival/check-in times, observation and reply lead times, companion assignments and 2–4 causal request/acknowledgment/reply histories per run, executed through the public plugin.",
+    "generated_on": "2026-11-28",
+    "script": "scripts/generate-dataset.cjs",
+    "script_sha256": "937ee02a80f7db945b4f79a86a410352746da4d3a28142eb9ed617dd9f7e4a20",
+    "baseline": "fixtures/minimal.json",
+    "baseline_sha256": "600da2c5abda5e15cc42705f62ddb59bb32007c3445e67479e421437453851d8",
+    "random_seed": null,
+    "inputs": [
+      {
+        "file": "fixtures/binding.json",
+        "sha256": "09f80dd060b621bf5b8c2bccedfe2930e96ebc3002d329516ba376386fecdbc4"
+      },
+      {
+        "file": "fixtures/minimal.json",
+        "sha256": "600da2c5abda5e15cc42705f62ddb59bb32007c3445e67479e421437453851d8"
+      },
+      {
+        "file": "plugin.cjs",
+        "sha256": "1f44aaf708a3b735b4e91c122822e3100ef6b867434d702bbe818f7f7b7da132"
+      },
+      {
+        "file": "schemas/conditions.schema.json",
+        "sha256": "a98633832190686a85829e12e075900459fd0033915eb0ed1e5b8f058272b4f4"
+      },
+      {
+        "file": "schemas/events.schema.json",
+        "sha256": "2b1a38c14207fc1b8a5a90a41f056421a55039cb5f01ed9b7a0aaa44ccb709d3"
+      },
+      {
+        "file": "schemas/seed.schema.json",
+        "sha256": "14fff58d30104b633157f60a6b46abffeeae822c4e7c88b1ed0d1184c6e46289"
+      },
+      {
+        "file": "schemas/terms.schema.json",
+        "sha256": "459c29bac053af642c3723247b09863b2737e3f63768dbdbf86776d4233ee3de"
+      },
+      {
+        "file": "src/common.cjs",
+        "sha256": "4fab35435792d55ebf703efe6b4334fce04d1193fafd31409ccf808da465ba0b"
+      },
+      {
+        "file": "src/conditions.cjs",
+        "sha256": "fbf3c7daa582bf4a2a52d7849d635935204aa9cdf3b348ade663521dfcaa711b"
+      },
+      {
+        "file": "src/events.cjs",
+        "sha256": "b3b08c5bd38e10cad2962891c2c72fbbb634c79eb974392fe9cd9a76db14015e"
+      },
+      {
+        "file": "src/model.cjs",
+        "sha256": "35ee28125980774884c85b9519e0829463406d492a450100860f230554201f31"
+      },
+      {
+        "file": "src/operations.cjs",
+        "sha256": "68399f441bcb61f8761a6f8ac653fc15a3ebfbe6c083e83b42e3d294b8f624f9"
+      },
+      {
+        "file": "src/schema-validator.cjs",
+        "sha256": "ec610c39317e190664ce74a717137363cdf737b2f9b04d7c4dc7dfd7fc0350e3"
+      },
+      {
+        "file": "tools.json",
+        "sha256": "b98706ff6136b729ca74560685c864776e80c21e6ab865c5cb58477fe15671f0"
+      }
+    ]
+  },
+  "provenance": {
+    "source_id": "authored-scenario-library",
+    "kind": "synthetic",
+    "license": "MIT",
+    "real_guest_records": 0,
+    "mixed_guest_records": 0,
+    "statement": "All hotel, traveler, source, request, reply and event records are authored fiction. The fixed property and three-person pool implement the approved one-property/two-guest scope; dates, assignments, timing and causal histories vary independently across isolated runs. No real-data anchor is claimed or required.",
+    "future_dates": "Dates after authoring are explicitly synthetic prospective scenarios, never observations of actual future activity.",
+    "record_identity": "scenario_id plus record_type plus record id; App-local IDs are intentionally reused only across isolated runs."
+  },
+  "scenarios": [
+    {
+      "scenario_id": "2025-01-arrival-mismatch",
+      "file": "seeds/2025-01-arrival-mismatch.json",
+      "sha256": "86ac93d39e1655759f7fcae0f8f3e44a8ccca59feceb0ffffb4e688a4afe9b28",
+      "bytes": 22595,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-01-03T16:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-01-03T14:00:00Z",
+      "stay_check_out": "2025-01-05T09:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 3,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2025-01-route-unavailable",
+      "file": "seeds/2025-01-route-unavailable.json",
+      "sha256": "93e6c7fe269304f227d5c34333231ca3b94f99a3db828af8f57d61a85c5b6552",
+      "bytes": 27225,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-01-10T17:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-01-10T15:00:00Z",
+      "stay_check_out": "2025-01-12T10:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-01-breakfast-partial",
+      "file": "seeds/2025-01-breakfast-partial.json",
+      "sha256": "91b3ceb51f4d5f80603d6000f0af92fc03837bab22ff0a36d05f7b3ee7c6afb8",
+      "bytes": 28364,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-01-18T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-01-18T16:00:00Z",
+      "stay_check_out": "2025-01-20T11:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 18,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2025-01-guest-replaced",
+      "file": "seeds/2025-01-guest-replaced.json",
+      "sha256": "6cd523c778c1d18b9f3dd8a51246243c634e1881966c1d423acdf3f2687ca6db",
+      "bytes": 22352,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-01-27T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-01-27T17:00:00Z",
+      "stay_check_out": "2025-01-29T12:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-02-arrival-mismatch",
+      "file": "seeds/2025-02-arrival-mismatch.json",
+      "sha256": "8174b0f747f54d391ae7e79cd6dab646431c9a71d2a03a3ec32b88c751f5c04b",
+      "bytes": 26394,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-02-06T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-02-06T15:30:00Z",
+      "stay_check_out": "2025-02-08T10:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 6,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2025-02-route-unavailable",
+      "file": "seeds/2025-02-route-unavailable.json",
+      "sha256": "afc5bdab429d8f5b9f11decafe96ebe8118f25de797d72b221952a316b7f1ae0",
+      "bytes": 30240,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-02-12T20:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-02-12T16:30:00Z",
+      "stay_check_out": "2025-02-14T11:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-02-breakfast-partial",
+      "file": "seeds/2025-02-breakfast-partial.json",
+      "sha256": "a66c8099aa491e24485ab39cf10000c590723a4b0d240bcad86b4b1673cd3923",
+      "bytes": 21945,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-02-23T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-02-23T17:30:00Z",
+      "stay_check_out": "2025-02-25T12:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 23,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2025-02-guest-replaced",
+      "file": "seeds/2025-02-guest-replaced.json",
+      "sha256": "47bf8efd01ac14ab37bf3eb64eb316e0b11ac9021139ea7440aa43dc3b97cd4b",
+      "bytes": 25955,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-02-25T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-02-25T14:30:00Z",
+      "stay_check_out": "2025-02-27T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 25,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-03-arrival-mismatch",
+      "file": "seeds/2025-03-arrival-mismatch.json",
+      "sha256": "613b66e96349d21628f7fff4de3343c5e275c411097a1328776a50b29d834ffd",
+      "bytes": 29502,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-03-04T20:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-03-04T16:00:00Z",
+      "stay_check_out": "2025-03-06T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 4,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2025-03-route-unavailable",
+      "file": "seeds/2025-03-route-unavailable.json",
+      "sha256": "b1994c32d52dc2dbf627b4733322443b7a44408096b39865772aa4f43fcebc4b",
+      "bytes": 23384,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-03-14T21:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-03-14T17:00:00Z",
+      "stay_check_out": "2025-03-16T12:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-03-breakfast-partial",
+      "file": "seeds/2025-03-breakfast-partial.json",
+      "sha256": "20eb1ada024e91ee6fda10f3de7804494f5f3f8979aa6612c0b7becbfad92ece",
+      "bytes": 25607,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-03-22T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-03-22T14:00:00Z",
+      "stay_check_out": "2025-03-24T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 22,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2025-03-guest-replaced",
+      "file": "seeds/2025-03-guest-replaced.json",
+      "sha256": "02270bfa86eca9f30889f5e847bde9f87f8b05c192af9b99d6babf7e8488faf6",
+      "bytes": 29161,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-03-29T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-03-29T15:00:00Z",
+      "stay_check_out": "2025-03-31T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 29,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-04-arrival-mismatch",
+      "file": "seeds/2025-04-arrival-mismatch.json",
+      "sha256": "5e149d2de0a8ac83915ede7367ee8dfbf49475b6634c9e75ba018d51937484d8",
+      "bytes": 22620,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-04-07T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-04-07T16:30:00Z",
+      "stay_check_out": "2025-04-09T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 7,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2025-04-route-unavailable",
+      "file": "seeds/2025-04-route-unavailable.json",
+      "sha256": "97877e79e65db04b6a32ad69db35d0354d181a3945db4e0e4b29a94e12936bea",
+      "bytes": 27135,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-04-10T16:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-04-10T13:30:00Z",
+      "stay_check_out": "2025-04-12T08:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-04-breakfast-partial",
+      "file": "seeds/2025-04-breakfast-partial.json",
+      "sha256": "957f1fb771877bc012f92b0da53e10bc21356fd6ccacff35f06e90f56f3eba57",
+      "bytes": 28444,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-04-21T16:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-04-21T14:30:00Z",
+      "stay_check_out": "2025-04-23T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 21,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2025-04-guest-replaced",
+      "file": "seeds/2025-04-guest-replaced.json",
+      "sha256": "ef985ac2536933dbd02645b5c66da053dec62bbb8ceda0749049a90ef106002e",
+      "bytes": 22174,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-04-26T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-04-26T15:30:00Z",
+      "stay_check_out": "2025-04-28T10:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 26,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-05-arrival-mismatch",
+      "file": "seeds/2025-05-arrival-mismatch.json",
+      "sha256": "243f4772cff7c2692ffd38b1c1718665f7fce8e25e8b5f6b6944d1c4c24bf1b7",
+      "bytes": 26361,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-05-05T16:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-05-05T13:00:00Z",
+      "stay_check_out": "2025-05-07T08:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 5,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2025-05-route-unavailable",
+      "file": "seeds/2025-05-route-unavailable.json",
+      "sha256": "0c512ef906a8518763869a498c1c852cde7a64c18c85706599db97b4e2744154",
+      "bytes": 30342,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-05-12T17:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-05-12T14:00:00Z",
+      "stay_check_out": "2025-05-14T09:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-05-breakfast-partial",
+      "file": "seeds/2025-05-breakfast-partial.json",
+      "sha256": "6e852dfa54c020d20e93d85085b82cdd599816167077cbd0ec27a12cc3602b17",
+      "bytes": 21911,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-05-20T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-05-20T15:00:00Z",
+      "stay_check_out": "2025-05-22T10:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 20,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2025-05-guest-replaced",
+      "file": "seeds/2025-05-guest-replaced.json",
+      "sha256": "a0ba79ee545a14e8f52586659dbfb7b91a3cc45b26ba2c00ebd728b680ebbb7e",
+      "bytes": 26117,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-05-28T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-05-28T16:00:00Z",
+      "stay_check_out": "2025-05-30T11:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-06-arrival-mismatch",
+      "file": "seeds/2025-06-arrival-mismatch.json",
+      "sha256": "5ec6d295084278c7a80e7995292934801954a25ffa7011691d5af6685bde0666",
+      "bytes": 29508,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-06-03T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-06-03T14:30:00Z",
+      "stay_check_out": "2025-06-05T09:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 3,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2025-06-route-unavailable",
+      "file": "seeds/2025-06-route-unavailable.json",
+      "sha256": "9a05c99268793a71582953d524d407872b8ef888f64746157b2d15f5be112e16",
+      "bytes": 23354,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-06-14T20:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-06-14T15:30:00Z",
+      "stay_check_out": "2025-06-16T10:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-06-breakfast-partial",
+      "file": "seeds/2025-06-breakfast-partial.json",
+      "sha256": "f51252a27227a7439b9a70f140ba308d5637779e09a276a59426133ba9f55984",
+      "bytes": 25785,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-06-19T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-06-19T16:30:00Z",
+      "stay_check_out": "2025-06-21T11:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 19,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2025-06-guest-replaced",
+      "file": "seeds/2025-06-guest-replaced.json",
+      "sha256": "d5a8beb50f172035d6b2eab3e36aa1f4f66b5f6d543c0dd5ee9b15ea58311b25",
+      "bytes": 29138,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-06-28T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-06-28T13:30:00Z",
+      "stay_check_out": "2025-06-30T08:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-07-arrival-mismatch",
+      "file": "seeds/2025-07-arrival-mismatch.json",
+      "sha256": "2eec2d9023e4150eb5786229a33e1c91719ca9cda1556c7a3e49b5b956bf2d6c",
+      "bytes": 22595,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-07-06T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-07-06T15:00:00Z",
+      "stay_check_out": "2025-07-08T10:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 6,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2025-07-route-unavailable",
+      "file": "seeds/2025-07-route-unavailable.json",
+      "sha256": "01c1fd2a50349c0356c2d6c7ae400b5db8b13785098e2df5224b45dfb6effa75",
+      "bytes": 27225,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-07-10T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-07-10T16:00:00Z",
+      "stay_check_out": "2025-07-12T11:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-07-breakfast-partial",
+      "file": "seeds/2025-07-breakfast-partial.json",
+      "sha256": "0be6b97d8e67e4fc02fac5f26c13e875e2d5fb93942a57d25c6e72800cea449e",
+      "bytes": 28364,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-07-18T15:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-07-18T13:00:00Z",
+      "stay_check_out": "2025-07-20T08:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 18,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2025-07-guest-replaced",
+      "file": "seeds/2025-07-guest-replaced.json",
+      "sha256": "a8ab2e28cf1a8a55a33b1af17b0c2fb83e4661f17576e22b66b121510aac6a62",
+      "bytes": 22352,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-07-27T16:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-07-27T14:00:00Z",
+      "stay_check_out": "2025-07-29T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-08-arrival-mismatch",
+      "file": "seeds/2025-08-arrival-mismatch.json",
+      "sha256": "da011d9ba263398220499a566dfe9366bb389f5263e87d3062392d76149fd402",
+      "bytes": 26394,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-08-04T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-08-04T16:30:00Z",
+      "stay_check_out": "2025-08-06T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 4,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2025-08-route-unavailable",
+      "file": "seeds/2025-08-route-unavailable.json",
+      "sha256": "f938a5e432e5df1c60e2cf16653f53f791b6d75636c66ac720a35b4f81cdb037",
+      "bytes": 30240,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-08-12T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-08-12T13:30:00Z",
+      "stay_check_out": "2025-08-14T08:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-08-breakfast-partial",
+      "file": "seeds/2025-08-breakfast-partial.json",
+      "sha256": "cf142bb458f833e4866d2c8472ef135d2b7c94b444b5df9c98c18c170ebc8d9c",
+      "bytes": 21945,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-08-23T17:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-08-23T14:30:00Z",
+      "stay_check_out": "2025-08-25T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 23,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2025-08-guest-replaced",
+      "file": "seeds/2025-08-guest-replaced.json",
+      "sha256": "0dbde62280f5db5820c1b103d2e9fb981eb8a61c7ab934d2993773dd3bff1936",
+      "bytes": 25955,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-08-28T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-08-28T15:30:00Z",
+      "stay_check_out": "2025-08-30T10:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-09-arrival-mismatch",
+      "file": "seeds/2025-09-arrival-mismatch.json",
+      "sha256": "5845e92162494c64e58a7b4f5c64b088a3ab2c98c2b5a88e30eac81e0ba139c6",
+      "bytes": 29502,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-09-07T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-09-07T13:00:00Z",
+      "stay_check_out": "2025-09-09T08:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 7,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2025-09-route-unavailable",
+      "file": "seeds/2025-09-route-unavailable.json",
+      "sha256": "4a3ea29acdbad7b243d68bd7bdfa794be62e899b9706ee3ba774daa11881e1ea",
+      "bytes": 23384,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-09-14T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-09-14T14:00:00Z",
+      "stay_check_out": "2025-09-16T09:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-09-breakfast-partial",
+      "file": "seeds/2025-09-breakfast-partial.json",
+      "sha256": "e6cb0fb986832be53121e77f52aa15e6e83dff77085ac267c58e4e34965b16fe",
+      "bytes": 25607,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-09-22T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-09-22T15:00:00Z",
+      "stay_check_out": "2025-09-24T10:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 22,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2025-09-guest-replaced",
+      "file": "seeds/2025-09-guest-replaced.json",
+      "sha256": "63f17717a1e9e85756925c336f02ac597d0f28da33a98a2fb9cfa697b2e4fe0c",
+      "bytes": 29161,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-09-28T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-09-28T16:00:00Z",
+      "stay_check_out": "2025-09-30T11:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-10-arrival-mismatch",
+      "file": "seeds/2025-10-arrival-mismatch.json",
+      "sha256": "520007a515f837c13d63fb608d813238f95eb302034873c1267d64d536f4f1b1",
+      "bytes": 22620,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-10-05T16:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-10-05T14:30:00Z",
+      "stay_check_out": "2025-10-07T09:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 5,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2025-10-route-unavailable",
+      "file": "seeds/2025-10-route-unavailable.json",
+      "sha256": "36ea0e9c682c60b17d789a78d00729cac1a8f025dd8abafd8daab6cb206f2774",
+      "bytes": 27135,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-10-10T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-10-10T15:30:00Z",
+      "stay_check_out": "2025-10-12T10:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-10-breakfast-partial",
+      "file": "seeds/2025-10-breakfast-partial.json",
+      "sha256": "4348c6c7f454a377b1cb8d727e5c2d643939e4a986dffdd20e06facb2c92e73a",
+      "bytes": 28444,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-10-21T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-10-21T16:30:00Z",
+      "stay_check_out": "2025-10-23T11:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 21,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2025-10-guest-replaced",
+      "file": "seeds/2025-10-guest-replaced.json",
+      "sha256": "e9b6b810f87bd8f8c0d4a3d81dada6f722c07f9df483413b06c736ac8beba074",
+      "bytes": 22174,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-10-27T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-10-27T14:30:00Z",
+      "stay_check_out": "2025-10-29T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-11-arrival-mismatch",
+      "file": "seeds/2025-11-arrival-mismatch.json",
+      "sha256": "acf5d136548edd8bf4a935ba632762bb572fc04e9a5fd8cd2e0b8c96156ccf85",
+      "bytes": 26361,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-11-03T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-11-03T16:00:00Z",
+      "stay_check_out": "2025-11-05T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 3,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2025-11-route-unavailable",
+      "file": "seeds/2025-11-route-unavailable.json",
+      "sha256": "343705b4de93edaba0f9181b054109d3648d8effb86adce7b97f34de3e22b78a",
+      "bytes": 30342,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-11-12T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-11-12T17:00:00Z",
+      "stay_check_out": "2025-11-14T12:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2025-11-breakfast-partial",
+      "file": "seeds/2025-11-breakfast-partial.json",
+      "sha256": "ff04864b3b73504d566e38dda95543e99a760b805820796dfd9222668180b8ae",
+      "bytes": 21911,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-11-20T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-11-20T14:00:00Z",
+      "stay_check_out": "2025-11-22T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 20,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2025-11-guest-replaced",
+      "file": "seeds/2025-11-guest-replaced.json",
+      "sha256": "64e51e4efb09ee3df3e28628542b742d74fc8430d61a1a6914594e3a4fd68260",
+      "bytes": 26117,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-11-27T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-11-27T15:00:00Z",
+      "stay_check_out": "2025-11-29T10:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2025-12-arrival-mismatch",
+      "file": "seeds/2025-12-arrival-mismatch.json",
+      "sha256": "92bf4909526bf2858e52685239bc3ec9bd8a586e3675fb0af8046181ece071f6",
+      "bytes": 29508,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2025-12-06T21:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-12-06T17:30:00Z",
+      "stay_check_out": "2025-12-08T12:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 6,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2025-12-route-unavailable",
+      "file": "seeds/2025-12-route-unavailable.json",
+      "sha256": "378e2e7504b20a432e1416f9455d037e9ff740ce4d7ea121e0c7190006b136a2",
+      "bytes": 23354,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2025-12-14T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-12-14T14:30:00Z",
+      "stay_check_out": "2025-12-16T09:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2025-12-breakfast-partial",
+      "file": "seeds/2025-12-breakfast-partial.json",
+      "sha256": "38f75e6c5aad705a66e8ba4c7049dab8db699b994060565df3dcc1aee0b5a145",
+      "bytes": 25785,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2025-12-19T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-12-19T15:30:00Z",
+      "stay_check_out": "2025-12-21T10:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 19,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2025-12-guest-replaced",
+      "file": "seeds/2025-12-guest-replaced.json",
+      "sha256": "db2edb6caae1f2b6f6b7a548d2223361296342dcdd0a110e13697ae240cbfff9",
+      "bytes": 29138,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2025-12-29T21:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2025-12-29T16:30:00Z",
+      "stay_check_out": "2025-12-31T11:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 29,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-01-arrival-mismatch",
+      "file": "seeds/2026-01-arrival-mismatch.json",
+      "sha256": "d3effcc4eb08f67a35dc6849916474f137d8148f67c53814f999789d43279c22",
+      "bytes": 22595,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-01-04T16:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-01-04T14:00:00Z",
+      "stay_check_out": "2026-01-06T09:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 4,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2026-01-route-unavailable",
+      "file": "seeds/2026-01-route-unavailable.json",
+      "sha256": "a34c2a14eb8c15b0586fc8a711aa2c29797a3ce5816050b6f606a2c129ac1e1b",
+      "bytes": 27225,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-01-10T17:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-01-10T15:00:00Z",
+      "stay_check_out": "2026-01-12T10:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-01-breakfast-partial",
+      "file": "seeds/2026-01-breakfast-partial.json",
+      "sha256": "fe0baea26fe54ba83ca7d1f48ee946181b80240cad8e62fb000bb850fee706a8",
+      "bytes": 28364,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-01-18T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-01-18T16:00:00Z",
+      "stay_check_out": "2026-01-20T11:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 18,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2026-01-guest-replaced",
+      "file": "seeds/2026-01-guest-replaced.json",
+      "sha256": "be14d2f2fa74952349dc745bb63389997f787c3686c8d6f97979368a925c896b",
+      "bytes": 22352,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-01-27T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-01-27T17:00:00Z",
+      "stay_check_out": "2026-01-29T12:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-02-arrival-mismatch",
+      "file": "seeds/2026-02-arrival-mismatch.json",
+      "sha256": "61d97594b47d8195a128a2559ef66d8b5440d4c2d085f392016cf6f7991efa88",
+      "bytes": 26394,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-02-07T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-02-07T15:30:00Z",
+      "stay_check_out": "2026-02-09T10:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 7,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2026-02-route-unavailable",
+      "file": "seeds/2026-02-route-unavailable.json",
+      "sha256": "c50419f00b15358d4f85f6c63d1b2c475749046959a007ab38bddb1848e4df26",
+      "bytes": 30240,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-02-12T20:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-02-12T16:30:00Z",
+      "stay_check_out": "2026-02-14T11:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-02-breakfast-partial",
+      "file": "seeds/2026-02-breakfast-partial.json",
+      "sha256": "532d6c75e49e3767536ac0bb11de682f85510a80359edd4e2b1e221c911f6143",
+      "bytes": 21945,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-02-23T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-02-23T17:30:00Z",
+      "stay_check_out": "2026-02-25T12:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 23,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2026-02-guest-replaced",
+      "file": "seeds/2026-02-guest-replaced.json",
+      "sha256": "ee29dc7298052923eed6226f2b5369b1b636d900dc7883776707038919a3018b",
+      "bytes": 25955,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-02-25T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-02-25T14:30:00Z",
+      "stay_check_out": "2026-02-27T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 25,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-03-arrival-mismatch",
+      "file": "seeds/2026-03-arrival-mismatch.json",
+      "sha256": "bc257ae5b22b69159f6ee6ec41d91d331194828bcb9d5a1bb0463dc967f5ac04",
+      "bytes": 29502,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-03-05T20:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-03-05T16:00:00Z",
+      "stay_check_out": "2026-03-07T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 5,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2026-03-route-unavailable",
+      "file": "seeds/2026-03-route-unavailable.json",
+      "sha256": "a078ad35347f56b4358645696a6f3f15790806106482f564851131a3d9d7248d",
+      "bytes": 23384,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-03-14T21:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-03-14T17:00:00Z",
+      "stay_check_out": "2026-03-16T12:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-03-breakfast-partial",
+      "file": "seeds/2026-03-breakfast-partial.json",
+      "sha256": "e1173b505860557b8b2065f8c9a924caf54210ffde109867a9840072263f9908",
+      "bytes": 25607,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-03-22T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-03-22T14:00:00Z",
+      "stay_check_out": "2026-03-24T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 22,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2026-03-guest-replaced",
+      "file": "seeds/2026-03-guest-replaced.json",
+      "sha256": "d97570fc58cdebe0092d75f20f66569674cee58ab830952ac85d6da3e73e04ff",
+      "bytes": 29161,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-03-29T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-03-29T14:00:00Z",
+      "stay_check_out": "2026-03-31T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 29,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-04-arrival-mismatch",
+      "file": "seeds/2026-04-arrival-mismatch.json",
+      "sha256": "94ac8edb54b408dbb53d2225598aa49801743528604f5a85d45a1dcc5d9d63b1",
+      "bytes": 22620,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-04-03T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-04-03T16:30:00Z",
+      "stay_check_out": "2026-04-05T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 3,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2026-04-route-unavailable",
+      "file": "seeds/2026-04-route-unavailable.json",
+      "sha256": "779bff5c140b4f7fa81745b3531be3c713e15927842a46350a507b2ab1d8bfab",
+      "bytes": 27135,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-04-10T16:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-04-10T13:30:00Z",
+      "stay_check_out": "2026-04-12T08:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-04-breakfast-partial",
+      "file": "seeds/2026-04-breakfast-partial.json",
+      "sha256": "9dc029d60388e980ec49fe50955abdb543f2c7ee3569bcb5767859a6a2d19b68",
+      "bytes": 28444,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-04-21T16:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-04-21T14:30:00Z",
+      "stay_check_out": "2026-04-23T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 21,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2026-04-guest-replaced",
+      "file": "seeds/2026-04-guest-replaced.json",
+      "sha256": "abc9dcd992286c248d5db920ad7765169600c65f2e08ed22166d42575eace759",
+      "bytes": 22174,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-04-26T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-04-26T15:30:00Z",
+      "stay_check_out": "2026-04-28T10:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 26,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-05-arrival-mismatch",
+      "file": "seeds/2026-05-arrival-mismatch.json",
+      "sha256": "3e39a312e22e826b0780b04d242d66a737e47e2c466f98eca7f1277afd43bd10",
+      "bytes": 26361,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-05-06T16:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-05-06T13:00:00Z",
+      "stay_check_out": "2026-05-08T08:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 6,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2026-05-route-unavailable",
+      "file": "seeds/2026-05-route-unavailable.json",
+      "sha256": "d422f5698bc9aa444e2ef262ebb15d06b085cbfc093a3efc478e7681eeaf1e47",
+      "bytes": 30342,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-05-12T17:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-05-12T14:00:00Z",
+      "stay_check_out": "2026-05-14T09:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-05-breakfast-partial",
+      "file": "seeds/2026-05-breakfast-partial.json",
+      "sha256": "57adf32e52bcdf787211b72d2e7eebb56137d6bb3895aee0e441902135c53098",
+      "bytes": 21911,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-05-20T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-05-20T15:00:00Z",
+      "stay_check_out": "2026-05-22T10:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 20,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2026-05-guest-replaced",
+      "file": "seeds/2026-05-guest-replaced.json",
+      "sha256": "71af8599b86d43ab80334bf95b4f446095f2f903ca4f96fc0dd9fd8693ac45fc",
+      "bytes": 26117,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-05-28T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-05-28T16:00:00Z",
+      "stay_check_out": "2026-05-30T11:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-06-arrival-mismatch",
+      "file": "seeds/2026-06-arrival-mismatch.json",
+      "sha256": "f1f360d5f90bcf89707428d8245247665eeca6f939573b2360af7f5a5ef37301",
+      "bytes": 29508,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-06-04T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-06-04T14:30:00Z",
+      "stay_check_out": "2026-06-06T09:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 4,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2026-06-route-unavailable",
+      "file": "seeds/2026-06-route-unavailable.json",
+      "sha256": "b8dc3e57f7aaf19f5c56ffae93adeceb33fcd131b23c8d83d76941f30a3176b7",
+      "bytes": 23354,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-06-14T20:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-06-14T15:30:00Z",
+      "stay_check_out": "2026-06-16T10:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-06-breakfast-partial",
+      "file": "seeds/2026-06-breakfast-partial.json",
+      "sha256": "33bede7b5cb2083e85746bb7b54db6228d25584e09160c5d7e73b0c180d3865b",
+      "bytes": 25785,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-06-19T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-06-19T16:30:00Z",
+      "stay_check_out": "2026-06-21T11:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 19,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2026-06-guest-replaced",
+      "file": "seeds/2026-06-guest-replaced.json",
+      "sha256": "e99027b4708f3298525aa175752f04bf85d467d9f9b2883a7d9b3f642b0acf66",
+      "bytes": 29138,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-06-28T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-06-28T13:30:00Z",
+      "stay_check_out": "2026-06-30T08:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-07-arrival-mismatch",
+      "file": "seeds/2026-07-arrival-mismatch.json",
+      "sha256": "ed7bc39334092f04afa67d54082cef30fd0c8eaf69e3e0de4ba687dc8e46c313",
+      "bytes": 22595,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-07-07T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-07-07T15:00:00Z",
+      "stay_check_out": "2026-07-09T10:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 7,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2026-07-route-unavailable",
+      "file": "seeds/2026-07-route-unavailable.json",
+      "sha256": "6521386f29f44e4cb7fe54407212ae716e2d6d2abcfb3a084f475750fc0ead08",
+      "bytes": 27225,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-07-10T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-07-10T16:00:00Z",
+      "stay_check_out": "2026-07-12T11:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-07-breakfast-partial",
+      "file": "seeds/2026-07-breakfast-partial.json",
+      "sha256": "5cdb844fd5e96c21c8da3325bcb707cf5dd392c472c3e636c6f7eefcd46a8a2d",
+      "bytes": 28364,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-07-18T15:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-07-18T13:00:00Z",
+      "stay_check_out": "2026-07-20T08:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 18,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2026-07-guest-replaced",
+      "file": "seeds/2026-07-guest-replaced.json",
+      "sha256": "f03542ea8dd736857dd373fb96c376849e3cfceb5c9d5bef3d4c2584989688a7",
+      "bytes": 22352,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-07-27T16:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-07-27T14:00:00Z",
+      "stay_check_out": "2026-07-29T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-08-arrival-mismatch",
+      "file": "seeds/2026-08-arrival-mismatch.json",
+      "sha256": "67cb4af9bca5fa07825179f5c1d27ed27d8140dd6d07504cc774740e0f9d2115",
+      "bytes": 26394,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-08-05T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-08-05T16:30:00Z",
+      "stay_check_out": "2026-08-07T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 5,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2026-08-route-unavailable",
+      "file": "seeds/2026-08-route-unavailable.json",
+      "sha256": "7c2e5e734564f18e81b8e3154bd5b737c490ad621441ee4cec01e8ac81be98f9",
+      "bytes": 30240,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-08-12T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-08-12T13:30:00Z",
+      "stay_check_out": "2026-08-14T08:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-08-breakfast-partial",
+      "file": "seeds/2026-08-breakfast-partial.json",
+      "sha256": "3d14fe7680d6d864137647f385e4c7bfef9aba5c513236a8a6effdfe93accc2e",
+      "bytes": 21945,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-08-23T17:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-08-23T14:30:00Z",
+      "stay_check_out": "2026-08-25T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 23,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2026-08-guest-replaced",
+      "file": "seeds/2026-08-guest-replaced.json",
+      "sha256": "e72c86ffe6807962ccdce4bde485fdb2f1887d4b8e75b58538bdf79ce23495dc",
+      "bytes": 25955,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-08-28T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-08-28T15:30:00Z",
+      "stay_check_out": "2026-08-30T10:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-09-arrival-mismatch",
+      "file": "seeds/2026-09-arrival-mismatch.json",
+      "sha256": "52d3e07861cd8c08e88a0201c1a2ecc67c118970e9ad176cfece9fc430944975",
+      "bytes": 29502,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-09-03T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-09-03T13:00:00Z",
+      "stay_check_out": "2026-09-05T08:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 3,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2026-09-route-unavailable",
+      "file": "seeds/2026-09-route-unavailable.json",
+      "sha256": "fefccb1d2a6d166c7738e33e68018141a9cdfacbb6447e92931cf2f8390eec87",
+      "bytes": 23384,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-09-14T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-09-14T14:00:00Z",
+      "stay_check_out": "2026-09-16T09:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-09-breakfast-partial",
+      "file": "seeds/2026-09-breakfast-partial.json",
+      "sha256": "7e8c947eacfd213ff671e8630736100c08e985b9d7f375d580521e676e875f06",
+      "bytes": 25607,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-09-22T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-09-22T15:00:00Z",
+      "stay_check_out": "2026-09-24T10:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 22,
+        "planned_lead_days": 2,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2026-09-guest-replaced",
+      "file": "seeds/2026-09-guest-replaced.json",
+      "sha256": "eec7e35ee1cf6d7ee30ca56357ae2e6b042e98f8332ce810faac2eeef2d00eb6",
+      "bytes": 29161,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-09-28T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-09-28T16:00:00Z",
+      "stay_check_out": "2026-09-30T11:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 28,
+        "planned_lead_days": 4,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-10-arrival-mismatch",
+      "file": "seeds/2026-10-arrival-mismatch.json",
+      "sha256": "2d9665ff08244607af50e901f4f652b6d63d39fc09ab2f2176bb7e8dbe95e3cb",
+      "bytes": 22620,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-10-06T16:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-10-06T14:30:00Z",
+      "stay_check_out": "2026-10-08T09:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 6,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 8
+      }
+    },
+    {
+      "scenario_id": "2026-10-route-unavailable",
+      "file": "seeds/2026-10-route-unavailable.json",
+      "sha256": "83185da4cac840cfdbe1cfa46fb07d663e99780d115f7bf0a618c978f0f2ade8",
+      "bytes": 27135,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-10-10T18:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-10-10T15:30:00Z",
+      "stay_check_out": "2026-10-12T10:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 10,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-10-breakfast-partial",
+      "file": "seeds/2026-10-breakfast-partial.json",
+      "sha256": "b8c4074c7f21214cc310ee705923fb7cb685b1cd1f2910e70fa4a697ab0ffd73",
+      "bytes": 28444,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-10-21T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-10-21T16:30:00Z",
+      "stay_check_out": "2026-10-23T11:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 21,
+        "planned_lead_days": 3,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 12
+      }
+    },
+    {
+      "scenario_id": "2026-10-guest-replaced",
+      "file": "seeds/2026-10-guest-replaced.json",
+      "sha256": "937acdf07a954fc3f9398fbadcdae87fbdea5d72d6b00332c89636c38290e357",
+      "bytes": 22174,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-10-27T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-10-27T14:30:00Z",
+      "stay_check_out": "2026-10-29T09:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 6,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-11-arrival-mismatch",
+      "file": "seeds/2026-11-arrival-mismatch.json",
+      "sha256": "35f0fc7dde8d3efb52c4b09061c4978a4036099087f5eeb60e974e812e22cb63",
+      "bytes": 26361,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-11-04T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-11-04T16:00:00Z",
+      "stay_check_out": "2026-11-06T11:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 4,
+        "planned_lead_days": 8,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 11
+      }
+    },
+    {
+      "scenario_id": "2026-11-route-unavailable",
+      "file": "seeds/2026-11-route-unavailable.json",
+      "sha256": "22a6d40335ae2a599dbde1a71d48265accf1ef20d1fbed92811616ecffe6b7e3",
+      "bytes": 30342,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-11-12T20:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-11-12T17:00:00Z",
+      "stay_check_out": "2026-11-14T12:30:00Z",
+      "focus_need_id": "need-access-person-3",
+      "variation": {
+        "check_in_local_day": 12,
+        "planned_lead_days": 2,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    },
+    {
+      "scenario_id": "2026-11-breakfast-partial",
+      "file": "seeds/2026-11-breakfast-partial.json",
+      "sha256": "26c5bfafecb92df3372a914ad9672fa2678467764b99f19c6850fb24ac1300ba",
+      "bytes": 21911,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-11-20T17:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-11-20T14:00:00Z",
+      "stay_check_out": "2026-11-22T09:00:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 20,
+        "planned_lead_days": 4,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 6
+      }
+    },
+    {
+      "scenario_id": "2026-11-guest-replaced",
+      "file": "seeds/2026-11-guest-replaced.json",
+      "sha256": "366cdadda193cd21a6c553a484cc1b166daa20792cb17f337b757b367fdcdff6",
+      "bytes": 26117,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-11-27T18:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-11-27T15:00:00Z",
+      "stay_check_out": "2026-11-29T10:30:00Z",
+      "focus_need_id": "need-breakfast-person-3",
+      "variation": {
+        "check_in_local_day": 27,
+        "planned_lead_days": 8,
+        "initial_companion": "person-3",
+        "current_companion": "person-2",
+        "former_companion": "person-3",
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 10
+      }
+    },
+    {
+      "scenario_id": "2026-12-arrival-mismatch",
+      "file": "seeds/2026-12-arrival-mismatch.json",
+      "sha256": "c4cd4dfaf2d87f78ba3f750d552bbe02715f5b8335c17d8fcb3b408affd8fda6",
+      "bytes": 29508,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "arrival-mismatch",
+      "description": "The confirmed entrance window ends before the updated arrival; the original hotel promise and its request history remain visible.",
+      "initial_time": "2026-12-07T21:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-12-07T17:30:00Z",
+      "stay_check_out": "2026-12-09T12:00:00Z",
+      "focus_need_id": "need-arrival",
+      "variation": {
+        "check_in_local_day": 7,
+        "planned_lead_days": 11,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 14
+      }
+    },
+    {
+      "scenario_id": "2026-12-route-unavailable",
+      "file": "seeds/2026-12-route-unavailable.json",
+      "sha256": "5ceec0712a98d93525cdea23ef0e4ba08f621792523b11bc5c2cb6066dde3374",
+      "bytes": 23354,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "route-unavailable",
+      "description": "A named traveler has an acknowledged and confirmed step-free request followed by a dated route-unavailable notice.",
+      "initial_time": "2026-12-14T19:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-12-14T14:30:00Z",
+      "stay_check_out": "2026-12-16T09:30:00Z",
+      "focus_need_id": "need-access-person-1",
+      "variation": {
+        "check_in_local_day": 14,
+        "planned_lead_days": 3,
+        "initial_companion": "person-2",
+        "current_companion": "person-2",
+        "former_companion": null,
+        "request_count": 2,
+        "request_statuses": [
+          "confirmed",
+          "confirmed"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 2,
+        "commitments": 2,
+        "history": 7
+      }
+    },
+    {
+      "scenario_id": "2026-12-breakfast-partial",
+      "file": "seeds/2026-12-breakfast-partial.json",
+      "sha256": "71550a08fd088471f233a402145b4d5c6f55afd1abd55a2c16528d03a2b12c2c",
+      "bytes": 25785,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "breakfast-partial",
+      "description": "The hotel acknowledged two requested mornings but confirmed only one; the other morning remains unresolved.",
+      "initial_time": "2026-12-19T19:30:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-12-19T15:30:00Z",
+      "stay_check_out": "2026-12-21T10:00:00Z",
+      "focus_need_id": "need-breakfast-person-1",
+      "variation": {
+        "check_in_local_day": 19,
+        "planned_lead_days": 6,
+        "initial_companion": "person-3",
+        "current_companion": "person-3",
+        "former_companion": null,
+        "request_count": 3,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "needs_clarification"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 3,
+        "commitments": 2,
+        "history": 9
+      }
+    },
+    {
+      "scenario_id": "2026-12-guest-replaced",
+      "file": "seeds/2026-12-guest-replaced.json",
+      "sha256": "9f4f775c45dff6c14e60cbaa8b177c424c6a109c70a97ced594708915c3cf878",
+      "bytes": 29138,
+      "kind": "synthetic",
+      "source_id": "authored-scenario-library",
+      "pattern": "guest-replaced",
+      "description": "A different current companion replaces the traveler whose breakfast request was already acknowledged and confirmed; the former service is still active.",
+      "initial_time": "2026-12-29T21:00:00Z",
+      "account_id": "stayready-alex",
+      "stay_check_in": "2026-12-29T16:30:00Z",
+      "stay_check_out": "2026-12-31T11:30:00Z",
+      "focus_need_id": "need-breakfast-person-2",
+      "variation": {
+        "check_in_local_day": 29,
+        "planned_lead_days": 11,
+        "initial_companion": "person-2",
+        "current_companion": "person-3",
+        "former_companion": "person-2",
+        "request_count": 4,
+        "request_statuses": [
+          "confirmed",
+          "confirmed",
+          "withdrawn",
+          "declined"
+        ]
+      },
+      "record_counts": {
+        "property": 1,
+        "stay": 1,
+        "people": 3,
+        "sources": 7,
+        "needs": 7,
+        "requests": 4,
+        "commitments": 2,
+        "history": 13
+      }
+    }
+  ]
+}

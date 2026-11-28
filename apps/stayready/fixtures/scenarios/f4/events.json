@@ -1,0 +1,202 @@
+{
+  "bootstrap": [
+    {
+      "event_id": "baseline-reply-1",
+      "at": "2026-12-01T17:05:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-arrival",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "late_arrival",
+            "person_ids": [
+              "person-1",
+              "person-2"
+            ],
+            "arrival_at": "2026-12-01T21:30:00Z"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T17:00:00Z",
+            "until": "2026-12-01T17:05:00Z"
+          }
+        },
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "late_arrival",
+          "person_ids": [
+            "person-1",
+            "person-2"
+          ],
+          "arrival_window": {
+            "start": "2026-12-01T21:00:00Z",
+            "end": "2026-12-01T22:00:00Z"
+          },
+          "entrance_id": "east",
+          "access_method_id": "night-desk"
+        }
+      }
+    },
+    {
+      "event_id": "baseline-reply-2",
+      "at": "2026-12-01T17:15:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-breakfast-person-1",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-1"
+            ],
+            "morning_dates": [
+              "2026-12-02",
+              "2026-12-03"
+            ],
+            "meal_request": "No peanuts in the prepared breakfast"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T17:10:00Z",
+            "until": "2026-12-01T17:15:00Z"
+          }
+        },
+        "outcome": "declined"
+      }
+    }
+  ],
+  "run": [
+    {
+      "event_id": "f4-received",
+      "at": "2026-12-01T18:04:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-breakfast-person-2",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-2"
+            ],
+            "morning_dates": [
+              "2026-12-02",
+              "2026-12-03"
+            ],
+            "meal_request": "Plant-based breakfast"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:04:00Z"
+          }
+        },
+        "outcome": "acknowledged"
+      }
+    },
+    {
+      "event_id": "f4-clarify",
+      "at": "2026-12-01T18:05:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-breakfast-person-2",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-2"
+            ],
+            "morning_dates": [
+              "2026-12-02",
+              "2026-12-03"
+            ],
+            "meal_request": "Plant-based breakfast"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:04:00Z"
+          }
+        },
+        "outcome": "needs_clarification"
+      }
+    },
+    {
+      "event_id": "f4-declined",
+      "at": "2026-12-01T18:08:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-breakfast-person-2",
+          "action": "arrange",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-2"
+            ],
+            "morning_dates": [
+              "2026-12-02",
+              "2026-12-03"
+            ],
+            "meal_request": "Plant-based breakfast"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:04:00Z"
+          }
+        },
+        "outcome": "declined"
+      }
+    },
+    {
+      "event_id": "f4-cancel-refused",
+      "at": "2026-12-01T18:10:00Z",
+      "operation": "stayready.hotel_reply",
+      "payload": {
+        "target": {
+          "need_id": "need-arrival",
+          "action": "cancel",
+          "request_conditions": {
+            "stay_id": "stay-1",
+            "service": "late_arrival",
+            "person_ids": [
+              "person-1",
+              "person-2"
+            ],
+            "arrival_at": "2026-12-01T21:30:00Z"
+          },
+          "submitted_in": {
+            "from": "2026-12-01T18:00:00Z",
+            "until": "2026-12-01T18:05:00Z"
+          },
+          "predecessor": {
+            "commitment_terms": {
+              "stay_id": "stay-1",
+              "service": "late_arrival",
+              "person_ids": [
+                "person-1",
+                "person-2"
+              ],
+              "arrival_window": {
+                "start": "2026-12-01T21:00:00Z",
+                "end": "2026-12-01T22:00:00Z"
+              },
+              "entrance_id": "east",
+              "access_method_id": "night-desk"
+            },
+            "confirmed_in": {
+              "from": "2026-12-01T17:00:00Z",
+              "until": "2026-12-01T17:20:00Z"
+            }
+          }
+        },
+        "outcome": "declined"
+      }
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "mail",
+  "app_version": "1.3.0",
+  "package_sha256": "ba9112331a30880cc6e679447f6dfe17936a59d9c26eea02610e6c3abf696ebd",
+  "node": "v22.23.5",
+  "verified_at": "2026-11-28T12:53:53.498Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for mail.search",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for mail.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for mail.attachment.get",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: read and search preserve the unread flag and business state\nok 1 - read and search preserve the unread flag and business state\n  ---\n  duration_ms: 1.09525\n  type: 'test'\n  ...\n# Subtest: create, edit and send a draft; sent mail cannot be sent or edited again\nok 2 - create, edit and send a draft; sent mail cannot be sent or edited again\n  ---\n  duration_ms: 0.409583\n  type: 'test'\n  ...\n# Subtest: invalid recipient is rejected without adding a record\nok 3 - invalid recipient is rejected without adding a record\n  ---\n  duration_ms: 0.115208\n  type: 'test'\n  ...\n# Subtest: flag, archive and trash update the intended record\nok 4 - flag, archive and trash update the intended record\n  ---\n  duration_ms: 0.101083\n  type: 'test'\n  ...\n# Subtest: incoming event is applied once by the App and duplicate record IDs are rejected\nok 5 - incoming event is applied once by the App and duplicate record IDs are rejected\n  ---\n  duration_ms: 0.206458\n  type: 'test'\n  ...\n# Subtest: cross-account event, duplicate seed and unresolved cross-App reference are rejected\nok 6 - cross-account event, duplicate seed and unresolved cross-App reference are rejected\n  ---\n  duration_ms: 0.429833\n  type: 'test'\n  ...\n# Subtest: publisher constructs the declared CloudEvents envelope from a sent record\nok 7 - publisher constructs the declared CloudEvents envelope from a sent record\n  ---\n  duration_ms: 0.327333\n  type: 'test'\n  ...\n# Subtest: receiver maps message content and rejects a mismatched destination\nok 8 - receiver maps message content and rejects a mismatched destination\n  ---\n  duration_ms: 0.240625\n  type: 'test'\n  ...\n# Subtest: outbound adapter does not publish if the injected client rejects send\nok 9 - outbound adapter does not publish if the injected client rejects send\n  ---\n  duration_ms: 0.308542\n  type: 'test'\n  ...\n# Subtest: optional logging preserves business results and records, including older contexts\nok 10 - optional logging preserves business results and records, including older contexts\n  ---\n  duration_ms: 0.440041\n  type: 'test'\n  ...\n# Subtest: failed send retains diagnostic steps without claiming success or altering data\nok 11 - failed send retains diagnostic steps without claiming success or altering data\n  ---\n  duration_ms: 0.119708\n  type: 'test'\n  ...\n# Subtest: incoming mail and notification diagnostics contain IDs rather than message content\nok 12 - incoming mail and notification diagnostics contain IDs rather than message content\n  ---\n  duration_ms: 0.161583\n  type: 'test'\n  ...\n# Subtest: unavailable logging never changes a Mail result or domain error\nok 13 - unavailable logging never changes a Mail result or domain error\n  ---\n  duration_ms: 0.097667\n  type: 'test'\n  ...\n# Subtest: draft attachments use host import and can be removed without changing content\nok 14 - draft attachments use host import and can be removed without changing content\n  ---\n  duration_ms: 0.203625\n  type: 'test'\n  ...\n# Subtest: attachment receive handler imports bytes onto its own message\nok 15 - attachment receive handler imports bytes onto its own message\n  ---\n  duration_ms: 0.073875\n  type: 'test'\n  ...\n# Subtest: read attachment requires a reference on the selected message\nok 16 - read attachment requires a reference on the selected message\n  ---\n  duration_ms: 0.117625\n  type: 'test'\n  ...\n# Subtest: Mail attachment publishing uses the separate declared channel\nok 17 - Mail attachment publishing uses the separate declared channel\n  ---\n  duration_ms: 0.037917\n  type: 'test'\n  ...\n# Subtest: attachment import without a supplied host capability fails explicitly\nok 18 - attachment import without a supplied host capability fails explicitly\n  ---\n  duration_ms: 0.057416\n  type: 'test'\n  ...\n# Subtest: publisher identity is stable for retries and distinct after a source reset\nok 19 - publisher identity is stable for retries and distinct after a source reset\n  ---\n  duration_ms: 0.355458\n  type: 'test'\n  ...\n# Subtest: publisher refuses a missing or invalid source epoch\nok 20 - publisher refuses a missing or invalid source epoch\n  ---\n  duration_ms: 0.16375\n  type: 'test'\n  ...\n# Subtest: outbound adapter does not publish a replacement record after reset during confirmation\nok 21 - outbound adapter does not publish a replacement record after reset during confirmation\n  ---\n  duration_ms: 0.113542\n  type: 'test'\n  ...\n1..21\n# tests 21\n# suites 0\n# pass 21\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 37.65375\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"example\": \"mail\",\n  \"mode\": \"local business functions\",\n  \"before\": {\n    \"account_id\": \"mail-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"address\": \"maya.main@example.com\",\n    \"messages\": [\n      {\n        \"id\": \"materials\",\n        \"thread_id\": \"design-review\",\n        \"account_id\": \"mail-maya\",\n        \"from\": \"alex.rivera@example.com\",\n        \"to\": [\n          \"maya.main@example.com\"\n        ],\n        \"subject\": \"Design review: room and media materials\",\n        \"body\": \"Attachments contain a Room B illustration, a synthetic audio brief, a four-second room video and temperature observations. These materials do not authorize edits.\",\n        \"received_at\": \"2026-11-12T08:30:00-08:00\",\n        \"folder\": \"inbox\",\n        \"read\": false,\n        \"attachments\": [\n          \"room-image\",\n          \"brief-audio\",\n          \"room-video\",\n          \"room-sensor\",\n          \"missing-image\"\n        ]\n      },\n      {\n        \"id\": \"confirmation\",\n        \"thread_id\": \"design-review\",\n        \"account_id\": \"mail-maya\",\n        \"from\": \"alex.rivera@example.com\",\n        \"to\": [\n          \"maya.main@example.com\"\n        ],\n        \"subject\": \"Design review: Monday 10:00\",\n        \"body\": \"The review is scheduled for November 16, 10:00-11:00 Pacific. Check the event in your calendar.\",\n        \"received_at\": \"2026-11-12T09:00:00-08:00\",\n        \"folder\": \"inbox\",\n        \"read\": true,\n        \"attachments\": [],\n        \"event_ref\": {\n          \"app_id\": \"calendar\",\n          \"account_id\": \"calendar-maya\",\n          \"object_id\": \"evt-review\"\n        }\n      }\n    ]\n  },\n  \"after\": {\n    \"account_id\": \"mail-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"address\": \"maya.main@example.com\",\n    \"messages\": [\n      {\n        \"id\": \"materials\",\n        \"thread_id\": \"design-review\",\n        \"account_id\": \"mail-maya\",\n        \"from\": \"alex.rivera@example.com\",\n        \"to\": [\n          \"maya.main@example.com\"\n        ],\n        \"subject\": \"Design review: room and media materials\",\n        \"body\": \"Attachments contain a Room B illustration, a synthetic audio brief, a four-second room video and temperature observations. These materials do not authorize edits.\",\n        \"received_at\": \"2026-11-12T08:30:00-08:00\",\n        \"folder\": \"inbox\",\n        \"read\": false,\n        \"attachments\": [\n          \"room-image\",\n          \"brief-audio\",\n          \"room-video\",\n          \"room-sensor\",\n          \"missing-image\"\n        ]\n      },\n      {\n        \"id\": \"confirmation\",\n        \"thread_id\": \"design-review\",\n        \"account_id\": \"mail-maya\",\n        \"from\": \"alex.rivera@example.com\",\n        \"to\": [\n          \"maya.main@example.com\"\n        ],\n        \"subject\": \"Design review: Monday 10:00\",\n        \"body\": \"The review is scheduled for November 16, 10:00-11:00 Pacific. Check the event in your calendar.\",\n        \"received_at\": \"2026-11-12T09:00:00-08:00\",\n        \"folder\": \"inbox\",\n        \"read\": true,\n        \"attachments\": [],\n        \"event_ref\": {\n          \"app_id\": \"calendar\",\n          \"account_id\": \"calendar-maya\",\n          \"object_id\": \"evt-review\"\n        }\n      },\n      {\n        \"id\": \"reschedule\",\n        \"thread_id\": \"design-review\",\n        \"account_id\": \"mail-maya\",\n        \"from\": \"alex.rivera@example.com\",\n        \"to\": [\n          \"maya.main@example.com\"\n        ],\n        \"subject\": \"Move the design review to 11:00\",\n        \"body\": \"Please move Monday's design review to 11:00-12:00 Pacific, keeping the participants and location.\",\n        \"received_at\": \"2026-11-15T09:05:00-08:00\",\n        \"folder\": \"inbox\",\n        \"read\": false,\n        \"attachments\": [],\n        \"event_ref\": {\n          \"app_id\": \"calendar\",\n          \"account_id\": \"calendar-maya\",\n          \"object_id\": \"evt-review\"\n        }\n      }\n    ]\n  }\n}\nPASS: local App event example. Platform MCP, permissions and persistence are validated separately.\n{\n  \"diagnostic_steps\": [\n    {\n      \"call_index\": 1,\n      \"step\": \"mail.event.started\",\n      \"details\": {\n        \"event_id\": \"mail-reschedule-01\",\n        \"operation\": \"mail.deliver\"\n      }\n    },\n    {\n      \"call_index\": 1,\n      \"step\": \"mail.deliver.validated\",\n      \"details\": {\n        \"message_id\": \"reschedule\"\n      }\n    },\n    {\n      \"call_index\": 1,\n      \"step\": \"mail.deliver.prepared\",\n      \"details\": {\n        \"message_id\": \"reschedule\"\n      }\n    }\n  ]\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}

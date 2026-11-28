@@ -1,0 +1,55 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "stayready-evaluation-2025-2026",
+  "version": "2.0.0",
+  "description": "The delivered synthetic Environment evaluation library: 96 independent fixed two-night hotel scenarios across 2025–2026, with real plugin-generated request/acknowledgment/reply histories and deterministic business variation.",
+  "record_source_ids": [
+    "authored-scenario-library"
+  ],
+  "sources": [
+    {
+      "source_id": "authored-scenario-library",
+      "kind": "synthetic",
+      "description": "All hotel, traveler, source, request, reply and event records are authored fiction. The fixed property and three-person pool implement the approved one-property/two-guest scope; dates, assignments, timing and causal histories vary independently across isolated runs. No real-data anchor is claimed or required.",
+      "uri": "manifest.json",
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "Deterministic authored variation in local dates, arrival/check-in times, observation and reply lead times, companion assignments and 2–4 causal request/acknowledgment/reply histories per run, executed through the public plugin.",
+        "tool": "scripts/generate-dataset.cjs + public StayReady plugin",
+        "tool_version": "2.0.0",
+        "seed": null,
+        "parameters": {
+          "manifest": "manifest.json",
+          "scenario_count": 96,
+          "timezone": "Europe/London",
+          "coverage_window": {
+            "from": "2025-01-01",
+            "through": "2026-12-31"
+          },
+          "records": 3264
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "All timestamps are stored as UTC instants; date coverage is counted in the property IANA timezone.",
+    "Requests, acknowledgments, final replies, source changes and companion replacements are executed through the public plugin before seed export.",
+    "Evaluation labels are stored in manifest metadata, not in public business seed records."
+  ],
+  "expected_counts": {
+    "records": 3264,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Synthetic records are acceptable without a real-data anchor; independent review of causal realism and variation remains required."
+  }
+}

@@ -1,0 +1,896 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:stayready:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "stayready.source_updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "source_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expected_source_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "source_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fields": {
+              "type": "object",
+              "properties": {
+                "arrival_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "functional_need": {
+                  "const": "step_free"
+                },
+                "meal_request": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "private_background": {
+                  "type": "string",
+                  "maxLength": 4000
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "arrival_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "readable": {
+              "type": "boolean"
+            },
+            "disclose_fields": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "arrival_at",
+                  "functional_need",
+                  "meal_request"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 3,
+              "uniqueItems": true
+            },
+            "grant_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "source_id",
+            "expected_source_version",
+            "source_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "stayready.hotel_reply"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "object",
+              "properties": {
+                "need_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "action": {
+                  "enum": [
+                    "arrange",
+                    "change",
+                    "cancel"
+                  ]
+                },
+                "request_conditions": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "stay_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "person_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 3,
+                          "uniqueItems": true
+                        },
+                        "service": {
+                          "const": "late_arrival"
+                        },
+                        "arrival_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "stay_id",
+                        "person_ids",
+                        "service",
+                        "arrival_at"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "stay_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "person_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 3,
+                          "uniqueItems": true
+                        },
+                        "service": {
+                          "const": "step_free_access"
+                        },
+                        "functional_need": {
+                          "const": "step_free"
+                        },
+                        "window": {
+                          "type": "object",
+                          "properties": {
+                            "start": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "end": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "end"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "stay_id",
+                        "person_ids",
+                        "service",
+                        "functional_need",
+                        "window"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "stay_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "person_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 3,
+                          "uniqueItems": true
+                        },
+                        "service": {
+                          "const": "breakfast"
+                        },
+                        "morning_dates": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 2,
+                          "uniqueItems": true
+                        },
+                        "meal_request": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "stay_id",
+                        "person_ids",
+                        "service",
+                        "morning_dates",
+                        "meal_request"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "submitted_in": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "until": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "until"
+                  ],
+                  "additionalProperties": false
+                },
+                "predecessor": {
+                  "type": "object",
+                  "properties": {
+                    "commitment_terms": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "stay_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            },
+                            "person_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              },
+                              "minItems": 1,
+                              "maxItems": 3,
+                              "uniqueItems": true
+                            },
+                            "service": {
+                              "const": "late_arrival"
+                            },
+                            "arrival_window": {
+                              "type": "object",
+                              "properties": {
+                                "start": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                },
+                                "end": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                }
+                              },
+                              "required": [
+                                "start",
+                                "end"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "entrance_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            },
+                            "access_method_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            }
+                          },
+                          "required": [
+                            "stay_id",
+                            "person_ids",
+                            "service",
+                            "arrival_window",
+                            "entrance_id",
+                            "access_method_id"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "stay_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            },
+                            "person_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              },
+                              "minItems": 1,
+                              "maxItems": 3,
+                              "uniqueItems": true
+                            },
+                            "service": {
+                              "const": "step_free_access"
+                            },
+                            "route_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            },
+                            "window": {
+                              "type": "object",
+                              "properties": {
+                                "start": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                },
+                                "end": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                }
+                              },
+                              "required": [
+                                "start",
+                                "end"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "stay_id",
+                            "person_ids",
+                            "service",
+                            "route_id",
+                            "window"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "stay_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            },
+                            "person_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              },
+                              "minItems": 1,
+                              "maxItems": 3,
+                              "uniqueItems": true
+                            },
+                            "service": {
+                              "const": "breakfast"
+                            },
+                            "morning_dates": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                              },
+                              "minItems": 1,
+                              "maxItems": 2,
+                              "uniqueItems": true
+                            },
+                            "meal_request": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          },
+                          "required": [
+                            "stay_id",
+                            "person_ids",
+                            "service",
+                            "morning_dates",
+                            "meal_request"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "confirmed_in": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "until": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "until"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "commitment_terms",
+                    "confirmed_in"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "need_id",
+                "action",
+                "request_conditions",
+                "submitted_in"
+              ],
+              "additionalProperties": false
+            },
+            "outcome": {
+              "enum": [
+                "acknowledged",
+                "needs_clarification",
+                "declined",
+                "confirmed"
+              ]
+            },
+            "terms": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "late_arrival"
+                    },
+                    "arrival_window": {
+                      "type": "object",
+                      "properties": {
+                        "start": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "end": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "start",
+                        "end"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "entrance_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "access_method_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "arrival_window",
+                    "entrance_id",
+                    "access_method_id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "step_free_access"
+                    },
+                    "route_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "window": {
+                      "type": "object",
+                      "properties": {
+                        "start": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "end": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "start",
+                        "end"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "route_id",
+                    "window"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "stay_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    },
+                    "person_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 3,
+                      "uniqueItems": true
+                    },
+                    "service": {
+                      "const": "breakfast"
+                    },
+                    "morning_dates": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      "minItems": 1,
+                      "maxItems": 2,
+                      "uniqueItems": true
+                    },
+                    "meal_request": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "stay_id",
+                    "person_ids",
+                    "service",
+                    "morning_dates",
+                    "meal_request"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "target",
+            "outcome"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "stayready.service_unavailable"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "object",
+              "properties": {
+                "need_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "commitment_terms": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "stay_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "person_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 3,
+                          "uniqueItems": true
+                        },
+                        "service": {
+                          "const": "late_arrival"
+                        },
+                        "arrival_window": {
+                          "type": "object",
+                          "properties": {
+                            "start": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "end": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "end"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "entrance_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "access_method_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "stay_id",
+                        "person_ids",
+                        "service",
+                        "arrival_window",
+                        "entrance_id",
+                        "access_method_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "stay_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "person_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 3,
+                          "uniqueItems": true
+                        },
+                        "service": {
+                          "const": "step_free_access"
+                        },
+                        "route_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "window": {
+                          "type": "object",
+                          "properties": {
+                            "start": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "end": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "end"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "stay_id",
+                        "person_ids",
+                        "service",
+                        "route_id",
+                        "window"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "stay_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "person_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 3,
+                          "uniqueItems": true
+                        },
+                        "service": {
+                          "const": "breakfast"
+                        },
+                        "morning_dates": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 2,
+                          "uniqueItems": true
+                        },
+                        "meal_request": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "stay_id",
+                        "person_ids",
+                        "service",
+                        "morning_dates",
+                        "meal_request"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "confirmed_in": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "until": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "until"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "need_id",
+                "commitment_terms",
+                "confirmed_in"
+              ],
+              "additionalProperties": false
+            },
+            "effective_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "target",
+            "effective_at",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

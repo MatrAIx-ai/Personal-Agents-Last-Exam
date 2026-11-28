@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "app_id": "stayready",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Ruilin Yao (@Mr-Bigworth), PR #44"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "stayready.source_updated",
+    "stayready.hotel_reply",
+    "stayready.service_unavailable"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "business GUI via public Web Host",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One property, fixed two-night stay and two guests per run.",
+    "No external communications, booking commerce, full checkpoint restore or production deployment."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

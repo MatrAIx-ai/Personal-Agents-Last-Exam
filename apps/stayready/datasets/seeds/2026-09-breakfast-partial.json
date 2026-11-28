@@ -1,0 +1,956 @@
+{
+  "account_id": "stayready-alex",
+  "owner_person_id": "person-1",
+  "property": {
+    "id": "property-1",
+    "name": "Harbor Lantern Hotel",
+    "timezone": "Europe/London",
+    "reception_hours": "07:00–22:00 hotel local time; late arrival requires a confirmed arrangement.",
+    "policy_text": "Two registered guests; fixed two-night stay. Service arrangements do not alter the room reservation.",
+    "entrances": [
+      {
+        "id": "east",
+        "label": "East entrance",
+        "access_methods": [
+          "night-desk",
+          "staff-meeting"
+        ]
+      },
+      {
+        "id": "front",
+        "label": "Front entrance",
+        "access_methods": [
+          "front-desk"
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "id": "east-step-free",
+        "label": "East entrance, level corridor and lift to lodging",
+        "entrance_id": "east",
+        "step_free": true,
+        "uses_lift": true,
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      {
+        "id": "front-steps",
+        "label": "Front entrance with six steps, then lift to lodging",
+        "entrance_id": "front",
+        "step_free": false,
+        "uses_lift": true,
+        "window": {
+          "start": "2026-09-22T09:00:00Z",
+          "end": "2026-09-24T16:00:00Z"
+        }
+      }
+    ]
+  },
+  "stay": {
+    "id": "stay-1",
+    "property_id": "property-1",
+    "check_in": "2026-09-22T15:00:00Z",
+    "check_out": "2026-09-24T10:00:00Z",
+    "guest_person_ids": [
+      "person-1",
+      "person-2"
+    ],
+    "guest_revision": 1,
+    "reservation_status": "confirmed"
+  },
+  "people": [
+    {
+      "id": "person-1",
+      "name": "Alex Morgan"
+    },
+    {
+      "id": "person-2",
+      "name": "Jamie Chen"
+    },
+    {
+      "id": "person-3",
+      "name": "Sam Rivera"
+    }
+  ],
+  "sources": [
+    {
+      "id": "source-arrival",
+      "person_id": null,
+      "version": 1,
+      "observed_at": "2026-09-19T15:05:00Z",
+      "readable": true,
+      "fields": {
+        "arrival_at": "2026-09-22T19:40:00Z",
+        "private_background": "Private journey details: do not disclose."
+      },
+      "disclose_fields": [
+        "arrival_at"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-arrival",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-access-person-1",
+      "person_id": "person-1",
+      "version": 1,
+      "observed_at": "2026-09-19T15:23:00Z",
+      "readable": true,
+      "fields": {
+        "functional_need": "step_free",
+        "private_background": "Private health history is not relevant to the hotel request."
+      },
+      "disclose_fields": [
+        "functional_need"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-access-person-1",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-breakfast-person-1",
+      "person_id": "person-1",
+      "version": 1,
+      "observed_at": "2026-09-19T15:41:00Z",
+      "readable": true,
+      "fields": {
+        "meal_request": "No peanuts in the prepared breakfast",
+        "private_background": "Personal background not authorized for the hotel."
+      },
+      "disclose_fields": [
+        "meal_request"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-breakfast-person-1",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-access-person-2",
+      "person_id": "person-2",
+      "version": 1,
+      "observed_at": "2026-09-19T15:59:00Z",
+      "readable": true,
+      "fields": {
+        "functional_need": "step_free",
+        "private_background": "Private health history is not relevant to the hotel request."
+      },
+      "disclose_fields": [
+        "functional_need"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-access-person-2",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-breakfast-person-2",
+      "person_id": "person-2",
+      "version": 1,
+      "observed_at": "2026-09-19T16:17:00Z",
+      "readable": true,
+      "fields": {
+        "meal_request": "No egg ingredients",
+        "private_background": "Personal background not authorized for the hotel."
+      },
+      "disclose_fields": [
+        "meal_request"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-breakfast-person-2",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-access-person-3",
+      "person_id": "person-3",
+      "version": 1,
+      "observed_at": "2026-09-19T16:35:00Z",
+      "readable": true,
+      "fields": {
+        "functional_need": "step_free",
+        "private_background": "Private health history is not relevant to the hotel request."
+      },
+      "disclose_fields": [
+        "functional_need"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-access-person-3",
+        "observed_version": "1"
+      }
+    },
+    {
+      "id": "source-breakfast-person-3",
+      "person_id": "person-3",
+      "version": 1,
+      "observed_at": "2026-09-19T16:53:00Z",
+      "readable": true,
+      "fields": {
+        "meal_request": "Plant-based breakfast",
+        "private_background": "Personal background not authorized for the hotel."
+      },
+      "disclose_fields": [
+        "meal_request"
+      ],
+      "grant_version": 1,
+      "provenance": {
+        "app_id": "fixture",
+        "object_id": "2026-09-breakfast-partial:source-breakfast-person-3",
+        "observed_version": "1"
+      }
+    }
+  ],
+  "needs": [
+    {
+      "id": "need-arrival",
+      "service": "late_arrival",
+      "person_ids": [
+        "person-1",
+        "person-2"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "late_arrival",
+        "person_ids": [
+          "person-1",
+          "person-2"
+        ],
+        "arrival_at": "2026-09-22T19:40:00Z"
+      },
+      "source_ids": [
+        "source-arrival"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-arrival",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-access-person-1",
+      "service": "step_free_access",
+      "person_ids": [
+        "person-1"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      "source_ids": [
+        "source-access-person-1"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-1",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-breakfast-person-1",
+      "service": "breakfast",
+      "person_ids": [
+        "person-1"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-1"
+        ],
+        "morning_dates": [
+          "2026-09-23",
+          "2026-09-24"
+        ],
+        "meal_request": "No peanuts in the prepared breakfast"
+      },
+      "source_ids": [
+        "source-breakfast-person-1"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-1",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-access-person-2",
+      "service": "step_free_access",
+      "person_ids": [
+        "person-2"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-2"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      "source_ids": [
+        "source-access-person-2"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-2",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-breakfast-person-2",
+      "service": "breakfast",
+      "person_ids": [
+        "person-2"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-2"
+        ],
+        "morning_dates": [
+          "2026-09-23",
+          "2026-09-24"
+        ],
+        "meal_request": "No egg ingredients"
+      },
+      "source_ids": [
+        "source-breakfast-person-2"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-2",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-access-person-3",
+      "service": "step_free_access",
+      "person_ids": [
+        "person-3"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-3"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      "source_ids": [
+        "source-access-person-3"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-3",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    },
+    {
+      "id": "need-breakfast-person-3",
+      "service": "breakfast",
+      "person_ids": [
+        "person-3"
+      ],
+      "revision": 1,
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-3"
+        ],
+        "morning_dates": [
+          "2026-09-23",
+          "2026-09-24"
+        ],
+        "meal_request": "Plant-based breakfast"
+      },
+      "source_ids": [
+        "source-breakfast-person-3"
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-3",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "review_required": false
+    }
+  ],
+  "requests": [
+    {
+      "id": "hotel-request-1",
+      "need_id": "need-access-person-1",
+      "action": "arrange",
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      "submitted_at": "2026-09-20T09:05:00Z",
+      "status": "confirmed",
+      "predecessor_id": null,
+      "predecessor": null,
+      "disclosures": [
+        {
+          "source_id": "source-access-person-1",
+          "field": "functional_need",
+          "value": "step_free"
+        }
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-access-person-1",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "replies": [
+        {
+          "event_id": "2026-09-breakfast-partial-request-1-ack",
+          "at": "2026-09-20T09:23:00Z",
+          "outcome": "acknowledged",
+          "terms": null,
+          "message": "The property has received this specific service request."
+        },
+        {
+          "event_id": "2026-09-breakfast-partial-request-1-reply",
+          "at": "2026-09-20T12:19:00Z",
+          "outcome": "confirmed",
+          "terms": {
+            "stay_id": "stay-1",
+            "service": "step_free_access",
+            "person_ids": [
+              "person-1"
+            ],
+            "route_id": "east-step-free",
+            "window": {
+              "start": "2026-09-22T15:00:00Z",
+              "end": "2026-09-24T10:00:00Z"
+            }
+          },
+          "message": "The stated service terms are confirmed."
+        }
+      ],
+      "final_reply": {
+        "event_id": "2026-09-breakfast-partial-request-1-reply",
+        "at": "2026-09-20T12:19:00Z",
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "step_free_access",
+          "person_ids": [
+            "person-1"
+          ],
+          "route_id": "east-step-free",
+          "window": {
+            "start": "2026-09-22T15:00:00Z",
+            "end": "2026-09-24T10:00:00Z"
+          }
+        },
+        "message": "The stated service terms are confirmed."
+      }
+    },
+    {
+      "id": "hotel-request-2",
+      "need_id": "need-breakfast-person-2",
+      "action": "arrange",
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-2"
+        ],
+        "morning_dates": [
+          "2026-09-23",
+          "2026-09-24"
+        ],
+        "meal_request": "No egg ingredients"
+      },
+      "submitted_at": "2026-09-20T12:40:00Z",
+      "status": "confirmed",
+      "predecessor_id": null,
+      "predecessor": null,
+      "disclosures": [
+        {
+          "source_id": "source-breakfast-person-2",
+          "field": "meal_request",
+          "value": "No egg ingredients"
+        }
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-2",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "replies": [
+        {
+          "event_id": "2026-09-breakfast-partial-request-2-ack",
+          "at": "2026-09-20T13:01:00Z",
+          "outcome": "acknowledged",
+          "terms": null,
+          "message": "The property has received this specific service request."
+        },
+        {
+          "event_id": "2026-09-breakfast-partial-request-2-reply",
+          "at": "2026-09-20T13:44:00Z",
+          "outcome": "confirmed",
+          "terms": {
+            "stay_id": "stay-1",
+            "service": "breakfast",
+            "person_ids": [
+              "person-2"
+            ],
+            "morning_dates": [
+              "2026-09-23"
+            ],
+            "meal_request": "No egg ingredients"
+          },
+          "message": "The stated service terms are confirmed."
+        }
+      ],
+      "final_reply": {
+        "event_id": "2026-09-breakfast-partial-request-2-reply",
+        "at": "2026-09-20T13:44:00Z",
+        "outcome": "confirmed",
+        "terms": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-2"
+          ],
+          "morning_dates": [
+            "2026-09-23"
+          ],
+          "meal_request": "No egg ingredients"
+        },
+        "message": "The stated service terms are confirmed."
+      }
+    },
+    {
+      "id": "hotel-request-3",
+      "need_id": "need-breakfast-person-1",
+      "action": "arrange",
+      "conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-1"
+        ],
+        "morning_dates": [
+          "2026-09-23",
+          "2026-09-24"
+        ],
+        "meal_request": "No peanuts in the prepared breakfast"
+      },
+      "submitted_at": "2026-09-20T14:05:00Z",
+      "status": "needs_clarification",
+      "predecessor_id": null,
+      "predecessor": null,
+      "disclosures": [
+        {
+          "source_id": "source-breakfast-person-1",
+          "field": "meal_request",
+          "value": "No peanuts in the prepared breakfast"
+        }
+      ],
+      "source_versions": [
+        {
+          "source_id": "source-breakfast-person-1",
+          "version": 1,
+          "grant_version": 1
+        }
+      ],
+      "replies": [
+        {
+          "event_id": "2026-09-breakfast-partial-request-3-ack",
+          "at": "2026-09-20T14:29:00Z",
+          "outcome": "acknowledged",
+          "terms": null,
+          "message": "The property has received this specific service request."
+        },
+        {
+          "event_id": "2026-09-breakfast-partial-request-3-reply",
+          "at": "2026-09-20T15:29:00Z",
+          "outcome": "needs_clarification",
+          "terms": null,
+          "message": "Please clarify this request before the property can commit."
+        }
+      ],
+      "final_reply": null
+    }
+  ],
+  "commitments": [
+    {
+      "id": "commitment-1",
+      "need_id": "need-access-person-1",
+      "request_id": "hotel-request-1",
+      "request_conditions": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "functional_need": "step_free",
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      "terms": {
+        "stay_id": "stay-1",
+        "service": "step_free_access",
+        "person_ids": [
+          "person-1"
+        ],
+        "route_id": "east-step-free",
+        "window": {
+          "start": "2026-09-22T15:00:00Z",
+          "end": "2026-09-24T10:00:00Z"
+        }
+      },
+      "confirmed_at": "2026-09-20T12:19:00Z",
+      "status": "active",
+      "unavailability": []
+    },
+    {
+      "id": "commitment-2",
+      "need_id": "need-breakfast-person-2",
+      "request_id": "hotel-request-2",
+      "request_conditions": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-2"
+        ],
+        "morning_dates": [
+          "2026-09-23",
+          "2026-09-24"
+        ],
+        "meal_request": "No egg ingredients"
+      },
+      "terms": {
+        "stay_id": "stay-1",
+        "service": "breakfast",
+        "person_ids": [
+          "person-2"
+        ],
+        "morning_dates": [
+          "2026-09-23"
+        ],
+        "meal_request": "No egg ingredients"
+      },
+      "confirmed_at": "2026-09-20T13:44:00Z",
+      "status": "active",
+      "unavailability": []
+    }
+  ],
+  "history": [
+    {
+      "id": "history-1",
+      "kind": "operation",
+      "at": "2026-09-20T09:05:00Z",
+      "operation": "stayready.request.submit",
+      "outcome": "submitted",
+      "event_id": null,
+      "fingerprint": null,
+      "selector": null,
+      "target_id": "hotel-request-1",
+      "details": {
+        "need_id": "need-access-person-1",
+        "action": "arrange",
+        "superseded_request_id": null
+      }
+    },
+    {
+      "id": "history-2",
+      "kind": "hotel_event",
+      "at": "2026-09-20T09:23:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "acknowledged",
+      "event_id": "2026-09-breakfast-partial-request-1-ack",
+      "fingerprint": "ffd698c161871bd433feda38261a35668dbad021fc9d45677d214c6c18fa7cd9",
+      "selector": {
+        "need_id": "need-access-person-1",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "step_free_access",
+          "person_ids": [
+            "person-1"
+          ],
+          "functional_need": "step_free",
+          "window": {
+            "start": "2026-09-22T15:00:00Z",
+            "end": "2026-09-24T10:00:00Z"
+          }
+        },
+        "submitted_in": {
+          "from": "2026-09-20T09:04:59.999Z",
+          "until": "2026-09-20T09:23:00Z"
+        }
+      },
+      "target_id": "hotel-request-1",
+      "details": {}
+    },
+    {
+      "id": "history-3",
+      "kind": "hotel_event",
+      "at": "2026-09-20T12:19:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "confirmed",
+      "event_id": "2026-09-breakfast-partial-request-1-reply",
+      "fingerprint": "d6e602db3e1fd37d42492085dafed3536c62bd49ee36dcebdd6e8c7c74d8c0eb",
+      "selector": {
+        "need_id": "need-access-person-1",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "step_free_access",
+          "person_ids": [
+            "person-1"
+          ],
+          "functional_need": "step_free",
+          "window": {
+            "start": "2026-09-22T15:00:00Z",
+            "end": "2026-09-24T10:00:00Z"
+          }
+        },
+        "submitted_in": {
+          "from": "2026-09-20T09:04:59.999Z",
+          "until": "2026-09-20T09:23:00Z"
+        }
+      },
+      "target_id": "hotel-request-1",
+      "details": {
+        "commitment_id": "commitment-1",
+        "superseded_commitment_id": null
+      }
+    },
+    {
+      "id": "history-4",
+      "kind": "operation",
+      "at": "2026-09-20T12:40:00Z",
+      "operation": "stayready.request.submit",
+      "outcome": "submitted",
+      "event_id": null,
+      "fingerprint": null,
+      "selector": null,
+      "target_id": "hotel-request-2",
+      "details": {
+        "need_id": "need-breakfast-person-2",
+        "action": "arrange",
+        "superseded_request_id": null
+      }
+    },
+    {
+      "id": "history-5",
+      "kind": "hotel_event",
+      "at": "2026-09-20T13:01:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "acknowledged",
+      "event_id": "2026-09-breakfast-partial-request-2-ack",
+      "fingerprint": "f695b1b3e78d600777fb07a5e8b1f4f55a487e05795c9bd04a2e1d6f0d983c52",
+      "selector": {
+        "need_id": "need-breakfast-person-2",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-2"
+          ],
+          "morning_dates": [
+            "2026-09-23",
+            "2026-09-24"
+          ],
+          "meal_request": "No egg ingredients"
+        },
+        "submitted_in": {
+          "from": "2026-09-20T12:39:59.999Z",
+          "until": "2026-09-20T13:01:00Z"
+        }
+      },
+      "target_id": "hotel-request-2",
+      "details": {}
+    },
+    {
+      "id": "history-6",
+      "kind": "hotel_event",
+      "at": "2026-09-20T13:44:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "confirmed",
+      "event_id": "2026-09-breakfast-partial-request-2-reply",
+      "fingerprint": "3e75624ad1d7b62c46762bad66719b47b0f9cba35e007ec2ce8d2f0762498781",
+      "selector": {
+        "need_id": "need-breakfast-person-2",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-2"
+          ],
+          "morning_dates": [
+            "2026-09-23",
+            "2026-09-24"
+          ],
+          "meal_request": "No egg ingredients"
+        },
+        "submitted_in": {
+          "from": "2026-09-20T12:39:59.999Z",
+          "until": "2026-09-20T13:01:00Z"
+        }
+      },
+      "target_id": "hotel-request-2",
+      "details": {
+        "commitment_id": "commitment-2",
+        "superseded_commitment_id": null
+      }
+    },
+    {
+      "id": "history-7",
+      "kind": "operation",
+      "at": "2026-09-20T14:05:00Z",
+      "operation": "stayready.request.submit",
+      "outcome": "submitted",
+      "event_id": null,
+      "fingerprint": null,
+      "selector": null,
+      "target_id": "hotel-request-3",
+      "details": {
+        "need_id": "need-breakfast-person-1",
+        "action": "arrange",
+        "superseded_request_id": null
+      }
+    },
+    {
+      "id": "history-8",
+      "kind": "hotel_event",
+      "at": "2026-09-20T14:29:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "acknowledged",
+      "event_id": "2026-09-breakfast-partial-request-3-ack",
+      "fingerprint": "5a7d8412b829829e798b8527fe6782eca96a3fd84ff71255a3290e12d1138b9c",
+      "selector": {
+        "need_id": "need-breakfast-person-1",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-1"
+          ],
+          "morning_dates": [
+            "2026-09-23",
+            "2026-09-24"
+          ],
+          "meal_request": "No peanuts in the prepared breakfast"
+        },
+        "submitted_in": {
+          "from": "2026-09-20T14:04:59.999Z",
+          "until": "2026-09-20T14:29:00Z"
+        }
+      },
+      "target_id": "hotel-request-3",
+      "details": {}
+    },
+    {
+      "id": "history-9",
+      "kind": "hotel_event",
+      "at": "2026-09-20T15:29:00Z",
+      "operation": "stayready.hotel_reply",
+      "outcome": "needs_clarification",
+      "event_id": "2026-09-breakfast-partial-request-3-reply",
+      "fingerprint": "3712c7421c0e17fd819d71b8c0cfaf2f8a6a596d2906bcdc6bdde68d5c3f8cae",
+      "selector": {
+        "need_id": "need-breakfast-person-1",
+        "action": "arrange",
+        "request_conditions": {
+          "stay_id": "stay-1",
+          "service": "breakfast",
+          "person_ids": [
+            "person-1"
+          ],
+          "morning_dates": [
+            "2026-09-23",
+            "2026-09-24"
+          ],
+          "meal_request": "No peanuts in the prepared breakfast"
+        },
+        "submitted_in": {
+          "from": "2026-09-20T14:04:59.999Z",
+          "until": "2026-09-20T14:29:00Z"
+        }
+      },
+      "target_id": "hotel-request-3",
+      "details": {}
+    }
+  ]
+}
