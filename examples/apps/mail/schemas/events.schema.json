@@ -1,0 +1,219 @@
+{
+  "oneOf": [
+    {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "urn:pale:mail:events:1",
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "mail.deliver"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "thread_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "account_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "from": {
+              "type": "string",
+              "minLength": 1
+            },
+            "to": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "body": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "received_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "folder": {
+              "enum": [
+                "inbox",
+                "archive",
+                "trash",
+                "drafts",
+                "sent"
+              ]
+            },
+            "read": {
+              "type": "boolean"
+            },
+            "attachments": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "uniqueItems": true
+            },
+            "event_ref": {
+              "type": "object",
+              "properties": {
+                "app_id": {
+                  "const": "calendar"
+                },
+                "account_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "object_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "app_id",
+                "account_id",
+                "object_id"
+              ],
+              "additionalProperties": false
+            },
+            "sent_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "thread_id",
+            "account_id",
+            "from",
+            "to",
+            "subject",
+            "body",
+            "received_at",
+            "folder",
+            "read",
+            "attachments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "mail.receive_notification"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "recipient_account_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "$ref": "router-message.schema.json"
+            }
+          },
+          "required": [
+            "recipient_account_id",
+            "message"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "mail.receive_attachments"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "recipient_account_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "$ref": "router-attachments.schema.json"
+            }
+          },
+          "required": [
+            "recipient_account_id",
+            "message"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
