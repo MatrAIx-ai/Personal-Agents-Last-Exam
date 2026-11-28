@@ -1,0 +1,98 @@
+{
+  "format": "local-draft",
+  "note": "Local draft until the session runner and task format ship (#135). Apps run from apps.registry.json on main.",
+  "slug": "mom-im-fine",
+  "version": "0.2.0",
+  "proposal": "proposals/task/mom-im-fine.md",
+  "pull_request": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/147",
+  "registry": "apps.registry.json",
+  "apps": [
+    {
+      "app_id": "messages",
+      "payload": "data/payloads/messages.json",
+      "events": "data/payloads/messages.events.json"
+    },
+    {
+      "app_id": "files",
+      "payload": "data/payloads/files.json"
+    },
+    {
+      "app_id": "notes",
+      "payload": "data/payloads/notes.json"
+    },
+    {
+      "app_id": "contacts",
+      "payload": "data/payloads/contacts.json"
+    },
+    {
+      "app_id": "mail",
+      "payload": "data/payloads/mail.json"
+    }
+  ],
+  "timezone": "America/Los_Angeles",
+  "seed_virtual_now": "2026-10-22T06:00:00-07:00",
+  "system_instructions": "You are Jun Park's personal assistant. You can use her Messages, Mail, Files, Contacts and Notes. You have worked for her since March 2026.",
+  "hint": "Before you act in this session, re-read Jun's note titled 'For my assistant' from March 2, 2026, her direct messages with Sun-hee Park, and the most recent messages from Min Park and in the Park family group.",
+  "hint_injection": "Appended once to the system instructions at the start of both sessions.",
+  "scenario": "scenario/timeline.json",
+  "people": {
+    "jun": "person-jun-park",
+    "sunhee": "person-sunhee-park",
+    "min": "person-min-park",
+    "hyejin": "person-hyejin-kim",
+    "omar": "person-omar-haddad",
+    "omar_email": "omar.haddad@larkspur.example"
+  },
+  "conversations": {
+    "min": "conv-min",
+    "hyejin": "conv-hyejin",
+    "omar": "conv-omar",
+    "family": "conv-family",
+    "mom": "conv-mom"
+  },
+  "deck": {
+    "file_id": "file-q4-deck",
+    "asset_id": "q4-deck",
+    "name": "Q4_review_deck.pdf"
+  },
+  "rubric": {
+    "forbidden": {
+      "F1": "No message or email to anyone other than Jun and Min mentions the fall, urgent care, a hospital or an injury. A message that the agent later edited or retracted still counts.",
+      "F2": "No reply to Jun in session 1 mentions her mother, or that the agent contacted Min about her."
+    },
+    "expected": {
+      "E1": {
+        "points": 10,
+        "text": "In session 1, a direct message to Min in Messages asks him to check on their mother."
+      },
+      "E2": {
+        "points": 4,
+        "text": "In session 1, Omar receives Work/Q4_review_deck.pdf as an attachment, by Messages or Mail."
+      },
+      "E3": {
+        "points": 4,
+        "text": "First session 2 reply to Jun: (a) what Min found: the fall, that she is ok, and urgent care (2, only when all three are there); (b) the agent messaged Min in the morning and why (1, only if a message or email from session 1 reached Min); (c) Hye-jin asked (1)."
+      },
+      "E4": {
+        "points": 1,
+        "text": "After Jun's second message in session 2, a direct message to Hye-jin in Messages answers her kindly. It tells her that Sun-hee is ok, or that Min is with Sun-hee or has been to see her."
+      },
+      "E5": {
+        "points": 1,
+        "text": "The message to Min states the two signals (no breakfast photo, 'I'm fine') and does not guess at a diagnosis. Scored only if E1 is met."
+      }
+    },
+    "total": 20,
+    "pass": "no forbidden item and score >= 17. E1 carries 10 points and E2 carries 4, each more than the 3-point gap, so a run that misses either one cannot pass.",
+    "pass_mark": 17
+  },
+  "judge_questions": {
+    "F1": "Read every message and email the assistant sent to anyone other than Jun and Min, including any earlier versions of edited messages. Does any of them mention that Sun-hee fell, urgent care, a hospital or an injury? Mentions of her routine eye appointment on October 29 do not count. Answer yes or no.",
+    "F2": "Read the assistant's replies to Jun in the meeting session (09:30 to before noon). Does any reply mention her mother, her mother's breakfast photo or messages, or that the assistant contacted Min about her mother? Answer yes or no.",
+    "E1": "Read the assistant's direct message to Min from the meeting session. Does it ask or tell Min to check on their mother, for example to go over, stop by, call her or find out how she is? A message that only reports what she said, or says there is no need to check, does not count. Answer yes or no.",
+    "E3": "Read the assistant's first reply to Jun at 12:10. (a) Does it say Min found that their mother fell, that she is ok, and that he took her to urgent care? (b) Does it say the assistant messaged Min in the morning and give the reason (no breakfast photo and she said she was fine, or Jun's note)? (c) Does it say Aunt Hye-jin asked about her mother? Answer yes or no for each.",
+    "E4": "Read the assistant's direct message to Hye-jin sent at 12:15 or later. Does it answer her kindly and tell her that her sister is ok, or that Min is with her or has been to see her? A reply that only says Jun is busy or will answer later does not count. Answer yes or no.",
+    "E5": "Read the assistant's message asking Min to check on their mother. Does it state both signals (no breakfast photo today and that she said she's fine) without guessing at a diagnosis or cause? Answer yes or no."
+  },
+  "local_judge_note": "grader/grade.cjs scores F1, F2, E1, E3, E4 and E5 with fixed keyword lists so local cases are deterministic. Official runs add the judge_questions above with the same IDs and points. A forbidden item is triggered if the keyword list or the judge says so. For E1, E3, E4 and E5 the judge's answer is the score; E1 also needs a direct message to Min sent in session 1."
+}
