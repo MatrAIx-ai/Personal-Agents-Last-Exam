@@ -1,0 +1,629 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 140
+          },
+          "genre": {
+            "enum": [
+              "adventure",
+              "puzzle",
+              "coop_action",
+              "action_rpg",
+              "racing",
+              "party",
+              "rpg",
+              "horror",
+              "strategy",
+              "shooter",
+              "sports",
+              "mystery",
+              "roguelite"
+            ]
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "pc",
+                "handheld",
+                "switch",
+                "ps5",
+                "xbox"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "cross_play_platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "pc",
+                "handheld",
+                "switch",
+                "ps5",
+                "xbox"
+              ]
+            },
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "offline_ok": {
+            "type": "boolean"
+          },
+          "coop_max_players": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "typical_session_minutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 480
+          },
+          "playtime_hours": {
+            "type": "object",
+            "properties": {
+              "main": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 500
+              },
+              "main_extra": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 800
+              },
+              "completionist": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 1500
+              }
+            },
+            "required": [
+              "main",
+              "main_extra",
+              "completionist"
+            ],
+            "additionalProperties": false
+          },
+          "critic_rating": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "hud_font_pt": {
+            "type": "integer",
+            "minimum": 6,
+            "maximum": 36
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "maxItems": 30,
+            "uniqueItems": true
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 16,
+            "uniqueItems": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "genre",
+          "platforms",
+          "cross_play_platforms",
+          "offline_ok",
+          "coop_max_players",
+          "typical_session_minutes",
+          "playtime_hours",
+          "critic_rating",
+          "hud_font_pt",
+          "tags",
+          "summary",
+          "asset_ids",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "shelves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "game_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "status": {
+            "enum": [
+              "backlog",
+              "playing",
+              "completed",
+              "dropped"
+            ]
+          },
+          "owned_platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "pc",
+                "handheld",
+                "switch",
+                "ps5",
+                "xbox"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "hours_logged": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "drop_reasons": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "first_person_motion_sickness",
+                "horror",
+                "tiny_ui_text",
+                "excessive_grind",
+                "too_long",
+                "no_offline_mode",
+                "other"
+              ]
+            },
+            "maxItems": 10,
+            "uniqueItems": true
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "play_history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "enum": [
+                    "backlog",
+                    "playing",
+                    "completed",
+                    "dropped"
+                  ]
+                },
+                "hours_logged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5000
+                },
+                "rating": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "drop_reasons": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "first_person_motion_sickness",
+                      "horror",
+                      "tiny_ui_text",
+                      "excessive_grind",
+                      "too_long",
+                      "no_offline_mode",
+                      "other"
+                    ]
+                  },
+                  "maxItems": 10,
+                  "uniqueItems": true
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 400
+                }
+              },
+              "required": [
+                "at",
+                "status",
+                "hours_logged",
+                "rating",
+                "drop_reasons",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "game_id",
+          "status",
+          "owned_platforms",
+          "hours_logged",
+          "rating",
+          "drop_reasons",
+          "note",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "preferred_platforms": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "pc",
+              "handheld",
+              "switch",
+              "ps5",
+              "xbox"
+            ]
+          },
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "muted_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "maxItems": 40,
+          "uniqueItems": true
+        },
+        "not_interested": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "avoid_reasons": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "first_person_motion_sickness",
+              "horror",
+              "tiny_ui_text",
+              "excessive_grind",
+              "too_long",
+              "no_offline_mode",
+              "other"
+            ]
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "min_hud_font_pt": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 6,
+              "maximum": 36
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "preferred_platforms",
+        "muted_tags",
+        "not_interested",
+        "avoid_reasons",
+        "min_hud_font_pt",
+        "updated_at"
+      ],
+      "additionalProperties": false
+    },
+    "friends": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "friend_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "pc",
+                "handheld",
+                "switch",
+                "ps5",
+                "xbox"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "owned_games": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "game_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "platform": {
+                  "enum": [
+                    "pc",
+                    "handheld",
+                    "switch",
+                    "ps5",
+                    "xbox"
+                  ]
+                },
+                "added_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "game_id",
+                "platform"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "friend_id",
+          "name",
+          "platforms",
+          "owned_games"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "polls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "poll_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "status": {
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "candidate_game_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "uniqueItems": true
+          },
+          "invited_friend_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "max_session_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 10,
+                "maximum": 480
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "voter_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "selected_game_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 10,
+                  "uniqueItems": true
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                "voted_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "voter_id",
+                "selected_game_ids",
+                "note",
+                "voted_at"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50
+          },
+          "winner_game_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 10,
+            "uniqueItems": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closes_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "poll_id",
+          "title",
+          "status",
+          "candidate_game_ids",
+          "invited_friend_ids",
+          "max_session_minutes",
+          "votes",
+          "winner_game_ids",
+          "created_at",
+          "closes_at",
+          "closed_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "games",
+    "shelves",
+    "preferences",
+    "friends",
+    "polls"
+  ],
+  "additionalProperties": false
+}

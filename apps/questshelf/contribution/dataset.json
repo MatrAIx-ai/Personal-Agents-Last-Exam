@@ -1,0 +1,68 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "questshelf-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic cross-platform game catalog, friend libraries, shelves, polls, and 640x360 illustrated PNG gameplay/HUD preview screenshots for QuestShelf. Full 2025-01-01..2026-12-31 synthetic evaluation dataset is delivered alongside in datasets/eval-2025-2026/seed.json (metadata in datasets/eval-2025-2026/dataset.json).",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "100% synthetic fictional cross-platform game metadata, shelf logs, friend libraries, and poll fixtures (fixtures/minimal.json, fixtures/seed-casual.json, and datasets/eval-2025-2026/seed.json via scripts/build-eval-dataset.cjs).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "PALE fixture authoring + scripts/build-eval-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 42,
+        "parameters": {
+          "eval_dataset": "datasets/eval-2025-2026/seed.json",
+          "eval_window": "2025-01-01..2026-12-31",
+          "time_zone": "America/Los_Angeles"
+        }
+      }
+    },
+    {
+      "source_id": "synthetic-previews",
+      "kind": "synthetic",
+      "description": "Programmatically rendered 640x360 PNG gameplay & proportional HUD preview screenshots via scripts/render-previews.py (Pillow), with zero text-caption spoilers.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "scripts/render-previews.py (Pillow)",
+        "tool_version": "2.0.0",
+        "seed": 42,
+        "parameters": {
+          "dimensions": "640x360",
+          "palette_colors": 96,
+          "hud_scale_px": "round(hud_font_pt * 1.45)"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized ISO timestamps, verified SHA-256 digests, quantized 20 PNGs to 117.5 KiB (<= 1 MiB bundle budget), neutralized all game summaries and asset alt_text."
+  ],
+  "expected_counts": {
+    "records": 20,
+    "assets": 20
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "All 20 regenerated 640x360 PNGs and the 2025-2026 evaluation dataset are author-checked; independent reviewer/maintainer sign-off pending."
+  }
+}
