@@ -1,0 +1,226 @@
+{
+  "about": "Curated screenshots written by node apps/stoopside/tests/web-checks.cjs --evidence. Each step follows the check named in after_check.",
+  "app_commit": "12a4aa84a77e7b5babbffd8830d41113cfa3715c",
+  "app_tree_dirty": false,
+  "gui_app_js_sha256": "8e8ecab397aba0bb4bb91f7cd15d9f0e557e4acad2a51821bf9d380d2bc9baf8",
+  "host": {
+    "file": "runtime/web/server.cjs",
+    "last_commit": "f2eb0396d590f36c139d96ac801c8106b8146ac2",
+    "sha256": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+    "stylesheet_sha256": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02"
+  },
+  "browser": "Chromium 141.0.7390.37 (Playwright, headless)",
+  "node": "v24.10.0",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "run": {
+    "run_id": "web-checks",
+    "read_only_run_id": "web-checks-ro",
+    "hillcrest_run_id": "web-checks-hillcrest",
+    "hillcrest_registry": "apps/stoopside/web.hillcrest.registry.json",
+    "profile": "sandbox",
+    "read_only_profile": "scenario",
+    "registry": "apps/stoopside/web.registry.json",
+    "clock": "2027-03-01T09:00:00-05:00",
+    "seed": "apps/stoopside/fixtures/minimal.json",
+    "seed_sha256": "86fe8a45b202397096e78b329ab02abde3412f4a8590795fa67525fa4a0500ce",
+    "account": "st-dana (Dana O., member m-001)"
+  },
+  "checks": 76,
+  "screens": [
+    {
+      "file": "01-groups-discovery.png",
+      "step": "Group discovery: start state, one card per group with member count and membership",
+      "hash": "#/groups",
+      "after_check": "group cards show the member count and the user's membership from the tool"
+    },
+    {
+      "file": "02-group-home.png",
+      "step": "Group home: header, hosts, upcoming event cards (date, venue, places left) and actions",
+      "hash": "#/group/g-block",
+      "after_check": "Edit appears on no other member's post (the user's only post here is a locked announcement)"
+    },
+    {
+      "file": "03-view-as-group.png",
+      "step": "View-as on the group home: Wren Adeyemi (m-027) sees the group now; as-of time in EST",
+      "hash": "#/group/g-block",
+      "after_check": "view-as on the group home shows the tool answer in the group's zone"
+    },
+    {
+      "file": "04-members-search-everyday-name.png",
+      "step": "Member search by the everyday name \"Birdie\": 0 matches (search covers display names and bios only)",
+      "hash": "#/members/g-block",
+      "after_check": "a search by the everyday name finds nobody, as the tool does"
+    },
+    {
+      "file": "05-members-export.png",
+      "step": "Member export (co-organizer): the only place emails appear; Wren Adeyemi's email links her to \"Birdie\"",
+      "hash": "#/members/g-block",
+      "after_check": "the export shows every member email the tool returns"
+    },
+    {
+      "file": "06-rsvp-error-guest-limit.png",
+      "step": "RSVP error path: Book fair volunteers allows 0 guests; empty counts pre-filled 1 guest from r-0139, so the preview fails with guest_limit_exceeded and says where the guest came from",
+      "hash": "#/event/e-0125",
+      "after_check": "the failed preview wrote nothing"
+    },
+    {
+      "file": "07-rsvp-start.png",
+      "step": "RSVP start: Spring fling family dance, no RSVP yet; guests and children left empty",
+      "hash": "#/event/e-0121",
+      "after_check": "the event page shows the date in the group's zone and the places the tool returns"
+    },
+    {
+      "file": "08-rsvp-preview-prefilled.png",
+      "step": "RSVP preview: party of 4 pre-filled from the year-old Pi Day bake sale RSVP (guests 1, children 2), with Confirm and Cancel",
+      "hash": "#/event/e-0121",
+      "after_check": "the preview is sentences, not key/value dumps"
+    },
+    {
+      "file": "09-rsvp-receipt.png",
+      "step": "RSVP result: receipt kept on the page (RSVP r-0511, notice st-notice-0001); Your RSVP reads going, 1 place",
+      "hash": "#/event/e-0121",
+      "after_check": "the RSVP receipt stays on the page after the re-render and names the RSVP and its notice"
+    },
+    {
+      "file": "10-change-notify-required.png",
+      "step": "Event change error path: venue moved with \"Nobody\" selected; notify_required shown next to the form, nothing written",
+      "hash": "#/change/edit/e-0140",
+      "after_check": "moving the venue with no notify choice shows notify_required next to the form"
+    },
+    {
+      "file": "11-change-preview-recipients.png",
+      "step": "Event change preview: venue Elm Ave lot to Linden Park pavilion, every open RSVP notified, 11 yes RSVPs must reconfirm, 10 named recipients",
+      "hash": "#/change/edit/e-0140",
+      "after_check": "the change preview names the old and new venue as a sentence"
+    },
+    {
+      "file": "12-change-receipt.png",
+      "step": "Event change result: the event page with the kept receipt (10 members notified) and the Changes list in EST",
+      "hash": "#/event/e-0140",
+      "after_check": "the receipt is still visible after Refresh on the same page"
+    },
+    {
+      "file": "13-change-stale.png",
+      "step": "Event change stale path: an independent MCP edit renamed the event after this preview; Confirm fails with stale_version, the MCP value stays",
+      "hash": "#/change/edit/e-0130",
+      "after_check": "confirming after an independent MCP edit shows stale_version next to the preview and keeps the MCP value"
+    },
+    {
+      "file": "14-post-audience-required.png",
+      "step": "Post error path: no audience chosen; audience_required shown next to the composer, nothing written",
+      "hash": "#/compose/g-block",
+      "after_check": "a post with no audience shows audience_required next to the composer and writes nothing"
+    },
+    {
+      "file": "15-post-preview-recipients.png",
+      "step": "Post preview: audience is the planning meeting's guests and hosts; every notified member is listed",
+      "hash": "#/compose/g-block/event/e-0130",
+      "after_check": "the post preview states the audience as a sentence"
+    },
+    {
+      "file": "16-post-receipt.png",
+      "step": "Post result: the group page keeps the receipt (5 members notified, post p-0307); Wren Adeyemi is not among them",
+      "hash": "#/group/g-block",
+      "after_check": "the publish receipt stays on the group page after navigation"
+    },
+    {
+      "file": "17-post-delete-confirm.png",
+      "step": "Delete asks for confirmation inline: the post is hidden from now on, nothing delivered is recalled",
+      "hash": "#/group/g-block",
+      "after_check": "the publish receipt stays on the group page after navigation"
+    },
+    {
+      "file": "18-sheet-start.png",
+      "step": "Sheet start: full slots show Full and no Claim; the user's slots offer Release; Theo's pending swap offers Accept and Decline",
+      "hash": "#/sheet/s-0022",
+      "after_check": "only the swap's recipient can accept or decline; no Withdraw is offered on a swap the user did not propose"
+    },
+    {
+      "file": "19-sheet-release-receipt.png",
+      "step": "Sheet result: carpool seat released, receipt kept on the page",
+      "hash": "#/sheet/s-0022",
+      "after_check": "the release receipt is kept on the page"
+    },
+    {
+      "file": "20-sheet-swap-accepted.png",
+      "step": "Sheet result: swap sw-0005 accepted; the user now holds Snacks and Theo holds the coffee urn",
+      "hash": "#/sheet/s-0022",
+      "after_check": "sheet actions commit the release and the accepted swap"
+    },
+    {
+      "file": "21-view-as-sheet.png",
+      "step": "View-as on the sheet: Theo B. (m-013) sees the sheet now, with his slots after the swap",
+      "hash": "#/sheet/s-0022",
+      "after_check": "view-as on the sheet page shows the member's slots from the tool"
+    },
+    {
+      "file": "22-waitlist-offer.png",
+      "step": "Waitlist offer: after an Infra scenario event (a guest dropped out), the event shows the offer and its claim deadline",
+      "hash": "#/event/e-0117",
+      "after_check": "a refresh shows the waitlist offer an Infra event created, with the claim deadline in EST"
+    },
+    {
+      "file": "23-waitlist-claim-preview.png",
+      "step": "Waitlist claim preview: claims the offered place for 2 before the deadline",
+      "hash": "#/event/e-0117",
+      "after_check": "a refresh shows the waitlist offer an Infra event created, with the claim deadline in EST"
+    },
+    {
+      "file": "24-waitlist-claim-receipt.png",
+      "step": "Waitlist claim result: RSVP r-0451 is yes for 2 places; receipt kept on the page",
+      "hash": "#/event/e-0117",
+      "after_check": "claiming the offer from the page commits yes for 2 places"
+    },
+    {
+      "file": "25-cancel-preview.png",
+      "step": "Event cancel preview: says it cannot be undone, sheets lock, every open RSVP is notified",
+      "hash": "#/change/cancel/e-0141",
+      "after_check": "creating an event from the page stores the times in the group's offset"
+    },
+    {
+      "file": "26-cancel-receipt.png",
+      "step": "Event cancel result: the event shows Cancelled and the receipt is kept on the page",
+      "hash": "#/event/e-0141",
+      "after_check": "cancelling from the page commits the cancellation and keeps the receipt"
+    },
+    {
+      "file": "27-leave-confirm.png",
+      "step": "Leave group asks first and says what happens to RSVPs and sign-up slots",
+      "hash": "#/group/g-garden",
+      "after_check": "Leave group asks for confirmation and writes nothing until confirmed"
+    },
+    {
+      "file": "28-join-receipt.png",
+      "step": "Join result: the user is a member again; receipt kept on the page",
+      "hash": "#/group/g-garden",
+      "after_check": "joining again from the page commits membership"
+    },
+    {
+      "file": "29-not-found.png",
+      "step": "not_found: an unknown event ID; the page title changes to Not found",
+      "hash": "#/event/e-9999",
+      "after_check": "a not_found page says so in its title and the document title"
+    },
+    {
+      "file": "30-narrow-event.png",
+      "step": "Narrow viewport (390 px): the event page has no horizontal overflow",
+      "hash": "#/event/e-0140",
+      "after_check": "narrow viewport has no horizontal overflow on #/compose/g-block"
+    },
+    {
+      "file": "31-read-only-profile.png",
+      "step": "Read-only scenario profile: no RSVP form, edit, cancel or post controls; the page says why",
+      "hash": "#/event/e-0140",
+      "after_check": "the read-only event page says RSVPs cannot be changed here"
+    },
+    {
+      "file": "32-hillcrest-in-window.png",
+      "step": "Hillcrest run at its clock (2026-11-18 09:00 PST, inside 2025-2026): Friends of Hillcrest Library with December 2026 events in PST",
+      "hash": "#/group/g-library",
+      "after_check": "the Hillcrest run (clock 2026-11-18 09:00 PST, inside the coverage window) shows its own groups and times in PST"
+    }
+  ]
+}
