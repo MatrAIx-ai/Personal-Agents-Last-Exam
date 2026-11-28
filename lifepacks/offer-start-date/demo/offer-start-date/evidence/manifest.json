@@ -1,0 +1,208 @@
+{
+  "schema": "pale.evidence-manifest/0.1",
+  "task_id": "offer-start-date",
+  "package_version": "0.2.0",
+  "note": "Reference, do-nothing, isolation-probe and verifier-check runs, and one model with unhinted runs only. No hinted model run and no second model have been run, so the package does not yet meet the validation policy in CONTRIBUTING. All model runs scored 20 of 20: this reduced version of the task is too easy to count as a validated benchmark task.",
+  "common": {
+    "adapter": {
+      "name": "harbor-steps",
+      "version": "0.2.0"
+    },
+    "harbor": "0.27.0",
+    "docker": "25.0.14",
+    "host": "Linux x86_64, 16 cores, 30 GB",
+    "image": "node@sha256:be979e5523c76fa4d5ca4ebd3099078f220aa47ec39c48ad5b5df9314debd6eb",
+    "runtime_revision": "6933c430942c64f94874083815829e4a4b20920a",
+    "harbor_task_checksum": "de87832300f6c95260fe7f2e229282f8a3541164635971c1b72717b44b1f8c7b",
+    "harbor_task_checksum_note": "Of the build these runs used. Every build has new random values in its step data, so a rebuild has another checksum.",
+    "sessions": 2,
+    "simulated_start": "2026-11-16T09:00:00-08:00",
+    "simulated_end": "2026-11-20T17:00:00-08:00",
+    "agent_account": "agent (not root)",
+    "verifier": "tests/test_outcomes.cjs, rule-based, no judge model, in a container of its own",
+    "user": "scripted (context/user/script.json), no user model",
+    "build_directory_note": "On the test host the build directory was named osd3, so trial names start with osd3__ and the kept config files show that path. The commands below use the directory name from the package README."
+  },
+  "runs": [
+    {
+      "run_id": "harbor-reference-2",
+      "run_type": "reference",
+      "path": "runs/harbor-reference-2",
+      "command": "harbor run -p offer-start-date -a oracle",
+      "agent": {
+        "name": "oracle",
+        "model": null
+      },
+      "harbor_trial_id": "d2a4e2a4-e77c-4a70-8b07-6ae2e32818cc",
+      "executed_at": "2026-11-28T00:41:40Z",
+      "real_duration_sec": 58,
+      "tokens": null,
+      "cost": null,
+      "score": 20,
+      "max_score": 20,
+      "normalized": 1.0,
+      "pass": true,
+      "items": {
+        "E1": 4,
+        "E2": 11,
+        "E3": 2,
+        "E4": 2,
+        "E5": 1
+      },
+      "forbidden": [],
+      "final_state": "runs/harbor-reference-2/trial/steps/s2/verifier/state.json",
+      "infrastructure_errors": []
+    },
+    {
+      "run_id": "harbor-do-nothing-2",
+      "run_type": "do-nothing",
+      "path": "runs/harbor-do-nothing-2",
+      "command": "harbor run -p offer-start-date -a nop",
+      "agent": {
+        "name": "nop",
+        "model": null
+      },
+      "harbor_trial_id": "9519066a-dab4-44f5-9df9-d3b418f479b5",
+      "executed_at": "2026-11-28T00:42:44Z",
+      "real_duration_sec": 53,
+      "tokens": null,
+      "cost": null,
+      "score": 0,
+      "max_score": 20,
+      "normalized": 0.0,
+      "pass": false,
+      "items": {
+        "E1": 0,
+        "E2": 0,
+        "E3": 0,
+        "E4": 0,
+        "E5": 0
+      },
+      "forbidden": [],
+      "final_state": "not kept: it equals the starting records plus Elena's November 18 email",
+      "infrastructure_errors": []
+    },
+    {
+      "run_id": "harbor-gemini-cli-gemini-4-carbon-1",
+      "run_type": "model, unhinted",
+      "path": "runs/harbor-gemini-cli-gemini-4-carbon-1",
+      "command": "harbor run -p offer-start-date -a gemini-cli -m gemini-4-carbon",
+      "agent": {
+        "name": "gemini-cli",
+        "version": "0.71.1",
+        "model": "gemini-4-carbon",
+        "provider": "Gemini API",
+        "settings": "Harbor defaults: --yolo, a fresh conversation per session"
+      },
+      "harbor_trial_id": "78568a20-2cea-4b11-9ecd-1f62cb130600",
+      "executed_at": "2026-11-28T00:45:34Z",
+      "real_duration_sec": 1371,
+      "tokens": {
+        "input": 1143118,
+        "of_which_cached": 526171,
+        "output": 66839,
+        "by_session": {
+          "s1": {
+            "input": 602769,
+            "of_which_cached": 292523,
+            "output": 34591
+          },
+          "s2": {
+            "input": 540349,
+            "of_which_cached": 233648,
+            "output": 32248
+          }
+        }
+      },
+      "cost": "not reported: Harbor has no price for this model",
+      "tool_calls": {
+        "s1": 39,
+        "s2": 37
+      },
+      "score": 20,
+      "max_score": 20,
+      "normalized": 1.0,
+      "pass": true,
+      "items": {
+        "E1": 4,
+        "E2": 11,
+        "E3": 2,
+        "E4": 2,
+        "E5": 1
+      },
+      "forbidden": [],
+      "trajectory": "runs/harbor-gemini-cli-gemini-4-carbon-1/trial/steps/<session>/agent/trajectory.json (ATIF-v1.7)",
+      "final_state": "runs/harbor-gemini-cli-gemini-4-carbon-1/trial/steps/s2/verifier/state.json",
+      "infrastructure_errors": [
+        "One request per session failed and was retried by the agent (\"fetch failed sending request\"). No effect on the run."
+      ]
+    },
+    {
+      "run_id": "harbor-isolation-probe-1",
+      "run_type": "isolation-check",
+      "path": "runs/harbor-isolation-probe-1",
+      "command": "harbor run -p offer-start-date.probe -a oracle   (a --probe build)",
+      "agent": {
+        "name": "oracle running scripts/lifepack/probe.sh as the agent's account",
+        "model": null
+      },
+      "result": "0 open in session 1 (24 checks) and in session 2 (22 checks). See s1.txt and s2.txt.",
+      "infrastructure_errors": []
+    },
+    {
+      "run_id": "local-verifier-check",
+      "run_type": "grader-validation",
+      "path": "runs/local-verifier-check/report.txt",
+      "command": "node scripts/lifepack/local-run.cjs <built-dir> --check",
+      "agent": {
+        "name": "scripted paths from solution/variants.json, without Docker",
+        "model": null
+      },
+      "result": "7 of 7 cases gave the expected score, pass result and forbidden items",
+      "infrastructure_errors": []
+    }
+  ],
+  "runs_not_kept": [
+    {
+      "what": "Gemini CLI 0.71.1 with gemini-4-carbon, unhinted, on an earlier 0.2 build (agent as its own account, verifier still in the agent's container)",
+      "executed_at": "2026-11-28T00:35:10Z",
+      "real_duration_sec": 1018,
+      "tokens": {
+        "input": 1128448,
+        "of_which_cached": 618129,
+        "output": 64554
+      },
+      "score": 20,
+      "pass": true
+    },
+    {
+      "what": "Gemini CLI 0.71.1 with gemini-4-carbon, unhinted, on the 0.1 build (agent as root, no isolation). The trajectory shows App tools and two shell commands for decoding and date arithmetic, and no read of the state files.",
+      "executed_at": "2026-11-28T00:13:30Z",
+      "real_duration_sec": 1350,
+      "tokens": {
+        "input": 1173522,
+        "of_which_cached": 589785,
+        "output": 75855
+      },
+      "score": 20,
+      "pass": true
+    },
+    {
+      "what": "Infrastructure failure: the first model run named the model google/gemini-4-carbon and the API answered 404. No tokens used.",
+      "executed_at": "2026-11-28T00:11:00Z"
+    },
+    {
+      "what": "Infrastructure failure: the first two runs of an isolated build stopped in session 1 setup, because Docker's build cache had kept another build's check file. Fixed in the adapter; see scripts/lifepack/README.md.",
+      "executed_at": "2026-11-28T00:26:08Z"
+    },
+    {
+      "what": "Reference (20 of 20), do-nothing (0 of 20) and isolation probe (0 open in both sessions) repeated at repository revision 25d559778696dff849bb88fcca03f325185f2599, after the Mail change of PR #288",
+      "executed_at": "2026-11-28"
+    }
+  ],
+  "omitted": [
+    "steps/s1/verifier/state.json of every Harbor run (about 250 kB each); the final state of the reference run and of the model run is kept",
+    "steps/<session>/artifacts/pale-state.json (the same content as verifier/state.json); the artifact list is kept as artifacts-manifest.json",
+    "the agent's raw session log gemini-cli.trajectory.jsonl (about 300 kB per session); the ATIF trajectory is kept"
+  ]
+}

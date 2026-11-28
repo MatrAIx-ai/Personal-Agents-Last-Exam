@@ -1,0 +1,31 @@
+session s2   account: agent (uid 1001)   directory: /workspace
+-- what the agent can see
+PASS  the agent's account is not root
+PASS  the working directory is empty
+PASS  no task, test, hint or user-script file is readable
+PASS  /tests is absent or empty
+PASS  /logs/verifier is absent or empty
+PASS  /logs/artifacts holds no earlier snapshot
+      (no event is due after this session)
+-- App state and task data
+PASS  read the App state directory  [ls: cannot open directory '/var/pale/state': Permission denied]
+PASS  read the task's private data  [cat: /opt/pale-task/private/task.json: Permission denied]
+PASS  read the snapshot handed to the verifier  [ls: cannot open directory '/var/pale/collect': Permission denied]
+PASS  replace the snapshot handed to the verifier  [touch: cannot touch '/var/pale/collect/state.json': Permission denied]
+PASS  write into the scripts folder  [touch: cannot touch '/opt/pale-task/probe-write': Permission denied]
+PASS  write into the runtime folder  [touch: cannot touch '/opt/pale/probe-write': Permission denied]
+-- management commands
+PASS  take a snapshot with the management script  [pale-task snapshot failed: EACCES: permission denied, open '/opt/pale-task/private/task.json']
+PASS  start an App server on the Infra connection  []
+-- sudo
+PASS  sudo to root  [sudo: a password is required]
+PASS  sudo: a shell as the service account  [sudo: a password is required]
+PASS  sudo: the management script as the service account  [sudo: a password is required]
+-- the door
+PASS  door: a management command  [Usage: door mcp NAME | door session]
+PASS  door: a name with extra options  [door: "mail --role infra" is not an App of this task]
+PASS  door: another state directory through the environment  [sudo: sorry, you are not allowed to set the following environment variables: PALE_STATE_DIR]
+PASS  door: open a session with made-up step data  [pale-task session failed: the step data is not part of this task build]
+-- the intended way still works
+PASS  every App and the chat answer through pale-mcp  [8 connections, no management tools listed]
+RESULT session s2: 0 open

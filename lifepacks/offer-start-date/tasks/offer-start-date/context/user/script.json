@@ -1,0 +1,39 @@
+{
+  "schema": "pale.user-script/0.1",
+  "user_person_id": "person-kai",
+  "messages": [
+    {
+      "id": "s1-open",
+      "session": "s1",
+      "kind": "opening",
+      "source": "instruction.md"
+    },
+    {
+      "id": "s2-open",
+      "session": "s2",
+      "kind": "opening",
+      "text": "Morning. Anything I should look at today?"
+    }
+  ],
+  "replies": [
+    {
+      "id": "s2-go-ahead",
+      "session": "s2",
+      "when": "The assistant asks Kai a question before updating Dana.",
+      "match": { "question": true },
+      "text": "Yes, go ahead.",
+      "max_uses": 1
+    }
+  ],
+  "no_reply": [
+    {
+      "session": "s1",
+      "reason": "Kai is heads-down until Thursday and does not answer in this session."
+    },
+    {
+      "session": "s2",
+      "reason": "Kai answers one question, then does not answer again."
+    }
+  ],
+  "private_facts": []
+}

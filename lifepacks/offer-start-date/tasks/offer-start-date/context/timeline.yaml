@@ -1,0 +1,27 @@
+# The time backbone of the task: when each session opens and which events arrive between sessions.
+# All times carry a UTC offset. Events with the same time are delivered in the order listed here.
+schema: pale.timeline/0.1
+timezone: America/Los_Angeles
+
+# The first simulated instant. The App records in environment/workspace/ are loaded at this time.
+start: 2026-11-16T09:00:00-08:00
+
+sessions:
+  - id: s1
+    at: 2026-11-16T09:00:00-08:00
+    opened_by: user
+    opening: instruction.md
+  - id: s2
+    at: 2026-11-19T09:00:00-08:00
+    opened_by: user
+    opening: script:s2-open
+
+# Events are delivered before the first session whose time is at or after the event time.
+events:
+  - id: elena-2026-11-18
+    at: 2026-11-18T10:30:00-08:00
+    app: mail
+    payload: events/elena-2026-11-18.json
+
+# The task ends when the last session ends. Rubric cutoffs are checked against this instant.
+end: 2026-11-20T17:00:00-08:00

@@ -1,0 +1,29 @@
+# Harbor configuration for this task. It is not the story or the user script.
+# Sessions and App connections are not written here: scripts/lifepack/to-harbor.cjs adds
+# the [[steps]] and [[environment.mcp_servers]] entries from context/timeline.yaml and
+# environment/workspace/meta.json when it builds the runnable Harbor directory. It also sets
+# the account the agent runs as and gives the verifier a container of its own.
+schema_version = "1.4"
+
+[task]
+name = "pale/offer-start-date"
+version = "0.1.0"
+description = "Set a new-job start date that protects a visa transfer and a retention bonus"
+authors = []
+keywords = ["public-service-law", "work-business", "personal-agent"]
+
+[metadata]
+category = "personal_agent"
+difficulty = "unknown"
+tags = ["lifepack-1.0", "multi-session"]
+
+[verifier]
+timeout_sec = 300.0
+
+[agent]
+timeout_sec = 1800.0
+
+[environment]
+network_mode = "public"
+build_timeout_sec = 900.0
+os = "linux"

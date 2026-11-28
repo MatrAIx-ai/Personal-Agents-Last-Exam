@@ -1,0 +1,34 @@
+#!/bin/sh
+# The only entrance from the agent's side of the container to the Apps.
+# sudo runs this file as the service account "pale" (see install.sh). Any account may call it.
+#
+#   door mcp NAME    the agent connection of one App of this task, or of the user chat (NAME = chat),
+#                    as an MCP server over stdio
+#   door session     open the next session; the step data comes on standard input and is checked
+#                    against this build before anything is applied
+#
+# There is no way through it to choose a role, another state directory or a management command.
+# sudo clears the caller's environment, so the paths below cannot be changed from the agent's side.
+set -eu
+: "${PALE_ROOT:=/opt/pale}" "${PALE_TASK_DIR:=/opt/pale-task}" "${PALE_STATE_DIR:=/var/pale/state}"
+export PALE_ROOT PALE_TASK_DIR PALE_STATE_DIR
+
+case "${1:-}" in
+  mcp)
+    name="${2:-}"
+    if [ "$name" = chat ]; then exec node "$PALE_TASK_DIR/chat-server.cjs"; fi
+    if ! grep -qxF -- "$name" "$PALE_TASK_DIR/private/apps.txt"; then
+      echo "door: \"$name\" is not an App of this task" >&2
+      exit 2
+    fi
+    exec node "$PALE_ROOT/runtime/mcp-server.cjs" --app "$name" --role agent --run task \
+      --state-dir "$PALE_STATE_DIR" --registry "$PALE_ROOT/apps.registry.json"
+    ;;
+  session)
+    exec node "$PALE_TASK_DIR/pale-task.cjs" session -
+    ;;
+  *)
+    echo "Usage: door mcp NAME | door session" >&2
+    exit 2
+    ;;
+esac
