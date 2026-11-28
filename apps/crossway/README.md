@@ -97,6 +97,8 @@ Crossway has no scheduler or clock event. **Agent reads and writes do not advanc
 
 `tests/business.test.cjs` checks all three, and `tests/platform-checks.cjs` checks the single-jump and stepwise case through Core's real `env.advance_time`.
 
+**Notice timing is simplified.** A violation notice is issued at the instant of the toll read that causes it (`src/account.cjs`, `issueNotice`), while a real Tolls by Mail bill arrives some weeks after the trip. The due date counts from that issue date, so the payment window an agent sees is the policy's full window from the read. Escalation and collections follow from the due date as described above.
+
 ## Scenario events
 
 Infra applies these with `env.apply_event`. An event naming an unknown record, or not applicable in the current state, is rejected with `invalid_event` and changes nothing.
