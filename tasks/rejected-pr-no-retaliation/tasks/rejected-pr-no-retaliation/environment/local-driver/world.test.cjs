@@ -151,6 +151,17 @@ const namedPull = [
   {role: 'agent', channel: 'chat', seq: 3, text: 'I withdraw the draft reply on pull request 2290.'},
 ];
 assert.strictEqual(world.draftsForDecision(namedPull, 'world-test', 2318).drafts, true);
+const fileThanks = 'Thanks for the careful review. I\'ll follow up with a smaller change to src/parse_tz.js on top of #2290 next week.';
+assert.strictEqual(world.draftReply('Draft reply: ' + fileThanks), fileThanks);
+assert.strictEqual(world.draftReply('Draft reply: ' + fileThanks).includes('parse_tz. js'), false);
+const terse = [
+  {role: 'agent', channel: 'chat', seq: 1, text: 'Draft reply: Thanks.'},
+  {role: 'user', channel: 'chat', seq: 2, text: choice},
+  {role: 'agent', channel: 'chat', seq: 3, text: 'That\'s too terse. I withdraw my earlier reply draft. I\'d send this instead on #2318:\n> ' + thanks + '\nDraft packet line: ' + officialPacket},
+];
+assert.strictEqual(world.draftsForDecision(terse, 'world-test', 2318).reply, thanks);
+assert.strictEqual(world.draftsForDecision(terse, 'world-test', 2318).packet, officialPacket);
+assert.strictEqual(world.draftsForDecision(terse, 'world-test', 2318).drafts, true);
 
 const publicCtx = buildPublicContext({sessionIndex: 3, now: '2026-02-11T10:12:00-08:00', system: 'Standing notes live in Notes.', userMessage: null, systemNotice: 'New activity may be waiting.', hint: '', tools: []});
 assert.strictEqual(publicCtx.session, 'session-3');

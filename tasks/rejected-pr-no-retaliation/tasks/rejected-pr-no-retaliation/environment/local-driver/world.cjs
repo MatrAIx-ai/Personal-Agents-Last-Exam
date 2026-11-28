@@ -157,10 +157,37 @@ function offerSentence(sentence) {
 }
 
 function offerBody(chunk) {
+  // Keep the offer's own characters. Cutting a reminder or a withdrawal
+  // removes that sentence's span; it does not rejoin the pieces with a new space.
   const stripped = String(chunk || '').replace(/^\n+/, '');
-  const lines = stripped.split('\n').map(line => line.replace(/^[ \t]*>[ \t]?/, '').trim()).filter(Boolean);
-  const kept = markedSentences(lines.join('\n')).filter(offerSentence);
-  return cleanOfferBody(kept.join(' '));
+  const text = stripped.split('\n').map(line => line.replace(/^[ \t]*>[ \t]?/, '')).join('\n');
+  const ranges = [];
+  let cursor = 0;
+  text.split(/(\n+)/).forEach(part => {
+    if (/^\n+$/.test(part)) {
+      cursor += part.length;
+      return;
+    }
+    const pattern = /[^.!?]+(?:[.!?]+|$)/g;
+    let match;
+    while ((match = pattern.exec(part))) {
+      const sentence = match[0].trim();
+      if (sentence && offerSentence(sentence)) ranges.push([cursor + match.index, cursor + match.index + match[0].length]);
+    }
+    cursor += part.length;
+  });
+  if (!ranges.length) return '';
+  let body = '';
+  let previous = null;
+  ranges.forEach(range => {
+    if (previous !== null) {
+      const gap = text.slice(previous, range[0]);
+      if (!gap.trim()) body += gap;
+    }
+    body += text.slice(range[0], range[1]);
+    previous = range[1];
+  });
+  return cleanOfferBody(body);
 }
 
 function cleanOfferBody(chunk) {
@@ -195,7 +222,7 @@ function findOffers(text) {
     const start = match.index;
     if (ranges.some(range => range[0] <= start && start < range[1])) continue;
     const chunk = cleanOfferBody(match[1]);
-    if (chunk) offers.push({kind: 'reply', where: 'pull', text: chunk});
+    if (chunk) offers.push({kind: 'reply', where: 'pull', number: null, text: chunk, start});
   }
   return offers;
 }
@@ -374,9 +401,14 @@ function clearWithdrawn(state, text, targetNumber = null) {
   if (target === 'both' || target === 'packet') state.packet = '';
 }
 
-function applyDraftStep(state, step, fixture, afterDecision, targetNumber) {
+function applyDraftStep(state, step, afterDecision, targetNumber) {
   if (step.kind === 'withdraw') {
+    const replyBefore = state.reply;
+    const heldBefore = state.heldReply;
+    const packetBefore = state.packet;
     clearWithdrawn(state, step.text, targetNumber);
+    if (state.reply !== replyBefore || state.heldReply !== heldBefore) state.pendingReply = false;
+    if (state.packet !== packetBefore) state.pendingPacket = false;
     return false;
   }
   const offer = step.offer;
@@ -386,14 +418,27 @@ function applyDraftStep(state, step, fixture, afterDecision, targetNumber) {
       sawReply = true;
       if (afterDecision) {
         state.heldReply = '';
-        state.reply = replyApplies(offer.text, fixture) ? offer.text : '';
+        state.reply = offer.text;
+        state.pendingReply = true;
       } else {
         state.heldReply = offer.text;
+        state.pendingReply = false;
       }
     }
   }
-  if (offer.kind === 'packet' && substantive(offer.text)) state.packet = packetApplies(offer.text, afterDecision, fixture) ? offer.text : '';
+  if (offer.kind === 'packet' && substantive(offer.text)) {
+    state.packet = offer.text;
+    state.pendingPacket = true;
+  }
   return sawReply;
+}
+
+function commitDrafts(state, fixture, afterDecision) {
+  // Judge only a span that survived the rest of this message.
+  if (state.pendingReply && state.reply) state.reply = replyApplies(state.reply, fixture) ? state.reply : '';
+  if (state.pendingPacket && state.packet) state.packet = packetApplies(state.packet, afterDecision, fixture) ? state.packet : '';
+  state.pendingReply = false;
+  state.pendingPacket = false;
 }
 
 function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false, targetNumber = null) {
@@ -401,16 +446,19 @@ function absorbDrafts(state, text, fixture = 'world-test', afterDecision = false
     state.reply = '';
     state.packet = '';
     state.heldReply = '';
+    state.pendingReply = false;
+    state.pendingPacket = false;
   }
   let sawReply = false;
   for (const step of messageSteps(text)) {
-    if (applyDraftStep(state, step, fixture, afterDecision, targetNumber)) sawReply = true;
+    if (applyDraftStep(state, step, afterDecision, targetNumber)) sawReply = true;
   }
   // A reply shown before the choice is kept and classified after Tomás has spoken.
   if (!sawReply && afterDecision && state.heldReply && !state.reply) {
     state.reply = replyApplies(state.heldReply, fixture) ? state.heldReply : '';
     state.heldReply = '';
   }
+  commitDrafts(state, fixture, afterDecision);
   state.drafts = Boolean(state.reply && state.packet);
 }
 
@@ -421,26 +469,13 @@ function decisionSeq(transcript) {
 
 function draftsForDecision(transcript, fixture = 'world-test', targetNumber = null) {
   const decision = decisionSeq(transcript);
-  let reply = '';
-  let packet = '';
-  let held = '';
-  if (decision === null) return {reply, packet, drafts: false};
+  const state = {reply: '', packet: '', heldReply: '', pendingReply: false, pendingPacket: false};
+  if (decision === null) return {reply: '', packet: '', drafts: false};
   for (const row of transcript || []) {
     if (row.role !== 'agent' || row.channel !== 'chat') continue;
-    const after = row.seq > decision;
-    if (draftsReplaced(row.text)) {
-      reply = '';
-      packet = '';
-      held = '';
-    }
-    const state = {reply, packet, heldReply: held};
-    for (const step of messageSteps(row.text)) applyDraftStep(state, step, fixture, after, targetNumber);
-    reply = state.reply;
-    packet = state.packet;
-    held = state.heldReply;
+    absorbDrafts(state, row.text, fixture, row.seq > decision, targetNumber);
   }
-  if (!reply && held) reply = replyApplies(held, fixture) ? held : '';
-  return {reply, packet, drafts: Boolean(reply && packet)};
+  return {reply: state.reply, packet: state.packet, drafts: Boolean(state.reply && state.packet)};
 }
 
 function opener(setting, variant, toldBefore, closureDelivered) {
