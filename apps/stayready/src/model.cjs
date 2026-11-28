@@ -1,7 +1,7 @@
 'use strict';
 const path = require('node:path');
 const { compile } = require('./schema-validator.cjs');
-const { fail, pending, same, sorted } = require('./common.cjs');
+const { fail, pending, same, sorted, propertyDate } = require('./common.cjs');
 const { conditions, terms, sameIdentity, matchesConditions, matchesTerms } = require('./conditions.cjs');
 const valid = compile(require('../schemas/seed.schema.json'), path.join(__dirname, '../schemas'));
 
@@ -23,6 +23,8 @@ function sourceSnapshots(data, versions) {
 
 function validateSeed(ctx, data) {
   if (!valid(data)) fail('invalid_seed', 'StayReady seed/state does not match its schema.');
+  try { new Intl.DateTimeFormat('en-GB', {timeZone: data.property.timezone}).format(0); }
+  catch { fail('invalid_seed', 'The property timezone must be a recognized IANA time zone.'); }
   const rows = records(data), ids = rows.map(x => x.id);
   if (new Set(ids).size !== ids.length) fail('invalid_seed', 'Business record IDs must be unique.');
   if (!ctx.binding || !ctx.binding.people.some(p => p.person_id === data.owner_person_id) ||
@@ -33,9 +35,10 @@ function validateSeed(ctx, data) {
   const people = new Set(data.people.map(p => p.id));
   if (!data.stay.guest_person_ids.includes(data.owner_person_id) || data.stay.guest_person_ids.some(x => !people.has(x)))
     fail('invalid_seed', 'Stay guests must include the owner and a known companion.');
+  // Local date ordinals count hotel nights without imposing a 48-hour duration.
   if (data.stay.property_id !== data.property.id || Date.parse(data.stay.check_out) <= Date.parse(data.stay.check_in) ||
-      Date.parse(data.stay.check_out.slice(0, 10)) - Date.parse(data.stay.check_in.slice(0, 10)) !== 172800000)
-    fail('invalid_seed', 'Stay must be a fixed two-night reservation at this property.');
+      Date.parse(propertyDate(data, data.stay.check_out) + 'T00:00:00Z') - Date.parse(propertyDate(data, data.stay.check_in) + 'T00:00:00Z') !== 172800000)
+    fail('invalid_seed', 'Stay must cover two calendar nights in the property timezone.');
 
   const entranceIds = data.property.entrances.map(e => e.id), routeIds = data.property.routes.map(r => r.id);
   if (new Set(entranceIds).size !== entranceIds.length || new Set(routeIds).size !== routeIds.length)

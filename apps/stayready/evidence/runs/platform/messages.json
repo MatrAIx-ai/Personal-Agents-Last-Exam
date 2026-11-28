@@ -1,0 +1,190 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "messages",
+  "app_version": "1.0.0",
+  "package_sha256": "813c7fc86ad1602d59c9216d6db6a71047f70c86175e073be87da2c2a8326013",
+  "node": "v22.23.5",
+  "verified_at": "2026-11-28T12:54:05.090Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for messages.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for messages.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for messages.conversations",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for messages.attachment.read",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for messages.outbound",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: standalone seed, list, get and search are side-effect free\nok 1 - standalone seed, list, get and search are side-effect free\n  ---\n  duration_ms: 1.658291\n  type: 'test'\n  ...\n# Subtest: unknown IDs, fields and malformed history do not change data\nok 2 - unknown IDs, fields and malformed history do not change data\n  ---\n  duration_ms: 0.486291\n  type: 'test'\n  ...\n# Subtest: scenario updates preserve history; attempted replacement cannot erase it\nok 3 - scenario updates preserve history; attempted replacement cannot erase it\n  ---\n  duration_ms: 0.500209\n  type: 'test'\n  ...\n# Subtest: optional diagnostics cannot change business results\nok 4 - optional diagnostics cannot change business results\n  ---\n  duration_ms: 0.282542\n  type: 'test'\n  ...\n# Subtest: reviewer renderer escapes untrusted content\nok 5 - reviewer renderer escapes untrusted content\n  ---\n  duration_ms: 0.218667\n  type: 'test'\n  ...\n# Subtest: reads do not mark messages read; edits/retractions require the author\nok 6 - reads do not mark messages read; edits/retractions require the author\n  ---\n  duration_ms: 0.639792\n  type: 'test'\n  ...\n# Subtest: conversations require bound participants and membership of the account owner\nok 7 - conversations require bound participants and membership of the account owner\n  ---\n  duration_ms: 0.279667\n  type: 'test'\n  ...\n# Subtest: outbound contract carries original bytes, stable event ID/time, and explicit destination\nok 8 - outbound contract carries original bytes, stable event ID/time, and explicit destination\n  ---\n  duration_ms: 0.71025\n  type: 'test'\n  ...\n# Subtest: marking an outgoing message read does not create a new delivery identity\nok 9 - marking an outgoing message read does not create a new delivery identity\n  ---\n  duration_ms: 0.929167\n  type: 'test'\n  ...\n# Subtest: a received App notification is not an own authored message even when its account owner matches\nok 10 - a received App notification is not an own authored message even when its account owner matches\n  ---\n  duration_ms: 0.731542\n  type: 'test'\n  ...\n1..10\n# tests 10\n# suites 0\n# pass 10\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 45.08825\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"app\": \"messages\",\n  \"before\": {\n    \"account_id\": \"messages-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"messages\": [\n      {\n        \"id\": \"msg-dinner\",\n        \"account_id\": \"messages-maya\",\n        \"created_at\": \"2026-11-17T08:00:00-08:00\",\n        \"updated_at\": \"2026-11-17T08:00:00-08:00\",\n        \"history\": [\n          {\n            \"at\": \"2026-11-17T08:00:00-08:00\",\n            \"action\": \"seeded\"\n          }\n        ],\n        \"conversation_id\": \"conversation-home\",\n        \"author_person_id\": \"person-alex\",\n        \"text\": \"Can you check the pantry before ordering?\",\n        \"sent_at\": \"2026-11-17T08:00:00-08:00\",\n        \"received_at\": \"2026-11-17T08:00:00-08:00\",\n        \"read_by\": [\n          \"person-alex\"\n        ],\n        \"retracted\": false,\n        \"attachments\": [],\n        \"edits\": []\n      }\n    ],\n    \"conversations\": [\n      {\n        \"id\": \"conversation-home\",\n        \"title\": \"Household\",\n        \"participant_ids\": [\n          \"person-maya\",\n          \"person-alex\"\n        ],\n        \"archived\": false\n      }\n    ]\n  },\n  \"after\": {\n    \"account_id\": \"messages-maya\",\n    \"owner_person_id\": \"person-maya\",\n    \"messages\": [\n      {\n        \"id\": \"msg-dinner\",\n        \"account_id\": \"messages-maya\",\n        \"created_at\": \"2026-11-17T08:00:00-08:00\",\n        \"updated_at\": \"2026-11-18T09:05:00-08:00\",\n        \"history\": [\n          {\n            \"at\": \"2026-11-17T08:00:00-08:00\",\n            \"action\": \"seeded\"\n          },\n          {\n            \"at\": \"2026-11-18T09:05:00-08:00\",\n            \"action\": \"scenario_update\"\n          }\n        ],\n        \"conversation_id\": \"conversation-home\",\n        \"author_person_id\": \"person-alex\",\n        \"text\": \"Can you check the pantry before ordering? (updated by scenario)\",\n        \"sent_at\": \"2026-11-17T08:00:00-08:00\",\n        \"received_at\": \"2026-11-17T08:00:00-08:00\",\n        \"read_by\": [\n          \"person-alex\"\n        ],\n        \"retracted\": false,\n        \"attachments\": [],\n        \"edits\": [\n          {\n            \"at\": \"2026-11-17T08:00:00-08:00\",\n            \"text\": \"Can you check the pantry before ordering?\"\n          }\n        ]\n      }\n    ],\n    \"conversations\": [\n      {\n        \"id\": \"conversation-home\",\n        \"title\": \"Household\",\n        \"participant_ids\": [\n          \"person-maya\",\n          \"person-alex\"\n        ],\n        \"archived\": false\n      }\n    ]\n  }\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}

@@ -1,0 +1,451 @@
+{
+  "passed": true,
+  "checks": 73,
+  "node": "v22.23.5",
+  "verified_at": "2026-11-28T12:53:59.031Z",
+  "scope": "Core and Infra messaging only; App schemas unchanged; CloudEvents time remains optional.",
+  "evidence": [
+    {
+      "case": "with-time",
+      "cloud_event": {
+        "source": "urn:pale:app:delivery:account:delivery-maya",
+        "id": "with-time",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-11-15T08:42:12.345-08:00"
+      },
+      "messaging": {
+        "seq": 1,
+        "run_id": "time-trace",
+        "received_at": "2026-11-28T12:53:57.990Z",
+        "wall_time": "2026-11-28T12:53:58.022Z",
+        "request_id": "with-time",
+        "cloud_event": {
+          "source": "urn:pale:app:delivery:account:delivery-maya",
+          "id": "with-time",
+          "type": "org.pale.mail.notification.v1",
+          "time": "2026-11-15T08:42:12.345-08:00"
+        },
+        "result": {
+          "received_at": "2026-11-28T12:53:57.990Z",
+          "status": "committed",
+          "run_id": "time-trace",
+          "source_app": "delivery",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "with-time",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-15T08:42:12.345-08:00"
+          },
+          "event_id": "router-ff9fdf4ed513f7cf1f92b778d0e34655",
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "committed_at": "2026-11-28T12:53:58.021Z",
+          "receiver_trace": {
+            "run_id": "time-trace",
+            "app_id": "mail",
+            "event_id": "router-ff9fdf4ed513f7cf1f92b778d0e34655",
+            "cloud_event": {
+              "source": "urn:pale:app:delivery:account:delivery-maya",
+              "id": "with-time",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-15T08:42:12.345-08:00"
+            },
+            "received_at": "2026-11-28T12:53:58.009Z",
+            "virtual_received_at": "2026-11-15T09:00:00-08:00",
+            "applied_at": "2026-11-15T09:00:00-08:00",
+            "processed_at": "2026-11-28T12:53:58.013Z"
+          }
+        }
+      },
+      "core_audit": {
+        "seq": 1,
+        "actor": "infra",
+        "tool": "env.apply_event",
+        "decision": "allow",
+        "before": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "after": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "state_changed": true,
+        "received_at": "2026-11-28T12:53:58.009Z",
+        "wall_time": "2026-11-28T12:53:58.013Z",
+        "virtual_time": "2026-11-15T09:00:00-08:00",
+        "trace": {
+          "run_id": "time-trace",
+          "app_id": "mail",
+          "event_id": "router-ff9fdf4ed513f7cf1f92b778d0e34655",
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "with-time",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-15T08:42:12.345-08:00"
+          },
+          "received_at": "2026-11-28T12:53:58.009Z",
+          "virtual_received_at": "2026-11-15T09:00:00-08:00",
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "processed_at": "2026-11-28T12:53:58.013Z"
+        },
+        "connection_id": "d6a7fc1a-8c03-43f0-a2f3-67bff5562426",
+        "client_name": "pale-router-receiver",
+        "input": {
+          "expected_version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "event_id": "router-ff9fdf4ed513f7cf1f92b778d0e34655"
+        },
+        "result": {
+          "status": "committed",
+          "object_id": null
+        }
+      },
+      "mail": {
+        "id": "router-ff9fdf4ed513f7cf1f92b778d0e34655",
+        "thread_id": "with-time",
+        "received_at": "2026-11-15T09:00:00-08:00"
+      },
+      "retry": {
+        "seq": 2,
+        "run_id": "time-trace",
+        "received_at": "2026-11-28T12:53:58.057Z",
+        "wall_time": "2026-11-28T12:53:58.073Z",
+        "request_id": "with-time-retry",
+        "cloud_event": {
+          "source": "urn:pale:app:delivery:account:delivery-maya",
+          "id": "with-time",
+          "type": "org.pale.mail.notification.v1",
+          "time": "2026-11-15T08:42:12.345-08:00"
+        },
+        "result": {
+          "received_at": "2026-11-28T12:53:57.990Z",
+          "status": "committed",
+          "run_id": "time-trace",
+          "source_app": "delivery",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "with-time",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-15T08:42:12.345-08:00"
+          },
+          "event_id": "router-ff9fdf4ed513f7cf1f92b778d0e34655",
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "committed_at": "2026-11-28T12:53:58.021Z",
+          "receiver_trace": {
+            "run_id": "time-trace",
+            "app_id": "mail",
+            "event_id": "router-ff9fdf4ed513f7cf1f92b778d0e34655",
+            "cloud_event": {
+              "source": "urn:pale:app:delivery:account:delivery-maya",
+              "id": "with-time",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-15T08:42:12.345-08:00"
+            },
+            "received_at": "2026-11-28T12:53:58.009Z",
+            "virtual_received_at": "2026-11-15T09:00:00-08:00",
+            "applied_at": "2026-11-15T09:00:00-08:00",
+            "processed_at": "2026-11-28T12:53:58.013Z"
+          },
+          "duplicate": true
+        }
+      }
+    },
+    {
+      "case": "without-time",
+      "cloud_event": {
+        "source": "urn:pale:app:delivery:account:delivery-maya",
+        "id": "without-time",
+        "type": "org.pale.mail.notification.v1"
+      },
+      "messaging": {
+        "seq": 4,
+        "run_id": "time-trace",
+        "received_at": "2026-11-28T12:53:58.084Z",
+        "wall_time": "2026-11-28T12:53:58.115Z",
+        "request_id": "without-time",
+        "cloud_event": {
+          "source": "urn:pale:app:delivery:account:delivery-maya",
+          "id": "without-time",
+          "type": "org.pale.mail.notification.v1"
+        },
+        "result": {
+          "received_at": "2026-11-28T12:53:58.084Z",
+          "status": "committed",
+          "run_id": "time-trace",
+          "source_app": "delivery",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "without-time",
+            "type": "org.pale.mail.notification.v1"
+          },
+          "event_id": "router-2fc18dd81946709de2502b70794a4c1e",
+          "version": {
+            "epoch": 1,
+            "revision": 2
+          },
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "committed_at": "2026-11-28T12:53:58.115Z",
+          "receiver_trace": {
+            "run_id": "time-trace",
+            "app_id": "mail",
+            "event_id": "router-2fc18dd81946709de2502b70794a4c1e",
+            "cloud_event": {
+              "source": "urn:pale:app:delivery:account:delivery-maya",
+              "id": "without-time",
+              "type": "org.pale.mail.notification.v1"
+            },
+            "received_at": "2026-11-28T12:53:58.103Z",
+            "virtual_received_at": "2026-11-15T09:00:00-08:00",
+            "applied_at": "2026-11-15T09:00:00-08:00",
+            "processed_at": "2026-11-28T12:53:58.106Z"
+          }
+        }
+      },
+      "core_audit": {
+        "seq": 3,
+        "actor": "infra",
+        "tool": "env.apply_event",
+        "decision": "allow",
+        "before": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "after": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "state_changed": true,
+        "received_at": "2026-11-28T12:53:58.103Z",
+        "wall_time": "2026-11-28T12:53:58.106Z",
+        "virtual_time": "2026-11-15T09:00:00-08:00",
+        "trace": {
+          "run_id": "time-trace",
+          "app_id": "mail",
+          "event_id": "router-2fc18dd81946709de2502b70794a4c1e",
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "without-time",
+            "type": "org.pale.mail.notification.v1"
+          },
+          "received_at": "2026-11-28T12:53:58.103Z",
+          "virtual_received_at": "2026-11-15T09:00:00-08:00",
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "processed_at": "2026-11-28T12:53:58.106Z"
+        },
+        "connection_id": "d6a7fc1a-8c03-43f0-a2f3-67bff5562426",
+        "client_name": "pale-router-receiver",
+        "input": {
+          "expected_version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "event_id": "router-2fc18dd81946709de2502b70794a4c1e"
+        },
+        "result": {
+          "status": "committed",
+          "object_id": null
+        }
+      },
+      "mail": {
+        "id": "router-2fc18dd81946709de2502b70794a4c1e",
+        "thread_id": "without-time",
+        "received_at": "2026-11-15T09:00:00-08:00"
+      },
+      "retry": {
+        "seq": 5,
+        "run_id": "time-trace",
+        "received_at": "2026-11-28T12:53:58.144Z",
+        "wall_time": "2026-11-28T12:53:58.159Z",
+        "request_id": "without-time-retry",
+        "cloud_event": {
+          "source": "urn:pale:app:delivery:account:delivery-maya",
+          "id": "without-time",
+          "type": "org.pale.mail.notification.v1"
+        },
+        "result": {
+          "received_at": "2026-11-28T12:53:58.084Z",
+          "status": "committed",
+          "run_id": "time-trace",
+          "source_app": "delivery",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "without-time",
+            "type": "org.pale.mail.notification.v1"
+          },
+          "event_id": "router-2fc18dd81946709de2502b70794a4c1e",
+          "version": {
+            "epoch": 1,
+            "revision": 2
+          },
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "committed_at": "2026-11-28T12:53:58.115Z",
+          "receiver_trace": {
+            "run_id": "time-trace",
+            "app_id": "mail",
+            "event_id": "router-2fc18dd81946709de2502b70794a4c1e",
+            "cloud_event": {
+              "source": "urn:pale:app:delivery:account:delivery-maya",
+              "id": "without-time",
+              "type": "org.pale.mail.notification.v1"
+            },
+            "received_at": "2026-11-28T12:53:58.103Z",
+            "virtual_received_at": "2026-11-15T09:00:00-08:00",
+            "applied_at": "2026-11-15T09:00:00-08:00",
+            "processed_at": "2026-11-28T12:53:58.106Z"
+          },
+          "duplicate": true
+        }
+      }
+    },
+    {
+      "case": "lost-ack",
+      "messaging": {
+        "seq": 1,
+        "run_id": "lost-ack",
+        "received_at": "2026-11-28T12:53:58.434Z",
+        "wall_time": "2026-11-28T12:53:58.468Z",
+        "request_id": "lost-ack",
+        "cloud_event": {
+          "source": "urn:pale:app:delivery:account:delivery-maya",
+          "id": "order-17-confirmed-email",
+          "type": "org.pale.mail.notification.v1",
+          "time": "2026-11-15T09:00:00-08:00"
+        },
+        "result": {
+          "received_at": "2026-11-28T12:53:58.434Z",
+          "status": "unknown",
+          "code": "receiver_unconfirmed",
+          "run_id": "lost-ack",
+          "stop_run": true,
+          "event_id": "router-82b12296267009d9f2741cbfe37e0896"
+        }
+      },
+      "receiver_receipt": {
+        "status": "committed",
+        "event_id": "router-82b12296267009d9f2741cbfe37e0896",
+        "trace": {
+          "run_id": "lost-ack",
+          "app_id": "mail",
+          "event_id": "router-82b12296267009d9f2741cbfe37e0896",
+          "cloud_event": {
+            "source": "urn:pale:app:delivery:account:delivery-maya",
+            "id": "order-17-confirmed-email",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-15T09:00:00-08:00"
+          },
+          "received_at": "2026-11-28T12:53:58.454Z",
+          "virtual_received_at": "2026-11-15T09:00:00-08:00",
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "processed_at": "2026-11-28T12:53:58.458Z"
+        },
+        "app_id": "mail",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "case": "calendar-event",
+      "receiver_receipt": {
+        "status": "committed",
+        "event_id": "calendar-busy-01",
+        "trace": {
+          "run_id": "calendar-time",
+          "app_id": "calendar",
+          "event_id": "calendar-busy-01",
+          "cloud_event": null,
+          "received_at": "2026-11-28T12:53:58.586Z",
+          "virtual_received_at": "2026-11-15T09:00:00-08:00",
+          "applied_at": "2026-11-15T09:06:00-08:00",
+          "processed_at": "2026-11-28T12:53:58.587Z"
+        },
+        "app_id": "calendar",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "case": "mail-to-mail",
+      "source": {
+        "id": "draft-lab",
+        "sent_at": "2026-11-15T09:00:00-08:00"
+      },
+      "receipt": {
+        "received_at": "2026-11-28T12:53:58.981Z",
+        "status": "committed",
+        "run_id": "m2m-4ef68386-7d0",
+        "source_app": "mail",
+        "channel": "channel.email",
+        "target": {
+          "app_id": "mail",
+          "account_id": "mail-b"
+        },
+        "cloud_event": {
+          "source": "urn:pale:app:mail:account:mail-a",
+          "id": "mail-2-draft-lab",
+          "type": "org.pale.mail.notification.v1",
+          "time": "2026-11-15T09:00:00-08:00"
+        },
+        "event_id": "router-db7e1705b8b1472ac6293768a8833e16",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "applied_at": "2026-11-15T09:00:00-08:00",
+        "committed_at": "2026-11-28T12:53:58.996Z",
+        "receiver_trace": {
+          "run_id": "m2m-4ef68386-7d0",
+          "app_id": "mail",
+          "event_id": "router-db7e1705b8b1472ac6293768a8833e16",
+          "cloud_event": {
+            "source": "urn:pale:app:mail:account:mail-a",
+            "id": "mail-2-draft-lab",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-15T09:00:00-08:00"
+          },
+          "received_at": "2026-11-28T12:53:58.987Z",
+          "virtual_received_at": "2026-11-15T09:00:00-08:00",
+          "applied_at": "2026-11-15T09:00:00-08:00",
+          "processed_at": "2026-11-28T12:53:58.988Z"
+        }
+      },
+      "target": {
+        "id": "router-db7e1705b8b1472ac6293768a8833e16",
+        "received_at": "2026-11-15T09:00:00-08:00"
+      }
+    }
+  ]
+}

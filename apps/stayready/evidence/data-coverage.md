@@ -1,89 +1,102 @@
 # Delivered dataset coverage
 
-The delivered evaluation library contains **96 independent, loadable synthetic scenarios**, four in each month from January 2025 through December 2026. Each run has one fictional property, a fixed two-night reservation and exactly two current guests. Three people exist in the identity binding so the companion can be replaced; this never adds a third registered guest.
+The delivered evaluation library contains **96 independent, loadable synthetic scenarios**, four in each month from January 2025 through December 2026. Each run retains the approved boundary: one fictional property, one fixed two-night reservation and exactly two current guests, selected from a pool of three synthetic people. The same hotel and owner recur because those are deliberate scope constraints; service history, companion assignments, dates, lead times and times of day vary.
 
-This is a library of independent hotel-service situations, not a continuous two-year history of one traveler. Every guest, personal fact, hotel policy, commitment and represented event date in the library is synthetic. The monthly sampling is intentionally even for reproducible evaluation; it is not an estimated empirical booking distribution. The four monthly situations have distinct operational consequences:
+The contribution declares both datasets explicitly. [contribution/dataset.json](../contribution/dataset.json) retains `expected_counts.records: 20` for the small runtime baseline, as required by the public bundle validator. Its `authored-scenario-library` source links the separate, schema-valid [full evaluation declaration](../datasets/declaration.json), which declares **3,264 synthetic records** and references [manifest.json](../datasets/manifest.json). The manifest indexes the actual 96 seed files, their hashes, counts, account binding and initial virtual times. The small baseline does not stand in for the delivered library.
 
-| Pattern | Meaningful difference from an unchanged baseline |
+## Variation and prior history
+
+This is a library of independent hotel-service situations, not a claim of continuous two-year activity by one traveler or an empirical booking distribution. Sampling is intentionally four scenarios per month. Within that sampling:
+
+- Check-in dates occupy **19 different days of the month**. Each of the four patterns changes its day of month across the period; none is permanently assigned the 2nd, 10th or 18th.
+- Check-in and checkout times each have **10 distinct UTC serializations**, with local check-in hours from 14:00 to 17:30 and checkout hours from 09:00 to 12:30. UTC offsets vary correctly with the property's `Europe/London` zone.
+- Source observations have **195 distinct UTC times of day**. Request submissions have **78 distinct rounded lead-hour values**, from **44 to 269 hours before check-in**. Observation, submission, acknowledgment and response times are separate dated events, not a single repeated timestamp.
+- `person-2` and `person-3` each appear as the current companion in **48 scenarios**. Replacement cases rotate both directions; partial breakfast and unavailable-route cases also vary their target traveler. Six service-level meal requests rotate across people.
+- Every seed contains **2–4 actual request histories**: 32 seeds have two requests, 32 have three, and 32 have four. All **288 requests** received an acknowledgment. Final states comprise **192 confirmed**, **32 declined**, **32 needs clarification** and **32 withdrawn** requests, with **960 operation/event history records**.
+
+The generator builds those histories by executing `request.preview`, `request.submit`, `request.withdraw`, `need.save` and `people.replace`, plus the public plugin's hotel-reply/source-update/unavailability event handler. It does not append invented final responses or bypass business validation. Each confirmed service has a commitment linked to its actual request, final terms and confirmation time. Acknowledgment alone never creates a promise. The generation tests reproduce all 96 exported seeds through those calls and compare the full business state.
+
+Sources are visible before their corresponding request; replies follow submission; provider decisions and history records precede the scenario's `initial_time`. A clarification remains unresolved until a later authorized event. Former-companion promises survive a replacement. Future service dates describe obligations, not completed stays or historical observations. No Task answer labels are inserted into the loaded business records.
+
+| Pattern | Initial business situation and retained causal evidence |
 | --- | --- |
-| `arrival-mismatch` | Current arrival is later than a previously confirmed window. Monthly variants change the later time and access method; the old commitment is retained. |
-| `route-unavailable` | The named step-free route carries an already-effective notice, with corridor closure and lift failure variants. A label alone cannot establish usability. |
-| `breakfast-partial` | Both mornings are requested but only the first is confirmed. Six meal request values rotate across people and scenarios; the second morning remains unresolved. |
-| `guest-replaced` | The companion has changed. The former guest's breakfast commitment remains active, while current-person need flags identify the new companion. |
+| `arrival-mismatch` | A confirmed arrival request is followed by a changed arrival source and explicit need update. The existing entrance window remains earlier than the new arrival, including after-midnight cases. |
+| `route-unavailable` | A traveler-specific access request was acknowledged and confirmed. A later notice makes that exact named route unavailable; the notice does not rewrite the original promise. |
+| `breakfast-partial` | Two mornings were requested and acknowledged, but the hotel confirmed only one of them. Both the requested dates and narrower confirmed terms remain visible. |
+| `guest-replaced` | The previous companion's breakfast was requested, acknowledged and confirmed before a same-headcount substitution. The former service stays active until explicit hotel-confirmed cancellation. |
 
-The seeds describe an initial state with existing commitments. They do not invent completed message exchanges: `request_id: null` explicitly represents an imported initial commitment and request/history arrays are empty. Subsequent requests and hotel replies are exercised through App tools and authorized events. Known source observations and existing confirmations precede each scenario's `initial_time`; future service dates are visible obligations, not completed stays.
+The additional histories represent provider refusal, unanswered clarification and withdrawal. They are service attempts with observable consequences, not duplicate log records inserted solely to increase date counts.
 
-## Provenance and the November 2026 anchor
+## Synthetic provenance
 
-[manifest.json](../datasets/manifest.json) records every seed path, SHA-256, byte size, record counts, clock, generation method and the exact baseline/generator hashes. Records use the identity tuple `(scenario_id, record_type, id)` across the library; ordinary App IDs are reused only inside separate reset runs. The same fixture binding maps `stayready-alex` to its owner and three synthetic people. No private data or real transaction was copied.
+All **3,264** App records are authored synthetic data, including future-dated prospective scenarios. Real guest records and mixed guest records are both **zero**. The review explicitly accepts synthetic data for this fictional environment; **no real-data anchor is claimed or required**. Public product references in [reference/sources.json](reference/sources.json) serve only as GUI/workflow comparisons and are excluded from guest-data and date totals.
 
-Three real public-document observations, collected **2026-11-26**, are kept separately in [reference/sources.json](reference/sources.json), with actual public-page screenshots and hashes. They concern Booking.com request/arrival guidance and Premier Inn access/breakfast workflows. They supply a factual workflow anchor, **not real hotel guest records**. They are not blended into the seed count or assigned fictitious 2025 publication dates. Public reference coverage is one observation date in November 2026; historical and later public-page versions were not collected.
-
-**Maintainer review remains pending** on whether these official public workflow facts are an acceptable real reference anchor and public-page alternative for the original synthetic StayReady environment under the November 26 evidence policy. No approval or exemption is claimed. There are no real or mixed guest records; all 1,992 delivered App records are synthetic, including those dated after collection.
+The manifest records the generator version and hash, the original baseline hash, and all generation dependencies: trusted binding, plugin entry point, business modules, tool schemas and the four business schemas. A change to any hashed input requires intentional regeneration. Record identity across independent runs is `(scenario_id, record_type, id)`; ordinary App IDs are intentionally reused across isolated seeds. The checker rejects duplicate identities, altered bytes and inconsistent declared counts. Human review of realism remains a separate acceptance step.
 
 ## Counts and date semantics
 
-[coverage.json](../datasets/coverage.json) is computed from the delivered JSON, with **UTC** as the IANA counting zone. It reports 1,992 business records, of which 480 static property/person records have no occurrence date. The global union is **384 represented calendar dates**, from **2025-01-01 through 2026-12-31**. Of these, **96 dates** hold synthetic source observations or confirmations, and **288 dates** describe stay/service timing. These are disjoint in this library. The 384-date union is **not** 384 days of pre-session personal history.
+[coverage.json](../datasets/coverage.json) is calculated from the actual delivered JSON using **Europe/London** as the IANA counting zone. Stored timestamps remain UTC; timestamps are converted to the property zone before taking a calendar date. Date-only breakfast values are dates in that zone.
 
-| Record source | Records | Authoritative dates used |
+The global union is **383 represented dates**, from **2025-01-01 through 2026-12-31**, inclusive. **167 dates** contain source observations, submissions, replies, confirmations or recorded events; **286 dates** describe stay/service timing. These sets overlap on **70 dates**, so they must not be added. This is Environment coverage, not a claim of 383 days of pre-session personal history.
+
+| Record source | Records | Authoritative dates counted |
 | --- | ---: | --- |
-| `stayready.property` | 96 | None; static metadata and route availability windows are excluded from history counts. |
-| `stayready.stay` | 96 | `check_in`, `check_out` as represented service dates. |
-| `stayready.person` | 288 | None; identity records are excluded from date counts. |
-| `stayready.source` | 672 | `observed_at` as occurrence/receipt dates. Embedded future arrival facts are not a second observation. |
-| `stayready.need` | 672 | `conditions.arrival_at`, access `window.start/end`, breakfast `morning_dates` as represented service dates. |
-| `stayready.commitment` | 168 | `confirmed_at` and notice `recorded_at` as occurrences; actual terms and notice `effective_at` as service dates. |
-| Requests/history | 0 | The checker supports `submitted_at`, reply `at` and history `at` if these records are introduced. |
-| Official public references | 3, reported separately | Actual observation date `2026-11-26`; none are loaded guest records. |
+| `stayready.property` | 96 | None. Static metadata and route definitions are excluded from activity dates. |
+| `stayready.stay` | 96 | `check_in`, `check_out`, as represented service dates. |
+| `stayready.person` | 288 | None. Identities are excluded from dated activity. |
+| `stayready.source` | 672 | `observed_at`, as occurrence/receipt dates. Embedded arrival facts are not additional observations. |
+| `stayready.need` | 672 | `conditions.arrival_at`, access `window.start/end`, and breakfast `morning_dates`, as service dates. |
+| `stayready.request` | 288 | `submitted_at` and every reply's `at`, as occurrence dates. |
+| `stayready.commitment` | 192 | `confirmed_at` and notice `recorded_at`, as occurrences; actual terms and notice `effective_at`, as service dates. |
+| `stayready.history` | 960 | `at`, as operation/event occurrence dates. Shared event dates are deduplicated globally. |
 
-Date-only breakfast dates mean midnight-to-midnight in UTC. The checker rejects invalid or out-of-window dates, verifies schema/business invariants and hashes, and deduplicates dates globally across fields, records and scenarios. Generation timestamps, file modification times, provenance-version strings and the scenario clock are never counted as guest activity. Static identities still count as records but not dated activity.
-
-There are **346 calendar dates without represented records**. The explicit date list, per-source date lists and monthly breakdown appear in the generated report. Every month has substantive scenarios; no month is missing. There is no claim of daily activity or a mandatory 300-day history. Task authors must select a scenario, enforce their own first-session cutoff, and distinguish known confirmations from future service obligations; they must not expose a later scenario as earlier personal history.
+The **384 static property/person records** remain in the record count but contribute no date. Generation dates, file modification times, provenance-version strings, the scenario clock and reference-page collection dates are excluded. The checker also validates every request/reply-to-history link, per-seed chronology, schema/business invariants and hash. It reports **zero invalid dates**, **zero out-of-window dates** and **347 calendar dates without represented records**; the full gap list is included.
 
 | Month | Scenarios | Synthetic records | Occurrence dates | Service dates | Global dates in month |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 2025-01 | 4 | 83 | 4 | 12 | 16 |
-| 2025-02 | 4 | 83 | 4 | 12 | 16 |
-| 2025-03 | 4 | 83 | 4 | 12 | 16 |
-| 2025-04 | 4 | 83 | 4 | 12 | 16 |
-| 2025-05 | 4 | 83 | 4 | 12 | 16 |
-| 2025-06 | 4 | 83 | 4 | 12 | 16 |
-| 2025-07 | 4 | 83 | 4 | 12 | 16 |
-| 2025-08 | 4 | 83 | 4 | 12 | 16 |
-| 2025-09 | 4 | 83 | 4 | 12 | 16 |
-| 2025-10 | 4 | 83 | 4 | 12 | 16 |
-| 2025-11 | 4 | 83 | 4 | 12 | 16 |
-| 2025-12 | 4 | 83 | 4 | 12 | 16 |
-| 2026-01 | 4 | 83 | 4 | 12 | 16 |
-| 2026-02 | 4 | 83 | 4 | 12 | 16 |
-| 2026-03 | 4 | 83 | 4 | 12 | 16 |
-| 2026-04 | 4 | 83 | 4 | 12 | 16 |
-| 2026-05 | 4 | 83 | 4 | 12 | 16 |
-| 2026-06 | 4 | 83 | 4 | 12 | 16 |
-| 2026-07 | 4 | 83 | 4 | 12 | 16 |
-| 2026-08 | 4 | 83 | 4 | 12 | 16 |
-| 2026-09 | 4 | 83 | 4 | 12 | 16 |
-| 2026-10 | 4 | 83 | 4 | 12 | 16 |
-| 2026-11 | 4 | 83 | 4 | 12 | 16 |
-| 2026-12 | 4 | 83 | 4 | 12 | 16 |
+| 2025-01 | 4 | 132 | 4 | 12 | 15 |
+| 2025-02 | 4 | 136 | 6 | 11 | 14 |
+| 2025-03 | 4 | 140 | 11 | 12 | 16 |
+| 2025-04 | 4 | 132 | 8 | 12 | 17 |
+| 2025-05 | 4 | 136 | 5 | 12 | 15 |
+| 2025-06 | 4 | 140 | 5 | 12 | 16 |
+| 2025-07 | 4 | 132 | 9 | 12 | 19 |
+| 2025-08 | 4 | 136 | 9 | 12 | 16 |
+| 2025-09 | 4 | 140 | 8 | 12 | 17 |
+| 2025-10 | 4 | 132 | 5 | 12 | 15 |
+| 2025-11 | 4 | 136 | 9 | 12 | 20 |
+| 2025-12 | 4 | 140 | 8 | 12 | 18 |
+| 2026-01 | 4 | 132 | 7 | 12 | 16 |
+| 2026-02 | 4 | 136 | 7 | 11 | 15 |
+| 2026-03 | 4 | 140 | 11 | 12 | 17 |
+| 2026-04 | 4 | 132 | 7 | 12 | 16 |
+| 2026-05 | 4 | 136 | 8 | 12 | 18 |
+| 2026-06 | 4 | 140 | 5 | 12 | 16 |
+| 2026-07 | 4 | 132 | 4 | 12 | 15 |
+| 2026-08 | 4 | 136 | 7 | 12 | 13 |
+| 2026-09 | 4 | 140 | 9 | 12 | 15 |
+| 2026-10 | 4 | 132 | 4 | 12 | 13 |
+| 2026-11 | 4 | 136 | 6 | 12 | 16 |
+| 2026-12 | 4 | 140 | 5 | 12 | 15 |
 
-Real/mixed guest-record counts are zero in every month. The complete report also contains each source's deduplicated date count, hash inputs, gaps and exclusions. Requests and commitments created during a demonstration are runtime results and do not silently increase these delivered-seed totals.
+Monthly record counts are grouped by the scenario's check-in month. Date distribution is grouped by each record's actual represented local date, so a request lead time can contribute an occurrence in the previous month. Every month has substantive scenarios and 13–20 represented dates. Real/mixed guest-record counts remain zero in every month. Tasks must select relevant scenarios and enforce their own first-session cutoff; the full library is not automatically personal history for any one Task.
 
 ## Reproduce and query
 
-From the repository root with Node 18+ (verified using Node 22):
+From the repository root (Node **22.23.5** used for this revision):
 
 ```sh
 node apps/stayready/scripts/generate-dataset.cjs
 node apps/stayready/scripts/check-dataset.cjs --write
 node apps/stayready/scripts/check-dataset.cjs
-node apps/stayready/tests/dataset-mcp.cjs
+node --test apps/stayready/tests/dataset.test.cjs
+STAYREADY_REPORT_DIR=.artifacts/stayready-dataset node apps/stayready/tests/dataset-mcp.cjs
 ```
 
-Generation is deterministic. The first two commands intentionally regenerate data/report after an authored change. The third is the normal verification command: it checks the existing report rather than silently replacing it. Dataset checking uses the actual App seed validator and fails if a baseline or generator hash changes without regeneration.
+The first two commands intentionally regenerate data and its coverage after an authored change. Normal checking verifies the existing report instead of silently replacing it. The dedicated tests reproduce every seed through plugin operations, check all four business patterns and verify contribution → full declaration → manifest links and counts.
 
-The MCP driver uses the repository's real public `prepare`/`Client` runtime, with `PALE_RUNTIME_ROOT` supported for an external runtime checkout. It loads **every one of the 96 seeds** via Infra `env.load_seed`, explicitly supplies the fixture binding and the manifest's `initial_time`, then queries Agent `stayready.inspect`. It verifies account/owner, visible boundary dates, all record counts, pattern-specific business states, absence of private background in the Agent view and read-only state preservation. This exercises the same interfaces used by a Task; direct JSON counting alone is not the loading proof.
+The MCP driver uses the real public `prepare`/`Client` runtime (`PALE_RUNTIME_ROOT` can select an external pinned runtime). Infra calls `env.load_seed` for **every one of the 96 seeds**, with the trusted binding and manifest time; a separate Agent process calls `stayready.inspect`. The driver checks complete request/reply and history equality against each seed, request-to-confirmed-promise links, account/owner, terms, pattern-specific results, hidden private background and absence of read-side mutation. This proves loading and retrieval of the counted histories through the actual public interface.
 
-The driver writes `.artifacts/stayready/dataset-mcp.json` with per-seed input SHA-256, initial clock, correlation/request ID, exact load result/version, query counts/terms and persisted-state/query hashes. Seed bodies and binding are reproducible from the recorded file/hash references. The main evidence index retains the run result alongside other interface evidence.
+Each report row retains seed/binding hashes, initial clock, actual load result/version, request correlation ID, retrieved request/reply summaries and history/state hashes. Full seed bodies remain available at their recorded paths and hashes. `STAYREADY_REPORT_DIR` controls the destination; the default is `apps/stayready/.artifacts/dataset`. The final checked evidence index links the submission run.
 
-**Loading result:** **passed, 96/96 seeds and all 24 months**, through the real Infra/Agent MCP processes on 2026-11-26 (Node v22.23.5, runtime 1.6.0). Both coverage boundaries were retrieved through Agent inspect. No private source background was returned and queries did not mutate persisted business state. The schema and App business validator also passed all 96 seeds.
+**Revision validation:** dedicated dataset tests **3/3 passed** and real Infra/Agent MCP loading/retrieval **96/96 passed** on Node v22.23.5 with public runtime 1.6.0. The loaded history totals are **288 requests** and **960 history records**. Both coverage boundaries were retrieved; private source background was absent and inspection did not alter persisted state. Final package hashes are recorded with the submission evidence after the remaining package edits are frozen.

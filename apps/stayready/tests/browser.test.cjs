@@ -3,11 +3,16 @@
 // this evidence driver for prewritten hotel events and independent inspection.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {chromium}=require('playwright');
-const {start}=require('../../../runtime/web/server.cjs');
-const {Client}=require('../../../runtime/client.cjs');
-const {digestTree}=require('../../../runtime/verify.cjs');
-const root=path.resolve(__dirname,'../../..');
-const output=path.resolve(process.env.STAYREADY_BROWSER_REPORT_DIR||path.join(root,'.artifacts/stayready/browser'));
+const appDirectory=path.resolve(__dirname,'..');
+let runtimeDirectory=process.env.PALE_RUNTIME_ROOT&&path.resolve(process.env.PALE_RUNTIME_ROOT);
+if(!runtimeDirectory){let directory=appDirectory;while(!fs.existsSync(path.join(directory,'runtime/web/server.cjs'))){const parent=path.dirname(directory);if(parent===directory)throw Error('Set PALE_RUNTIME_ROOT to the pinned runtime directory.');directory=parent;}runtimeDirectory=path.join(directory,'runtime');}
+const {start}=require(path.join(runtimeDirectory,'web/server.cjs'));
+const {Client}=require(path.join(runtimeDirectory,'client.cjs'));
+const {digestTree}=require(path.join(runtimeDirectory,'verify.cjs'));
+let outputArgument;
+for(let i=2;i<process.argv.length;i+=2){if(process.argv[i]!=='--output'||!process.argv[i+1])throw Error('Usage: node tests/browser.test.cjs [--output DIRECTORY]');outputArgument=process.argv[i+1];}
+const output=path.resolve(outputArgument||process.env.STAYREADY_BROWSER_REPORT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'stayready-browser-report-')));
+if(output===appDirectory||output.startsWith(appDirectory+path.sep))throw Error('Generate reports outside the App package, then retain reviewed evidence separately.');
 const baseline=require('../fixtures/minimal.json');
 const initial='2026-12-01T18:00:00Z';
 const normalizeTimes=value=>Array.isArray(value)?value.map(normalizeTimes):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,normalizeTimes(v)])):typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(value)?new Date(value).toISOString():value;
@@ -26,14 +31,26 @@ const events={
  denied:{event_id:'browser-sharing-revoked',at:'2026-12-01T18:07:00Z',operation:'stayready.source_updated',payload:{source_id:'source-breakfast-person-1',expected_source_version:1,source_version:2,disclose_fields:[],grant_version:2}},
  content:{event_id:'browser-untrusted-source-text',at:'2026-12-01T18:08:00Z',operation:'stayready.source_updated',payload:{source_id:'source-breakfast-person-2',expected_source_version:1,source_version:2,fields:{meal_request:'<img src=x onerror="window.untrustedExecuted=true"> plant-based breakfast',private_background:'PRIVATE TEST BACKGROUND DO NOT SHARE'}}}
 };
-const report={schema:'stayready.browser-evidence.v1',checked_at:new Date().toISOString(),app_version:require('../app.json').version,host_version:require('../../../runtime/package.json').version,node:process.version,playwright:require('playwright/package.json').version,viewport:{width:1360,height:920},run:'stayready-browser',checks:[],screenshots:[],mcp:[],browser_requests:[],console_errors:[],page_errors:[],static_events:events,passed:false};
+const report={schema:'stayready.browser-evidence.v1',checked_at:new Date().toISOString(),app_version:require('../app.json').version,host_version:require(path.join(runtimeDirectory,'package.json')).version,node:process.version,playwright:require('playwright/package.json').version,viewport:{width:1360,height:920},browser_timezone:'America/Los_Angeles',property_timezone:baseline.property.timezone,run:'stayready-browser',checks:[],screenshots:[],mcp:[],browser_requests:[],console_errors:[],page_errors:[],static_events:events,passed:false};
 let host,infra,observer,browser,context,page,sequence=0;
 const stateDir=fs.mkdtempSync(path.join(os.tmpdir(),'stayready-browser-'));
 fs.mkdirSync(output,{recursive:true});
 if(fs.existsSync(path.join(output,'report.json'))){const previous=JSON.parse(fs.readFileSync(path.join(output,'report.json'),'utf8'));if(previous.schema===report.schema)for(const item of previous.screenshots||[]){if(/^\d{2}-[a-z-]+\.png$/.test(item.filename))fs.rmSync(path.join(output,item.filename),{force:true});}}
 fs.rmSync(path.join(output,'failure.png'),{force:true});
 function check(name,condition=true,details){assert.ok(condition,name);report.checks.push({name,passed:true,...(details?{details}:{})});console.log('PASS '+name);}
-async function capture(name,action,expected){const filename=String(++sequence).padStart(2,'0')+'-'+name+'.png';await page.screenshot({path:path.join(output,filename),fullPage:true});report.screenshots.push({sequence,filename,action,expected,view:await page.locator('nav [aria-current=page]').innerText(),visible_status:await page.locator('#status').innerText()});}
+async function capture(name,action,expected){
+ const filename=String(++sequence).padStart(2,'0')+'-'+name+'.png';
+ const observed=await page.evaluate(()=>{
+  const dialog=document.querySelector('dialog[open]'),scope=dialog||document.querySelector('#app');
+  const elements=[...scope.querySelectorAll('*')].filter(node=>node.getClientRects().length&&getComputedStyle(node).visibility!=='hidden'&&[...node.childNodes].some(child=>child.nodeType===Node.TEXT_NODE&&child.textContent.trim()));
+  const small=elements.filter(node=>parseFloat(getComputedStyle(node).fontSize)<12).map(node=>({text:node.textContent.trim().slice(0,100),font_size:getComputedStyle(node).fontSize}));
+  return {view:document.querySelector('nav [aria-current=page]')?.textContent,heading:scope.querySelector('h2')?.textContent,detail_text:(dialog||document.querySelector('.detail')).innerText,visible_status:document.querySelector('#status').innerText,dialog:dialog?{title:dialog.querySelector('h2').innerText,fields:[...dialog.querySelectorAll('input,select')].map(input=>({name:input.name,value:input.value})),error:dialog.querySelector('[role=alert]')?.textContent}:null,font_check:{passed:small.length===0,minimum_px:Math.min(...elements.map(node=>parseFloat(getComputedStyle(node).fontSize))),below_minimum:small},backdrop_check:dialog?{passed:document.documentElement.scrollHeight<=innerHeight+1,document_height:document.documentElement.scrollHeight,viewport_height:innerHeight}:null};
+ });
+ assert.equal(observed.font_check.passed,true,'App-owned visible text must be at least 12px: '+JSON.stringify(observed.font_check.below_minimum));
+ if(observed.backdrop_check)assert.equal(observed.backdrop_check.passed,true,'Dialog backdrop must cover the complete captured page.');
+ await page.screenshot({path:path.join(output,filename),fullPage:true});
+ report.screenshots.push({sequence,filename,action,expected,observed,view:observed.view,visible_status:observed.visible_status,preceding_check:report.checks.at(-1)?.name});
+}
 async function observed(label){const result=await observer.call('stayready.inspect');assert.equal(result.status,'ok');report.mcp.push({kind:'independent-agent-inspect',label,result});return result;}
 async function snapshot(label){const result=await infra.call('env.snapshot');assert.equal(result.status,'ok');report.mcp.push({kind:'infra-snapshot',label,result});return result;}
 async function event(name){const input={expected_version:(await snapshot('before '+name)).version,event:events[name]};const result=await infra.call('env.apply_event',input);report.mcp.push({kind:'infra-event',name,input,result});assert.equal(result.status,'committed',JSON.stringify(result));return result;}
@@ -44,10 +61,14 @@ async function select(id){await page.locator('[data-record-id="'+id+'"]').click(
 async function submit(){await page.locator('dialog button[type=submit]').click();}
 async function closed(){await page.locator('dialog').waitFor({state:'hidden'});await idle();}
 async function closeDialog(){await page.locator('dialog').getByRole('button',{name:'Close',exact:true}).click();}
+async function preview(label='Preview request'){await page.getByRole('button',{name:label,exact:true}).click();await page.locator('dialog[open]').waitFor();}
 
 (async()=>{
  try{
-  host=await start({app:'stayready',registry:path.join(root,'stayready.registry.json'),stateDir,run:report.run,profile:'sandbox'});
+  const registry=path.join(appDirectory,'web.registry.json'),registration=JSON.parse(fs.readFileSync(registry,'utf8'));
+  assert.deepEqual(registration.apps,[{app_id:'stayready',version:require('../app.json').version,path:'.'}]);
+  host=await start({app:'stayready',registry,stateDir,run:report.run,profile:'sandbox'});
+  check('Public Host starts using only the package-local GUI registry',host.registry===registry);
   infra=new Client('stayready','infra',report.run,stateDir,'stayready-browser-infra',{registry:host.registry});await infra.initialize();
   observer=new Client('stayready','agent',report.run,stateDir,'stayready-independent-observer',{registry:host.registry});await observer.initialize();
   // The public registry clock can predate this fixture. Use the standard seed
@@ -56,13 +77,14 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   const load=await infra.call('env.load_seed',{expected_version:current.version,data:baseline,virtual_now:initial,request_id:'browser-fixture-baseline'});
   assert.equal(load.status,'ready');report.mcp.push({kind:'baseline-load',result:load});
   browser=await chromium.launch({headless:true});report.browser=browser.version();
-  context=await browser.newContext({viewport:report.viewport});page=await context.newPage();page.setDefaultTimeout(10000);
+  context=await browser.newContext({viewport:report.viewport,timezoneId:report.browser_timezone});page=await context.newPage();page.setDefaultTimeout(10000);
   page.on('pageerror',error=>report.page_errors.push(error.message));
   page.on('console',message=>{if(message.type()==='error')report.console_errors.push(message.text());});
   page.on('request',request=>{if(request.url().endsWith('/api/call'))report.browser_requests.push({method:request.method(),body:request.postDataJSON()});});
   await page.goto(host.accessUrl);await idle();
   check('Public Host loads packaged StayReady controller',await page.getByRole('heading',{name:'StayReady',exact:true}).isVisible());
   check('Access token removed from URL',!page.url().includes('access='));
+  check('Winter times use hotel GMT even when the browser is in Los Angeles',await page.getByText('1 Dec 2026, 15:00 GMT',{exact:true}).isVisible());
   await capture('stay-start','Open authenticated public Host','Confirmed room booking and current guests visible');
   await select('policies');
   check('Policies distinguish steps from a lift',await page.getByText('Includes steps',{exact:true}).isVisible());
@@ -86,10 +108,10 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   const receipts=(await snapshot('GUI save persisted receipt')).snapshot.receipts;
   check('Retry reused one successful write receipt',Object.keys(receipts).filter(k=>k.startsWith('request:')).length===1);
   await page.reload();await idle();
-  check('Reload reconstructs latest business state',await page.locator('.detail').getByText(/2 Dec 2026, 00:20 UTC/).first().isVisible());
+  check('Reload reconstructs latest business state',await page.locator('.detail').getByText(/2 Dec 2026, 00:20 GMT/).first().isVisible());
   await capture('need-saved','Retry then reload','Updated arrival requirement persists; source review cleared');
   const beforePreview=await observed('before read-only preview');
-  await page.getByRole('button',{name:'Preview request',exact:true}).click();
+  await preview();
   const afterPreview=await observed('after read-only preview');
   check('Disclosure preview is read-only',JSON.stringify(beforePreview.view)===JSON.stringify(afterPreview.view)&&JSON.stringify(beforePreview.version)===JSON.stringify(afterPreview.version));
   await capture('request-preview','Click Preview request','Exact arrival, people and permitted disclosure visible before send');
@@ -108,13 +130,13 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   await capture('reply-confirmed','Apply static confirmation and click Refresh','Hotel-confirmed entrance, window and night desk visible');
   await page.getByRole('button',{name:'View arrangements',exact:true}).click();
   await capture('arrangements-confirmed','Click View arrangements','Both original access promise and new arrival promise visible');
-  await nav('Needs & requests');await select('need-arrival');await page.getByRole('button',{name:'Preview change',exact:true}).click();
+  await nav('Needs & requests');await select('need-arrival');await preview('Preview change');
   await capture('change-preview','Preview a change to the arrival service','Prior promise remains until hotel confirmation');await submit();await closed();
   check('Submitting change preserves existing promise',(await observed('pending change')).view.commitments.find(c=>c.need_id==='need-arrival').status==='active');
   await page.getByRole('button',{name:'Withdraw pending request',exact:true}).click();await capture('withdraw-confirm','Click Withdraw pending request','Confirmation explains existing services remain');await submit();await closed();
   current=await observed('withdrawn change');check('Withdrawing request preserves active commitment',current.view.requests.filter(r=>r.action==='change')[0].status==='withdrawn'&&current.view.commitments.find(c=>c.need_id==='need-arrival').status==='active');
   await capture('withdraw-result','Confirm withdrawal','Request is withdrawn and earlier promise remains');
-  await nav('Needs & requests');await select('need-access-person-1');await page.getByRole('button',{name:'Preview cancellation',exact:true}).click();
+  await nav('Needs & requests');await select('need-access-person-1');await preview('Preview cancellation');
   await capture('cancel-preview','Preview cancellation of access arrangement','Original terms and provider confirmation requirement visible');await submit();await closed();
   check('Pending cancellation preserves service',(await observed('pending cancellation')).view.commitments.find(c=>c.id==='commitment-baseline-access').status==='active');
   await capture('cancel-pending','Send cancellation request','Sent cancellation has not yet cancelled hotel service');
@@ -142,7 +164,7 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   await capture('breakfast-edit','Edit breakfast mornings through the business form','Both in-stay dates are ready to save');await submit();await closed();
   current=await observed('after GUI breakfast save');assert.deepEqual(current.view.needs.find(n=>n.id==='need-breakfast-person-2').conditions,breakfastConditions);check('GUI saves both requested breakfast mornings');
   await capture('breakfast-saved','Save breakfast need','Both requested dates persist in the need');
-  await page.getByRole('button',{name:'Preview request',exact:true}).click();await capture('breakfast-preview','Preview breakfast request','Exact guest, both mornings and permitted meal request appear before send');await submit();await closed();
+  await preview();await capture('breakfast-preview','Preview breakfast request','Exact guest, both mornings and permitted meal request appear before send');await submit();await closed();
   current=await observed('after GUI breakfast submission');
   check('Breakfast submission remains pending without a commitment',current.view.requests.find(r=>r.need_id==='need-breakfast-person-2').status==='submitted'&&!current.view.commitments.some(c=>c.need_id==='need-breakfast-person-2'));
   await capture('breakfast-pending','Send breakfast request','Both mornings are requested; the hotel has not confirmed either');
@@ -150,17 +172,17 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   const breakfastCommitment=current.view.commitments.find(c=>c.need_id==='need-breakfast-person-2');
   assert.deepEqual(breakfastCommitment.terms,breakfastTerms);assert.deepEqual(current.view.requests.find(r=>r.need_id==='need-breakfast-person-2').conditions,breakfastConditions);check('Partial breakfast reply retains two requested dates but confirms only one');
   const breakfastReply=page.locator('.detail .query-result').filter({hasText:'Breakfast is confirmed for 2 December only.'});
-  check('Visible hotel reply does not imply the second morning is covered',(await breakfastReply.innerText()).includes('2026-12-02')&&!(await breakfastReply.innerText()).includes('2026-12-03'));
+  check('Visible hotel reply does not imply the second morning is covered',(await breakfastReply.innerText()).includes('2 Dec 2026')&&!(await breakfastReply.innerText()).includes('3 Dec 2026'));
   await capture('breakfast-partial-reply','Apply the prewritten partial reply and click Refresh','Request lists both dates; hotel reply explicitly confirms 2 December only');
   await page.getByRole('button',{name:'View arrangements',exact:true}).click();
   const breakfastCard=page.locator('[data-commitment-id="'+breakfastCommitment.id+'"]');
-  check('Arrangement shows only the hotel-confirmed breakfast date',(await breakfastCard.innerText()).includes('2026-12-02')&&!(await breakfastCard.innerText()).includes('2026-12-03'));
+  check('Arrangement shows only the hotel-confirmed breakfast date',(await breakfastCard.innerText()).includes('2 Dec 2026')&&!(await breakfastCard.innerText()).includes('3 Dec 2026'));
   await capture('breakfast-partial-arrangement','Open confirmed arrangements','Breakfast commitment covers 2 December; 3 December is not included');
   await nav('Needs & requests');await select('need-breakfast-person-2');await page.getByRole('button',{name:'Clear local need',exact:true}).click();
   await capture('clear-need-confirm','Click Clear local need','Confirmation explains that existing hotel service stays on record');await submit();await closed();
   current=await observed('after clearing breakfast need');
   assert.deepEqual(current.view.commitments.find(c=>c.id===breakfastCommitment.id),breakfastCommitment);check('Clearing local need preserves the confirmed breakfast service',current.view.needs.find(n=>n.id==='need-breakfast-person-2').conditions===null);
-  await page.reload();await idle();check('Reload shows cleared need alongside the surviving promise',await page.getByText('No current requirement saved. Existing hotel arrangements remain on record.',{exact:true}).isVisible()&&await page.locator('.detail').getByText('2026-12-02',{exact:true}).isVisible());
+  await page.reload();await idle();check('Reload shows cleared need alongside the surviving promise',await page.getByText('No current requirement saved. Existing hotel arrangements remain on record.',{exact:true}).isVisible()&&await page.locator('.detail').getByText('2 Dec 2026',{exact:true}).isVisible());
   await capture('clear-need-result','Clear the local need and reload','No current requirement is saved; the hotel’s 2 December promise remains visible');
   await select('need-breakfast-person-1');
   await event('denied');await refresh();await page.getByRole('button',{name:'Preview request',exact:true}).click();await page.locator('#status[data-error=true]').waitFor();
@@ -168,7 +190,7 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   await capture('sharing-denied','Preview after trusted source grant revocation','Hotel disclosure denied; no request created');
   check('Denied preview creates no hotel request',!(await observed('denied preview')).view.requests.some(r=>r.need_id==='need-breakfast-person-1'));
   // Source text is rendered as text, including in the hotel disclosure preview.
-  await event('content');await refresh();await select('need-breakfast-person-2');await page.getByRole('button',{name:'Edit need',exact:true}).click();await page.locator('input[name=morning_dates]').fill('2026-12-02, 2026-12-03');await submit();await closed();await page.getByRole('button',{name:'Preview change',exact:true}).click();
+  await event('content');await refresh();await select('need-breakfast-person-2');await page.getByRole('button',{name:'Edit need',exact:true}).click();await page.locator('input[name=morning_dates]').fill('2026-12-02, 2026-12-03');await submit();await closed();await preview('Preview change');
   check('Untrusted source text cannot create elements or execute script',await page.locator('dialog img').count()===0&&await page.evaluate(()=>window.untrustedExecuted!==true));
   check('Private source background is absent from business UI',!(await page.locator('#app').innerText()).includes('PRIVATE TEST BACKGROUND')&&!(await page.locator('dialog').innerText()).includes('PRIVATE TEST BACKGROUND'));
   await capture('untrusted-text','Preview permitted service fact containing markup','Markup is literal text; private background omitted');await closeDialog();
@@ -187,8 +209,48 @@ async function closeDialog(){await page.locator('dialog').getByRole('button',{na
   check('Mobile viewport has no horizontal overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   check('Mobile action labels remain readable',await page.locator('.detail .reader-footer button').evaluateAll(buttons=>buttons.every(button=>{const rect=button.getBoundingClientRect();return rect.width>=88&&rect.height<=80;})));
   await capture('mobile-needs','Open needs at 390 × 844','All controls usable without horizontal page overflow');
+  await snapshot('completed original business workflows');
+  await page.setViewportSize(report.viewport);
+  async function loadTimezoneCase(label,data,virtual_now){
+   const input={expected_version:(await snapshot('before '+label)).version,data,virtual_now,request_id:'browser-timezone-'+label};
+   const result=await infra.call('env.load_seed',input);assert.equal(result.status,'ready');report.mcp.push({kind:'timezone-fixture-load',label,input,result});await page.reload();await idle();
+  }
+  await loadTimezoneCase('winter',baseline,initial);await nav('Needs & requests');await select('need-access-person-1');await page.getByRole('button',{name:'Edit need',exact:true}).click();
+  check('Winter datetime-local fields use hotel wall time',await page.locator('[name=window_start]').inputValue()==='2026-12-01T15:00'&&await page.locator('[name=window_end]').inputValue()==='2026-12-03T11:00');
+  await capture('winter-local-form','Open winter access-window editor','15:00 GMT appears as 15:00 in Europe/London fields');await submit();await closed();
+  let timezoneNeed=(await observed('winter local round trip')).view.needs.find(n=>n.id==='need-access-person-1');
+  assert.deepEqual(normalizeTimes(timezoneNeed.conditions.window),normalizeTimes(baseline.needs.find(n=>n.id==='need-access-person-1').conditions.window));check('Unchanged winter local form preserves UTC instants');
+  await capture('winter-local-saved','Save unchanged winter local fields','The stored UTC coverage remains unchanged');
+  const shiftDates=(value,mapping)=>Array.isArray(value)?value.map(v=>shiftDates(v,mapping)):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,shiftDates(v,mapping)])):typeof value==='string'?value.replace(/2026-(?:11-30|12-0[123])/g,date=>mapping[date]||date):value;
+  const summer=shiftDates(baseline,{'2026-11-30':'2026-06-30','2026-12-01':'2026-07-01','2026-12-02':'2026-07-02','2026-12-03':'2026-07-03'});
+  await loadTimezoneCase('summer',summer,'2026-07-01T18:00:00Z');await nav('Your stay');await select('booking');
+  check('Summer display uses hotel BST instead of browser timezone',await page.getByText('1 Jul 2026, 16:00 BST',{exact:true}).isVisible());
+  await capture('summer-local-stay','Load the explicit summer fixture','15:00 UTC check-in displays as 16:00 BST at the hotel');
+  await nav('Needs & requests');await select('need-access-person-1');await page.getByRole('button',{name:'Edit need',exact:true}).click();
+  check('Summer datetime-local fields apply the hotel daylight-saving offset',await page.locator('[name=window_start]').inputValue()==='2026-07-01T16:00'&&await page.locator('[name=window_end]').inputValue()==='2026-07-03T12:00');
+  await page.locator('[name=window_start]').fill('2026-07-01T16:30');await page.locator('[name=window_end]').fill('2026-07-03T11:30');
+  await capture('summer-local-form','Edit the hotel-local access coverage','16:30 and 11:30 are Europe/London wall-clock values');await submit();await closed();
+  timezoneNeed=(await observed('summer edited local round trip')).view.needs.find(n=>n.id==='need-access-person-1');
+  assert.deepEqual(normalizeTimes(timezoneNeed.conditions.window),{start:'2026-07-01T15:30:00.000Z',end:'2026-07-03T10:30:00.000Z'});check('Edited summer local times persist the correct UTC instants');
+  await page.reload();await idle();await page.getByRole('button',{name:'Edit need',exact:true}).click();
+  check('Summer UTC values reload into the same hotel-local fields',await page.locator('[name=window_start]').inputValue()==='2026-07-01T16:30'&&await page.locator('[name=window_end]').inputValue()==='2026-07-03T11:30');await closeDialog();
+  await capture('summer-local-saved','Save and reload summer coverage','The edited coverage displays 16:30–11:30 BST after reloading UTC state');
+  const badZone=structuredClone(summer);badZone.property.timezone='Not/A_Timezone';const zoneBefore=await observed('before invalid timezone');
+  const invalidZone=await infra.call('env.load_seed',{expected_version:zoneBefore.version,data:badZone,virtual_now:'2026-07-01T18:00:00Z',request_id:'browser-invalid-timezone'});
+  report.mcp.push({kind:'invalid-timezone-fixture',result:invalidZone});check('Invalid property IANA zone is rejected without changing state',invalidZone.status==='invalid_seed'&&JSON.stringify((await observed('after invalid timezone')).version)===JSON.stringify(zoneBefore.version));
+  for(const [label,mapping,virtualNow,localValue,message] of [
+   ['spring-gap',{'2026-11-30':'2026-03-27','2026-12-01':'2026-03-28','2026-12-02':'2026-03-29','2026-12-03':'2026-03-30'},'2026-03-28T18:00:00Z','2026-03-29T01:30','does not exist'],
+   ['autumn-overlap',{'2026-11-30':'2026-10-23','2026-12-01':'2026-10-24','2026-12-02':'2026-10-25','2026-12-03':'2026-10-26'},'2026-10-24T18:00:00Z','2026-10-25T01:30','occurs twice']
+  ]){
+   await loadTimezoneCase(label,shiftDates(baseline,mapping),virtualNow);await nav('Needs & requests');await select('need-access-person-1');await page.getByRole('button',{name:'Edit need',exact:true}).click();await page.locator('[name=window_start]').fill(localValue);
+   const before=await observed('before '+label+' local edit');await submit();await page.locator('dialog [role=alert]').filter({hasText:message}).waitFor();
+   check('Hotel-local '+label+' is rejected visibly without a write',JSON.stringify((await observed('after '+label+' local edit')).version)===JSON.stringify(before.version));
+   await capture(label+'-rejected','Submit a hotel-local time inside the '+label,'A precise local-time error is visible and saved coverage is unchanged');await closeDialog();
+  }
+  check('Every captured business frame has App-owned text of at least 12px',report.screenshots.every(frame=>frame.observed.font_check.passed));
+  check('Every captured dialog has a complete-page backdrop',report.screenshots.filter(frame=>frame.observed.dialog).every(frame=>frame.observed.backdrop_check.passed));
   check('No browser JavaScript errors',report.page_errors.length===0,report.page_errors);
-  await snapshot('final persisted records and receipts');report.package_sha256=digestTree(path.join(root,'apps/stayready'));report.host_sha256=digestTree(path.join(root,'runtime'));report.passed=true;
+  await snapshot('final persisted records and receipts');report.package_sha256=digestTree(appDirectory);report.host_sha256=digestTree(runtimeDirectory);report.passed=true;
  }catch(error){report.error=error.stack;console.error(error);if(page)await page.screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});process.exitCode=1;}
  finally{await context?.close();await browser?.close();await observer?.close();await infra?.close();await host?.close();fs.rmSync(stateDir,{recursive:true,force:true});fs.writeFileSync(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log('Browser evidence: '+output);}
 })().catch(error=>{console.error(error);process.exitCode=1;});

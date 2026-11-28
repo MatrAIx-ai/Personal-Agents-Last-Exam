@@ -18,10 +18,12 @@ node apps/stayready/tests/fixture-controls.cjs
 node apps/stayready/tests/dependencies.cjs
 node apps/stayready/scripts/check-dataset.cjs
 node apps/stayready/tests/dataset-mcp.cjs
-npm run web -- --app stayready --registry stayready.registry.json --state-dir .artifacts/stayready-web --run stayready-demo
+node runtime/web/server.cjs --app stayready --registry apps/stayready/web.registry.json --state-dir /tmp/stayready-web-state --run stayready-demo
 ```
 
-Use the URL printed by the Host. The dedicated registry starts at `2026-12-01T18:00:00Z` and pins StayReady 0.1.0, Contacts 1.0.0 and Notes 1.0.0. Its later time is intentional: it leaves the general repository registry unchanged and makes the baseline November 30 source observations readable. All local state is disposable; do not put real guest data in these examples.
+Use the URL printed by the Host. The package-owned [web registry](web.registry.json) starts at `2026-12-01T18:00:00Z` and pins StayReady 0.1.0 with paths relative to the package. GUI startup needs only `apps/stayready/` and the pinned `runtime/`, with no repository-root registry or package.json. Contacts/Notes are needed only for the optional integration demonstration. The clock makes the baseline November 30 source observations readable. All local state is disposable; do not put real guest data in these examples.
+
+A clean package-only layout is `runtime/` beside `apps/stayready/`; use the public runtime at upstream `25d5597` (1.6.0). Add `apps/contacts/` and `apps/notes/` only to reproduce the optional integration. From `apps/stayready`, `npm run web -- --state-dir /tmp/stayready-web-state --run stayready-demo` starts the same public Host. No root-level npm scripts are required.
 
 App-only checks need neither Core nor sibling Apps:
 
@@ -38,9 +40,13 @@ npx playwright install chromium
 node apps/stayready/tests/browser.test.cjs
 ```
 
-MCP, dependency and dataset drivers accept `PALE_RUNTIME_ROOT=/absolute/path/to/independently-selected/runtime` and `STAYREADY_REPORT_DIR=/absolute/output/directory`. The independent runtime must be compatible with the documented contracts. The browser driver uses the public Host from the checkout.
+MCP, dependency and dataset drivers accept `PALE_RUNTIME_ROOT=/absolute/path/to/independently-selected/runtime` and `STAYREADY_REPORT_DIR=/absolute/output/directory`. The independent runtime must be compatible with the documented contracts. The browser driver uses the same runtime override or the public Host from the checkout, and writes to an OS temporary directory unless `--output /absolute/directory` or `STAYREADY_BROWSER_REPORT_DIR` is supplied. Install Playwright 1.56.1 and Chromium as explicit browser-test tooling; these are not App runtime dependencies.
+
+The full [delivery reproduction](evidence/README.md#reproduce-the-delivery) copies only the package, runtime and declared participants to a fresh directory before executing its verifiers, MCP flows and actual browser controls. Retained reports are under `evidence/runs/`; their manifest inventories every tested input and artifact without a circular self-hash.
 
 ## User workflow and authority
+
+The property declares the IANA zone **Europe/London**. The GUI shows GMT/BST for hotel-local instants and uses local dates for breakfast mornings; UTC remains the wire/storage format. Local form input is converted in that property zone, independently of the browser timezone. Breakfast eligibility and the two-night invariant also use the property-local calendar, so daylight-saving changes do not turn two local nights into a fixed 48-hour requirement.
 
 The GUI has three views: **Your stay**, **Needs & requests**, and **Replies & arrangements**. A traveler reviews current sources, saves a local need, previews the exact disclosure, and submits it. Submission creates a pending request. Acknowledgement and clarification do not create a hotel promise. Only an applicable confirmed hotel reply does.
 
@@ -99,11 +105,11 @@ StayReady works independently. The delivered optional demonstration uses the act
 
 ## Environment data and provenance
 
-The [dataset manifest](datasets/manifest.json), [coverage report](datasets/coverage.json) and [data evidence](evidence/data-coverage.md) describe independently loadable monthly scenarios from 2025-01-01 through 2026-12-31. Each seed preserves the bounded one-property, two-night, two-person model. The minimal fixture supports quick verification; the full dataset provides arrival mismatches, route availability, partial breakfast commitments and companion replacement.
+The [dataset manifest](datasets/manifest.json), [coverage report](datasets/coverage.json) and [data evidence](evidence/data-coverage.md) describe independently loadable monthly scenarios from 2025-01-01 through 2026-12-31. Each seed preserves the bounded one-property, two-night, two-person model. The [contribution declaration](contribution/dataset.json) links the complete [evaluation dataset declaration](datasets/declaration.json), including its synthetic source, generation method, manifest and expected counts. Its existing `expected_counts.records: 20` describes the minimal seed required by the runtime contract; the second declaration describes the full delivered library. The library includes varied advance notice, local times, stay dates and companion assignments, plus plugin-generated requests, acknowledgments and final or pending replies. Four substantive patterns retain arrival mismatches, route availability, partial breakfast commitments and companion replacement.
 
-Separately, [six small F1–F6 fixtures](fixtures/scenarios/README.md) each retain two actual request/reply histories and six fixed event inputs. Their reference, no-action and incorrect executions check business consequences and include ordered replay. An unchanged, already-covered F3 case correctly requires no new hotel request. These fixtures are distinct from the 96 monthly seeds and are not silently added to the dataset's record/date totals.
+Separately, [six small F1–F6 fixtures](fixtures/scenarios/README.md) each retain two plugin-generated request/reply histories and six fixed event inputs. Their reference, no-action and incorrect executions check business consequences and include ordered replay. An unchanged, already-covered F3 case correctly requires no new hotel request. These fixtures are distinct from the 96 monthly seeds and are not silently added to the dataset's record/date totals.
 
-Guest identities, requests, commitments and future states are synthetic. Public hotel help pages captured in November 2026 provide service-behavior reference facts, not guest histories. Counts distinguish observation/confirmation dates from future service dates. The scripts regenerate canonical hashes and verify all seeds; the real MCP loader confirms public loading and retrieval. See [reference sources](evidence/reference/) for URLs, capture dates and inaccessible-reference alternatives requiring reviewer judgment.
+Guest identities, requests, commitments and future states are synthetic. As clarified in Chenngzz’s November 28 review, this original synthetic dataset does not require real guest records or a real-data anchor. Public hotel pages provide separate GUI/service-behavior references, not guest histories. Counts distinguish observation/confirmation dates from future service dates. The scripts regenerate canonical hashes and verify all seeds; the real MCP loader confirms public loading and retrieval. See [reference sources](evidence/reference/) for URLs, capture dates and inaccessible-reference alternatives requiring reviewer judgment.
 
 ## Limits and acceptance
 

@@ -8,17 +8,17 @@ Run from the repository root after installing the pinned Playwright dependency a
 node apps/stayready/tests/browser.test.cjs
 ```
 
-The test writes `.artifacts/stayready/browser/report.json` and ordered PNGs in the same directory. Set `STAYREADY_BROWSER_REPORT_DIR` to choose a different output directory. It launches the public Web Host against `stayready.registry.json`, creates an isolated temporary run, and cleans up the run and browser processes after writing the evidence. The report includes Node, Playwright, Chromium and Host versions, viewport, App package hash, static event inputs, observed browser requests, independent Agent MCP inspections, Infra snapshots and receipts, console errors and page errors. The lost-response check deliberately produces a network error after a successful server commit; its second unchanged submission uses the original transport request ID.
+The test defaults to an OS temporary output directory and writes `report.json` and ordered PNGs there. Pass `--output /absolute/directory` to select it explicitly. Set `STAYREADY_BROWSER_REPORT_DIR` to choose a different output directory. It launches the public Web Host against the package-owned `web.registry.json`, creates an isolated temporary run, and cleans up the run and browser processes after writing the evidence. The report includes Node, Playwright, Chromium and Host versions, viewport, App package hash, static event inputs, observed browser requests, independent Agent MCP inspections, Infra snapshots and receipts, console errors and page errors. The lost-response check deliberately produces a network error after a successful server commit; its second unchanged submission uses the original transport request ID.
 
 ## Workflow comparison
 
-StayReady is an original text-only service-arrangement workspace. Its reference-product comparison is about the booking details, special-request, confirmation and history workflows; it does not copy a hotel product's branding or promise visual parity. The implementation intentionally separates a confirmed room reservation, a current local need, a pending request and the hotel's actual terms. An arrival acknowledgment is visibly unconfirmed. A change or cancellation request leaves the earlier promise visible until a valid hotel response changes it. All time fields are explicitly UTC for the fictional fixture property.
+StayReady is an original text-only service-arrangement workspace. Its reference-product comparison is about the booking details, special-request, confirmation and history workflows; it does not copy a hotel product's branding or promise visual parity. The implementation intentionally separates a confirmed room reservation, a current local need, a pending request and the hotel's actual terms. An arrival acknowledgment is visibly unconfirmed. A change or cancellation request leaves the earlier promise visible until a valid hotel response changes it. The property declares `Europe/London`; hotel instants display local GMT/BST and breakfast mornings display human-readable local dates. Storage and event selectors remain UTC. Form conversion does not depend on the browser zone.
 
 The three views reuse the public Host's sidebar, record list, detail panel, metadata rows, tags and dialog layout. The booking view exposes same-headcount companion replacement and route conditions. The needs view shows current and historical personal needs, linked readable sources, authorized service facts and an exact request preview. The hotel record view shows immutable submitted conditions, replies, original promises, current availability and observed history. Backend authorization is rechecked for every operation; the GUI does not contain reset, seed, future-event or management controls.
 
 ## Ordered sequence
 
-The report is the authoritative index for the current run's filenames, actions and expected outcomes. The sequence covers:
+The report is the authoritative index for the current run's filenames, actions, expected outcomes and explicit observed results. The sequence covers:
 
 | Workflow | Browser controls and evidence | Independent state check |
 | --- | --- | --- |
@@ -32,10 +32,10 @@ The report is the authoritative index for the current run's filenames, actions a
 
 Screenshots supplement the real controls, MCP inspections and persisted receipts. The independent M4 reviewer still needs to reproduce the evidence against the submitted commit. Local browser success is not an independent acceptance decision.
 
-## Local execution and visual inspection
+## Current execution and visual inspection
 
-The retained [browser report](../../../evidence/stayready/browser/report.json) indexes the 34 ordered screenshots beside it. Evidence is stored outside the App package so adding reports does not create a circular package hash.
+The retained [browser report](runs/browser/report.json) is the authoritative current screenshot index and result count. Each frame records the action, expected result, observed visible state, correlated checks and a screenshot path. The [delivery manifest](runs/manifest.json) binds the exact source inputs and artifacts as explained in the [evidence index](README.md#hash-scope-and-isolation).
 
-The 2026-11-26 local run passed 38 browser checks and generated 34 ordered screenshots on Node 22.23.5, Playwright 1.56.1 and Chromium 141.0.7390.37, with the public Host at version 1.6.0. There were no browser JavaScript exceptions. Two expected console errors were retained in the report: the deliberately lost post-commit response and the rejected management request (403).
+The regression checks include winter GMT and summer BST, property-local form input round trips to UTC, human-readable breakfast dates, visible App text at least 12px, full-page modal coverage, and 390 × 844 mobile layout. Business workflows still exercise real controls and independent persisted MCP state. No browser JavaScript exceptions are expected; intentionally injected lost-response and management-denial console errors are recorded separately.
 
-The booking page, disclosure preview, hotel-confirmed reply, partial breakfast confirmation, cleared-need result, activity history and narrow-screen needs page were visually inspected. The breakfast screenshots visibly separate the two requested mornings from the one confirmed morning, and retain that promise after the local need is cleared. Visual inspection also caught narrow footer buttons before delivery; adding the existing shared `actions` class makes them wrap at 390 pixels. The final mobile check verifies both absence of page overflow and readable action-button dimensions. The final report's package/Host hashes and the submission evidence manifest bind these observations to their tested source; rerun after changes before claiming current-commit acceptance.
+The package-only delivery runner performs this same browser suite without the root registry, root npm scripts or root evidence directory. Reviewer reproduction and human judgment remain required; this report does not self-approve M4.

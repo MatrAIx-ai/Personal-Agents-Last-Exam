@@ -1,7 +1,7 @@
 'use strict';
 const {compile}=require('./schema-validator.cjs');
 const path=require('node:path');
-const {copy,fail,instant,sorted,window,same}=require('./common.cjs');
+const {copy,fail,instant,propertyDate,sorted,window,same}=require('./common.cjs');
 const validConditions=compile(require('../schemas/conditions.schema.json'),path.join(__dirname,'../schemas'));
 const validTerms=compile(require('../schemas/terms.schema.json'),path.join(__dirname,'../schemas'));
 function identity(data,value,need){
@@ -14,7 +14,7 @@ function identity(data,value,need){
  if(value.service==='late_arrival'&&value.person_ids.length!==2)fail('invalid_arguments','Arrival is scoped to the two booked travelers.');
 }
 function dates(data,values){
- const start=data.stay.check_in.slice(0,10),end=data.stay.check_out.slice(0,10);
+ const start=propertyDate(data,data.stay.check_in),end=propertyDate(data,data.stay.check_out);
  for(const day of values){if(!Number.isFinite(Date.parse(day+'T00:00:00Z'))||new Date(day+'T00:00:00Z').toISOString().slice(0,10)!==day||day<=start||day>end)fail('invalid_arguments','Breakfast dates must be mornings in the fixed stay.');}
  return sorted(values);
 }

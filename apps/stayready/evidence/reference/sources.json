@@ -1,25 +1,35 @@
 {
-  "schema": "stayready.public-reference-evidence.v1",
+  "schema": "stayready.public-reference-evidence.v2",
   "timezone": "UTC",
-  "collection_date": "2026-11-26",
-  "capture_method": "Actual Chrome page screenshots through the CUA extension; no generated or reconstructed page images.",
+  "capture_method": "November 26 FAQ and November 28 public booking-gate images are actual Chrome/CUA screenshots. The two November 28 product-interface images are faithful full-page renders of official public PDF guides, using pdftoppm. No interface was reconstructed or generated.",
   "browser": "Chrome (CUA extension; version not recorded for these public reference captures)",
   "observed_css_viewport": {
-    "width": 1470,
-    "height": 711
+    "november_26": {
+      "width": 1470,
+      "height": 711
+    },
+    "november_28": "Not recorded; actual image dimensions are recorded per artifact."
   },
-  "screenshot_note": "Returned screenshot bytes are 1455×704; saved without cropping or other image editing. Canonical public URLs omit transient session/tracking parameters.",
-  "privacy": "Public unauthenticated pages only; no private account or guest records. No DOM snapshots containing transient session URLs are included.",
+  "screenshot_note": "Original FAQ screenshot bytes are unchanged. New guide PNGs are full selected pages with no crop, redaction, enhancement or inserted content. The public booking-gate JPEG is unedited. Canonical URLs omit transient session/tracking parameters.",
+  "privacy": "Only public unauthenticated pages and publisher-supplied guide examples were accessed. The retained guide pages show no identifiable private guest, reservation credential or payment data. No booking lookup, login, request or purchase was submitted.",
   "counts": {
-    "real_public_reference_records": 3,
+    "real_public_reference_records": 6,
+    "official_product_guide_records": 2,
+    "public_product_access_gate_records": 1,
+    "public_policy_faq_records": 3,
     "synthetic_reference_records": 0,
     "mixed_reference_records": 0,
     "real_guest_records": 0,
-    "distinct_observation_dates": 1,
+    "distinct_observation_dates": 2,
+    "reference_images": 8,
+    "by_collection_date": {
+      "2026-11-26": 3,
+      "2026-11-28": 3
+    },
     "by_month": {
       "2026-11": {
-        "real_public_reference_records": 3,
-        "distinct_observation_dates": 1
+        "real_public_reference_records": 6,
+        "distinct_observation_dates": 2
       }
     }
   },
@@ -51,9 +61,12 @@
             "width": 1455,
             "height": 704
           },
-          "state": "Expanded extra-service and early/late check-in questions; cookie banner dismissed."
+          "state": "Expanded extra-service and early/late check-in questions; cookie banner dismissed.",
+          "method": "Chrome/CUA getScreenshot; unedited JPEG"
         }
-      ]
+      ],
+      "reference_type": "public-policy-faq",
+      "publication_date": null
     },
     {
       "source_id": "premierinn-access",
@@ -70,7 +83,7 @@
       ],
       "workflow": "Inspect the named entrance, route and lift dependencies rather than treating an accessible label as a complete stay promise.",
       "limitations": [
-        "These are real hub by Premier Inn public statements; they do not establish any facts about the fictional Harbor Lantern Hotel.",
+        "These are real hub by Premier Inn public statements; they do not establish any facts about the fictional StayReady properties.",
         "The fictional route, dates, outage and confirmation states are authored examples."
       ],
       "screenshots": [
@@ -83,9 +96,12 @@
             "width": 1455,
             "height": 704
           },
-          "state": "Public access FAQ including reception, restaurant and lift routes; essential cookies only."
+          "state": "Public access FAQ including reception, restaurant and lift routes; essential cookies only.",
+          "method": "Chrome/CUA getScreenshot; unedited JPEG"
         }
-      ]
+      ],
+      "reference_type": "public-policy-faq",
+      "publication_date": null
     },
     {
       "source_id": "premierinn-breakfast",
@@ -115,7 +131,8 @@
             "width": 1455,
             "height": 704
           },
-          "state": "Breakfast FAQ heading and booking guidance."
+          "state": "Breakfast FAQ heading and booking guidance.",
+          "method": "Chrome/CUA getScreenshot; unedited JPEG"
         },
         {
           "file": "premierinn-breakfast-changes.jpg",
@@ -126,7 +143,141 @@
             "width": 1455,
             "height": 704
           },
-          "state": "Scrolled to food-allergy information and changing/cancelling food or breakfast orders."
+          "state": "Scrolled to food-allergy information and changing/cancelling food or breakfast orders.",
+          "method": "Chrome/CUA getScreenshot; unedited JPEG"
+        }
+      ],
+      "reference_type": "public-policy-faq",
+      "publication_date": null
+    },
+    {
+      "source_id": "diamond-special-requests-guide",
+      "kind": "real-public-reference",
+      "reference_type": "official-product-guide-image",
+      "url": "https://cmsprod.diamondresorts.com/sites/default/files/HOW-TO-BOOK-RESERVATIONS-ONLINE_0.pdf",
+      "publisher": "Diamond Resorts",
+      "title": "How to Book Reservations Online — Step 2: Resort and Guest Details (continued)",
+      "collected_on": "2026-11-28",
+      "represented_date": "2026-11-28",
+      "date_meaning": "Date the public guide was retrieved; the embedded source metadata dates this legacy guide to 2019. The illustrated booking is a publisher-provided example, not an observed guest stay.",
+      "publication_date": null,
+      "pdf_source": {
+        "url": "https://cmsprod.diamondresorts.com/sites/default/files/HOW-TO-BOOK-RESERVATIONS-ONLINE_0.pdf",
+        "sha256": "6d0776fc7c4dee3416d754977941ee2c3ec26af65b34fabbdb25fb86252569d8",
+        "bytes": 500482,
+        "downloaded_at": "2026-11-28T12:42:50Z",
+        "page_number": 4,
+        "total_pages": 12,
+        "embedded_creation_date": "2019-05-31T13:53:31-07:00",
+        "publication_date": null,
+        "publication_date_note": "The embedded PDF creation timestamp is source metadata, not a verified public release date.",
+        "retention": "Only the selected unaltered rendered page is retained in this evidence directory; the complete original is available at the official URL."
+      },
+      "facts": [
+        "The guide reproduces a booking interface with a special-request text area, accessibility selections and a further-details field.",
+        "Its instructions describe requests as subject to availability."
+      ],
+      "workflow": "Enter an explicit special/access requirement and review it before proceeding.",
+      "limitations": [
+        "Historical product UI; this is not a claim about the current live Diamond Resorts booking design.",
+        "The publisher embedded a low-resolution screenshot; it is retained faithfully, not enhanced or reconstructed.",
+        "StayReady deliberately excludes broad medical/profile collection and whole-reservation cancellation."
+      ],
+      "screenshots": [
+        {
+          "file": "diamond-special-requests-guide.png",
+          "sha256": "d3371be0d33d2bcaace3a4ec27ff6d49ec307119e173e747e1c3f2e0cd04659a",
+          "bytes": 721200,
+          "captured_at": "2026-11-28T12:43:30Z",
+          "pixel_dimensions": {
+            "width": 1800,
+            "height": 1391
+          },
+          "method": "Official public PDF page rendered by pdftoppm -f 4 -l 4 -scale-to 1800 -png -singlefile; unedited",
+          "state": "Complete PDF page 4, including the publisher's special-request/accessibility interface image and surrounding explanatory text."
+        }
+      ]
+    },
+    {
+      "source_id": "premierinn-add-breakfast-guide",
+      "kind": "real-public-reference",
+      "reference_type": "official-product-guide-image",
+      "url": "https://www.businessaccount.premierinn.com/ext/CNPBookingUserguide.pdf",
+      "publisher": "Premier Inn",
+      "title": "Premier Inn Business Pay — Making a Cardholder Not Present Booking, Step 5",
+      "collected_on": "2026-11-28",
+      "represented_date": "2026-11-28",
+      "date_meaning": "Date the public guide was retrieved; PDF creation metadata is 2026-09-30. The dates and prices in the guide are illustrative product content, not collected guest history.",
+      "publication_date": null,
+      "pdf_source": {
+        "url": "https://www.businessaccount.premierinn.com/ext/CNPBookingUserguide.pdf",
+        "sha256": "c9f2cd73f3a08b99916badab461c26e6b13689c4bdd0150e76f4eb8b6b96b845",
+        "bytes": 694742,
+        "downloaded_at": "2026-11-28T12:43:04Z",
+        "page_number": 3,
+        "total_pages": 5,
+        "embedded_creation_date": "2026-09-30T15:33:01+05:30",
+        "publication_date": null,
+        "publication_date_note": "The embedded PDF creation timestamp is source metadata, not a verified public release date.",
+        "retention": "Only the selected unaltered rendered page is retained in this evidence directory; the complete original is available at the official URL."
+      },
+      "facts": [
+        "The guide reproduces the Customise your stay product page with breakfast options, quantity controls, a booking summary and Continue/Back controls."
+      ],
+      "workflow": "Select a breakfast service while keeping its scope and the fixed stay visible.",
+      "limitations": [
+        "The guide illustrates the Business Pay pre-booking flow; its text says meals may instead be authorized at payment in that flow.",
+        "StayReady provides per-person/per-morning requests and separate hotel confirmation; it has no checkout, prices, payment authorization or guaranteed allergen-safety claim.",
+        "This image does not show post-booking changes or a hotel reply."
+      ],
+      "screenshots": [
+        {
+          "file": "premierinn-add-breakfast-guide.png",
+          "sha256": "839ef36bbe953261c0546c21b0786faffd60efd590b5b01251be3830dc2af025",
+          "bytes": 546103,
+          "captured_at": "2026-11-28T12:43:29Z",
+          "pixel_dimensions": {
+            "width": 1273,
+            "height": 1800
+          },
+          "method": "Official public PDF page rendered by pdftoppm -f 3 -l 3 -scale-to 1800 -png -singlefile; unedited",
+          "state": "Complete PDF page 3, containing the publisher's Customise your stay / Add meals product interface."
+        }
+      ]
+    },
+    {
+      "source_id": "travelodge-manage-booking-gate",
+      "kind": "real-public-reference",
+      "reference_type": "public-product-access-gate",
+      "url": "https://www.travelodge.co.uk/manage-bookings",
+      "publisher": "Travelodge",
+      "title": "Find a Booking",
+      "collected_on": "2026-11-28",
+      "represented_date": "2026-11-28",
+      "date_meaning": "Actual public product screen observed on collection date.",
+      "publication_date": null,
+      "entry_url": "https://www.travelodge.co.uk/about/our-restaurants",
+      "entry_action": "Followed the public Amend my booking link under Add food to your booking.",
+      "facts": [
+        "The product gate requests booking identification or account access before showing an existing reservation."
+      ],
+      "workflow": "Boundary of access to post-booking breakfast changes.",
+      "limitations": [
+        "No details were entered and no booking lookup was submitted.",
+        "This capture proves the access gate only, not the protected add-breakfast or manage-service screen."
+      ],
+      "screenshots": [
+        {
+          "file": "travelodge-manage-booking-gate.jpg",
+          "sha256": "9d1de1b414a0634983e7bd249b1d7c6934e03135d272768616aa0bd52a217fa3",
+          "bytes": 48943,
+          "captured_at": "2026-11-28T12:42:39Z",
+          "pixel_dimensions": {
+            "width": 1455,
+            "height": 648
+          },
+          "method": "Chrome/CUA getScreenshot; unedited JPEG",
+          "state": "Empty Find a Booking form reached from the public food-amendment entry; no guest information entered."
         }
       ]
     }
@@ -150,16 +301,59 @@
       },
       "alternative_url": "https://www.booking.com/tpi_faq.html",
       "acceptance": "pending-maintainer-review"
+    },
+    {
+      "url": "https://www.travelodge.co.uk/manage-bookings",
+      "status": "reservation-access-required",
+      "observed_on": "2026-11-28",
+      "issue": "Following the public food-amendment link led to an empty booking-identification/account gate. No protected service-management page was accessed.",
+      "evidence": {
+        "file": "travelodge-manage-booking-gate.jpg",
+        "sha256": "9d1de1b414a0634983e7bd249b1d7c6934e03135d272768616aa0bd52a217fa3",
+        "bytes": 48943,
+        "captured_at": "2026-11-28T12:42:39Z",
+        "pixel_dimensions": {
+          "width": 1455,
+          "height": 648
+        },
+        "method": "Chrome/CUA getScreenshot; unedited JPEG",
+        "state": "Empty Find a Booking form reached from the public food-amendment entry; no guest information entered."
+      },
+      "alternative_url": "https://www.businessaccount.premierinn.com/ext/CNPBookingUserguide.pdf",
+      "acceptance": "pending-maintainer-review",
+      "alternative_scope": "Official guide image supplies breakfast-selection UI; existing FAQ and StayReady sequence supply change/cancel context, but no real post-booking modification or hotel-reply screenshot is claimed."
     }
   ],
   "review_decision": {
     "status": "pending-maintainer-review",
-    "question": "Are public official workflow/policy facts and their screenshots acceptable November 2026 real reference anchors for this original synthetic hotel-service App, whose dataset contains no real guest transactions?",
+    "scope": "GUI reference alternatives only",
+    "question": "Please explicitly accept the two official product-guide page images and the paired FAQ references as the comparison alternative for protected post-booking request/reply/change/cancellation states that could not be captured without reservation access.",
+    "dataset_decision": "The 2026-11-28 PR review explicitly accepts synthetic evaluation data and says no real anchor is needed. These references are GUI evidence, not a dataset-realism anchor requirement.",
     "not_claimed": [
-      "Historical real guest data across 2025–2026",
-      "A screenshot of an authenticated booking management flow",
-      "A reviewed exemption from Environment data requirements"
+      "Access to an authenticated customer booking",
+      "Operation of a live hotel request or breakfast purchase",
+      "An original-product screenshot of hotel acknowledgment, partial confirmation or confirmed cancellation",
+      "Current pixel parity with the legacy Diamond Resorts guide"
     ]
   },
-  "rights": "Reference screenshots remain the source publishers’ material, retained as attributed review evidence. They are not runtime UI assets and are not claimed to be MIT-licensed."
+  "rights": "Publisher-provided reference images remain their publishers' material, retained as attributed review evidence. The two PNGs are faithful selected-page reproductions of official public guides. They are not runtime assets and are not claimed to be MIT-licensed.",
+  "collection_dates": [
+    "2026-11-26",
+    "2026-11-28"
+  ],
+  "updated_on": "2026-11-28",
+  "retrieval_notes": [
+    {
+      "url": "https://cmsprod.diamondresorts.com/sites/default/files/HOW-TO-BOOK-RESERVATIONS-ONLINE_0.pdf",
+      "observed_on": "2026-11-28",
+      "browser_outcome": "CUA browser PDF view remained blank; web screenshot retrieval timed out.",
+      "resolution": "The exact official public PDF URL downloaded successfully over HTTPS without credentials. The selected page was rendered and visually inspected locally."
+    },
+    {
+      "url": "https://help.onthebeach.co.uk/hc/en-gb/articles/31528753148817-How-do-I-make-a-special-request",
+      "observed_on": "2026-11-28",
+      "outcome": "Public text instructions only; no useful product screenshot was present, so no extra FAQ image was added."
+    }
+  ],
+  "render_tool": "Poppler pdftoppm 26.11.0"
 }

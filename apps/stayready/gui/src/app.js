@@ -3,13 +3,51 @@ import {el, human, tag, metadata, textBlock, avatar} from '/shared/client.js';
 // This controller uses the public Host's fixed Agent session. Its only business
 // data is the latest authorized inspect result; previews are read-only receipts.
 document.body.dataset.app = 'stayready';
+// The public Host deliberately serves only its shared stylesheet. These static,
+// App-owned CSSOM rules extend that stylesheet without adding a server route or
+// allowing inline/user-provided styles through the Host's CSP.
+const presentation = new CSSStyleSheet();
+presentation.replaceSync(`
+  body[data-app="stayready"] :is(small,.tag,.record-subtitle,.kicker,.collection-count,.sidebar-foot strong,#status,.attachments h3) {font-size:12px}
+  body[data-app="stayready"] #status {height:auto;min-height:30px}
+  body[data-app="stayready"]:has(dialog[open]) #app {height:100dvh;overflow:hidden}
+  html:has(body[data-app="stayready"] dialog[open]) {overflow:hidden}
+`);
+document.adoptedStyleSheets = [...document.adoptedStyleSheets, presentation];
 const pendingStatuses = new Set(['submitted', 'acknowledged', 'needs_clarification']);
 const serviceLabels = {late_arrival:'Late arrival', step_free_access:'Step-free access', breakfast:'Breakfast'};
 const activityLabels = {'stayready.need.save':'Need updated','stayready.people.replace':'Companion replaced','stayready.request.submit':'Request sent','stayready.request.withdraw':'Request withdrawn','stayready.source_updated':'Source updated','stayready.hotel_reply':'Hotel reply received','stayready.service_unavailable':'Service availability notice'};
 const statusLabels = {submitted:'Sent · awaiting hotel', acknowledged:'Received · not yet confirmed', needs_clarification:'Hotel needs clarification', confirmed:'Hotel confirmed', declined:'Hotel declined', withdrawn:'Withdrawn', superseded:'Replaced by a newer request', active:'Confirmed arrangement', unavailable:'Service unavailable', cancelled:'Hotel confirmed cancellation'};
 let csrf = '', tools = new Set(), state = null, version = null, view = sessionStorage.getItem('stayready-view') || 'stay';
 let selected = sessionStorage.getItem('stayready-selected') || 'need-arrival', refreshing = false, busy = false;
-const displayTime = value => value ? new Intl.DateTimeFormat('en-GB', {dateStyle:'medium', timeStyle:'short', timeZone:'UTC'}).format(new Date(value)) + ' UTC' : '—';
+const hotelZone = () => state.property.timezone;
+const displayTime = value => value ? new Intl.DateTimeFormat('en-GB', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZoneName:'short',timeZone:hotelZone()}).format(new Date(value)) : '—';
+// A breakfast morning is a calendar date, not an instant to shift across zones.
+const displayMorning = value => new Intl.DateTimeFormat('en-GB', {day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
+function localInput(value) {
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:hotelZone(),year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(value)).map(p=>[p.type,p.value]));
+  return parts.year+'-'+parts.month+'-'+parts.day+'T'+parts.hour+':'+parts.minute;
+}
+function localToInstant(value, original) {
+  // Preserve the precise original instant for an unchanged wall-clock field,
+  // including an original instant inside an autumn overlap.
+  if(original && value===localInput(original))return original;
+  const match=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+  if(!match)throw Object.assign(Error('Enter a complete hotel-local date and time.'),{code:'invalid_arguments'});
+  const wall=Date.UTC(+match[1],+match[2]-1,+match[3],+match[4],+match[5]);
+  const candidates=new Set();
+  // Both sides of a possible daylight-saving transition supply their actual
+  // IANA offset. Never parse datetime-local using the browser's own timezone.
+  for(const hours of [-36,-12,0,12,36]) {
+    const probe=wall+hours*3600000;
+    const local=localInput(new Date(probe).toISOString());
+    const offset=Date.parse(local+':00Z')-probe;
+    const candidate=new Date(wall-offset).toISOString();
+    if(localInput(candidate)===value)candidates.add(candidate);
+  }
+  if(candidates.size!==1)throw Object.assign(Error(candidates.size ? 'This hotel-local time occurs twice when the clocks change. Choose an unambiguous time.' : 'This hotel-local time does not exist when the clocks change. Choose a valid time.'),{code:'invalid_arguments'});
+  return [...candidates][0];
+}
 const personName = id => state.people.find(p => p.id === id)?.name || id;
 const peopleNames = ids => (ids || []).map(personName).join(', ');
 const needTitle = need => serviceLabels[need.service] || human(need.service);
@@ -81,7 +119,7 @@ function facts(value) {
   if (value.route_id) rows.push(metadata('Confirmed route', state.property.routes.find(r => r.id === value.route_id)?.label || value.route_id));
   if (value.entrance_id) rows.push(metadata('Entrance', state.property.entrances.find(e => e.id === value.entrance_id)?.label || value.entrance_id));
   if (value.access_method_id) rows.push(metadata('Arrival method', human(value.access_method_id)));
-  if (value.morning_dates) rows.push(metadata('Mornings', value.morning_dates.join(', ')));
+  if (value.morning_dates) rows.push(metadata('Mornings', value.morning_dates.map(displayMorning).join(', ')));
   if (value.meal_request) rows.push(metadata('Meal request', value.meal_request));
   return el('div', {}, rows);
 }
@@ -102,7 +140,7 @@ function renderStay() {
   }
   detail.replaceChildren(article('Booking stays separate from service requests',state.property.name,
     el('div',{class:'tags'},tag('Room reservation ' + state.stay.reservation_status),tag('Two guests · two nights')),
-    metadata('Check-in',displayTime(state.stay.check_in)),metadata('Check-out',displayTime(state.stay.check_out)),
+    metadata('Check-in',displayTime(state.stay.check_in)),metadata('Check-out',displayTime(state.stay.check_out)),metadata('Hotel time zone',hotelZone()),
     section('Staying guests',el('div',{class:'people'},state.stay.guest_person_ids.map(id=>el('div',{class:'person'},avatar(personName(id)),el('div',{},el('strong',{},personName(id)),el('small',{},id === state.owner_person_id ? 'Booking owner' : 'Companion')))))),
     textBlock('You can replace the companion while keeping the same headcount. Review the new guest’s needs and arrange cancellation of any unwanted confirmed services separately.'),
     el('div',{class:'reader-footer actions'},can('people.replace') ? button('Replace companion',replacePerson,{class:'primary'}) : null,button('Review needs',()=>navigate('needs','need-arrival'))),
@@ -200,7 +238,7 @@ function replacePerson() {
 function editNeed(need) {
   const factKey = {late_arrival:'arrival_at',step_free_access:'functional_need',breakfast:'meal_request'}[need.service];
   const sources = state.sources.filter(s=>s.readable !== false && (s.person_id == null || need.person_ids.includes(s.person_id)) && s.fields?.[factKey] !== undefined);
-  const sourceInput = select(sources.map(s=>[s.id,human(s.id.replace(/^source-/,''))+' · '+String(s.fields[factKey])]),need.source_ids?.[0]); sourceInput.name='source_id';
+  const sourceInput = select(sources.map(s=>[s.id,human(s.id.replace(/^source-/,''))+' · '+(factKey==='arrival_at' ? displayTime(s.fields[factKey]) : String(s.fields[factKey]))]),need.source_ids?.[0]); sourceInput.name='source_id';
   const inputs = [field('Service fact source',sourceInput,'Use an observed source fact. Sharing permission is checked again when you send.')];
   let readConditions;
   const base = {stay_id:state.stay.id,service:need.service,person_ids:need.person_ids};
@@ -208,10 +246,11 @@ function editNeed(need) {
     inputs.push(textBlock('Saving applies the selected source’s latest arrival time to this need. Preview the exact time and guests before sending.'));
     readConditions=()=>({...base,arrival_at:sources.find(s=>s.id===sourceInput.value)?.fields.arrival_at});
   } else if(need.service === 'step_free_access') {
-    const start=el('input',{name:'window_start',type:'datetime-local',required:true,value:(need.conditions?.window.start || state.stay.check_in).slice(0,16)});
-    const end=el('input',{name:'window_end',type:'datetime-local',required:true,value:(need.conditions?.window.end || state.stay.check_out).slice(0,16)});
-    inputs.push(field('Coverage starts (UTC)',start),field('Coverage ends (UTC)',end));
-    readConditions=()=>({...base,functional_need:sources.find(s=>s.id===sourceInput.value)?.fields.functional_need,window:{start:start.value+':00Z',end:end.value+':00Z'}});
+    const originalStart=need.conditions?.window.start || state.stay.check_in, originalEnd=need.conditions?.window.end || state.stay.check_out;
+    const start=el('input',{name:'window_start',type:'datetime-local',required:true,value:localInput(originalStart)});
+    const end=el('input',{name:'window_end',type:'datetime-local',required:true,value:localInput(originalEnd)});
+    inputs.push(field('Coverage starts ('+hotelZone()+')',start),field('Coverage ends ('+hotelZone()+')',end,'Hotel local time; daylight-saving offsets are applied automatically.'));
+    readConditions=()=>({...base,functional_need:sources.find(s=>s.id===sourceInput.value)?.fields.functional_need,window:{start:localToInstant(start.value,originalStart),end:localToInstant(end.value,originalEnd)}});
   } else {
     const dates=el('input',{name:'morning_dates',type:'text',required:true,value:(need.conditions?.morning_dates || []).join(', ')});
     inputs.push(field('Breakfast mornings',dates,'Dates in the stay, separated by commas: YYYY-MM-DD.'));

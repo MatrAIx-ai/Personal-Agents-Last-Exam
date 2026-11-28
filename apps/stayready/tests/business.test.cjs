@@ -187,3 +187,64 @@ test('required need slots and source/notice chronology remain valid after seed l
     d=>d.commitments[0].unavailability=[{event_id:'bad-notice',recorded_at:'2026-11-29T00:00:00Z',effective_at:'2026-12-01T22:00:00Z',reason:'Notice predates confirmation'}]
   ]){const d=clone(seed);mutate(d);assert.throws(()=>fixture(d));}
 });
+
+// Keep service facts and sources coherent while exercising calendar boundaries.
+function calendarSeed(checkIn,checkOut,mornings) {
+  const data=clone(seed),window={start:checkIn,end:checkOut};
+  data.stay.check_in=checkIn;data.stay.check_out=checkOut;
+  data.requests=[];data.commitments=[];data.history=[];
+  const arrival=new Date(Date.parse(checkIn)+30*60000).toISOString();
+  for(const route of data.property.routes)route.window=clone(window);
+  for(const source of data.sources) {
+    source.observed_at=new Date(Date.parse(checkIn)-2*86400000).toISOString();
+    if(source.fields.arrival_at)source.fields.arrival_at=arrival;
+  }
+  for(const need of data.needs) {
+    if(need.service==='late_arrival')need.conditions.arrival_at=arrival;
+    if(need.service==='step_free_access')need.conditions.window=clone(window);
+    if(need.service==='breakfast')need.conditions.morning_dates=clone(mornings);
+  }
+  return data;
+}
+
+test('breakfast edits and confirmed terms use property dates across a UTC midnight boundary',()=>{
+  // These UTC instants mean local 2 July 00:30 -> 4 July 00:30 in London.
+  const f=fixture(calendarSeed('2026-07-01T23:30:00Z','2026-07-03T23:30:00Z',['2026-07-03','2026-07-04']));
+  f.ctx.virtual_now='2026-07-01T18:00:00Z';
+  const n=f.data.needs.find(n=>n.id==='need-breakfast-person-1');
+  f.call('need.save',{need_id:n.id,conditions:n.conditions,source_ids:n.source_ids});
+  for(const morning of ['2026-07-02','2026-07-05'])
+    noMutation(f,()=>f.call('need.save',{need_id:n.id,conditions:{...n.conditions,morning_dates:[morning]},source_ids:n.source_ids}));
+  submit(f,n.id);
+  const event=reply(f.data.requests[0],{at:'2026-07-01T18:05:00Z',from:'2026-07-01T18:00:00Z'});
+  const invalid=clone(event);invalid.payload.terms.morning_dates=['2026-07-02'];
+  noMutation(f,()=>f.event(invalid));
+  f.event(event);
+  assert.deepEqual(f.data.commitments[0].terms.morning_dates,['2026-07-03','2026-07-04']);
+});
+
+test('two property-local nights remain valid through 47-hour and 49-hour daylight-saving stays',()=>{
+  for(const [checkIn,checkOut,mornings,hours] of [
+    ['2026-03-28T12:00:00Z','2026-03-30T11:00:00Z',['2026-03-29','2026-03-30'],47],
+    ['2026-10-24T11:00:00Z','2026-10-26T12:00:00Z',['2026-10-25','2026-10-26'],49]
+  ]) {
+    assert.equal((Date.parse(checkOut)-Date.parse(checkIn))/3600000,hours);
+    const data=calendarSeed(checkIn,checkOut,mornings),before=clone(data);
+    assert.equal(plugin.validateSeed({binding:clone(binding)},data),true);
+    assert.deepEqual(data,before,'calendar validation must not rewrite stored UTC instants');
+    const f=fixture(data);
+    assert.deepEqual(preview(f,'need-breakfast-person-1').value.request_conditions.morning_dates,mornings);
+  }
+});
+
+test('a UTC two-date difference cannot admit a local three-night or one-night seed',()=>{
+  for(const [checkIn,checkOut,mornings] of [
+    ['2026-07-01T22:30:00Z','2026-07-03T23:30:00Z',['2026-07-02','2026-07-03']], // local 1 -> 4 July
+    ['2026-07-01T23:30:00Z','2026-07-03T22:30:00Z',['2026-07-03']] // local 2 -> 3 July
+  ]) {
+    assert.equal(Date.parse(checkOut.slice(0,10))-Date.parse(checkIn.slice(0,10)),2*86400000);
+    const data=calendarSeed(checkIn,checkOut,mornings),before=clone(data);
+    assert.throws(()=>plugin.validateSeed({binding:clone(binding)},data),{code:'invalid_seed'});
+    assert.deepEqual(data,before,'invalid local-calendar stays must leave the supplied seed unchanged');
+  }
+});

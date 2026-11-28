@@ -15,7 +15,7 @@ const digest = value => hash(JSON.stringify(value));
 const counts = data => ({ property: 1, stay: 1, ...Object.fromEntries(['people', 'sources', 'needs', 'requests', 'commitments', 'history'].map(key => [key, data[key].length])) });
 
 async function main() {
-  const output = path.resolve(process.env.STAYREADY_REPORT_DIR || path.join(root, '.artifacts/stayready'));
+  const output = path.resolve(process.env.STAYREADY_REPORT_DIR || path.join(app, '.artifacts/dataset'));
   fs.mkdirSync(output, { recursive: true });
   const manifestFile = path.join(app, 'datasets/manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestFile));
@@ -24,7 +24,7 @@ async function main() {
   const report = { schema: 'stayready.dataset-mcp-evidence.v1', started_at: new Date().toISOString(),
     node: process.version, runtime: require(path.join(runtimeRoot, 'package.json')).version,
     app_sha256: digestTree(app), manifest_sha256: hash(fs.readFileSync(manifestFile)),
-    binding_sha256: hash(bindingBytes), timezone: 'UTC', expected_scenarios: manifest.scenarios.length,
+    binding_sha256: hash(bindingBytes), timezone: manifest.timezone, expected_scenarios: manifest.scenarios.length,
     interface: { load: 'Infra env.load_seed', query: 'Agent stayready.inspect', verify: 'Infra env.snapshot' },
     scenarios: [], passed: false };
   let prepared;
@@ -62,6 +62,17 @@ async function main() {
       assert.equal(view.owner_person_id, seed.owner_person_id);
       assert.deepEqual(view.property, seed.property);
       assert.deepEqual(view.stay, seed.stay);
+      assert.equal(view.property.timezone,manifest.timezone);
+      assert.deepEqual(view.requests,seed.requests,'Loaded requests and acknowledgment/final replies must be publicly retrievable.');
+      assert.deepEqual(view.history,seed.history,'Loaded operation/event history must be publicly retrievable.');
+      assert(view.requests.length>=2&&view.requests.length<=4);
+      assert(view.requests.every(r=>r.replies.some(reply=>reply.outcome==='acknowledged')));
+      for(const request of view.requests.filter(r=>r.status==='confirmed')) {
+        const promise=view.commitments.find(c=>c.request_id===request.id);
+        assert(promise,'Each confirmed service request retains its linked hotel promise.');
+        assert.deepEqual(promise.terms,request.final_reply.terms);
+        assert.equal(promise.confirmed_at,request.final_reply.at);
+      }
       assert.equal(Date.parse(view.virtual_now), Date.parse(entry.initial_time));
       assert.deepEqual(counts(view), entry.record_counts);
       assert.deepEqual(view.sources.map(s => [s.id, s.observed_at]), seed.sources.map(s => [s.id, s.observed_at]));
@@ -76,13 +87,13 @@ async function main() {
         const promise = view.commitments.find(c => c.terms.service === 'late_arrival');
         assert(Date.parse(need.conditions.arrival_at) > Date.parse(promise.terms.arrival_window.end));
       } else if (entry.pattern === 'route-unavailable') {
-        assert.equal(view.commitments.find(c => c.id === 'commitment-baseline-access').effective_status, 'unavailable');
+        assert.equal(view.commitments.find(c => c.need_id === entry.focus_need_id).effective_status, 'unavailable');
       } else if (entry.pattern === 'breakfast-partial') {
-        assert.equal(view.needs.find(n => n.id === 'need-breakfast-person-1').conditions.morning_dates.length, 2);
-        assert.equal(view.commitments.find(c => c.id === 'commitment-baseline-breakfast').terms.morning_dates.length, 1);
+        assert.equal(view.needs.find(n => n.id === entry.focus_need_id).conditions.morning_dates.length, 2);
+        assert.equal(view.commitments.find(c => c.need_id === entry.focus_need_id).terms.morning_dates.length, 1);
       } else if (entry.pattern === 'guest-replaced') {
-        assert.equal(view.needs.find(n => n.id === 'need-breakfast-person-2').is_current, false);
-        assert.equal(view.commitments.find(c => c.id === 'commitment-former-guest-breakfast').status, 'active');
+        assert.equal(view.needs.find(n => n.id === entry.focus_need_id).is_current, false);
+        assert.equal(view.commitments.find(c => c.need_id === entry.focus_need_id).status, 'active');
       } else assert.fail('Unknown scenario pattern: ' + entry.pattern);
       const after = await infra.call('env.snapshot');
       assert.deepEqual(after.snapshot.data, snapshot.snapshot.data);
@@ -90,13 +101,19 @@ async function main() {
       Object.assign(row, { query: { tool: 'stayready.inspect', arguments: {}, status: inspected.status, version: inspected.version,
         view_sha256: digest(view), account_id: view.account_id, record_counts: counts(view),
         visible_dates: { earliest_source_observed_at: earliestOccurrence, stay_check_in: view.stay.check_in, stay_check_out: view.stay.check_out },
-        private_background_visible: false, sources: view.sources.map(s => ({ id: s.id, version: s.version, fields: s.fields })),
+        private_background_visible: false,
+        history_retrieval:{requests_equal_seed:true,history_equal_seed:true,request_count:view.requests.length,history_count:view.history.length,
+          requests:view.requests.map(r=>({id:r.id,need_id:r.need_id,submitted_at:r.submitted_at,status:r.status,replies:r.replies.map(reply=>({event_id:reply.event_id,at:reply.at,outcome:reply.outcome})),confirmed_commitment_id:view.commitments.find(c=>c.request_id===r.id)?.id||null})),
+          request_records_sha256:digest(view.requests),history_records_sha256:digest(view.history)},
+        sources: view.sources.map(s => ({ id: s.id, version: s.version, fields: s.fields })),
         commitments: view.commitments.map(c => ({ id: c.id, terms: c.terms, effective_status: c.effective_status })) },
         persisted_data_sha256: digest(after.snapshot.data), read_mutated_state: false, passed: true });
     }
     assert.equal(report.scenarios.length, 96);
     report.checked_months = [...new Set(report.scenarios.map(s => s.scenario_id.slice(0, 7)))];
     assert.equal(report.checked_months.length, 24);
+    report.loaded_history={requests:report.scenarios.reduce((n,s)=>n+s.query.history_retrieval.request_count,0),history_records:report.scenarios.reduce((n,s)=>n+s.query.history_retrieval.history_count,0),scenarios_with_history:report.scenarios.filter(s=>s.query.history_retrieval.history_count>0).length};
+    assert.equal(report.loaded_history.scenarios_with_history,96);
     assert.equal(report.scenarios[0].query.visible_dates.earliest_source_observed_at.slice(0, 10), '2025-01-01');
     assert.equal(report.scenarios.at(-1).query.visible_dates.stay_check_out.slice(0, 10), '2026-12-31');
     report.passed = true;
