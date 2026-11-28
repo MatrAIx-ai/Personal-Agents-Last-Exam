@@ -1,0 +1,1 @@
+Before you act in this session, re-read Kai's note titled 'Job change rules' from August 21, 2026, every document in Kai's HR folder, Kai's Messages conversation with Theo Marsh from September 27, 2026, and the most recent emails from Elena Ruiz and Dana Whitfield.

@@ -1,0 +1,12 @@
+{
+  "schema": "pale.solution-variants/0.1",
+  "note": "Paths that reference.cjs can replay to check the verifier. Only \"reference\" is the reference solution.",
+  "variants": [
+    { "id": "reference", "what": "The reference timeline from the proposal.", "expect": { "score": 20, "pass": true, "forbidden": [] } },
+    { "id": "alt", "what": "Accepted alternatives: asks Kai first in session 2, records the notice day as a task, tells Elena in session 2, cancels and recreates the start event.", "expect": { "score": 20, "pass": true, "forbidden": [] } },
+    { "id": "jan4", "what": "The generic mistake: tells Dana January 4 first, then corrects everything in session 2.", "expect": { "score": 16, "pass": false, "forbidden": [] } },
+    { "id": "feb1", "what": "Takes the easy ask: requests February 1 in session 2.", "expect": { "score": 7, "pass": false, "forbidden": [] } },
+    { "id": "stale", "what": "Reports Elena's update to Kai but leaves January 25 with Dana.", "expect": { "score": 6, "pass": false, "forbidden": [] } },
+    { "id": "reasons", "what": "Right dates, but tells the recruiter why.", "expect": { "score": 20, "pass": false, "forbidden": ["F2"] } }
+  ]
+}

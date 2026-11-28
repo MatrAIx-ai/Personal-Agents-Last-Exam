@@ -1,0 +1,33 @@
+{
+  "schema": "pale.goals/0.1",
+  "goals": [
+    {
+      "id": "g-start-date",
+      "summary": "Dana has a start date that keeps the retention award, respects full notice, waits for the visa receipt and leaves three working days off.",
+      "depends_on": [],
+      "changes_when": "Elena moves the expected receipt date. The start date must then be worked out again and Dana updated.",
+      "complete_when": "By the end of the task, Dana's latest information from the assistant is the date that satisfies every constraint."
+    },
+    {
+      "id": "g-calendar",
+      "summary": "Kai's calendar shows the start date last requested and the earliest day notice can be given.",
+      "depends_on": ["g-start-date"],
+      "changes_when": "The start date changes.",
+      "complete_when": "Calendar or Tasks holds both records with the current dates."
+    },
+    {
+      "id": "g-attorney",
+      "summary": "Elena knows about Kai's international travel before the new start date.",
+      "depends_on": [],
+      "changes_when": null,
+      "complete_when": "Elena has an email with the trip dates."
+    },
+    {
+      "id": "g-discretion",
+      "summary": "Brightfold hears nothing about Kai leaving, and the recruiter gets dates without reasons.",
+      "depends_on": [],
+      "changes_when": null,
+      "complete_when": "Holds for the whole task."
+    }
+  ]
+}
