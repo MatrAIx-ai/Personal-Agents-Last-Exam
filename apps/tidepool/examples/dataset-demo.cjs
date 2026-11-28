@@ -112,6 +112,33 @@ async function main() {
     const end = await look('End of 2026', '2026-12-31T23:59:00-08:00');
     ok('By the end of 2026 every episode is visible', end.episodes === seed.episodes.length);
     ok('No session is recorded after the dataset clock', stages[2].priya_sessions === stages[1].priya_sessions);
+
+    // An Agent write at an earlier clock that drops later family records reports them (README, clock cutoff):
+    // the #216 review's repro, through Core with the write-enabled task policy.
+    const AT = '2026-04-01T12:00:00-07:00', writes = JSON.parse(fs.readFileSync(path.join(pkg, 'examples/task-data/policies.json'), 'utf8'));
+    const version = async () => (await infra.call('env.snapshot')).version;
+    await infra.call('env.load_seed', {expected_version: await version(), request_id: 'load-early-write', data: seed, binding, policies: writes, bundle, virtual_now: AT});
+    const albums = seed.albums.filter(a => Date.parse(a.released + 'T12:00:00Z') <= Date.parse(AT)).map(a => a.album_id).slice(0, 9);
+    const receipts = [];
+    let args;
+    for (const [i, item_id] of albums.entries()) {
+      args = {id, device_id: 'dev-priya-phone', item_type: 'album', item_id, expected_version: await version(), request_id: 'early-download-' + (i + 1)};
+      receipts.push(await agent.call('tidepool.downloads.add', args));
+    }
+    const last = receipts.at(-1), counts = last.later_history_removed || {};
+    ok('At 2026-04-01 the first eight album downloads commit and report no later history',
+      receipts.slice(0, 8).every(r => r.status === 'committed' && r.later_history_removed === null));
+    ok('The ninth (' + albums[8] + ') commits and its receipt counts the later family records it dropped (143 sessions, 4 playlists, 8 payments)',
+      last.status === 'committed' && counts.sessions === 143 && counts.playlists === 4 && counts['billing.payments'] === 8);
+    const snap = (await infra.call('env.snapshot')).snapshot, row = snap.data.activity.at(-1), kept = row.later_history_removed || {};
+    const storedAs = (family, x) => (family.startsWith('billing.') ? seed.billing[family.slice(8)] : seed[family]).some(y => JSON.stringify(y) === JSON.stringify(x));
+    ok('Its activity row in env.snapshot holds exactly those records, each as the loaded seed stored it', row.request_id === 'early-download-9'
+      && JSON.stringify(Object.fromEntries(Object.entries(kept).map(([k, v]) => [k, v.length]))) === JSON.stringify(counts)
+      && Object.entries(kept).every(([family, list]) => list.every(x => storedAs(family, x))));
+    const again = await agent.call('tidepool.downloads.add', args);
+    ok('An identical retry returns the stored receipt, marked duplicate, with the same counts',
+      again.duplicate === true && JSON.stringify(again.later_history_removed) === JSON.stringify(counts));
+    stages.push({label: 'Early write', clock: AT, request_id: args.request_id, item_id: albums[8], later_history_removed: counts});
     return {
       app_id: 'tidepool', package_sha256: digestTree(pkg), node: process.version,
       dataset: {path: 'apps/tidepool/data/evaluation/seed.json', version: meta.version, sha256: crypto.createHash('sha256').update(seedText).digest('hex'),

@@ -181,7 +181,7 @@ function laterRemoved(stored, base, out) {
 // caps, member limits, one open invitation or active download per key), the later family records
 // are dropped instead: they described a future without this change. Later albums, tracks and episodes stay.
 // Whatever later history is dropped or replaced is reported: the stored records in the change's activity
-// row, and their IDs by family in `removed` (the caller logs them and puts only counts in the receipt).
+// row, and their IDs by family in `removed` (the caller counts them for the receipt and the log).
 function commit(ctx, stored, now, change) {
   const {data: base, cut} = view(stored, now), mine = copy(base);
   mine[HIDDEN] = base[HIDDEN];

@@ -207,7 +207,8 @@ function applyEvent(ctx, stored, event) {
     a.activity(data, {...row, at: event.at, actor: 'event', action: event.operation, event_id: event.event_id});
     return row;
   });
-  log(ctx, 'tidepool.event_applied', {operation: event.operation, object_id: out.result.object_id, later_history_removed: out.removed});
+  const counts = out.removed && Object.fromEntries(Object.entries(out.removed).map(([family, ids]) => [family, ids.length]));
+  log(ctx, 'tidepool.event_applied', {operation: event.operation, object_id: out.result.object_id, later_history_removed: counts});
   return out.data;
 }
 

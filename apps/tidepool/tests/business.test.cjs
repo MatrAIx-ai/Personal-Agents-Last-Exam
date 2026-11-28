@@ -974,7 +974,7 @@ function laterReport(before, after, receipt, at) {
     if (gone.length) {expected[name] = gone.map(key); stored[name] = gone;}
   }
   const counts = Object.fromEntries(Object.entries(expected).map(([family, ids]) => [family, ids.length]));
-  assert.deepEqual(receipt.later_history_removed ?? {}, counts, 'the receipt counts exactly the later records removed or changed');
+  if (receipt) assert.deepEqual(receipt.later_history_removed ?? {}, counts, 'the receipt counts exactly the later records removed or changed');
   const row = after.activity.at(-1);
   assert.deepEqual(row.later_history_removed ?? {}, stored, 'the activity row keeps them as stored');
   return expected;
@@ -1015,4 +1015,17 @@ test('every kind of early-clock collision reports the later record it replaced, 
   assert.deepEqual(upnext.lost.upnext, ['mem-priya']);
   // A write that touches no later record keeps them all and reports null.
   assert.equal(run('tidepool.library.save', {id: 'mem-priya', item_type: 'album', item_id: 'alb-kestrel-1'}).receipt.later_history_removed, null);
+});
+
+test('an event at an early clock that replaces a later record keeps it in the event\'s activity row', () => {
+  // A listening.record at 2026-04-01 finishes an episode whose progress the seed records on Apr. 2.
+  const at = '2026-04-01T12:00:00-07:00', f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: '2026-04-01T11:00:00-07:00', logging: false});
+  const before = f.data;
+  f.event({event_id: 'early-harborhours-071', at, operation: 'listening.record', payload: {session_id: 'ls-early-071', member_id: 'mem-priya',
+    device_id: 'dev-priya-phone', item_type: 'episode', item_id: 'ep-harborhours-071', started_at: '2026-04-01T11:10:00-07:00', start_reason: 'user',
+    speed: 1, start_position_s: 0, end_position_s: 2958, end_reason: 'completed'}});
+  const after = f.data, lost = laterReport(before, after, null, at);
+  assert.deepEqual(lost.progress, ['mem-priya/ep-harborhours-071']);
+  assert.equal(after.activity.at(-1).event_id, 'early-harborhours-071');
+  assert.equal(after.activity.at(-1).later_history_removed.progress[0].updated_at, '2026-04-02T08:04:48-07:00');
 });
