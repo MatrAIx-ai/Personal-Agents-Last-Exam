@@ -84,6 +84,8 @@ async function run() {
     // Stoopside (Core) and the user's Mail (Core), one run, separate state.
     const stoopInfra = await open('stoopside', 'infra', path.join(dir, 'stoopside'), prepared.registry);
     const stoopAgent = await open('stoopside', 'agent', path.join(dir, 'stoopside'), prepared.registry);
+    // Core starts the run from the manifest seed (Hillcrest); this example uses Maple St at its clock.
+    await require('../scripts/load-fixture.cjs').loadFixture(stoopInfra, 'maple-street');
     let s = await stoopInfra.call('env.snapshot');
     assert.equal((await stoopInfra.call('env.reset', {expected_version: s.version, profile: 'full'})).status, 'ready');
     const mailInfra = await open('mail', 'infra', dir, MAIL_REGISTRY), mailAgent = await open('mail', 'agent', dir, MAIL_REGISTRY);
@@ -104,7 +106,7 @@ async function run() {
 
     // An event creates a notice: m-009 drops out of the full potluck and the user is offered a place.
     s = await stoopInfra.call('env.snapshot');
-    const applied = await stoopInfra.call('env.apply_event', {expected_version: s.version, event: require('./scenario.json')});
+    const applied = await stoopInfra.call('env.apply_event', {expected_version: s.version, event: require('./maple-street-event.json')});
     assert.equal(applied.status, 'committed');
     let stoop = (await stoopInfra.call('env.snapshot')).snapshot;
     const [offer] = newNotices(stoop);

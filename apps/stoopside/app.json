@@ -16,8 +16,8 @@
     "events": "schemas/events.schema.json"
   },
   "fixtures": {
-    "seed": "fixtures/minimal.json",
-    "binding": "fixtures/binding.json",
+    "seed": "fixtures/hillcrest.json",
+    "binding": "fixtures/hillcrest.binding.json",
     "policies": "fixtures/policies.json"
   },
   "dependencies": [],
@@ -44,7 +44,7 @@
   "limitations": [
     "Pages are served by the shared business Web Host over the Agent MCP connection; they hold no business state.",
     "Groups use a fixed UTC offset with no daylight-saving changes.",
-    "Only fixtures/minimal.json is the manifest seed; the Riverside and Hillcrest fixtures load with env.load_seed and their own binding.",
+    "The manifest seed is the Hillcrest fixture, whose clock (2026-11-18 09:00 PST) is the shared registry time; Maple St (fixtures/minimal.json, clock 2027-03-01) and Riverside load with env.load_seed, their own binding and their own clock.",
     "Notices are stored as Mail channel.email messages; examples/publish-to-mail.cjs publishes them through Messaging."
   ],
   "dataset": "contribution/dataset.json",

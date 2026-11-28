@@ -13,7 +13,7 @@ const assert = require('node:assert/strict');
 const {fixture} = require('./harness.cjs');
 const {evaluate} = require('./checks.cjs');
 
-const EV04 = require('../examples/scenario.json');
+const EV04 = require('../examples/maple-street-event.json');
 
 const ANCHORS = {
   send_off: {

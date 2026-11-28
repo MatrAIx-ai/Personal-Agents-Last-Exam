@@ -13,8 +13,11 @@ const eventValid = compile(require('../schemas/events.schema.json'), schemaDir);
 const input = new Map(tools.map(t => [t.name, compile(t.inputSchema, path.resolve(__dirname, '..'))]));
 const output = new Map(tools.map(t => [t.name, compile(t.outputSchema, path.resolve(__dirname, '..'))]));
 
-function fixture({logging = true, seed = require('../fixtures/minimal.json'), now = require('../fixtures/clock.json').initial_time,
-  binding = require('../fixtures/binding.json')} = {}) {
+// The business tests run on the Maple St fixture at its own clock (the manifest
+// seed is Hillcrest; see fixtures/index.json).
+const MAPLE = require('../fixtures/index.json').fixtures.find(f => f.key === 'maple-street');
+function fixture({logging = true, seed = require('../' + MAPLE.seed), now = MAPLE.clock,
+  binding = require('../' + MAPLE.binding)} = {}) {
   let data = structuredClone(seed);
   const logs = [];
   const ctx = {app_id: app, role: 'agent', virtual_now: now, binding: structuredClone(binding)};

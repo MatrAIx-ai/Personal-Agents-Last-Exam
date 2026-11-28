@@ -7,7 +7,7 @@ const {fixture} = require('./harness.cjs');
 const {evaluate, START} = require('./checks.cjs');
 
 const SEED = require('../fixtures/minimal.json');
-const EV04 = require('../examples/scenario.json');   // m-009 changes yes -> no on e-0117 at 2027-03-05 18:20
+const EV04 = require('../examples/maple-street-event.json');   // m-009 changes yes -> no on e-0117 at 2027-03-05 18:20
 const USER = 'm-001';
 const code = c => e => e.code === c;
 function unchanged(f, fn, c) {
@@ -536,19 +536,19 @@ test('diagnostics are optional and never change business results', () => {
 test('fixture and example dates: history on or after 2025-01-01, task clock on or after 2026-01-01', () => {
   const floor = Date.parse('2025-01-01T00:00:00Z');
   const stamps = value => [...JSON.stringify(value).matchAll(/\d{4}-\d{2}-\d{2}(T[0-9:.]+(Z|[+-]\d{2}:\d{2}))?/g)].map(m => m[0]);
-  const files = ['../fixtures/minimal.json', '../examples/scenario.json', '../examples/timeline.json', './visibility-table.json'];
+  const files = ['../fixtures/minimal.json', '../fixtures/hillcrest.json', '../examples/scenario.json', '../examples/maple-street-event.json', '../examples/timeline.json', './visibility-table.json'];
   for (const file of files) {
     for (const s of stamps(require(file))) assert.ok(Date.parse(s.length === 10 ? s + 'T00:00:00Z' : s) >= floor, `${file}: ${s} is before 2025-01-01`);
   }
   assert.ok(stamps(smallSeed()).every(s => Date.parse(s.length === 10 ? s + 'T00:00:00Z' : s) >= floor));
   assert.ok(Date.parse(require('../fixtures/clock.json').initial_time) >= Date.parse('2026-01-01T00:00:00Z'));
-  for (const e of [require('../examples/scenario.json'), ...require('../examples/timeline.json')]) assert.ok(Date.parse(e.at) >= Date.parse('2026-01-01T00:00:00Z'));
+  for (const e of [require('../examples/scenario.json'), require('../examples/maple-street-event.json'), ...require('../examples/timeline.json')]) assert.ok(Date.parse(e.at) >= Date.parse('2026-01-01T00:00:00Z'));
 });
 
 test('generated files are current: schemas, tools, fixture, binding and dataset hashes', () => {
   require('../scripts/build-schemas.cjs').build({check: true});
   require('../scripts/generate-fixture.cjs').write({check: true});
-  assert.equal(require('../contribution/dataset.json').expected_counts.records, plugin.records(SEED).length);
+  assert.equal(require('../contribution/dataset.json').expected_counts.records, plugin.records(require('../' + require('../app.json').fixtures.seed)).length);
 });
 
 // ---- (c) Contracts: role by operation ---------------------------------------------

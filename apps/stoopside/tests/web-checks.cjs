@@ -24,6 +24,9 @@ const root = path.resolve(app, '../..');
 const {chromium} = require(require.resolve('playwright', {paths: [root]}));
 const {start} = require(path.join(root, 'runtime/web/server.cjs'));
 const {Client} = require(path.join(root, 'runtime/client.cjs'));
+// Core starts each run from the manifest seed (Hillcrest); the main and
+// read-only runs switch to Maple St at its clock through env.load_seed.
+const {loadFixture} = require('../scripts/load-fixture.cjs');
 
 const EVIDENCE = process.argv.includes('--evidence');
 const VIEWPORT = {width: 1280, height: 800};
@@ -46,6 +49,7 @@ async function main() {
     host = await start({app: 'stoopside', registry: path.join(app, 'web.registry.json'), stateDir, run: RUN, profile: 'sandbox'});
     infra = new Client('stoopside', 'infra', host.run, stateDir, 'stoopside-web-inspector', {registry: host.registry});
     await infra.initialize();
+    await loadFixture(infra, 'maple-street');
     const tool = (name, args = {}) => host.client.call('stoopside.' + name, args);
     const snapshot = async () => (await infra.call('env.snapshot'));
     const data = async () => (await snapshot()).snapshot.data;
@@ -316,7 +320,7 @@ async function main() {
 
     // A scenario event applied by Infra appears after a refresh; the offer is claimed through the page.
     s = await snapshot();
-    const applied = await infra.call('env.apply_event', {expected_version: s.version, event: require('../examples/scenario.json')});
+    const applied = await infra.call('env.apply_event', {expected_version: s.version, event: require('../examples/maple-street-event.json')});
     assert.equal(applied.status, 'committed');
     await go('#/event/e-0117');
     ok('a refresh shows the waitlist offer an Infra event created, with the claim deadline in EST', (await text('[data-my-rsvp]')).includes('A place was offered to you for you and 1 guest (2 places). Claim by Sat, Mar 6, 2027, 6:20 PM EST.'));
@@ -398,6 +402,8 @@ async function main() {
 
     // Read-only profile: a second run with the scenario profile shows no write controls.
     roHost = await start({app: 'stoopside', registry: path.join(app, 'web.registry.json'), stateDir: roDir, run: RUN + '-ro', profile: 'scenario'});
+    const roInfra = new Client('stoopside', 'infra', roHost.run, roDir, 'stoopside-web-ro-loader', {registry: roHost.registry});
+    try { await roInfra.initialize(); await loadFixture(roInfra, 'maple-street', {requestId: 'load-ro'}); } finally { await roInfra.close(); }
     const ro = await context.newPage();
     ro.on('pageerror', e => errors.push(e.message));
     await ro.goto(roHost.accessUrl);
@@ -444,7 +450,7 @@ async function main() {
         node: process.version,
         viewport: VIEWPORT,
         run: {run_id: RUN, read_only_run_id: RUN + '-ro', hillcrest_run_id: RUN + '-hillcrest', hillcrest_registry: 'apps/stoopside/web.hillcrest.registry.json', profile: 'sandbox', read_only_profile: 'scenario', registry: 'apps/stoopside/web.registry.json',
-          clock: JSON.parse(fs.readFileSync(path.join(app, 'web.registry.json'))).initial_time, seed: 'apps/stoopside/fixtures/minimal.json', seed_sha256: sha256(path.join(app, 'fixtures/minimal.json')),
+          clock: JSON.parse(fs.readFileSync(path.join(app, 'web.registry.json'))).initial_time, seed: 'apps/stoopside/fixtures/minimal.json (loaded with env.load_seed)', seed_sha256: sha256(path.join(app, 'fixtures/minimal.json')),
           account: 'st-dana (Dana O., member m-001)'},
         checks: checks.length,
         screens: shots,

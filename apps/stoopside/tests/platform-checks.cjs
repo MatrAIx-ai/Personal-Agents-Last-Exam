@@ -22,7 +22,9 @@ const sha = value => crypto.createHash('sha256').update(canonical(value)).digest
 const hash = snapshot => sha(snapshot.data);
 const recordHash = snapshot => sha(VIS.record(snapshot.data));
 
-const EV04 = require('../examples/scenario.json');
+const EV04 = require('../examples/maple-street-event.json');
+// Core starts each run from the manifest seed (Hillcrest); these checks run on Maple St.
+const {loadFixture} = require('../scripts/load-fixture.cjs');
 const GATED = ['stoopside.posts.publish', 'stoopside.events.confirm_change', 'stoopside.rsvps.confirm', 'stoopside.members.export'];
 
 async function main() {
@@ -35,6 +37,7 @@ async function main() {
   const ok = (name, condition) => { assert.ok(condition, name); results.push(name); };
   try {
     const infra = await open('infra');
+    await loadFixture(infra, 'maple-street');
     let snap = await infra.call('env.snapshot');
     ok('reset into the full profile', (await infra.call('env.reset', {expected_version: snap.version, profile: 'full'})).status === 'ready');
     const agent = await open('agent');
@@ -91,6 +94,7 @@ async function main() {
     // deadlines and small steps give the same committed chain.
     const chain = async (run, targets) => {
       const i = await open('infra', run), a = await open('agent', run);
+      await loadFixture(i, 'maple-street', {requestId: 'load-' + run});
       let s = await i.call('env.snapshot');
       await i.call('env.reset', {expected_version: s.version, profile: 'full'});
       s = await i.call('env.snapshot');

@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const {fixture} = require('../tests/harness.cjs');
 const f = fixture();
 const before = f.data;
-f.event(require('./scenario.json'));
+f.event(require('./maple-street-event.json'));
 assert.notDeepEqual(f.data, before);
 const offer = f.data.notices.at(-1);
 assert.equal(offer.kind, 'waitlist_offer');

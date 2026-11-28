@@ -31,8 +31,35 @@ function revisions(record, what, fields, seqs, nextSeq) {
   }
 }
 
+// A seed is the account's history up to the clock: a load whose clock is
+// earlier than any recorded row would show the Agent records from its future
+// (posts, RSVPs, members, mail) and is refused. Build an earlier start with
+// `node scripts/generate-fixture.cjs --cutoff`, which keeps a coherent prefix.
+function historyBefore(ctx, data) {
+  if (typeof ctx.virtual_now !== 'string') return;
+  const now = ms(ctx.virtual_now);
+  const late = (what, id, at) => {
+    if (at !== null && at !== undefined && ms(at) > now) {
+      fail('invalid_seed', `The clock ${ctx.virtual_now} is earlier than the seed's history: ${what} ${id} is dated ${at}. Load the seed at or after its last record, or build a cut-off with scripts/generate-fixture.cjs --cutoff.`);
+    }
+  };
+  for (const g of data.groups) late('group', g.id, g.created_at);
+  for (const m of data.members) late('member', m.id, m.created_at);
+  for (const [what, list] of [['membership', data.memberships], ['event', data.events], ['RSVP', data.rsvps], ['post', data.posts], ['sheet', data.sheets]]) {
+    for (const x of list) {
+      late(what, x.id, x.created_at);
+      for (const v of x.revisions) late(what, x.id, v.at);
+    }
+  }
+  for (const w of data.swaps) { late('swap', w.id, w.proposed_at); late('swap', w.id, w.decided_at); }
+  for (const d of data.deliveries) late('delivery', d.id, d.at);
+  for (const p of data.previews) late('preview', p.id, p.created_at);
+  for (const n of data.notices) late('notice', n.id, n.created_at);
+}
+
 function validateSeed(ctx, data) {
   references(ctx, data);
+  historyBefore(ctx, data);
   const people = new Set(ctx.binding.people.map(p => p.person_id));
   const seqs = new Set();
   const groups = unique(data.groups, 'group');
