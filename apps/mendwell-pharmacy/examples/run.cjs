@@ -1,0 +1,12 @@
+'use strict';
+const assert = require('node:assert/strict');
+const { fixture } = require('../tests/harness.cjs');
+const f = fixture({ seed: require('../fixtures/minimal.json'), now: require('../fixtures/clock.json').initial_time });
+const household = f.call('mendwell-pharmacy.household.list', {});
+assert.equal(household.status, 'ok');
+assert.notEqual(f.data().stores.find(s => s.store_id === 'st-2').stock['d-atorvastatin-40'], true);
+const restocked = f.event(require('./scenario.json'));
+assert.equal(restocked.status, 'committed');
+assert.equal(f.data().stores.find(s => s.store_id === 'st-2').stock['d-atorvastatin-40'], true);
+assert.equal(f.data().fills.find(x => x.fill_id === 'f-15').state, 'ready');
+console.log(JSON.stringify({ people: household.people.map(p => p.person_id), event: restocked.status, f15: 'ready' }));

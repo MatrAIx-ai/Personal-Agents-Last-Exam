@@ -1,0 +1,225 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "mendwell-pharmacy-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic Mendwell fixture for one household of four (account holder, spouse, a child and an elderly parent living separately): three invented stores, twelve generic drugs with facts cited from public DailyMed labels, two drug plans with price tables and four cards; a task timeline in 2026 with twelve current prescriptions and twenty fills in every state; and a generated history from 2025-01-01. For package validation and examples; not an evaluation task. The full-window delivery dataset for evaluation, 2025-01-01 to 2026-12-31, is the source delivery-dataset in dataset/; it is not loaded as the package fixture.",
+  "record_source_ids": [
+    "authored",
+    "generated-history",
+    "label-d-atorvastatin-40",
+    "label-d-donepezil-5",
+    "label-d-warfarin-5",
+    "label-d-lisinopril-10",
+    "label-d-levothyroxine-50",
+    "label-d-sertraline-50",
+    "label-d-omeprazole-20",
+    "label-d-metformin-500",
+    "label-d-amlodipine-5",
+    "label-d-albuterol-90",
+    "label-d-amoxicillin-250-5",
+    "label-d-montelukast-4"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Synthetic household, prescribers, drugs, drug plans, prices, stores and cards, and the task timeline (2026), authored for this package with AI assistance, checked by dev/check-fixture.cjs and reviewed by the contributor. The task timeline is a hand-written list of dated steps in dev/generate-history.cjs (opening on 2026-01-01 with a view grant; twelve prescriptions received or renewed; twenty fills with prior authorizations, early-refill requests, a quantity change, cash payments, two prepayments, a fill-limited pickup grant, a cancellation, a return to stock and two pharmacist holds; two grants and two renewals) that the script replays through the App's own tools and events in one run with the history, both in date order, so these records too are ones the App wrote. The two series share prescriptions where a household would: routine history refills continue on the current task-timeline prescriptions, and the task renewal rn-1 renews a 2025 prescription. The task timeline's IDs continue the runtime counters (f-1 to f-20, pr-1 to pr-12), except its notices, which are numbered n-t1 onward outside the runtime notice series, as seeded notices are history, so the notices a run appends start at n-1. Clinical facts are short paraphrases of the cited DailyMed labels; no patient or personal data was collected and no label text was copied.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Mendwell fixture authoring",
+        "tool_version": "1",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated-history",
+      "kind": "synthetic",
+      "description": "Synthetic pharmacy history from 2025-01-01, opening with the household's grants on that day, to the fixture clock: the household's 2025 prescriptions and grants; routine refills of eleven regimens (monthly and 90-day supplies) with their claims, prior-authorization requests, early requests that waited for their eligible date, cash payments for a drug the plan does not cover, stock waits and restocks, pharmacist holds, forgotten pickups returned to stock or cancelled, and collection refusals (closed store, declined card); each visit to the counter also takes every other unheld fill of that collector that is ready at that store, task-timeline fills included, apart from the forgotten ones; two acute amoxicillin prescriptions, one with a fill-limited pickup grant revoked before collection; and their notices. IDs are in a separate h series (f-h1, cl-h1, n-h1, rx-h1, g-h1 and so on), outside the runtime counters; routine refills continue on the current task-timeline prescriptions once those arrive in 2026, so the 53 history fills from f-h86 on name task-timeline prescriptions, as a household's refills would. Produced deterministically by dev/generate-history.cjs, which replays the package's own tools and events with a fixed seed (one random stream per regimen) in one run with the task timeline, in date order, acting as the household member who would make each request with that person bound as the account holder, and checks every state with the App's validateSeed under that binding before and after each request and under the fixture's binding after each committed step; approvals used during the replay are not kept, because seeds carry none. Request and pickup windows, hold notes and plan-request notes are constants in the script. Checked by dev/check-fixture.cjs, which also regenerates it byte for byte.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dev/generate-history.cjs",
+        "tool_version": "1",
+        "seed": "2025",
+        "parameters": {
+          "from": "2025-01-01",
+          "to": "2026-11-18T12:00:00-05:00",
+          "regimens": "11",
+          "seed": "2025"
+        }
+      }
+    },
+    {
+      "source_id": "delivery-dataset",
+      "kind": "synthetic",
+      "description": "Synthetic full-window delivery dataset from 2025-01-01 to 2026-12-31 (America/New_York) generated for this package. It reuses the household, prescribers, drugs (with their cited label facts), plans, cash prices, stores and cards authored for the fixture and generates every prescription, fill, claim, plan request, renewal, prepayment, charge, refusal, pharmacist note, grant and notice; every pharmacy record is synthetic and none was collected or observed, including those dated at or after the fixture clock 2026-11-18T12:00:00-05:00. dataset/generate.cjs replays the package's own tools as the household member who makes each request, with that person bound as the account holder (Alex for Alex's, Sam's and Mia's records, Elena for her own), and its events as Infra (prescriptions and renewal replies, plan decisions, holds, restocks, grant changes, counter collections), with a fixed seed, validating every state against the seed schema and validateSeed. A prepayment or grant change that needs the person's confirmation is replayed as preview, user.confirmed and confirm at one instant, and the used approval is not kept, because seeds carry none. The free texts the generator supplies (plan-request, renewal and hold notes) are checked against the records they describe by dataset/notes.cjs. It writes dataset/base.json (the household and catalog at 2025-01-01T00:00:00-05:00, before the restocks), dataset/replay.json (every committed step with its time) and dataset/full.json (the state at 2027-01-01T00:00:00-05:00), and regenerates them byte for byte with --check. At the fixture clock the household and catalog, store stock included, equal the fixture's; the records are their own sequence in the App's runtime ID series (rx-1, f-1, cl-1, g-1, n-1, ...) and do not include the fixture's history or task timeline, whose IDs (f-15, rx-9, g-3 and the others named by the proposal's example events) name different records. dataset/as-of.cjs selects the records dated before a first-session instant; dataset/coverage.cjs writes dataset/COVERAGE.json and dataset/COVERAGE.md. There is no real pharmacy record in the window: prescriptions, fills, claims and payments are a real patient's protected health information, the reference product shows them only in a signed-in account, and the approved proposal (PR #63, revision c7ddf519b029cebe1c93c5bed50edb889cf34deb, lines 12 and 102) excludes real patient data and data collection; the only real source data are the twelve DailyMed labels cited by the drug facts (read 2026-11-23), which the coverage report counts as real only for drugs the dataset prescribes. This is a stated gap, pending maintainer agreement.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dataset/generate.cjs",
+        "tool_version": "1",
+        "seed": "20250101",
+        "parameters": {
+          "from": "2025-01-01",
+          "to": "2026-12-31",
+          "time_zone": "America/New_York",
+          "seed": "20250101",
+          "regimens": "11 regimens (four for Elena: atorvastatin and warfarin monthly, donepezil and amlodipine every 90 days; three for Alex and two for Sam every 90 days; Mia's montelukast monthly and albuterol as needed) and nine amoxicillin courses for Mia",
+          "household_calendar": "trips 2025-07-12 to 2025-07-20, 2026-05-23 to 2026-06-01 and 2026-12-19 to 2026-12-28 (Alex, Sam and Mia) and 2025-10-04 to 2025-10-12 (Elena); Elena's fills at Maple Avenue from 2025-06-16 to 2025-08-31; the household's at Harbor Street from 2025-10-01 to 2026-02-28",
+          "outcomes": "ten maintenance regimens refilled on their own cadence (25 to 29 days after a monthly supply, 81 to 87 days after a 90-day supply, with some early requests that wait for the eligible date) and Mia's albuterol inhaler every 70 to 115 days; prior authorization for every donepezil fill (some denied then approved with chart notes, some withdrawn and sent again); early refills before trips and after a lost supply (approved, or denied and then waited out or paid in cash); quantity-limit rejections changed to the plan maximum; cash for the drug the family plan does not cover; renewals approved, denied (followed by a new prescription) or withdrawn; holds during review and while ready; stock waits ended by a restock or a store change; prepayments captured at pickup or voided; refusals at the counter (on hold, not ready, store closed, collector not authorized, declined or expired card); pickups returned to stock or cancelled; and grants given, extended, expired and revoked by events and by the account holder",
+          "base": "dataset/base.json",
+          "replay": "dataset/replay.json",
+          "end_state": "dataset/full.json",
+          "end_clock": "2027-01-01T00:00:00-05:00",
+          "reference_clock": "2026-11-18T12:00:00-05:00"
+        }
+      }
+    },
+    {
+      "source_id": "label-d-atorvastatin-40",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for atorvastatin calcium (set ID 4e06b20d-cc5d-46eb-991b-5972248de3af, version 14), read on 2026-11-23 and cited by the fixture's drug d-atorvastatin-40. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Keep the tablets at controlled room temperature, about 20 to 25 degrees C (68 to 77 degrees F).\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"The tablets are taken by mouth once a day, at any time of day, and can be taken with or without food.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4e06b20d-cc5d-46eb-991b-5972248de3af",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-donepezil-5",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for donepezil hydrochloride (set ID 76bf638e-dbde-418e-8977-1caf009990bc, version 16), read on 2026-11-23 and cited by the fixture's drug d-donepezil-5. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Store at controlled room temperature, 20 to 25 degrees C (68 to 77 degrees F).\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"Tablets are taken in the evening just before bedtime, and food does not matter.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=76bf638e-dbde-418e-8977-1caf009990bc",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-warfarin-5",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for warfarin sodium (set ID 8ad881e0-ca41-42ad-9d7d-eb85b3a30af0, version 15), read on 2026-11-23 and cited by the fixture's drug d-warfarin-5. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Keep at 20 to 25 degrees C (68 to 77 degrees F), shielded from light and moisture, in a tight light-resistant container.\"; section \"17 PATIENT COUNSELING INFORMATION\" as \"Patients are counseled to eat a balanced diet with a steady vitamin K intake and avoid big swings, such as large servings of leafy greens.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8ad881e0-ca41-42ad-9d7d-eb85b3a30af0",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-lisinopril-10",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for lisinopril (set ID 0e6364a4-6d66-4151-8197-d45e2a762895, version 27), read on 2026-11-23 and cited by the fixture's drug d-lisinopril-10. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Keep at room temperature, 20 to 25 degrees C (68 to 77 degrees F), away from damp, frost and high heat.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"For high blood pressure in adults the usual range is 20 to 40 mg a day, taken as one dose each day.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=0e6364a4-6d66-4151-8197-d45e2a762895",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-levothyroxine-50",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for levothyroxine sodium (set ID 4ddcaec1-a58f-340b-9bc1-bbe048b8c885, version 10), read on 2026-11-23 and cited by the fixture's drug d-levothyroxine-50. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Store at 20 to 25 degrees C (68 to 77 degrees F), protected from light and moisture.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"The label calls for one daily dose on an empty stomach, about 30 to 60 minutes before breakfast.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4ddcaec1-a58f-340b-9bc1-bbe048b8c885",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-sertraline-50",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for sertraline hydrochloride (set ID 42120ff8-b353-4632-9ea9-54de9a698724, version 28), read on 2026-11-23 and cited by the fixture's drug d-sertraline-50. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Store at 20 to 25 degrees C (68 to 77 degrees F), with brief excursions to 15 to 30 degrees C allowed.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"When therapy ends, the label advises lowering the amount gradually rather than stopping abruptly, where possible.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=42120ff8-b353-4632-9ea9-54de9a698724",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-omeprazole-20",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for omeprazole (set ID c5af5f4b-17be-7245-b281-f27c87831242, version 7), read on 2026-11-23 and cited by the fixture's drug d-omeprazole-20. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Keep in a tight container at 20 to 25 degrees C (68 to 77 degrees F), protected from light and moisture.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"The capsules are swallowed whole, not chewed; for someone who cannot swallow one, it can be opened and all of its pellets emptied onto a tablespoon of soft applesauce that is not hot, then swallowed at once with cool water.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=c5af5f4b-17be-7245-b281-f27c87831242",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-metformin-500",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for metformin hydrochloride (set ID 2387a618-24d8-4813-aa83-9114edb35374, version 7), read on 2026-11-23 and cited by the fixture's drug d-metformin-500. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Keep at 20 to 25 degrees C (68 to 77 degrees F), with short spells from 15 to 30 degrees C allowed; it is handed out in a tightly closing, light-shielding bottle with a child-resistant cap.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"The tablets are meant to be taken with meals.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2387a618-24d8-4813-aa83-9114edb35374",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-amlodipine-5",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for amlodipine besylate (set ID 003dd1ec-16f8-4f96-b6a8-c4689d35892a, version 29), read on 2026-11-23 and cited by the fixture's drug d-amlodipine-5. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Store at 20 to 25 degrees C (68 to 77 degrees F) in tight, light-resistant containers.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"The tablets are taken by mouth once a day, with 1 to 2 weeks suggested between dose adjustments.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=003dd1ec-16f8-4f96-b6a8-c4689d35892a",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-albuterol-90",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for albuterol sulfate (set ID 7bb5b6dd-9105-4ee7-b205-ed79cf4b371b, version 16), read on 2026-11-23 and cited by the fixture's drug d-albuterol-90. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Store between 15 and 25 degrees C (59 and 77 degrees F); protect from freezing and prolonged direct sunlight.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"Shake the inhaler well before each spray, and prime it with three sprays into the air if new or unused for over two weeks.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7bb5b6dd-9105-4ee7-b205-ed79cf4b371b",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-amoxicillin-250-5",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for amoxicillin (set ID 9ce26893-c7a1-47e9-98f9-f5d998cac418, version 2), read on 2026-11-23 and cited by the fixture's drug d-amoxicillin-250-5. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Keep the unmixed powder at controlled room temperature, 20 to 25 degrees C (68 to 77 degrees F).\"; section \"2.6 Directions for Mixing Oral Suspension\" as \"Once mixed, the liquid is shaken well every time before it is used, the bottle is kept tightly closed, and whatever is left after 14 days is thrown away.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9ce26893-c7a1-47e9-98f9-f5d998cac418",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    },
+    {
+      "source_id": "label-d-montelukast-4",
+      "kind": "reused",
+      "description": "DailyMed, U.S. National Library of Medicine label for montelukast sodium (set ID ba42b0a9-83f1-4283-a853-f99cdd0761b9, version 22), read on 2026-11-23 and cited by the fixture's drug d-montelukast-4. Its 2 facts are short paraphrases, each of the section it cites: section \"16 HOW SUPPLIED/STORAGE AND HANDLING\" as \"Store at 20 to 25 degrees C (68 to 77 degrees F), protected from moisture and light, in the original package.\"; section \"2 DOSAGE AND ADMINISTRATION\" as \"For asthma the label has the tablet taken once a day in the evening, with or without food.\"; no label text was copied and the label itself is not redistributed.",
+      "uri": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=ba42b0a9-83f1-4283-a853-f99cdd0761b9",
+      "license": "Public U.S. drug labeling; cited, not redistributed",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    }
+  ],
+  "transformations": [],
+  "expected_counts": {
+    "records": 217,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation, label citations and reuse permissions."
+  }
+}

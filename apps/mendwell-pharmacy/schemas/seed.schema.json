@@ -1,0 +1,1598 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mendwell Pharmacy seed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "seed_id",
+    "account_id",
+    "owner_person_id",
+    "time_zone",
+    "people",
+    "prescribers",
+    "drugs",
+    "plans",
+    "cash_prices",
+    "stores",
+    "cards",
+    "prescriptions",
+    "fills",
+    "claims",
+    "authorizations",
+    "charges",
+    "grants",
+    "plan_requests",
+    "renewals",
+    "approvals",
+    "notices",
+    "issued"
+  ],
+  "properties": {
+    "seed_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+    },
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+    },
+    "time_zone": {
+      "const": "America/New_York"
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "relation": {
+            "enum": [
+              "self",
+              "spouse",
+              "child",
+              "parent",
+              "in_law",
+              "other"
+            ]
+          },
+          "birth_date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "is_minor": {
+            "type": "boolean"
+          },
+          "guardian_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "uniqueItems": true
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grant_set_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "person_id",
+          "name",
+          "relation",
+          "birth_date",
+          "is_minor",
+          "guardian_ids",
+          "plan_id",
+          "grant_set_version"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "prescribers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "prescriber_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "prescriber_id",
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "drugs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "drug_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "generic_name": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "string"
+          },
+          "form": {
+            "type": "string"
+          },
+          "quantities": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "publisher": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "set_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https://[^ ]+$"
+                    },
+                    "section": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "publisher",
+                    "set_id",
+                    "version",
+                    "url",
+                    "section"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "drug_id",
+          "generic_name",
+          "strength",
+          "form",
+          "quantities",
+          "facts"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "covered": {
+                  "type": "boolean"
+                },
+                "max_quantity": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "prior_auth_required": {
+                  "type": "boolean"
+                },
+                "refill_days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 366
+                },
+                "copay_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "covered",
+                "max_quantity",
+                "prior_auth_required",
+                "refill_days",
+                "copay_cents"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "plan_id",
+          "name",
+          "rules"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cash_prices": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "stores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "store_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "hours": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "open": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "close": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                }
+              },
+              "required": [
+                "day",
+                "open",
+                "close"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "stock": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        },
+        "required": [
+          "store_id",
+          "name",
+          "address",
+          "hours",
+          "stock"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "owner_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "last4": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+          },
+          "exp_month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "exp_year": {
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2100
+          },
+          "status": {
+            "enum": [
+              "active",
+              "declined"
+            ]
+          }
+        },
+        "required": [
+          "card_id",
+          "owner_id",
+          "label",
+          "last4",
+          "exp_month",
+          "exp_year",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "prescriptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rx_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "patient_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "prescriber_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "drug_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "fills_authorized": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99
+          },
+          "fills_remaining": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99
+          },
+          "written_on": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "superseded"
+            ]
+          },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "superseded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "rx_id",
+          "patient_id",
+          "prescriber_id",
+          "drug_id",
+          "quantity",
+          "fills_authorized",
+          "fills_remaining",
+          "written_on",
+          "received_at",
+          "state",
+          "superseded_by",
+          "superseded_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "fill_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rx_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "store_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "state": {
+            "enum": [
+              "requested",
+              "waiting_stock",
+              "claim_rejected",
+              "pending_plan_decision",
+              "ready",
+              "collected",
+              "returned_to_stock",
+              "cancelled"
+            ]
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "review_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resubmission_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ready_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warning_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "return_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warned_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hold": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  },
+                  "placed_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "remaining": {
+                    "type": "object",
+                    "properties": {
+                      "review_ms": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "warning_ms": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "return_ms": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "stored_decision": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "plan_request_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                          },
+                          "decision": {
+                            "enum": [
+                              "approved",
+                              "denied"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "plan_request_id",
+                          "decision",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "note",
+                  "placed_at",
+                  "remaining",
+                  "stored_decision"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "amount_due_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "claim_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "waived": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "not_covered",
+                "quantity_limit",
+                "prior_auth_required",
+                "refill_too_soon"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "cash": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "price_cents"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authorization_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "charge_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "collector": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                  },
+                  "via_grant_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "set_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "via_grant_id",
+                  "set_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plan_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "enum": [
+                    "requested",
+                    "waiting_stock",
+                    "claim_rejected",
+                    "pending_plan_decision",
+                    "ready",
+                    "collected",
+                    "returned_to_stock",
+                    "cancelled"
+                  ]
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "state",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "refusals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "refusal_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "reason": {
+                  "enum": [
+                    "on_hold",
+                    "not_ready",
+                    "store_closed",
+                    "collector_not_authorized",
+                    "payment_failed"
+                  ]
+                },
+                "collector_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "refusal_id",
+                "reason",
+                "collector_id",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "cancellation": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "enum": [
+                      "agent",
+                      "rx_expired",
+                      "rx_superseded"
+                    ]
+                  },
+                  "stage": {
+                    "enum": [
+                      "requested",
+                      "waiting_stock",
+                      "claim_rejected",
+                      "pending_plan_decision",
+                      "ready",
+                      "collected",
+                      "returned_to_stock",
+                      "cancelled"
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "reason",
+                  "stage",
+                  "at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "fill_id",
+          "fill_version",
+          "rx_id",
+          "store_id",
+          "quantity",
+          "state",
+          "requested_at",
+          "review_due_at",
+          "resubmission_due_at",
+          "ready_at",
+          "warning_due_at",
+          "return_due_at",
+          "warned_at",
+          "hold",
+          "amount_due_cents",
+          "claim_id",
+          "waived",
+          "cash",
+          "authorization_id",
+          "charge_id",
+          "collector",
+          "plan_request_id",
+          "notes",
+          "timeline",
+          "refusals",
+          "cancellation",
+          "closed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "fill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "result": {
+            "enum": [
+              "paid",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "not_covered",
+                  "quantity_limit",
+                  "prior_auth_required",
+                  "refill_too_soon"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "eligible_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "copay_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reversed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "claim_id",
+          "fill_id",
+          "attempt",
+          "at",
+          "result",
+          "reason",
+          "eligible_on",
+          "copay_cents",
+          "reversed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "authorizations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "authorization_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "fill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "state": {
+            "enum": [
+              "live",
+              "captured",
+              "voided"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "authorization_id",
+          "fill_id",
+          "card_id",
+          "amount_cents",
+          "state",
+          "at",
+          "ended_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "charges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "charge_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "fill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "payer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "method": {
+            "enum": [
+              "capture",
+              "counter"
+            ]
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "charge_id",
+          "fill_id",
+          "payer_id",
+          "card_id",
+          "method",
+          "amount_cents",
+          "at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "grant_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "grant_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "patient_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "grantor_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "grantee_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "scope": {
+            "enum": [
+              "view",
+              "refill",
+              "pickup"
+            ]
+          },
+          "fill_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "revoked"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "grant_id",
+          "grant_version",
+          "patient_id",
+          "grantor_id",
+          "grantee_id",
+          "scope",
+          "fill_id",
+          "expires_at",
+          "status",
+          "created_at",
+          "revoked_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "plan_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "plan_request_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "fill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "reason": {
+            "enum": [
+              "not_covered",
+              "quantity_limit",
+              "prior_auth_required",
+              "refill_too_soon"
+            ]
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "withdrawn"
+            ]
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "enum": [
+                  "approved",
+                  "denied"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "plan_request_id",
+          "fill_id",
+          "claim_id",
+          "reason",
+          "state",
+          "decision",
+          "note",
+          "created_at",
+          "closed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "renewals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "renewal_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "rx_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "withdrawn"
+            ]
+          },
+          "new_rx_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "renewal_id",
+          "rx_id",
+          "state",
+          "new_rx_id",
+          "note",
+          "created_at",
+          "closed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^tok-[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "grant",
+                      "revoke",
+                      "prepay",
+                      "cash",
+                      "cancel"
+                    ]
+                  },
+                  "kind": {
+                    "enum": [
+                      "fill",
+                      "grant",
+                      "patient"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                  }
+                },
+                "required": [
+                  "action",
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confirmed_by": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "approval_id",
+          "token",
+          "subject",
+          "confirmed_by",
+          "confirmed_at",
+          "used_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "notice_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "kind": {
+            "enum": [
+              "notice.fill_ready",
+              "notice.return_warning",
+              "notice.returned",
+              "notice.refused",
+              "notice.held",
+              "notice.released",
+              "notice.claim_rejected",
+              "notice.plan_decision",
+              "notice.renewal_reply",
+              "notice.payment_voided"
+            ]
+          },
+          "recipient_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "audience": {
+            "enum": [
+              "full",
+              "logistics",
+              "card_owner"
+            ]
+          },
+          "subject": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "fill",
+                  "renewal",
+                  "notice"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fields": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "notice_id",
+          "kind",
+          "recipient_id",
+          "audience",
+          "subject",
+          "at",
+          "title",
+          "body",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "issued": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 999999999
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "app_id": "mendwell-pharmacy",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:mendwell-pharmacy"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "rx.received",
+    "renewal.replied",
+    "plan.decided",
+    "grant.changed",
+    "fill.hold_placed",
+    "fill.hold_released",
+    "store.restocked",
+    "fill.collection_attempted",
+    "user.confirmed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic household, prescriptions, stores, drug plans and cards only; no real people, brands, patient data or payment data. Clinical facts are short paraphrases of cited public drug labels.",
+    "The App records facts, statuses, pharmacist notes and consequences; it makes no clinical decisions and does not rank options.",
+    "Member-facing business GUI on the shared local Web Host (gui/) for the account holder; no pharmacist, prescriber or plan screens, whose actions arrive as scenario events, and no page route for user confirmations, which Infra applies.",
+    "Time is the environment's: no clock event and no scheduler. Review, scheduled resubmission, pickup warning, return to stock and prescription expiry are due times on each record, applied from the supplied virtual time.",
+    "No attachments or media: resources are not used."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

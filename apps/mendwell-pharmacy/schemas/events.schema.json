@@ -1,0 +1,570 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mendwell incoming events",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "rx.received"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "rx_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "patient_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "prescriber_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "drug_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "fills_authorized": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99
+            },
+            "written_on": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            }
+          },
+          "required": [
+            "rx_id",
+            "patient_id",
+            "prescriber_id",
+            "drug_id",
+            "quantity",
+            "fills_authorized",
+            "written_on"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "renewal.replied"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "renewal_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "decision": {
+                  "const": "approved"
+                },
+                "rx": {
+                  "type": "object",
+                  "properties": {
+                    "rx_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                    },
+                    "quantity": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "fills_authorized": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 99
+                    },
+                    "written_on": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                    }
+                  },
+                  "required": [
+                    "rx_id",
+                    "quantity",
+                    "fills_authorized",
+                    "written_on"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "renewal_id",
+                "decision",
+                "rx"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "renewal_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "decision": {
+                  "const": "denied"
+                }
+              },
+              "required": [
+                "renewal_id",
+                "decision"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "plan.decided"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "plan_request_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "decision": {
+              "enum": [
+                "approved",
+                "denied"
+              ]
+            }
+          },
+          "required": [
+            "plan_request_id",
+            "decision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "grant.changed"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "grant_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "patient_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "grantor_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "grantee_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "scope": {
+                  "enum": [
+                    "view",
+                    "refill",
+                    "pickup"
+                  ]
+                },
+                "fill_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "expires_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "const": "active"
+                }
+              },
+              "required": [
+                "grant_id",
+                "patient_id",
+                "grantor_id",
+                "grantee_id",
+                "scope",
+                "fill_id",
+                "expires_at",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "grant_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "patient_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "grantor_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "grantee_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                },
+                "scope": {
+                  "enum": [
+                    "view",
+                    "refill",
+                    "pickup"
+                  ]
+                },
+                "fill_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "expires_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "const": "revoked"
+                }
+              },
+              "required": [
+                "grant_id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "fill.hold_placed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "fill_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "fill_id",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "fill.hold_released"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "fill_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "fill_id",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "store.restocked"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "store_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "drug_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            }
+          },
+          "required": [
+            "store_id",
+            "drug_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "fill.collection_attempted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "fill_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "collector_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            }
+          },
+          "required": [
+            "fill_id",
+            "collector_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "user.confirmed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "token": {
+              "type": "string",
+              "pattern": "^tok-[A-Za-z0-9_.:-]{1,160}$"
+            },
+            "confirmed_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+            }
+          },
+          "required": [
+            "token",
+            "confirmed_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,1650 @@
+{
+  "schema": "mendwell.mail-demonstration.v1",
+  "captured_on": "2026-11-28",
+  "command": "node apps/mendwell-pharmacy/evidence/tools/mail.cjs",
+  "node": "v25.8.1",
+  "mendwell_load_digest": "2fade01ee4af2ab862d5ae263b62722629d5e867422d3d259d8ffa94343a75f0",
+  "host": {
+    "runtime_version": "1.6.0",
+    "runtime_tree_sha256": "a1325458390f5a1b474a8598c663c35160a53ac30dce7afac4646587a3e889a3",
+    "files": {
+      "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+      "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+      "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+      "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+      "apps.registry.json": "53b1698288ba3be50e2b89586ca084c15574d77aa95b9afda3b6a813e5d93593"
+    }
+  },
+  "participants": {
+    "mendwell": {
+      "version": "1.0.0",
+      "publishes": [
+        {
+          "channel": "channel.email",
+          "schema_id": "urn:pale:email-message:2",
+          "schema_ref": "schemas/router-message.schema.json",
+          "status": "implemented",
+          "event_type": "org.pale.mail.notification.v1",
+          "payload_schema_id": "urn:pale:email-payload:1"
+        }
+      ]
+    },
+    "sender": "apps/mendwell-pharmacy/infra/sender.cjs (run by Infra)",
+    "mail": {
+      "version": "1.3.0",
+      "package_sha256": "ba9112331a30880cc6e679447f6dfe17936a59d9c26eea02610e6c3abf696ebd",
+      "receives": [
+        {
+          "channel": "channel.email",
+          "schema_id": "urn:pale:email-message:2",
+          "schema_ref": "schemas/router-message.schema.json",
+          "status": "implemented",
+          "mcp_tool": "env.apply_event",
+          "operation": "mail.receive_notification",
+          "event_type": "org.pale.mail.notification.v1",
+          "payload_schema_id": "urn:pale:email-payload:1"
+        }
+      ]
+    },
+    "wire_schema": {
+      "id": "urn:pale:email-message:2",
+      "sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0",
+      "identical_in": {
+        "runtime": true,
+        "mail": true
+      }
+    },
+    "payload_schema": {
+      "id": "urn:pale:email-payload:1",
+      "sha256": "8cec4c19e42dc9c027b84798984a7950471457195e606e7583fe9f00cf635795"
+    },
+    "runtime": {
+      "version": "1.6.0"
+    },
+    "router": {
+      "grants": [
+        {
+          "app_id": "mail",
+          "account_id": "mail-p-1",
+          "channel": "channel.email"
+        },
+        {
+          "app_id": "mail",
+          "account_id": "mail-p-2",
+          "channel": "channel.email"
+        }
+      ],
+      "publisher_account": "mendwell-p-2"
+    },
+    "mail_accounts": [
+      {
+        "app_id": "mail",
+        "account_id": "mail-p-1",
+        "owner_person_id": "p-1"
+      },
+      {
+        "app_id": "mail",
+        "account_id": "mail-p-2",
+        "owner_person_id": "p-2"
+      }
+    ]
+  },
+  "gui": {
+    "run": "mail-gui-demo",
+    "browser": "chromium 141.0.7390.37",
+    "viewport": "1280x900",
+    "locale": "en-US",
+    "browser_timezone": "America/New_York",
+    "initial": {
+      "mendwell": {
+        "run_id": "mail-gui-demo",
+        "account_id": "mendwell-p-2",
+        "owner_person_id": "p-2",
+        "version": "2.0",
+        "virtual_now": "2026-11-18T09:00:00-08:00",
+        "fills": 158,
+        "notices_in_seed": 443,
+        "bound_accounts": [
+          {
+            "app_id": "mendwell-pharmacy",
+            "account_id": "mendwell-p-2",
+            "owner_person_id": "p-2"
+          },
+          {
+            "app_id": "mail",
+            "account_id": "mail-p-1",
+            "owner_person_id": "p-1"
+          },
+          {
+            "app_id": "mail",
+            "account_id": "mail-p-2",
+            "owner_person_id": "p-2"
+          }
+        ]
+      },
+      "mail": [
+        {
+          "account_id": "mail-p-1",
+          "owner_person_id": "p-1",
+          "address": "mail-p-1@pale.example",
+          "run_id": "mail-gui-demo",
+          "state_namespace": "mail-f7161d70c35326cf8c54899a029e5cd3",
+          "version": "2.0",
+          "virtual_now": "2026-11-15T09:00:00-08:00",
+          "messages": 0
+        },
+        {
+          "account_id": "mail-p-2",
+          "owner_person_id": "p-2",
+          "address": "mail-p-2@pale.example",
+          "run_id": "mail-gui-demo",
+          "state_namespace": "mail-c23bf3debdebe9283bb0aeae0a95c2c6",
+          "version": "2.0",
+          "virtual_now": "2026-11-15T09:00:00-08:00",
+          "messages": 0
+        }
+      ]
+    },
+    "steps": [
+      {
+        "step": 1,
+        "app": "Mendwell (Infra clock and event, then GUI Refresh)",
+        "action": "Infra moves the clock to 12:41, past the review of Sam's sertraline fill f-20, and applies plan.decided approving pr-12 (Alex's metformin f-16); press Refresh and open f-20",
+        "expected": "Local commit in Mendwell: f-20's claim is rejected as too soon and f-16 becomes ready; claim-rejected, plan-decision and fill-ready entries join Mendwell's notice log; nothing is sent",
+        "observed": {
+          "infra": [
+            "env.advance_time to 2026-11-18T12:41:00-05:00 committed",
+            "plan.decided committed"
+          ],
+          "fills": [
+            "f-20 claim_rejected",
+            "f-16 ready"
+          ],
+          "pending_notices": [
+            "n-1 notice.claim_rejected to p-1",
+            "n-2 notice.claim_rejected to p-2",
+            "n-3 notice.plan_decision to p-2",
+            "n-4 notice.fill_ready to p-2"
+          ],
+          "mail_messages": {
+            "mail-p-1": 0,
+            "mail-p-2": 0
+          }
+        },
+        "version": "mendwell 2.2",
+        "screenshot": "gui/01-mendwell-claim-rejected.png"
+      },
+      {
+        "step": 2,
+        "app": "Mendwell (Infra events, then GUI Refresh)",
+        "action": "Infra applies renewal.replied approving rn-2 (Alex's levothyroxine renewal, new rx-20), fill.hold_placed on f-16, fill.collection_attempted on f-16 by Alex while it is held, and fill.hold_released; press Refresh and open f-16",
+        "expected": "Renewal-reply, held, refused (on hold) and released entries are written locally; f-16 is ready again",
+        "observed": {
+          "infra": [
+            "renewal.replied committed",
+            "fill.hold_placed committed",
+            "fill.collection_attempted committed",
+            "fill.hold_released committed"
+          ],
+          "fills": [
+            "f-16 ready"
+          ],
+          "pending_notices": [
+            "n-1 notice.claim_rejected to p-1",
+            "n-2 notice.claim_rejected to p-2",
+            "n-3 notice.plan_decision to p-2",
+            "n-4 notice.fill_ready to p-2",
+            "n-5 notice.renewal_reply to p-2",
+            "n-6 notice.held to p-2",
+            "n-7 notice.refused to p-2",
+            "n-8 notice.released to p-2"
+          ],
+          "mail_messages": {
+            "mail-p-1": 0,
+            "mail-p-2": 0
+          }
+        },
+        "version": "mendwell 2.6",
+        "screenshot": "gui/02-mendwell-hold-released.png"
+      },
+      {
+        "step": 3,
+        "app": "Mendwell (GUI)",
+        "action": "Open Sam's prepaid omeprazole fill f-17, press Cancel fill, then Confirm cancellation",
+        "expected": "f-17 cancelled, its $65.00 prepayment voided; payment-voided entries for Sam (patient) and Alex (card owner) are written locally",
+        "observed": {
+          "fills": [
+            "f-17 cancelled"
+          ],
+          "authorization": "au-2 voided",
+          "pending_notices": [
+            "n-1 notice.claim_rejected to p-1",
+            "n-2 notice.claim_rejected to p-2",
+            "n-3 notice.plan_decision to p-2",
+            "n-4 notice.fill_ready to p-2",
+            "n-5 notice.renewal_reply to p-2",
+            "n-6 notice.held to p-2",
+            "n-7 notice.refused to p-2",
+            "n-8 notice.released to p-2",
+            "n-9 notice.payment_voided to p-1",
+            "n-10 notice.payment_voided to p-2 (card_owner)"
+          ],
+          "mail_messages": {
+            "mail-p-1": 0,
+            "mail-p-2": 0
+          }
+        },
+        "version": "mendwell 2.7",
+        "screenshot": "gui/03-mendwell-cancelled.png"
+      },
+      {
+        "step": 4,
+        "app": "Mendwell (Infra clock and event, then GUI Refresh)",
+        "action": "Infra moves the clock to Saturday 28 November 13:00, past f-16's pickup reminder (25 November 12:41) and return (28 November 12:41), and applies store.restocked at store st-2, which commits the due timers; press Refresh and open f-16",
+        "expected": "f-16 returned to stock; return-warning and returned entries are written locally; Mendwell's log now holds all ten notice kinds; Mail is still empty",
+        "observed": {
+          "infra": [
+            "env.advance_time to 2026-11-28T13:00:00-05:00 committed",
+            "store.restocked committed"
+          ],
+          "fills": [
+            "f-16 returned_to_stock"
+          ],
+          "pending_notices": [
+            "n-1 notice.claim_rejected to p-1",
+            "n-2 notice.claim_rejected to p-2",
+            "n-3 notice.plan_decision to p-2",
+            "n-4 notice.fill_ready to p-2",
+            "n-5 notice.renewal_reply to p-2",
+            "n-6 notice.held to p-2",
+            "n-7 notice.refused to p-2",
+            "n-8 notice.released to p-2",
+            "n-9 notice.payment_voided to p-1",
+            "n-10 notice.payment_voided to p-2 (card_owner)",
+            "n-11 notice.return_warning to p-2",
+            "n-12 notice.returned to p-2",
+            "n-13 notice.fill_ready to p-1",
+            "n-14 notice.fill_ready to p-4"
+          ],
+          "notice_kinds": [
+            "notice.claim_rejected",
+            "notice.fill_ready",
+            "notice.held",
+            "notice.payment_voided",
+            "notice.plan_decision",
+            "notice.refused",
+            "notice.released",
+            "notice.renewal_reply",
+            "notice.return_warning",
+            "notice.returned"
+          ],
+          "mail_messages": {
+            "mail-p-1": 0,
+            "mail-p-2": 0
+          }
+        },
+        "version": "mendwell 2.9",
+        "screenshot": "gui/04-mendwell-returned.png"
+      },
+      {
+        "step": 5,
+        "app": "Messaging and Mail (Infra runs the sender; Mail GUI)",
+        "action": "Infra runs infra/sender.cjs: one Router session per recipient Mail account (mail-p-1 for Sam, mail-p-2 for Alex), each with its grant from infra/router.config.example.json; the sender aligns the Mail clocks and publishes every pending entry; open Mail's page for mail-p-2 in the same run",
+        "expected": "Receiver commit: one committed Router receipt and one inbox record per entry in the recipient's own account, all ten notice kinds; Mendwell unchanged by publishing",
+        "observed": {
+          "status": "published",
+          "clock": {
+            "status": "aligned",
+            "virtual_now": "2026-11-28T13:00:00-05:00",
+            "advanced": [
+              1,
+              2
+            ],
+            "failed": []
+          },
+          "receipts": [
+            "e2-n-1 p-1 -> mail-p-1 committed router-255aa3828fce106761398ccb2cb2e4d5",
+            "e2-n-2 p-2 -> mail-p-2 committed router-b61996bd7e9a183ea2005ffaccb48e8d",
+            "e2-n-3 p-2 -> mail-p-2 committed router-b5375de110babcbff01d9c82f140afcd",
+            "e2-n-4 p-2 -> mail-p-2 committed router-08df0faf30f4c6529abb4348ca922488",
+            "e2-n-5 p-2 -> mail-p-2 committed router-e305dae6f9165a71b9151f24123d53c0",
+            "e2-n-6 p-2 -> mail-p-2 committed router-c41a2c5501255ff1776fb45a6db4b8ff",
+            "e2-n-7 p-2 -> mail-p-2 committed router-ecd41e6b74b76c0a16a99f5a704cce22",
+            "e2-n-8 p-2 -> mail-p-2 committed router-7a2cc60528e4a21366e3e80df95954cc",
+            "e2-n-9 p-1 -> mail-p-1 committed router-eb2de1df5230bf52341832f7f88a1860",
+            "e2-n-10 p-2 -> mail-p-2 committed router-8ed6aeb7b4e81a0ca73812758eb887a3",
+            "e2-n-11 p-2 -> mail-p-2 committed router-5ee75e7799c50d2872d668df49859e02",
+            "e2-n-12 p-2 -> mail-p-2 committed router-c9d898a1ff69da8a44c2d576ef7b3cf4",
+            "e2-n-13 p-1 -> mail-p-1 committed router-7817859d65d07e23f21f74bc97484ee0"
+          ],
+          "held": [
+            {
+              "notice_id": "n-14",
+              "recipient_id": "p-4",
+              "reason": "no_mail_account"
+            }
+          ],
+          "refused": [],
+          "mail_event_status": [
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed",
+            "committed"
+          ],
+          "mail_records": {
+            "mail-p-1": [
+              "router-255aa3828fce106761398ccb2cb2e4d5 Claim rejected",
+              "router-eb2de1df5230bf52341832f7f88a1860 Payment voided",
+              "router-7817859d65d07e23f21f74bc97484ee0 Fill ready for pickup"
+            ],
+            "mail-p-2": [
+              "router-b61996bd7e9a183ea2005ffaccb48e8d Claim rejected",
+              "router-b5375de110babcbff01d9c82f140afcd Plan decision",
+              "router-08df0faf30f4c6529abb4348ca922488 Fill ready for pickup",
+              "router-e305dae6f9165a71b9151f24123d53c0 Renewal reply",
+              "router-c41a2c5501255ff1776fb45a6db4b8ff Fill on hold",
+              "router-ecd41e6b74b76c0a16a99f5a704cce22 Collection refused",
+              "router-7a2cc60528e4a21366e3e80df95954cc Hold released",
+              "router-8ed6aeb7b4e81a0ca73812758eb887a3 Payment voided",
+              "router-5ee75e7799c50d2872d668df49859e02 Pickup reminder",
+              "router-c9d898a1ff69da8a44c2d576ef7b3cf4 Fill returned to stock"
+            ]
+          },
+          "mendwell_version_unchanged": true
+        },
+        "version": "mail-p-1 2.4, mail-p-2 2.11, mendwell 2.9",
+        "screenshot": "gui/05-mail-inbox.png"
+      },
+      {
+        "step": 6,
+        "app": "Mail (GUI and Agent MCP)",
+        "action": "Open the “Payment voided” message in Mail; read it through Mail's Agent tool mail.get",
+        "expected": "The notice text as Mendwell wrote it, from the Mendwell sender address to mail-p-2",
+        "observed": {
+          "record_id": "router-8ed6aeb7b4e81a0ca73812758eb887a3",
+          "status": "ok",
+          "subject": "Payment voided",
+          "from": "mendwell-pharmacy@pale.example",
+          "to": [
+            "mail-p-2@pale.example"
+          ],
+          "folder": "inbox",
+          "received_at": "2026-11-28T13:00:00-05:00",
+          "body": "A prepayment of $65.00 on your card ending 4417 was voided.",
+          "body_matches_notice": true,
+          "notice": "n-10 (card_owner)"
+        },
+        "version": "mail-p-2 2.11",
+        "screenshot": "gui/06-mail-payment-voided.png"
+      },
+      {
+        "step": 7,
+        "app": "Mail (GUI and Agent MCP)",
+        "action": "Open the “Fill returned to stock” message in Mail; read it through Mail's Agent tool mail.get",
+        "expected": "The notice text as Mendwell wrote it, from the Mendwell sender address to mail-p-2",
+        "observed": {
+          "record_id": "router-c9d898a1ff69da8a44c2d576ef7b3cf4",
+          "status": "ok",
+          "subject": "Fill returned to stock",
+          "from": "mendwell-pharmacy@pale.example",
+          "to": [
+            "mail-p-2@pale.example"
+          ],
+          "folder": "inbox",
+          "received_at": "2026-11-28T13:00:00-05:00",
+          "body": "Fill f-16 of metformin hydrochloride 500 mg for Alex Rivera was returned to stock at Mendwell Maple Avenue on Saturday, November 28 at 12:41. The plan claim was reversed. Fills remaining on the prescription are unchanged.",
+          "body_matches_notice": true,
+          "notice": "n-12 (full)"
+        },
+        "version": "mail-p-2 2.11",
+        "screenshot": "gui/07-mail-returned.png"
+      }
+    ],
+    "stages": {
+      "local_commit": {
+        "app": "mendwell-pharmacy",
+        "notices": [
+          {
+            "id": "n-1",
+            "kind": "notice.claim_rejected",
+            "recipient_id": "p-1",
+            "audience": "full",
+            "subject": "fill f-20",
+            "at": "2026-11-18T12:40:00-05:00"
+          },
+          {
+            "id": "n-2",
+            "kind": "notice.claim_rejected",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-20",
+            "at": "2026-11-18T12:40:00-05:00"
+          },
+          {
+            "id": "n-3",
+            "kind": "notice.plan_decision",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-4",
+            "kind": "notice.fill_ready",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-5",
+            "kind": "notice.renewal_reply",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "renewal rn-2",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-6",
+            "kind": "notice.held",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-7",
+            "kind": "notice.refused",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-8",
+            "kind": "notice.released",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-9",
+            "kind": "notice.payment_voided",
+            "recipient_id": "p-1",
+            "audience": "full",
+            "subject": "fill f-17",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-10",
+            "kind": "notice.payment_voided",
+            "recipient_id": "p-2",
+            "audience": "card_owner",
+            "subject": "notice n-10",
+            "at": "2026-11-18T12:41:00-05:00"
+          },
+          {
+            "id": "n-11",
+            "kind": "notice.return_warning",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-25T12:41:00-05:00"
+          },
+          {
+            "id": "n-12",
+            "kind": "notice.returned",
+            "recipient_id": "p-2",
+            "audience": "full",
+            "subject": "fill f-16",
+            "at": "2026-11-28T12:41:00-05:00"
+          },
+          {
+            "id": "n-13",
+            "kind": "notice.fill_ready",
+            "recipient_id": "p-1",
+            "audience": "full",
+            "subject": "fill f-15",
+            "at": "2026-11-28T13:00:00-05:00"
+          },
+          {
+            "id": "n-14",
+            "kind": "notice.fill_ready",
+            "recipient_id": "p-4",
+            "audience": "full",
+            "subject": "fill f-15",
+            "at": "2026-11-28T13:00:00-05:00"
+          }
+        ],
+        "mendwell_version": "2.9"
+      },
+      "receiver_commit": {
+        "receipts": [
+          {
+            "notice_id": "n-1",
+            "recipient_id": "p-1",
+            "request_id": "e2-n-1",
+            "account_id": "mail-p-1",
+            "status": "committed",
+            "event_id": "router-255aa3828fce106761398ccb2cb2e4d5",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "cloud_event_time": "2026-11-18T12:40:00-05:00",
+            "mail_version": "2.2"
+          },
+          {
+            "notice_id": "n-2",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-2",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-b61996bd7e9a183ea2005ffaccb48e8d",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:40:00-05:00",
+            "mail_version": "2.2"
+          },
+          {
+            "notice_id": "n-3",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-3",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-b5375de110babcbff01d9c82f140afcd",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.3"
+          },
+          {
+            "notice_id": "n-4",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-4",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-08df0faf30f4c6529abb4348ca922488",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.4"
+          },
+          {
+            "notice_id": "n-5",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-5",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-e305dae6f9165a71b9151f24123d53c0",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.5"
+          },
+          {
+            "notice_id": "n-6",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-6",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-c41a2c5501255ff1776fb45a6db4b8ff",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.6"
+          },
+          {
+            "notice_id": "n-7",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-7",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-ecd41e6b74b76c0a16a99f5a704cce22",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.7"
+          },
+          {
+            "notice_id": "n-8",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-8",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-7a2cc60528e4a21366e3e80df95954cc",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.8"
+          },
+          {
+            "notice_id": "n-9",
+            "recipient_id": "p-1",
+            "request_id": "e2-n-9",
+            "account_id": "mail-p-1",
+            "status": "committed",
+            "event_id": "router-eb2de1df5230bf52341832f7f88a1860",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.3"
+          },
+          {
+            "notice_id": "n-10",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-10",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-8ed6aeb7b4e81a0ca73812758eb887a3",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-18T12:41:00-05:00",
+            "mail_version": "2.9"
+          },
+          {
+            "notice_id": "n-11",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-11",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-5ee75e7799c50d2872d668df49859e02",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-25T12:41:00-05:00",
+            "mail_version": "2.10"
+          },
+          {
+            "notice_id": "n-12",
+            "recipient_id": "p-2",
+            "request_id": "e2-n-12",
+            "account_id": "mail-p-2",
+            "status": "committed",
+            "event_id": "router-c9d898a1ff69da8a44c2d576ef7b3cf4",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-2"
+            },
+            "cloud_event_time": "2026-11-28T12:41:00-05:00",
+            "mail_version": "2.11"
+          },
+          {
+            "notice_id": "n-13",
+            "recipient_id": "p-1",
+            "request_id": "e2-n-13",
+            "account_id": "mail-p-1",
+            "status": "committed",
+            "event_id": "router-7817859d65d07e23f21f74bc97484ee0",
+            "target": {
+              "app_id": "mail",
+              "account_id": "mail-p-1"
+            },
+            "cloud_event_time": "2026-11-28T13:00:00-05:00",
+            "mail_version": "2.4"
+          }
+        ],
+        "mail_event_status": [
+          {
+            "account_id": "mail-p-1",
+            "event_id": "router-255aa3828fce106761398ccb2cb2e4d5",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-b61996bd7e9a183ea2005ffaccb48e8d",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-b5375de110babcbff01d9c82f140afcd",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-08df0faf30f4c6529abb4348ca922488",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-e305dae6f9165a71b9151f24123d53c0",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-c41a2c5501255ff1776fb45a6db4b8ff",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-ecd41e6b74b76c0a16a99f5a704cce22",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-7a2cc60528e4a21366e3e80df95954cc",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-1",
+            "event_id": "router-eb2de1df5230bf52341832f7f88a1860",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-8ed6aeb7b4e81a0ca73812758eb887a3",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-5ee75e7799c50d2872d668df49859e02",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-2",
+            "event_id": "router-c9d898a1ff69da8a44c2d576ef7b3cf4",
+            "status": "committed"
+          },
+          {
+            "account_id": "mail-p-1",
+            "event_id": "router-7817859d65d07e23f21f74bc97484ee0",
+            "status": "committed"
+          }
+        ],
+        "records": {
+          "mail-p-1": [
+            {
+              "id": "router-255aa3828fce106761398ccb2cb2e4d5",
+              "subject": "Claim rejected",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-1"
+            },
+            {
+              "id": "router-eb2de1df5230bf52341832f7f88a1860",
+              "subject": "Payment voided",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-9"
+            },
+            {
+              "id": "router-7817859d65d07e23f21f74bc97484ee0",
+              "subject": "Fill ready for pickup",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-13"
+            }
+          ],
+          "mail-p-2": [
+            {
+              "id": "router-b61996bd7e9a183ea2005ffaccb48e8d",
+              "subject": "Claim rejected",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-2"
+            },
+            {
+              "id": "router-b5375de110babcbff01d9c82f140afcd",
+              "subject": "Plan decision",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-3"
+            },
+            {
+              "id": "router-08df0faf30f4c6529abb4348ca922488",
+              "subject": "Fill ready for pickup",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-4"
+            },
+            {
+              "id": "router-e305dae6f9165a71b9151f24123d53c0",
+              "subject": "Renewal reply",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-5"
+            },
+            {
+              "id": "router-c41a2c5501255ff1776fb45a6db4b8ff",
+              "subject": "Fill on hold",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-6"
+            },
+            {
+              "id": "router-ecd41e6b74b76c0a16a99f5a704cce22",
+              "subject": "Collection refused",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-7"
+            },
+            {
+              "id": "router-7a2cc60528e4a21366e3e80df95954cc",
+              "subject": "Hold released",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-8"
+            },
+            {
+              "id": "router-8ed6aeb7b4e81a0ca73812758eb887a3",
+              "subject": "Payment voided",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-10"
+            },
+            {
+              "id": "router-5ee75e7799c50d2872d668df49859e02",
+              "subject": "Pickup reminder",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-11"
+            },
+            {
+              "id": "router-c9d898a1ff69da8a44c2d576ef7b3cf4",
+              "subject": "Fill returned to stock",
+              "folder": "inbox",
+              "received_at": "2026-11-28T13:00:00-05:00",
+              "thread_id": "e2-n-12"
+            }
+          ]
+        },
+        "readback": [
+          {
+            "notice_id": "n-1",
+            "kind": "notice.claim_rejected",
+            "audience": "full",
+            "account_id": "mail-p-1",
+            "record_id": "router-255aa3828fce106761398ccb2cb2e4d5",
+            "subject": "Claim rejected",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-2",
+            "kind": "notice.claim_rejected",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-b61996bd7e9a183ea2005ffaccb48e8d",
+            "subject": "Claim rejected",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-3",
+            "kind": "notice.plan_decision",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-b5375de110babcbff01d9c82f140afcd",
+            "subject": "Plan decision",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-4",
+            "kind": "notice.fill_ready",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-08df0faf30f4c6529abb4348ca922488",
+            "subject": "Fill ready for pickup",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-5",
+            "kind": "notice.renewal_reply",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-e305dae6f9165a71b9151f24123d53c0",
+            "subject": "Renewal reply",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-6",
+            "kind": "notice.held",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-c41a2c5501255ff1776fb45a6db4b8ff",
+            "subject": "Fill on hold",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-7",
+            "kind": "notice.refused",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-ecd41e6b74b76c0a16a99f5a704cce22",
+            "subject": "Collection refused",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-8",
+            "kind": "notice.released",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-7a2cc60528e4a21366e3e80df95954cc",
+            "subject": "Hold released",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-9",
+            "kind": "notice.payment_voided",
+            "audience": "full",
+            "account_id": "mail-p-1",
+            "record_id": "router-eb2de1df5230bf52341832f7f88a1860",
+            "subject": "Payment voided",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-10",
+            "kind": "notice.payment_voided",
+            "audience": "card_owner",
+            "account_id": "mail-p-2",
+            "record_id": "router-8ed6aeb7b4e81a0ca73812758eb887a3",
+            "subject": "Payment voided",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-11",
+            "kind": "notice.return_warning",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-5ee75e7799c50d2872d668df49859e02",
+            "subject": "Pickup reminder",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-12",
+            "kind": "notice.returned",
+            "audience": "full",
+            "account_id": "mail-p-2",
+            "record_id": "router-c9d898a1ff69da8a44c2d576ef7b3cf4",
+            "subject": "Fill returned to stock",
+            "body_matches_notice": true
+          },
+          {
+            "notice_id": "n-13",
+            "kind": "notice.fill_ready",
+            "audience": "full",
+            "account_id": "mail-p-1",
+            "record_id": "router-7817859d65d07e23f21f74bc97484ee0",
+            "subject": "Fill ready for pickup",
+            "body_matches_notice": true
+          }
+        ]
+      },
+      "business_confirmation": "Not claimed. A committed Mail record shows delivery into the recipient's Mail account, not that the person read or acted on it."
+    },
+    "retry": {
+      "status": "published",
+      "receipts": [
+        {
+          "request_id": "e2-n-1",
+          "account_id": "mail-p-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-255aa3828fce106761398ccb2cb2e4d5"
+        },
+        {
+          "request_id": "e2-n-2",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-b61996bd7e9a183ea2005ffaccb48e8d"
+        },
+        {
+          "request_id": "e2-n-3",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-b5375de110babcbff01d9c82f140afcd"
+        },
+        {
+          "request_id": "e2-n-4",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-08df0faf30f4c6529abb4348ca922488"
+        },
+        {
+          "request_id": "e2-n-5",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-e305dae6f9165a71b9151f24123d53c0"
+        },
+        {
+          "request_id": "e2-n-6",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-c41a2c5501255ff1776fb45a6db4b8ff"
+        },
+        {
+          "request_id": "e2-n-7",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-ecd41e6b74b76c0a16a99f5a704cce22"
+        },
+        {
+          "request_id": "e2-n-8",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-7a2cc60528e4a21366e3e80df95954cc"
+        },
+        {
+          "request_id": "e2-n-9",
+          "account_id": "mail-p-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-eb2de1df5230bf52341832f7f88a1860"
+        },
+        {
+          "request_id": "e2-n-10",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-8ed6aeb7b4e81a0ca73812758eb887a3"
+        },
+        {
+          "request_id": "e2-n-11",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-5ee75e7799c50d2872d668df49859e02"
+        },
+        {
+          "request_id": "e2-n-12",
+          "account_id": "mail-p-2",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-c9d898a1ff69da8a44c2d576ef7b3cf4"
+        },
+        {
+          "request_id": "e2-n-13",
+          "account_id": "mail-p-1",
+          "status": "committed",
+          "duplicate": true,
+          "event_id": "router-7817859d65d07e23f21f74bc97484ee0"
+        }
+      ],
+      "mail_records": {
+        "mail-p-1": 3,
+        "mail-p-2": 10
+      }
+    },
+    "page_errors": 0
+  },
+  "refusal": {
+    "run": "mail-refusal-demo",
+    "condition": "The Router session for mail-p-1 is configured without the grant for that account (allowed_recipients empty); mail-p-2 keeps its grant",
+    "action": "Infra applies fill.hold_placed on Sam's fill f-20, which writes a held entry for Sam (p-1) and for Alex (p-2); Infra aligns the Mail clocks to Mendwell's (adapter.align), records both Apps' state, and runs the sender once",
+    "aligned": {
+      "status": "aligned",
+      "virtual_now": "2026-11-18T09:00:00-08:00"
+    },
+    "pending": [
+      "n-1 notice.held to p-1",
+      "n-2 notice.held to p-2"
+    ],
+    "status": "partial",
+    "refused": [
+      {
+        "notice_id": "n-1",
+        "account_id": "mail-p-1",
+        "code": "recipient_not_authorized"
+      }
+    ],
+    "receipts": [
+      {
+        "notice_id": "n-1",
+        "recipient_id": "p-1",
+        "request_id": "e2-n-1",
+        "account_id": "mail-p-1",
+        "status": "rejected",
+        "code": "recipient_not_authorized",
+        "event_id": null,
+        "target": null,
+        "cloud_event_time": null,
+        "mail_version": null
+      },
+      {
+        "notice_id": "n-2",
+        "recipient_id": "p-2",
+        "request_id": "e2-n-2",
+        "account_id": "mail-p-2",
+        "status": "committed",
+        "event_id": "router-3f9819b630999c13473f4ac7d6b61145",
+        "target": {
+          "app_id": "mail",
+          "account_id": "mail-p-2"
+        },
+        "cloud_event_time": "2026-11-18T12:00:00-05:00",
+        "mail_version": "2.2"
+      }
+    ],
+    "held": [],
+    "mendwell": {
+      "before": "2.1",
+      "after": "2.1",
+      "state_sha256_before": "7834632a4dc15ba067354631956746f2c1a5ba51738376dbe745da236abf447b",
+      "state_sha256_after": "7834632a4dc15ba067354631956746f2c1a5ba51738376dbe745da236abf447b"
+    },
+    "mail": {
+      "before": {
+        "mail-p-1": {
+          "version": "2.1",
+          "records": 0,
+          "state_sha256": "187823f692c4403c2d8d5788e4d5d8572a92dce5c1060483bfa419a6fa591514"
+        },
+        "mail-p-2": {
+          "version": "2.1",
+          "records": 0,
+          "state_sha256": "61da22ebdc85ba581b2c9d39b15412db6676badd82dd686fe1cd947f14ec72d7"
+        }
+      },
+      "after": {
+        "mail-p-1": {
+          "version": "2.1",
+          "records": 0,
+          "state_sha256": "187823f692c4403c2d8d5788e4d5d8572a92dce5c1060483bfa419a6fa591514"
+        },
+        "mail-p-2": {
+          "version": "2.2",
+          "records": 1,
+          "state_sha256": "9693e2c16ef5211afb8188560cb761d30b4f38e605f756032f314031e600fe93"
+        }
+      }
+    },
+    "routers_halted": {
+      "mail-p-1": false,
+      "mail-p-2": false
+    }
+  },
+  "integration": {
+    "command": "node apps/mendwell-pharmacy/tests/mail.integration.cjs --report FILE",
+    "receiver": "mail 1.3.0",
+    "runtime": "1.6.0",
+    "node": "v25.8.1",
+    "checks": [
+      {
+        "name": "Mail 1.3.0 is the receiver",
+        "status": "passed"
+      },
+      {
+        "name": "The package wire schema is byte-identical to the runtime contract",
+        "status": "passed"
+      },
+      {
+        "name": "The package wire schema is byte-identical to Mail's receive schema",
+        "status": "passed"
+      },
+      {
+        "name": "Each Mail account's seed and binding were loaded and checked before its Router session started",
+        "status": "passed"
+      },
+      {
+        "name": "One Router session per recipient Mail account, each with its own grant and a digest namespace shared by its Mail state",
+        "status": "passed"
+      },
+      {
+        "name": "Both sessions share one Router state directory and run, one session file each",
+        "status": "passed"
+      },
+      {
+        "name": "Only entries appended in the current epoch are pending, not the seeded history",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-2 (notice.held, full) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-3 (notice.held, full) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-4 (notice.refused, full) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-5 (notice.refused, full) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Payload for n-6 (notice.refused, logistics) matches the Mail payload schema",
+        "status": "passed"
+      },
+      {
+        "name": "Each routed entry is published in log order through its recipient's own session and committed there",
+        "status": "passed"
+      },
+      {
+        "name": "An entry without exactly one eligible route stays in the log",
+        "status": "passed"
+      },
+      {
+        "name": "The Router audit shows each request ID and CloudEvents ID built from the Mendwell epoch and the notice ID",
+        "status": "passed"
+      },
+      {
+        "name": "Both Mail clocks were advanced with env.advance_time to Mendwell's time before delivery",
+        "status": "passed"
+      },
+      {
+        "name": "mail-p-1 holds its full hold notice and its logistics refusal, received at the aligned time",
+        "status": "passed"
+      },
+      {
+        "name": "mail-p-2 holds its full hold and refusal notices, received at the aligned time",
+        "status": "passed"
+      },
+      {
+        "name": "The logistics refusal carries only fill, store and amount",
+        "status": "passed"
+      },
+      {
+        "name": "The delivered notice reads back in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "The receipt keeps the notice time as the CloudEvents time",
+        "status": "passed"
+      },
+      {
+        "name": "Publishing leaves Mendwell unchanged",
+        "status": "passed"
+      },
+      {
+        "name": "An identical retry returns each original receipt unchanged, marked duplicate",
+        "status": "passed"
+      },
+      {
+        "name": "A retry creates no second record",
+        "status": "passed"
+      },
+      {
+        "name": "Two simultaneous passes on the run are serialized: both complete as duplicates and neither session halts",
+        "status": "passed"
+      },
+      {
+        "name": "A Mendwell reset keeps both inboxes record for record",
+        "status": "passed"
+      },
+      {
+        "name": "The reset moves Mendwell's clock back to its loaded time, not the fixture clock",
+        "status": "passed"
+      },
+      {
+        "name": "After the reset the lagging Mendwell clock is advanced to the Mail clocks",
+        "status": "passed"
+      },
+      {
+        "name": "After the reset each eligible inbox gets exactly one new message whose ID carries the new epoch",
+        "status": "passed"
+      },
+      {
+        "name": "The clocks agree at the new delivery",
+        "status": "passed"
+      },
+      {
+        "name": "The earlier records are unchanged after the new delivery",
+        "status": "passed"
+      },
+      {
+        "name": "Account IDs with a colon or a dot get digest namespaces used by both their Mail state and their Router sessions, and both are delivered",
+        "status": "passed"
+      },
+      {
+        "name": "A downgrade to pickup queued while the first publish was in flight lands before the next check, and the full entry is not sent",
+        "status": "passed"
+      },
+      {
+        "name": "The downgraded viewer's inbox has only the entry still covered by its remaining grant",
+        "status": "passed"
+      },
+      {
+        "name": "A Mendwell reset between two publishes stops the pass before the next one",
+        "status": "passed"
+      },
+      {
+        "name": "The new epoch has no pending entry, so nothing more is delivered and nothing halts",
+        "status": "passed"
+      },
+      {
+        "name": "The return writes full entries for the viewer, a logistics entry for the pickup holder and the card owner's masked void",
+        "status": "passed"
+      },
+      {
+        "name": "A viewer downgraded to pickup before dispatch gets no full-detail mail, and the card owner who lost pickup access keeps only the masked void",
+        "status": "passed"
+      },
+      {
+        "name": "The downgraded viewer's inbox stays empty",
+        "status": "passed"
+      },
+      {
+        "name": "The masked void shows only the card, amount and void status",
+        "status": "passed"
+      },
+      {
+        "name": "The masked void's Mail source object is the notice itself",
+        "status": "passed"
+      },
+      {
+        "name": "A session built for another run and a hand-assembled session are refused before any clock alignment or publish",
+        "status": "passed"
+      },
+      {
+        "name": "Nothing reaches the other run's inboxes and the source clock keeps its own time",
+        "status": "passed"
+      },
+      {
+        "name": "A session is never built around another run's Router",
+        "status": "passed"
+      },
+      {
+        "name": "Without a granted session for one account its entry stays in the log while the other inbox still receives its own",
+        "status": "passed"
+      },
+      {
+        "name": "A publish the Router does not authorize is refused before dispatch; the pass continues without halting",
+        "status": "passed"
+      },
+      {
+        "name": "A refusal before dispatch creates no Mail record and leaves both sessions available",
+        "status": "passed"
+      },
+      {
+        "name": "A session whose Router serves an incompatible contract is held before routing and the other account is still served",
+        "status": "passed"
+      },
+      {
+        "name": "An incompatible contract creates no Mail record in its inbox and halts nothing",
+        "status": "passed"
+      },
+      {
+        "name": "With two granted accounts for one person, the sole compatible route is used instead of being held as ambiguous",
+        "status": "passed"
+      },
+      {
+        "name": "A Router whose contract is known to be incompatible stays excluded while it is also unreachable, so the sole compatible inbox still gets the notice",
+        "status": "passed"
+      },
+      {
+        "name": "A receiver rejection in one session stops the run and the adapter halts",
+        "status": "passed"
+      },
+      {
+        "name": "The other session then reports halted and refuses with run_halted",
+        "status": "passed"
+      },
+      {
+        "name": "The halted adapter refuses with run_halted without calling either Router",
+        "status": "passed"
+      },
+      {
+        "name": "A fresh adapter for the run in the same Infra process refuses at once with the original cause",
+        "status": "passed"
+      },
+      {
+        "name": "A receiver rejection creates no Mail record and leaves Mendwell's committed state",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail reset is detected against the session's checked epoch before any clock change or publish, and the adapter halts every session",
+        "status": "passed"
+      },
+      {
+        "name": "After that stop the reset inbox stays empty and the other keeps only its earlier record",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail reset after the check and before dispatch is refused by the Router with receiver_lifecycle_changed, and the adapter halts on it",
+        "status": "passed"
+      },
+      {
+        "name": "A publish whose Router reply is lost is unknown and halts the adapter",
+        "status": "passed"
+      },
+      {
+        "name": "Infra's stop mechanism then halts every session of the run, and the adapter verifies it",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation finds the dispatched message by its ID in the dispatch epoch and reports committed",
+        "status": "passed"
+      },
+      {
+        "name": "The run stays halted after reconciliation",
+        "status": "passed"
+      },
+      {
+        "name": "Without a shared stop mechanism the adapter refuses to start",
+        "status": "passed"
+      },
+      {
+        "name": "When the stop mechanism fails the halt is reported unverified, never healthy",
+        "status": "passed"
+      },
+      {
+        "name": "A fresh adapter for that run in the same Infra process still refuses, so nothing more is published there",
+        "status": "passed"
+      },
+      {
+        "name": "With two granted inboxes for p-1, a Router unreachable for one pass, alternating, never turns the ambiguous entry into a delivery",
+        "status": "passed"
+      },
+      {
+        "name": "A closed Mail client for one of them keeps the entry waiting too",
+        "status": "passed"
+      },
+      {
+        "name": "An entry sent while only one inbox had a session stays with that inbox once the second session exists",
+        "status": "passed"
+      },
+      {
+        "name": "With that inbox's Router paused the retry waits instead of switching to the other inbox",
+        "status": "passed"
+      },
+      {
+        "name": "Once it is back the retry returns the original receipt; the notice exists in exactly one inbox",
+        "status": "passed"
+      },
+      {
+        "name": "A Router discovery that times out returns a resumable setup instead of a stranded Router",
+        "status": "passed"
+      },
+      {
+        "name": "A second session for that account cannot be opened in the run",
+        "status": "passed"
+      },
+      {
+        "name": "Resuming the setup on the same Router delivers the pending notice",
+        "status": "passed"
+      },
+      {
+        "name": "A disconnected Router fails discovery for its own session only; the other inbox is still served",
+        "status": "passed"
+      },
+      {
+        "name": "A Router built for another inbox of the same owner cannot be seen before dispatch; its receipt is caught and every session halts",
+        "status": "passed"
+      },
+      {
+        "name": "Through a spawned Router whose receiver replies after the acknowledgement deadline, the Router records the receiver's acknowledgement as lost",
+        "status": "passed"
+      },
+      {
+        "name": "The adapter reports the publish as unknown and halts, and verifies the halt only once Mail holds the late receive",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation by the derived event ID in the dispatch run, account and epoch reports committed only because the receipt and the record agree",
+        "status": "passed"
+      },
+      {
+        "name": "The lost publish left exactly one record, in mail-p-1 only",
+        "status": "passed"
+      },
+      {
+        "name": "The other session reports halted and refuses with run_halted",
+        "status": "passed"
+      },
+      {
+        "name": "The run stays halted after reconciliation",
+        "status": "passed"
+      },
+      {
+        "name": "Mendwell stays committed after an unknown acknowledgement",
+        "status": "passed"
+      },
+      {
+        "name": "Reconciliation is never committed for another event ID, another message, another publisher or another account",
+        "status": "passed"
+      },
+      {
+        "name": "After a receiver reset the unknown outcome reconciles as indeterminate, never committed",
+        "status": "passed"
+      },
+      {
+        "name": "Across spawned Router sessions the shared lock admits one dispatch at a time: while A is held by its receiver, B is refused with concurrent_dispatch and the run stops",
+        "status": "passed"
+      },
+      {
+        "name": "After a concurrent dispatch both sessions report halted, the adapter refuses, and the other inbox gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "A publish whose Router request times out halts at once, before any probe, and its outcome is unknown",
+        "status": "passed"
+      },
+      {
+        "name": "The delayed request reaches a halted Router and is refused, so the revoked viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "The queued revocation commits only after the Router settled the delayed request",
+        "status": "passed"
+      },
+      {
+        "name": "When the publish times out, the Router is done with the request while its receive is still unconfirmed in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "When the publish times out, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+        "status": "passed"
+      },
+      {
+        "name": "When the publish times out, the viewer gets the notice before the queued revocation commits, never after it",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router replies that its receiver did not confirm, the Router is done with the request while its receive is still unconfirmed in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router replies that its receiver did not confirm, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router replies that its receiver did not confirm, the viewer gets the notice before the queued revocation commits, never after it",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router is killed while its receiver holds the delivery, the Router is done with the request while its receive is still unconfirmed in Mail",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router is killed while its receiver holds the delivery, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+        "status": "passed"
+      },
+      {
+        "name": "When the Router is killed while its receiver holds the delivery, the viewer gets the notice before the queued revocation commits, never after it",
+        "status": "passed"
+      },
+      {
+        "name": "A receive still queued in Mail when the adapter fences arrives after the revocation, is refused as stale, and the viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "Closing a Router that still answers ends or orphans its Mail receiver inside the transaction and leaves that Mail instance unusable",
+        "status": "passed"
+      },
+      {
+        "name": "Closing a Router that still answers leaves the run halted: send() is still pending with the publish lock held, the queued revocation has not run, the viewer's inbox is empty, and status() shows the halt without stop_verified",
+        "status": "passed"
+      },
+      {
+        "name": "Killing a Router ends or orphans its Mail receiver inside the transaction and leaves that Mail instance unusable",
+        "status": "passed"
+      },
+      {
+        "name": "Killing a Router leaves the run halted: send() is still pending with the publish lock held, the queued revocation has not run, the viewer's inbox is empty, and status() shows the halt without stop_verified",
+        "status": "passed"
+      },
+      {
+        "name": "When Infra closes the live Router during settlement, the sender writes nothing more to it and keeps running",
+        "status": "passed"
+      },
+      {
+        "name": "Closing is not an exit: the lock is kept until the Router process has exited, and the revocation commits after it",
+        "status": "passed"
+      },
+      {
+        "name": "After the exit Mail settles the dispatch, and the viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "A fence whose acknowledgement is lost is retried with the same request and target, and Mail returns the stored receipt",
+        "status": "passed"
+      },
+      {
+        "name": "So the viewer's Mail clock moves by exactly 1 ms and the viewer gets nothing",
+        "status": "passed"
+      },
+      {
+        "name": "Without a bound Mail account nothing is published",
+        "status": "passed"
+      },
+      {
+        "name": "No Mail record is created and the entries stay in the Mendwell log",
+        "status": "passed"
+      },
+      {
+        "name": "A Mail instance whose seed is not loaded fails the receiver check",
+        "status": "passed"
+      },
+      {
+        "name": "A session opened before its Mail seed was loaded cannot be reopened for that account in the run",
+        "status": "passed"
+      }
+    ]
+  }
+}
