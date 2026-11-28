@@ -114,19 +114,27 @@ Agent reads and writes never move the clock. Time moves only when Infra calls `e
 
 ## Data
 
-Three reset fixtures, written by [`fixtures/generate.cjs`](fixtures/generate.cjs) from fixed seeds (the same seeds give the same bytes; `node fixtures/generate.cjs --check` and a test confirm it). All use one account (Dana Okafor) and the identity binding in `fixtures/binding.json`. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
+Three reset fixtures, written by [`fixtures/generate.cjs`](fixtures/generate.cjs) from fixed seeds (the same seeds give the same bytes; `node fixtures/generate.cjs --check` and a test confirm it). All use one account (Dana Okafor) and the identity binding in `fixtures/binding.json`. Every record is synthetic: no real facility, person, payment or Recreation.gov record is used, and none is presented as an observed fact. The generator and its fixed text (facility names and descriptions, alert texts, companion names) were written with AI assistance; the records themselves come only from the script. See [`contribution/dataset.json`](contribution/dataset.json). A human read-through of the fixtures is still pending.
 
 | Fixture | Clock | Facilities | Sites | Reservations | Seeded claims | Schedule events |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| [`minimal.json`](fixtures/minimal.json) (manifest seed) | 2027-05-20 09:00 -07:00 | 3 | 12 | 22 | 0 | 35 |
-| [`high-country.json`](fixtures/high-country.json) | 2026-06-12 08:00 -06:00 | 7 (-06:00 and -07:00) | 308 | 11 | 1,237 | 38 |
-| [`desert-rivers.json`](fixtures/desert-rivers.json) | 2026-10-02 07:30 -07:00 | 6 (-07:00 and -08:00) | 261 | 20 | 1,047 | 38 |
+| [`minimal.json`](fixtures/minimal.json) (manifest seed) | 2027-05-20 09:00 -07:00 | 3 | 12 | 27 | 0 | 35 |
+| [`high-country.json`](fixtures/high-country.json) | 2026-06-12 08:00 -06:00 | 7 (-06:00 and -07:00) | 308 | 14 | 1,237 | 38 |
+| [`desert-rivers.json`](fixtures/desert-rivers.json) | 2026-10-02 07:30 -07:00 | 6 (-07:00 and -08:00) | 261 | 23 | 1,047 | 38 |
 
-`minimal.json` is the M1 fixture, unchanged: two policy records, three cards, 22 reservations from 2025-01-02 to the two upcoming stays. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length.
+`minimal.json` is the M1 fixture plus five stays from the quiet-month pass below: two policy records, three cards, 27 reservations from 2025-01-02 to the two upcoming stays. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length.
 
 The two larger fixtures follow the proposal's scale: 6-8 facilities with two or three policy records (the default ladder, the 3-day/50% record and a week-out record), 250-400 sites covering all six attributes with some unknown values, three cards under two cardholders (one expired, the default is Carol's), 2-3 equipment records, 5-6 companions, history from early January 2025 and four upcoming stays. Other bookers' claims fill part of the 180-day released window (busy weekends, quiet weekdays); nights beyond it are unreleased by rule, so no inventory is seeded there. Infra loads them with `env.load_seed` at the clock above; the manifest seed stays `minimal.json`.
 
 Seeded history is on or after 2025-01-01; task clocks and every scheduled event are on or after 2026-01-01. A test checks every date in every fixture, schedule and claim-times file.
+
+### Coverage of 2025-01 to 2026-12
+
+[`evidence/coverage.md`](evidence/coverage.md) (and [`coverage.json`](evidence/coverage.json)), written by [`scripts/coverage-report.cjs`](scripts/coverage-report.cjs), counts each fixture's represented dates (bookings, check-ins, cancellations, stay nights, payments, alerts, closures, other bookers' claims, saved-record edits) in `America/Phoenix`, with per-fixture SHA-256, distinct-date counts, a month-by-month table and the gaps. `npm test` fails if the committed report differs from a fresh run, and `tests/platform-checks.cjs` checks that the counted records load through `env.load_seed` and come back from the Agent tools.
+
+- `minimal` is the full-window source: its clock is after the window, so every month of 2025 and 2026 is past activity.
+- `high-country` and `desert-rivers` have clocks inside the window. Their history runs from January 2025 to the clock; after it they hold only future bookings, up to the end of the 180-day released window (high-country's ends 2026-12-08 by rule).
+- The main history loop skips about a third of its 30-day steps, which had left some months empty. `fillQuietMonths` in the generator now adds one stay of the same account for each such month (a stay in season, otherwise a booking made that month for a later trip), with its own random stream, so earlier records keep their bytes and IDs. The added reservations are listed in the report and in `dataset.json`.
 
 ### Schedules and hidden values
 

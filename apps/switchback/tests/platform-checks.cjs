@@ -190,7 +190,36 @@ async function main() {
       fixtureHashes[name] = base;
     }
     ok('(c) on high-country and desert-rivers: 20 resets each, after schedule events and Agent writes, restore the loaded hash and clock', true);
-    console.log(JSON.stringify({app: 'switchback', baseline_sha256: baseline, fixture_sha256: fixtureHashes, permissions: outcomes, passed: results}, null, 2));
+
+    // Coverage: the records evidence/coverage.json counts are the ones Infra
+    // loads and the Agent tools return. Each fixture is loaded in its own run at
+    // its clock; reservations.list, reservations.get and alerts.list must return
+    // every counted reservation, payment and alert with the counted date field.
+    const coverage = require('../evidence/coverage.json'), loadedCounts = {};
+    for (const name of ['minimal', 'high-country', 'desert-rivers']) {
+      const run = 'coverage-' + name, ci = await open('infra', run), ca = await open('agent', run);
+      const seed = require(`../fixtures/${name}.json`), schedule = require(`../fixtures/schedules/${name}.json`);
+      const cv = async () => (await ci.call('env.snapshot')).version;
+      assert.equal((await ci.call('env.load_seed', {expected_version: await cv(), data: seed, virtual_now: schedule.initial_time, request_id: 'coverage-load'})).status, 'ready');
+      const src = coverage.sources.find(s => s.source_id === 'fixture-' + name), count = c => src.collections.find(x => x.collection === c).records;
+      const listed = (await ca.call('switchback.reservations.list', {})).reservations;
+      assert.deepEqual(listed.map(r => [r.id, r.created_at]), seed.reservations.map(r => [r.id, r.created_at]), name + ' reservations');
+      assert.equal(listed.length, count('reservations'));
+      let payments = 0;
+      for (const r of listed) {
+        const got = await ca.call('switchback.reservations.get', {reservation_id: r.id});
+        assert.deepEqual(got.payments.map(p => [p.id, p.created_at]), seed.payments.filter(p => p.reservation_id === r.id).map(p => [p.id, p.created_at]), r.id);
+        assert.deepEqual(got.reservation.history.map(h => h.at), seed.reservations.find(x => x.id === r.id).history.map(h => h.at), r.id + ' history');
+        payments += got.payments.length;
+      }
+      assert.equal(payments, count('payments'), name + ' payments');
+      const alerts = (await ca.call('switchback.alerts.list', {})).alerts;
+      assert.deepEqual(alerts.map(a => [a.id, a.posted_at]), seed.alerts.map(a => [a.id, a.posted_at]));
+      assert.equal(alerts.length, count('alerts'));
+      loadedCounts[name] = {reservations: listed.length, payments, alerts: alerts.length};
+    }
+    ok('coverage: each fixture loaded through env.load_seed returns every counted reservation, payment and alert, with its counted date, through the Agent tools', true);
+    console.log(JSON.stringify({app: 'switchback', baseline_sha256: baseline, fixture_sha256: fixtureHashes, permissions: outcomes, coverage_loaded: loadedCounts, passed: results}, null, 2));
   } finally {
     await Promise.allSettled(clients.map(c => c.close()));
     prepared.cleanup();

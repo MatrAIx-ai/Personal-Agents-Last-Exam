@@ -60,8 +60,9 @@ const POLICY = {
 };
 
 // ---- minimal.json: the manifest seed -----------------------------------------
-// This function is the M1 generator unchanged; its random draws, and so its
-// bytes, must not change.
+// This function is the M1 generator unchanged; its random draws, and so the
+// records it writes, must not change. fillQuietMonths below appends records
+// to it afterwards with a separate random stream.
 function minimal() {
   const OFF = '-07:00';
   const rand = rng(20250101);
@@ -371,6 +372,106 @@ function large(name) {
   return {seed, upcoming, taken, rand, int, pick, stamp, sitesOf};
 }
 
+// ---- Quiet months --------------------------------------------------------------
+// The history loops above skip about a third of their 30-day steps at random,
+// which left some calendar months of 2025-2026 with no dated record at all
+// (docs/submission-evidence.md section 3 asks for coverage across the window).
+// This pass runs after a fixture is built, with its own random stream, so every
+// record above keeps its bytes and ID. For each month from 2025-01 up to the
+// fixture's clock (and at most 2026-12) that has no represented date, it adds
+// one more stay of the same account: in season a stay in that month, out of
+// season a booking made that month for a later trip, as people book ahead in
+// winter. New reservations and payments take the next free IDs.
+const SEASON = {
+  // Facility IDs that are open for camping in a month (1-12); others are booked ahead.
+  minimal: m => (m >= 5 && m <= 10 ? null : []),
+  // Mountain loops: June to September; the lower ones also in May and October.
+  'high-country': m => (m >= 6 && m <= 9 ? null : m === 5 || m === 10 ? ['aspen-bench', 'bridger-flats', 'coldwater-spring', 'dutch-creek', 'fir-ridge'] : []),
+  'desert-rivers': m => (m >= 10 || m <= 4 ? null : ['echo-bar', 'falcon-point']),
+};
+
+function representedMonths(seed) {
+  const out = new Set(), add = v => { if (typeof v === 'string') out.add(v.slice(0, 7)); };
+  for (const r of seed.reservations) {
+    add(r.created_at);
+    for (const h of r.history) add(h.at);
+    if (!['cancelled', 'closure_cancelled'].includes(r.state)) r.nights.forEach(add);
+  }
+  for (const p of seed.payments) add(p.created_at);
+  for (const a of seed.alerts) add(a.posted_at);
+  for (const c of seed.closures) add(c.ordered_at);
+  for (const c of seed.claims) { add(c.claimed_at); c.nights.forEach(add); }
+  for (const e of [...seed.equipment, ...seed.companions]) add(e.updated_at);
+  return out;
+}
+
+function fillQuietMonths(name, seed, {seed: number, clock}) {
+  const rand = rng(number + 101), int = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
+  const pick = list => list[Math.floor(rand() * list.length)];
+  const clockDate = clock.slice(0, 10), lastMonth = clockDate.slice(0, 7) < '2026-12' ? clockDate.slice(0, 7) : '2026-12';
+  const off = fid => seed.facilities.find(f => f.id === fid).utc_offset;
+  const stamp = (fid, date, hh, mm) => `${date}T${pad(hh)}:${pad(mm)}:00${off(fid)}`;
+  const next = (list, prefix) => `${prefix}-${String(Math.max(0, ...list.map(x => Number(x.id.split('-').pop()))) + 1).padStart(4, '0')}`;
+  const taken = new Set();
+  for (const r of seed.reservations) if (r.state !== 'cancelled') for (const d of r.nights) taken.add(r.site_id + '|' + d);
+  for (const c of seed.claims) for (const d of c.nights) taken.add(c.site_id + '|' + d);
+  const closed = (s, d) => seed.closures.some(c => c.facility_id === s.facility_id && (!c.site_ids.length || c.site_ids.includes(s.id)) && c.from <= d && d < c.to);
+  const gear0 = seed.equipment[0], gear1 = seed.equipment[1];
+  const party = seed.companions.filter(c => c.default_party).map(c => ({id: c.id, display_name: c.display_name, person_id: c.person_id}));
+  const holder = {kind: 'holder', id: 'holder', display_name: seed.holder.display_name};
+  const fits = s => s.loop !== 'W' && s.max_vehicle_ft !== null && s.max_vehicle_ft > 0 && s.max_occupancy >= party.length + 1;
+  const added = [];
+
+  function stay(fid, arrival, created, cancelled) {
+    const length = int(1, 3), departure = addDays(arrival, length), list = nights(arrival, departure);
+    const options = seed.sites.filter(s => s.facility_id === fid && fits(s) && list.every(d => !taken.has(s.id + '|' + d) && !closed(s, d)));
+    if (!options.length || departure >= clockDate) return false;
+    const s = pick(options), f = seed.facilities.find(x => x.id === fid), nightly = list.map(() => s.nightly_cents);
+    const card = rand() < 0.7 ? 'card-dana-visa' : 'card-carol-visa', total = nightly.reduce((a, b) => a + b, 0);
+    const hist = [{at: created, action: 'confirmed'}];
+    if (cancelled) hist.push({at: stamp(fid, addDays(arrival, -int(15, 25)), int(8, 20), int(0, 59)), action: 'cancelled', refund_cents: total});
+    else hist.push({at: stamp(fid, arrival, int(14, 19), int(0, 59)), action: 'checked_in'}, {at: stamp(fid, departure, 12, 0), action: 'completed'});
+    if (hist[1].at <= created) return false;
+    const r = {id: next(seed.reservations, 'res'), facility_id: fid, site_id: s.id, arrival, departure, nights: list, nightly_cents: nightly,
+      total_cents: total, policy_id: f.policy_id, primary_occupant: holder,
+      equipment: s.max_vehicle_ft >= gear0.length_ft ? gear0 : gear1, companions: party, party_size: party.length + 1, pets: 0, card_id: card,
+      state: cancelled ? 'cancelled' : 'completed', late_arrival: false, created_at: created, updated_at: hist.at(-1).at, history: hist};
+    seed.reservations.push(r);
+    seed.payments.push({id: next(seed.payments, 'pay'), reservation_id: r.id, card_id: card, amount_cents: total, kind: 'charge', reason: 'booking',
+      created_at: created, posts_at: created, status: 'posted'});
+    if (cancelled) seed.payments.push({id: next(seed.payments, 'pay'), reservation_id: r.id, card_id: card, amount_cents: total, kind: 'refund',
+      reason: 'cancellation', created_at: hist[1].at, posts_at: isoAt(Date.parse(hist[1].at) + 3 * 86400000, off(fid)), status: 'posted'});
+    else for (const d of list) taken.add(s.id + '|' + d);
+    added.push(r.id);
+    return true;
+  }
+
+  for (let month = '2025-01'; month <= lastMonth; month = addDays(`${month}-01`, 32).slice(0, 7)) {
+    if (representedMonths(seed).has(month)) continue;
+    const m = Number(month.slice(5)), open = SEASON[name](m);
+    const inSeason = open === null ? seed.facilities.map(f => f.id) : open;
+    for (let attempt = 0; attempt < 400 && !representedMonths(seed).has(month); attempt++) {
+      if (inSeason.length && rand() < 0.85) {
+        // A stay in this month, booked three weeks to three months before.
+        const fid = pick(inSeason), arrival = `${month}-${pad(int(1, 24))}`;
+        let created = stamp(fid, addDays(arrival, -int(21, 90)), int(7, 21), int(0, 59));
+        if (created < '2025-01-02') created = stamp(fid, '2025-01-02', 9, int(0, 59));
+        stay(fid, arrival, created, false);
+      } else {
+        // A booking made this month for a trip six weeks to six months later (the
+        // release window is 180 days).
+        // The trip itself falls in a month when its facility is open.
+        const fid = pick(seed.facilities.map(f => f.id)), made = `${month}-${pad(int(2, 26))}`, arrival = addDays(made, int(45, 178));
+        const openThen = SEASON[name](Number(arrival.slice(5, 7)));
+        if (made < '2025-01-02' || (openThen !== null && !openThen.includes(fid))) continue;
+        stay(fid, arrival, stamp(fid, made, int(7, 21), int(0, 59)), rand() < 0.3);
+      }
+    }
+    if (!representedMonths(seed).has(month)) throw Error(`${name}: could not add a record in ${month}`);
+  }
+  return added;
+}
+
 // ---- Default scenario schedules ------------------------------------------------
 // Each schedule is a fixed list of events. Claim events carry a time window;
 // their instants come from the evaluator-side claim-times file.
@@ -512,13 +613,15 @@ const json = value => JSON.stringify(value, null, 2) + '\n';
 
 function templates() {
   const out = {minimal: minimalTemplate()};
-  const seeds = {minimal: minimal()};
+  const seeds = {minimal: minimal()}, filled = {};
+  filled.minimal = fillQuietMonths('minimal', seeds.minimal, {seed: 20250101, clock: out.minimal.initial_time});
   for (const name of Object.keys(LARGE)) {
     const built = large(name);
     seeds[name] = built.seed;
     out[name] = largeTemplate(name, built);
+    filled[name] = fillQuietMonths(name, built.seed, LARGE[name]);
   }
-  return {templates: out, seeds};
+  return {templates: out, seeds, filled};
 }
 
 // Every output file, keyed by its path under fixtures/. Claim-times files are

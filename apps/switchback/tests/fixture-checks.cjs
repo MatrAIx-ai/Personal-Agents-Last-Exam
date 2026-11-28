@@ -121,4 +121,21 @@ test('schedules and claim times are evaluator-side: no tool, page or business so
   }
 });
 
+test('the committed coverage report matches a fresh run, and every month of 2025-2026 has dated records in each fixture up to its clock', () => {
+  const coverage = require('../scripts/coverage-report.cjs');
+  for (const [rel, content] of Object.entries(coverage.files())) assert.equal(fs.readFileSync(path.join(root, rel), 'utf8'), content, rel + ' is stale: run node scripts/coverage-report.cjs');
+  const r = coverage.report();
+  assert.equal(r.time_zone, 'America/Phoenix');
+  for (const s of r.sources.filter(x => x.source_id.startsWith('fixture-'))) {
+    assert.equal(s.invalid, 0, s.source_id);
+    assert.equal(s.provenance, 'synthetic');
+    const before = s.months.filter(m => !m.after_clock);
+    assert.deepEqual(before.filter(m => !m.records).map(m => m.month), [], s.source_id + ' has an empty month before its clock');
+    assert.ok(s.earliest >= '2025-01-01');
+  }
+  // minimal's clock lies after the window, so it covers every month as past activity.
+  assert.deepEqual(r.sources.find(s => s.source_id === 'fixture-minimal').empty_months, []);
+  assert.deepEqual(r.global.empty_months, []);
+});
+
 module.exports = {FIXTURES, seedOf, scheduleOf};

@@ -1,0 +1,1356 @@
+{
+  "schema": "switchback.coverage.v1",
+  "scope": "Environment dataset coverage of the records each delivered Switchback fixture loads with env.load_seed (and the Mail seed used by the publisher), counted over represented occurrence dates.",
+  "window": {
+    "from": "2025-01-01",
+    "to": "2026-12-31"
+  },
+  "time_zone": "America/Phoenix",
+  "time_zone_note": "Facilities keep fixed UTC offsets (-06:00, -07:00 or -08:00, no daylight saving). Timestamps are normalized to America/Phoenix (UTC-07:00 all year) before taking the date; date-only fields (stay and claim nights) are facility-local calendar dates and are taken as they are. date_shift_vs_facility_offset counts records whose America/Phoenix date differs from the date in their own offset.",
+  "provenance": "All records are synthetic: written by fixtures/generate.cjs from fixed seeds (claim instants drawn once from OS entropy into fixtures/evaluator/). No real facility, person, payment or Recreation.gov record is included, and none of these records is an observed fact.",
+  "fields": [
+    {
+      "collection": "reservations",
+      "field": "created_at",
+      "meaning": "booking made (charge receipt time)"
+    },
+    {
+      "collection": "reservations[].history",
+      "field": "at",
+      "meaning": "lifecycle event after booking: check-in, completion, cancellation, no-show release, change, late-arrival notice (the \"confirmed\" row repeats created_at and is not counted again)"
+    },
+    {
+      "collection": "reservations[].nights",
+      "field": "date (date-only, facility-local)",
+      "meaning": "a night the account holder stayed or is booked to stay (cancelled stays excluded)"
+    },
+    {
+      "collection": "payments",
+      "field": "created_at",
+      "meaning": "charge or refund issued"
+    },
+    {
+      "collection": "alerts",
+      "field": "posted_at",
+      "meaning": "facility alert posted"
+    },
+    {
+      "collection": "closures",
+      "field": "ordered_at",
+      "meaning": "closure ordered"
+    },
+    {
+      "collection": "claims",
+      "field": "claimed_at",
+      "meaning": "another booker took open nights"
+    },
+    {
+      "collection": "claims[].nights",
+      "field": "date (date-only, facility-local)",
+      "meaning": "a night another booker holds"
+    },
+    {
+      "collection": "equipment",
+      "field": "updated_at",
+      "meaning": "saved equipment last edited"
+    },
+    {
+      "collection": "companions",
+      "field": "updated_at",
+      "meaning": "saved companion last edited"
+    },
+    {
+      "collection": "messages (Mail)",
+      "field": "received_at",
+      "meaning": "Mail message in the seeded inbox"
+    }
+  ],
+  "excluded": [
+    {
+      "field": "reservations.updated_at",
+      "reason": "repeats the last history row"
+    },
+    {
+      "field": "reservations.arrival, departure",
+      "reason": "stay bounds; the nights themselves are counted"
+    },
+    {
+      "field": "payments.posts_at",
+      "reason": "derived posting date (refunds post three days after created_at); counted once through created_at"
+    },
+    {
+      "field": "alerts.from, to, cancelled_at; alerts.revisions",
+      "reason": "validity window and its end, not an occurrence"
+    },
+    {
+      "field": "closures.from, to",
+      "reason": "validity window of the closure, not an occurrence"
+    },
+    {
+      "field": "wallet.cards exp_month, exp_year",
+      "reason": "expiry deadline"
+    },
+    {
+      "field": "holds.expires_at, previews.expires_at, notices",
+      "reason": "deadlines and run records; empty in every seed"
+    },
+    {
+      "field": "facilities, sites, policies",
+      "reason": "catalogue records with no represented date"
+    },
+    {
+      "field": "fixtures/schedules/*.json, fixtures/evaluator/*.json",
+      "reason": "scenario events applied during a run, not loaded history; listed separately below and not counted"
+    }
+  ],
+  "invalid_dates": "A value that does not parse as a date is counted under invalid and shown; there are none when invalid is 0.",
+  "sources": [
+    {
+      "source_id": "fixture-minimal",
+      "file": "fixtures/minimal.json",
+      "kind": "reset fixture (manifest seed)",
+      "provenance": "synthetic",
+      "sha256": "2d1612022bb34d9c4d4521e4d30178e5c685e6781714682c1f74120d38cfb2e4",
+      "clock": "2027-05-20T09:00:00-07:00",
+      "records_counted": 158,
+      "in_window": 141,
+      "outside_window": 17,
+      "invalid": 0,
+      "date_shift_vs_facility_offset": 0,
+      "distinct_dates": 85,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-30",
+      "quiet_month_records": [
+        "res-0023",
+        "res-0024",
+        "res-0025",
+        "res-0026",
+        "res-0027"
+      ],
+      "samples": [
+        {
+          "id": "res-0003",
+          "text": "res-0003: Cedar Flat site B14, 2025-02-01 to 2025-02-02, completed, $28.00 on card-dana-visa, booked 2025-01-02T09:00:00-07:00; history confirmed 2025-01-02T09:00, checked in 2025-02-01T15:41, completed 2025-02-02T12:00."
+        },
+        {
+          "id": "res-0024",
+          "text": "res-0024: Pine Hollow site 14, 2026-08-18 to 2026-08-19, completed, $32.00 on card-dana-visa, booked 2026-02-24T17:42:00-07:00; history confirmed 2026-02-24T17:42, checked in 2026-08-18T17:20, completed 2026-08-19T12:00."
+        },
+        {
+          "id": "res-0005",
+          "text": "res-0005: Pine Hollow site 14, 2025-05-04 to 2025-05-06, cancelled, $64.00 on card-dana-visa, booked 2025-03-21T12:16:00-07:00; history confirmed 2025-03-21T12:16, cancelled 2025-04-13T11:44."
+        },
+        {
+          "id": "res-0021",
+          "text": "res-0021: Cedar Flat site C03, 2027-03-09 to 2027-03-10, no show, $26.00 on card-dana-visa, booked 2027-01-19T21:21:00-07:00; history confirmed 2027-01-19T21:21, no show released 2027-03-09T21:00."
+        },
+        {
+          "id": "al-0001",
+          "text": "al-0001: fire restriction at Pine Hollow, posted 2027-05-14T09:00:00-07:00: \"Stage 1 fire restriction: campfires only in provided rings.\""
+        }
+      ],
+      "thin_months": [
+        "2025-05",
+        "2025-08",
+        "2025-11",
+        "2026-02",
+        "2026-03"
+      ],
+      "empty_months": [],
+      "collections": [
+        {
+          "collection": "reservations",
+          "field": "created_at",
+          "meaning": "booking made (charge receipt time)",
+          "records": 27,
+          "in_window": 24,
+          "outside_window": 3,
+          "invalid": 0,
+          "distinct_dates": 23,
+          "earliest": "2025-01-02",
+          "latest": "2026-12-20"
+        },
+        {
+          "collection": "reservations[].history",
+          "field": "at",
+          "meaning": "lifecycle event after booking: check-in, completion, cancellation, no-show release, change, late-arrival notice (the \"confirmed\" row repeats created_at and is not counted again)",
+          "records": 45,
+          "in_window": 42,
+          "outside_window": 3,
+          "invalid": 0,
+          "distinct_dates": 41,
+          "earliest": "2025-02-01",
+          "latest": "2026-12-30"
+        },
+        {
+          "collection": "reservations[].nights",
+          "field": "date (date-only, facility-local)",
+          "meaning": "a night the account holder stayed or is booked to stay (cancelled stays excluded)",
+          "records": 47,
+          "in_window": 40,
+          "outside_window": 7,
+          "invalid": 0,
+          "distinct_dates": 40,
+          "earliest": "2025-02-01",
+          "latest": "2026-12-29"
+        },
+        {
+          "collection": "payments",
+          "field": "created_at",
+          "meaning": "charge or refund issued",
+          "records": 31,
+          "in_window": 28,
+          "outside_window": 3,
+          "invalid": 0,
+          "distinct_dates": 27,
+          "earliest": "2025-01-02",
+          "latest": "2026-12-24"
+        },
+        {
+          "collection": "alerts",
+          "field": "posted_at",
+          "meaning": "facility alert posted",
+          "records": 3,
+          "in_window": 2,
+          "outside_window": 1,
+          "invalid": 0,
+          "distinct_dates": 2,
+          "earliest": "2025-08-09",
+          "latest": "2026-06-02"
+        },
+        {
+          "collection": "equipment",
+          "field": "updated_at",
+          "meaning": "saved equipment last edited",
+          "records": 2,
+          "in_window": 2,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 1,
+          "earliest": "2025-03-02",
+          "latest": "2025-03-02"
+        },
+        {
+          "collection": "companions",
+          "field": "updated_at",
+          "meaning": "saved companion last edited",
+          "records": 3,
+          "in_window": 3,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 2,
+          "earliest": "2025-01-20",
+          "latest": "2025-03-02"
+        }
+      ],
+      "months": [
+        {
+          "month": "2025-01",
+          "records": 5,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-02",
+          "records": 3,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-03",
+          "records": 10,
+          "distinct_dates": 5,
+          "after_clock": false
+        },
+        {
+          "month": "2025-04",
+          "records": 4,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-05",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-06",
+          "records": 7,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2025-07",
+          "records": 4,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-08",
+          "records": 1,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-09",
+          "records": 9,
+          "distinct_dates": 6,
+          "after_clock": false
+        },
+        {
+          "month": "2025-10",
+          "records": 3,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-11",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-12",
+          "records": 4,
+          "distinct_dates": 3,
+          "after_clock": false
+        },
+        {
+          "month": "2026-01",
+          "records": 13,
+          "distinct_dates": 7,
+          "after_clock": false
+        },
+        {
+          "month": "2026-02",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2026-03",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2026-04",
+          "records": 8,
+          "distinct_dates": 5,
+          "after_clock": false
+        },
+        {
+          "month": "2026-05",
+          "records": 9,
+          "distinct_dates": 7,
+          "after_clock": false
+        },
+        {
+          "month": "2026-06",
+          "records": 11,
+          "distinct_dates": 6,
+          "after_clock": false
+        },
+        {
+          "month": "2026-07",
+          "records": 5,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2026-08",
+          "records": 5,
+          "distinct_dates": 3,
+          "after_clock": false
+        },
+        {
+          "month": "2026-09",
+          "records": 11,
+          "distinct_dates": 6,
+          "after_clock": false
+        },
+        {
+          "month": "2026-10",
+          "records": 5,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2026-11",
+          "records": 7,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2026-12",
+          "records": 9,
+          "distinct_dates": 6,
+          "after_clock": false
+        }
+      ]
+    },
+    {
+      "source_id": "fixture-high-country",
+      "file": "fixtures/high-country.json",
+      "kind": "reset fixture",
+      "provenance": "synthetic",
+      "sha256": "72b70303e3d03330f3ac9a9ad4e01d06bdf0b3f9bd9027a165de971bdd2f346b",
+      "clock": "2026-06-12T08:00:00-06:00",
+      "records_counted": 11009,
+      "in_window": 11009,
+      "outside_window": 0,
+      "invalid": 0,
+      "date_shift_vs_facility_offset": 0,
+      "distinct_dates": 299,
+      "earliest": "2025-01-28",
+      "latest": "2026-12-08",
+      "quiet_month_records": [
+        "res-0012",
+        "res-0013",
+        "res-0014"
+      ],
+      "samples": [
+        {
+          "id": "res-0005",
+          "text": "res-0005: Dutch Creek site A10, 2025-04-12 to 2025-04-15, completed, $147.00 on card-dana-visa, booked 2025-01-28T15:40:00-07:00; history confirmed 2025-01-28T15:40, checked in 2025-04-12T17:09, completed 2025-04-15T12:00."
+        },
+        {
+          "id": "res-0010",
+          "text": "res-0010: Dutch Creek site A01, 2025-10-04 to 2025-10-07, completed, $162.00 on card-dana-visa, booked 2025-07-21T19:52:00-07:00; history confirmed 2025-07-21T19:52, checked in 2025-10-04T19:39, completed 2025-10-07T12:00."
+        },
+        {
+          "id": "res-0012",
+          "text": "res-0012: Coldwater Spring site C29, 2025-07-20 to 2025-07-21, cancelled, $30.00 on card-dana-visa, booked 2025-02-05T20:33:00-06:00; history confirmed 2025-02-05T20:33, cancelled 2025-06-26T17:04."
+        },
+        {
+          "id": "res-0011",
+          "text": "res-0011: Aspen Bench site A11, 2026-05-05 to 2026-05-08, no show, $144.00 on card-dana-visa, booked 2026-03-06T13:15:00-06:00; history confirmed 2026-03-06T13:15, no show released 2026-05-05T21:00."
+        },
+        {
+          "id": "al-0001",
+          "text": "al-0001: smoke advisory at Aspen Bench, posted 2025-08-10T16:00:00-06:00: \"Smoke from the Ridge fire; air unhealthy for sensitive groups.\""
+        },
+        {
+          "id": "claim-0001",
+          "text": "claim-0001: another booker took site ab-A01 for 2026-06-19, 2026-06-20, 2026-07-03, 2026-07-17 at 2025-12-21T07:10:19-06:00."
+        }
+      ],
+      "thin_months": [
+        "2025-01",
+        "2025-02",
+        "2025-08",
+        "2025-11"
+      ],
+      "empty_months": [],
+      "collections": [
+        {
+          "collection": "reservations",
+          "field": "created_at",
+          "meaning": "booking made (charge receipt time)",
+          "records": 14,
+          "in_window": 14,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 14,
+          "earliest": "2025-01-28",
+          "latest": "2026-03-26"
+        },
+        {
+          "collection": "reservations[].history",
+          "field": "at",
+          "meaning": "lifecycle event after booking: check-in, completion, cancellation, no-show release, change, late-arrival notice (the \"confirmed\" row repeats created_at and is not counted again)",
+          "records": 16,
+          "in_window": 16,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 16,
+          "earliest": "2025-04-12",
+          "latest": "2026-05-13"
+        },
+        {
+          "collection": "reservations[].nights",
+          "field": "date (date-only, facility-local)",
+          "meaning": "a night the account holder stayed or is booked to stay (cancelled stays excluded)",
+          "records": 27,
+          "in_window": 27,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 27,
+          "earliest": "2025-04-12",
+          "latest": "2026-07-21"
+        },
+        {
+          "collection": "payments",
+          "field": "created_at",
+          "meaning": "charge or refund issued",
+          "records": 17,
+          "in_window": 17,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 16,
+          "earliest": "2025-01-28",
+          "latest": "2026-03-26"
+        },
+        {
+          "collection": "alerts",
+          "field": "posted_at",
+          "meaning": "facility alert posted",
+          "records": 3,
+          "in_window": 3,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 3,
+          "earliest": "2025-08-10",
+          "latest": "2026-06-01"
+        },
+        {
+          "collection": "closures",
+          "field": "ordered_at",
+          "meaning": "closure ordered",
+          "records": 1,
+          "in_window": 1,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 1,
+          "earliest": "2025-10-20",
+          "latest": "2025-10-20"
+        },
+        {
+          "collection": "claims",
+          "field": "claimed_at",
+          "meaning": "another booker took open nights",
+          "records": 1237,
+          "in_window": 1237,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 82,
+          "earliest": "2025-12-14",
+          "latest": "2026-06-09"
+        },
+        {
+          "collection": "claims[].nights",
+          "field": "date (date-only, facility-local)",
+          "meaning": "a night another booker holds",
+          "records": 9686,
+          "in_window": 9686,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 180,
+          "earliest": "2026-06-12",
+          "latest": "2026-12-08"
+        },
+        {
+          "collection": "equipment",
+          "field": "updated_at",
+          "meaning": "saved equipment last edited",
+          "records": 3,
+          "in_window": 3,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 1,
+          "earliest": "2025-03-02",
+          "latest": "2025-03-02"
+        },
+        {
+          "collection": "companions",
+          "field": "updated_at",
+          "meaning": "saved companion last edited",
+          "records": 5,
+          "in_window": 5,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 2,
+          "earliest": "2025-03-02",
+          "latest": "2025-06-14"
+        }
+      ],
+      "months": [
+        {
+          "month": "2025-01",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-02",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-03",
+          "records": 8,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-04",
+          "records": 13,
+          "distinct_dates": 6,
+          "after_clock": false
+        },
+        {
+          "month": "2025-05",
+          "records": 4,
+          "distinct_dates": 3,
+          "after_clock": false
+        },
+        {
+          "month": "2025-06",
+          "records": 6,
+          "distinct_dates": 3,
+          "after_clock": false
+        },
+        {
+          "month": "2025-07",
+          "records": 9,
+          "distinct_dates": 6,
+          "after_clock": false
+        },
+        {
+          "month": "2025-08",
+          "records": 1,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-09",
+          "records": 4,
+          "distinct_dates": 3,
+          "after_clock": false
+        },
+        {
+          "month": "2025-10",
+          "records": 6,
+          "distinct_dates": 5,
+          "after_clock": false
+        },
+        {
+          "month": "2025-11",
+          "records": 2,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-12",
+          "records": 307,
+          "distinct_dates": 15,
+          "after_clock": false
+        },
+        {
+          "month": "2026-01",
+          "records": 78,
+          "distinct_dates": 8,
+          "after_clock": false
+        },
+        {
+          "month": "2026-02",
+          "records": 239,
+          "distinct_dates": 17,
+          "after_clock": false
+        },
+        {
+          "month": "2026-03",
+          "records": 305,
+          "distinct_dates": 18,
+          "after_clock": false
+        },
+        {
+          "month": "2026-04",
+          "records": 76,
+          "distinct_dates": 8,
+          "after_clock": false
+        },
+        {
+          "month": "2026-05",
+          "records": 249,
+          "distinct_dates": 18,
+          "after_clock": false
+        },
+        {
+          "month": "2026-06",
+          "records": 1105,
+          "distinct_dates": 22,
+          "after_clock": false
+        },
+        {
+          "month": "2026-07",
+          "records": 1686,
+          "distinct_dates": 31,
+          "after_clock": true
+        },
+        {
+          "month": "2026-08",
+          "records": 1683,
+          "distinct_dates": 31,
+          "after_clock": true
+        },
+        {
+          "month": "2026-09",
+          "records": 1483,
+          "distinct_dates": 30,
+          "after_clock": true
+        },
+        {
+          "month": "2026-10",
+          "records": 1795,
+          "distinct_dates": 31,
+          "after_clock": true
+        },
+        {
+          "month": "2026-11",
+          "records": 1557,
+          "distinct_dates": 30,
+          "after_clock": true
+        },
+        {
+          "month": "2026-12",
+          "records": 389,
+          "distinct_dates": 8,
+          "after_clock": true
+        }
+      ]
+    },
+    {
+      "source_id": "fixture-desert-rivers",
+      "file": "fixtures/desert-rivers.json",
+      "kind": "reset fixture",
+      "provenance": "synthetic",
+      "sha256": "2c0895296ae64ef0c9273d423c62a29beb99650b2e4ca2ed12bee63f8ec7f8e5",
+      "clock": "2026-10-02T07:30:00-07:00",
+      "records_counted": 9317,
+      "in_window": 5321,
+      "outside_window": 3996,
+      "invalid": 0,
+      "date_shift_vs_facility_offset": 0,
+      "distinct_dates": 242,
+      "earliest": "2025-01-03",
+      "latest": "2026-12-31",
+      "quiet_month_records": [
+        "res-0021",
+        "res-0022",
+        "res-0023"
+      ],
+      "samples": [
+        {
+          "id": "res-0005",
+          "text": "res-0005: Canyon Mouth site A08, 2025-01-07 to 2025-01-10, completed, $165.00 on card-carol-visa, booked 2025-01-03T09:20:00-07:00; history confirmed 2025-01-03T09:20, checked in 2025-01-07T17:21, completed 2025-01-10T12:00."
+        },
+        {
+          "id": "res-0015",
+          "text": "res-0015: Falcon Point site A02, 2026-02-28 to 2026-03-01, cancelled, $57.00 on card-carol-visa, booked 2025-12-05T20:36:00-08:00; history confirmed 2025-12-05T20:36, cancelled 2026-02-12T11:00."
+        },
+        {
+          "id": "res-0010",
+          "text": "res-0010: Agave Wash site A09, 2025-07-06 to 2025-07-07, cancelled, $45.00 on card-carol-visa, booked 2025-04-18T11:18:00-07:00; history confirmed 2025-04-18T11:18, cancelled 2025-06-18T12:30."
+        },
+        {
+          "id": "res-0016",
+          "text": "res-0016: Canyon Mouth site A02, 2026-04-02 to 2026-04-05, no show, $141.00 on card-carol-visa, booked 2026-03-12T08:35:00-07:00; history confirmed 2026-03-12T08:35, no show released 2026-04-02T21:00."
+        },
+        {
+          "id": "al-0001",
+          "text": "al-0001: smoke advisory at Agave Wash, posted 2025-08-10T16:00:00-07:00: \"Smoke from the Mesa fire; air unhealthy for sensitive groups.\""
+        },
+        {
+          "id": "claim-0001",
+          "text": "claim-0001: another booker took site aw-A01 for 2026-10-03, 2026-10-23, 2026-11-07, 2026-11-10, 2026-11-13 at 2026-04-06T07:13:42-07:00."
+        }
+      ],
+      "thin_months": [
+        "2025-10"
+      ],
+      "empty_months": [],
+      "collections": [
+        {
+          "collection": "reservations",
+          "field": "created_at",
+          "meaning": "booking made (charge receipt time)",
+          "records": 23,
+          "in_window": 23,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 22,
+          "earliest": "2025-01-03",
+          "latest": "2026-07-17"
+        },
+        {
+          "collection": "reservations[].history",
+          "field": "at",
+          "meaning": "lifecycle event after booking: check-in, completion, cancellation, no-show release, change, late-arrival notice (the \"confirmed\" row repeats created_at and is not counted again)",
+          "records": 33,
+          "in_window": 33,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 33,
+          "earliest": "2025-01-07",
+          "latest": "2026-08-28"
+        },
+        {
+          "collection": "reservations[].nights",
+          "field": "date (date-only, facility-local)",
+          "meaning": "a night the account holder stayed or is booked to stay (cancelled stays excluded)",
+          "records": 44,
+          "in_window": 44,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 44,
+          "earliest": "2025-01-07",
+          "latest": "2026-11-10"
+        },
+        {
+          "collection": "payments",
+          "field": "created_at",
+          "meaning": "charge or refund issued",
+          "records": 26,
+          "in_window": 26,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 25,
+          "earliest": "2025-01-03",
+          "latest": "2026-07-17"
+        },
+        {
+          "collection": "alerts",
+          "field": "posted_at",
+          "meaning": "facility alert posted",
+          "records": 3,
+          "in_window": 3,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 3,
+          "earliest": "2025-08-10",
+          "latest": "2026-09-21"
+        },
+        {
+          "collection": "closures",
+          "field": "ordered_at",
+          "meaning": "closure ordered",
+          "records": 1,
+          "in_window": 1,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 1,
+          "earliest": "2025-10-20",
+          "latest": "2025-10-20"
+        },
+        {
+          "collection": "claims",
+          "field": "claimed_at",
+          "meaning": "another booker took open nights",
+          "records": 1047,
+          "in_window": 1047,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 84,
+          "earliest": "2026-04-05",
+          "latest": "2026-09-27"
+        },
+        {
+          "collection": "claims[].nights",
+          "field": "date (date-only, facility-local)",
+          "meaning": "a night another booker holds",
+          "records": 8132,
+          "in_window": 4136,
+          "outside_window": 3996,
+          "invalid": 0,
+          "distinct_dates": 91,
+          "earliest": "2026-10-02",
+          "latest": "2026-12-31"
+        },
+        {
+          "collection": "equipment",
+          "field": "updated_at",
+          "meaning": "saved equipment last edited",
+          "records": 2,
+          "in_window": 2,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 1,
+          "earliest": "2025-03-02",
+          "latest": "2025-03-02"
+        },
+        {
+          "collection": "companions",
+          "field": "updated_at",
+          "meaning": "saved companion last edited",
+          "records": 6,
+          "in_window": 6,
+          "outside_window": 0,
+          "invalid": 0,
+          "distinct_dates": 2,
+          "earliest": "2025-03-02",
+          "latest": "2025-06-14"
+        }
+      ],
+      "months": [
+        {
+          "month": "2025-01",
+          "records": 13,
+          "distinct_dates": 7,
+          "after_clock": false
+        },
+        {
+          "month": "2025-02",
+          "records": 6,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2025-03",
+          "records": 10,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2025-04",
+          "records": 6,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2025-05",
+          "records": 3,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-06",
+          "records": 14,
+          "distinct_dates": 8,
+          "after_clock": false
+        },
+        {
+          "month": "2025-07",
+          "records": 5,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2025-08",
+          "records": 3,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-09",
+          "records": 4,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2025-10",
+          "records": 1,
+          "distinct_dates": 1,
+          "after_clock": false
+        },
+        {
+          "month": "2025-11",
+          "records": 4,
+          "distinct_dates": 3,
+          "after_clock": false
+        },
+        {
+          "month": "2025-12",
+          "records": 10,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2026-01",
+          "records": 5,
+          "distinct_dates": 4,
+          "after_clock": false
+        },
+        {
+          "month": "2026-02",
+          "records": 7,
+          "distinct_dates": 5,
+          "after_clock": false
+        },
+        {
+          "month": "2026-03",
+          "records": 4,
+          "distinct_dates": 2,
+          "after_clock": false
+        },
+        {
+          "month": "2026-04",
+          "records": 265,
+          "distinct_dates": 21,
+          "after_clock": false
+        },
+        {
+          "month": "2026-05",
+          "records": 249,
+          "distinct_dates": 17,
+          "after_clock": false
+        },
+        {
+          "month": "2026-06",
+          "records": 27,
+          "distinct_dates": 12,
+          "after_clock": false
+        },
+        {
+          "month": "2026-07",
+          "records": 269,
+          "distinct_dates": 19,
+          "after_clock": false
+        },
+        {
+          "month": "2026-08",
+          "records": 256,
+          "distinct_dates": 18,
+          "after_clock": false
+        },
+        {
+          "month": "2026-09",
+          "records": 15,
+          "distinct_dates": 8,
+          "after_clock": false
+        },
+        {
+          "month": "2026-10",
+          "records": 1442,
+          "distinct_dates": 30,
+          "after_clock": false
+        },
+        {
+          "month": "2026-11",
+          "records": 1337,
+          "distinct_dates": 30,
+          "after_clock": true
+        },
+        {
+          "month": "2026-12",
+          "records": 1366,
+          "distinct_dates": 31,
+          "after_clock": true
+        }
+      ]
+    },
+    {
+      "source_id": "mail-seed",
+      "file": "examples/messaging/mail-seed.json",
+      "kind": "Mail seed used by examples/publish-to-mail.cjs",
+      "provenance": "synthetic",
+      "sha256": "ab5f3b38f6fd2f3c5e6c3fd96d6efdb99eece8c2cb768e6661a1627e372fa0d3",
+      "clock": null,
+      "records_counted": 0,
+      "in_window": 0,
+      "outside_window": 0,
+      "invalid": 0,
+      "date_shift_vs_facility_offset": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "quiet_month_records": [],
+      "samples": [],
+      "thin_months": [],
+      "empty_months": [
+        "2025-01",
+        "2025-02",
+        "2025-03",
+        "2025-04",
+        "2025-05",
+        "2025-06",
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08",
+        "2026-09",
+        "2026-10",
+        "2026-11",
+        "2026-12"
+      ],
+      "collections": [],
+      "months": [
+        {
+          "month": "2025-01",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-02",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-03",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-04",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-05",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-06",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-07",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-08",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-09",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-10",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-11",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2025-12",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-01",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-02",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-03",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-04",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-05",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-06",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-07",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-08",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-09",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-10",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-11",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        },
+        {
+          "month": "2026-12",
+          "records": 0,
+          "distinct_dates": 0,
+          "after_clock": null
+        }
+      ]
+    }
+  ],
+  "global": {
+    "distinct_dates": 424,
+    "earliest": "2025-01-02",
+    "latest": "2026-12-31",
+    "empty_months": [],
+    "months": [
+      {
+        "month": "2025-01",
+        "distinct_dates": 10
+      },
+      {
+        "month": "2025-02",
+        "distinct_dates": 7
+      },
+      {
+        "month": "2025-03",
+        "distinct_dates": 8
+      },
+      {
+        "month": "2025-04",
+        "distinct_dates": 11
+      },
+      {
+        "month": "2025-05",
+        "distinct_dates": 4
+      },
+      {
+        "month": "2025-06",
+        "distinct_dates": 11
+      },
+      {
+        "month": "2025-07",
+        "distinct_dates": 11
+      },
+      {
+        "month": "2025-08",
+        "distinct_dates": 3
+      },
+      {
+        "month": "2025-09",
+        "distinct_dates": 11
+      },
+      {
+        "month": "2025-10",
+        "distinct_dates": 7
+      },
+      {
+        "month": "2025-11",
+        "distinct_dates": 5
+      },
+      {
+        "month": "2025-12",
+        "distinct_dates": 19
+      },
+      {
+        "month": "2026-01",
+        "distinct_dates": 13
+      },
+      {
+        "month": "2026-02",
+        "distinct_dates": 19
+      },
+      {
+        "month": "2026-03",
+        "distinct_dates": 19
+      },
+      {
+        "month": "2026-04",
+        "distinct_dates": 26
+      },
+      {
+        "month": "2026-05",
+        "distinct_dates": 28
+      },
+      {
+        "month": "2026-06",
+        "distinct_dates": 28
+      },
+      {
+        "month": "2026-07",
+        "distinct_dates": 31
+      },
+      {
+        "month": "2026-08",
+        "distinct_dates": 31
+      },
+      {
+        "month": "2026-09",
+        "distinct_dates": 30
+      },
+      {
+        "month": "2026-10",
+        "distinct_dates": 31
+      },
+      {
+        "month": "2026-11",
+        "distinct_dates": 30
+      },
+      {
+        "month": "2026-12",
+        "distinct_dates": 31
+      }
+    ]
+  },
+  "not_counted": {
+    "scenario_schedules": [
+      {
+        "file": "fixtures/schedules/minimal.json",
+        "sha256": "affdfdaaf41a5700e2c29cb5285cab8922999d215d33fc54f627ac013fd88986",
+        "events": 35,
+        "first": "2027-05-20",
+        "last": "2027-07-05"
+      },
+      {
+        "file": "fixtures/schedules/high-country.json",
+        "sha256": "f3dd4cdd37a152c3fcbd70324c6843d92e200c4ac8f98af0b59b740025884bca",
+        "events": 38,
+        "first": "2026-06-13",
+        "last": "2026-07-23"
+      },
+      {
+        "file": "fixtures/schedules/desert-rivers.json",
+        "sha256": "c4dcd9dafeb223ec1284767ae052f28c5d3b21ebc37d667374cdd576dca1d902",
+        "events": 38,
+        "first": "2026-10-02",
+        "last": "2026-11-12"
+      }
+    ]
+  }
+}
