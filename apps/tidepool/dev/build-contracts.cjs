@@ -192,14 +192,12 @@ const MEMBER_ID = {...ID, description: 'member_id of the family member this call
 // describe the future. Their IDs and stored values are in the activity row. This happens only when a seed
 // that runs past its clock is loaded early.
 const LATER = nullable({type: 'object', additionalProperties: int(1)});
-const LATER_NOTE = ' later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.';
 function tool(name, description, readOnly, input, output, required = Object.keys(input)) {
   const inputSchema = readOnly ? obj(input, required)
     : obj({...input, expected_version: VERSION, request_id: ID}, [...required, 'expected_version', 'request_id']);
   for (const key of ['status', 'app_id', 'version']) if (key in output) throw Error(name + ' output cannot redefine Core field ' + key);
   const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output,
     ...(readOnly ? {} : {later_history_removed: LATER})});
-  if (!readOnly) description += LATER_NOTE;
   const target = 'id' in input ? 'member named by id in the bound family account' : 'bound family account';
   return {name: APP + '.' + name, description, read_only: readOnly, scope: APP + '.' + name, resource_target: target, inputSchema, outputSchema};
 }

@@ -181,6 +181,38 @@ function validateSeed(ctx, data) {
     if (!text(p.name, 100)) fail('invalid_seed', 'Playlist names cannot be blank.');
   }
   for (const n of data.notifications) if (!idx.members.has(n.member_id)) fail('invalid_seed', 'Notice ' + n.notice_id + ' names an unknown member.');
+
+  // Removed members. members.remove ends the member's downloads and their collaborator places on others'
+  // playlists, and from then on nothing is recorded for them: tools act only as the active caller, and events
+  // refuse an inactive member, notify and auto-download only for active followers, and let only an active
+  // owner or collaborator edit a playlist. So nothing of theirs is dated after removed_at, none of their
+  // downloads was still on a device then, and they hold no collaborator place. (A device check-in is not
+  // the member's record and is not checked.) Writes and events keep this; one at an earlier clock that
+  // later seeded records contradict drops the later family records instead (src/visible.cjs).
+  const DATED = [['devices', 'registered_at', 'a device registered'], ['sessions', 'ended_at', 'a listening session ended'],
+    ['progress', 'updated_at', 'episode progress updated'], ['plays', 'last_played_at', 'a track play count last played'],
+    ['follows', 'followed_at', 'a follow started'], ['upnext', 'updated_at', 'an Up Next list updated'],
+    ['downloads', 'requested_at', 'a download requested'], ['library', 'saved_at', 'a library save'], ['notifications', 'created_at', 'a notice created']];
+  for (const m of data.members) {
+    if (m.status !== 'removed') continue;
+    const t = instant(m.removed_at), after = ts => ts !== null && ts !== undefined && instant(ts) > t;
+    const has = what => fail('invalid_seed', m.display_name + ' (' + m.member_id + ') was removed at ' + m.removed_at + ' but has ' + what + '.');
+    for (const [family, key, what] of DATED) {
+      const x = data[family].find(r => r.member_id === m.member_id && after(r[key]));
+      if (x) has(what + ' at ' + x[key]);
+    }
+    for (const d of data.downloads) {
+      if (d.member_id !== m.member_id) continue;
+      const gone = d.removed_at ? !after(d.removed_at) : Boolean(d.auto_delete_at) && !after(d.auto_delete_at);
+      if (!gone) has('download ' + d.download_id + ' still on a device at the removal');
+    }
+    for (const p of data.playlists) {
+      if (p.owner_member_id === m.member_id && after(p.created_at)) has('playlist ' + p.playlist_id + ' created at ' + p.created_at);
+      const x = p.tracks.find(e => e.added_by === m.member_id && after(e.added_at));
+      if (x) has('a track added to playlist ' + p.playlist_id + ' at ' + x.added_at);
+      if (p.owner_member_id !== m.member_id && p.collaborators.includes(m.member_id)) has('a collaborator place on playlist ' + p.playlist_id);
+    }
+  }
   data.activity.forEach((a, i) => {if (i && a.seq <= data.activity[i - 1].seq) fail('invalid_seed', 'Activity rows must be in sequence order.');});
 }
 

@@ -178,8 +178,8 @@ function laterRemoved(stored, base, out) {
 
 // Runs a write or event on the view at `now` and returns the data to store. Later records the view
 // hid stay stored. If keeping them would leave the family inconsistent with the change (storage
-// caps, member limits, one open invitation or active download per key), the later family records
-// are dropped instead: they described a future without this change. Later albums, tracks and episodes stay.
+// caps, member limits, one open invitation or active download per key, a removed member's later records),
+// the later family records are dropped instead: they described a future without this change. Later albums, tracks and episodes stay.
 // Whatever later history is dropped or replaced is reported: the stored records in the change's activity
 // row, and their IDs by family in `removed` (the caller counts them for the receipt and the log).
 function commit(ctx, stored, now, change) {

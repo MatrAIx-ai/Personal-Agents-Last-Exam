@@ -139,6 +139,22 @@ async function main() {
     ok('An identical retry returns the stored receipt, marked duplicate, with the same counts',
       again.duplicate === true && JSON.stringify(again.later_history_removed) === JSON.stringify(counts));
     stages.push({label: 'Early write', clock: AT, request_id: args.request_id, item_id: albums[8], later_history_removed: counts});
+
+    // A member removed at an earlier clock stays removed (README, implementation note 7): the #216 follow-up
+    // review's repro. Sam's seeded later records described a future in which Sam stayed, so the later family
+    // records are dropped and reported, and at the dataset clock Sam has no downloads and no collaborator place.
+    await infra.call('env.load_seed', {expected_version: await version(), request_id: 'load-early-removal', data: seed, binding, policies: writes, bundle, virtual_now: AT});
+    const removal = await agent.call('tidepool.members.remove', {id: 'mem-sam', expected_version: await version(), request_id: 'early-remove-sam'});
+    const removedRow = (await infra.call('env.snapshot')).snapshot.data.activity.at(-1);
+    ok('At 2026-04-01 removing Sam commits and its receipt counts the later family records it dropped, as its activity row holds them',
+      removal.status === 'committed' && removal.later_history_removed !== null && removedRow.request_id === 'early-remove-sam'
+      && JSON.stringify(Object.fromEntries(Object.entries(removedRow.later_history_removed).map(([k, v]) => [k, v.length]))) === JSON.stringify(removal.later_history_removed));
+    const moved = await infra.call('env.advance_time', {expected_version: await version(), virtual_now: clock, request_id: 'advance-after-removal'});
+    const sam = (await agent.call('tidepool.family.get', {})).members.find(m => m.member_id === 'mem-sam');
+    const shared = (await agent.call('tidepool.playlists.list', {id})).playlists;
+    ok('At the dataset clock Sam is still removed, with no downloads and no collaborator place', moved.status === 'committed' && sam.status === 'removed'
+      && JSON.stringify(sam.downloads) === JSON.stringify({queued: 0, downloaded: 0, needs_check: 0, bytes: 0}) && shared.every(p => !p.collaborators.includes('mem-sam')));
+    stages.push({label: 'Early member removal', clock: AT, request_id: 'early-remove-sam', member_id: 'mem-sam', later_history_removed: removal.later_history_removed});
     return {
       app_id: 'tidepool', package_sha256: digestTree(pkg), node: process.version,
       dataset: {path: 'apps/tidepool/data/evaluation/seed.json', version: meta.version, sha256: crypto.createHash('sha256').update(seedText).digest('hex'),

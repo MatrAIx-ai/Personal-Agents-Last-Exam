@@ -3944,7 +3944,7 @@
   },
   {
     "name": "tidepool.progress.set",
-    "description": "Set a member's progress on one episode: state unplayed, in_progress (position_s required, 1 to the episode duration) or played. Records set_by \"agent\" with the value it replaced and adds no listening session. A position beyond the duration returns invalid_position. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Set a member's progress on one episode: state unplayed, in_progress (position_s required, 1 to the episode duration) or played. Records set_by \"agent\" with the value it replaced and adds no listening session. A position beyond the duration returns invalid_position. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.progress.set",
     "resource_target": "member named by id in the bound family account",
@@ -4120,7 +4120,7 @@
   },
   {
     "name": "tidepool.follows.add",
-    "description": "Follow a show for a member, optionally with auto-download of the newest n episodes (0 = off, default 0) and auto-delete of played episodes after d days (default off). Auto-delete also applies to downloads of episodes already played, counted from when each was played or downloaded, whichever is later. Following a show already followed changes nothing; settings that differ from the existing follow return invalid_arguments (use follows.update_settings). id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Follow a show for a member, optionally with auto-download of the newest n episodes (0 = off, default 0) and auto-delete of played episodes after d days (default off). Auto-delete also applies to downloads of episodes already played, counted from when each was played or downloaded, whichever is later. Following a show already followed changes nothing; settings that differ from the existing follow return invalid_arguments (use follows.update_settings). id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.follows.add",
     "resource_target": "member named by id in the bound family account",
@@ -4260,7 +4260,7 @@
   },
   {
     "name": "tidepool.follows.remove",
-    "description": "Unfollow a show for a member. The show's downloads are kept (and no longer auto-deleted) unless removed with downloads.remove. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Unfollow a show for a member. The show's downloads are kept (and no longer auto-deleted) unless removed with downloads.remove. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.follows.remove",
     "resource_target": "member named by id in the bound family account",
@@ -4379,7 +4379,7 @@
   },
   {
     "name": "tidepool.follows.update_settings",
-    "description": "Change a followed show's settings. patch may set auto_download_count (0-10) and auto_delete_days (1-90, or null for off). A new auto-delete window applies to already-played downloads of the show, counted from when each was played or downloaded, whichever is later; a window that has already passed removes them now. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Change a followed show's settings. patch may set auto_download_count (0-10) and auto_delete_days (1-90, or null for off). A new auto-delete window applies to already-played downloads of the show, counted from when each was played or downloaded, whichever is later; a window that has already passed removes them now. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.follows.update_settings",
     "resource_target": "member named by id in the bound family account",
@@ -4566,7 +4566,7 @@
   },
   {
     "name": "tidepool.upnext.set",
-    "description": "Replace a member's whole Up Next queue with episode_ids in order (an empty list clears it). expected_list_version must equal the list_version from upnext.get; otherwise the App returns list_version_mismatch (separate from Core's expected_version check). Returns the new list_version. Removed episodes return unavailable. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Replace a member's whole Up Next queue with episode_ids in order (an empty list clears it). expected_list_version must equal the list_version from upnext.get; otherwise the App returns list_version_mismatch (separate from Core's expected_version check). Returns the new list_version. Removed episodes return unavailable. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.upnext.set",
     "resource_target": "member named by id in the bound family account",
@@ -4704,7 +4704,7 @@
   },
   {
     "name": "tidepool.downloads.add",
-    "description": "Download a track, album or episode to one of the member's devices. The item's bytes are reserved at once and the download completes one simulated minute later (status queued until completes_at). Exceeding the device's free Tidepool storage returns storage_full and changes nothing; a removed item returns unavailable; a device without offline storage returns unavailable; a payment past its grace period returns payment_due. An item already on the device returns the existing download with changed false. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Download a track, album or episode to one of the member's devices. The item's bytes are reserved at once and the download completes one simulated minute later (status queued until completes_at). Exceeding the device's free Tidepool storage returns storage_full and changes nothing; a removed item returns unavailable; a device without offline storage returns unavailable; a payment past its grace period returns payment_due. An item already on the device returns the existing download with changed false. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.downloads.add",
     "resource_target": "member named by id in the bound family account",
@@ -4874,7 +4874,7 @@
   },
   {
     "name": "tidepool.downloads.remove",
-    "description": "Remove one of the member's downloads, or cancel it if still queued, releasing its reserved bytes. Returns the bytes freed. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Remove one of the member's downloads, or cancel it if still queued, releasing its reserved bytes. Returns the bytes freed. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.downloads.remove",
     "resource_target": "member named by id in the bound family account",
@@ -5005,7 +5005,7 @@
   },
   {
     "name": "tidepool.library.save",
-    "description": "Save a track or album to a member's library. Saving an item already saved changes nothing; a removed item returns unavailable. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Save a track or album to a member's library. Saving an item already saved changes nothing; a removed item returns unavailable. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.library.save",
     "resource_target": "member named by id in the bound family account",
@@ -5137,7 +5137,7 @@
   },
   {
     "name": "tidepool.library.unsave",
-    "description": "Remove a saved track or album from a member's library. Fails with not_found if it is not saved. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Remove a saved track or album from a member's library. Fails with not_found if it is not saved. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.library.unsave",
     "resource_target": "member named by id in the bound family account",
@@ -5265,7 +5265,7 @@
   },
   {
     "name": "tidepool.playlists.create",
-    "description": "Create a playlist owned by the member, with a name, visibility (private, shared or collaborative), optional collaborators (other active members; they can add, remove and reorder tracks while the playlist is collaborative) and optional starting tracks in order. Removed tracks return unavailable. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Create a playlist owned by the member, with a name, visibility (private, shared or collaborative), optional collaborators (other active members; they can add, remove and reorder tracks while the playlist is collaborative) and optional starting tracks in order. Removed tracks return unavailable. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.playlists.create",
     "resource_target": "member named by id in the bound family account",
@@ -5440,7 +5440,7 @@
   },
   {
     "name": "tidepool.playlists.update_tracks",
-    "description": "Edit a playlist's tracks as the member (its owner, or a collaborator while it is collaborative). operations apply in order: add (track_id, optional 1-based position; past the end appends), remove (track_id) and move (track_id to position). Added tracks record the member as their author. Optional expected_track_version must equal the playlist's track_version (list_version_mismatch otherwise). A track already in the playlist returns invalid_arguments. Returns the new track_version. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Edit a playlist's tracks as the member (its owner, or a collaborator while it is collaborative). operations apply in order: add (track_id, optional 1-based position; past the end appends), remove (track_id) and move (track_id to position). Added tracks record the member as their author. Optional expected_track_version must equal the playlist's track_version (list_version_mismatch otherwise). A track already in the playlist returns invalid_arguments. Returns the new track_version. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.playlists.update_tracks",
     "resource_target": "member named by id in the bound family account",
@@ -5600,7 +5600,7 @@
   },
   {
     "name": "tidepool.playlists.update_settings",
-    "description": "Change a playlist's settings as its owner. patch may set name, description, visibility and collaborators (the full new list). A collaborator or viewer returns forbidden. Removing a collaborator keeps the tracks they added. id must be the signed-in member; another member returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Change a playlist's settings as its owner. patch may set name, description, visibility and collaborators (the full new list). A collaborator or viewer returns forbidden. Removing a collaborator keeps the tracks they added. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.playlists.update_settings",
     "resource_target": "member named by id in the bound family account",
@@ -5766,7 +5766,7 @@
   },
   {
     "name": "tidepool.members.invite",
-    "description": "Plan manager only: invite a person to the family. id is the invitee's person_id from the run binding. An open invitation holds a member slot (counted against the smaller plan while a downgrade is scheduled), so accepting it never exceeds the limit. Errors: already_member, already_invited, too_many_members, forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Plan manager only: invite a person to the family. id is the invitee's person_id from the run binding. An open invitation holds a member slot (counted against the smaller plan while a downgrade is scheduled), so accepting it never exceeds the limit. Errors: already_member, already_invited, too_many_members, forbidden.",
     "read_only": false,
     "scope": "tidepool.members.invite",
     "resource_target": "member named by id in the bound family account",
@@ -5919,7 +5919,7 @@
   },
   {
     "name": "tidepool.members.remove",
-    "description": "Plan manager only: remove a member (id) from the family. Their downloads are removed, their edit access to other members' collaborative playlists ends (tracks they added stay), and their own shared and collaborative playlists leave the family view. Returns the same counts family.get showed under if_removed. The manager cannot remove themself (forbidden). later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Plan manager only: remove a member (id) from the family. Their downloads are removed, their edit access to other members' collaborative playlists ends (tracks they added stay), and their own shared and collaborative playlists leave the family view. Returns the same counts family.get showed under if_removed. The manager cannot remove themself (forbidden).",
     "read_only": false,
     "scope": "tidepool.members.remove",
     "resource_target": "member named by id in the bound family account",
@@ -6062,7 +6062,7 @@
   },
   {
     "name": "tidepool.filters.update",
-    "description": "Plan manager only: change a member's explicit-content filter. id is the member whose filter changes; patch.explicit_filter is the new value. Returns the replaced value. Any other caller returns forbidden. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Plan manager only: change a member's explicit-content filter. id is the member whose filter changes; patch.explicit_filter is the new value. Returns the replaced value. Any other caller returns forbidden.",
     "read_only": false,
     "scope": "tidepool.filters.update",
     "resource_target": "member named by id in the bound family account",
@@ -6196,7 +6196,7 @@
   },
   {
     "name": "tidepool.plan.confirm_change",
-    "description": "Plan manager only (id is the manager's own member_id; any other member returns forbidden): change the family plan, using the same rules as plan.preview_change. An upgrade applies at once and adds its prorated difference to the next invoice (refused with payment_due while a payment is due); a downgrade is scheduled for the end of the current period and is refused with too_many_members if active members plus open invitations exceed the new limit. Choosing the plan already in effect keeps it: a scheduled change is revoked (revoked_change), and with none scheduled the call returns invalid_arguments, as does repeating a downgrade already scheduled. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Plan manager only (id is the manager's own member_id; any other member returns forbidden): change the family plan, using the same rules as plan.preview_change. An upgrade applies at once and adds its prorated difference to the next invoice (refused with payment_due while a payment is due); a downgrade is scheduled for the end of the current period and is refused with too_many_members if active members plus open invitations exceed the new limit. Choosing the plan already in effect keeps it: a scheduled change is revoked (revoked_change), and with none scheduled the call returns invalid_arguments, as does repeating a downgrade already scheduled.",
     "read_only": false,
     "scope": "tidepool.plan.confirm_change",
     "resource_target": "member named by id in the bound family account",
@@ -6465,7 +6465,7 @@
   },
   {
     "name": "tidepool.plan.revoke_change",
-    "description": "Plan manager only (id is the manager's own member_id; any other member returns forbidden): cancel the scheduled plan change before it takes effect. Returns no_pending_change if none is scheduled. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
+    "description": "Plan manager only (id is the manager's own member_id; any other member returns forbidden): cancel the scheduled plan change before it takes effect. Returns no_pending_change if none is scheduled.",
     "read_only": false,
     "scope": "tidepool.plan.revoke_change",
     "resource_target": "member named by id in the bound family account",

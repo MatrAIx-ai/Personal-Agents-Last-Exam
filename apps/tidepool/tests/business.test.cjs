@@ -1029,3 +1029,106 @@ test('an event at an early clock that replaces a later record keeps it in the ev
   assert.equal(after.activity.at(-1).event_id, 'early-harborhours-071');
   assert.equal(after.activity.at(-1).later_history_removed.progress[0].updated_at, '2026-04-02T08:04:48-07:00');
 });
+
+// ---- A member removed at an earlier clock (#216 follow-up review) ---------------------------------
+// Independent of src/model.cjs: what a removed member still has after the removal time `at`.
+function afterRemoval(data, memberId, at) {
+  const t = Date.parse(at), after = ts => ts !== null && Date.parse(ts) > t, out = {};
+  const dated = {devices: 'registered_at', sessions: 'ended_at', progress: 'updated_at', plays: 'last_played_at', follows: 'followed_at',
+    upnext: 'updated_at', downloads: 'requested_at', library: 'saved_at', notifications: 'created_at'};
+  for (const [family, key] of Object.entries(dated)) {
+    const n = data[family].filter(x => x.member_id === memberId && after(x[key])).length;
+    if (n) out[family] = n;
+  }
+  const owned = data.playlists.filter(p => p.owner_member_id === memberId && after(p.created_at)).length;
+  const added = data.playlists.flatMap(p => p.tracks).filter(x => x.added_by === memberId && after(x.added_at)).length;
+  const active = data.downloads.filter(d => d.member_id === memberId && (d.removed_at ? after(d.removed_at) : !(d.auto_delete_at && !after(d.auto_delete_at)))).length;
+  const places = data.playlists.filter(p => p.owner_member_id !== memberId && p.collaborators.includes(memberId)).length;
+  for (const [k, n] of Object.entries({playlists: owned, tracks_added: added, active_downloads: active, collaborator_places: places})) if (n) out[k] = n;
+  return out;
+}
+
+test('a member removed at an early clock stays removed: their later records are dropped with the later family history and reported', () => {
+  // The follow-up review's repro: the dataset loaded at 2026-04-01 and Sam removed. Sam's seeded records dated
+  // after the removal describe a future in which Sam stayed, so, as for any change the later family records
+  // cannot coexist with, the later family history is dropped and reported. At 2026-09-01 pl-family-car
+  // (created 2026-04-04 with Sam as a collaborator) exists, keeps its other collaborators and loses Sam.
+  for (const at of ['2026-04-01T12:00:00-07:00', '2026-09-01T12:00:00-07:00']) {
+    const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: at, logging: false}), before = f.data;
+    assert.ok(Object.keys(afterRemoval(before, 'mem-sam', at)).length > 0, at + ': the seed holds later records of Sam\'s');
+    const receipt = f.call('tidepool.members.remove', {id: 'mem-sam'});
+    const lost = laterReport(before, f.data, receipt, at);
+    assert.ok(lost.sessions, at + ': later history is reported');
+    assert.ok(lost.sessions.some(id => before.sessions.find(s => s.session_id === id).member_id === 'mem-sam'), at + ': Sam\'s later sessions are reported');
+    assert.ok(lost.sessions.some(id => before.sessions.find(s => s.session_id === id).member_id !== 'mem-sam'), at + ': so are the rest of the family\'s');
+    assert.deepEqual(afterRemoval(f.data, 'mem-sam', f.data.members.find(m => m.member_id === 'mem-sam').removed_at), {}, at + ': nothing of Sam\'s is left after the removal');
+    assert.equal(receipt.collaborations_ended, at.startsWith('2026-09') ? 1 : 0);
+    f.advance(evalClock);
+    const sam = f.call('tidepool.family.get', {}).members.find(m => m.member_id === 'mem-sam');
+    assert.equal(sam.status, 'removed');
+    assert.deepEqual(sam.downloads, {queued: 0, downloaded: 0, needs_check: 0, bytes: 0}, at + ': no download of Sam\'s comes back');
+    const playlists = f.call('tidepool.playlists.list', {id: 'mem-priya'}).playlists;
+    assert.ok(playlists.every(p => !p.collaborators.includes('mem-sam')), at + ': Sam has no collaborator place');
+    const car = playlists.find(p => p.playlist_id === 'pl-family-car');
+    if (at.startsWith('2026-09')) assert.deepEqual(car.collaborators, ['mem-noor', 'mem-kai']);
+    else assert.equal(car, undefined, 'pl-family-car was created after the removal and is dropped with the later history');
+  }
+  // At the dataset clock nothing is dated later, so the same removal drops nothing.
+  const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: evalClock, logging: false});
+  assert.equal(f.call('tidepool.members.remove', {id: 'mem-sam'}).later_history_removed, null);
+});
+
+test('a seed\'s removed member has nothing dated after the removal, no download left and no collaborator place', () => {
+  const ctx = {app_id: 'tidepool', binding, virtual_now: '2026-11-24T19:00:00-08:00'}, T = '2026-11-24T18:00:00-08:00', LATER = '2026-11-24T18:00:01-08:00';
+  // Sam removed at T, after his last record, with what members.remove does: downloads removed, collaborator places ended.
+  const removed = mutate => {
+    const d = structuredClone(minimal), sam = d.members.find(m => m.member_id === 'mem-sam');
+    Object.assign(sam, {status: 'removed', removed_at: T});
+    for (const x of d.downloads) if (x.member_id === 'mem-sam' && !x.removed_at) Object.assign(x, {removed_at: T, removed_reason: 'member_removed'});
+    for (const p of d.playlists) if (p.owner_member_id !== 'mem-sam') p.collaborators = p.collaborators.filter(id => id !== 'mem-sam');
+    mutate(d);
+    return d;
+  };
+  const rejects = (mutate, pattern) => assert.throws(() => plugin.validateSeed(ctx, removed(mutate)), e => e.code === 'invalid_seed' && pattern.test(e.message));
+  const sams = (d, family) => d[family].find(x => x.member_id === 'mem-sam');
+  plugin.validateSeed(ctx, removed(() => {}));
+  // Records dated exactly at the removal are valid.
+  plugin.validateSeed(ctx, removed(d => {sams(d, 'library').saved_at = T;}));
+  rejects(d => {const s = sams(d, 'sessions'), ms = Date.parse(LATER) - Date.parse(s.ended_at); for (const k of ['started_at', 'ended_at']) s[k] = new Date(Date.parse(s[k]) + ms).toISOString();}, /Sam .*session/);
+  rejects(d => {sams(d, 'progress').updated_at = LATER;}, /Sam .*progress/);
+  rejects(d => {sams(d, 'plays').last_played_at = LATER;}, /Sam .*play/);
+  rejects(d => {sams(d, 'follows').followed_at = LATER;}, /Sam .*follow/);
+  rejects(d => {sams(d, 'upnext').updated_at = LATER;}, /Sam .*Up Next/);
+  rejects(d => {sams(d, 'library').saved_at = LATER;}, /Sam .*library/);
+  rejects(d => {sams(d, 'notifications').created_at = LATER;}, /Sam .*notice/);
+  rejects(d => {sams(d, 'devices').registered_at = LATER;}, /Sam .*device/);
+  rejects(d => {Object.assign(sams(d, 'downloads'), {requested_at: LATER, completes_at: LATER, removed_at: LATER});}, /Sam .*download/);
+  rejects(d => {Object.assign(d.downloads.find(x => x.download_id === 'dl-121'), {removed_at: null, removed_reason: null});}, /Sam .*download/);
+  rejects(d => {d.downloads.find(x => x.download_id === 'dl-121').removed_at = LATER;}, /Sam .*download/);
+  rejects(d => {d.playlists.find(p => p.owner_member_id === 'mem-sam').created_at = LATER;}, /Sam .*playlist/);
+  rejects(d => {d.playlists.find(p => p.playlist_id === 'pl-family-car').tracks[0].added_by = 'mem-sam'; d.playlists.find(p => p.playlist_id === 'pl-family-car').tracks[0].added_at = LATER;}, /Sam .*playlist/);
+  rejects(d => {d.playlists.find(p => p.playlist_id === 'pl-family-car').collaborators.push('mem-sam');}, /Sam .*collaborator/);
+  // A download whose auto-delete time had passed at the removal is already gone.
+  plugin.validateSeed(ctx, removed(d => {Object.assign(d.downloads.find(x => x.download_id === 'dl-121'), {removed_at: null, removed_reason: null, auto_delete_at: T});}));
+});
+
+test('after a removal at the clock, writes and every event type naming the member apply or are refused, and the data stays valid', () => {
+  const f = fixture();
+  f.call('tidepool.members.remove', {id: 'mem-sam'});
+  const refused = (e, code) => unchanged(f, () => f.event(e), code);
+  refused(event('kitchen-fieldnotes-114', {}, {member_id: 'mem-sam', device_id: 'dev-sam-phone', speaker_hint: undefined}), 'invalid_event');
+  refused(event('family-car-noor-add', {}, {author_member_id: 'mem-sam'}), 'not_collaborator');
+  refused(event('roadtrip-noor-add-1', {}, {playlist_ref: {owner_member_id: 'mem-sam', name: f.data.playlists.find(p => p.playlist_id === 'pl-road-trip-ideas').name}}), 'not_collaborator');
+  // Sam's phone still checks in; Sam's follows get no notice or auto-download; removing an item Sam had downloaded is fine.
+  f.event(event('priya-phone-checkin', {}, {device_id: 'dev-sam-phone'}));
+  const notices = f.data.notifications.length, downloads = f.data.downloads.length;
+  f.event(ev('catalog-remove-staticsignal-071'));
+  f.event(ev('fieldnotes-115-publish'));
+  const after = f.data;
+  assert.ok(after.notifications.slice(notices).every(n => n.member_id !== 'mem-sam') && after.downloads.slice(downloads).every(d => d.member_id !== 'mem-sam'));
+  assert.deepEqual(afterRemoval(after, 'mem-sam', after.members.find(m => m.member_id === 'mem-sam').removed_at), {});
+  // Invited again and accepted, Sam is reactivated.
+  f.call('tidepool.members.invite', {id: 'person-sam'});
+  f.event(event('invite-ana-accept', {at: '2026-11-28T09:00:00-08:00'}, {invitee_person_id: 'person-sam'}));
+  assert.equal(f.data.members.find(m => m.member_id === 'mem-sam').status, 'active');
+});
