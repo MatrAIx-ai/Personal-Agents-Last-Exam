@@ -1,6 +1,6 @@
 {
   "schema": "kinodex.v1-evidence-index",
-  "recorded_at": "2026-11-28T02:22:42Z",
+  "recorded_at": "2026-11-28T05:11:33Z",
   "app_id": "kinodex",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,9 +10,9 @@
   "proposal_blob_sha": "7eb7aef8ce1cdad0096fa8436e6512c37b65d16c",
   "proposal_status": "plan approved for implementation by the reviewer Chenngzz (/approve-plan for this commit at 2026-11-24T07:08:04Z); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "59ce97c3c90535bbaee8e5485519868a66bddc59",
-  "app_package_sha256": "6ea4f619d76be3f8c63bf75e269c5df5edbeca0e8510cfe654c8ff586b52fad6",
-  "app_package_git_tree": "fd79ee7772ad9dcedc0f069f87d119a105478613",
+  "app_package_commit": "eeadf8f3a0f19607b2410fb6354ec44507310881",
+  "app_package_sha256": "3fd1a029e469b1fd20ddd232988324a660af7d69939dfdadf6f3a07faecaf5c0",
+  "app_package_git_tree": "5914ed207fe71353ef3e21bd4e3508ad5b75a688",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -36,14 +36,14 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 42,
-        "pass": 42,
+        "tests": 43,
+        "pass": 43,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 42,
-        "pass": 42,
+        "tests": 43,
+        "pass": 43,
         "fail": 0,
         "skipped": 0
       }
@@ -252,16 +252,16 @@
     "human review of realism and invented names"
   ],
   "previous_submission": {
-    "head": "95f5307aebb5c3ce2e86f6c560f5eb7d6bc98d9f",
-    "app_package_commit": "c3031bf725feca240a4dc0dd52db4d29efe419bf",
-    "app_package_sha256": "a30577050afefa464a4044c35ff8866ab10679c176415c01c73002c9ec5e3ac8"
+    "head": "c4051ebefb5ef39c821f1941df61cff282f94d89",
+    "app_package_commit": "59ce97c3c90535bbaee8e5485519868a66bddc59",
+    "app_package_sha256": "6ea4f619d76be3f8c63bf75e269c5df5edbeca0e8510cfe654c8ff586b52fad6"
   },
   "added_scope_after_plan_approval": {
     "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
     "items": [
       "evaluation dataset in apps/kinodex/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
       "clock cutoff: tools show only records dated at or before the run clock",
-      "package size 4,712,782 bytes of tracked files (was 4,594,384)",
+      "package size 4,717,261 bytes of tracked files (was 4,712,782)",
       "`later_history_removed`: counts in every write receipt and the stored records as an optional activity-row field; titles listed from guide version 1; 313 US rental and purchase windows before 2026; current_state_valid_from in dataset.json (2026-11-28 revision)"
     ]
   },
@@ -269,6 +269,10 @@
     {
       "package": "59ce97c3c90535bbaee8e5485519868a66bddc59",
       "note": "review of 2026-11-28 (packages 535c364 and 59ce97c): later history replaced by an early write or event is kept in the activity row and counted in the receipt (B39-B40); titles exist from their first listing (B41); 313 US rental and purchase windows before the fixture offers, so every diary entry is watchable; current_state_valid_from in dataset.json; services.list test (B42)"
+    },
+    {
+      "package": "eeadf8f3a0f19607b2410fb6354ec44507310881",
+      "note": "re-review of 2026-11-28 (package eeadf8f): validateSeed rejects a seed whose alerts, corrections, notices or diary entries are dated before their title's first listing, or whose diary entries are logged before the season of one of their episodes was added (B43); write tool descriptions no longer mention the clock (tools.json descriptions only); the seed and every fixture are unchanged"
     }
   ]
 }
