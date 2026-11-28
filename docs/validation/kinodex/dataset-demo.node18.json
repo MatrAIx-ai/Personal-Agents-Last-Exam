@@ -1,6 +1,6 @@
 {
   "app_id": "kinodex",
-  "package_sha256": "5c5b38da3a94e877718fa0eb9afda3e8f48c7c1fe13ee022ca0ea85ce365485e",
+  "package_sha256": "6ea4f619d76be3f8c63bf75e269c5df5edbeca0e8510cfe654c8ff586b52fad6",
   "node": "v18.20.8",
   "dataset": {
     "path": "apps/kinodex/data/evaluation/seed.json",
@@ -239,10 +239,32 @@
         "at": "2026-11-08T08:00:00Z",
         "text": "Sallowstead General season 3 has been added."
       }
+    },
+    {
+      "label": "Early write and event",
+      "clock": "2026-09-01T12:00:00-07:00",
+      "write": {
+        "request_id": "early-delete-al-13",
+        "later_history_removed": {
+          "alerts": 1,
+          "notices": 1
+        }
+      },
+      "event": {
+        "event_id": "sallowmere-brightreel-early",
+        "later_history_removed": {
+          "alerts": [
+            "al-13"
+          ],
+          "notices": [
+            "nt-21"
+          ]
+        }
+      }
     }
   ],
   "checks": {
-    "count": 26,
+    "count": 30,
     "passed": [
       "The bundle dataset is data/evaluation/dataset.json; its record count is the seed's titles (184)",
       "env.load_seed accepts the whole dataset in one request (1405265 bytes, under the 2 MiB line limit)",
@@ -269,7 +291,11 @@
       "End of 2026: reviews.list shows only public reviews posted by the clock",
       "End of 2026: notices.list shows the 22 notices written by the clock",
       "End of 2026: rules and corrections exist from their creation and show only the triggers and decisions dated by the clock",
-      "By the end of 2026 every diary entry, public review and notice is visible"
+      "By the end of 2026 every diary entry, public review and notice is visible",
+      "At 2026-09-01, alerts.delete al-13 commits and its receipt counts the later trigger and notice it replaced",
+      "Its activity row in env.snapshot holds al-13 (triggered on Oct. 6) and nt-21 exactly as the seed stored them",
+      "An identical retry returns the stored receipt, marked duplicate, with the same counts",
+      "An offer.publish on Sept. 2 that fires al-13 early commits, and its activity row holds the Oct. 6 trigger and nt-21 as stored"
     ]
   }
 }
