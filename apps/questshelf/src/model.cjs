@@ -54,6 +54,25 @@ function validateSeed(ctx, data) {
   for (const s of data.shelves) {
     if (!gameIds.has(s.game_id) || shelfIds.has(s.game_id)) fail('invalid_seed', 'Invalid or duplicate shelf game_id: ' + s.game_id);
     shelfIds.add(s.game_id);
+    if (s.status !== 'dropped' && s.drop_reasons.length > 0) {
+      fail('invalid_seed', 'drop_reasons only allowed on dropped shelf entry: ' + s.game_id);
+    }
+    if (Array.isArray(s.play_history)) {
+      let prevAt = -Infinity;
+      let prevHours = -1;
+      const shelfMs = Date.parse(s.updated_at);
+      for (const h of s.play_history) {
+        const hMs = Date.parse(h.at);
+        if (hMs < prevAt) fail('invalid_seed', 'Shelf play_history timestamps must be chronological for ' + s.game_id);
+        if (hMs > shelfMs) fail('invalid_seed', 'Shelf play_history timestamp exceeds shelf updated_at for ' + s.game_id);
+        if (h.hours_logged < prevHours) fail('invalid_seed', 'Shelf play_history hours_logged cannot decrease for ' + s.game_id);
+        if (h.status !== 'dropped' && h.drop_reasons.length > 0) {
+          fail('invalid_seed', 'play_history drop_reasons only allowed when status is dropped for ' + s.game_id);
+        }
+        prevAt = hMs;
+        prevHours = h.hours_logged;
+      }
+    }
   }
 
   for (const nid of data.preferences.not_interested) {
@@ -75,7 +94,21 @@ function validateSeed(ctx, data) {
   for (const p of data.polls) {
     if (pollIds.has(p.poll_id)) fail('invalid_seed', 'Duplicate poll_id: ' + p.poll_id);
     pollIds.add(p.poll_id);
-    if (p.status === 'open') openPolls += 1;
+    if (p.status === 'open') {
+      openPolls += 1;
+      if (p.closed_at !== null) fail('invalid_seed', 'Open poll must have closed_at = null: ' + p.poll_id);
+    } else if (p.status === 'closed') {
+      if (p.closed_at === null) fail('invalid_seed', 'Closed poll must have closed_at set: ' + p.poll_id);
+      if (Date.parse(p.closed_at) < Date.parse(p.created_at)) fail('invalid_seed', 'Poll closed_at precedes created_at: ' + p.poll_id);
+    }
+    const createdMs = Date.parse(p.created_at);
+    const closedMs = p.closed_at ? Date.parse(p.closed_at) : Infinity;
+    for (const v of p.votes) {
+      const vMs = Date.parse(v.voted_at);
+      if (vMs < createdMs || vMs > closedMs) {
+        fail('invalid_seed', 'Poll vote timestamp outside poll lifetime: ' + p.poll_id);
+      }
+    }
     for (const cid of p.candidate_game_ids) {
       if (!gameIds.has(cid)) fail('invalid_seed', 'Poll references unknown game_id: ' + cid);
     }

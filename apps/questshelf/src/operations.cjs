@@ -106,10 +106,10 @@ function handleTool(ctx, data, name, args) {
       }
     }
 
-    // Positive tag signals from completed games rated >= 8
+    // Positive tag signals from completed games rated >= 8.0
     const likedTags = new Set();
     for (const s of data.shelves) {
-      if (s.status === 'completed' && (s.rating === null || s.rating >= 8)) {
+      if (s.status === 'completed' && typeof s.rating === 'number' && s.rating >= 8) {
         const g = data.games.find(x => x.id === s.game_id);
         if (g) for (const t of g.tags) likedTags.add(t);
       }
@@ -147,6 +147,8 @@ function handleTool(ctx, data, name, args) {
       if (avoid.has('horror') && g.tags.includes('horror')) continue;
       if (avoid.has('excessive_grind') && g.tags.includes('excessive_grind')) continue;
       if (avoid.has('tiny_ui_text') && (g.tags.includes('tiny_ui_text') || g.hud_font_pt < 12)) continue;
+      if (avoid.has('too_long') && g.playtime_hours.main > 20) continue;
+      if (avoid.has('no_offline_mode') && !g.offline_ok) continue;
 
       let score = g.critic_rating;
       const reasons = [];
@@ -215,6 +217,12 @@ function handleTool(ctx, data, name, args) {
     if (args.status !== 'dropped' && args.drop_reasons && args.drop_reasons.length > 0) {
       fail('invalid_arguments', 'drop_reasons may only be supplied when status is dropped.');
     }
+    if (existing && existing.status === 'completed' && args.status === 'backlog') {
+      fail('invalid_state', 'Cannot transition a completed game back to backlog.');
+    }
+    if (args.status === 'backlog' && args.rating !== undefined && args.rating !== null) {
+      fail('invalid_arguments', 'Cannot set a rating on a backlog entry.');
+    }
 
     let entry;
     if (existing) {
@@ -222,9 +230,20 @@ function handleTool(ctx, data, name, args) {
       existing.owned_platforms = copy(owned);
       if (args.hours_logged !== undefined) existing.hours_logged = args.hours_logged;
       if (args.rating !== undefined) existing.rating = args.rating;
+      else if (args.status === 'backlog') existing.rating = null;
       existing.drop_reasons = args.status === 'dropped' ? dropReasons : [];
       if (args.note !== undefined) existing.note = args.note;
       existing.updated_at = ctx.virtual_now;
+      if (Array.isArray(existing.play_history)) {
+        existing.play_history.push({
+          at: ctx.virtual_now,
+          status: existing.status,
+          hours_logged: existing.hours_logged,
+          rating: existing.rating,
+          drop_reasons: copy(existing.drop_reasons),
+          note: existing.note,
+        });
+      }
       entry = existing;
     } else {
       entry = {
@@ -238,12 +257,6 @@ function handleTool(ctx, data, name, args) {
         updated_at: ctx.virtual_now,
       };
       data.shelves.push(entry);
-    }
-
-    if (args.status === 'dropped' && dropReasons.length > 0) {
-      const merged = new Set([...(data.preferences.avoid_reasons || []), ...dropReasons]);
-      data.preferences.avoid_reasons = [...merged];
-      data.preferences.updated_at = ctx.virtual_now;
     }
 
     log(ctx, 'questshelf.shelf.upsert', { game_id: args.game_id, status: args.status });

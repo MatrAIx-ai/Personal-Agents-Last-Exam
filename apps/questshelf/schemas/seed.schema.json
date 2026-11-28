@@ -241,6 +241,73 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "play_history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "enum": [
+                    "backlog",
+                    "playing",
+                    "completed",
+                    "dropped"
+                  ]
+                },
+                "hours_logged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5000
+                },
+                "rating": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "drop_reasons": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "first_person_motion_sickness",
+                      "horror",
+                      "tiny_ui_text",
+                      "excessive_grind",
+                      "too_long",
+                      "no_offline_mode",
+                      "other"
+                    ]
+                  },
+                  "maxItems": 10,
+                  "uniqueItems": true
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 400
+                }
+              },
+              "required": [
+                "at",
+                "status",
+                "hours_logged",
+                "rating",
+                "drop_reasons",
+                "note"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
           }
         },
         "required": [
@@ -382,6 +449,10 @@
                     "ps5",
                     "xbox"
                   ]
+                },
+                "added_at": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               },
               "required": [

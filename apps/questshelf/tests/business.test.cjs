@@ -239,11 +239,29 @@ test('second seed fixture (seed-casual.json) and evaluation visual-cues manifest
 
   const catalog = JSON.parse(fs.readFileSync(path.join(root, 'contribution/assets.catalog.json'), 'utf8'));
   const cues = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/visual-cues.eval.json'), 'utf8'));
+  const minimal = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/minimal.json'), 'utf8'));
   assert.equal(cues.cues.length, catalog.assets.length);
+  for (const cue of cues.cues) {
+    const cat = catalog.assets.find(a => a.asset_id === cue.asset_id);
+    const game = minimal.games.find(g => g.id === cue.game_id);
+    assert.equal(cue.sha256, cat.integrity.sha256);
+    assert.equal(cue.hud_font_pt, game.hud_font_pt);
+    assert.equal(cue.handheld_hud_readable, game.hud_font_pt >= 14);
+    assert.ok(!game.summary.toLowerCase().includes('inspect preview card'), 'Summary must stay neutral');
+  }
   const trap = cues.cues.find(c => c.game_id === 'game-lantern-hollow');
   assert.equal(trap.camera_perspective, 'first_person');
   assert.equal(trap.horror_visual_cues, true);
   assert.equal(trap.visual_trap, 'unlabeled_first_person_horror');
+
+  // Full 2025-2026 evaluation dataset validates cleanly and covers all 24 months
+  const evalSeed = JSON.parse(fs.readFileSync(path.join(root, 'datasets/eval-2025-2026/seed.json'), 'utf8'));
+  assert.equal(seedValidator(evalSeed), true);
+  plugin.validateSeed({ binding }, evalSeed);
+  const { computeCoverage } = require('../scripts/coverage.cjs');
+  const cov = computeCoverage('datasets/eval-2025-2026/seed.json');
+  assert.equal(cov.user_activity_summary.months_covered, 24);
+  assert.equal(cov.out_of_window_or_invalid_records, 0);
 });
 
 test('game.update_patch add_asset_id syncs game.get asset_ids, resource_uris, and plugin.assetReferences', () => {
@@ -263,4 +281,100 @@ test('game.update_patch add_asset_id syncs game.get asset_ids, resource_uris, an
   assert.ok(detail.resource_uris.includes('pale://test-run/questshelf/assets/asset-preview-game-clockwork-isle-hud-v2'));
   const refs = plugin.assetReferences(app.getData());
   assert.ok(refs.some(r => r.object_id === 'game-clockwork-isle' && r.asset_id === 'asset-preview-game-clockwork-isle-hud-v2'));
+});
+
+test('undoing a drop restores active avoid_reasons and original Top-3 ranking', () => {
+  const app = createHarness();
+  const initialTop3 = app.call('questshelf.recommend.rank', { pool: 'unplayed', limit: 3 }).recommendations.map(r => r.game_id);
+  assert.deepEqual(initialTop3, ['game-iron-sovereign', 'game-clockwork-isle', 'game-frost-protocol']);
+
+  app.call('questshelf.shelf.upsert', {
+    game_id: 'game-ashen-depths',
+    status: 'dropped',
+    drop_reasons: ['tiny_ui_text', 'excessive_grind'],
+    note: 'Temporarily dropped.',
+  });
+  const droppedTop3 = app.call('questshelf.recommend.rank', { pool: 'unplayed', limit: 3 }).recommendations.map(r => r.game_id);
+  assert.deepEqual(droppedTop3, ['game-clockwork-isle', 'game-moss-cartographer', 'game-velvet-cipher']);
+
+  // Restore game-ashen-depths back to playing -> drop_reasons cleared -> Top-3 restored
+  const restored = app.call('questshelf.shelf.upsert', {
+    game_id: 'game-ashen-depths',
+    status: 'playing',
+    note: 'Giving it another shot after UI scaling patch.',
+  });
+  assert.deepEqual(restored.entry.drop_reasons, []);
+  assert.ok(!restored.avoid_reasons.includes('tiny_ui_text'));
+  assert.ok(!restored.avoid_reasons.includes('excessive_grind'));
+
+  const restoredTop3 = app.call('questshelf.recommend.rank', { pool: 'unplayed', limit: 3 }).recommendations.map(r => r.game_id);
+  assert.deepEqual(restoredTop3, initialTop3);
+});
+
+test('events reject unknown fields and out-of-range payload values atomically', () => {
+  const plugin = require('../plugin.cjs');
+  const app = createHarness();
+  const beforeRev = app.version().revision;
+
+  // Out-of-range hud_font_pt rejected by schema and handler
+  assert.throws(() => app.applyEvent({
+    event_id: 'ev-bad-hud',
+    at: '2026-11-20T18:30:00-08:00',
+    operation: 'questshelf.game.update_patch',
+    payload: { game_id: 'game-clockwork-isle', hud_font_pt: 99 },
+  }));
+
+  // Misspelled field rejected by schema and handler
+  assert.throws(() => app.applyEvent({
+    event_id: 'ev-typo-field',
+    at: '2026-11-20T18:31:00-08:00',
+    operation: 'questshelf.game.update_patch',
+    payload: { game_id: 'game-clockwork-isle', offline_okk: false },
+  }));
+
+  // Direct plugin.applyEvent also rejects unknown field & out-of-range hud_font_pt with invalid_event
+  const snap = app.getData();
+  assert.throws(() => plugin.applyEvent({ log: () => {} }, structuredClone(snap), {
+    event_id: 'ev-direct-bad-hud',
+    at: '2026-11-20T18:32:00-08:00',
+    operation: 'questshelf.game.update_patch',
+    payload: { game_id: 'game-clockwork-isle', hud_font_pt: 99 },
+  }), err => err.code === 'invalid_event');
+  assert.throws(() => plugin.applyEvent({ log: () => {} }, structuredClone(snap), {
+    event_id: 'ev-direct-typo',
+    at: '2026-11-20T18:33:00-08:00',
+    operation: 'questshelf.game.update_patch',
+    payload: { game_id: 'game-clockwork-isle', offline_okk: false },
+  }), err => err.code === 'invalid_event');
+
+  assert.equal(app.version().revision, beforeRev);
+});
+
+test('recommend.rank ignores unrated completed games for liked tags, honors too_long/no_offline_mode, and shelf.upsert rejects invalid completed->backlog transition', () => {
+  const app = createHarness();
+  // Invalid transition: completed -> backlog rejects atomically
+  assert.throws(() => app.call('questshelf.shelf.upsert', {
+    game_id: 'game-pebble-harbor',
+    status: 'backlog',
+  }), /Cannot transition a completed game back to backlog/);
+
+  // Completed game with rating: null does NOT contribute liked tags
+  app.call('questshelf.shelf.upsert', {
+    game_id: 'game-starlight-tactics',
+    status: 'completed',
+    hours_logged: 12,
+    rating: null,
+    note: 'Finished without rating.',
+  });
+  const glyphRec = app.call('questshelf.recommend.rank', { pool: 'unplayed', limit: 20 })
+    .recommendations.find(r => r.game_id === 'game-glyph-forge');
+  assert.ok(!glyphRec.reasons.some(r => r.includes('turn_based') || r.includes('tactical')));
+
+  // too_long and no_offline_mode avoid reasons filter out >20h and online-only games
+  app.call('questshelf.preferences.update', {
+    avoid_reasons: ['first_person_motion_sickness', 'horror', 'too_long', 'no_offline_mode'],
+  });
+  const filtered = app.call('questshelf.recommend.rank', { pool: 'unplayed', limit: 20 }).recommendations;
+  assert.ok(filtered.every(r => r.main_hours <= 20 && r.offline_ok === true));
+  assert.ok(!filtered.some(r => r.game_id === 'game-iron-sovereign' || r.game_id === 'game-orbit-relay'));
 });

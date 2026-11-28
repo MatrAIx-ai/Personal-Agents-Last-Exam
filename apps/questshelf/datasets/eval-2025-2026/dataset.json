@@ -1,0 +1,50 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "questshelf-eval-2025-2026",
+  "version": "1.0.0",
+  "description": "Full 24-month (2025-01-01 through 2026-12-31) synthetic QuestShelf evaluation dataset containing shelf status transitions, play sessions, completions, ratings, drop reasons, friend library additions, and 26 co-op polls. Recommended virtual_now >= 2026-12-31T23:00:00-08:00.",
+  "record_source_ids": [
+    "synthetic-eval-history"
+  ],
+  "sources": [
+    {
+      "source_id": "synthetic-eval-history",
+      "kind": "synthetic",
+      "description": "100% synthetic 2-year user game-library activity, friend library additions, and co-op poll history generated deterministically by scripts/build-eval-dataset.cjs (no scraped store data or real personal data).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "scripts/build-eval-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20252026,
+        "parameters": {
+          "time_zone": "America/Los_Angeles",
+          "window_start": "2025-01-01",
+          "window_end": "2026-12-31",
+          "recommended_virtual_now": "2026-12-31T23:00:00-08:00",
+          "seed_sha256": "8666ccd2d327acb7a87fd856701d67d363b4ca29d3334ae42ba8b891e352ccff"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Validated against schemas/seed.schema.json and plugin.validateSeed chronological invariants."
+  ],
+  "expected_counts": {
+    "records": 20,
+    "assets": 20
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "approved",
+    "reviewer": "@shangliy (author self-check; independent maintainer review pending)",
+    "notes": "100% synthetic evaluation dataset verified across all 24 months (2025-01..2026-12) via scripts/coverage.cjs and real stdio MCP env.load_seed."
+  }
+}

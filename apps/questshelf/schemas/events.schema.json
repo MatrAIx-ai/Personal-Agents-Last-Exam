@@ -1,31 +1,190 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "event_id": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "questshelf.game.update_patch"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "game_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "cross_play_platforms": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "pc",
+                  "handheld",
+                  "switch",
+                  "ps5",
+                  "xbox"
+                ]
+              },
+              "maxItems": 5,
+              "uniqueItems": true
+            },
+            "offline_ok": {
+              "type": "boolean"
+            },
+            "hud_font_pt": {
+              "type": "integer",
+              "minimum": 6,
+              "maximum": 36
+            },
+            "add_tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "add_asset_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "game_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
     },
-    "at": {
-      "type": "string",
-      "format": "date-time"
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "questshelf.friend.library_update"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "friend_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "game_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "platform": {
+              "enum": [
+                "pc",
+                "handheld",
+                "switch",
+                "ps5",
+                "xbox"
+              ]
+            },
+            "action": {
+              "enum": [
+                "add",
+                "remove"
+              ]
+            }
+          },
+          "required": [
+            "friend_id",
+            "game_id",
+            "platform",
+            "action"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
     },
-    "operation": {
-      "enum": [
-        "questshelf.game.update_patch",
-        "questshelf.friend.library_update",
-        "questshelf.poll.friend_vote"
-      ]
-    },
-    "payload": {
-      "type": "object"
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "questshelf.poll.friend_vote"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "poll_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "friend_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "selected_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "minItems": 1,
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "note": {
+              "type": "string",
+              "maxLength": 300
+            }
+          },
+          "required": [
+            "friend_id",
+            "selected_game_ids"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
     }
-  },
-  "required": [
-    "event_id",
-    "at",
-    "operation",
-    "payload"
-  ],
-  "additionalProperties": false
+  ]
 }
