@@ -1,0 +1,62 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "nyc311-watch-evaluation-v1",
+  "version": "1.0.0",
+  "description": "Versioned real NYC Open Data observations and separately labeled synthetic calendar coverage.",
+  "record_source_ids": [
+    "nyc311-snapshot",
+    "synthetic-gaps"
+  ],
+  "sources": [
+    {
+      "source_id": "nyc311-snapshot",
+      "kind": "collected",
+      "description": "Allowlisted historic street-condition extract. Original identifiers are never redistributed.",
+      "uri": "https://data.cityofnewyork.us/d/erm2-nwe9",
+      "license": "NYC Open Data Terms of Use (not MIT)",
+      "usage": "permitted",
+      "collection": {
+        "method": "Build-time Socrata monthly queries listed in capture-v1.json",
+        "collected_at": "2026-11-28T02:07:26.782+00:00"
+      },
+      "generation": null
+    },
+    {
+      "source_id": "synthetic-gaps",
+      "kind": "synthetic",
+      "description": "Authored deterministic cases for unobserved periods, never municipal reports.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "Calendar gap fill",
+        "tool": "data/capture.py",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "timezone": "America/New_York"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Allowlisted fields only; case IDs are release-local.",
+    "Capture timestamps attest to current observations only.",
+    "Calendar gaps marked synthetic; see capture-v1.json for source and output hashes."
+  ],
+  "expected_counts": {
+    "records": 386,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

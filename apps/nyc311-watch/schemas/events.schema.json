@@ -1,0 +1,145 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "civic311.case_status_changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "previous_status": {
+              "enum": [
+                "open",
+                "in_progress",
+                "closed"
+              ]
+            },
+            "new_status": {
+              "enum": [
+                "open",
+                "in_progress",
+                "closed"
+              ]
+            }
+          },
+          "required": [
+            "case_id",
+            "previous_status",
+            "new_status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "civic311.case_agency_changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "previous_agency": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{1,16}$"
+            },
+            "new_agency": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{1,16}$"
+            }
+          },
+          "required": [
+            "case_id",
+            "previous_agency",
+            "new_agency"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "civic311.case_admin_updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "update_code": {
+              "enum": [
+                "inspection_logged",
+                "record_corrected"
+              ]
+            }
+          },
+          "required": [
+            "case_id",
+            "update_code"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

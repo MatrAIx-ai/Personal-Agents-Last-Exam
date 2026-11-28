@@ -1,0 +1,75 @@
+'use strict';
+const assert=require('node:assert/strict'), crypto=require('node:crypto'),fs=require('node:fs'),path=require('node:path');
+const {early,observed,closure,agency,accept,business,stable,session,snap,apply,advance,load}=require('./session.cjs');
+async function smoke(f){
+ const infra=await f.make('infra'),a=await f.make('agent'),other=await f.make('agent','other-resident');
+ const call=(n,args)=>business(a,n,args),read=async()=>accept(await call('read_case',{case_id:'C17'})).item;
+ const write=async(n,args,request_id)=>call(n,{...args,request_id,expected_version:(await snap(infra)).version});
+ await load(infra,early);
+ await snap(await f.make("infra","other-resident"));
+ const baseline=await snap(infra);
+ assert.deepEqual([(await read()).status,(await read()).agency,(await read()).admin_update_code,(await read()).last_updated_at],['unknown',null,null,null]);
+ accept(await apply(infra,{...closure,at:'2026-11-21T13:59:00Z'}),'invalid_event');
+ assert.deepEqual(stable(await snap(infra)),stable(baseline));
+ accept(await a.call('env.apply_event',{}),'permission_denied');
+ await advance(infra,observed,'observe');
+ assert.equal((await read()).status,'open');assert.equal(accept(await call('list_activity')).items.length,0);
+ const v=(await snap(infra)).version,args={case_id:'C17',change_types:['resolved'],request_id:'save-watch',expected_version:v};
+ const w=accept(await call('save_watch',args),'committed');
+ assert.deepEqual(await call('save_watch',args),{...w,duplicate:true});
+ accept(await call('save_watch',{...args,change_types:['reopened']}),'idempotency_conflict');
+ accept(await call('remove_watch',{watch_id:w.watch.watch_id,request_id:'stale',expected_version:v}),'stale_version');
+ assert.deepEqual(accept(await business(other,'list_watches')).items,[]);
+ accept(await apply(infra,agency),'committed');
+ assert.equal((await read()).agency,'DEP');assert.equal(accept(await call('list_activity')).items.length,0);
+ const receipt=accept(await apply(infra,closure),'committed');
+ const a1=accept(await call('list_activity')).items;
+ assert.equal(a1.length,1);assert.equal(a1[0].change_type,'resolved');assert.equal((await read()).last_updated_at,closure.at);
+ const post=stable(await snap(infra));assert.deepEqual(await apply(infra,closure),{...receipt,duplicate:true});
+ assert.deepEqual(stable(await snap(infra)),post);
+ accept(await apply(infra,{...closure,payload:{...closure.payload,new_status:'in_progress'}}),'idempotency_conflict');
+ accept(await apply(infra,{...agency,event_id:'new-backdated'}),'invalid_event');
+ assert.deepEqual(stable(await snap(infra)),post);
+ accept(await write('ack_activity',{activity_id:a1[0].activity_id},'ack'),'committed');
+ assert.equal(accept(await call('list_activity',{unread_only:true})).items.length,0);
+ accept(await write('remove_watch',{watch_id:w.watch.watch_id},'remove'),'committed');
+ assert.equal(accept(await call('list_activity')).items.length,1);
+ accept(await infra.call('env.reset',{expected_version:(await snap(infra)).version}),'ready');
+ assert.deepEqual((await snap(infra)).snapshot.data,baseline.snapshot.data);
+ assert.equal((await read()).status,'unknown');
+}
+async function evaluation(f){
+ const evalPath=path.join(__dirname,'../data/evaluation-v1.json');
+ const bytes=fs.readFileSync(evalPath),d=JSON.parse(bytes),m=require('../data/capture-v1.json'),meta=require('../data/dataset.json');
+ assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),m.normalized_sha256);
+ assert.equal(d.cases.length,m.records);
+ const counts={};
+ for(const c of d.cases){
+  const day=c.created_at.slice(0,10),month=day.slice(0,7);
+  const row=counts[month]??={real:0,synthetic:0,days:new Set()};
+  row[c.source==='nyc311-snapshot'?'real':'synthetic']++;row.days.add(day);
+  assert.deepEqual(Object.keys(c).sort(),['borough','case_id','category','created_at','observations','recorded_closed_at','source']);
+ }
+ assert.equal(Object.keys(counts).length,24);
+ assert.deepEqual(Object.fromEntries(Object.entries(counts).map(([k,v])=>[k,[v.real,v.synthetic,v.days.size]])),Object.fromEntries(Object.entries(m.months).map(([k,v])=>[k,[v.real,v.synthetic,v.distinct_creation_dates]])));
+ assert.ok(counts['2026-11'].real>=10&&counts['2026-12'].real===0);
+ const dates=d.cases.map(c=>c.created_at.slice(0,10)).sort();
+ assert.deepEqual([dates[0],dates.at(-1)],['2025-01-01','2026-12-31']);
+ const infra=await f.make('infra','evaluation'),a=await f.make('agent','evaluation');
+ const anchor=d.cases.find(c=>c.created_at.startsWith('2026-11')&&c.source==='nyc311-snapshot'&&c.observations.length);
+ assert.ok(anchor);
+ const initial='2026-11-27T12:00:00-05:00';
+ await load(infra,initial,d,{dataset:meta,catalog:require('../contribution/assets.catalog.json'),blobs:{}});
+ const current=()=>business(a,'read_case',{case_id:anchor.case_id});
+ assert.equal(accept(await current()).item.status,'unknown');
+ const before=accept(await business(a,'search_cases')).total;assert.ok(before>350&&before<d.cases.length);
+ await advance(infra,'2026-12-31T23:59:59-05:00','end-of-window');
+ assert.equal(accept(await current()).item.status,anchor.observations[0].status);
+ assert.equal(accept(await business(a,'search_cases')).total,d.cases.length);
+ assert.equal(accept(await business(a,'list_activity')).items.length,0);
+ accept(await infra.call('env.reset',{expected_version:(await snap(infra)).version}),'ready');
+ assert.equal(accept(await current()).item.status,'unknown');
+ assert.equal(accept(await business(a,'search_cases')).total,before);
+ console.log('Evaluation records:',d.cases.length,'24 months; real November anchor',anchor.case_id,'as-of load/query/reset passed.');
+}
+(async()=>{const f=session();try{await smoke(f);await evaluation(f);console.log('PASS: independent Core/MCP clock rollback, scope, watched transition, replay, ack, reset and full data.');}finally{await f.close()}})().catch(e=>{console.error(e);process.exitCode=1});

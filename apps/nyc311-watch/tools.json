@@ -1,0 +1,920 @@
+[
+  {
+    "name": "civic311.search_cases",
+    "description": "Find visible street-condition cases by exact local ID, borough or current status; newest first.",
+    "read_only": true,
+    "scope": "civic311.search_cases",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "borough": {
+          "enum": [
+            "BRONX",
+            "BROOKLYN",
+            "MANHATTAN",
+            "QUEENS",
+            "STATEN ISLAND"
+          ]
+        },
+        "status": {
+          "enum": [
+            "open",
+            "in_progress",
+            "closed",
+            "unknown"
+          ]
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "borough": {
+                "enum": [
+                  "BRONX",
+                  "BROOKLYN",
+                  "MANHATTAN",
+                  "QUEENS",
+                  "STATEN ISLAND"
+                ]
+              },
+              "category": {
+                "enum": [
+                  "Street Condition"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "in_progress",
+                  "closed",
+                  "unknown"
+                ]
+              },
+              "agency": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Z0-9]{1,16}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "admin_update_code": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "inspection_logged",
+                      "record_corrected"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "last_updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "case_id",
+              "created_at",
+              "borough",
+              "category",
+              "status",
+              "agency",
+              "admin_update_code",
+              "last_updated_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "total",
+        "next_offset"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civic311.read_case",
+    "description": "Read one local case with fields supported at the virtual clock.",
+    "read_only": true,
+    "scope": "civic311.read_case",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "case_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "borough": {
+              "enum": [
+                "BRONX",
+                "BROOKLYN",
+                "MANHATTAN",
+                "QUEENS",
+                "STATEN ISLAND"
+              ]
+            },
+            "category": {
+              "enum": [
+                "Street Condition"
+              ]
+            },
+            "status": {
+              "enum": [
+                "open",
+                "in_progress",
+                "closed",
+                "unknown"
+              ]
+            },
+            "agency": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9]{1,16}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "admin_update_code": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "inspection_logged",
+                    "record_corrected"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "last_updated_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "case_id",
+            "created_at",
+            "borough",
+            "category",
+            "status",
+            "agency",
+            "admin_update_code",
+            "last_updated_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civic311.list_watches",
+    "description": "List the resident\u2019s private watches and selected changes.",
+    "read_only": true,
+    "scope": "civic311.list_watches",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "watch_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "case_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "change_types": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "resolved",
+                    "reopened",
+                    "agency_changed",
+                    "admin_update"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 4,
+                "uniqueItems": true
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "watch_id",
+              "account_id",
+              "case_id",
+              "change_types",
+              "version",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civic311.list_activity",
+    "description": "Read local reminders, optionally only unread; never sends a notification.",
+    "read_only": true,
+    "scope": "civic311.list_activity",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "unread_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "activity_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "watch_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "case_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "event_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "change_type": {
+                "enum": [
+                  "resolved",
+                  "reopened",
+                  "agency_changed",
+                  "admin_update"
+                ]
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "message": {
+                "type": "string",
+                "maxLength": 160
+              },
+              "acknowledged_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "activity_id",
+              "watch_id",
+              "account_id",
+              "case_id",
+              "event_id",
+              "change_type",
+              "at",
+              "message",
+              "acknowledged_at"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civic311.save_watch",
+    "description": "Create or edit a watch on a visible case; omit watch_id when creating.",
+    "read_only": false,
+    "scope": "civic311.save_watch",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "change_types": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "resolved",
+              "reopened",
+              "agency_changed",
+              "admin_update"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "watch_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "case_id",
+        "change_types",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "watch": {
+          "type": "object",
+          "properties": {
+            "watch_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "change_types": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "resolved",
+                  "reopened",
+                  "agency_changed",
+                  "admin_update"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 4,
+              "uniqueItems": true
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "watch_id",
+            "account_id",
+            "case_id",
+            "change_types",
+            "version",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "watch"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civic311.remove_watch",
+    "description": "Remove one watch without erasing past local activity.",
+    "read_only": false,
+    "scope": "civic311.remove_watch",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "watch_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "watch_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "watch_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civic311.ack_activity",
+    "description": "Mark one local reminder as read.",
+    "read_only": false,
+    "scope": "civic311.ack_activity",
+    "resource_target": "bound sandbox resident account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "activity_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "activity_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "civic311"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "activity": {
+          "type": "object",
+          "properties": {
+            "activity_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "watch_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "event_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "change_type": {
+              "enum": [
+                "resolved",
+                "reopened",
+                "agency_changed",
+                "admin_update"
+              ]
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "acknowledged_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "activity_id",
+            "watch_id",
+            "account_id",
+            "case_id",
+            "event_id",
+            "change_type",
+            "at",
+            "message",
+            "acknowledged_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "activity"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
