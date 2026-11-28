@@ -4,11 +4,11 @@ Owner: @byshail. App `tidepool` 1.0.0 under `apps/tidepool/`; public runtime 1.6
 
 - **Plan.** It implements the plan in [PR #216](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/216), `proposals/environment/tidepool-audio.md` at `575bb90fec3e44be6a7f46ce66fe6a7577a1029f`. The assigned Track reviewer approved it for implementation on 2026-11-24 with `/approve-plan` for that commit at 07:05:26Z; the bot recorded the approval after a repeated command at 21:56:00Z.
 - **Proposal file.** Unchanged since that commit (blob `307acdf79525bccc546e772a7481c11c9301cfaa`).
-- **Package.** At commit `feec7df6c69f4e9b201f4583c9870cb52f6fde03`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`); this revision adds the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260.
+- **Package.** At commit `cf8982bcd04be0120030f0e7a5f7407ea9fd1c0e`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`). The second, `da7f538` (package `feec7df`), added the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260. This one answers the implementation review of 2026-11-28 ([below](#review-of-2026-11-28)).
 
 This document records implementation evidence; it claims no acceptance.
 
-Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [tidepool/index.json](tidepool/index.json), next to the raw reports.
+Checked on 2026-11-28 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [tidepool/index.json](tidepool/index.json), next to the raw reports.
 
 **Automated outcome: passed.** Independent reproduction, official CI on the implementation commit and human review are still to come.
 
@@ -16,7 +16,7 @@ Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 
 | Evidence | Result | What was exercised |
 | :--- | :--- | :--- |
-| App-only business tests, package alone | 30 passed, on both Node versions | A copy of `apps/tidepool/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core's handling of events and of `env.advance_time`: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical. |
+| App-only business tests, package alone | 32 passed, on both Node versions | A copy of `apps/tidepool/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core's handling of events and of `env.advance_time`: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical. |
 | Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs`, `dev/build-contracts.cjs` and `dev/build-dataset.cjs`, run in a copy, leave every committed file byte-identical: fixtures, example events, policies, task data, dataset counts, schemas and `tools.json`. |
 | Public App verifier | 50 checks passed, on both ([node22](tidepool/public-runtime.node22.json), [node18](tidepool/public-runtime.node18.json)) | An isolated package copy, then real MCP. Agent discovery shows no Infra tools. It covers published input and output of the 16 tools the default `scenario` profile lists, the Agent denied all seven Infra operations, history loading and rejection, the declared event with retry and conflict, reset, a separate run and a restarted process. |
 | CI job, reproduced | `tidepool: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job. It selected `tidepool` only (`full: false`). |
@@ -25,7 +25,7 @@ Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 | Dataset coverage | 454 distinct dates in 24 of 24 months ([coverage.json](tidepool/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](tidepool/reference-suite.node22.json), [node18](tidepool/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present. |
 | Independent base validator | Passed, 50 checks ([report](tidepool/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `tidepool` only. |
-| Package identity | `d6f7edb116e3247306a77d0c72690778a1dd906a85424a044d6b01d1f9b90ba6` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `270d22b6ec3ab518df1f734651e953c4c2edb171`. |
+| Package identity | `8f3cb44c96741ee25ce2a48f61c00b6c72a738cd68c2465b11218f692b809e8f` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `ec27307221f28e86a0c69c488a20a5577e75596b`. |
 | Human review | Pending | Realism of the catalog, listening history and billing, including the generated dataset; that artists, shows, people and prices are fictional. |
 
 The walkthrough's instances:
@@ -109,6 +109,7 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 - A write or event on a later record fails (`not_found`; `invalid_event` or `target_not_found` for events) and changes nothing.
 - Changed records replace their stored form, including a later stored record with the same key.
 - If later family records cannot coexist with a change (validation fails), the family is stored as it reads at the clock plus the change; later albums, tracks and episodes are kept.
+- Every later record that a change drops or replaces, in either case above, is reported: the change's activity row holds it as stored (`later_history_removed`, by family), and the write's receipt counts it per family; both are `null` otherwise (B31–B32, [below](#review-of-2026-11-28)).
 - Before the bound member's `joined_at`, every tool returns `not_found`.
 - The README carries the field table.
 
@@ -129,13 +130,13 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 
 | Command | Node 22.23.2 | Node 18.20.8 |
 | --- | --- | --- |
-| `npm test` (apps/tidepool) | 30 tests, 30 pass | 30 tests, 30 pass |
+| `npm test` (apps/tidepool) | 32 tests, 32 pass | 32 tests, 32 pass |
 | `node runtime/cli.cjs verify --app apps/tidepool` | passed, 50 checks | passed, 50 checks |
 | `npm run walkthrough` (apps/tidepool) | passed, 158 checks (same checks and reference replies as the v1.0.0 evidence) | passed, 158 checks (same) |
 | `node apps/tidepool/examples/dataset-demo.cjs` | 91 checks; one `env.load_seed` of 434,421 bytes, with `data/evaluation/dataset.json` as the bundle's `dataset` | 91 checks |
 | `node apps/tidepool/dev/build-dataset.cjs` twice | byte-identical output | — |
 
-All reports carry package sha256 `d6f7edb116e3247306a77d0c72690778a1dd906a85424a044d6b01d1f9b90ba6`.
+All reports carry package sha256 `8f3cb44c96741ee25ce2a48f61c00b6c72a738cd68c2465b11218f692b809e8f`.
 
 New tests in `tests/business.test.cjs`:
 - *a seed loaded before its latest record shows only what existed at the clock* (Leila's task data on Oct. 1, 2026, then advanced to Nov. 24 with no data change; and on Feb. 1, 2026, before an album's release);
@@ -146,9 +147,24 @@ New tests in `tests/business.test.cjs`:
 - *events count only visible records: playlist positions, newest-n auto-downloads and seeded later IDs*;
 - *the evaluation dataset matches its dataset.json and keeps every fixture record except the three its 2025 story extends*;
 - *at the dataset clock the fixture facts read the same for Priya and Sam*;
-- *the evaluation dataset loads at any clock in its window and shows nothing dated later* (2025-03-15, 2025-12-31, the dataset clock, 2026-12-31).
+- *the evaluation dataset loads at any clock in its window and shows nothing dated later* (2025-03-15, 2025-12-31, the dataset clock, 2026-12-31);
+- B31 *a write at an early clock that drops later family records reports each one in its receipt and activity row*;
+- B32 *every kind of early-clock collision reports the later record it replaced, and a plain write reports nothing*.
 
-**Added scope against the approval baseline:** the dataset and its three scripts; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; and a larger package: 1,668,941 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
+**Added scope against the approval baseline:** the dataset and its three scripts; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; and a larger package: 1,688,098 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
+
+### Review of 2026-11-28
+
+The implementation review of `da7f538` asked for two must-fixes. Package `cf8982b` and this commit answer them; the approved proposal file is unchanged.
+
+- **Must fix 1: the cutoff fallback removed later records without reporting them.** `commit()` in `src/visible.cjs` now compares the stored data with the data it stores, after the merge-or-fallback decision. Every stored record that the clock view hid or showed in an earlier state, and that is no longer stored as it was, is reported. That covers the fallback and the two same-key paths: a later record replaced by the change, and a later active download or open invitation with the same key. The change's activity row holds those records as stored, by family, in `later_history_removed`; the write's receipt counts them per family; both are `null` otherwise. The receipt holds counts rather than IDs because it goes to the Agent, and the dropped records include other members' sessions and payments dated after the clock.
+  - B31 is the review's repro: the full dataset at 2026-04-01 and albums added to Priya's phone. The ninth (`alb-copperleaf-1`) returns `later_history_removed: {devices: 6, sessions: 143, progress: 87, plays: 28, follows: 3, upnext: 2, downloads: 33, library: 8, playlists: 4, notifications: 14, billing.payments: 8}`, and its activity row holds those 336 records. Sessions go from 321 to 178, and Priya's history at the dataset clock is 157, which is 242 less the 85 reported sessions dated by then. The eight earlier downloads report `null`.
+  - B32 covers the same-key paths (progress, a follow and Up Next replaced at the clock) and a plain write that reports `null`.
+  - Both tests check the report against an independent before/after diff, in which a record counts as later when it records a time after the clock.
+  - The README describes the report and tells Task authors to start at or after the dataset clock, or stage later records as scenario events, when the Agent writes.
+- **Must fix 2: PR description.** Updated to the validation stage, with the progress boxes checked and a link to this report at the submitted commit.
+- **Should fix 3.** The README's dataset section states that there is no family history before 2026 and that a Task needing 2025 family records must supply them.
+- **Should fix 4 and 5.** The reports stay under `docs/validation/` unless maintainers prefer PR attachments. The templated episode notes are left for the human realism review.
 
 ## Plan and implementation
 
