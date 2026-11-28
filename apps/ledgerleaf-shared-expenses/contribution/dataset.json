@@ -1,0 +1,50 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "ledgerleaf-synthetic-v1",
+  "version": "1.0.0",
+  "description": "Deterministically generated synthetic shared-expense histories for reproducible acceptance; not a benchmark task.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Original fictional names, groups, ledgers and notices generated locally.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic_script",
+        "tool": "scripts/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": "ledgerleaf-v1",
+        "parameters": {
+          "people": 16,
+          "groups": 5,
+          "expenses": 60,
+          "expense_corrections": 12,
+          "settlements": 10
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Integer-minor-unit normalization with deterministic largest-remainder allocation."
+  ],
+  "expected_counts": {
+    "records": 175,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Human realism and provenance review remains required."
+  }
+}

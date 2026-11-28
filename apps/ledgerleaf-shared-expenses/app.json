@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "app_id": "ledgerleaf-shared-expenses",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:ledgerleaf-shared-expenses"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "group.member_joined",
+    "group.member_left",
+    "expense.created_by_member",
+    "expense.updated_by_member",
+    "expense.deleted_by_member",
+    "settlement.recorded_by_member"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic group accounting only; no payments, payment requests, FX conversion, bank/card connections, receipt scanning, recurring bills or automatic PalePay integration.",
+    "Optional Mail delivery is separate from the ledger commit; unknown acknowledgement halts the Router for reconciliation."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

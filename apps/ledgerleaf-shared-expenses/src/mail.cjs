@@ -1,0 +1,5 @@
+'use strict';
+const c=require('./common.cjs');
+function message(data,notice,{id=notice.id,time=notice.created_at}={}){return {specversion:'1.0',id,source:`urn:pale:app:ledgerleaf-shared-expenses:account:${data.account_id}`,type:'org.pale.mail.notification.v1',time,datacontenttype:'application/json',dataschema:'urn:pale:email-payload:1',data:{channel:'channel.email',recipient:{kind:'person_ref',id:notice.recipient_person_id},source_object:{app_id:'ledgerleaf-shared-expenses',account_id:data.account_id,object_type:notice.source_object.object_type,object_id:notice.source_object.object_id},content:{title:notice.title,body:{format:'text/plain',text:notice.body},asset_ids:[]},subscription_ref:`${data.account_id}-ledger-activity`,extensions:[]}};}
+function latestPrepared(data){const notice=data.notifications.filter(x=>x.delivery_status==='prepared').at(-1);if(!notice)c.fail('not_found','No prepared Mail notice exists.');return {notice:c.copy(notice),message:message(data,notice)};}
+module.exports={message,latestPrepared};
