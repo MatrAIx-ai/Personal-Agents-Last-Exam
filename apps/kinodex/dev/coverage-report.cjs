@@ -38,7 +38,7 @@ const fx = {diary: byId(fixture.diary, 'entry_id'), reviews: byId(fixture.public
 const fixtureOffers = new Set(fixture.offers.map(o => JSON.stringify(o)));
 
 // Each source names its authoritative date field and its class: "happened" records exist in Kinodex from that
-// time (the clock cutoff hides them until then); "scheduled or descriptive" dates are shown at any clock.
+// time (the clock cutoff hides them until then); "scheduled or descriptive" dates are shown once their title is listed.
 const SOURCES = {
   diary: {label: 'Diary entries (Dana)', field: 'watched_on', kind: 'happened (visible from logged_at)'},
   public_reviews: {label: 'Public reviews', field: 'posted_at', kind: 'happened'},
@@ -209,7 +209,7 @@ out.push('# Kinodex evaluation dataset coverage', '',
   row(['**All sources, deduplicated**', '', '', T.counted, T.excluded, T.global_distinct_dates, T.earliest, T.latest]), '',
   '## By month', '', row(['Month', 'Diary', 'Public reviews', 'Catalog', 'Offers', 'Account', 'Distinct dates', 'After the clock']), row(['---', '---:', '---:', '---:', '---:', '---:', '---:', '---:']),
   ...monthly.map(m => row([m.month, m.diary, m.public_reviews, m.catalog, m.offers, m.account, m.distinct_dates, m.after_clock])), '',
-  'Catalog is episodes, seasons, guide versions 2+ and releases; Account is alerts, corrections, notices, lists and the account and watchlist stamps. Records after the dataset clock are catalog records only (public reviews, guide versions, a season and its episodes, offer windows). Kinodex shows a happened record once the run clock reaches its time; scheduled and descriptive dates are shown at any clock. None of them is pre-session history.', '',
+  'Catalog is episodes, seasons, guide versions 2+ and releases; Account is alerts, corrections, notices, lists and the account and watchlist stamps. Records after the dataset clock are catalog records only (public reviews, guide versions, a season and its episodes, offer windows). Kinodex shows a happened record once the run clock reaches its time; scheduled and descriptive dates are shown once their title is listed. None of them is pre-session history.', '',
   '## Excluded and not counted', '', ...report.excluded_by_reason.map(e => `- ${e.reason}: ${e.records} records (e.g. ${e.examples.join(', ')}).`),
   ...report.not_counted.map(x => `- Not counted: ${x}.`), '',
   '## Text checks', '', row(['Field', 'Texts', 'Distinct']), row(['---', '---:', '---:']), ...byField.map(f => row([f.field, f.texts, f.distinct])), '',

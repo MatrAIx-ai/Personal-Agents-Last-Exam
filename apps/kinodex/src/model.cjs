@@ -143,13 +143,30 @@ function validateSeed(ctx, data) {
     if (!idx.titles.has(r.title_id)) fail('invalid_seed', 'Review ' + r.review_id + ' references an unknown title.');
     if (!c.halfStar(r.rating) || !text(r.text, 2000) || !text(r.author, 60)) fail('invalid_seed', 'Review ' + r.review_id + ' needs an author, text and a half-star rating.');
   }
-  // Account state.
+  // Account state. Records about a title are dated from its first listing (guide version 1), and a diary
+  // entry from when the seasons of its episodes were added: before then catalog.visible hides the title or
+  // season, so the record could not be shown. Writes and events keep this, because they date records at
+  // the clock and see only listed titles and added seasons.
+  const listedAt = id => idx.guides.get(id).versions[0].published_at;
+  const fromListing = (what, at, titleId) => {
+    if (c.instant(at) < c.instant(listedAt(titleId))) {
+      fail('invalid_seed', what + ' is dated ' + at + ', before ' + idx.titles.get(titleId).name + ' was listed in Kinodex (' + listedAt(titleId) + ').');
+    }
+  };
   if (data.account.service_ids.some(id => !idx.services.has(id))) fail('invalid_seed', 'The account subscribes to an unknown service.');
   if (!c.validZone(data.account.time_zone)) fail('invalid_seed', 'The account time_zone must be an IANA time zone name such as America/Los_Angeles.');
   if (data.watchlist.title_ids.some(id => !idx.titles.has(id))) fail('invalid_seed', 'The watchlist lists an unknown title.');
   for (const e of data.diary) {
     checkDiaryEntry(idx, data, ctx.binding, e, SEED_CODES);
     if (c.instant(e.updated_at) < c.instant(e.logged_at)) fail('invalid_seed', 'Diary entry ' + e.entry_id + ' was updated before it was logged.');
+    fromListing('Diary entry ' + e.entry_id, e.logged_at, e.title_id);
+    const t = idx.titles.get(e.title_id);
+    for (const id of e.episode_ids) {
+      const season = t.seasons.find(s => s.season_number === idx.episodes.get(id).season_number);
+      if (c.instant(e.logged_at) < c.instant(season.added_at)) {
+        fail('invalid_seed', 'Diary entry ' + e.entry_id + ' is dated ' + e.logged_at + ', before season ' + season.season_number + ' of ' + t.name + ' was added (' + season.added_at + ').');
+      }
+    }
   }
   for (const l of data.lists) {
     if (!text(l.name, 120) || l.title_ids.some(id => !idx.titles.has(id))) fail('invalid_seed', 'List ' + l.list_id + ' needs a name and known titles.');
@@ -157,6 +174,7 @@ function validateSeed(ctx, data) {
   for (const a of data.alerts) {
     const t = idx.titles.get(a.title_id);
     if (!t) fail('invalid_seed', 'Alert ' + a.alert_id + ' references an unknown title.');
+    fromListing('Alert ' + a.alert_id, a.created_at, a.title_id);
     const priced = a.kind === 'price_below';
     if (priced !== (a.offer_type !== null) || priced !== (a.threshold !== null) || (priced && !(a.threshold > 0))) {
       fail('invalid_seed', 'Alert ' + a.alert_id + ': only price_below rules carry an offer_type and a positive threshold.');
@@ -179,6 +197,7 @@ function validateSeed(ctx, data) {
   for (const co of data.corrections) {
     const t = idx.titles.get(co.title_id);
     if (!t) fail('invalid_seed', 'Correction ' + co.correction_id + ' references an unknown title.');
+    fromListing('Correction ' + co.correction_id, co.submitted_at, co.title_id);
     if (Object.keys(co.target)[0] !== TARGET[co.field]) fail('invalid_seed', 'Correction ' + co.correction_id + ': a ' + co.field + ' correction targets ' + TARGET[co.field] + '.');
     const target = co.target[TARGET[co.field]];
     const exists = co.field === 'runtime' ? idx.editions.get(target)?.title_id === t.title_id
@@ -205,6 +224,7 @@ function validateSeed(ctx, data) {
     if (!idx.titles.has(n.title_id) || (n.alert_id !== null && !idx.alerts.has(n.alert_id)) || (n.correction_id !== null && !idx.corrections.has(n.correction_id))) {
       fail('invalid_seed', 'Notice ' + n.notice_id + ' references an unknown title, alert or correction.');
     }
+    fromListing('Notice ' + n.notice_id, n.at, n.title_id);
     if (!text(n.text, 500)) fail('invalid_seed', 'Notice text cannot be blank.');
   }
   for (let i = 1; i < data.activity.length; i++) {

@@ -210,9 +210,9 @@ Added after plan approval, together with the [evaluation dataset](#evaluation-da
 | `corrections[].submitted_at` | happened | `not_found`; absent from `corrections.list`; no `correction.decision` reaches it |
 | `corrections[].decisions[].decided_at`, `amended_at`, `withdrawn_at` | happened (transition) | Hidden; `status` and `updated_at` come from the transitions dated by the clock |
 | `notices[].at` | happened | Absent from `notices.list` |
-| `titles[].seasons[].added_at` | happened | The season and its episodes are absent; `episodes.list` on it is `not_found`; `new_season` rules do not see it |
+| `titles[].seasons[].added_at` | happened | The season and its episodes are absent; `episodes.list` on it is `not_found`; `new_season` rules do not see it. A seed's diary entry is logged at or after the seasons of its episodes were added; `validateSeed` rejects an earlier one with `invalid_seed` |
 | `guides[].versions[].published_at`, version 2 and later | happened | `guide.get` on it is `not_found`; the current guide is the latest one published |
-| `guides[].versions[0].published_at` | happened (listing) | The title is not listed yet: it is `not_found`, absent from search, and its episodes, credits, guide, offers and public reviews are hidden with it. The watchlist and lists leave it out (they keep it in storage, also when the Agent saves them) |
+| `guides[].versions[0].published_at` | happened (listing) | The title is not listed yet: it is `not_found`, absent from search, and its episodes, credits, guide, offers and public reviews are hidden with it. The watchlist and lists leave it out (they keep it in storage, also when the Agent saves them). A seed's diary entries, alerts, corrections and notices about the title are dated at or after its listing; `validateSeed` rejects an earlier one with `invalid_seed`. Writes and events keep both rules, because they date records at the clock and see only listed titles and added seasons |
 | `titles[].year`, `titles[].releases[].date` | descriptive | Shown for a listed title, including releases still to come |
 | `episodes[].air_date` | scheduled | Shown for an episode of a visible season of a listed title |
 | `offers[].available_from`, `offers[].available_until` | scheduled | Shown for a listed title; availability is derived ([Where to watch](#where-to-watch)) |
@@ -436,6 +436,7 @@ node runtime/build-contracts.cjs --check
 | An alert fires once | T04, T08; walkthrough 57, 108, 117 |
 | A correction decision reaches a correction the Agent created during the run | T10; walkthrough 99–100 |
 | Fixture checks: episodes in their series, credits to existing people and titles, ordered offer windows, diary after release, diary between 2025-01-01 and the clock, Dana's rating distribution, seed byte size | `validateSeed` (`src/model.cjs`); T13 *seed validation…*, T13 *fixture checks…* |
+| A seed's account records are dated from their title's listing, and diary entries from their episodes' seasons, so no read fails at an earlier clock (added after the re-review) | `validateSeed`; *a seed's account records start at their title's listing…* |
 | `hide_spoilers` boundary moves back after a diary entry is deleted | T02; walkthrough 76 |
 | The clock alone (an offer's end time, the seven-day window, an alert's `expires_at`, an offer's start) changes `offers.search` and `alerts.list` consistently with no activity row or notice | T03 *clock-only changes…*, T08 *item 2…*; walkthrough 85–87 |
 | "Today" for `watched_on` follows the account's time zone, not the clock's spelling | T06 *"today" is the date of the clock instant…* |

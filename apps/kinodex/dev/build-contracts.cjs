@@ -160,13 +160,11 @@ const HIDE = {hide_spoilers: BOOL, as_of_person: ID};
 // by family. Only counts, because the receipt goes to the Agent; the records are in the activity row.
 // This happens only when a seed that runs past its clock is loaded early.
 const LATER = nullable({type: 'object', additionalProperties: INT(1)});
-const LATER_NOTE = ' later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.';
 function tool(name, description, readOnly, input, output, required = Object.keys(input)) {
   const inputSchema = readOnly ? obj(input, required)
     : obj({...input, expected_version: VERSION, request_id: ID}, [...required, 'expected_version', 'request_id']);
   const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output,
     ...(readOnly ? {} : {later_history_removed: LATER})});
-  if (!readOnly) description += LATER_NOTE;
   return {name, description, read_only: readOnly, scope: name, resource_target: 'current account', inputSchema, outputSchema};
 }
 const DIARY_PATCH = obj({edition_id: nullable(ID), watched_on: DATE, rewatch: BOOL, watched_with: arr(ID, 20, {uniqueItems: true}),

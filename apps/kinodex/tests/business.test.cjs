@@ -923,3 +923,53 @@ test('services.list returns every service with its regions and offer types, mark
   assert.deepEqual(after.filter(s => s.subscribed).map(s => s.service_id).sort(), [...services].sort());
   assert.deepEqual(after.map(({subscribed, ...s}) => s), seed.services);
 });
+
+test('a seed\'s account records start at their title\'s listing, and diary entries at their episodes\' seasons; earlier ones are invalid_seed (re-review)', () => {
+  const {seed: s, binding} = evalData(), load = (data, at) => fixture({seed: data, binding, virtual_now: at});
+  const pellmoor = 'tt-pellmoor-junction', title = 'Pellmoor Junction', second = at => new Date(Date.parse(at) - 1000).toISOString().replace('.000Z', 'Z');
+  const alert = at => ({...structuredClone(s.alerts.find(a => a.alert_id === 'al-02')), alert_id: 'al-x', title_id: pellmoor, created_at: at, updated_at: at, expires_at: null});
+  // The repro: an active alert created 2026-03-01 for a title first listed on 2026-04-15, loaded on 2026-03-10.
+  const repro = structuredClone(s);
+  repro.alerts.push(alert('2026-03-01T20:00:00Z'));
+  assert.throws(() => load(repro, '2026-03-10T12:00:00-08:00'), e => e.code === 'invalid_seed' && /Alert al-x is dated 2026-03-01T20:00:00Z, before Pellmoor Junction was listed/.test(e.message));
+  // Each family, one second before the listing and exactly at it. The listing is moved after the US release
+  // (2026-05-15), as for an older film added to Kinodex late, so a diary entry can be logged before it.
+  const listed = '2026-06-01T08:00:00Z';
+  const families = [
+    ['Alert al-x', (d, at) => d.alerts.push(alert(at)), 'kinodex.alerts.list', r => r.alerts.map(a => a.alert_id), 'al-x'],
+    ['Correction co-03', (d, at) => Object.assign(d.corrections.find(co => co.correction_id === 'co-03'), {submitted_at: at, updated_at: at}),
+      'kinodex.corrections.list', r => r.corrections.map(co => co.correction_id), 'co-03'],
+    ['Notice nt-x', (d, at) => d.notices.push({...structuredClone(s.notices.find(n => n.notice_id === 'nt-04')), notice_id: 'nt-x', at, title_id: pellmoor,
+      guide_version: 1, event_id: 'guide-pellmoor-junction-v1', text: 'The parental guide for ' + title + ' was updated.'}), 'kinodex.notices.list', r => r.notices.map(n => n.notice_id), 'nt-x'],
+    ['Diary entry de-x', (d, at) => d.diary.push({...structuredClone(s.diary.find(e => e.entry_id === 'de-0003')), entry_id: 'de-x', title_id: pellmoor,
+      watched_on: '2026-05-20', logged_at: at, updated_at: at}), 'kinodex.diary.list', r => r.entries.map(e => e.entry_id), 'de-x'],
+  ];
+  for (const [what, add, tool, ids, id] of families) {
+    const at = at => {const d = structuredClone(s); d.guides.find(g => g.title_id === pellmoor).versions[0].published_at = listed; add(d, at); return d;};
+    assert.throws(() => load(at(second(listed)), listed), e => e.code === 'invalid_seed' && e.message === what + ' is dated ' + second(listed)
+      + ', before ' + title + ' was listed in Kinodex (' + listed + ').', what);
+    assert.ok(ids(load(at(listed), listed).call(tool, {})).includes(id), what + ' is shown from the listing');
+  }
+  // Harbor Lights season 2 added on 2026-09-10, after its first episode aired on 2026-09-04: a diary entry for that
+  // episode is dated from 2026-09-10, and the diary and the spoiler boundary then read it.
+  const added = '2026-09-10T08:00:00Z', ep = 'ep-harbor-lights-s2e1', season = at => {
+    const d = structuredClone(s);
+    d.titles.find(t => t.title_id === 'tt-harbor-lights').seasons.find(x => x.season_number === 2).added_at = added;
+    d.diary.push({...structuredClone(s.diary.find(e => e.entry_id === 'de-0003')), entry_id: 'de-y', title_id: 'tt-harbor-lights', episode_ids: [ep],
+      watched_on: '2026-09-04', logged_at: at, updated_at: at});
+    return d;
+  };
+  assert.throws(() => load(season(second(added)), added), e => e.code === 'invalid_seed'
+    && e.message === 'Diary entry de-y is dated ' + second(added) + ', before season 2 of Harbor Lights was added (' + added + ').');
+  const f = load(season(added), added);
+  assert.deepEqual(f.call('kinodex.diary.list', {title_id: 'tt-harbor-lights'}).entries.find(e => e.entry_id === 'de-y').episodes,
+    [{episode_id: ep, season_number: 2, number: 1}]);
+  const seen = f.call('kinodex.titles.get', {title_id: 'tt-harbor-lights', hide_spoilers: true}).title;
+  assert.deepEqual(seen.spoiler_boundary.furthest_episode, {episode_id: ep, season_number: 2, number: 1});
+  // No event can date a record before its title's listing: a guide version must follow version 1.
+  const g = fixture({...evalData(), virtual_now: '2025-03-15T12:00:00-07:00'});
+  unchanged(g, () => g.event({event_id: 'ev-early-guide', operation: 'title.update', at: '2025-03-15T13:00:00-07:00',
+    payload: {title_id: 'tt-harbor-lights', guide_version: {version: 2, reason: 'correction_approved', categories: {violence: {summary: 'Updated.'}}}}}), code('invalid_event'));
+  // The shipped seeds already keep these rules; none of their records changed.
+  for (const [data, b] of [[seed, require('../fixtures/binding.json')], [inesSeed, inesBinding], [s, binding]]) fixture({seed: data, binding: b});
+});
