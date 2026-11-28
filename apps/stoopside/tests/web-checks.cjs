@@ -7,7 +7,7 @@
 //   node apps/stoopside/tests/web-checks.cjs --evidence   checks, and writes the
 //       curated screenshots and their manifest to apps/stoopside/evidence/screens/
 // It starts runtime/web/server.cjs with apps/stoopside/web.registry.json (the
-// fixture clock), opens all eight pages in Chromium, compares what each page
+// Maple St clock) and loads the Maple St fixture through env.load_seed, opens all eight pages in Chromium, compares what each page
 // shows with the tool results over MCP, drives every write through the page,
 // including the error, cancel and stale paths, checks the committed state with
 // an Infra snapshot, reloads, applies an independent MCP write and an Infra
@@ -103,7 +103,11 @@ async function main() {
     ok('group discovery shows a card for exactly the groups groups.list returns', JSON.stringify(await page.locator('#records [data-record-id]').evaluateAll(n => n.map(x => x.dataset.recordId))) === JSON.stringify(groups.map(g => g.id)));
     ok('group cards show the member count and the user\'s membership from the tool', (await text('#records [data-record-id=g-block]')).includes(`${groups.find(g => g.id === 'g-block').member_count} members`) &&
       (await text('#records [data-record-id=g-runclub]')).includes('Request pending'));
-    await shot('01-groups-discovery.png', 'Group discovery: start state, one card per group with member count and membership');
+    const waitingSwaps = (await tool('signups.get', {sheet_id: 's-0022'})).swaps.filter(w => w.state === 'proposed' && w.to.member_id === 'm-001');
+    ok('the groups page lists what waits for the user, here the swap Theo proposed, linked to its sheet (follow-up review, minor)',
+      waitingSwaps.length === 1 && await page.locator('[data-waiting=swap]').count() === 1 && /Theo B\. offers you snacks for your coffee urn and cups/.test(await text('[data-waiting=swap]')) &&
+      await page.locator('[data-waiting=swap]').getAttribute('href') === '#/sheet/s-0022');
+    await shot('01-groups-discovery.png', 'Group discovery: start state, what waits for the user (a pending swap), one card per group with member count and membership');
     await go('#/group/g-block');
     const block = await tool('groups.get', {group_id: 'g-block'}), posts = (await tool('posts.list', {group_id: 'g-block'})).posts;
     ok('group home shows the hosts and the post count the tools return',
@@ -126,12 +130,14 @@ async function main() {
     ok('view-as on the group home shows the tool answer in the group\'s zone', await page.locator('[data-view-as-result]').getAttribute('data-visible') === String(groupView.visible) &&
       (await text('[data-view-as-result]')).includes('As of Mon, Mar 1, 2027, 9:00 AM EST'));
     await shot('03-view-as-group.png', `View-as on the group home: ${viewerName} (${viewer}) sees the group now; as-of time in EST`, '[data-section=view-as]');
-    await go('#/group/g-garden');
-    const gardenPosts = (await tool('posts.list', {group_id: 'g-garden'})).posts;
+    // Dana is a plain member of the parents group and has a post there.
+    await go('#/group/g-parents');
+    const parentPosts = (await tool('posts.list', {group_id: 'g-parents'})).posts;
     const deletable = await page.locator('[data-delete]').evaluateAll(n => n.map(x => x.dataset.delete));
-    const gardenEdits = await page.locator('[data-edit]').evaluateAll(n => n.map(x => x.dataset.edit));
-    ok('in a group where the user is a plain member, Edit and Delete appear only on their own posts', deletable.length > 0 && JSON.stringify(gardenEdits) === JSON.stringify(deletable) &&
-      deletable.every(id => gardenPosts.find(p => p.id === id).author.member_id === 'm-001'));
+    const parentEdits = await page.locator('[data-edit]').evaluateAll(n => n.map(x => x.dataset.edit));
+    ok('in a group where the user is a plain member, Edit and Delete appear only on their own posts', deletable.length > 0 && JSON.stringify(parentEdits) === JSON.stringify(deletable) &&
+      deletable.every(id => parentPosts.find(p => p.id === id).author.member_id === 'm-001'));
+    await go('#/group/g-garden');
     ok('the garden hides its member list from members, so the page offers no directory link', await page.locator('[data-link=members]').count() === 0);
 
     // 2. Member directory.
@@ -169,6 +175,15 @@ async function main() {
     ok('the event page shows the date in the group\'s zone and the places the tool returns', (await text('#page')).includes('Sat, Mar 20, 2027, 4:00 PM to 7:00 PM EST') &&
       (await text('#page')).includes(`${e121.places_taken} of ${e121.capacity} taken`) && !rawIso.test(await text('#page')));
     await shot('07-rsvp-start.png', 'RSVP start: Spring fling family dance, no RSVP yet; guests and children left empty');
+    before = digest(await data());
+    for (const bad of ['-1', '1.5']) {
+      await page.locator('[data-field=guests]').fill(bad);
+      await page.locator('[data-action=preview-rsvp]').click();
+      const badCount = await formError();
+      ok(`a guest count of ${bad} is refused on the page in page wording and writes nothing (follow-up review, minor)`,
+        /^invalid_input: Enter the number of guests as a whole number, 0 or more\.$/.test(badCount) && digest(await data()) === before);
+    }
+    await page.locator('[data-field=guests]').fill('');
     await page.locator('[data-action=preview-rsvp]').click();
     await page.locator('[data-prefilled]').waitFor();
     ok('an RSVP preview with empty counts shows where the pre-filled counts came from', /guests 1, children 2/.test(await text('[data-prefilled]')) && /Pi Day bake sale/.test(await text('[data-prefilled]')));
@@ -250,8 +265,10 @@ async function main() {
 
     // 5. Post composer: audience_required, then a post to an event's guests.
     await go('#/compose/g-block');
-    await page.locator('[data-form=compose] [data-field=text]').fill('Send-off plans: potluck on the porch, May 8. Keep it quiet.');
     before = digest(await data());
+    await page.locator('[data-action=preview-post]').click();
+    ok('an empty post is refused on the page in page wording and writes nothing', /^invalid_input: Write the post before you preview it\.$/.test(await formError()) && digest(await data()) === before);
+    await page.locator('[data-form=compose] [data-field=text]').fill('Send-off plans: potluck on the porch, May 8. Keep it quiet.');
     await page.locator('[data-action=preview-post]').click();
     const audienceError = await formError();
     ok('a post with no audience shows audience_required next to the composer, in page wording, and writes nothing', /^audience_required: /.test(audienceError) &&
@@ -311,6 +328,12 @@ async function main() {
 
     // 7. Profile and 8. Help.
     await go('#/profile');
+    const shownName = await page.locator('[data-form=profile] [data-field=display_name]').inputValue();
+    await page.locator('[data-form=profile] [data-field=display_name]').fill('  ');
+    before = digest(await data());
+    await page.locator('[data-action=save-profile]').click();
+    ok('an empty display name is refused on the page in page wording and writes nothing', /^invalid_input: Enter a display name\./.test(await formError()) && digest(await data()) === before);
+    await page.locator('[data-form=profile] [data-field=display_name]').fill(shownName);
     await page.locator('[data-form=profile] [data-field=bio]').fill('Two kids at Maple St School. I host the block cleanups and the coffee urn.');
     await page.locator('[data-action=save-profile]').click();
     ok('the profile page saves through profile.update and keeps the receipt', /Profile saved/.test(await flash(/Profile saved/)) && (await data()).members.find(m => m.id === 'm-001').bio.endsWith('the coffee urn.'));
@@ -357,7 +380,10 @@ async function main() {
     await go(`#/change/cancel/${created.id}`);
     await page.locator('[data-action=preview-change]').click();
     await page.locator('[data-preview]').waitFor();
-    await shot('25-cancel-preview.png', 'Event cancel preview: says it cannot be undone, sheets lock, every open RSVP is notified', '[data-preview]');
+    const cancelText = await text('[data-preview]');
+    ok('the cancel preview of an event nobody answered says no email goes out, and nothing says otherwise (follow-up review, minor)',
+      /Nobody has an open RSVP, so no email goes out\./.test(cancelText) && !/is notified by email/.test(cancelText));
+    await shot('25-cancel-preview.png', 'Event cancel preview: says it cannot be undone and sheets lock; nobody has an open RSVP, so no email goes out', '[data-preview]');
     await page.locator('[data-confirm]').click();
     await page.waitForFunction(id => location.hash === '#/event/' + id, created.id);
     ok('cancelling from the page commits the cancellation and keeps the receipt', (await data()).events.find(e => e.id === created.id).state === 'cancelled' && /Stoop sale is cancelled/.test(await flash(/Stoop sale is cancelled/)));
@@ -391,6 +417,14 @@ async function main() {
       const t = await smallText();
       ok(`no visible text below 12px on ${hash}`, t.total > 0 && t.small === 0);
     }
+    // Muted text contrast (WCAG 2.1 AA, 4.5:1 for small text) against the white page.
+    await go('#/event/e-0117');
+    const contrast = await page.evaluate(() => {
+      const lum = c => { const [r, g, b] = c.match(/\d+/g).slice(0, 3).map(Number).map(v => v / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+      const ratio = c => 1.05 / (lum(c) + 0.05);
+      return Math.min(...[...document.querySelectorAll('.st-muted, .st-id, .kicker, #status, .toolbar button')].filter(e => e.getBoundingClientRect().width).map(e => ratio(getComputedStyle(e).color)));
+    });
+    ok(`muted text has a contrast of at least 4.5:1 (lowest ${contrast.toFixed(2)})`, contrast >= 4.5);
     await page.setViewportSize({width: 390, height: 844});
     for (const hash of ['#/group/g-block', '#/event/e-0140', '#/sheet/s-0022', '#/compose/g-block']) {
       await go(hash);

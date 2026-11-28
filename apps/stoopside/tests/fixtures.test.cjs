@@ -20,7 +20,7 @@ for (const fx of FIXTURES) {
   test(`fixture checker: ${fx.key} passes every check`, () => {
     const r = checkFixture(fx);
     for (const c of r.checks) assert.ok(c.pass, `${fx.key} ${c.name}: ${c.problems.join('; ')}`);
-    assert.deepEqual(r.checks.map(c => c.name), ['shape', 'seed_valid', 'unique_ids', 'ordered_dates', 'capacity', 'mail_emails', 'name_links', 'stale_default', 'scenario_applies']);
+    assert.deepEqual(r.checks.map(c => c.name), ['shape', 'seed_valid', 'unique_ids', 'ordered_dates', 'coherent_history', 'capacity', 'mail_emails', 'name_links', 'stale_default', 'scenario_applies']);
   });
 }
 
@@ -43,6 +43,12 @@ test('fixture checker: each check catches a broken copy of the fixture', () => {
   broken(f => { for (const r of f.data.rsvps) if (r.member_id === 'm-001') { r.guests = 0; r.children = 0; r.revisions.at(-1).guests = 0; r.revisions.at(-1).children = 0; } }, 'stale_default');
   broken(f => { f.scenario[0].payload.member_id = 'm-999'; }, 'scenario_applies');
   broken(f => { f.data.members = f.data.members.slice(0, 50); }, 'shape');
+  // The reviewer's contradictions: an RSVP before the member joined, a claim
+  // before the event was posted, an event posted before its group existed.
+  broken(f => { const r = f.data.rsvps.find(x => x.member_id === 'm-001'), e = f.data.events.find(x => x.id === r.event_id);
+    f.data.memberships.find(m => m.group_id === e.group_id && m.member_id === 'm-001').revisions[0].at = r.revisions[0].at.replace(/T.*/, 'T23:59:00-06:00'); }, 'coherent_history');
+  broken(f => { const s = f.data.sheets[0]; s.revisions[0].at = f.data.events.find(e => e.id === s.event_id).created_at.replace(/T/, 'T00:00:00-06:00').slice(0, 10) + 'T00:01:00-06:00'; }, 'coherent_history');
+  broken(f => { f.data.events[0].created_at = '2025-01-02T10:00:00-06:00'; }, 'coherent_history');
   assert.equal(aliased('Birdie Adeyemi', 'Wren Adeyemi'), true);
   assert.equal(aliased('Tomasz Nowak', 'Tom N.'), false);
   assert.equal(aliased('Harold Brennan', 'Hal B.'), true);
@@ -248,3 +254,72 @@ for (const fx of FIXTURES) {
     assert.ok(!d.events.some(e => /All members welcome\.$/.test(e.description)), `${fx.key}: templated description`);
   });
 }
+
+// ---- History that changes, posted at a varied cadence (follow-up review item 5) ----------
+
+for (const fx of FIXTURES) {
+  test(`varied history: ${fx.key} posts vary by month, threads run on, and past records change`, () => {
+    const d = fx.data, background = d.posts.filter(p => p.kind === 'post' && !p.parent_id);
+    const perMonth = {};
+    for (const p of background) perMonth[p.group_id + p.created_at.slice(0, 7)] = (perMonth[p.group_id + p.created_at.slice(0, 7)] || 0) + 1;
+    const counts = Object.values(perMonth);
+    assert.ok(counts.filter(n => n === 1).length / counts.length < 0.7, `${fx.key}: most group-months have exactly one post`);
+    assert.ok(counts.some(n => n >= 3), `${fx.key}: no month with three posts`);
+    assert.ok(background.some(p => Number(p.created_at.slice(8, 10)) >= 28), `${fx.key}: no post on days 28 to 31`);
+    const replies = {};
+    for (const p of d.posts.filter(x => x.parent_id)) replies[p.parent_id] = (replies[p.parent_id] || 0) + 1;
+    assert.ok(Object.values(replies).filter(n => n >= 2).length >= 5, `${fx.key}: fewer than five threads with two or more replies`);
+    assert.ok(d.rsvps.filter(r => r.revisions.length > 1 && r.member_id !== d.user_member_id).length >= 10, `${fx.key}: too few changed RSVPs`);
+    assert.ok(d.posts.some(p => p.state === 'edited') && d.posts.some(p => p.state === 'deleted'), `${fx.key}: no edited or deleted post`);
+    assert.ok(d.events.some(e => e.revisions.some(v => v.action === 'edited')) && d.events.some(e => e.state === 'cancelled'), `${fx.key}: no moved or cancelled event`);
+    const joins = d.memberships.map(m => Date.parse(m.created_at)), first = Math.min(...joins);
+    assert.ok(joins.filter(t => t > first + 365 * 864e5).length >= 10, `${fx.key}: almost every join is in the first year`);
+    for (const e of d.events.filter(x => x.capacity >= 120 && Date.parse(x.start) < Date.parse(fx.clock) && x.state === 'published')) {
+      // Most of the group answers its big events (bounded by who had joined by the close).
+      const members = d.memberships.filter(m => m.group_id === e.group_id && Date.parse(m.created_at) < Date.parse(e.rsvp_close)).length;
+      assert.ok(d.rsvps.filter(r => r.event_id === e.id).length >= Math.min(7, 0.6 * members), `${fx.key}: ${e.id} (${e.capacity} places) has few answers`);
+    }
+  });
+}
+
+// ---- Clocks: a load before the data is refused; a cut-off is a coherent prefix -------------
+
+test('a load whose clock precedes its history is refused with invalid_seed', () => {
+  for (const fx of FIXTURES) {
+    const earlier = new Date(Date.parse(fx.clock) - 30 * 864e5).toISOString();
+    assert.throws(() => plugin.validateSeed({app_id: 'stoopside', binding: fx.binding, virtual_now: earlier}, fx.data),
+      e => e.code === 'invalid_seed' && /is earlier than the seed's history/.test(e.message), fx.key);
+    plugin.validateSeed({app_id: 'stoopside', binding: fx.binding, virtual_now: fx.clock}, fx.data);
+  }
+});
+
+test('a cut-off at the fixture clock reproduces the fixture byte for byte', () => {
+  const {cut} = require('../scripts/cutoff.cjs');
+  for (const fx of FIXTURES) {
+    const c = cut({data: fx.data, binding: fx.binding, mail: fx.mail}, fx.clock);
+    assert.deepEqual([c.data, c.binding, c.mail], [fx.data, fx.binding, fx.mail], fx.key);
+  }
+});
+
+test('cut-offs inside the window pass every history check and leave the user work at typical clocks', () => {
+  const {cutoff} = require('../scripts/generate-fixture.cjs');
+  const clocks = ['2025-09-15T09:00:00-05:00', '2026-01-20T09:00:00-05:00', '2026-03-10T09:00:00-05:00', '2026-06-15T09:00:00-05:00',
+    '2026-09-01T09:00:00-05:00', '2026-11-16T09:00:00-05:00'];
+  const work = {};
+  for (const fx of FIXTURES) {
+    for (const t of clocks.filter(x => Date.parse(x) < Date.parse(fx.clock))) {
+      const c = cutoff(fx.key, t);   // validateSeed at the cut-off clock runs inside
+      const r = checkFixture({...fx, data: c.data, binding: c.binding, mail: c.mail, scenario: [], clock: t});
+      for (const name of ['seed_valid', 'unique_ids', 'coherent_history', 'capacity', 'mail_emails']) {
+        const x = r.checks.find(y => y.name === name);
+        assert.ok(x.pass, `${fx.key} at ${t} ${name}: ${x.problems.join('; ')}`);
+      }
+      assert.notDeepEqual(c.data, fx.data, `${fx.key} at ${t} is the whole fixture`);
+      work[fx.key + ' ' + t.slice(0, 10)] = c.actionable.rsvp_open.length + c.actionable.open_sheets.length;
+    }
+  }
+  // The clocks the README recommends for in-window runs have open RSVPs.
+  for (const k of ['maple-street 2026-06-15', 'riverside 2026-01-20', 'riverside 2026-03-10', 'hillcrest 2026-01-20', 'hillcrest 2026-03-10', 'hillcrest 2026-09-01']) {
+    assert.ok(work[k] > 0, `${k} leaves nothing to do`);
+  }
+});

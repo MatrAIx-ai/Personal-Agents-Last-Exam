@@ -69,7 +69,7 @@ const READS = {
     const user = data.user_member_id, world = VIS.currentWorld(data);
     if (args.group_id) R.requireMember(data, R.group(data, args.group_id).id, user);
     return {events: data.events.filter(e => (!args.group_id || e.group_id === args.group_id) &&
-        VIS.canSee(world, user, {type: 'event', id: e.id}) && (args.include_past || R.eventState(e, now) !== 'past'))
+        VIS.canSee(world, user, {type: 'event', id: e.id}) && (args.include_past || (R.eventState(e, now) !== 'past' && now < ms(e.end))))
       .sort((a, b) => ms(a.start) - ms(b.start) || a.id.localeCompare(b.id)).map(e => V.eventSummary(data, e, now, user))};
   },
   'events.get'(data, args, now) {

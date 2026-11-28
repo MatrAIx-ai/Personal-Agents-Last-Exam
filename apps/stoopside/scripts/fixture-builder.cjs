@@ -62,11 +62,15 @@ function timeKit(rand, offMs) {
   // to a few weeks. RSVPs open when the event is posted or a few days later
   // and close a few hours to two days before the start. A hand-written user
   // RSVP (userAt) must fall inside the window.
-  const eventWindow = (start, capacity, userAt) => {
+  // `floor` is the earliest instant the event can be posted: after the group
+  // exists and its host has joined.
+  const eventWindow = (start, capacity, userAt, floor = -Infinity) => {
     const lead = (capacity >= 80 ? int(24, 55) : int(7, 30)) * DAY;
     let open = awakeOn(start - lead);
-    if (userAt && open >= userAt - HOUR) open = between(userAt - int(3, 9) * DAY, userAt - HOUR);
-    const created = rand() < 0.55 ? open - int(0, 40) * 60000 : awakeOn(open - int(1, 4) * DAY);
+    if (open < floor + HOUR) open = between(floor + HOUR, Math.max(floor + 2 * HOUR, Math.min(start - 3 * DAY, floor + 4 * DAY)));
+    if (userAt && open >= userAt - HOUR) open = between(Math.max(floor + HOUR, userAt - int(3, 9) * DAY), userAt - HOUR);
+    let created = rand() < 0.55 ? open - int(0, 40) * 60000 : awakeOn(open - int(1, 4) * DAY);
+    if (created < floor) created = between(floor, open);
     const close = start - [2, 3, 6, 12, 24, 24, 24, 48][Math.floor(rand() * 8)] * HOUR;
     return {created, open, close};
   };
@@ -79,7 +83,19 @@ function timeKit(rand, offMs) {
   return {minuteOfDay, midnight, awakeOn, between, int, eventWindow, answerTime};
 }
 
+const H = require('./history.cjs');
+function shuffleWith(r, list) {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(r() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 function build(spec) {
+  // Each build uses the texts from the start (a process may build twice).
+  for (const k of [...textUse.keys()]) if (k.startsWith(spec.key + '|')) textUse.delete(k);
   const rand = rng(spec.rngSeed);
   const pick = list => list[Math.floor(rand() * list.length)];
   const shuffle = list => {
@@ -129,9 +145,19 @@ function build(spec) {
       if (opts.joined?.[g]) joined = at(...opts.joined[g].split(' '));
       else if (role === 'organizer') joined = iso(groupCreated(g) + 30 * 60000);
       else {
-        // Founding members and hosts join in the group's first weeks; others over its first year.
+        // Hosts join in the group's first weeks. Members: about half in the
+        // first months, the rest at any time up to a few weeks before the clock.
         const span = role === 'member' ? spec.joinSpanDays || 300 : 30;
-        joined = iso(K.awakeOn(groupCreated(g) + (1 + Math.floor(rand() * span)) * DAY));
+        const late = (clock - groupCreated(g)) / DAY - 21;
+        const day = role === 'member' && rand() < 0.45 && late > span ? span + Math.floor(rand() * (late - span)) : 1 + Math.floor(rand() * span);
+        joined = iso(K.awakeOn(groupCreated(g) + day * DAY));
+        // A member who later leaves joined at least a month before leaving
+        // (whole days earlier, so the minute of day stays the drawn one).
+        const leave = (spec.leavers || []).find(([lg, ln]) => lg === g && mid(ln) === id);
+        if (leave) {
+          const by = ms(at(...leave[2].split(' '))) - 30 * DAY;
+          if (ms(joined) > by) joined = iso(ms(joined) - Math.ceil((ms(joined) - by) / DAY) * DAY);
+        }
       }
       joinedAt[g + '|' + id] = joined;
       const row = {id: 'ms-' + pad(data.memberships.length + 1), group_id: g, member_id: id, state: 'member',
@@ -163,7 +189,8 @@ function build(spec) {
   const organizer = g => data.memberships.find(m => m.group_id === g && m.role === 'organizer').member_id;
 
   // ---- Events and RSVPs --------------------------------------------------------
-  let eventNo = spec.firstEventNo, rsvpNo = 1;
+  // Past RSVPs are numbered from r-1001, apart from the hand-written ones.
+  let eventNo = spec.firstEventNo, rsvpNo = 1001;
   const addEvent = e => {
     data.events.push(e);
     fact(e.created_at, seq => e.revisions.push({seq, at: e.created_at, action: 'created', state: 'published', fields: {}, notify: null, actor: e.created_by}));
@@ -180,20 +207,23 @@ function build(spec) {
   for (const [g, date, start, hours, title, venue, capacity, guestLimit, opts = {}] of past) {
     const s = at(date, start), host = opts.host ? mid(opts.host) : organizer(g);
     const mine = (spec.userPast || []).find(([ug, ud]) => ug === g && ud === date);
-    const w = K.eventWindow(ms(s), capacity, mine && ms(at(...mine[4].split(' '))));
+    const floor = Math.max(groupCreated(g) + DAY, ms(joinedAt[g + '|' + host]) + HOUR);
+    const w = K.eventWindow(ms(s), capacity, mine && ms(at(...mine[4].split(' '))), floor);
     const e = addEvent({id: 'e-' + pad(eventNo++), group_id: g, title, description: opts.description || description(g, date, title), start: s,
       end: iso(ms(s) + hours * HOUR), venue, capacity, guest_limit: guestLimit, rsvp_open: iso(w.open),
       rsvp_close: iso(w.close), host_member_ids: [host], state: 'published', created_by: host, created_at: iso(w.created), revisions: []});
     const reserve = mine ? 1 + mine[2] + mine[3] : 0;
     const pool = members(g, e.rsvp_open).filter(m => m !== 'm-001');
-    const count = Math.min(pool.length, 5 + Math.floor(rand() * 9));
+    const count = H.pastRsvpCount(rand, capacity, pool.length);
     let used = 0;
     for (const m of shuffle(pool).slice(0, count).sort()) {
-      const yes = rand() < 0.8, guests = yes ? Math.min(guestLimit, Math.floor(rand() * 2)) : 0;
+      const yes = rand() < 0.8, guests = yes ? Math.min(guestLimit, Math.floor(rand() * (capacity >= 80 ? 3 : 2))) : 0;
       const children = yes && spec.childGroups.includes(g) ? Math.floor(rand() * 3) : 0;
       if (yes && used + 1 + guests + children > capacity - reserve) continue;
+      const when = iso(K.answerTime(w, clock));
+      if (ended[g + '|' + m] <= ms(when)) continue;   // left the group before answering
       if (yes) used += 1 + guests + children;
-      addRsvp(e, m, yes ? 'yes' : 'no', guests, children, iso(K.answerTime(w, clock)));
+      addRsvp(e, m, yes ? 'yes' : 'no', guests, children, when);
     }
     if (mine) {
       if (used + 1 + mine[2] + mine[3] > capacity) throw new Error(`${spec.key}: user RSVP does not fit ${e.id}`);
@@ -221,7 +251,9 @@ function build(spec) {
     const s = {id, event_id: eventRef(ref), title, lock_at: lock, slots: slots.map(([sid, label, q]) => ({id: sid, label, quantity: q, claims: []})), revisions: []};
     data.sheets.push(s);
     const total = slots.reduce((a, x) => a + x[3].length, 0);
-    const times = Array.from({length: total}, () => K.between(ms(claimAt) - 1, Math.min(ms(claimAt) + Math.max(1, total) * 4 * HOUR, ms(lock), clock))).sort((a, b) => a - b);
+    // Claims start once the event is posted (and not before the spec's date).
+    const lo = Math.max(ms(claimAt), ms(data.events.find(e => e.id === s.event_id).created_at) + 2 * HOUR);
+    const times = Array.from({length: total}, () => K.between(lo - 1, Math.min(lo + Math.max(1, total) * 4 * HOUR, ms(lock), clock))).sort((a, b) => a - b);
     let k = 0;
     slots.forEach(([sid, , , claims]) => claims.forEach(n => {
       const when = iso(times[k++]);
@@ -251,25 +283,43 @@ function build(spec) {
   const background = [];
   // Replies come from the spec's pool without repeats until it runs out.
   let replyPool = [];
-  const replyText = () => { if (!replyPool.length) replyPool = shuffle(spec.replies); return replyPool.pop(); };
+  // The reply order has its own PRNG, so the size of the pool never changes
+  // the dates and authors drawn from the main one.
+  const replyRand = rng(spec.rngSeed + 7);
+  let replyRound = 0;
+  const replyText = () => {
+    if (!replyPool.length) {
+      if (replyRound++ && !process.env.STOOPSIDE_TEXT_NEEDS) throw new Error(`${spec.key}: the reply pool (${spec.replies.length}) is used up`);
+      if (replyRound > 1) NEEDS.push(`${spec.key} reply beyond ${spec.replies.length}`);
+      replyPool = shuffleWith(replyRand, spec.replies);
+    }
+    return replyPool.pop();
+  };
   for (const month of months) {
     for (const g of spec.groups.map(x => x.id)) {
-      const when = iso(K.awakeOn(ms(at(`${month}-${pad(1 + Math.floor(rand() * 27), 2)}`, '12:00'))));
-      if (ms(when) < groupCreated(g) + DAY || ms(when) >= clock - DAY) continue;
-      const pool = members(g, when);
-      if (pool.length) background.push([g, pick(pool), when, monthText(spec, g, month)]);
+      for (const t of H.postSchedule({K, rand, month, offMs, busy: (spec.busy?.[g] || []).includes(month.slice(5))})) {
+        const when = iso(t);
+        if (ms(when) < groupCreated(g) + DAY || ms(when) >= clock - DAY) continue;
+        const pool = members(g, when);
+        if (pool.length) background.push([g, pick(pool), when, monthText(spec, g, month)]);
+      }
     }
   }
   background.sort((a, b) => ms(a[2]) - ms(b[2]) || a[0].localeCompare(b[0]));
   for (const [g, author, when, text] of background) {
     const p = addPost(g, author, when, text);
-    const others = members(g, when).filter(m => m !== author);
-    if (rand() < 0.25 && others.length) {
-      const reply = iso(K.between(ms(when) + 20 * 60000, ms(when) + 2 * DAY, x => x * x));
-      const text2 = replyText();
-      if (ms(reply) < clock) addPost(g, pick(others), reply, text2, {kind: 'comment', parent_id: p.id});
+    let last = ms(when), people = members(g, when).filter(m => m !== author);
+    for (let i = H.replyCount(rand); i > 0 && people.length; i--) {
+      // A later reply is sometimes the post's author answering.
+      const who = i < 3 && rand() < 0.3 && last !== ms(when) ? author : pick(people);
+      const reply = K.between(last + 10 * 60000, last + (last === ms(when) ? 2 : 1.5) * DAY, x => x * x);
+      if (reply >= clock) break;
+      addPost(g, who, iso(reply), replyText(), {kind: 'comment', parent_id: p.id});
+      people = people.filter(m => m !== who);
+      last = reply;
     }
   }
+  if (postNo > spec.firstPostNo) throw new Error(`${spec.key}: background posts reach p-${pad(postNo)}, past firstPostNo`);
   postNo = spec.firstPostNo;
   for (const [g, n, when, text, extra = {}] of spec.posts) {
     const x = {...extra};
@@ -285,6 +335,14 @@ function build(spec) {
   data.next_seq = seq;
   data.events.sort((a, b) => a.id.localeCompare(b.id));
   data.rsvps.sort((a, b) => a.id.localeCompare(b.id));
+  const handEvents = new Set(spec.upcoming.map(u => u.id));
+  const fixedJoin = m => Boolean(spec.people.find(x => mid(x[0]) === m.member_id)?.[5]?.joined?.[m.group_id]);
+  H.fixJoins(data, K, {iso, fixed: fixedJoin, everyday: Object.fromEntries(spec.people.map(x => [mid(x[0]), x[1].split(' ')[0]]))});
+  H.topUpRsvps(data, {K, rand, iso, clock, children: g => spec.childGroups.includes(g),
+    skipEvent: e => handEvents.has(e.id) || data.sheets.some(s => s.event_id === e.id)});
+  H.changeHistory(data, {K, rand, iso, clock, edits: spec.edits || {},
+    skipPost: p => Number(p.id.slice(2)) >= spec.firstPostNo, skipEvent: e => handEvents.has(e.id) || data.sheets.some(s => s.event_id === e.id),
+    skipRsvp: r => Number(r.id.slice(2)) < 1001});
   // Deliveries are recorded for posts from spec.deliveriesFrom on; older
   // notification history was not imported. Recipients follow the app's own rule.
   const T = require('../src/transitions.cjs');
@@ -315,13 +373,16 @@ function build(spec) {
 // Background text for a group in a month: spec.texts[group] lists, for each
 // month of the year ('01' to '12'), one text per year the history covers, so
 // no text recurs.
-const textUse = new Map();
+const textUse = new Map(), NEEDS = [];
 function monthText(spec, g, month) {
   const key = spec.key + '|' + g + '|' + month.slice(5);
   const n = textUse.get(key) || 0;
   textUse.set(key, n + 1);
   const t = spec.texts[g][month.slice(5)]?.[n];
-  if (!t) throw new Error(`${spec.key}: no background text ${n + 1} for ${g} in month ${month.slice(5)}`);
+  if (!t) {
+    if (process.env.STOOPSIDE_TEXT_NEEDS) { NEEDS.push(`${spec.key} ${g} ${month.slice(5)} #${n + 1}`); return `NEEDED ${spec.key} ${g} ${month} ${n + 1}`; }
+    throw new Error(`${spec.key}: no background text ${n + 1} for ${g} in month ${month.slice(5)}`);
+  }
   return t;
 }
 
@@ -342,4 +403,4 @@ function mailSeed(spec, data) {
   return {account_id: spec.mail.account_id, owner_person_id: data.owner_person_id, address: user.email, messages};
 }
 
-module.exports = {build, mailSeed, rng, timeKit, monthText, emailOf, personOf, mid, pad};
+module.exports = {build, mailSeed, rng, timeKit, monthText, emailOf, personOf, mid, pad, NEEDS, shuffleWith};

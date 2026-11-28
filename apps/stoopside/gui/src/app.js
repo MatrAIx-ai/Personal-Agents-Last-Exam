@@ -35,7 +35,9 @@ const ctx = {groups: [], me: null};
 // App's own rules are a constructed stylesheet. They raise every App-owned text
 // to at least 12px (body 14px) and add event, group, post and member cards.
 const CSS = `
-body[data-app=stoopside] #status{font-size:13px;height:auto;min-height:30px}
+body[data-app=stoopside]{--muted:#5a6577}
+body[data-app=stoopside] #status{font-size:13px;height:auto;min-height:30px;color:#56645c}
+body[data-app=stoopside] .toolbar button,body[data-app=stoopside] .detail-actions button,body[data-app=stoopside] .sidebar>.actions button:not(.primary),body[data-app=stoopside] .collection-count{color:#56637a}
 body[data-app=stoopside] .kicker{font-size:12px}
 body[data-app=stoopside] .tag{font-size:12px;padding:3px 8px}
 body[data-app=stoopside] .record-subtitle,body[data-app=stoopside] .field small,body[data-app=stoopside] small{font-size:12px}
@@ -81,6 +83,7 @@ a.st-card[aria-current=page]{border-color:var(--accent);box-shadow:inset 3px 0 v
 .st-flash button{padding:2px 10px;font-size:13px;background:transparent}
 .st-error{margin-top:12px;padding:10px 14px;border-radius:10px;background:#fdecea;color:#7c2a22;font-size:14px}
 .st-error:empty{display:none}
+.st-waiting{margin:0 0 6px;padding-left:20px;display:grid;gap:6px;font-size:14px}
 .st-note{margin-top:10px;padding:10px 14px;border-radius:10px;background:#fff4e0;color:#6b4300;font-size:14px}
 .st-preview{border:1px solid #becbe0;border-radius:12px;padding:18px;margin:18px 0;background:#f8faff}
 .st-preview h3{font-size:16px;margin-bottom:10px}
@@ -224,7 +227,19 @@ const PAGE_ERROR = {
   guest_limit_exceeded: e => e.message.replace(' Pass guests to choose the count.', ' Enter a smaller number of guests to continue.')
     .replace(/, (r-\d+) for /, ' for '),
   claim_expired: e => e.message.replace(/ Pass rejoin_waitlist[^.]*\./, ' You can join the back of the waitlist instead.'),
+  invalid_arguments: () => 'One of the entries is not accepted: counts are whole numbers of 0 or more, and text cannot be empty.',
 };
+// Checks the page makes before a call, worded for the page (the tool would
+// answer invalid_arguments).
+const refuse = text => { throw Object.assign(Error(text), {code: 'invalid_input'}); };
+const COUNT_NAME = {guests: 'guests', children: 'children'};
+function countOf(form, k) {
+  const raw = valueOf(form, k).trim();
+  if (raw === '') return undefined;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 0) refuse(`Enter the number of ${COUNT_NAME[k]} as a whole number, 0 or more.`);
+  return n;
+}
 const errorText = e => pageDates(PAGE_ERROR[e.code] ? PAGE_ERROR[e.code](e) : e.message || 'Something went wrong.');
 let flash = null;   // {hash, text, kind}
 const flashBox = el('div', {id: 'flash'});
@@ -432,6 +447,31 @@ function navigation(route) {
 
 // ---- Pages -------------------------------------------------------------------------------
 
+// What waits for the user across their groups: a waitlist place to claim, an
+// RSVP to reconfirm, a sign-up swap someone proposed to them. Read from the
+// same tools the event and sheet pages use.
+async function waitingForYou() {
+  const groups = ctx.groups.filter(g => g.my_membership?.state === 'member');
+  const events = (await Promise.all(groups.map(g => call('events.list', {group_id: g.id}).then(x => x.events).catch(() => [])))).flat();
+  const items = [];
+  for (const e of events) {
+    const r = e.my_rsvp;
+    if (r?.answer === 'offered') items.push([r.offer_expires_at, link('#/event/' + e.id, `A place opened for ${e.title}. Claim it by ${when(r.offer_expires_at)}.`, {'data-waiting': 'offer'})]);
+    if (r?.answer === 'needs_reconfirm') items.push([r.reconfirm_by, link('#/event/' + e.id, `${e.title} changed. Reconfirm your RSVP by ${when(r.reconfirm_by)}.`, {'data-waiting': 'reconfirm'})]);
+  }
+  const sheets = (await Promise.all(events.filter(e => e.state === 'published').map(e => call('events.get', {event_id: e.id}).then(x => x.event.sheets || []).catch(() => [])))).flat();
+  const answers = await Promise.all(sheets.map(s => call('signups.get', {sheet_id: s.id}).catch(() => null)));
+  for (const a of answers.filter(Boolean)) {
+    for (const w of a.swaps.filter(x => x.state === 'proposed' && x.to.member_id === ctx.me)) {
+      const slot = id => (a.sheet.slots.find(x => x.id === id)?.label || id).toLowerCase();
+      items.push([w.expires_at, link('#/sheet/' + a.sheet.id, `${w.from.display_name} offers you ${slot(w.give_slot)} for your ${slot(w.want_slot)} on ${a.sheet.title}. Answer by ${when(w.expires_at)}.`, {'data-waiting': 'swap'})]);
+    }
+  }
+  if (!items.length) return null;
+  items.sort((x, y) => Date.parse(x[0]) - Date.parse(y[0]));
+  return section('Waiting for your answer', el('ul', {class: 'st-waiting'}, ...items.map(([, a]) => el('li', {}, a))));
+}
+
 async function groupsPage(id) {
   const list = el('div', {class: 'records st-cards st-grid', id: 'records'});
   const search = input('group_query', '', {type: 'search', placeholder: 'Search groups by name or description', 'aria-label': 'Search groups'});
@@ -439,7 +479,7 @@ async function groupsPage(id) {
   fill(ctx.groups);
   search.addEventListener('change', async () => { try { fill((await call('groups.list', {query: search.value})).groups); } catch (e) { say(errorText(e), true); } });
   const discovery = [el('h2', {}, id ? 'Discover more groups' : 'Groups'), el('p', {class: 'st-lead'}, 'Your groups and groups you can join near you.'), field('Search', search), list];
-  if (!id) return {title: 'Groups', body: discovery};
+  if (!id) return {title: 'Groups', body: [await waitingForYou(), ...discovery].filter(Boolean)};
   const r = await call('groups.get', {group_id: id}), g = r.group, mine = g.my_membership;
   useZone(g);
   const member = mine?.state === 'member';
@@ -538,7 +578,7 @@ async function eventPage(id) {
     form.append(el('div', {class: 'form-actions'}, button('Preview RSVP', async () => {
       out.replaceChildren();
       const args = {event_id: id, answer: valueOf(form, 'answer')};
-      for (const k of ['guests', 'children']) if (valueOf(form, k) !== '') args[k] = Number(valueOf(form, k));
+      for (const k of ['guests', 'children']) { const n = countOf(form, k); if (n !== undefined) args[k] = n; }
       if (valueOf(form, 'rejoin_waitlist')) args.rejoin_waitlist = true;
       const p = (await write('rsvps.preview', args)).preview;
       const pf = p.prefilled_from;
@@ -627,7 +667,11 @@ async function changePage(mode, id) {
       if (p.change === 'cancel') lines.push(el('p', {}, `${p.title} will be cancelled. This cannot be undone; the event's sign-up sheets lock at once.`));
       else if (p.change === 'create') lines.push(el('p', {}, `A new event in ${g ? g.name : groupId}:`), el('ul', {}, ...changed.map(([k, v]) => el('li', {}, `${FIELD[k]}: ${fieldValue(k, v)}`))));
       else lines.push(el('p', {}, `Changes to ${p.title}:`), el('ul', {'data-changed-fields': changed.map(([k]) => k).join(' ')}, ...changed.map(([k, v]) => el('li', {}, `${FIELD[k]}: ${fieldValue(k, v)} (was ${fieldValue(k, e[k])})`))));
-      lines.push(el('p', {}, p.notify === 'guests' ? 'Every open RSVP is notified by email.' : p.notify === 'group' ? 'Every member of the group is notified by email.' : 'Nobody is notified.'));
+      // One sentence about the notice, in step with the recipient list below it.
+      const told = (p.recipients || []).length;
+      if (told && p.notify === 'guests') lines.push(el('p', {}, `Everyone with an open RSVP (${told}) is notified by email.`));
+      else if (told && p.notify === 'group') lines.push(el('p', {}, `Every member of the group (${told}) is notified by email.`));
+      else if (p.notify === 'guests') lines.push(el('p', {}, 'Nobody has an open RSVP, so no email goes out.'));
       if (p.rsvps_to_reconfirm) lines.push(el('p', {class: 'st-note'}, `${plural(p.rsvps_to_reconfirm, 'yes RSVP')} must reconfirm: each holds its place for 48 hours (or until the event starts) and then becomes no.`));
       else lines.push(el('p', {}, p.note));
       out.replaceChildren(previewBox({create: 'Check the new event', edit: 'Check this change', cancel: 'Cancel this event?'}[p.change], lines, p,
@@ -666,6 +710,7 @@ async function composePage(groupId, mode, ref) {
   form.append(el('div', {class: 'form-actions'}, link('#/group/' + groupId, 'Back', {class: 'st-linkbtn', 'data-link': 'back'}), button('Preview', async () => {
     out.replaceChildren();
     const args = {group_id: groupId, text: valueOf(form, 'text')};
+    if (!args.text.trim()) refuse(mode === 'comment' ? 'Write your comment before you preview it.' : 'Write the post before you preview it.');
     if (mode === 'edit') Object.assign(args, {kind: target ? target.kind : 'post', edit_of: ref});
     else if (mode === 'comment') Object.assign(args, {kind: 'comment', parent_id: ref});
     else {
@@ -769,6 +814,7 @@ async function profilePage() {
       field('Display name', input('display_name', r.profile.display_name), 'Other members see this name. Search matches it and your bio.'), field('Bio', el('textarea', {'data-field': 'bio', rows: 3}, r.profile.bio)));
     form.append(el('div', {class: 'form-actions'}, button('Save profile', async () => {
       const args = {};
+      if (!valueOf(form, 'display_name').trim()) refuse('Enter a display name. Other members see it next to your posts and RSVPs.');
       if (valueOf(form, 'display_name') !== r.profile.display_name) args.display_name = valueOf(form, 'display_name');
       if (valueOf(form, 'bio') !== r.profile.bio) args.bio = valueOf(form, 'bio');
       await write('profile.update', args);

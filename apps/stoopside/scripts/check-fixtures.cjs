@@ -10,6 +10,11 @@
 //   ordered_dates    history from 2025-01-01 up to the clock; the clock and
 //                    every scenario event from 2026-01-01; revisions, threads
 //                    and scenario events in time order; event times consistent
+//   coherent_history nobody acts in a group before joining it or after leaving;
+//                    events are posted after their group exists and by a member;
+//                    RSVPs fall in the RSVP window after the posting; sheet
+//                    claims fall between the posting and the lock; swaps trade
+//                    slots both sides held
 //   capacity         places taken never exceed capacity; guests within the
 //                    limit; no waitlisted RSVP would fit; sheet claims within
 //                    quantity
@@ -137,6 +142,79 @@ function checkFixture(fx) {
       prev = ms(e.at);
     }
     add('ordered_dates', p);
+  }
+
+  // coherent_history: nobody acts in a group before they joined it or after
+  // they left; nothing about an event happens before it was posted or before
+  // its group existed; claims fall between the posting and the lock.
+  {
+    const p = [];
+    const group = new Map(data.groups.map(g => [g.id, g])), event = new Map(data.events.map(e => [e.id, e]));
+    const member = new Map(data.members.map(m => [m.id, m])), post = new Map(data.posts.map(x => [x.id, x]));
+    const ships = new Map(data.memberships.map(m => [m.group_id + '|' + m.member_id, m]));
+    // State of the membership at instant t, from its revisions.
+    const inGroup = (g, m, t) => {
+      const row = ships.get(g + '|' + m);
+      if (!row) return false;
+      let s = null;
+      for (const v of row.revisions) if (ms(v.at) <= t) s = v.state;
+      return s === 'member';
+    };
+    const need = (cond, msg) => { if (!cond) p.push(msg); };
+    for (const m of data.memberships) {
+      need(ms(m.created_at) >= ms(group.get(m.group_id).created_at), `${m.id} joins ${m.group_id} before the group exists`);
+      if (member.has(m.member_id)) need(ms(member.get(m.member_id).created_at) <= ms(m.created_at), `${m.member_id} joins ${m.group_id} before the member record exists`);
+      need(m.revisions[0].at === m.created_at, `${m.id} first revision is not its creation`);
+    }
+    for (const e of data.events) {
+      const t = ms(e.created_at);
+      need(t >= ms(group.get(e.group_id).created_at), `${e.id} is posted before its group exists`);
+      need(inGroup(e.group_id, e.created_by, t), `${e.id} is posted by ${e.created_by} before they joined ${e.group_id}`);
+      for (const h of e.host_member_ids) need(inGroup(e.group_id, h, Math.min(ms(e.start), now)), `${e.id} host ${h} is not in ${e.group_id} by the start`);
+      need(t <= ms(e.rsvp_open), `${e.id} opens RSVPs before it is posted`);
+      for (const v of e.revisions.slice(1)) need(ms(v.at) < ms(v.previous?.start || e.start), `${e.id} is changed after it started`);
+    }
+    for (const r of data.rsvps) {
+      const e = event.get(r.event_id);
+      for (const v of r.revisions) {
+        const t = ms(v.at);
+        need(t >= ms(e.created_at), `${r.id} answers ${e.id} before it was posted`);
+        need(inGroup(e.group_id, r.member_id, t), `${r.id} by ${r.member_id} at ${v.at} while not a member of ${e.group_id}`);
+        if (v.reason === 'rsvp') need(t >= ms(e.rsvp_open) && t < ms(e.rsvp_close), `${r.id} answers ${e.id} outside its RSVP window`);
+      }
+      const cancel = e.revisions.find(v => v.action === 'cancelled');
+      if (cancel) need(r.revisions.every(v => ms(v.at) <= ms(cancel.at)), `${r.id} answers ${e.id} after it was cancelled`);
+    }
+    for (const x of data.posts) {
+      const t = ms(x.created_at);
+      need(t >= ms(group.get(x.group_id).created_at), `${x.id} is posted before its group exists`);
+      need(inGroup(x.group_id, x.author_member_id, t), `${x.id} by ${x.author_member_id} while not a member of ${x.group_id}`);
+      if (x.parent_id && post.has(x.parent_id)) need(t > ms(post.get(x.parent_id).created_at), `${x.id} replies before its parent`);
+      if (x.event_id && event.has(x.event_id)) need(t >= ms(event.get(x.event_id).created_at), `${x.id} mentions ${x.event_id} before it was posted`);
+      for (const v of x.revisions.slice(1)) need(ms(v.at) > t, `${x.id} is revised at its creation`);
+    }
+    for (const s of data.sheets) {
+      const e = event.get(s.event_id);
+      for (const v of s.revisions) {
+        const t = ms(v.at);
+        need(t >= ms(e.created_at), `${s.id} ${v.action} by ${v.member_id} before ${e.id} was posted`);
+        need(t <= ms(s.lock_at), `${s.id} ${v.action} after the sheet locked`);
+        need(inGroup(e.group_id, v.member_id, t), `${s.id} ${v.action} by ${v.member_id} while not a member of ${e.group_id}`);
+      }
+    }
+    for (const w of data.swaps) {
+      const s = data.sheets.find(x => x.id === w.sheet_id), e = event.get(s.event_id);
+      need(ms(w.proposed_at) >= ms(e.created_at), `${w.id} is proposed before ${e.id} was posted`);
+      const claimed = (m, slot) => s.revisions.some(v => v.action === 'claim' && v.member_id === m && v.slot_id === slot && ms(v.at) <= ms(w.proposed_at));
+      need(claimed(w.from_member_id, w.give_slot), `${w.id} gives ${w.give_slot}, which ${w.from_member_id} had not claimed`);
+      need(claimed(w.to_member_id, w.want_slot), `${w.id} wants ${w.want_slot}, which ${w.to_member_id} had not claimed`);
+      if (w.decided_at) need(ms(w.decided_at) > ms(w.proposed_at), `${w.id} is decided before it was proposed`);
+    }
+    for (const d of data.deliveries) {
+      const x = d.object_type === 'post' ? post.get(d.object_id) : null;
+      if (x) need(ms(d.at) >= ms(x.created_at), `${d.id} delivers ${x.id} before it was posted`);
+    }
+    add('coherent_history', p);
   }
 
   // capacity

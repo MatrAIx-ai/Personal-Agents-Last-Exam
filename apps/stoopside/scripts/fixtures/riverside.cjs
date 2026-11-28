@@ -197,8 +197,8 @@ module.exports = {
     {id: 'sw-0012', sheet_id: 's-0031', from: 11, to: 1, give_slot: 'carpool-2', want_slot: 'lunch', state: 'proposed',
       proposed_at: '2026-04-19T18:00:00-06:00', expires_at: '2026-04-21T18:00:00-06:00', decided_at: null},
   ],
-  // Background texts, replies and past-event descriptions: fixtures/text/riverside.json.
-  ...(({texts, replies, descriptions}) => ({texts, replies, descriptions}))(require('./text/riverside.json')),
+  // Background texts, replies, past-event descriptions and post edits: fixtures/text/riverside.json.
+  ...(({texts, replies, descriptions, edits = {}}) => ({texts, replies, descriptions, edits}))(require('./text/riverside.json')),
   // Hand-written posts: [group, author, time, text, extra]. Names in links use first names only.
   posts: [
     [S, 4, '2025-11-09T09:00:00-06:00', 'Awards night MVP: Marguerite (Daisy on here) for running the snack table all season.'],

@@ -194,7 +194,7 @@ module.exports = {
   ],
   sheets: [
     ['s-0034', [D, 'Pup splash day', '2026'], 'Splash day supplies', '2026-07-10T18:00:00-08:00',
-      [['pools', 'Kiddie pools', 3, [4, 10]], ['towels', 'Towels', 4, [1, 17, 25]], ['treats', 'Frozen treats', 2, [57]]], '2026-06-25T09:00:00-08:00'],
+      [['pools', 'Kiddie pools', 3, [4, 10]], ['towels', 'Towels', 4, [1, 25]], ['treats', 'Frozen treats', 2, [17, 57]]], '2026-06-25T09:00:00-08:00'],
     ['s-0035', [H, 'Winter concert', '2025'], 'Winter concert volunteers', '2025-12-12T12:00:00-08:00',
       [['ushers', 'Ushers', 4, [14, 30, 41]], ['bake', 'Bake sale table', 3, [11, 50]], ['setup', 'Riser setup', 4, [1, 20]]], '2025-11-20T09:00:00-08:00'],
     ['s-0036', [L, 'Book sale', '2026-10'], 'Book sale shifts', '2026-10-02T12:00:00-08:00',
@@ -216,8 +216,8 @@ module.exports = {
     {id: 'sw-0021', sheet_id: 's-0042', from: 29, to: 1, give_slot: 'mulch', want_slot: 'coffee', state: 'proposed',
       proposed_at: '2026-11-17T20:00:00-08:00', expires_at: '2026-11-19T20:00:00-08:00', decided_at: null},
   ],
-  // Background texts, replies and past-event descriptions: fixtures/text/hillcrest.json.
-  ...(({texts, replies, descriptions}) => ({texts, replies, descriptions}))(require('./text/hillcrest.json')),
+  // Background texts, replies, past-event descriptions and post edits: fixtures/text/hillcrest.json.
+  ...(({texts, replies, descriptions, edits = {}}) => ({texts, replies, descriptions, edits}))(require('./text/hillcrest.json')),
   posts: [
     [D, 4, '2025-11-02T10:00:00-08:00', 'Welcome Archibald (Archie here) and his beagle, Pickle.'],
     [D, 10, '2026-05-10T09:30:00-08:00', 'Thanks to Augustus (Gus here) for the new water bowls by the gate.'],

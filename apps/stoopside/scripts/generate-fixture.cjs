@@ -10,6 +10,13 @@
 // 2025-01-01 and the clock starts 2027-03-01 09:00 EST.
 // Run: node scripts/generate-fixture.cjs        (writes the fixtures)
 //      node scripts/generate-fixture.cjs --check (fails on drift)
+//      node scripts/generate-fixture.cjs --cutoff <fixture> <instant> [--out DIR]
+//          writes that fixture as it stood at the earlier instant (a coherent
+//          prefix, scripts/cutoff.cjs): seed, binding and Mail seed, ready for
+//          env.load_seed with virtual_now set to the instant
+//      node scripts/generate-fixture.cjs --scan <fixture>
+//          lists, week by week from 2025-01-01 to the fixture clock, what the
+//          user could act on at a cut there (open RSVPs, unlocked sheets, swaps)
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -171,6 +178,11 @@ const USER_PAST = [
 // Background post texts (one per group, month of year and year covered), the
 // reply pool and the past events' descriptions live in fixtures/text/.
 const TEXT = require('./fixtures/text/maple-street.json');
+const H = require('./history.cjs');
+const NEEDS = require('./fixture-builder.cjs').NEEDS;
+// Months when a group posts more (the garden in spring, the school in
+// September, the block before its summer party, the run club before races).
+const BUSY = {[P]: ['09', '05'], [G]: ['03', '04', '05'], [B]: ['04', '06'], [RUN]: ['03', '10']};
 
 function build() {
   rand = rng(20270301);
@@ -184,7 +196,17 @@ function build() {
     const lo = ms(first), hi = lo + Math.max(1, n - 1) * stepH * HOUR;
     return Array.from({length: n}, () => K.between(lo - 1, hi)).sort((a, b) => a - b);
   })();
-  const replyText = () => { if (!replyPool.length) replyPool = shuffle(TEXT.replies); return replyPool.pop(); };
+  // The reply order has its own PRNG (see fixture-builder.cjs).
+  const replyRand = rng(20270308);
+  let replyRound = 0;
+  const replyText = () => {
+    if (!replyPool.length) {
+      if (replyRound++ && !process.env.STOOPSIDE_TEXT_NEEDS) throw new Error(`maple-street: the reply pool (${TEXT.replies.length}) is used up`);
+      if (replyRound > 1) NEEDS.push(`maple-street reply beyond ${TEXT.replies.length}`);
+      replyPool = require('./fixture-builder.cjs').shuffleWith(replyRand, TEXT.replies);
+    }
+    return replyPool.pop();
+  };
   const data = {account_id: 'st-dana', owner_person_id: 'person-dana-okafor', user_member_id: 'm-001', next_seq: 1,
     groups: [], members: [], memberships: [], events: [], rsvps: [], posts: [], digests: [], sheets: [], swaps: [],
     deliveries: [], previews: [], notices: []};
@@ -202,9 +224,12 @@ function build() {
     // Founders join the day the group is made; others over the first months,
     // at waking-hours times.
     const joins = Object.entries(groups).map(([g, role]) => {
+      // About half the plain members join in the first months, the rest at
+      // any time up to a few weeks before the clock; hosts join early.
+      const late = role === 'member' && rand() < 0.45;
       let joined = role === 'organizer' ? at(GROUPS.find(x => x.id === g).created, '12:30')
-        : iso(K.awakeOn(ms(at('2025-02-01', '12:00')) + K.int(0, 119) * DAY));
-      if (n === 41) joined = at('2026-05-09', '10:00');   // Bea moved here in spring 2026
+        : iso(K.awakeOn(ms(at('2025-02-01', '12:00')) + (late ? K.int(120, 700) : K.int(0, 119)) * DAY));
+      if (n === 41) joined = at('2026-04-01', '10:00');   // Bea moved here in spring 2026
       if (n === 27 && g === B) joined = at('2025-08-02', '11:00');
       return [g, role, joined];
     });
@@ -243,7 +268,8 @@ function build() {
   const roleAt = g => data.memberships.filter(m => m.group_id === g && m.role === 'organizer').map(m => m.member_id)[0];
 
   // ---- Events ------------------------------------------------------------------
-  let eventNo = 81, rsvpNo = 1;
+  // Past RSVPs are numbered from r-1001, apart from the hand-written ones.
+  let eventNo = 81, rsvpNo = 1001;
   const addEvent = (e, created) => {
     data.events.push(e);
     fact(created, seq => e.revisions.push({seq, at: created, action: 'created', state: 'published', fields: {}, notify: null, actor: e.created_by}));
@@ -260,7 +286,8 @@ function build() {
   for (const [g, date, start, hours, title, venue, capacity, guestLimit] of pastEvents) {
     const s = at(date, start), host = roleAt(g);
     const mineAt = USER_PAST.find(([ug, ud]) => ug === g && ud === date);
-    const w = K.eventWindow(ms(s), capacity, mineAt && ms(at(mineAt[4].slice(0, 10), mineAt[4].slice(11))));
+    const floor = Math.max(ms(at(GROUPS.find(x => x.id === g).created, '12:00')) + DAY, ms(joinDay[g + '|' + host]) + HOUR);
+    const w = K.eventWindow(ms(s), capacity, mineAt && ms(at(mineAt[4].slice(0, 10), mineAt[4].slice(11))), floor);
     const description = TEXT.descriptions[g + '|' + date];
     if (!description) throw new Error(`no description for ${g} ${date} ${title}`);
     const e = {id: 'e-' + pad(eventNo++), group_id: g, title, description, start: s,
@@ -268,11 +295,11 @@ function build() {
       rsvp_close: iso(w.close), host_member_ids: [host], state: 'published', created_by: host, created_at: iso(w.created), revisions: []};
     addEvent(e, e.created_at);
     const pool = members(g, e.rsvp_open).filter(m => m !== 'm-001');
-    const count = Math.min(pool.length, 5 + Math.floor(rand() * 8));
+    const count = H.pastRsvpCount(rand, capacity, pool.length);
     const chosen = shuffle(pool).slice(0, count).sort();
     let used = 0;
     for (const m of chosen) {
-      const yes = rand() < 0.82, guests = yes ? Math.min(guestLimit, Math.floor(rand() * 2)) : 0;
+      const yes = rand() < 0.82, guests = yes ? Math.min(guestLimit, Math.floor(rand() * (capacity >= 80 ? 3 : 2))) : 0;
       const children = yes && g === P ? Math.floor(rand() * 3) : 0;
       if (yes && used + 1 + guests + children > capacity) continue;
       if (yes) used += 1 + guests + children;
@@ -283,6 +310,7 @@ function build() {
     if (mine) addRsvp(e, 'm-001', 'yes', mine[2], mine[3], at(mine[4].slice(0, 10), mine[4].slice(11)));
   }
 
+  rsvpNo = 246;
   // ---- Upcoming events (hand-written) --------------------------------------------
   const upcoming = (id, g, title, description, start, end, venue, capacity, guestLimit, open, close, hosts, created) => addEvent({id, group_id: g, title,
     description, start, end, venue, capacity, guest_limit: guestLimit, rsvp_open: open, rsvp_close: close, host_member_ids: hosts,
@@ -329,6 +357,8 @@ function build() {
   // ---- Sign-up sheets ---------------------------------------------------------
   const byTitle = (g, title, year) => data.events.find(e => e.group_id === g && e.title === title && e.start.startsWith(year));
   const sheet = (id, e, title, lock, slots, claimAt) => {
+    // Claims start once the event is posted (and not before the given date).
+    if (ms(claimAt) < ms(e.created_at) + 2 * HOUR) claimAt = iso(ms(e.created_at) + 2 * HOUR);
     const s = {id, event_id: e.id, title, lock_at: lock, slots: slots.map(([sid, label, q, claims]) => ({id: sid, label, quantity: q, claims: []})), revisions: []};
     data.sheets.push(s);
     slots.forEach(([sid, , , claims], i) => claims.forEach((m, j) => {
@@ -370,26 +400,40 @@ function build() {
   const months = [];
   for (let y = 2025, m = 2; y < 2027 || m <= 2; m === 12 ? (y++, m = 1) : m++) months.push(`${y}-${pad(m, 2)}`);
   const background = [];
+  const CLOCK = ms(at('2027-03-01'));
   for (const month of months) {
     for (const g of [P, G, B, RUN]) {
-      const when = iso(K.awakeOn(ms(at(`${month}-${pad(1 + Math.floor(rand() * 27), 2)}`, '12:00'))));
-      const pool = members(g, when);
-      const k = g + '|' + month.slice(5), n = textUse[k] = (textUse[k] || 0) + 1;
-      const text = TEXT.texts[g][month.slice(5)][n - 1];
-      if (!text) throw new Error(`no background text ${n} for ${g} in month ${month.slice(5)}`);
-      background.push([g, pick(pool), when, text]);
+      for (const t of H.postSchedule({K, rand, month, offMs: -5 * HOUR, busy: (BUSY[g] || []).includes(month.slice(5))})) {
+        const when = iso(t);
+        if (ms(when) < ms(at(GROUPS.find(x => x.id === g).created, '12:00')) + DAY || ms(when) >= CLOCK - DAY) continue;
+        const pool = members(g, when);
+        if (!pool.length) continue;
+        const k = g + '|' + month.slice(5), n = textUse[k] = (textUse[k] || 0) + 1;
+        let text = TEXT.texts[g][month.slice(5)]?.[n - 1];
+        if (!text) {
+          if (!process.env.STOOPSIDE_TEXT_NEEDS) throw new Error(`no background text ${n} for ${g} in month ${month.slice(5)}`);
+          NEEDS.push(`maple-street ${g} ${month.slice(5)} #${n}`);
+          text = `NEEDED maple-street ${g} ${month} ${n}`;
+        }
+        background.push([g, pick(pool), when, text]);
+      }
     }
   }
   background.sort((a, b) => ms(a[2]) - ms(b[2]) || a[0].localeCompare(b[0]));
   for (const [g, author, when, text] of background) {
     const p = addPost(g, author, when, text);
-    const others = members(g, when).filter(m => m !== author);
-    if (rand() < 0.25 && others.length) {
-      const pool = others;
-      addPost(g, pick(pool), iso(K.between(ms(when) + 20 * 60000, ms(when) + 2 * DAY, x => x * x)), replyText(),
-        {kind: 'comment', parent_id: p.id});
+    let last = ms(when), people = members(g, when).filter(m => m !== author);
+    for (let i = H.replyCount(rand); i > 0 && people.length; i--) {
+      // A later reply is sometimes the post's author answering.
+      const who = i < 3 && rand() < 0.3 && last !== ms(when) ? author : pick(people);
+      const reply = K.between(last + 10 * 60000, last + (last === ms(when) ? 2 : 1.5) * DAY, x => x * x);
+      if (reply >= CLOCK) break;
+      addPost(g, who, iso(reply), replyText(), {kind: 'comment', parent_id: p.id});
+      people = people.filter(m => m !== who);
+      last = reply;
     }
   }
+  if (postNo > 300) throw new Error(`maple-street: background posts reach p-${pad(postNo)}, past p-0300`);
   postNo = 300;
   addPost(G, 'm-005', at('2026-10-03', '18:20'), 'Huge thanks to Birdie (Wren on here) for running the seed swap again. The bean jars are on the shed shelf.');
   addPost(B, 'm-006', at('2026-12-05', '10:00'), 'Winter meeting is January 23 at the library. Agenda: the June social and the spring cleanup.', {kind: 'announcement'});
@@ -407,6 +451,16 @@ function build() {
   data.next_seq = seq;
   data.events.sort((a, b) => a.id.localeCompare(b.id));
   data.rsvps.sort((a, b) => a.id.localeCompare(b.id));
+  // Hand-written joins (Bea, Wren on the block) stay; others move earlier
+  // where a hand-written row shows the member acting first.
+  H.fixJoins(data, K, {iso, fixed: m => m.member_id === 'm-041' || (m.member_id === 'm-027' && m.group_id === B),
+    everyday: Object.fromEntries(PEOPLE.map(x => [mid(x[0]), x[1].split(' ')[0]]))});
+  const handEvents = new Set(['e-0117', 'e-0118', 'e-0121', 'e-0125', 'e-0127', 'e-0130', 'e-0140']);
+  H.topUpRsvps(data, {K, rand, iso, clock: CLOCK, children: g => g === P,
+    skipEvent: e => handEvents.has(e.id) || data.sheets.some(s => s.event_id === e.id)});
+  H.changeHistory(data, {K, rand, iso, clock: CLOCK, edits: TEXT.edits || {},
+    skipPost: p => Number(p.id.slice(2)) >= 300, skipEvent: e => handEvents.has(e.id) || data.sheets.some(s => s.event_id === e.id),
+    skipRsvp: r => Number(r.id.slice(2)) < 1001});
   // Deliveries are recorded for posts from 2027-01-01 on (older notification
   // history was not imported); recipients follow the app's own audience rule.
   const T = require('../src/transitions.cjs');
@@ -474,7 +528,7 @@ const PROVENANCE = {
   real_records: 0,
   real_anchor: 'none: no record is collected from a real website or service, and the reviewer confirmed that synthetic data needs no real anchor',
   generation: 'Deterministic Node scripts (this generator, scripts/fixture-builder.cjs and the specs in scripts/fixtures/). No language model is called when the fixtures are generated; the same scripts always produce byte-identical files (a business test fails if a committed file is out of date).',
-  language_model_assistance: 'The scripts and their hand-written text (people, display names, bios, group descriptions, event titles, venues and descriptions, key posts, background post texts and replies in scripts/fixtures/text/, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Every background text and event description is used once. A fixed-seed generator draws past RSVPs, background members\' join dates, event lead times and RSVP windows, background post dates and authors, with times at waking hours and minute resolution.',
+  language_model_assistance: 'The scripts and their hand-written text (people, display names, bios, group descriptions, event titles, venues and descriptions, key posts, background post texts, replies and post edits in scripts/fixtures/text/, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Every background text and event description is used once. A fixed-seed generator draws past RSVPs, background members\' join dates, event lead times and RSVP windows, background post dates (0 to 3 a month) and authors, reply threads, and later changes to past records (revised RSVPs, edited and deleted posts, moved and cancelled events), with times at waking hours and minute resolution.',
   human_review: 'pending: Rohan Pandey has not yet read every member and event row (see review.status)',
 };
 
@@ -485,18 +539,18 @@ function dataset(all, sha, scenarioSha) {
   return {
     schema_version: 'pale.dataset.v1',
     dataset_id: 'stoopside-community-groups',
-    version: '0.4.0',
+    version: '0.5.0',
     description: 'Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Hillcrest. For reproducible checks; not a benchmark task. All records are synthetic: no real group, person, post or message is used, nothing was crawled or collected, and there is no real-data anchor (the approved plan has no collection, and the reviewer confirmed that synthetic data is acceptable). Coverage of 2025-01-01 to 2026-12-31 by month and source is in evidence/coverage.md (scripts/coverage-report.cjs).',
     record_source_ids: [MANIFEST],
     sources: all.map(f => ({
       source_id: f.key,
       kind: 'synthetic',
-      description: f.description + ' People, groups, events (titles, venues and descriptions), sheets, key posts, background post texts, replies and Mail threads are written by hand; a fixed-seed generator draws past RSVPs, join dates, event lead times and post dates and authors at waking hours. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup\'s public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside\'s own rules.',
+      description: f.description + ' People, groups, events (titles, venues and descriptions), sheets, key posts, background post texts, replies, post edits and Mail threads are written by hand; a fixed-seed generator draws past RSVPs, join dates, event lead times, post dates and authors, reply threads and later changes to past records at waking hours. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup\'s public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside\'s own rules.',
       uri: null,
       license: 'CC0-1.0',
       usage: 'permitted',
       collection: null,
-      generation: {method: 'scripted', tool: f.tool, tool_version: '0.4.0', seed: f.rng_seed,
+      generation: {method: 'scripted', tool: f.tool, tool_version: '0.5.0', seed: f.rng_seed,
         parameters: {provenance: PROVENANCE, fixture: f.seed, fixture_sha256: sha(f.data), binding: f.binding, binding_sha256: sha(f.bindingData), mail_seed: f.mail,
           mail_seed_sha256: sha(f.mailSeed), scenario: f.scenario, scenario_sha256: scenarioSha(f.scenario), history_from: f.history_from, clock: f.clock,
           counts: counts(f)}},
@@ -535,6 +589,55 @@ function write({check = false} = {}) {
   return {data: all[0].data, binding: all[0].bindingData, all};
 }
 module.exports = {build, buildAll, write, FIXTURES};
+if (require.main === module && process.env.STOOPSIDE_TEXT_NEEDS) {
+  buildAll();
+  const counts = {};
+  for (const n of NEEDS) { const k = n.replace(/ #\d+$/, ''); counts[k] = (counts[k] || 0) + 1; }
+  console.log(JSON.stringify(counts, null, 1));
+  process.exit(0);
+}
+// A fixture cut at an earlier instant, checked like the committed fixtures.
+let built = null;
+function cutoff(key, instant) {
+  const f = (built ||= buildAll()).find(x => x.key === key);
+  if (!f) throw new Error('Unknown fixture ' + key + '; use one of ' + FIXTURES.map(x => x.key).join(', '));
+  if (!(Date.parse(instant) < Date.parse(f.clock))) throw new Error(`The cut-off must be earlier than the ${key} clock ${f.clock}`);
+  const out = require('./cutoff.cjs').cut({data: f.data, binding: f.bindingData, mail: f.mailSeed}, instant);
+  require('../plugin.cjs').validateSeed({app_id: 'stoopside', binding: out.binding, virtual_now: instant}, out.data);
+  return {...out, key, clock: instant, actionable: require('./cutoff.cjs').actionable(out.data, instant)};
+}
+module.exports.cutoff = cutoff;
+
+// Weekly cut-offs (Mondays 09:00 in the fixture's offset) with what is open.
+function scan(key) {
+  const f = buildAll().find(x => x.key === key);
+  if (!f) throw new Error('Unknown fixture ' + key);
+  const off = f.data.groups[0].utc_offset, C = require('./cutoff.cjs'), out = [];
+  for (let t = Date.parse('2025-01-06T09:00:00' + off); t < Date.parse(f.clock); t += 7 * DAY) {
+    const instant = new Date(t + (Date.parse('2000-01-01T00:00:00Z') - Date.parse('2000-01-01T00:00:00' + off))).toISOString().slice(0, 19) + off;
+    const c = C.cut({data: f.data, binding: f.bindingData, mail: f.mailSeed}, instant);
+    out.push({clock: instant, ...C.actionable(c.data, instant)});
+  }
+  return out;
+}
+module.exports.scan = scan;
+
+if (require.main === module && process.argv.includes('--scan')) {
+  const key = process.argv[process.argv.indexOf('--scan') + 1];
+  for (const r of scan(key)) console.log(`${r.clock}  open RSVPs ${r.rsvp_open.join(' ') || '-'}  sheets ${r.open_sheets.join(' ') || '-'}  swaps ${r.swaps_for_user.join(' ') || '-'}`);
+  process.exit(0);
+}
+if (require.main === module && process.argv.includes('--cutoff')) {
+  const i = process.argv.indexOf('--cutoff'), [key, instant] = process.argv.slice(i + 1, i + 3);
+  const o = process.argv.indexOf('--out'), dir = o > 0 ? process.argv[o + 1] : path.join(root, '../../.artifacts/stoopside-cutoffs');
+  const c = cutoff(key, instant), stem = path.join(dir, `${key}-${instant.slice(0, 10)}`);
+  fs.mkdirSync(dir, {recursive: true});
+  for (const [suffix, value] of [['.json', c.data], ['.binding.json', c.binding], ['.mail.json', c.mail]]) fs.writeFileSync(stem + suffix, JSON.stringify(value, null, 2) + '\n');
+  console.log(JSON.stringify({fixture: key, clock: instant, seed: stem + '.json', binding: stem + '.binding.json', mail_seed: stem + '.mail.json',
+    counts: {members: c.data.members.length, events: c.data.events.length, rsvps: c.data.rsvps.length, posts: c.data.posts.length, mail: c.mail.messages.length},
+    actionable: c.actionable}, null, 2));
+  process.exit(0);
+}
 if (require.main === module) {
   const {all} = write({check: process.argv.includes('--check')});
   for (const f of all) {
