@@ -1,0 +1,223 @@
+{
+  "data": {
+    "account_id": "calendar-maya",
+    "owner_person_id": "person-maya",
+    "calendar_id": "cal-personal",
+    "timezone": "America/Los_Angeles",
+    "events": [
+      {
+        "id": "evt-review",
+        "uid": "design-review@pale.example",
+        "account_id": "calendar-maya",
+        "calendar_id": "cal-personal",
+        "title": "Task 素材包 · 设计评审",
+        "start": "2026-11-16T10:00:00-08:00",
+        "end": "2026-11-16T11:00:00-08:00",
+        "timezone": "America/Los_Angeles",
+        "organizer_person_id": "person-maya",
+        "attendees": [
+          "person-maya",
+          "person-alex"
+        ],
+        "location": "Room B",
+        "status": "confirmed",
+        "sequence": 0,
+        "attachments": [
+          "task-calendar-materials"
+        ]
+      },
+      {
+        "id": "evt-lunch",
+        "uid": "lunch@pale.example",
+        "account_id": "calendar-maya",
+        "calendar_id": "cal-personal",
+        "title": "午餐",
+        "start": "2026-11-16T13:00:00-08:00",
+        "end": "2026-11-16T14:00:00-08:00",
+        "timezone": "America/Los_Angeles",
+        "organizer_person_id": "person-maya",
+        "attendees": [
+          "person-maya"
+        ],
+        "location": "Cafe",
+        "status": "confirmed",
+        "sequence": 0,
+        "attachments": []
+      }
+    ]
+  },
+  "binding": {
+    "people": [
+      {
+        "person_id": "person-maya",
+        "name": "Maya Chen"
+      },
+      {
+        "person_id": "person-alex",
+        "name": "Alex Rivera"
+      }
+    ],
+    "accounts": [
+      {
+        "app_id": "mail",
+        "account_id": "mail-maya",
+        "owner_person_id": "person-maya"
+      },
+      {
+        "app_id": "calendar",
+        "account_id": "calendar-maya",
+        "owner_person_id": "person-maya"
+      }
+    ],
+    "objects": {
+      "calendar": [
+        "evt-review",
+        "evt-lunch",
+        "evt-busy"
+      ]
+    }
+  },
+  "policies": {
+    "scenario": {
+      "allow": [
+        "calendar.list",
+        "calendar.get",
+        "calendar.freebusy",
+        "calendar.update",
+        "calendar.export_ics"
+      ],
+      "constraints": {
+        "calendar.update": {
+          "ids": [
+            "evt-review"
+          ],
+          "fields": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    "sandbox": {
+      "allow": [
+        "calendar.list",
+        "calendar.get",
+        "calendar.freebusy",
+        "calendar.create",
+        "calendar.update",
+        "calendar.cancel",
+        "calendar.export_ics"
+      ],
+      "constraints": {}
+    }
+  },
+  "bundle": {
+    "dataset": {
+      "schema_version": "pale.dataset.v1",
+      "dataset_id": "calendar-task-materials",
+      "version": "1.0.0",
+      "description": "Task 自带素材示例：只替换本 App，不修改 App 代码。",
+      "record_source_ids": [
+        "authored"
+      ],
+      "sources": [
+        {
+          "source_id": "authored",
+          "kind": "synthetic",
+          "description": "手工编写的合成记录；无外部采集。",
+          "uri": null,
+          "license": "MIT",
+          "usage": "permitted",
+          "collection": null,
+          "generation": {
+            "method": "manual",
+            "tool": "PALE fixture authoring",
+            "tool_version": "1.1.0",
+            "seed": null,
+            "parameters": {}
+          }
+        }
+      ],
+      "transformations": [
+        "手工编写演示数据与 JSON 附件；按统一 schema 打包。"
+      ],
+      "expected_counts": {
+        "records": 2,
+        "assets": 1
+      },
+      "quality_policy": {
+        "duplicate_records": "reject",
+        "duplicate_assets": "reject",
+        "missing_assets": "allow_declared"
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": "自动检查不替代真实性、变化丰富度与来源许可的人工审核。"
+      }
+    },
+    "catalog": {
+      "schema_version": "pale.asset-catalog.v1",
+      "catalog_id": "calendar-assets",
+      "app_id": "calendar",
+      "dataset_ref": "dataset.json",
+      "assets": [
+        {
+          "schema_version": "pale.asset-descriptor.v1",
+          "asset_id": "task-calendar-materials",
+          "scope": {
+            "level": "task",
+            "app_id": "calendar",
+            "task_id": "calendar-example"
+          },
+          "roles": [
+            "content.attachment"
+          ],
+          "subjects": [
+            {
+              "app_id": "calendar",
+              "account_id": "calendar-maya",
+              "object_type": "event",
+              "object_id": "evt-review"
+            }
+          ],
+          "mime_type": "application/json",
+          "availability": {
+            "status": "ready"
+          },
+          "storage": {
+            "adapter": "storage.file",
+            "path": "assets/task-calendar-materials.json",
+            "packaging": "bundled"
+          },
+          "provenance": {
+            "dataset_id": "calendar-task-materials",
+            "source_ids": [
+              "authored"
+            ]
+          },
+          "publication": "public",
+          "access": {
+            "audience": [
+              "agent"
+            ],
+            "rule": "parent_object"
+          },
+          "presentation": {
+            "alt_text": "task-calendar-materials.json"
+          },
+          "media": {},
+          "extensions": [],
+          "integrity": {
+            "bytes": 168,
+            "sha256": "7010e8eb4b379383a9a630a6e68745fe5157e26328735d00c2a17bbd2e0204c9"
+          }
+        }
+      ],
+      "extensions": []
+    },
+    "blobs": {
+      "task-calendar-materials": "ewogICJ0aXRsZSI6ICJUYXNrLXByb3ZpZGVkIGFnZW5kYSIsCiAgImFwcCI6ICJjYWxlbmRhciIsCiAgImxvY2F0aW9uIjogIlJvb20gQiIsCiAgImNoZWNrbGlzdCI6IFsKICAgICLotYTmlpnlt7Lor7siLAogICAgIuWGsueqgeW3suajgOafpSIKICBdLAogICJzeW50aGV0aWMiOiB0cnVlCn0K"
+    }
+  }
+}
