@@ -1,0 +1,244 @@
+{
+  "schema": "wirewalk.v1-evidence-index",
+  "recorded_at": "2026-11-28T02:22:41Z",
+  "app_id": "wirewalk",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "proposal": "proposals/environment/wirewalk.md",
+  "proposal_commit": "ef524fc1b1882ead45879862862b96b360ee8cfc",
+  "proposal_blob_sha": "79ea5b93c3555b818290b114dd10fed3e669007f",
+  "proposal_status": "plan approved for implementation by the assigned Track reviewer (review APPROVED 2026-11-24T01:27:28Z; /approve-plan for this commit 2026-11-24T01:27:39Z); the proposal file is unchanged since",
+  "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "app_package_commit": "be61b8583e99b9266ce8bb481e6af5c4b71d222c",
+  "app_package_sha256": "a2d7636b14b924fcfa80612613500d928a55ba84472a1577f9ccb8c4cc78a181",
+  "app_package_git_tree": "f2391c824d385dfb8d1b4824a62ff356dcb9659f",
+  "package_hash_agrees_in": [
+    "public-runtime.node22.json",
+    "public-runtime.node18.json",
+    "base-runtime.json",
+    "mcp-walkthrough.node22.json",
+    "mcp-walkthrough.node18.json",
+    "dataset-demo.node22.json",
+    "dataset-demo.node18.json"
+  ],
+  "tested_node": {
+    "18": "v18.20.8",
+    "22": "v22.23.2"
+  },
+  "tested_os": "Darwin 27.2.0 arm64 (macOS 27.2.1)",
+  "interface": {
+    "operations": 8,
+    "read": 6,
+    "write": 2,
+    "events": 1,
+    "resources": "one PNG asset; Agent byte reads need a platform resource-access registration that is not part of this package"
+  },
+  "app_dependencies": [],
+  "scenario_dependencies": {
+    "used_by": "examples/mcp-walkthrough.cjs only; not loaded by the business tests, examples/run.cjs or the verifier",
+    "apps": {
+      "mail": "1.3.0 (examples/apps/mail, asserted by the walkthrough's first check)",
+      "calendar": "1.3.0 (examples/apps/calendar, asserted by the walkthrough's first check)"
+    },
+    "files_loaded": [
+      "runtime/prepare.cjs",
+      "runtime/client.cjs",
+      "runtime/verify.cjs",
+      "runtime/package.json",
+      "runtime/messaging/service.cjs",
+      "runtime/messaging/src/router.cjs",
+      "examples/registry.mail.json",
+      "examples/registry.calendar.json",
+      "examples/apps/mail/app.json",
+      "examples/apps/calendar/app.json",
+      "examples/apps/mail/src/publisher.cjs"
+    ]
+  },
+  "checks": {
+    "standalone_business": {
+      "node22": {
+        "tests": 27,
+        "pass": 27,
+        "fail": 0,
+        "skipped": 0
+      },
+      "node18": {
+        "tests": 27,
+        "pass": 27,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    "standalone_event_example": "examples/run.cjs passed from a copy of apps/wirewalk alone, with only PATH and LANG set, on both Node versions",
+    "generators_reproduce_committed_files": "Every dev/build-*.cjs generator, including dev/build-dataset.cjs, run in a copy, left every committed file byte-identical on both Node versions",
+    "public_app_verifier": {
+      "node22": 40,
+      "node18": 40,
+      "passed": true
+    },
+    "ci_submission_verifier": {
+      "command": "node runtime/ci/verify-submissions.cjs . <out> a4bce023953061483c41de5a287ba5e43f4a5648",
+      "selection": {
+        "full": false,
+        "ids": [
+          "wirewalk"
+        ]
+      },
+      "node22": "wirewalk: PASS",
+      "node18": "wirewalk: PASS"
+    },
+    "mcp_walkthrough": {
+      "node22": {
+        "checks": 134,
+        "calls": 572,
+        "passed": true
+      },
+      "node18": {
+        "checks": 134,
+        "calls": 572,
+        "passed": true
+      },
+      "logical_committed_writes": 136,
+      "trace_outcomes": {
+        "ok": 376,
+        "ready": 35,
+        "permission_denied": 2,
+        "invalid_bundle": 2,
+        "not_found": 5,
+        "committed": 136,
+        "duplicate_replay": 5,
+        "rejected": 2,
+        "unknown": 1,
+        "halted": 1,
+        "idempotency_conflict": 2,
+        "stale_version": 3,
+        "invalid_arguments": 1,
+        "invalid_event": 1
+      },
+      "audit_rows_joined_to_trace": {
+        "train-east (ww-priya)": "21 of 21",
+        "markets (ww-dario)": "29 of 29"
+      }
+    },
+    "reference_suite": {
+      "node22": {
+        "stages": 22,
+        "passed": 22
+      },
+      "node18": {
+        "stages": 22,
+        "passed": 22
+      }
+    },
+    "base_runtime_verifier": {
+      "checks": 40,
+      "passed": true,
+      "node": "v22.23.2",
+      "selection": {
+        "full": false,
+        "ids": [
+          "wirewalk"
+        ]
+      }
+    },
+    "evaluation_dataset": {
+      "path": "apps/wirewalk/data/evaluation/seed.json",
+      "version": "1.0.0",
+      "sha256": "2fb3a768836b166b4e728fa197e10e11fb857654fe06fe43df52096cdb2894be",
+      "sha256_matches_dataset_json": true,
+      "time_zone": "America/Los_Angeles",
+      "window": [
+        "2025-01-01",
+        "2026-12-31"
+      ],
+      "dataset_clock": "2026-10-10T21:10:00-07:00",
+      "totals": {
+        "records": 2014,
+        "counted": 1996,
+        "excluded": 18,
+        "invalid": 0,
+        "global_distinct_dates": 645,
+        "post_distinct_dates": 645,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-31",
+        "distinct_dates_on_or_before_clock": 577,
+        "months_with_records": 24,
+        "window_days_without_records": 85,
+        "longest_gap": {
+          "days": 3,
+          "from": "2026-02-05",
+          "to": "2026-02-07"
+        }
+      },
+      "real_records": 0,
+      "content": {
+        "posts": 1864,
+        "by_kind": {
+          "original": 1515,
+          "reply": 194,
+          "repost": 117,
+          "quote": 38
+        },
+        "accounts": 23,
+        "bookmarks": 127,
+        "text_posts": 1747,
+        "identical_texts": 0,
+        "near_duplicate_pairs_at_0_8": 0,
+        "pairs_at_0_6_or_more": 0,
+        "max_5gram_jaccard": 0.588
+      },
+      "real_mcp_demo": {
+        "node22": {
+          "checks": 27,
+          "load_request_bytes": 558817
+        },
+        "node18": {
+          "checks": 27,
+          "load_request_bytes": 558817
+        }
+      }
+    }
+  },
+  "reports": [
+    "base-runtime.json",
+    "coverage.json",
+    "dataset-demo.node18.json",
+    "dataset-demo.node22.json",
+    "mcp-walkthrough.node18.json",
+    "mcp-walkthrough.node22.json",
+    "public-runtime.node18.json",
+    "public-runtime.node22.json",
+    "reference-suite.node18.json",
+    "reference-suite.node22.json"
+  ],
+  "report_edits": "In reference-suite.node*.json, report paths inside stage commands were rewritten from a local temporary directory to .artifacts/. No other report was edited.",
+  "not_claimed": [
+    "model-agent runs (deferred for v1; the walkthrough's replies are scripted reference evidence)",
+    "Agent reads of the image bytes (need a platform resource-access registration under runtime/registrations/, which requires Infra review)",
+    "GUI or reviewer console",
+    "production deployment",
+    "official PR CI on the implementation commit (the fork's workflow run awaits maintainer approval)",
+    "human review of realism, image legibility and invented names"
+  ],
+  "previous_submission": {
+    "head": "d1adf7b34df95f5b582d919362637904d40827d2",
+    "app_package_commit": "07303aeb2ed851b7aaaf1e1061a7b67adde9d8b7",
+    "app_package_sha256": "92d454d03bf5b7d9519b15c3279cbbd2fe24763a50f50fe5e6e39028df3f01a7"
+  },
+  "added_scope_after_plan_approval": {
+    "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
+    "items": [
+      "evaluation dataset in apps/wirewalk/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
+      "clock cutoff: tools show only records dated at or before the run clock",
+      "package size 1,093,575 bytes of tracked files (was 1,085,945)",
+      "`later_history_removed` in both bookmark receipts (count of seeded later bookmarks the write replaced), from the 2026-11-28 revision"
+    ]
+  },
+  "revisions": [
+    {
+      "package": "be61b8583e99b9266ce8bb481e6af5c4b71d222c",
+      "note": "packages 7607709, 5197a43 and be61b85: a bookmark that replaces a seeded later bookmark at an earlier clock counts it in the receipt (later_history_removed); test B27; the walkthrough also passes on current main, whose Mail builder (#288) puts the source epoch in the event ID"
+    }
+  ]
+}

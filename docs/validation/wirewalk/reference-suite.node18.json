@@ -1,0 +1,270 @@
+{
+  "schema": "pale.public-runtime-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "node": "v18.20.8",
+  "verified_at": "2026-11-28T02:22:22.695Z",
+  "passed": true,
+  "stages": [
+    {
+      "name": "contracts",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/build-contracts.cjs",
+        "--check"
+      ],
+      "duration_ms": 39,
+      "exit_code": 0,
+      "log": "contracts.log"
+    },
+    {
+      "name": "contract-rules",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/contracts/tests.cjs"
+      ],
+      "duration_ms": 40,
+      "exit_code": 0,
+      "log": "contract-rules.log"
+    },
+    {
+      "name": "loader-and-compatibility",
+      "status": "passed",
+      "command": [
+        "node",
+        "--test",
+        "runtime/tests/loader.test.cjs"
+      ],
+      "duration_ms": 564,
+      "exit_code": 0,
+      "log": "loader-and-compatibility.log"
+    },
+    {
+      "name": "extensibility",
+      "status": "passed",
+      "command": [
+        "node",
+        "--test",
+        "runtime/tests/extensibility.test.cjs"
+      ],
+      "duration_ms": 191,
+      "exit_code": 0,
+      "log": "extensibility.log"
+    },
+    {
+      "name": "clock-contract",
+      "status": "passed",
+      "command": [
+        "node",
+        "--test",
+        "runtime/tests/clock.test.cjs"
+      ],
+      "duration_ms": 326,
+      "exit_code": 0,
+      "log": "clock-contract.log"
+    },
+    {
+      "name": "session-time",
+      "status": "passed",
+      "command": [
+        "node",
+        "examples/workflows/session-time/run.cjs",
+        ".artifacts/session-time.json"
+      ],
+      "duration_ms": 919,
+      "exit_code": 0,
+      "log": "session-time.log"
+    },
+    {
+      "name": "mail-public-verification",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/cli.cjs",
+        "verify",
+        "--app",
+        "examples/apps/mail",
+        "--output",
+        ".artifacts/mail.json"
+      ],
+      "duration_ms": 895,
+      "exit_code": 0,
+      "log": "mail-public-verification.log"
+    },
+    {
+      "name": "calendar-public-verification",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/cli.cjs",
+        "verify",
+        "--app",
+        "examples/apps/calendar",
+        "--output",
+        ".artifacts/calendar.json"
+      ],
+      "duration_ms": 679,
+      "exit_code": 0,
+      "log": "calendar-public-verification.log"
+    },
+    {
+      "name": "core-business-and-mcp",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/core-behavior.cjs"
+      ],
+      "duration_ms": 917,
+      "exit_code": 0,
+      "log": "core-business-and-mcp.log"
+    },
+    {
+      "name": "assets",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/assets.cjs"
+      ],
+      "duration_ms": 829,
+      "exit_code": 0,
+      "log": "assets.log"
+    },
+    {
+      "name": "platform-access",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/platform-access.cjs"
+      ],
+      "duration_ms": 74,
+      "exit_code": 0,
+      "log": "platform-access.log"
+    },
+    {
+      "name": "app-diagnostics",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/app-logging.cjs"
+      ],
+      "duration_ms": 942,
+      "exit_code": 0,
+      "log": "app-diagnostics.log"
+    },
+    {
+      "name": "messaging-directions",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/messaging/tests/test_contract.cjs"
+      ],
+      "duration_ms": 258,
+      "exit_code": 0,
+      "log": "messaging-directions.log"
+    },
+    {
+      "name": "messaging-delivery",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/messaging/tests/test_messaging.cjs"
+      ],
+      "duration_ms": 470,
+      "exit_code": 0,
+      "log": "messaging-delivery.log"
+    },
+    {
+      "name": "time-tracing",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/messaging/tests/test_time_trace.cjs",
+        ".artifacts/time-trace.json"
+      ],
+      "duration_ms": 1436,
+      "exit_code": 0,
+      "log": "time-tracing.log"
+    },
+    {
+      "name": "mail-to-mail",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/mail-to-mail.cjs"
+      ],
+      "duration_ms": 3278,
+      "exit_code": 0,
+      "log": "mail-to-mail.log"
+    },
+    {
+      "name": "delivery-to-mail",
+      "status": "passed",
+      "command": [
+        "node",
+        "examples/workflows/delivery-to-mail/run.cjs"
+      ],
+      "duration_ms": 288,
+      "exit_code": 0,
+      "log": "delivery-to-mail.log"
+    },
+    {
+      "name": "non-mail-route",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/non-mail-routing.cjs"
+      ],
+      "duration_ms": 306,
+      "exit_code": 0,
+      "log": "non-mail-route.log"
+    },
+    {
+      "name": "attachment-safety",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/attachments.cjs"
+      ],
+      "duration_ms": 1379,
+      "exit_code": 0,
+      "log": "attachment-safety.log"
+    },
+    {
+      "name": "attachment-workflow",
+      "status": "passed",
+      "command": [
+        "node",
+        "examples/workflows/attachments/run.cjs"
+      ],
+      "duration_ms": 675,
+      "exit_code": 0,
+      "log": "attachment-workflow.log"
+    },
+    {
+      "name": "personal-apps",
+      "status": "passed",
+      "command": [
+        "node",
+        "runtime/tests/personal-apps.cjs"
+      ],
+      "duration_ms": 7772,
+      "exit_code": 0,
+      "log": "personal-apps.log"
+    },
+    {
+      "name": "business-web-host",
+      "status": "passed",
+      "command": [
+        "node",
+        "--test",
+        "runtime/web/host.test.cjs"
+      ],
+      "duration_ms": 1600,
+      "exit_code": 0,
+      "log": "business-web-host.log"
+    }
+  ],
+  "scope": "Public local reference runtime. No private host, credentials, model API or remote service used. Manual workflow/provenance and production deployment review remain separate."
+}
