@@ -1,0 +1,148 @@
+{
+  "evidenceType": "Local public Core / Files integration smoke test; no model calls",
+  "documentedUpstreamBaseline": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "coreRuntime": "1.6.0",
+  "coreApi": "1.2.0",
+  "filesApp": "1.0.0",
+  "node": "v24.22.3",
+  "startedAt": "2026-11-23T02:45:27.068Z",
+  "wallDurationMs": 20515,
+  "checks": {
+    "seedValidated": true,
+    "futureRecordUnavailableBeforeEvent": true,
+    "eventsAndClockReplayed": true,
+    "agentCannotReset": true,
+    "protectedWriteDeniedAndSnapshotsMatch": true,
+    "internalReportWritableAndPriorVersionReadable": true,
+    "trustedResetRestoresSeedAndClock": true
+  },
+  "sessions": [
+    {
+      "sessionId": "session-1",
+      "at": "2026-06-01T09:00:00-04:00",
+      "visibleSourceIds": [
+        "A-old",
+        "B-final"
+      ]
+    },
+    {
+      "sessionId": "session-2",
+      "at": "2026-06-04T09:00:00-04:00",
+      "visibleSourceIds": [
+        "A-old",
+        "B-final",
+        "A-replacement",
+        "A-other",
+        "B-other",
+        "supersession-note"
+      ]
+    },
+    {
+      "sessionId": "session-3",
+      "at": "2026-06-08T09:00:00-04:00",
+      "visibleSourceIds": [
+        "A-old",
+        "B-final",
+        "A-replacement",
+        "A-other",
+        "B-other",
+        "supersession-note",
+        "B-running"
+      ]
+    }
+  ],
+  "receipts": [
+    {
+      "eventId": "completed-results-available-A-replacement",
+      "at": "2026-06-04T08:55:00-04:00"
+    },
+    {
+      "eventId": "completed-results-available-A-other",
+      "at": "2026-06-04T08:55:00-04:00"
+    },
+    {
+      "eventId": "completed-results-available-B-other",
+      "at": "2026-06-04T08:55:00-04:00"
+    },
+    {
+      "eventId": "completed-results-available-supersession-note",
+      "at": "2026-06-04T08:55:00-04:00"
+    },
+    {
+      "eventId": "running-result-available-B-running",
+      "at": "2026-06-08T08:55:00-04:00"
+    }
+  ],
+  "audit": [
+    {
+      "seq": 17,
+      "actor": "agent",
+      "tool": "files.put",
+      "decision": "deny",
+      "reason": "permission_denied",
+      "before": {
+        "epoch": 2,
+        "revision": 7
+      },
+      "after": {
+        "epoch": 2,
+        "revision": 7
+      },
+      "state_changed": false,
+      "received_at": "2026-11-23T02:45:41.674Z",
+      "wall_time": "2026-11-23T02:45:41.676Z",
+      "virtual_time": "2026-06-08T09:00:00-04:00",
+      "connection_id": "958f12b7-31d4-4ffc-a54a-a0cf3dab804c",
+      "client_name": "pr34-agent",
+      "input": {
+        "id": "A-old",
+        "request_id": "protected-write-probe",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 7
+        }
+      },
+      "result": {
+        "status": "permission_denied",
+        "object_id": null
+      }
+    },
+    {
+      "seq": 19,
+      "actor": "agent",
+      "tool": "files.put",
+      "decision": "allow",
+      "before": {
+        "epoch": 2,
+        "revision": 7
+      },
+      "after": {
+        "epoch": 2,
+        "revision": 8
+      },
+      "state_changed": true,
+      "received_at": "2026-11-23T02:45:41.992Z",
+      "wall_time": "2026-11-23T02:45:42.064Z",
+      "virtual_time": "2026-06-08T09:00:00-04:00",
+      "connection_id": "958f12b7-31d4-4ffc-a54a-a0cf3dab804c",
+      "client_name": "pr34-agent",
+      "input": {
+        "id": "group-meeting-summary",
+        "request_id": "report-write-probe",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 7
+        }
+      },
+      "result": {
+        "status": "committed",
+        "object_id": "group-meeting-summary"
+      }
+    }
+  ],
+  "limitations": [
+    "The history text is mirrored into Files solely to exercise synthetic file reads; the official task history interface is not exercised.",
+    "The Files policy permits edits only to an existing report ID. Task-specific output-folder writes and other action denials require a task adapter.",
+    "The report text is a smoke-test payload. End-to-end grading and agent evaluation are separate."
+  ]
+}
