@@ -6,6 +6,9 @@ const APP = c.APP;
 // Every rejection is invalid_event and leaves state unchanged; Infra reads the message with env.event_status.
 const reject = message => c.fail('invalid_event', message);
 
+// A date as a service message would print it, in the local time the timestamp itself carries: "October 31, 2026 at 11:59 PM".
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const readable = iso => { const h = Number(iso.slice(11, 13)); return MONTHS[Number(iso.slice(5, 7)) - 1] + ' ' + Number(iso.slice(8, 10)) + ', ' + iso.slice(0, 4) + ' at ' + (h % 12 || 12) + ':' + iso.slice(14, 16) + (h < 12 ? ' AM' : ' PM'); };
 function applyEvent(ctx, data, event) {
   const name = event.operation.slice(APP.length + 1), p = event.payload, now = ctx.virtual_now, a = data.account;
   const done = fields => c.record(ctx, data, 'event', name, {event_id: event.event_id, ...fields});
@@ -64,7 +67,7 @@ function applyEvent(ctx, data, event) {
     if (ms(p.available_until) <= ms(now)) reject('The end date is not after the event.');
     if (ms(p.available_until) <= ms(t.available_from)) reject('The title ends before it starts.');
     const replaced = {available_until: t.available_until}; t.available_until = p.available_until;
-    for (const x of followers(t, 'notify_leaving')) c.notify(ctx, data, 'title.leaving', t.name + ' leaves Lanternbox on ' + p.available_until + '.', {profile_id: x.profile_id, title_id: t.title_id});
+    for (const x of followers(t, 'notify_leaving')) c.notify(ctx, data, 'title.leaving', t.name + ' leaves Lanternbox on ' + readable(p.available_until) + '.', {profile_id: x.profile_id, title_id: t.title_id});
     done({object_id: t.title_id, replaced});
   } else if (name === 'billing.charged') {
     if (ms(p.period_start) !== ms(a.paid_through)) reject('The charge period does not start at the account\'s paid_through (' + a.paid_through + ').');
@@ -81,7 +84,7 @@ function applyEvent(ctx, data, event) {
         c.notify(ctx, data, 'plan.changed', 'Your plan changed from ' + d.plan(data, from).name + ' to ' + d.plan(data, a.plan_id).name + '.', {charge_id: id});
       } else if (a.pending?.kind === 'cancel') a.pending = null;
       a.paid_through = p.period_end;
-    } else c.notify(ctx, data, 'payment.failed', 'A payment of ' + (p.amount_cents / 100).toFixed(2) + ' could not be taken' + (p.reason ? ' (' + p.reason + ')' : '') + '.', {charge_id: id});
+    } else c.notify(ctx, data, 'payment.failed', 'A payment of $' + (p.amount_cents / 100).toFixed(2) + ' could not be taken' + (p.reason ? ' (' + p.reason + ')' : '') + '.', {charge_id: id});
     done({object_id: id, replaced: before});
   } else if (name === 'device.signed_in') {
     const x = data.devices.find(x => x.device_id === p.device_id);
