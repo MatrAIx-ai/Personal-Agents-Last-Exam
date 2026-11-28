@@ -1,0 +1,4121 @@
+{
+  "schema": "mendwell-pharmacy.coverage.v1",
+  "scope": "Environment dataset coverage of the Mendwell delivery dataset mendwell-delivery-2025-2026, whole window. Not a Task history report: a Task reports its own selection after its first-session cutoff (dataset/as-of.cjs).",
+  "dataset_id": "mendwell-delivery-2025-2026",
+  "time_zone": "America/New_York",
+  "window": {
+    "from": "2025-01-01",
+    "to": "2026-12-31"
+  },
+  "reference_clock": "2026-11-18T12:00:00-05:00",
+  "reproduce": [
+    "node dataset/generate.cjs --check",
+    "node dataset/coverage.cjs --check"
+  ],
+  "counting": "Every timestamp is ISO 8601 with its offset; each is converted to its calendar date in America/New_York before counting. Date-only fields (a prescription's written_on, a claim's eligible_on) are not occurrence dates and are not counted. A date counts once however many records or sources fall on it. A required occurrence date (received_at, requested_at, created_at or at) that is missing or not a valid ISO 8601 instant with the offset in force, and a record outside the window, is excluded from the count and listed by ID; closed_at and revoked_at are required only of closed fills and revoked grants. There are none.",
+  "sources": [
+    {
+      "file": "dataset/base.json",
+      "role": "Seed at the window start 2025-01-01T00:00:00-05:00: the household, prescribers, drugs with their 24 facts paraphrased from the cited DailyMed labels, plans, cash prices, stores (stock before the restocks) and cards; no records.",
+      "kind": "mixed",
+      "bytes": 26878,
+      "sha256": "1ae30ba0d64def8e42034bf9ba1a9e48ded71419c9609df7357e9619c3f1228f"
+    },
+    {
+      "file": "dataset/replay.json",
+      "role": "Every committed step in time order: the household members' tool calls and Infra events, each with its time.",
+      "kind": "synthetic",
+      "bytes": 83411,
+      "sha256": "17aca07e9c7de687680b8e25680c3b1d0c814bffe50cd9a9f1130178711580a3"
+    },
+    {
+      "file": "dataset/full.json",
+      "role": "Seed at 2027-01-01T00:00:00-05:00, the state after every step with the timers due before that instant committed: all records of the window, with the same catalog and label facts.",
+      "kind": "mixed",
+      "bytes": 601844,
+      "sha256": "44195d3f52a3a823bda918f73b16a6651c301beafbe8d0dc63b4e4eb734e7f10"
+    }
+  ],
+  "method": [
+    {
+      "file": "dataset/lib.cjs",
+      "sha256": "06b0c19b2be313f4679af092333876bf3ece3c623905c44ced939f733239cce1"
+    },
+    {
+      "file": "dataset/notes.cjs",
+      "sha256": "2581724f8e7efbdc84abba25aa6b31a199754db18fd0f4e9e58f4366d472c327"
+    },
+    {
+      "file": "dataset/generate.cjs",
+      "sha256": "d4526cb28a57173bb996aeb3d23d059d840fca8d20190d2ad87ed5b26cdff371"
+    },
+    {
+      "file": "dataset/as-of.cjs",
+      "sha256": "656db113f8d5cedd626e50a4f45b89dbaf869835aee5dc3cda7d078fe66641f0"
+    },
+    {
+      "file": "dataset/coverage.cjs",
+      "sha256": "74433dd25cb5aa1ce4752a79d4c7896aafb1eb5b8e6f443934300e782d3a9612"
+    }
+  ],
+  "record_kinds": [
+    {
+      "kind": "prescription",
+      "list": "prescriptions",
+      "id": "rx_id",
+      "date_field": "received_at",
+      "source": "dataset/full.json",
+      "records": 37,
+      "distinct_dates": 22,
+      "earliest": "2025-01-08",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "fill",
+      "list": "fills",
+      "id": "fill_id",
+      "date_field": "requested_at",
+      "source": "dataset/full.json",
+      "records": 158,
+      "distinct_dates": 134,
+      "earliest": "2025-01-09",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "fill_closing",
+      "list": "fills",
+      "id": "<fill id>/closed",
+      "date_field": "closed_at (collected, returned to stock or cancelled)",
+      "source": "dataset/full.json",
+      "records": 158,
+      "distinct_dates": 110,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "pharmacist_note",
+      "list": "fills[].notes",
+      "id": "<fill id>/note-<n>",
+      "date_field": "at (a hold placed or released)",
+      "source": "dataset/full.json",
+      "records": 19,
+      "distinct_dates": 10,
+      "earliest": "2025-04-22",
+      "latest": "2026-10-04"
+    },
+    {
+      "kind": "refusal",
+      "list": "fills[].refusals",
+      "id": "refusal_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 11,
+      "distinct_dates": 11,
+      "earliest": "2025-04-22",
+      "latest": "2026-10-23"
+    },
+    {
+      "kind": "claim",
+      "list": "claims",
+      "id": "claim_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 175,
+      "distinct_dates": 135,
+      "earliest": "2025-01-09",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "plan_request",
+      "list": "plan_requests",
+      "id": "plan_request_id",
+      "date_field": "created_at",
+      "source": "dataset/full.json",
+      "records": 15,
+      "distinct_dates": 15,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-23"
+    },
+    {
+      "kind": "renewal",
+      "list": "renewals",
+      "id": "renewal_id",
+      "date_field": "created_at",
+      "source": "dataset/full.json",
+      "records": 9,
+      "distinct_dates": 9,
+      "earliest": "2026-01-07",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "authorization",
+      "list": "authorizations",
+      "id": "authorization_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 16,
+      "distinct_dates": 15,
+      "earliest": "2025-01-15",
+      "latest": "2026-12-03"
+    },
+    {
+      "kind": "charge",
+      "list": "charges",
+      "id": "charge_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 143,
+      "distinct_dates": 103,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "grant",
+      "list": "grants",
+      "id": "grant_id",
+      "date_field": "created_at",
+      "source": "dataset/full.json",
+      "records": 10,
+      "distinct_dates": 9,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    },
+    {
+      "kind": "grant_revocation",
+      "list": "grants",
+      "id": "<grant id>/revoked",
+      "date_field": "revoked_at",
+      "source": "dataset/full.json",
+      "records": 2,
+      "distinct_dates": 2,
+      "earliest": "2025-11-03",
+      "latest": "2026-11-30"
+    },
+    {
+      "kind": "notice",
+      "list": "notices",
+      "id": "notice_id",
+      "date_field": "at",
+      "source": "dataset/full.json",
+      "records": 472,
+      "distinct_dates": 150,
+      "earliest": "2025-01-09",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "replay_step",
+      "source": "dataset/replay.json",
+      "list": "steps",
+      "id": "steps[].id",
+      "date_field": "at",
+      "records": 476,
+      "distinct_dates": 249,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    }
+  ],
+  "exclusions": [
+    {
+      "records": "people[], prescribers[], drugs[], plans[], stores[] and cards[] in dataset/full.json",
+      "count": 28,
+      "reason": "Household and catalog rows with no occurrence date; their dated changes are replay steps (store.restocked) and records (grants). Store stock is the only catalog field that changes in the window."
+    },
+    {
+      "records": "cash_prices in dataset/full.json",
+      "count": 12,
+      "reason": "Price table per drug, no occurrence date."
+    },
+    {
+      "records": "dataset/base.json",
+      "count": 0,
+      "reason": "Holds only the household and catalog at the window start; no dated records."
+    },
+    {
+      "records": "approvals",
+      "count": 0,
+      "reason": "A confirmation (user.confirmed) is applied with the prepayment or grant change it confirms and is not kept, because seeds carry no approvals; the confirmed step itself is in dataset/replay.json."
+    }
+  ],
+  "invalid_dates": 0,
+  "invalid": [],
+  "outside_window": 0,
+  "outside": [],
+  "totals": {
+    "records": 1225,
+    "counted": 1225,
+    "replay_steps": 476,
+    "app_records": 233,
+    "fills": 158,
+    "notices": 472
+  },
+  "distinct_dates": {
+    "coverage": 260,
+    "coverage_basis": "Counted over the records loaded into the App (dataset/full.json), which Agents and Infra read back.",
+    "coverage_note": "The global count over both sources adds 2 days on which the replay log holds steps but no App record is dated.",
+    "by_source": {
+      "dataset/full.json": 260,
+      "dataset/replay.json": 249
+    },
+    "by_kind": {
+      "prescription": 22,
+      "fill": 134,
+      "fill_closing": 110,
+      "pharmacist_note": 10,
+      "refusal": 11,
+      "claim": 135,
+      "plan_request": 15,
+      "renewal": 9,
+      "authorization": 15,
+      "charge": 103,
+      "grant": 9,
+      "grant_revocation": 2,
+      "notice": 150,
+      "replay_step": 249
+    },
+    "global": 262
+  },
+  "earliest": "2025-01-01",
+  "latest": "2026-12-31",
+  "provenance": {
+    "real": 0,
+    "synthetic": 1225,
+    "mixed": 0,
+    "note": "Every dated record and step is synthetic, written by the App while dataset/generate.cjs replayed it; none was collected or observed, including those dated at or after the reference clock.",
+    "label_facts": {
+      "kind": "reused",
+      "facts": 24,
+      "counted_as_real": 24,
+      "rule": "The drug facts are short paraphrases of public DailyMed labels, read on 2026-11-23 and cited by section in contribution/dataset.json. They sit in the drug catalog, carry no occurrence date and are not counted as dated records. A label's facts count as real data in use only when the dataset holds a prescription of that drug, because rx.get returns them with that prescription (shown by the loading demonstration); the table lists the prescriptions and fills per label.",
+      "labels": [
+        {
+          "source_id": "label-d-atorvastatin-40",
+          "drug_id": "d-atorvastatin-40",
+          "generic_name": "atorvastatin calcium",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4e06b20d-cc5d-46eb-991b-5972248de3af",
+          "read_on": "2026-11-23",
+          "prescriptions": 3,
+          "fills": 25,
+          "first_fill": "2025-01-09",
+          "last_fill": "2026-12-04",
+          "used": true
+        },
+        {
+          "source_id": "label-d-donepezil-5",
+          "drug_id": "d-donepezil-5",
+          "generic_name": "donepezil hydrochloride",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=76bf638e-dbde-418e-8977-1caf009990bc",
+          "read_on": "2026-11-23",
+          "prescriptions": 2,
+          "fills": 10,
+          "first_fill": "2025-01-09",
+          "last_fill": "2026-12-21",
+          "used": true
+        },
+        {
+          "source_id": "label-d-warfarin-5",
+          "drug_id": "d-warfarin-5",
+          "generic_name": "warfarin sodium",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8ad881e0-ca41-42ad-9d7d-eb85b3a30af0",
+          "read_on": "2026-11-23",
+          "prescriptions": 3,
+          "fills": 26,
+          "first_fill": "2025-01-09",
+          "last_fill": "2026-12-28",
+          "used": true
+        },
+        {
+          "source_id": "label-d-lisinopril-10",
+          "drug_id": "d-lisinopril-10",
+          "generic_name": "lisinopril",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=0e6364a4-6d66-4151-8197-d45e2a762895",
+          "read_on": "2026-11-23",
+          "prescriptions": 2,
+          "fills": 8,
+          "first_fill": "2025-01-21",
+          "last_fill": "2026-10-07",
+          "used": true
+        },
+        {
+          "source_id": "label-d-levothyroxine-50",
+          "drug_id": "d-levothyroxine-50",
+          "generic_name": "levothyroxine sodium",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4ddcaec1-a58f-340b-9bc1-bbe048b8c885",
+          "read_on": "2026-11-23",
+          "prescriptions": 3,
+          "fills": 9,
+          "first_fill": "2025-01-22",
+          "last_fill": "2026-10-10",
+          "used": true
+        },
+        {
+          "source_id": "label-d-sertraline-50",
+          "drug_id": "d-sertraline-50",
+          "generic_name": "sertraline hydrochloride",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=42120ff8-b353-4632-9ea9-54de9a698724",
+          "read_on": "2026-11-23",
+          "prescriptions": 2,
+          "fills": 9,
+          "first_fill": "2025-01-22",
+          "last_fill": "2026-10-09",
+          "used": true
+        },
+        {
+          "source_id": "label-d-omeprazole-20",
+          "drug_id": "d-omeprazole-20",
+          "generic_name": "omeprazole",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=c5af5f4b-17be-7245-b281-f27c87831242",
+          "read_on": "2026-11-23",
+          "prescriptions": 2,
+          "fills": 8,
+          "first_fill": "2025-01-21",
+          "last_fill": "2026-10-06",
+          "used": true
+        },
+        {
+          "source_id": "label-d-metformin-500",
+          "drug_id": "d-metformin-500",
+          "generic_name": "metformin hydrochloride",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2387a618-24d8-4813-aa83-9114edb35374",
+          "read_on": "2026-11-23",
+          "prescriptions": 2,
+          "fills": 10,
+          "first_fill": "2025-01-21",
+          "last_fill": "2026-10-01",
+          "used": true
+        },
+        {
+          "source_id": "label-d-amlodipine-5",
+          "drug_id": "d-amlodipine-5",
+          "generic_name": "amlodipine besylate",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=003dd1ec-16f8-4f96-b6a8-c4689d35892a",
+          "read_on": "2026-11-23",
+          "prescriptions": 3,
+          "fills": 10,
+          "first_fill": "2025-01-09",
+          "last_fill": "2026-12-25",
+          "used": true
+        },
+        {
+          "source_id": "label-d-albuterol-90",
+          "drug_id": "d-albuterol-90",
+          "generic_name": "albuterol sulfate",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7bb5b6dd-9105-4ee7-b205-ed79cf4b371b",
+          "read_on": "2026-11-23",
+          "prescriptions": 3,
+          "fills": 9,
+          "first_fill": "2025-01-14",
+          "last_fill": "2026-10-23",
+          "used": true
+        },
+        {
+          "source_id": "label-d-amoxicillin-250-5",
+          "drug_id": "d-amoxicillin-250-5",
+          "generic_name": "amoxicillin",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9ce26893-c7a1-47e9-98f9-f5d998cac418",
+          "read_on": "2026-11-23",
+          "prescriptions": 9,
+          "fills": 9,
+          "first_fill": "2025-02-18",
+          "last_fill": "2026-12-08",
+          "used": true
+        },
+        {
+          "source_id": "label-d-montelukast-4",
+          "drug_id": "d-montelukast-4",
+          "generic_name": "montelukast sodium",
+          "facts": 2,
+          "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=ba42b0a9-83f1-4283-a853-f99cdd0761b9",
+          "read_on": "2026-11-23",
+          "prescriptions": 3,
+          "fills": 25,
+          "first_fill": "2025-01-13",
+          "last_fill": "2026-12-30",
+          "used": true
+        }
+      ]
+    }
+  },
+  "partitions": [
+    {
+      "partition": "synthetic, dated before the reference clock",
+      "from": "2025-01-01T00:00:00-05:00",
+      "to": "2026-11-18T12:00:00-05:00",
+      "records": 1152,
+      "replay_steps": 440
+    },
+    {
+      "partition": "synthetic, dated at or after the reference clock: generated, never observed",
+      "from": "2026-11-18T12:00:00-05:00",
+      "to": "2027-01-01T00:00:00-05:00",
+      "records": 73,
+      "replay_steps": 36
+    }
+  ],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "prescriptions": 11,
+      "fills": 11,
+      "fill_closings": 11,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 12,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 2,
+      "charges": 10,
+      "grants": 2,
+      "grant_revocations": 0,
+      "notices": 21,
+      "replay_steps": 43,
+      "records": 81,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 11,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 81
+    },
+    {
+      "month": "2025-02",
+      "prescriptions": 1,
+      "fills": 4,
+      "fill_closings": 4,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 4,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 1,
+      "charges": 4,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 8,
+      "replay_steps": 10,
+      "records": 26,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 26
+    },
+    {
+      "month": "2025-03",
+      "prescriptions": 0,
+      "fills": 4,
+      "fill_closings": 3,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 4,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 3,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 7,
+      "replay_steps": 9,
+      "records": 23,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 23
+    },
+    {
+      "month": "2025-04",
+      "prescriptions": 0,
+      "fills": 10,
+      "fill_closings": 11,
+      "pharmacist_notes": 2,
+      "refusals": 1,
+      "claims": 11,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 1,
+      "charges": 10,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 34,
+      "replay_steps": 28,
+      "records": 80,
+      "distinct_dates": 15,
+      "distinct_dates_with_replay_log": 15,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 80
+    },
+    {
+      "month": "2025-05",
+      "prescriptions": 1,
+      "fills": 4,
+      "fill_closings": 4,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 4,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 4,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 10,
+      "replay_steps": 9,
+      "records": 27,
+      "distinct_dates": 6,
+      "distinct_dates_with_replay_log": 6,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 27
+    },
+    {
+      "month": "2025-06",
+      "prescriptions": 0,
+      "fills": 5,
+      "fill_closings": 3,
+      "pharmacist_notes": 2,
+      "refusals": 0,
+      "claims": 6,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 3,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 16,
+      "replay_steps": 13,
+      "records": 36,
+      "distinct_dates": 9,
+      "distinct_dates_with_replay_log": 9,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 36
+    },
+    {
+      "month": "2025-07",
+      "prescriptions": 0,
+      "fills": 9,
+      "fill_closings": 11,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 11,
+      "plan_requests": 2,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 10,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 25,
+      "replay_steps": 25,
+      "records": 68,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 11,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 68
+    },
+    {
+      "month": "2025-08",
+      "prescriptions": 0,
+      "fills": 4,
+      "fill_closings": 4,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 4,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 4,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 9,
+      "replay_steps": 8,
+      "records": 25,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 25
+    },
+    {
+      "month": "2025-09",
+      "prescriptions": 1,
+      "fills": 8,
+      "fill_closings": 6,
+      "pharmacist_notes": 2,
+      "refusals": 1,
+      "claims": 7,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 6,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 16,
+      "replay_steps": 19,
+      "records": 48,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 11,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 48
+    },
+    {
+      "month": "2025-10",
+      "prescriptions": 0,
+      "fills": 7,
+      "fill_closings": 9,
+      "pharmacist_notes": 0,
+      "refusals": 2,
+      "claims": 9,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 1,
+      "charges": 8,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 22,
+      "replay_steps": 21,
+      "records": 58,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 11,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 58
+    },
+    {
+      "month": "2025-11",
+      "prescriptions": 1,
+      "fills": 4,
+      "fill_closings": 4,
+      "pharmacist_notes": 2,
+      "refusals": 1,
+      "claims": 4,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 4,
+      "grants": 1,
+      "grant_revocations": 1,
+      "notices": 15,
+      "replay_steps": 19,
+      "records": 38,
+      "distinct_dates": 8,
+      "distinct_dates_with_replay_log": 8,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 38
+    },
+    {
+      "month": "2025-12",
+      "prescriptions": 1,
+      "fills": 7,
+      "fill_closings": 5,
+      "pharmacist_notes": 2,
+      "refusals": 1,
+      "claims": 8,
+      "plan_requests": 2,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 5,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 16,
+      "replay_steps": 20,
+      "records": 47,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 47
+    },
+    {
+      "month": "2026-01",
+      "prescriptions": 12,
+      "fills": 12,
+      "fill_closings": 14,
+      "pharmacist_notes": 1,
+      "refusals": 0,
+      "claims": 10,
+      "plan_requests": 0,
+      "renewals": 2,
+      "authorizations": 1,
+      "charges": 11,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 31,
+      "replay_steps": 43,
+      "records": 95,
+      "distinct_dates": 17,
+      "distinct_dates_with_replay_log": 17,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 95
+    },
+    {
+      "month": "2026-02",
+      "prescriptions": 0,
+      "fills": 3,
+      "fill_closings": 2,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 3,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 2,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 7,
+      "replay_steps": 5,
+      "records": 17,
+      "distinct_dates": 4,
+      "distinct_dates_with_replay_log": 4,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 17
+    },
+    {
+      "month": "2026-03",
+      "prescriptions": 1,
+      "fills": 9,
+      "fill_closings": 9,
+      "pharmacist_notes": 2,
+      "refusals": 0,
+      "claims": 12,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 1,
+      "charges": 7,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 39,
+      "replay_steps": 27,
+      "records": 82,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 11,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 82
+    },
+    {
+      "month": "2026-04",
+      "prescriptions": 0,
+      "fills": 7,
+      "fill_closings": 8,
+      "pharmacist_notes": 2,
+      "refusals": 1,
+      "claims": 7,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 2,
+      "charges": 7,
+      "grants": 1,
+      "grant_revocations": 0,
+      "notices": 18,
+      "replay_steps": 22,
+      "records": 53,
+      "distinct_dates": 12,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 53
+    },
+    {
+      "month": "2026-05",
+      "prescriptions": 0,
+      "fills": 5,
+      "fill_closings": 4,
+      "pharmacist_notes": 0,
+      "refusals": 1,
+      "claims": 4,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 1,
+      "charges": 4,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 13,
+      "replay_steps": 11,
+      "records": 32,
+      "distinct_dates": 10,
+      "distinct_dates_with_replay_log": 10,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 32
+    },
+    {
+      "month": "2026-06",
+      "prescriptions": 0,
+      "fills": 7,
+      "fill_closings": 6,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 13,
+      "plan_requests": 2,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 5,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 33,
+      "replay_steps": 20,
+      "records": 66,
+      "distinct_dates": 14,
+      "distinct_dates_with_replay_log": 14,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 66
+    },
+    {
+      "month": "2026-07",
+      "prescriptions": 0,
+      "fills": 7,
+      "fill_closings": 9,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 7,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 2,
+      "charges": 7,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 17,
+      "replay_steps": 19,
+      "records": 49,
+      "distinct_dates": 15,
+      "distinct_dates_with_replay_log": 15,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 49
+    },
+    {
+      "month": "2026-08",
+      "prescriptions": 0,
+      "fills": 4,
+      "fill_closings": 4,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 5,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 1,
+      "charges": 4,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 14,
+      "replay_steps": 12,
+      "records": 33,
+      "distinct_dates": 11,
+      "distinct_dates_with_replay_log": 12,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 33
+    },
+    {
+      "month": "2026-09",
+      "prescriptions": 1,
+      "fills": 7,
+      "fill_closings": 7,
+      "pharmacist_notes": 2,
+      "refusals": 0,
+      "claims": 9,
+      "plan_requests": 1,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 6,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 29,
+      "replay_steps": 20,
+      "records": 62,
+      "distinct_dates": 16,
+      "distinct_dates_with_replay_log": 16,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 62
+    },
+    {
+      "month": "2026-10",
+      "prescriptions": 2,
+      "fills": 10,
+      "fill_closings": 9,
+      "pharmacist_notes": 2,
+      "refusals": 3,
+      "claims": 9,
+      "plan_requests": 0,
+      "renewals": 2,
+      "authorizations": 2,
+      "charges": 8,
+      "grants": 0,
+      "grant_revocations": 0,
+      "notices": 41,
+      "replay_steps": 32,
+      "records": 88,
+      "distinct_dates": 18,
+      "distinct_dates_with_replay_log": 18,
+      "records_after_reference_clock": 0,
+      "real": 0,
+      "synthetic": 88
+    },
+    {
+      "month": "2026-11",
+      "prescriptions": 0,
+      "fills": 3,
+      "fill_closings": 3,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 4,
+      "plan_requests": 0,
+      "renewals": 0,
+      "authorizations": 0,
+      "charges": 3,
+      "grants": 0,
+      "grant_revocations": 1,
+      "notices": 9,
+      "replay_steps": 7,
+      "records": 23,
+      "distinct_dates": 5,
+      "distinct_dates_with_replay_log": 5,
+      "records_after_reference_clock": 5,
+      "real": 0,
+      "synthetic": 23
+    },
+    {
+      "month": "2026-12",
+      "prescriptions": 5,
+      "fills": 7,
+      "fill_closings": 8,
+      "pharmacist_notes": 0,
+      "refusals": 0,
+      "claims": 8,
+      "plan_requests": 2,
+      "renewals": 5,
+      "authorizations": 1,
+      "charges": 8,
+      "grants": 2,
+      "grant_revocations": 0,
+      "notices": 22,
+      "replay_steps": 34,
+      "records": 68,
+      "distinct_dates": 17,
+      "distinct_dates_with_replay_log": 17,
+      "records_after_reference_clock": 68,
+      "real": 0,
+      "synthetic": 68
+    }
+  ],
+  "months_without_fills": [],
+  "household": {
+    "trips": [
+      {
+        "from": "2025-07-12",
+        "to": "2025-07-20",
+        "people": [
+          "p-1",
+          "p-2",
+          "p-3"
+        ],
+        "what": "family summer trip"
+      },
+      {
+        "from": "2025-10-04",
+        "to": "2025-10-12",
+        "people": [
+          "p-4"
+        ],
+        "what": "Elena visits her sister"
+      },
+      {
+        "from": "2026-05-23",
+        "to": "2026-06-01",
+        "people": [
+          "p-1",
+          "p-2",
+          "p-3"
+        ],
+        "what": "family trip"
+      },
+      {
+        "from": "2026-12-19",
+        "to": "2026-12-28",
+        "people": [
+          "p-1",
+          "p-2",
+          "p-3"
+        ],
+        "what": "holiday travel"
+      }
+    ],
+    "elena_at_maple_avenue": {
+      "from": "2025-06-16",
+      "to": "2025-08-31"
+    },
+    "household_at_harbor_street": {
+      "from": "2025-10-01",
+      "to": "2026-02-28"
+    },
+    "replaced_without_renewal": [
+      {
+        "rx_id": "rx-1",
+        "patient_id": "p-4",
+        "drug_id": "d-atorvastatin-40",
+        "last_refill_collected": "2025-12-30T12:41:00-05:00",
+        "replaced_by": "rx-17",
+        "replacement_received": "2026-01-07T14:00:00-05:00",
+        "days_between": 8
+      },
+      {
+        "rx_id": "rx-2",
+        "patient_id": "p-4",
+        "drug_id": "d-warfarin-5",
+        "last_refill_collected": "2025-12-09T12:19:00-05:00",
+        "replaced_by": "rx-18",
+        "replacement_received": "2026-01-07T14:01:00-05:00",
+        "days_between": 29
+      },
+      {
+        "rx_id": "rx-4",
+        "patient_id": "p-4",
+        "drug_id": "d-amlodipine-5",
+        "last_refill_collected": "2026-01-01T12:02:00-05:00",
+        "replaced_by": "rx-20",
+        "replacement_received": "2026-01-07T14:03:00-05:00",
+        "days_between": 6
+      },
+      {
+        "rx_id": "rx-7",
+        "patient_id": "p-2",
+        "drug_id": "d-levothyroxine-50",
+        "last_refill_collected": "2026-01-13T17:48:00-05:00",
+        "replaced_by": "rx-22",
+        "replacement_received": "2026-01-14T16:00:00-05:00",
+        "days_between": 1
+      },
+      {
+        "rx_id": "rx-8",
+        "patient_id": "p-2",
+        "drug_id": "d-lisinopril-10",
+        "last_refill_collected": "2026-01-13T17:47:00-05:00",
+        "replaced_by": "rx-23",
+        "replacement_received": "2026-01-14T16:01:00-05:00",
+        "days_between": 1
+      },
+      {
+        "rx_id": "rx-9",
+        "patient_id": "p-2",
+        "drug_id": "d-metformin-500",
+        "last_refill_collected": "2026-01-10T13:58:00-05:00",
+        "replaced_by": "rx-24",
+        "replacement_received": "2026-01-14T16:02:00-05:00",
+        "days_between": 4
+      },
+      {
+        "rx_id": "rx-10",
+        "patient_id": "p-1",
+        "drug_id": "d-sertraline-50",
+        "last_refill_collected": "2026-01-11T16:14:00-05:00",
+        "replaced_by": "rx-25",
+        "replacement_received": "2026-01-14T16:03:00-05:00",
+        "days_between": 3
+      },
+      {
+        "rx_id": "rx-11",
+        "patient_id": "p-1",
+        "drug_id": "d-omeprazole-20",
+        "last_refill_collected": "2026-01-11T16:15:00-05:00",
+        "replaced_by": "rx-26",
+        "replacement_received": "2026-01-14T16:04:00-05:00",
+        "days_between": 3
+      }
+    ],
+    "supply_on_hand": {
+      "requests": 130,
+      "min": 0,
+      "median": 7,
+      "max": 39,
+      "too_soon": 9,
+      "claims": 175
+    },
+    "supply_method": "A documented lost supply (a plan request noted \"Replacement for a lost supply\") empties all supply on hand at the moment the household asks for the replacement, the lost-supply fill's requested_at; supply restarts with the next pickup. Every other pickup adds its days of supply to whatever is left (supply carries over).",
+    "supply_gaps": [
+      {
+        "key": "p-4 d-atorvastatin-40",
+        "kind": "between_pickups",
+        "from": "2026-08-09T09:49:00-04:00",
+        "to": "2026-08-12T11:40:00-04:00",
+        "days": 3.08,
+        "fill_id": "f-131",
+        "after_loss": "pr-12"
+      },
+      {
+        "key": "p-4 d-warfarin-5",
+        "kind": "between_pickups",
+        "from": "2025-11-07T11:24:00-05:00",
+        "to": "2025-11-11T12:14:00-05:00",
+        "days": 4.03,
+        "fill_id": "f-70",
+        "after_loss": "pr-6"
+      }
+    ],
+    "renewal_requests": {
+      "approved": 6,
+      "denied": 1,
+      "withdrawn": 1,
+      "pending": 1
+    },
+    "prior_authorizations": {
+      "requests": 13,
+      "fills": 10
+    }
+  },
+  "gaps": [
+    {
+      "kind": "real_data_anchor",
+      "period": "2026-11",
+      "status": "stated gap, pending maintainer agreement",
+      "reason": "There is no real pharmacy record to collect: prescriptions, fills, claims and payments are a real patient's protected health information, the reference product shows them only inside a signed-in account, and the approved proposal (PR #63, https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/c7ddf519b029cebe1c93c5bed50edb889cf34deb/proposals/environment/mendwell-pharmacy.md at the approved revision) excludes real patient data (line 12) and data collection (line 102: \"N/A: no crawling or copied content; record public workflow references\"). The only real source data are the DailyMed label facts read on 2026-11-23, which are reference content in the catalog, not pharmacy activity; every dated record of the window is synthetic."
+    },
+    {
+      "kind": "mail_history",
+      "status": "stated gap",
+      "reason": "The 472 notices are in the App's own notice log only; the dataset holds no Mail history for them. Mail is optional, and the Mail sender treats notices present in a loaded seed as history."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-01-24",
+      "to": "2025-02-03",
+      "days": 11,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-02-19",
+      "to": "2025-03-02",
+      "days": 12,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-03-13",
+      "to": "2025-03-30",
+      "days": 18,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-04-25",
+      "to": "2025-05-02",
+      "days": 8,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-05-13",
+      "to": "2025-06-01",
+      "days": 20,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-06-15",
+      "to": "2025-06-21",
+      "days": 7,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-07-10",
+      "to": "2025-07-20",
+      "days": 11,
+      "reason": "Overlaps the family summer trip (2025-07-12 to 2025-07-20, Sam, Alex, Mia), when the travellers make no counter visits; otherwise no refill falls due."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-07-23",
+      "to": "2025-07-31",
+      "days": 9,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-08-08",
+      "to": "2025-08-30",
+      "days": 23,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-09-11",
+      "to": "2025-09-22",
+      "days": 12,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-10-16",
+      "to": "2025-10-29",
+      "days": 14,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-11-12",
+      "to": "2025-11-30",
+      "days": 19,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2025-12-10",
+      "to": "2025-12-25",
+      "days": 16,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-02-05",
+      "to": "2026-02-26",
+      "days": 22,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-03-10",
+      "to": "2026-03-16",
+      "days": 7,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-04-17",
+      "to": "2026-04-26",
+      "days": 10,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-05-13",
+      "to": "2026-05-27",
+      "days": 15,
+      "reason": "Overlaps the family trip (2026-05-23 to 2026-06-01, Sam, Alex, Mia), when the travellers make no counter visits; otherwise no refill falls due."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-06-07",
+      "to": "2026-06-13",
+      "days": 7,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-07-15",
+      "to": "2026-07-25",
+      "days": 11,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-08-13",
+      "to": "2026-09-01",
+      "days": 20,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-11-04",
+      "to": "2026-11-28",
+      "days": 25,
+      "reason": "No refill falls due and no prescription, renewal or grant change happens in these days; the household's supplies last 30 or 90 days."
+    },
+    {
+      "kind": "days_without_records",
+      "from": "2026-12-10",
+      "to": "2026-12-20",
+      "days": 11,
+      "reason": "Overlaps the holiday travel (2026-12-19 to 2026-12-28, Sam, Alex, Mia), when the travellers make no counter visits; otherwise no refill falls due."
+    }
+  ],
+  "dates": {
+    "2025-01-01": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-01-08": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 4
+    },
+    "2025-01-09": {
+      "records": 12,
+      "fills": 4,
+      "replay_steps": 4
+    },
+    "2025-01-10": {
+      "records": 7,
+      "fills": 0,
+      "replay_steps": 4
+    },
+    "2025-01-13": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 4
+    },
+    "2025-01-14": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-01-15": {
+      "records": 10,
+      "fills": 0,
+      "replay_steps": 5
+    },
+    "2025-01-16": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-01-21": {
+      "records": 17,
+      "fills": 3,
+      "replay_steps": 9
+    },
+    "2025-01-22": {
+      "records": 10,
+      "fills": 2,
+      "replay_steps": 5
+    },
+    "2025-01-23": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-02-04": {
+      "records": 6,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2025-02-05": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-02-10": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-02-11": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-02-12": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-02-18": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-03-03": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-03-05": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-03-06": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-03-10": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-03-12": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-03-31": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-04-02": {
+      "records": 2,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-04-03": {
+      "records": 11,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-04-04": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2025-04-05": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-04-07": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-04-08": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-04-09": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-04-10": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-04-15": {
+      "records": 9,
+      "fills": 2,
+      "replay_steps": 3
+    },
+    "2025-04-16": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-04-17": {
+      "records": 6,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2025-04-18": {
+      "records": 9,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2025-04-21": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-04-22": {
+      "records": 16,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2025-04-24": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-05-03": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-05-04": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-05-05": {
+      "records": 7,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-05-06": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-05-11": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-05-12": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-06-02": {
+      "records": 10,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-06-03": {
+      "records": 11,
+      "fills": 1,
+      "replay_steps": 4
+    },
+    "2025-06-07": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-06-08": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2025-06-10": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-06-14": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-06-22": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-06-23": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-06-30": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-07-01": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-07-02": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-07-03": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-07-04": {
+      "records": 12,
+      "fills": 1,
+      "replay_steps": 5
+    },
+    "2025-07-05": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-07-06": {
+      "records": 9,
+      "fills": 2,
+      "replay_steps": 4
+    },
+    "2025-07-07": {
+      "records": 18,
+      "fills": 1,
+      "replay_steps": 5
+    },
+    "2025-07-08": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-07-09": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-07-21": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-07-22": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-08-01": {
+      "records": 8,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2025-08-04": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-08-06": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-08-07": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-08-31": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-09-02": {
+      "records": 7,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-09-04": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-09-06": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-09-07": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2025-09-08": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-09-10": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-09-23": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-09-27": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-09-28": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-09-29": {
+      "records": 15,
+      "fills": 2,
+      "replay_steps": 6
+    },
+    "2025-09-30": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-10-01": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2025-10-02": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-10-03": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-10-08": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-10-10": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-10-12": {
+      "records": 2,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2025-10-13": {
+      "records": 13,
+      "fills": 2,
+      "replay_steps": 4
+    },
+    "2025-10-14": {
+      "records": 7,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-10-15": {
+      "records": 9,
+      "fills": 0,
+      "replay_steps": 5
+    },
+    "2025-10-30": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-10-31": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-11-01": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-11-02": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-11-03": {
+      "records": 16,
+      "fills": 1,
+      "replay_steps": 8
+    },
+    "2025-11-04": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-11-05": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-11-07": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-11-10": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2025-11-11": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-12-01": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2025-12-02": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2025-12-03": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-12-06": {
+      "records": 4,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2025-12-07": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2025-12-08": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-12-09": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-12-26": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-12-27": {
+      "records": 0,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-12-29": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2025-12-30": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2025-12-31": {
+      "records": 12,
+      "fills": 1,
+      "replay_steps": 5
+    },
+    "2026-01-01": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2026-01-05": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-01-06": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-01-07": {
+      "records": 7,
+      "fills": 0,
+      "replay_steps": 6
+    },
+    "2026-01-08": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-01-09": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-01-10": {
+      "records": 3,
+      "fills": 2,
+      "replay_steps": 3
+    },
+    "2026-01-11": {
+      "records": 16,
+      "fills": 3,
+      "replay_steps": 7
+    },
+    "2026-01-12": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-01-13": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-01-14": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 5
+    },
+    "2026-01-21": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-01-22": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-01-24": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-01-27": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-01-28": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-01-29": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-02-02": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-02-03": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-02-04": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-02-27": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-03-02": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-03-05": {
+      "records": 9,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2026-03-06": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-03-07": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-03-09": {
+      "records": 14,
+      "fills": 2,
+      "replay_steps": 7
+    },
+    "2026-03-17": {
+      "records": 7,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-03-24": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-03-27": {
+      "records": 12,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-03-29": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-03-30": {
+      "records": 22,
+      "fills": 2,
+      "replay_steps": 5
+    },
+    "2026-03-31": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2026-04-02": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-04-03": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-04-04": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-04-05": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-04-06": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-04-10": {
+      "records": 6,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-04-11": {
+      "records": 2,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-04-12": {
+      "records": 8,
+      "fills": 2,
+      "replay_steps": 4
+    },
+    "2026-04-13": {
+      "records": 8,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-04-16": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-04-27": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-04-28": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-05-02": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-05-05": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-05-06": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-05-07": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-05-10": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-05-11": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-05-12": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-05-28": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-05-29": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-05-31": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-06-01": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-06-03": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-06-04": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-06-05": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-06-06": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-06-14": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-06-19": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-06-20": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-06-21": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-06-24": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-06-25": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-06-26": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-06-29": {
+      "records": 15,
+      "fills": 1,
+      "replay_steps": 5
+    },
+    "2026-06-30": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-07-01": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-07-02": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-07-03": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-07-04": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-07-05": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-07-06": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-07-09": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-07-10": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-07-11": {
+      "records": 9,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2026-07-12": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-07-13": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-07-14": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-07-26": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-07-27": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-07-29": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-02": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-08-03": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-08-04": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-05": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-06": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-08-07": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-08-08": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-09": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-08-10": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-11": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-12": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-08-24": {
+      "records": 0,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-02": {
+      "records": 9,
+      "fills": 2,
+      "replay_steps": 2
+    },
+    "2026-09-04": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-05": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-06": {
+      "records": 2,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-09-07": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-08": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-09": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-09-11": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-09-12": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-19": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-09-21": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-09-22": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-24": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-09-25": {
+      "records": 10,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-09-26": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-09-29": {
+      "records": 3,
+      "fills": 0,
+      "replay_steps": 0
+    },
+    "2026-10-01": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-10-02": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-10-03": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-10-04": {
+      "records": 16,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2026-10-05": {
+      "records": 6,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-10-06": {
+      "records": 10,
+      "fills": 2,
+      "replay_steps": 3
+    },
+    "2026-10-07": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-10-08": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-10-09": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-10-10": {
+      "records": 2,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-10-11": {
+      "records": 10,
+      "fills": 0,
+      "replay_steps": 4
+    },
+    "2026-10-13": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-10-19": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-10-23": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-10-24": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-10-26": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-10-27": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-10-31": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-11-01": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-11-02": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-11-03": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-11-29": {
+      "records": 1,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-11-30": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-01": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-02": {
+      "records": 2,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-12-03": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-04": {
+      "records": 5,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-12-05": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2026-12-06": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 2
+    },
+    "2026-12-07": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-08": {
+      "records": 9,
+      "fills": 1,
+      "replay_steps": 4
+    },
+    "2026-12-09": {
+      "records": 2,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-21": {
+      "records": 4,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-12-22": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-23": {
+      "records": 1,
+      "fills": 0,
+      "replay_steps": 1
+    },
+    "2026-12-25": {
+      "records": 3,
+      "fills": 1,
+      "replay_steps": 1
+    },
+    "2026-12-28": {
+      "records": 8,
+      "fills": 1,
+      "replay_steps": 3
+    },
+    "2026-12-29": {
+      "records": 5,
+      "fills": 0,
+      "replay_steps": 3
+    },
+    "2026-12-30": {
+      "records": 7,
+      "fills": 1,
+      "replay_steps": 2
+    },
+    "2026-12-31": {
+      "records": 4,
+      "fills": 0,
+      "replay_steps": 3
+    }
+  },
+  "representative": [
+    {
+      "example": "first fill of the window",
+      "fill_id": "f-1",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "donepezil hydrochloride 5 mg",
+      "quantity": 90,
+      "store_id": "st-3",
+      "requested_at": "2025-01-09T09:52:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-01-09T09:52:00-05:00 requested",
+        "2025-01-09T11:52:00-05:00 claim_rejected",
+        "2025-01-10T16:27:00-05:00 pending_plan_decision",
+        "2025-01-13T12:11:00-05:00 waiting_stock",
+        "2025-01-14T14:31:00-05:00 ready",
+        "2025-01-15T10:42:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-1 rejected prior_auth_required",
+        "cl-5 paid $15.00"
+      ],
+      "plan_requests": [
+        "pr-1 prior_auth_required approved: Prior authorization form sent by the prescriber"
+      ],
+      "cash": null,
+      "amount_due": "$15.00",
+      "payment": "counter $15.00 by p-4 on card-1",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-1 notice.claim_rejected to p-4 (full)",
+        "n-5 notice.plan_decision to p-4 (full)",
+        "n-6 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "last fill of the window",
+      "fill_id": "f-158",
+      "patient": "p-3 Mia Rivera",
+      "drug": "montelukast sodium 4 mg",
+      "quantity": 30,
+      "store_id": "st-1",
+      "requested_at": "2026-12-30T19:34:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2026-12-30T19:34:00-05:00 requested",
+        "2026-12-30T21:34:00-05:00 ready",
+        "2026-12-31T18:25:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-175 paid $10.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$10.00",
+      "payment": "counter $10.00 by p-2 on card-3",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-470 notice.fill_ready to p-1 (full)",
+        "n-471 notice.fill_ready to p-2 (full)",
+        "n-472 notice.fill_ready to p-3 (full)"
+      ]
+    },
+    {
+      "example": "first fill after the reference clock",
+      "fill_id": "f-151",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "warfarin sodium 5 mg",
+      "quantity": 30,
+      "store_id": "st-3",
+      "requested_at": "2026-11-29T11:22:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2026-11-29T11:22:00-05:00 requested",
+        "2026-11-30T09:00:00-05:00 ready",
+        "2026-12-01T13:34:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-167 paid $4.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$4.00",
+      "payment": "counter $4.00 by p-4 on card-1",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-449 notice.fill_ready to p-1 (full)",
+        "n-450 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "routine refill paid at the counter",
+      "fill_id": "f-12",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "atorvastatin calcium 40 mg",
+      "quantity": 30,
+      "store_id": "st-3",
+      "requested_at": "2025-02-04T09:12:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-02-04T09:12:00-05:00 requested",
+        "2025-02-04T11:12:00-05:00 ready",
+        "2025-02-05T11:26:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-13 paid $12.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$12.00",
+      "payment": "counter $12.00 by p-4 on card-1",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-22 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "collected with nothing due",
+      "fill_id": "f-9",
+      "patient": "p-2 Alex Rivera",
+      "drug": "metformin hydrochloride 500 mg",
+      "quantity": 180,
+      "store_id": "st-1",
+      "requested_at": "2025-01-21T19:50:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-01-21T19:50:00-05:00 requested",
+        "2025-01-21T21:50:00-05:00 ready",
+        "2025-01-22T17:50:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-10 paid $0.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$0.00",
+      "payment": null,
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-18 notice.fill_ready to p-2 (full)"
+      ]
+    },
+    {
+      "example": "prepaid online, captured at pickup",
+      "fill_id": "f-5",
+      "patient": "p-3 Mia Rivera",
+      "drug": "montelukast sodium 4 mg",
+      "quantity": 30,
+      "store_id": "st-1",
+      "requested_at": "2025-01-13T20:15:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-01-13T20:15:00-05:00 requested",
+        "2025-01-13T22:15:00-05:00 waiting_stock",
+        "2025-01-15T11:30:00-05:00 ready",
+        "2025-01-16T18:34:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-6 paid $10.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$10.00",
+      "payment": "capture $10.00 by p-2 on card-4",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-7 notice.fill_ready to p-1 (full)",
+        "n-8 notice.fill_ready to p-2 (full)",
+        "n-9 notice.fill_ready to p-3 (full)"
+      ]
+    },
+    {
+      "example": "drug the plan does not cover, paid at the cash price",
+      "fill_id": "f-8",
+      "patient": "p-1 Sam Rivera",
+      "drug": "omeprazole 20 mg",
+      "quantity": 90,
+      "store_id": "st-1",
+      "requested_at": "2025-01-21T19:01:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-01-21T19:01:00-05:00 requested",
+        "2025-01-21T21:01:00-05:00 claim_rejected",
+        "2025-01-21T21:16:00-05:00 ready",
+        "2025-01-22T17:52:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-9 rejected not_covered"
+      ],
+      "plan_requests": [],
+      "cash": "$65.00",
+      "amount_due": "$65.00",
+      "payment": "counter $65.00 (cash price) by p-2 on card-4",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-14 notice.claim_rejected to p-1 (full)",
+        "n-15 notice.claim_rejected to p-2 (full)",
+        "n-16 notice.fill_ready to p-1 (full)",
+        "n-17 notice.fill_ready to p-2 (full)"
+      ]
+    },
+    {
+      "example": "prior authorization denied, then approved",
+      "fill_id": "f-38",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "donepezil hydrochloride 5 mg",
+      "quantity": 90,
+      "store_id": "st-1",
+      "requested_at": "2025-06-30T11:03:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-06-30T11:03:00-04:00 requested",
+        "2025-06-30T13:03:00-04:00 claim_rejected",
+        "2025-07-01T11:08:00-04:00 pending_plan_decision",
+        "2025-07-03T14:20:00-04:00 claim_rejected",
+        "2025-07-03T15:49:00-04:00 pending_plan_decision",
+        "2025-07-07T09:04:00-04:00 ready",
+        "2025-07-07T18:12:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-41 rejected prior_auth_required",
+        "cl-47 paid $15.00"
+      ],
+      "plan_requests": [
+        "pr-3 prior_auth_required denied: Prior authorization form sent by the prescriber",
+        "pr-4 prior_auth_required approved: Chart notes sent by the prescriber"
+      ],
+      "cash": null,
+      "amount_due": "$15.00",
+      "payment": "counter $15.00 by p-2 on card-4",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-95 notice.claim_rejected to p-1 (full)",
+        "n-96 notice.claim_rejected to p-4 (full)",
+        "n-102 notice.plan_decision to p-4 (full)",
+        "n-109 notice.plan_decision to p-4 (full)",
+        "n-110 notice.fill_ready to p-4 (full)",
+        "n-111 notice.fill_ready to p-2 (logistics)"
+      ]
+    },
+    {
+      "example": "prior authorization withdrawn and sent again",
+      "fill_id": "f-75",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "donepezil hydrochloride 5 mg",
+      "quantity": 90,
+      "store_id": "st-3",
+      "requested_at": "2025-12-26T09:12:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-12-26T09:12:00-05:00 requested",
+        "2025-12-26T11:12:00-05:00 claim_rejected",
+        "2025-12-26T12:08:00-05:00 pending_plan_decision",
+        "2025-12-27T10:59:00-05:00 claim_rejected",
+        "2025-12-29T10:41:00-05:00 pending_plan_decision",
+        "2025-12-31T12:54:00-05:00 ready",
+        "2026-01-01T12:03:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-81 rejected prior_auth_required",
+        "cl-84 paid $15.00"
+      ],
+      "plan_requests": [
+        "pr-7 prior_auth_required withdrawn: Prior authorization form sent by the prescriber",
+        "pr-8 prior_auth_required approved: Corrected prior authorization form sent by the prescriber"
+      ],
+      "cash": null,
+      "amount_due": "$15.00",
+      "payment": "counter $15.00 by p-4 on card-1",
+      "refusals": [
+        "2025-12-31T14:39:00-05:00 on_hold (p-4)"
+      ],
+      "notes": [
+        "2025-12-31T14:00:00-05:00 Pharmacist double-checking the filled bottle against the label",
+        "2025-12-31T16:43:00-05:00 Label check completed"
+      ],
+      "notices": [
+        "n-192 notice.claim_rejected to p-4 (full)",
+        "n-195 notice.plan_decision to p-4 (full)",
+        "n-196 notice.fill_ready to p-4 (full)",
+        "n-197 notice.held to p-4 (full)",
+        "n-198 notice.refused to p-4 (full)",
+        "n-199 notice.released to p-4 (full)"
+      ]
+    },
+    {
+      "example": "lost supply",
+      "fill_id": "f-70",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "warfarin sodium 5 mg",
+      "quantity": 30,
+      "store_id": "st-3",
+      "requested_at": "2025-11-07T11:24:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-11-07T11:24:00-05:00 requested",
+        "2025-11-07T13:24:00-05:00 claim_rejected",
+        "2025-11-07T13:47:00-05:00 pending_plan_decision",
+        "2025-11-10T13:07:00-05:00 claim_rejected",
+        "2025-11-10T14:16:00-05:00 ready",
+        "2025-11-11T12:14:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-76 rejected refill_too_soon (eligible 2025-11-25)"
+      ],
+      "plan_requests": [
+        "pr-6 refill_too_soon denied: Replacement for a lost supply"
+      ],
+      "cash": "$18.00",
+      "amount_due": "$18.00",
+      "payment": "counter $18.00 (cash price) by p-4 on card-1",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-181 notice.claim_rejected to p-4 (full)",
+        "n-182 notice.plan_decision to p-4 (full)",
+        "n-183 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "quantity above the plan limit, changed",
+      "fill_id": "f-35",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "warfarin sodium 5 mg",
+      "quantity": 30,
+      "store_id": "st-3",
+      "requested_at": "2025-06-03T10:40:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-06-03T10:40:00-04:00 requested",
+        "2025-06-03T12:40:00-04:00 claim_rejected",
+        "2025-06-03T13:21:00-04:00 ready",
+        "2025-06-03T14:08:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-37 rejected quantity_limit",
+        "cl-38 paid $4.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$4.00",
+      "payment": "counter $4.00 by p-4 on card-1",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-87 notice.claim_rejected to p-1 (full)",
+        "n-88 notice.claim_rejected to p-4 (full)",
+        "n-89 notice.fill_ready to p-1 (full)",
+        "n-90 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "waited for stock, moved to another store",
+      "fill_id": "f-20",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "atorvastatin calcium 40 mg",
+      "quantity": 30,
+      "store_id": "st-3",
+      "requested_at": "2025-04-02T09:15:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-04-02T09:15:00-04:00 requested",
+        "2025-04-02T11:15:00-04:00 waiting_stock",
+        "2025-04-03T09:31:00-04:00 ready",
+        "2025-04-04T13:34:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-21 paid $12.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$12.00",
+      "payment": "counter $12.00 by p-4 on card-1",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-37 notice.fill_ready to p-1 (full)",
+        "n-38 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "waited for stock until a restock",
+      "fill_id": "f-6",
+      "patient": "p-3 Mia Rivera",
+      "drug": "albuterol sulfate 108 mcg (90 mcg base) per actuation",
+      "quantity": 1,
+      "store_id": "st-1",
+      "requested_at": "2025-01-14T20:52:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-01-14T20:52:00-05:00 requested",
+        "2025-01-14T22:52:00-05:00 waiting_stock",
+        "2025-01-15T15:41:00-05:00 ready",
+        "2025-01-16T18:33:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-7 paid $25.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$25.00",
+      "payment": "capture $25.00 by p-2 on card-4",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-10 notice.fill_ready to p-1 (full)",
+        "n-11 notice.fill_ready to p-2 (full)",
+        "n-12 notice.fill_ready to p-3 (full)"
+      ]
+    },
+    {
+      "example": "held during review",
+      "fill_id": "f-34",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "atorvastatin calcium 40 mg",
+      "quantity": 30,
+      "store_id": "st-3",
+      "requested_at": "2025-06-02T09:22:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-06-02T09:22:00-04:00 requested",
+        "2025-06-02T15:07:00-04:00 ready",
+        "2025-06-03T14:07:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-36 paid $12.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$12.00",
+      "payment": "counter $12.00 by p-4 on card-1",
+      "refusals": [],
+      "notes": [
+        "2025-06-02T09:42:00-04:00 Pharmacist confirming the dose with the prescriber's office",
+        "2025-06-02T13:27:00-04:00 The prescriber's office confirmed the dose"
+      ],
+      "notices": [
+        "n-81 notice.held to p-1 (full)",
+        "n-82 notice.held to p-4 (full)",
+        "n-83 notice.released to p-1 (full)",
+        "n-84 notice.released to p-4 (full)",
+        "n-85 notice.fill_ready to p-1 (full)",
+        "n-86 notice.fill_ready to p-4 (full)"
+      ]
+    },
+    {
+      "example": "held while ready, refused at the counter while held",
+      "fill_id": "f-29",
+      "patient": "p-3 Mia Rivera",
+      "drug": "albuterol sulfate 108 mcg (90 mcg base) per actuation",
+      "quantity": 1,
+      "store_id": "st-1",
+      "requested_at": "2025-04-21T21:08:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-04-21T21:08:00-04:00 requested",
+        "2025-04-22T10:00:00-04:00 ready",
+        "2025-04-24T18:22:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-31 paid $25.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$25.00",
+      "payment": "counter $25.00 by p-2 on card-4",
+      "refusals": [
+        "2025-04-22T12:18:00-04:00 on_hold (p-2)"
+      ],
+      "notes": [
+        "2025-04-22T11:23:00-04:00 Counseling note added: speak with the pharmacist at pickup",
+        "2025-04-22T13:54:00-04:00 Counseling note reviewed by the pharmacist"
+      ],
+      "notices": [
+        "n-59 notice.fill_ready to p-1 (full)",
+        "n-60 notice.fill_ready to p-2 (full)",
+        "n-61 notice.fill_ready to p-3 (full)",
+        "n-62 notice.held to p-1 (full)",
+        "n-63 notice.held to p-2 (full)",
+        "n-64 notice.held to p-3 (full)",
+        "n-65 notice.refused to p-1 (full)",
+        "n-66 notice.refused to p-2 (full)",
+        "n-67 notice.refused to p-3 (full)",
+        "n-68 notice.released to p-1 (full)",
+        "n-69 notice.released to p-2 (full)",
+        "n-70 notice.released to p-3 (full)"
+      ]
+    },
+    {
+      "example": "declined card at the counter",
+      "fill_id": "f-101",
+      "patient": "p-1 Sam Rivera",
+      "drug": "sertraline hydrochloride 50 mg",
+      "quantity": 90,
+      "store_id": "st-1",
+      "requested_at": "2026-03-30T19:49:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2026-03-30T19:49:00-04:00 requested",
+        "2026-03-30T21:49:00-04:00 ready",
+        "2026-04-02T17:59:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-109 paid $8.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$8.00",
+      "payment": "counter $8.00 by p-2 on card-4",
+      "refusals": [
+        "2026-04-02T17:54:00-04:00 payment_failed (p-2)"
+      ],
+      "notes": [],
+      "notices": [
+        "n-275 notice.fill_ready to p-1 (full)",
+        "n-276 notice.fill_ready to p-2 (full)",
+        "n-279 notice.refused to p-1 (full)",
+        "n-280 notice.refused to p-2 (full)"
+      ]
+    },
+    {
+      "example": "expired card at the counter",
+      "fill_id": "f-141",
+      "patient": "p-3 Mia Rivera",
+      "drug": "montelukast sodium 4 mg",
+      "quantity": 30,
+      "store_id": "st-1",
+      "requested_at": "2026-10-03T19:01:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2026-10-03T19:01:00-04:00 requested",
+        "2026-10-04T12:00:00-04:00 ready",
+        "2026-10-05T18:10:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-157 paid $10.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$10.00",
+      "payment": "counter $10.00 by p-2 on card-3",
+      "refusals": [
+        "2026-10-04T14:00:00-04:00 on_hold (p-2)",
+        "2026-10-05T18:07:00-04:00 payment_failed (p-2)"
+      ],
+      "notes": [
+        "2026-10-04T13:09:00-04:00 Counseling note added: speak with the pharmacist at pickup",
+        "2026-10-04T15:54:00-04:00 Counseling note reviewed by the pharmacist"
+      ],
+      "notices": [
+        "n-405 notice.fill_ready to p-1 (full)",
+        "n-406 notice.fill_ready to p-2 (full)",
+        "n-407 notice.fill_ready to p-3 (full)",
+        "n-408 notice.held to p-1 (full)",
+        "n-409 notice.held to p-2 (full)",
+        "n-410 notice.held to p-3 (full)",
+        "n-411 notice.refused to p-1 (full)",
+        "n-412 notice.refused to p-2 (full)",
+        "n-413 notice.refused to p-3 (full)",
+        "n-414 notice.released to p-1 (full)",
+        "n-415 notice.released to p-2 (full)",
+        "n-416 notice.released to p-3 (full)",
+        "n-417 notice.refused to p-1 (full)",
+        "n-418 notice.refused to p-2 (full)",
+        "n-419 notice.refused to p-3 (full)"
+      ]
+    },
+    {
+      "example": "arrived after closing",
+      "fill_id": "f-53",
+      "patient": "p-3 Mia Rivera",
+      "drug": "montelukast sodium 4 mg",
+      "quantity": 30,
+      "store_id": "st-1",
+      "requested_at": "2025-09-06T20:46:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-09-06T20:46:00-04:00 requested",
+        "2025-09-07T12:00:00-04:00 ready",
+        "2025-09-10T18:01:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-58 paid $10.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$10.00",
+      "payment": "counter $10.00 by p-2 on card-4",
+      "refusals": [
+        "2025-09-08T21:30:00-04:00 store_closed (p-2)"
+      ],
+      "notes": [],
+      "notices": [
+        "n-134 notice.fill_ready to p-1 (full)",
+        "n-135 notice.fill_ready to p-2 (full)",
+        "n-136 notice.fill_ready to p-3 (full)",
+        "n-137 notice.refused to p-1 (full)",
+        "n-138 notice.refused to p-2 (full)",
+        "n-139 notice.refused to p-3 (full)"
+      ]
+    },
+    {
+      "example": "arrived before the fill was ready",
+      "fill_id": "f-60",
+      "patient": "p-3 Mia Rivera",
+      "drug": "montelukast sodium 4 mg",
+      "quantity": 30,
+      "store_id": "st-2",
+      "requested_at": "2025-10-08T19:14:00-04:00",
+      "state": "collected",
+      "timeline": [
+        "2025-10-08T19:14:00-04:00 requested",
+        "2025-10-08T21:14:00-04:00 ready",
+        "2025-10-10T17:55:00-04:00 collected"
+      ],
+      "claims": [
+        "cl-66 paid $10.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$10.00",
+      "payment": "counter $10.00 by p-2 on card-4",
+      "refusals": [
+        "2025-10-08T19:45:00-04:00 not_ready (p-2)"
+      ],
+      "notes": [],
+      "notices": [
+        "n-152 notice.refused to p-1 (full)",
+        "n-153 notice.refused to p-2 (full)",
+        "n-154 notice.refused to p-3 (full)",
+        "n-155 notice.fill_ready to p-1 (full)",
+        "n-156 notice.fill_ready to p-2 (full)",
+        "n-157 notice.fill_ready to p-3 (full)"
+      ]
+    },
+    {
+      "example": "collector not authorized after a revocation",
+      "fill_id": "f-68",
+      "patient": "p-3 Mia Rivera",
+      "drug": "amoxicillin 250 mg/5 mL",
+      "quantity": 150,
+      "store_id": "st-2",
+      "requested_at": "2025-11-03T10:00:00-05:00",
+      "state": "collected",
+      "timeline": [
+        "2025-11-03T10:00:00-05:00 requested",
+        "2025-11-03T12:00:00-05:00 ready",
+        "2025-11-03T18:30:00-05:00 collected"
+      ],
+      "claims": [
+        "cl-74 paid $5.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$5.00",
+      "payment": "counter $5.00 by p-2 on card-4",
+      "refusals": [
+        "2025-11-03T15:40:00-05:00 collector_not_authorized (p-4)"
+      ],
+      "notes": [],
+      "notices": [
+        "n-172 notice.fill_ready to p-1 (full)",
+        "n-173 notice.fill_ready to p-2 (full)",
+        "n-174 notice.fill_ready to p-3 (full)",
+        "n-175 notice.refused to p-1 (full)",
+        "n-176 notice.refused to p-2 (full)",
+        "n-177 notice.refused to p-3 (full)"
+      ]
+    },
+    {
+      "example": "returned to stock after the pickup warning",
+      "fill_id": "f-95",
+      "patient": "p-4 Elena Ortiz",
+      "drug": "amlodipine besylate 5 mg",
+      "quantity": 90,
+      "store_id": "st-3",
+      "requested_at": "2026-03-09T09:54:00-04:00",
+      "state": "returned_to_stock",
+      "timeline": [
+        "2026-03-09T09:54:00-04:00 requested",
+        "2026-03-09T11:54:00-04:00 claim_rejected",
+        "2026-03-17T00:00:00-04:00 ready",
+        "2026-03-27T00:00:00-04:00 returned_to_stock"
+      ],
+      "claims": [
+        "cl-100 rejected refill_too_soon (eligible 2026-03-17)",
+        "cl-102 paid $3.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$3.00",
+      "payment": null,
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-243 notice.claim_rejected to p-1 (full)",
+        "n-244 notice.claim_rejected to p-4 (full)",
+        "n-249 notice.fill_ready to p-1 (full)",
+        "n-250 notice.fill_ready to p-4 (full)",
+        "n-253 notice.return_warning to p-1 (full)",
+        "n-254 notice.return_warning to p-4 (full)",
+        "n-255 notice.returned to p-1 (full)",
+        "n-256 notice.returned to p-4 (full)"
+      ]
+    },
+    {
+      "example": "prepaid, then cancelled when ready",
+      "fill_id": "f-97",
+      "patient": "p-1 Sam Rivera",
+      "drug": "sertraline hydrochloride 50 mg",
+      "quantity": 90,
+      "store_id": "st-1",
+      "requested_at": "2026-03-17T20:27:00-04:00",
+      "state": "cancelled (agent, from ready)",
+      "timeline": [
+        "2026-03-17T20:27:00-04:00 requested",
+        "2026-03-17T22:27:00-04:00 claim_rejected",
+        "2026-03-27T00:00:00-04:00 ready",
+        "2026-03-29T19:42:00-04:00 cancelled"
+      ],
+      "claims": [
+        "cl-103 rejected refill_too_soon (eligible 2026-03-27)",
+        "cl-104 paid $8.00"
+      ],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": "$8.00",
+      "payment": "prepayment voided $8.00",
+      "refusals": [],
+      "notes": [],
+      "notices": [
+        "n-251 notice.claim_rejected to p-1 (full)",
+        "n-252 notice.claim_rejected to p-2 (full)",
+        "n-257 notice.fill_ready to p-1 (full)",
+        "n-258 notice.fill_ready to p-2 (full)",
+        "n-261 notice.payment_voided to p-1 (full)"
+      ]
+    },
+    {
+      "example": "cancelled when its prescription expired while on the pharmacist's hold \"Waiting for the prescriber to confirm the quantity\"",
+      "fill_id": "f-86",
+      "patient": "p-3 Mia Rivera",
+      "drug": "albuterol sulfate 108 mcg (90 mcg base) per actuation",
+      "quantity": 1,
+      "store_id": "st-1",
+      "requested_at": "2026-01-12T19:40:00-05:00",
+      "state": "cancelled (rx_expired, from requested)",
+      "timeline": [
+        "2026-01-12T19:40:00-05:00 requested",
+        "2026-01-13T23:59:00-05:00 cancelled"
+      ],
+      "claims": [],
+      "plan_requests": [],
+      "cash": null,
+      "amount_due": null,
+      "payment": null,
+      "refusals": [],
+      "notes": [
+        "2026-01-12T20:05:00-05:00 Waiting for the prescriber to confirm the quantity"
+      ],
+      "notices": [
+        "n-217 notice.held to p-1 (full)",
+        "n-218 notice.held to p-2 (full)",
+        "n-219 notice.held to p-3 (full)"
+      ]
+    }
+  ],
+  "loading": {
+    "interface": "Real Core 1.6.0 over MCP stdio: Infra loads each selection with env.load_seed (data, virtual_now and provenance bundle) and reads env.snapshot; the Agent, bound as the account holder p-2, reads mendwell-pharmacy.household.list, fills.list, fills.get for every listed fill, rx.list, rx.get and stores.list; the first staged event, if any, is applied with env.apply_event.",
+    "runtime": "1.6.0",
+    "instants": [
+      {
+        "as_of": "2026-01-01T00:00:00-05:00",
+        "seed_id": "mendwell-delivery-asof-20260101T050000.000Z-5f8252f98e82",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 126,
+          "bundle_dataset_id": "mendwell-delivery-asof-20260101T050000.000Z-5f8252f98e82",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-01-01T00:00:00-05:00",
+        "steps_applied": 224,
+        "steps_withheld": 252,
+        "timers_committed": 0,
+        "fills_in_selection": 77,
+        "fills_listed_by_agent": 41,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "p-1 view+refill+pickup",
+          "p-2 self",
+          "p-3 guardian"
+        ],
+        "latest_requested_at": "2025-12-31T10:11:00-05:00",
+        "open_fills": [
+          "f-75 ready",
+          "f-77 ready"
+        ],
+        "open_fills_seen_by_agent": [],
+        "open_fills_match_core": true,
+        "read_back": {
+          "prescriptions": 16,
+          "fills": 77,
+          "fill_closings": 75,
+          "pharmacist_notes": 10,
+          "refusals": 6,
+          "claims": 84,
+          "plan_requests": 8,
+          "renewals": 0,
+          "authorizations": 5,
+          "charges": 71,
+          "grants": 5,
+          "grant_revocations": 1,
+          "notices": 199
+        },
+        "monthly_read_back_matches_selection": true,
+        "drug_facts_shown": {
+          "rx_id": "rx-16",
+          "drug": "amoxicillin",
+          "facts": 2,
+          "publisher": "DailyMed, U.S. National Library of Medicine"
+        },
+        "atorvastatin_stock": [
+          "st-1 in stock",
+          "st-2 out of stock",
+          "st-3 in stock"
+        ],
+        "staged_events_available": 20,
+        "first_staged_event": {
+          "event_id": "mendwell-delivery-s-225",
+          "at": "2026-01-01T10:00:00-05:00",
+          "operation": "grant.changed",
+          "status": "committed",
+          "target_after": "grant g-6 active"
+        }
+      },
+      {
+        "as_of": "2026-03-27T00:00:00.001-04:00",
+        "seed_id": "mendwell-delivery-asof-20260327T040000.001Z-da95da619604",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 161,
+          "bundle_dataset_id": "mendwell-delivery-asof-20260327T040000.001Z-da95da619604",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-03-27T00:00:00.001-04:00",
+        "steps_applied": 286,
+        "steps_withheld": 190,
+        "timers_committed": 3,
+        "fills_in_selection": 97,
+        "fills_listed_by_agent": 55,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "p-1 view+refill+pickup",
+          "p-2 self",
+          "p-3 guardian"
+        ],
+        "latest_requested_at": "2026-03-17T20:27:00-04:00",
+        "open_fills": [
+          "f-97 ready"
+        ],
+        "open_fills_seen_by_agent": [
+          "f-97 ready"
+        ],
+        "open_fills_match_core": true,
+        "read_back": {
+          "prescriptions": 29,
+          "fills": 97,
+          "fill_closings": 96,
+          "pharmacist_notes": 11,
+          "refusals": 6,
+          "claims": 104,
+          "plan_requests": 8,
+          "renewals": 2,
+          "authorizations": 6,
+          "charges": 88,
+          "grants": 7,
+          "grant_revocations": 1,
+          "notices": 258
+        },
+        "monthly_read_back_matches_selection": true,
+        "drug_facts_shown": {
+          "rx_id": "rx-29",
+          "drug": "amoxicillin",
+          "facts": 2,
+          "publisher": "DailyMed, U.S. National Library of Medicine"
+        },
+        "atorvastatin_stock": [
+          "st-1 in stock",
+          "st-2 out of stock",
+          "st-3 in stock"
+        ],
+        "staged_events_available": 6,
+        "first_staged_event": {
+          "event_id": "mendwell-delivery-s-391",
+          "at": "2026-09-09T09:40:00-04:00",
+          "operation": "rx.received",
+          "status": "committed",
+          "target_after": "prescription rx-30 stored"
+        }
+      },
+      {
+        "as_of": "2026-11-18T12:00:00-05:00",
+        "seed_id": "mendwell-delivery-asof-20261118T170000.000Z-bb642a6019d9",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 218,
+          "bundle_dataset_id": "mendwell-delivery-asof-20261118T170000.000Z-bb642a6019d9",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-11-18T12:00:00-05:00",
+        "steps_applied": 440,
+        "steps_withheld": 36,
+        "timers_committed": 0,
+        "fills_in_selection": 150,
+        "fills_listed_by_agent": 84,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "p-1 view+refill+pickup",
+          "p-2 self",
+          "p-3 guardian"
+        ],
+        "latest_requested_at": "2026-11-02T09:56:00-05:00",
+        "open_fills": [],
+        "open_fills_seen_by_agent": [],
+        "open_fills_match_core": true,
+        "read_back": {
+          "prescriptions": 32,
+          "fills": 150,
+          "fill_closings": 150,
+          "pharmacist_notes": 19,
+          "refusals": 11,
+          "claims": 166,
+          "plan_requests": 13,
+          "renewals": 4,
+          "authorizations": 15,
+          "charges": 135,
+          "grants": 8,
+          "grant_revocations": 1,
+          "notices": 448
+        },
+        "monthly_read_back_matches_selection": true,
+        "drug_facts_shown": {
+          "rx_id": "rx-32",
+          "drug": "albuterol sulfate",
+          "facts": 2,
+          "publisher": "DailyMed, U.S. National Library of Medicine"
+        },
+        "atorvastatin_stock": [
+          "st-1 in stock",
+          "st-2 out of stock",
+          "st-3 in stock"
+        ],
+        "staged_events_available": 4,
+        "first_staged_event": {
+          "event_id": "mendwell-delivery-s-448",
+          "at": "2026-12-04T14:48:00-05:00",
+          "operation": "rx.received",
+          "status": "committed",
+          "target_after": "prescription rx-33 stored"
+        }
+      },
+      {
+        "as_of": "2026-12-15T00:00:00-05:00",
+        "seed_id": "mendwell-delivery-asof-20261215T050000.000Z-27a1bdadffba",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 227,
+          "bundle_dataset_id": "mendwell-delivery-asof-20261215T050000.000Z-27a1bdadffba",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2026-12-15T00:00:00-05:00",
+        "steps_applied": 460,
+        "steps_withheld": 16,
+        "timers_committed": 0,
+        "fills_in_selection": 154,
+        "fills_listed_by_agent": 87,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "p-1 view+refill+pickup",
+          "p-2 self",
+          "p-3 guardian"
+        ],
+        "latest_requested_at": "2026-12-08T09:45:00-05:00",
+        "open_fills": [],
+        "open_fills_seen_by_agent": [],
+        "open_fills_match_core": true,
+        "read_back": {
+          "prescriptions": 36,
+          "fills": 154,
+          "fill_closings": 154,
+          "pharmacist_notes": 19,
+          "refusals": 11,
+          "claims": 170,
+          "plan_requests": 13,
+          "renewals": 7,
+          "authorizations": 16,
+          "charges": 139,
+          "grants": 9,
+          "grant_revocations": 2,
+          "notices": 462
+        },
+        "monthly_read_back_matches_selection": true,
+        "drug_facts_shown": {
+          "rx_id": "rx-35",
+          "drug": "amoxicillin",
+          "facts": 2,
+          "publisher": "DailyMed, U.S. National Library of Medicine"
+        },
+        "atorvastatin_stock": [
+          "st-1 in stock",
+          "st-2 in stock",
+          "st-3 in stock"
+        ],
+        "staged_events_available": 1,
+        "first_staged_event": {
+          "event_id": "mendwell-delivery-s-475",
+          "at": "2026-12-31T10:00:00-05:00",
+          "operation": "grant.changed",
+          "status": "committed",
+          "target_after": "grant g-10 active"
+        }
+      },
+      {
+        "as_of": "2027-01-01T00:00:00-05:00",
+        "seed_id": "mendwell-delivery-asof-20270101T050000.000Z-e391cc6fd932",
+        "load": {
+          "tool": "env.load_seed",
+          "status": "ready",
+          "loaded_objects": 233,
+          "bundle_dataset_id": "mendwell-delivery-asof-20270101T050000.000Z-e391cc6fd932",
+          "automated_checks": "pass"
+        },
+        "agent_clock": "2027-01-01T00:00:00-05:00",
+        "steps_applied": 476,
+        "steps_withheld": 0,
+        "timers_committed": 0,
+        "fills_in_selection": 158,
+        "fills_listed_by_agent": 88,
+        "listed_ids_match_grants": true,
+        "states_match_app_reads": true,
+        "household_powers": [
+          "p-1 view+refill+pickup",
+          "p-2 self",
+          "p-3 guardian"
+        ],
+        "latest_requested_at": "2026-12-30T19:34:00-05:00",
+        "open_fills": [],
+        "open_fills_seen_by_agent": [],
+        "open_fills_match_core": true,
+        "read_back": {
+          "prescriptions": 37,
+          "fills": 158,
+          "fill_closings": 158,
+          "pharmacist_notes": 19,
+          "refusals": 11,
+          "claims": 175,
+          "plan_requests": 15,
+          "renewals": 9,
+          "authorizations": 16,
+          "charges": 143,
+          "grants": 10,
+          "grant_revocations": 2,
+          "notices": 472
+        },
+        "monthly_read_back_matches_selection": true,
+        "drug_facts_shown": {
+          "rx_id": "rx-35",
+          "drug": "amoxicillin",
+          "facts": 2,
+          "publisher": "DailyMed, U.S. National Library of Medicine"
+        },
+        "atorvastatin_stock": [
+          "st-1 in stock",
+          "st-2 in stock",
+          "st-3 in stock"
+        ],
+        "staged_events_available": 0,
+        "first_staged_event": null,
+        "monthly_read_back": {
+          "2025-01": {
+            "prescriptions": 11,
+            "fills": 11,
+            "fill_closings": 11,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 12,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 2,
+            "charges": 10,
+            "grants": 2,
+            "grant_revocations": 0,
+            "notices": 21
+          },
+          "2025-02": {
+            "prescriptions": 1,
+            "fills": 4,
+            "fill_closings": 4,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 4,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 1,
+            "charges": 4,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 8
+          },
+          "2025-03": {
+            "prescriptions": 0,
+            "fills": 4,
+            "fill_closings": 3,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 4,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 3,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 7
+          },
+          "2025-04": {
+            "prescriptions": 0,
+            "fills": 10,
+            "fill_closings": 11,
+            "pharmacist_notes": 2,
+            "refusals": 1,
+            "claims": 11,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 1,
+            "charges": 10,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 34
+          },
+          "2025-05": {
+            "prescriptions": 1,
+            "fills": 4,
+            "fill_closings": 4,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 4,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 4,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 10
+          },
+          "2025-06": {
+            "prescriptions": 0,
+            "fills": 5,
+            "fill_closings": 3,
+            "pharmacist_notes": 2,
+            "refusals": 0,
+            "claims": 6,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 3,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 16
+          },
+          "2025-07": {
+            "prescriptions": 0,
+            "fills": 9,
+            "fill_closings": 11,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 11,
+            "plan_requests": 2,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 10,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 25
+          },
+          "2025-08": {
+            "prescriptions": 0,
+            "fills": 4,
+            "fill_closings": 4,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 4,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 4,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 9
+          },
+          "2025-09": {
+            "prescriptions": 1,
+            "fills": 8,
+            "fill_closings": 6,
+            "pharmacist_notes": 2,
+            "refusals": 1,
+            "claims": 7,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 6,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 16
+          },
+          "2025-10": {
+            "prescriptions": 0,
+            "fills": 7,
+            "fill_closings": 9,
+            "pharmacist_notes": 0,
+            "refusals": 2,
+            "claims": 9,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 1,
+            "charges": 8,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 22
+          },
+          "2025-11": {
+            "prescriptions": 1,
+            "fills": 4,
+            "fill_closings": 4,
+            "pharmacist_notes": 2,
+            "refusals": 1,
+            "claims": 4,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 4,
+            "grants": 1,
+            "grant_revocations": 1,
+            "notices": 15
+          },
+          "2025-12": {
+            "prescriptions": 1,
+            "fills": 7,
+            "fill_closings": 5,
+            "pharmacist_notes": 2,
+            "refusals": 1,
+            "claims": 8,
+            "plan_requests": 2,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 5,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 16
+          },
+          "2026-01": {
+            "prescriptions": 12,
+            "fills": 12,
+            "fill_closings": 14,
+            "pharmacist_notes": 1,
+            "refusals": 0,
+            "claims": 10,
+            "plan_requests": 0,
+            "renewals": 2,
+            "authorizations": 1,
+            "charges": 11,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 31
+          },
+          "2026-02": {
+            "prescriptions": 0,
+            "fills": 3,
+            "fill_closings": 2,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 3,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 2,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 7
+          },
+          "2026-03": {
+            "prescriptions": 1,
+            "fills": 9,
+            "fill_closings": 9,
+            "pharmacist_notes": 2,
+            "refusals": 0,
+            "claims": 12,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 1,
+            "charges": 7,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 39
+          },
+          "2026-04": {
+            "prescriptions": 0,
+            "fills": 7,
+            "fill_closings": 8,
+            "pharmacist_notes": 2,
+            "refusals": 1,
+            "claims": 7,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 2,
+            "charges": 7,
+            "grants": 1,
+            "grant_revocations": 0,
+            "notices": 18
+          },
+          "2026-05": {
+            "prescriptions": 0,
+            "fills": 5,
+            "fill_closings": 4,
+            "pharmacist_notes": 0,
+            "refusals": 1,
+            "claims": 4,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 1,
+            "charges": 4,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 13
+          },
+          "2026-06": {
+            "prescriptions": 0,
+            "fills": 7,
+            "fill_closings": 6,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 13,
+            "plan_requests": 2,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 5,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 33
+          },
+          "2026-07": {
+            "prescriptions": 0,
+            "fills": 7,
+            "fill_closings": 9,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 7,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 2,
+            "charges": 7,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 17
+          },
+          "2026-08": {
+            "prescriptions": 0,
+            "fills": 4,
+            "fill_closings": 4,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 5,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 1,
+            "charges": 4,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 14
+          },
+          "2026-09": {
+            "prescriptions": 1,
+            "fills": 7,
+            "fill_closings": 7,
+            "pharmacist_notes": 2,
+            "refusals": 0,
+            "claims": 9,
+            "plan_requests": 1,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 6,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 29
+          },
+          "2026-10": {
+            "prescriptions": 2,
+            "fills": 10,
+            "fill_closings": 9,
+            "pharmacist_notes": 2,
+            "refusals": 3,
+            "claims": 9,
+            "plan_requests": 0,
+            "renewals": 2,
+            "authorizations": 2,
+            "charges": 8,
+            "grants": 0,
+            "grant_revocations": 0,
+            "notices": 41
+          },
+          "2026-11": {
+            "prescriptions": 0,
+            "fills": 3,
+            "fill_closings": 3,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 4,
+            "plan_requests": 0,
+            "renewals": 0,
+            "authorizations": 0,
+            "charges": 3,
+            "grants": 0,
+            "grant_revocations": 1,
+            "notices": 9
+          },
+          "2026-12": {
+            "prescriptions": 5,
+            "fills": 7,
+            "fill_closings": 8,
+            "pharmacist_notes": 0,
+            "refusals": 0,
+            "claims": 8,
+            "plan_requests": 2,
+            "renewals": 5,
+            "authorizations": 1,
+            "charges": 8,
+            "grants": 2,
+            "grant_revocations": 0,
+            "notices": 22
+          }
+        }
+      }
+    ]
+  }
+}

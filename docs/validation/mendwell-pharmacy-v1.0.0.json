@@ -1,0 +1,934 @@
+{
+  "schema": "mendwell-pharmacy.validation.v1",
+  "checked_on": "2026-11-28",
+  "app": {
+    "app_id": "mendwell-pharmacy",
+    "version": "1.0.0",
+    "package_sha256": "a9f480956a23829420dc39c1fe5341b0aafdea90c704706e1c329d684980a648",
+    "package_sha256_note": "The verifier's digest of apps/mendwell-pharmacy; identical on Node 18.20.8, 22.23.5 and 25.8.1 and in the isolated copy. This validation report is outside the package and does not change it."
+  },
+  "base": {
+    "repository": "MatrAIx-ai/Personal-Agents-Last-Exam",
+    "branch": "main",
+    "commit": "25d559778696dff849bb88fcca03f325185f2599",
+    "subject": "Merge pull request #288: preserve Mail identity across source resets",
+    "taken_from_base": "runtime/, examples/, docs/ (except the Mendwell validation documents), scripts/, tests/ and the root files",
+    "submission_files": "apps/mendwell-pharmacy, the Mendwell entry in apps.registry.json, the App count in runtime/tests/clock.test.cjs and docs/validation/mendwell-pharmacy-v1.0.0.md and .json",
+    "runtime_tree_sha256": "a1325458390f5a1b474a8598c663c35160a53ac30dce7afac4646587a3e889a3",
+    "runtime_tree_note": "node apps/mendwell-pharmacy/evidence/tools/digest.cjs over runtime/, which includes the App count edit in runtime/tests/clock.test.cjs (seven to eight existing App packages); the same tree at the base commit, before that edit, is 9849b59da9ff9dfd312000904cc7070cd9b9f620a9845f82ee5692e0f63d80c1",
+    "mail_package_sha256": "ba9112331a30880cc6e679447f6dfe17936a59d9c26eea02610e6c3abf696ebd"
+  },
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "receiver": "mail 1.3.0",
+  "proposal": {
+    "path": "proposals/environment/mendwell-pharmacy.md",
+    "pr": 63,
+    "approved_revision": "c7ddf519b029cebe1c93c5bed50edb889cf34deb",
+    "url": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/c7ddf519b029cebe1c93c5bed50edb889cf34deb/proposals/environment/mendwell-pharmacy.md"
+  },
+  "registry": {
+    "file": "apps.registry.json",
+    "entry": {
+      "app_id": "mendwell-pharmacy",
+      "version": "1.0.0",
+      "path": "apps/mendwell-pharmacy"
+    },
+    "initial_time": "2026-11-18T09:00:00-08:00",
+    "fixture_clock": "2026-11-18T12:00:00-05:00",
+    "apps": 8,
+    "shared_test": "runtime/tests/clock.test.cjs counts eight existing App packages"
+  },
+  "fixture": {
+    "seed_id": "mendwell-fixture-1",
+    "prescriptions": 25,
+    "fills": 158,
+    "notices": 443,
+    "bytes": 577203,
+    "history_from": "2025-01-01",
+    "task_timeline_from": "2026-01-01",
+    "clock": "2026-11-18T12:00:00-05:00",
+    "generator": "dev/generate-history.cjs"
+  },
+  "runs": [
+    {
+      "node": "v18.20.8",
+      "npm_test": {
+        "total": 306,
+        "passed": 306,
+        "business_tests": 275,
+        "fixture_check_tests": 3,
+        "dataset_tests": 28
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "history_generator_check": "passed",
+      "dataset_generate_check": "passed",
+      "dataset_coverage_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 59,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ]
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 85
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 113
+      },
+      "browser_acceptance": {
+        "checks": 131,
+        "restricted_checks": 26,
+        "browser": "chromium 141.0.7390.37",
+        "browser_timezone": "Asia/Tokyo",
+        "unexpected_console_errors": 0
+      },
+      "root_suite": "22/22 stages",
+      "host_tests": "4/4",
+      "shared_browser_job": "passed (seven personal Apps)",
+      "isolated_copy": "not run on this version (run on v25.8.1)",
+      "binary": "official darwin-arm64 binary from nodejs.org, archive SHA-256 checked against the release's SHASUMS256.txt"
+    },
+    {
+      "node": "v22.23.5",
+      "npm_test": {
+        "total": 306,
+        "passed": 306,
+        "business_tests": 275,
+        "fixture_check_tests": 3,
+        "dataset_tests": 28
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "history_generator_check": "passed",
+      "dataset_generate_check": "passed",
+      "dataset_coverage_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 59,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ]
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 85
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 113
+      },
+      "browser_acceptance": {
+        "checks": 131,
+        "restricted_checks": 26,
+        "browser": "chromium 141.0.7390.37",
+        "browser_timezone": "Asia/Tokyo",
+        "unexpected_console_errors": 0
+      },
+      "root_suite": "22/22 stages",
+      "host_tests": "4/4",
+      "shared_browser_job": "passed (seven personal Apps)",
+      "isolated_copy": "not run on this version (run on v25.8.1)",
+      "binary": "official darwin-arm64 binary from nodejs.org, archive SHA-256 checked against the release's SHASUMS256.txt"
+    },
+    {
+      "node": "v25.8.1",
+      "npm_test": {
+        "total": 306,
+        "passed": 306,
+        "business_tests": 275,
+        "fixture_check_tests": 3,
+        "dataset_tests": 28
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "history_generator_check": "passed",
+      "dataset_generate_check": "passed",
+      "dataset_coverage_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 59,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ]
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 85
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 113
+      },
+      "browser_acceptance": {
+        "checks": 131,
+        "restricted_checks": 26,
+        "browser": "chromium 141.0.7390.37",
+        "browser_timezone": "Asia/Tokyo",
+        "unexpected_console_errors": 0
+      },
+      "root_suite": "22/22 stages",
+      "host_tests": "4/4",
+      "shared_browser_job": "passed (seven personal Apps)",
+      "isolated_copy": "passed"
+    }
+  ],
+  "standalone_copy": "passed (apps/mendwell-pharmacy, runtime/, examples/apps/mail, package.json): verifier (same package digest), npm test, fixture and history generator checks, delivery dataset checks with the coverage report and its MCP loading, MCP and Mail scripts",
+  "public_verifier_checks": [
+    "Manifest, schemas, seed, references, media and declarations load",
+    "business standalone command succeeds",
+    "event-example standalone command succeeds",
+    "Agent discovery excludes administrative tools",
+    "Published input/output for mendwell-pharmacy.household.list",
+    "Published input/output for mendwell-pharmacy.grants.list",
+    "Published input/output for mendwell-pharmacy.cards.list",
+    "Published input/output for mendwell-pharmacy.stores.list",
+    "Published input/output for mendwell-pharmacy.rx.list",
+    "Published input/output for mendwell-pharmacy.rx.get",
+    "Published input/output for mendwell-pharmacy.fills.list",
+    "Published input/output for mendwell-pharmacy.fills.get",
+    "Published input/output for mendwell-pharmacy.grants.change.preview",
+    "Published input/output for mendwell-pharmacy.grants.change.confirm",
+    "Published input/output for mendwell-pharmacy.fills.choose_cash.preview",
+    "Published input/output for mendwell-pharmacy.fills.choose_cash.confirm",
+    "Published input/output for mendwell-pharmacy.fills.prepay.preview",
+    "Published input/output for mendwell-pharmacy.fills.prepay.confirm",
+    "Published input/output for mendwell-pharmacy.fills.cancel.preview",
+    "Published input/output for mendwell-pharmacy.fills.cancel.confirm",
+    "Published input/output for mendwell-pharmacy.fills.request",
+    "Published input/output for mendwell-pharmacy.fills.change_quantity",
+    "Published input/output for mendwell-pharmacy.fills.change_store",
+    "Published input/output for mendwell-pharmacy.fills.wait",
+    "Published input/output for mendwell-pharmacy.fills.set_collector",
+    "Published input/output for mendwell-pharmacy.plan_requests.create",
+    "Published input/output for mendwell-pharmacy.plan_requests.withdraw",
+    "Published input/output for mendwell-pharmacy.renewals.create",
+    "Published input/output for mendwell-pharmacy.renewals.withdraw",
+    "Infra exposes the lifecycle interface and host clock operation",
+    "Agent cannot call env.advance_time",
+    "Agent cannot call env.apply_event",
+    "Agent cannot call env.event_status",
+    "Agent cannot call env.load_seed",
+    "Agent cannot call env.reset",
+    "Agent cannot call env.snapshot",
+    "Agent cannot call env.validate_bundle",
+    "Real MCP business read succeeds",
+    "MCP content and structured result agree",
+    "MCP envelope remains unchanged",
+    "Read does not change business data",
+    "Caller cannot override run or role",
+    "Infra loads history, relationships and assets",
+    "Loaded historical records match input",
+    "Invalid history is rejected",
+    "Rejected history leaves business state unchanged",
+    "Declared incoming event commits",
+    "Event changes business data",
+    "Committed event is queryable",
+    "Identical event retry is deduplicated",
+    "Duplicate has no additional state change",
+    "Same event ID with changed content is rejected",
+    "Old version cannot reset a changed App",
+    "A separate run retains its own initial data",
+    "Reset returns ready",
+    "Reset restores the loaded business baseline",
+    "Reset advances epoch",
+    "New MCP process reads persisted App state",
+    "Submitted package remains unchanged"
+  ],
+  "public_verifier_remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ],
+  "mcp_integration_checks": [
+    "The package wire schema is byte-identical to the runtime contract",
+    "T02 [MCP] two Agent clients race one version: exactly one request commits and the other is stale_version",
+    "T02 [MCP] the stored data holds exactly the winner's fill",
+    "T02 [MCP] a fresh retry of the losing request then sees duplicate_request",
+    "T13 [MCP] past its review time fills.get and fills.list give the same ready view",
+    "T13 [MCP] a cancel preview returns a token listing the reversal of the paid claim",
+    "T13 [MCP] env.snapshot still holds exactly the stored business data after the request",
+    "T13 [MCP] past its return deadline both give the same returned_to_stock view with the claim reversed",
+    "T13 [MCP] a new cancel preview returns invalid_state",
+    "T13 [MCP] a cancel confirm with the earlier token, a fresh request ID and the current version is stale_preview",
+    "T13 [MCP] with exactly one denial audit row of its own and nothing stored",
+    "T13 [MCP] throughout, env.snapshot holds exactly the stored business data after the request",
+    "T13 [MCP] the next fresh successful write commits",
+    "T13 [MCP] review, warning and return persisted once, each dated at its due time",
+    "T13 [MCP] the warning and the reversal carry their due times",
+    "T13 [MCP] their notices once, at their due times",
+    "T13 [MCP] the persisted views equal the projected ones, in both reads",
+    "T13 [MCP] a further write adds nothing for that fill",
+    "T21 an exact replay returns the stored receipt marked duplicate",
+    "T21 the replayed receipt equals the original",
+    "T21 the replay persists no catch-up: stored data, receipts, audit, clock and version unchanged",
+    "T21 the stored fill is still requested after the replay",
+    "W5 [MCP] the prepaid cancel preview lists the claim reversal and the authorization void",
+    "W5 [MCP] the prepaid cancellation commits and an identical retry returns the original receipt",
+    "W5 [MCP] the replayed receipt equals the original",
+    "W5 [MCP] the replay changes no business data, notice, receipt or version",
+    "W5 [MCP] the persisted fill is cancelled once at the ready stage, its authorization voided and its claim reversed",
+    "W5 [MCP] the cancellation wrote the full void entry and the card owner's masked entry",
+    "W5 [MCP] the terminal fill stays readable in both reads with its voided authorization and reversed claim",
+    "W5 [MCP] after the cancellation new previews and writes without a confirmation are invalid_state",
+    "W5 [MCP] the pre-terminal token with a fresh request ID and the current version is stale_preview",
+    "W5 [MCP] none of these controls changes business data, notices, receipts or the version",
+    "[MCP] a fresh ignored event commits",
+    "[MCP] it commits the overdue review, the clock, one revision and exactly one allow audit row of its own",
+    "[MCP] the ignored release adds no notice of its own: the only new entries are the overdue review's, at its due time",
+    "[MCP] its receipt is the original event response, and every earlier receipt is unchanged",
+    "[MCP] a fresh backdated event is invalid_event and a malformed one invalid_arguments",
+    "[MCP] each adds exactly one denial row of its own",
+    "[MCP] both preserve data, receipts, version and clock",
+    "[MCP] an App error after catch-up returns its code",
+    "[MCP] the catch-up rolls back: data, notices, receipts, version and clock unchanged, with exactly one denial row of its own",
+    "[MCP] no receipt was stored: the same request ID runs again",
+    "[MCP] Core rejects the event's bundle after the handler ran",
+    "[MCP] it rolls back data, notices, receipts, version and clock with exactly one denial row of its own and no receipt",
+    "T21 an unknown fill is not_found",
+    "T21 a repeated request ID returns the stored receipt",
+    "T21 the replayed request receipt equals the original response",
+    "T21 the same request ID with a changed payload is idempotency_conflict",
+    "T21 the Agent cannot apply events or reset",
+    "T22 the clock has moved past the event before its replay",
+    "T22 a repeated event ID returns the stored receipt",
+    "T22 with no second effect on data, receipts, audit rows, clock or version",
+    "T22 the replayed event receipt equals the original event response and the stored receipt",
+    "T22 the same event ID with a changed payload is idempotency_conflict, with exactly one denial row and nothing stored",
+    "T22 a seed loaded after a fill's review time: fills.get and fills.list report the same reviewed fill",
+    "T22 the stored fill is still requested",
+    "T22 the first write persists the review's two claim-rejection notices, dated at the review time",
+    "T22 the second write adds no notice",
+    "T22 the first fresh successful write persists the review once",
+    "T22 the approval is stored before the reset",
+    "T22 the clock was advanced before the reset",
+    "T22 reset is ready",
+    "T22 reset restores the loaded seed and its loaded virtual time, not the fixture clock; approvals and the fill are gone",
+    "T22 reset keeps no pre-reset receipt or audit row, only the reset itself, at a new epoch",
+    "T22 the new epoch reaches the pre-reset revision",
+    "T22 a write with the pre-reset epoch at an equal revision is stale_version",
+    "T22 an unseen event with the pre-reset epoch at an equal revision is stale_version",
+    "T22 the same write with the current epoch commits",
+    "T22 after reset the grant confirm needs a new approval",
+    "T22 the reset fill ID was free again and reissued to the new request",
+    "T22 reset to the same seed is ready",
+    "T22 a plan request brings the fill back to the previewed version",
+    "T22 the old cancel token with the current Core version is stale_preview",
+    "T22 the plan request stays pending",
+    "T22 the restock changes the cash preview's resulting status",
+    "T22 the cash token reused after the restock is stale_preview",
+    "[MCP] a seed carrying an approval is invalid_plugin_result",
+    "[MCP] with exactly one denial row of its own and prior data, version and receipts unchanged",
+    "[MCP] a schema-valid seed missing a price is invalid_seed",
+    "[MCP] a schema-valid seed missing a plan rule is invalid_seed",
+    "[MCP] a schema-valid seed missing a drug is invalid_seed",
+    "[MCP] a schema-valid seed missing a fact source is invalid_seed",
+    "T21 an unknown fill preview is not_found",
+    "T22 a seed with another seed ID loads",
+    "T22 a cancel token previewed under a different seed is stale_preview"
+  ],
+  "mail_integration_checks": [
+    "Mail 1.3.0 is the receiver",
+    "The package wire schema is byte-identical to the runtime contract",
+    "The package wire schema is byte-identical to Mail's receive schema",
+    "Each Mail account's seed and binding were loaded and checked before its Router session started",
+    "One Router session per recipient Mail account, each with its own grant and a digest namespace shared by its Mail state",
+    "Both sessions share one Router state directory and run, one session file each",
+    "Only entries appended in the current epoch are pending, not the seeded history",
+    "Payload for n-2 (notice.held, full) matches the Mail payload schema",
+    "Payload for n-3 (notice.held, full) matches the Mail payload schema",
+    "Payload for n-4 (notice.refused, full) matches the Mail payload schema",
+    "Payload for n-5 (notice.refused, full) matches the Mail payload schema",
+    "Payload for n-6 (notice.refused, logistics) matches the Mail payload schema",
+    "Each routed entry is published in log order through its recipient's own session and committed there",
+    "An entry without exactly one eligible route stays in the log",
+    "The Router audit shows each request ID and CloudEvents ID built from the Mendwell epoch and the notice ID",
+    "Both Mail clocks were advanced with env.advance_time to Mendwell's time before delivery",
+    "mail-p-1 holds its full hold notice and its logistics refusal, received at the aligned time",
+    "mail-p-2 holds its full hold and refusal notices, received at the aligned time",
+    "The logistics refusal carries only fill, store and amount",
+    "The delivered notice reads back in Mail",
+    "The receipt keeps the notice time as the CloudEvents time",
+    "Publishing leaves Mendwell unchanged",
+    "An identical retry returns each original receipt unchanged, marked duplicate",
+    "A retry creates no second record",
+    "Two simultaneous passes on the run are serialized: both complete as duplicates and neither session halts",
+    "A Mendwell reset keeps both inboxes record for record",
+    "The reset moves Mendwell's clock back to its loaded time, not the fixture clock",
+    "After the reset the lagging Mendwell clock is advanced to the Mail clocks",
+    "After the reset each eligible inbox gets exactly one new message whose ID carries the new epoch",
+    "The clocks agree at the new delivery",
+    "The earlier records are unchanged after the new delivery",
+    "Account IDs with a colon or a dot get digest namespaces used by both their Mail state and their Router sessions, and both are delivered",
+    "A downgrade to pickup queued while the first publish was in flight lands before the next check, and the full entry is not sent",
+    "The downgraded viewer's inbox has only the entry still covered by its remaining grant",
+    "A Mendwell reset between two publishes stops the pass before the next one",
+    "The new epoch has no pending entry, so nothing more is delivered and nothing halts",
+    "The return writes full entries for the viewer, a logistics entry for the pickup holder and the card owner's masked void",
+    "A viewer downgraded to pickup before dispatch gets no full-detail mail, and the card owner who lost pickup access keeps only the masked void",
+    "The downgraded viewer's inbox stays empty",
+    "The masked void shows only the card, amount and void status",
+    "The masked void's Mail source object is the notice itself",
+    "A session built for another run and a hand-assembled session are refused before any clock alignment or publish",
+    "Nothing reaches the other run's inboxes and the source clock keeps its own time",
+    "A session is never built around another run's Router",
+    "Without a granted session for one account its entry stays in the log while the other inbox still receives its own",
+    "A publish the Router does not authorize is refused before dispatch; the pass continues without halting",
+    "A refusal before dispatch creates no Mail record and leaves both sessions available",
+    "A session whose Router serves an incompatible contract is held before routing and the other account is still served",
+    "An incompatible contract creates no Mail record in its inbox and halts nothing",
+    "With two granted accounts for one person, the sole compatible route is used instead of being held as ambiguous",
+    "A Router whose contract is known to be incompatible stays excluded while it is also unreachable, so the sole compatible inbox still gets the notice",
+    "A receiver rejection in one session stops the run and the adapter halts",
+    "The other session then reports halted and refuses with run_halted",
+    "The halted adapter refuses with run_halted without calling either Router",
+    "A fresh adapter for the run in the same Infra process refuses at once with the original cause",
+    "A receiver rejection creates no Mail record and leaves Mendwell's committed state",
+    "A Mail reset is detected against the session's checked epoch before any clock change or publish, and the adapter halts every session",
+    "After that stop the reset inbox stays empty and the other keeps only its earlier record",
+    "A Mail reset after the check and before dispatch is refused by the Router with receiver_lifecycle_changed, and the adapter halts on it",
+    "A publish whose Router reply is lost is unknown and halts the adapter",
+    "Infra's stop mechanism then halts every session of the run, and the adapter verifies it",
+    "Reconciliation finds the dispatched message by its ID in the dispatch epoch and reports committed",
+    "The run stays halted after reconciliation",
+    "Without a shared stop mechanism the adapter refuses to start",
+    "When the stop mechanism fails the halt is reported unverified, never healthy",
+    "A fresh adapter for that run in the same Infra process still refuses, so nothing more is published there",
+    "With two granted inboxes for p-1, a Router unreachable for one pass, alternating, never turns the ambiguous entry into a delivery",
+    "A closed Mail client for one of them keeps the entry waiting too",
+    "An entry sent while only one inbox had a session stays with that inbox once the second session exists",
+    "With that inbox's Router paused the retry waits instead of switching to the other inbox",
+    "Once it is back the retry returns the original receipt; the notice exists in exactly one inbox",
+    "A Router discovery that times out returns a resumable setup instead of a stranded Router",
+    "A second session for that account cannot be opened in the run",
+    "Resuming the setup on the same Router delivers the pending notice",
+    "A disconnected Router fails discovery for its own session only; the other inbox is still served",
+    "A Router built for another inbox of the same owner cannot be seen before dispatch; its receipt is caught and every session halts",
+    "Through a spawned Router whose receiver replies after the acknowledgement deadline, the Router records the receiver's acknowledgement as lost",
+    "The adapter reports the publish as unknown and halts, and verifies the halt only once Mail holds the late receive",
+    "Reconciliation by the derived event ID in the dispatch run, account and epoch reports committed only because the receipt and the record agree",
+    "The lost publish left exactly one record, in mail-p-1 only",
+    "The other session reports halted and refuses with run_halted",
+    "The run stays halted after reconciliation",
+    "Mendwell stays committed after an unknown acknowledgement",
+    "Reconciliation is never committed for another event ID, another message, another publisher or another account",
+    "After a receiver reset the unknown outcome reconciles as indeterminate, never committed",
+    "Across spawned Router sessions the shared lock admits one dispatch at a time: while A is held by its receiver, B is refused with concurrent_dispatch and the run stops",
+    "After a concurrent dispatch both sessions report halted, the adapter refuses, and the other inbox gets nothing",
+    "A publish whose Router request times out halts at once, before any probe, and its outcome is unknown",
+    "The delayed request reaches a halted Router and is refused, so the revoked viewer gets nothing",
+    "The queued revocation commits only after the Router settled the delayed request",
+    "When the publish times out, the Router is done with the request while its receive is still unconfirmed in Mail",
+    "When the publish times out, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+    "When the publish times out, the viewer gets the notice before the queued revocation commits, never after it",
+    "When the Router replies that its receiver did not confirm, the Router is done with the request while its receive is still unconfirmed in Mail",
+    "When the Router replies that its receiver did not confirm, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+    "When the Router replies that its receiver did not confirm, the viewer gets the notice before the queued revocation commits, never after it",
+    "When the Router is killed while its receiver holds the delivery, the Router is done with the request while its receive is still unconfirmed in Mail",
+    "When the Router is killed while its receiver holds the delivery, the lock is kept until Mail shows the slow receive committed, and only then is the halt reported",
+    "When the Router is killed while its receiver holds the delivery, the viewer gets the notice before the queued revocation commits, never after it",
+    "A receive still queued in Mail when the adapter fences arrives after the revocation, is refused as stale, and the viewer gets nothing",
+    "Closing a Router that still answers ends or orphans its Mail receiver inside the transaction and leaves that Mail instance unusable",
+    "Closing a Router that still answers leaves the run halted: send() is still pending with the publish lock held, the queued revocation has not run, the viewer's inbox is empty, and status() shows the halt without stop_verified",
+    "Killing a Router ends or orphans its Mail receiver inside the transaction and leaves that Mail instance unusable",
+    "Killing a Router leaves the run halted: send() is still pending with the publish lock held, the queued revocation has not run, the viewer's inbox is empty, and status() shows the halt without stop_verified",
+    "When Infra closes the live Router during settlement, the sender writes nothing more to it and keeps running",
+    "Closing is not an exit: the lock is kept until the Router process has exited, and the revocation commits after it",
+    "After the exit Mail settles the dispatch, and the viewer gets nothing",
+    "A fence whose acknowledgement is lost is retried with the same request and target, and Mail returns the stored receipt",
+    "So the viewer's Mail clock moves by exactly 1 ms and the viewer gets nothing",
+    "Without a bound Mail account nothing is published",
+    "No Mail record is created and the entries stay in the Mendwell log",
+    "A Mail instance whose seed is not loaded fails the receiver check",
+    "A session opened before its Mail seed was loaded cannot be reopened for that account in the run"
+  ],
+  "browser_acceptance_checks": [
+    "The shared Host serves the App-owned Mendwell page: its title, app id and controller, and the first refresh completes",
+    "The controller names all 25 business tools",
+    "Business discovery lists the 25 tools and no management operation",
+    "Household shows exactly the people household.list returns",
+    "The snapshot backs the list: Alex is the bound holder, a guardian of Mia, and holds Sam’s refill and pickup grants",
+    "The grant preview shows the App’s token, the required confirmer and the 30-minute rule, and stores nothing",
+    "Confirm without a confirmation shows the waiting state and writes nothing",
+    "After Refresh the page shows the confirmation applied through dev/confirm.cjs, valid until 12:30 PM EST",
+    "Confirm commits g-3 and uses the confirmation",
+    "The used confirmation is listed as used",
+    "The end of access is entered and shown in Eastern Time",
+    "Confirm waits for the confirmation and stores no view grant",
+    "An expired confirmation is refused as confirmation_invalid with no success message and no grant",
+    "Once refused, the preview shows the expired confirmation and no longer says it is waiting",
+    "Discard closes the preview and writes nothing",
+    "A confirmation given by the wrong person is refused as confirmation_invalid and writes nothing",
+    "dev/confirm.cjs refuses a run that has no state and creates nothing",
+    "dev/confirm.cjs refuses an option without its value and an unknown option before issuing any event",
+    "An unknown typed person ID is answered with “No person with that ID”, and no preview is shown",
+    "A grant preview Mendwell refuses as invalid_state is explained for grants: the same access already held, and an end time that has passed, with no App wording, ID or time",
+    "The preview panel says how the confirmation is given in this local preview without naming a command, and what to do after a reload",
+    "After a reload no preview is kept in the browser, the confirmation stays listed, and the same preview gets the same code, already confirmed",
+    "Confirm commits the refill grant g-4",
+    "A preview changed by another write is caught before sending: new code shown, no confirm sent, g-4 still active",
+    "The grant list shows the end date set by the other change",
+    "A prescription with no fills left offers no fill request and says why; the App refuses one and creates nothing",
+    "Withdrawing asks for confirmation first and sends nothing yet",
+    "Withdraw renewal request withdraws rn-2",
+    "A renewal request is created with its note",
+    "A successful save never shows the “could not load” warning; the status goes from working to refreshing to saved",
+    "A reply after the withdrawal adds no prescription",
+    "A write after a change the page has not read is refused as stale_version",
+    "The old prescription shows it was replaced",
+    "The new prescription has 5 of 5 fills left",
+    "After the refresh settles, the status says the outcome cannot be confirmed, not that nothing changed",
+    "A manual Refresh while the request is unanswered never says “All changes saved”",
+    "A request whose reply is dropped after the commit offers Retry, not success",
+    "While the first request is unanswered, another change is refused on the page and nothing is sent",
+    "Retry replays the stored receipt (duplicate) and the fill exists once",
+    "A request that never reached Mendwell, retried after another change, is reported as not applied and nothing is created",
+    "A form opened before a change made outside the page shows the current quantity after Refresh, says so, and sends nothing",
+    "An edited form is kept after a change made outside the page, marked as changed and saved only through “Save anyway”",
+    "A store change made in the browser is recorded by Mendwell (read through MCP) and the same fill shows the new store after a reload",
+    "A too-soon rejection shows the reason, the eligible date and the recovery actions",
+    "Times are shown in America/New_York, not the browser zone (Asia/Tokyo)",
+    "The snapshot holds the review due at 12:40 PM with the clock at 12:45 PM, so the read applies the due review",
+    "Opening a form with the keyboard moves the focus to its first field",
+    "Ask the plan creates a pending early-refill request with the note stored as entered",
+    "While the plan request is pending, the page explains that the cash price needs the request withdrawn first",
+    "Withdrawing a plan request asks first and sends nothing yet",
+    "Withdraw plan request returns the fill to claim_rejected",
+    "The timeline labels the step as the user’s withdrawal, in order",
+    "Timeline labels come only from the current read: once a new request is sent, the earlier one says Mendwell does not report how it ended; the latest withdrawal is labelled as such",
+    "The wait action is labelled by what it does",
+    "Scheduling stores one resubmission at midnight on the eligible date, even though the refresh after it failed, and the page asks for Refresh",
+    "After the failed refresh a second write is refused until Refresh succeeds, and nothing is sent",
+    "Refresh succeeds and shows the scheduled resubmission",
+    "The cash preview shows the App’s price, store, resulting state and cleared resubmission, and stores nothing",
+    "Confirm switches the fill to cash: ready, $54.00 due, no resubmission",
+    "The timeline names the approval from the plan request the App returns",
+    "An approved plan request resubmits the claim and the fill is ready with nothing due",
+    "After the grant and Refresh, Elena and her fills are visible",
+    "A quantity the medicine does not come in is refused with the quantities it does come in",
+    "Changing the quantity resubmits the claim with the new quantity",
+    "The fill on the new prescription is requested with a review due two hours later",
+    "After the review the claim needs prior authorization",
+    "The prior-authorization request is pending",
+    "Plan requests keeps its own selection: coming from metformin, whose fill has a plan request, it still shows no fill and no fill action until one is chosen",
+    "Selecting pr-12 opens metformin (f-16)",
+    "Plan requests lists the current request of every fill, pending ones first, as stored",
+    "Selecting another plan request replaces the fill with its own",
+    "A withdraw prompt belongs to the request it was opened for: when a change made outside the page replaced that request with a new pending one, Refresh closes the prompt",
+    "A confirmation prompt whose action is no longer offered after Refresh is closed, so nothing stale can be sent",
+    "A denial returns the fill to claim_rejected with the cash option",
+    "Cash after a denied prior authorization makes the fill ready at the cash price",
+    "After a revocation and Refresh, Elena’s records, the selected fill and the unsent store change are gone, and nothing was written",
+    "When Elena shares her records again, the earlier unsent store change is not restored",
+    "The form takes the focus when opened and gives it back to its button when closed",
+    "A detail read denied after the list was read discards that refresh and the reread shows nothing of Elena’s",
+    "A denied detail read clears that person’s records at once, even when the reread fails at its first read",
+    "After a successful Refresh only Sam, Alex and Mia are listed",
+    "Names are recomputed on every refresh: once Elena is no longer visible, the open preview and the unanswered request describe her without her name",
+    "A selection read denied after a revocation purges that person’s records at once, even when the refresh after it fails",
+    "A finished message about a record that is no longer visible is removed on Refresh",
+    "Once the target is no longer visible, the unanswered request is shown without identifying text and cannot be replayed",
+    "A person the App does not name is described in plain words, with the ID only as a secondary reference",
+    "A fill-limited pickup grant shows the logistics view: store, status and amount due, no drug, claim or action",
+    "A version change between the reads of one refresh makes the page read again and show one consistent state",
+    "The pickup view of a held fill reports its state without promising collection, since the pickup read carries no hold",
+    "When refill access drops to pickup, the fill shows only the pickup view, its open form and draft are gone, and the page has no error",
+    "With refill access given again (g-25), the full view returns without the earlier collector form",
+    "An unanswered prepayment is described from the fill as the account may now see it: generic pickup wording after access drops to pickup, with Retry only because prepaying is still allowed",
+    "When the household list of a refresh shows lost access, that person’s records, prompts and messages are removed at once, also when a later read of the same refresh fails",
+    "The next Refresh completes with Sam’s full access back and nothing of Elena’s",
+    "Any household read that shows lost access removes that person’s records at once, also when the next read of the same refresh fails",
+    "When the grants read shows a pickup grant ended, the pickups it covered leave the screen at once, also when a later read of the same refresh fails",
+    "The next Refresh completes and still shows no pickup for f-15, matching what Mendwell lets this account see",
+    "The hold and the pharmacist’s note are shown",
+    "A held fill offers no store or quantity change and says why; the App refuses a store change as on_hold and nothing moves",
+    "After the release the review resumes with its remaining time",
+    "After the review the fill is ready with $10.00 due",
+    "The snapshot holds the review due at 4:20 PM with the clock at 4:30 PM, which the read applies",
+    "A collection attempted during a hold is refused on_hold and changes nothing",
+    "A pharmacist note with markup is displayed as its literal text and creates no element",
+    "The prepay preview shows the App’s token, amount and confirmer",
+    "The prepay confirmation is shown after Refresh",
+    "A declined card is refused as payment_failed and stores nothing",
+    "Prepay authorizes exactly the amount due on the household card",
+    "The collector choice offers every household member and an ID field, and the App accepts Sam as Mia’s guardian",
+    "When the read for a new selection fails, the page shows neither the old nor the new fill and offers no action",
+    "A preview stays bound to the fill it was made for and nothing is written",
+    "A prepaid fill on hold says plainly that it cannot be collected yet and that nothing more is owed",
+    "The cancel preview lists the App’s void and stopped timers",
+    "The cancel preview says in plain words what stops",
+    "Keep fill changes nothing",
+    "A cancelled fill shows nothing outstanding and its original price on a separate line",
+    "Confirm cancels the fill and voids its prepayment",
+    "The collector form says that anyone else needs pickup access first and links to Household",
+    "An App refusal is explained in plain words without internal IDs, and the status does not say “All changes saved”",
+    "“Give pickup access in Household” opens the Give access form for that person and fill",
+    "An unknown typed collector ID is answered with “No person with that ID”",
+    "The collector is recorded through Sam’s pickup grant",
+    "Revoking g-3 commits and clears the collector it backed",
+    "The counter collection captures the live prepayment once",
+    "Direct management requests from the business session are refused (403) and store nothing",
+    "The page rewrites only refused reads, in read wording, and keeps the HTTP status, status text and no-store header; a refused write passes through unchanged",
+    "Three refresh attempts that each see a different version end in a clear error, and the next Refresh succeeds",
+    "Choosing a fill in the list makes exactly one request (fills.get for that fill) and does not grey out the page",
+    "A search that excludes the open fill clears the detail; the holder is shown as signed in; label sources open as links",
+    "At 390 px every section and a fill detail fit without horizontal overflow, every tab is visible, and every button is at least 44 px tall",
+    "No JavaScript errors and no console or CSP errors beyond the induced network failures and refusals"
+  ],
+  "browser_restricted_checks": [
+    "The restricted run opens the Mendwell page",
+    "The Give access form can limit a pickup grant to one open fill, and nothing is previewed yet",
+    "Cancelling a fill with a pending plan request names both outcomes in its last timeline step",
+    "A fill limit that is no longer among the open fills is cleared without choosing all fills in its place: the form says so, asks to choose again and keeps Preview disabled",
+    "While the fill choice is open, Preview sends nothing and asks which fills the access covers",
+    "Choosing all of Alex’s fills explicitly enables Preview, and only then a request for all fills is sent",
+    "An unconfirmed request is described in words, with its ID only as a reference",
+    "A Retry answer stamped for another epoch is not taken as success: no “Fill cancelled”, the outcome cannot be confirmed, and the fill is still ready in the new run",
+    "An edited form from the older epoch is gone once a newer epoch is seen in any answer: the form shows the new run’s quantity, so nothing old can be saved",
+    "A reset between the re-preview and the write leaves the refusal on screen after the page settles, and nothing is cancelled",
+    "A reset right after a real commit keeps that change’s success message after the refresh",
+    "Repeating an open preview across a reset, with the refresh failing, leaves no preview that can be confirmed",
+    "A preview open before Mendwell was reset is not kept after a reload, and nothing from before is sent",
+    "An edited form from before a reset is closed on the next Refresh, the page says so, and nothing is sent",
+    "An open confirmation dialog for an action that the new access no longer allows closes on Refresh and leaves no detail behind",
+    "An unanswered request about a fill that is now pickup-only no longer names what it asked and cannot be retried",
+    "A preview answered after a reset that happened after the click is not kept: Confirm is never offered, and the reason stays although the refresh after it failed",
+    "A preview made before Mendwell was reloaded (new epoch) is refused on Confirm, the reason stays on screen, and nothing is written",
+    "A request whose answer was lost, retried after Mendwell was reloaded, is reported as cannot be confirmed, and after the page settles the message and the status still say so",
+    "Under the full policy the rejected fill offers Ask the plan and its form opens",
+    "Sending through a control that the new policy no longer allows is a plain refusal by the Host: no “Waiting for Mendwell”, no retry, nothing created",
+    "After the policy drops plan_requests.create, Refresh removes the open plan-request form and the Ask the plan control while the other recovery actions stay",
+    "A forced plan_requests.create call is refused (403) and nothing is created",
+    "A refusal is explained for what it means here, without internal IDs, and the status does not say “All changes saved”",
+    "A read that Mendwell refuses is shown in plain words, never as the App’s raw message",
+    "No JavaScript errors and no console or CSP errors beyond the induced refusals"
+  ],
+  "not_run": [
+    "Independent base validator selected by maintainers (PR check base-runtime-compatibility)",
+    "Maintainers' human review of realism and provenance",
+    "Trial runs with an Agent",
+    "Browser acceptance in CI: the shared browser job is fixed to the seven personal Apps; run locally with node apps/mendwell-pharmacy/tests/web.browser.cjs"
+  ],
+  "delivery_evidence": {
+    "index": "apps/mendwell-pharmacy/evidence/README.md",
+    "index_command": "node apps/mendwell-pharmacy/evidence/tools/index.cjs",
+    "regenerate": "node apps/mendwell-pharmacy/evidence/tools/regenerate.cjs --date 2026-11-28",
+    "policy": {
+      "path": "docs/submission-evidence.md",
+      "commit": "6933c430942c64f94874083815829e4a4b20920a",
+      "url": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/6933c430942c64f94874083815829e4a4b20920a/docs/submission-evidence.md",
+      "applied_as": "delivery work added to the approved scope"
+    },
+    "gui_scope": "The approved proposal planned no GUI; the business GUI on the shared Web Host was added at the platform reviewer's request to every Environment (https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/111#issuecomment-7123353250).",
+    "captured_on": "2026-11-28",
+    "captured_on_note": "The capture date of the GUI and Mail evidence (the reference captures keep their own dates in references.json). gui.cjs, mail.cjs and regenerate.cjs take it from --date, else from the day of the run in UTC, so a regeneration on another day without --date changes it in gui/run.json, gui/README.md, mail/demo.json, mail/README.md and the evidence index, and with them the package digest.",
+    "reference_screenshots": {
+      "count": 11,
+      "source": "Internet Archive (web.archive.org) copies of the reference product's public help, FAQ and caregiver pages, because its site refuses requests from outside the United States; no store, account or sign-in pages; reviewer agreement pending",
+      "index": "apps/mendwell-pharmacy/evidence/README.md#reference-comparison",
+      "details": "the product, original URLs, the refusal message, labels, archive URLs, dates, masks, sizes and hashes are in the index and the manifest",
+      "manifest": "apps/mendwell-pharmacy/evidence/reference/references.json",
+      "command": "node apps/mendwell-pharmacy/evidence/tools/reference.cjs",
+      "original_refusal": {
+        "http_status": 403,
+        "checked_at": [
+          "2026-11-27T21:02:22.621Z",
+          "2026-11-27T21:34:06.528Z"
+        ]
+      },
+      "snapshot_choice": "For each page, the most recent snapshot before 2026-11-18 that the archive index lists with HTTP 200 and an HTML page; the tool checks this against the index before capturing and stops if a later one has appeared.",
+      "workflows": [
+        "Household access and grants",
+        "Prescriptions and renewals",
+        "Refill requests",
+        "Fills, insurance claims and plan requests",
+        "Holds and store changes",
+        "Prepay",
+        "Pickup by someone else and cancellation",
+        "Account and stores"
+      ],
+      "pages_without_snapshot": 1,
+      "redactions": "phone numbers and e-mail addresses in a captured region; the regions show no names, addresses, prescription, member or card numbers, dates of birth or free text",
+      "dimensions": "read from the saved PNG",
+      "repeatable": "not byte-reproducible: the captures depend on the Internet Archive answering, and an archived script that fails to load can change how a page renders. reference.cjs compares each capture with the committed manifest before writing anything and stops, keeping the committed files, when the rendering mode (the page as it renders, or content revealed by setting its opacity to 1) or the size (width, height, scale) differs; --update replaces such captures after they are checked by eye. A capture with unchanged bytes keeps its committed captured_on.",
+      "rules_test": "node --test apps/mendwell-pharmacy/evidence/tools/reference.test.cjs (5 tests with stubbed captures: a changed rendering mode and a changed size are refused with nothing replaced, unchanged captures keep their date, --update replaces a changed capture with the --date given, an unknown option or a bad date is refused before the archive is asked)"
+    },
+    "gui_sequences": {
+      "sequences": 9,
+      "steps": 109,
+      "checks_passed": 158,
+      "evidence_only_checks": 1,
+      "index": "apps/mendwell-pharmacy/evidence/gui/README.md",
+      "data": "apps/mendwell-pharmacy/evidence/gui/sequences.json",
+      "account": "mendwell-p-2",
+      "browser": "chromium 141.0.7390.37",
+      "playwright": "1.56.1",
+      "browser_timezone": "Asia/Tokyo",
+      "command": "node apps/mendwell-pharmacy/evidence/tools/gui.cjs",
+      "runs": [
+        "mendwell-pharmacy-web",
+        "mendwell-pharmacy-web-restricted"
+      ],
+      "steps_from": "The steps are those of tests/web.browser.cjs, run unchanged inside the recorder: each step's action, expected result and checks come from that file, and every check it passes is listed with the step.",
+      "per_step": "action, expected result, the checked element (outlined in the screenshot), the test's own reading of the App state and every record changed since the previous step from the frozen Infra MCP state, the MCP calls the recorder lists for the step (every write, preview, Agent, Infra and forced call and every refused or failed read with its status and version; page reads answered with status ok, successful tool discoveries and inspector snapshots are owned but not listed), version, virtual time, the checks passed, screenshot",
+      "supplied_replies": "replies the test supplied or changed with Playwright route.fulfill are labelled injected, relayed or altered; an injected reply carries reached_host false",
+      "reached_host": "calls that failed on purpose carry reached_host: false when dropped before they reached the Web Host, true when the reply was dropped after Mendwell committed; steps_that_submit_writes counts only steps with a write or forced call whose reached_host is not false",
+      "writes_not_reaching_host": [
+        "02.10",
+        "04.6",
+        "04.8",
+        "04.14",
+        "09.7"
+      ],
+      "injected_replies": [
+        "09.7"
+      ],
+      "steps_that_submit_writes": 49,
+      "recorder_probes": 27,
+      "run_level_checks": [
+        {
+          "run": "mendwell-pharmacy-web",
+          "check": "No JavaScript errors and no console or CSP errors beyond the induced network failures and refusals"
+        },
+        {
+          "run": "mendwell-pharmacy-web-restricted",
+          "check": "No JavaScript errors and no console or CSP errors beyond the induced refusals"
+        }
+      ],
+      "checks_listed_with_steps": 156,
+      "outline_check": {
+        "rule": "Every step names the element it checks; it must be on the page and on screen, and after the screenshot the PNG is decoded and points every 3 px along each side of the outline (3 px wide, 2 px outside the element), leaving out 12 px at each rounded corner, are sampled: at least one side must have 8 or more points inside the image, 80% or more of them in the outline colour #d9480f (each channel within 24); a side can be off screen or covered by a neighbouring pane when the element is larger than the view",
+        "screenshots_checked": 109,
+        "all_four_sides_drawn": 57
+      },
+      "capture_point": "each step ends at its last check; restoring state for later steps is part of the next step, so the screenshot shows the state the step asserts",
+      "reproducibility": "software rasterization on one thread, screenshots with animations disabled, request IDs from a counter kept in a cookie, capture date only; two consecutive runs of regenerate.cjs with the same --date gave byte-identical files in gui/"
+    },
+    "mail_demonstration": {
+      "index": "apps/mendwell-pharmacy/evidence/mail/README.md",
+      "data": "apps/mendwell-pharmacy/evidence/mail/demo.json",
+      "command": "node apps/mendwell-pharmacy/evidence/tools/mail.cjs",
+      "gui_steps": 7,
+      "deliveries": 13,
+      "notice_kinds": [
+        "notice.claim_rejected",
+        "notice.fill_ready",
+        "notice.held",
+        "notice.payment_voided",
+        "notice.plan_decision",
+        "notice.refused",
+        "notice.released",
+        "notice.renewal_reply",
+        "notice.return_warning",
+        "notice.returned"
+      ],
+      "held": [
+        {
+          "notice_id": "n-14",
+          "recipient_id": "p-4",
+          "reason": "no_mail_account"
+        }
+      ],
+      "refusal": {
+        "status": "partial",
+        "refused": [
+          {
+            "notice_id": "n-1",
+            "account_id": "mail-p-1",
+            "code": "recipient_not_authorized"
+          }
+        ],
+        "mendwell_unchanged": true
+      },
+      "integration_checks": 113,
+      "stages": {
+        "local_commit": "Mendwell commits and appends a notice to its own log",
+        "receiver_commit": "committed Router receipt and the record in the recipient's Mail account",
+        "business_confirmation": "not claimed"
+      },
+      "repeatable": "two consecutive runs of regenerate.cjs with the same --date gave byte-identical files in mail/"
+    },
+    "app_load_digest": {
+      "sha256": "2fade01ee4af2ab862d5ae263b62722629d5e867422d3d259d8ffa94343a75f0",
+      "files": 52,
+      "includes": [
+        "app.json",
+        "contribution",
+        "fixtures",
+        "gui",
+        "infra",
+        "plugin.cjs",
+        "schemas",
+        "service.cjs",
+        "src",
+        "tools.json"
+      ],
+      "excludes": [
+        {
+          "name": "README.md",
+          "why": "documentation"
+        },
+        {
+          "name": "LICENSE",
+          "why": "licence text"
+        },
+        {
+          "name": "package.json",
+          "why": "npm scripts for the tests"
+        },
+        {
+          "name": "dataset",
+          "why": "the delivery dataset, reaching Core only as an env.load_seed selection"
+        },
+        {
+          "name": "dev",
+          "why": "fixture and history generators, fixture checker and the confirmation helper"
+        },
+        {
+          "name": "evidence",
+          "why": "this evidence"
+        },
+        {
+          "name": "examples",
+          "why": "the standalone event example"
+        },
+        {
+          "name": "tests",
+          "why": "tests"
+        }
+      ],
+      "algorithm": "SHA-256 over each file's package-relative path, a NUL byte and its bytes, in path order (the verifier's digestTree applied to the included files)",
+      "command": "node apps/mendwell-pharmacy/evidence/tools/digest.cjs"
+    },
+    "host": {
+      "runtime_version": "1.6.0",
+      "runtime_tree_sha256": "a1325458390f5a1b474a8598c663c35160a53ac30dce7afac4646587a3e889a3",
+      "files": {
+        "runtime/web/server.cjs": "cf8f3b0469509aaf23591437b7c9e320813556ad22527f54f160964354e60572",
+        "runtime/web/client.js": "fc106faf8c472089c59d0fb78d5aa8732c845390ac8bc3c9bed8649662c6e000",
+        "runtime/web/style.css": "a847c1de5005e9748fde51d4ea5498eea47fd40e75015bed8ca478aba2679f02",
+        "runtime/messaging/src/router.cjs": "e6c71ec82569c56849163601ddb706e0039cd55f6fc9643d4f8aed34e41e0242",
+        "apps.registry.json": "53b1698288ba3be50e2b89586ca084c15574d77aa95b9afda3b6a813e5d93593"
+      },
+      "server": "runtime/web/server.cjs (shared public Web Host)",
+      "registry": "apps.registry.json"
+    },
+    "app_limits": [
+      "Mendwell returns only each fill's latest plan request, without its note or the plan's reasons",
+      "No Agent read returns the App's current time or a card's state, so the Account page does not mark an expired card; the App refuses a payment with it (payment_failed)"
+    ]
+  },
+  "delivery_dataset": {
+    "dataset_id": "mendwell-delivery-2025-2026",
+    "directory": "apps/mendwell-pharmacy/dataset",
+    "report": "apps/mendwell-pharmacy/dataset/COVERAGE.md",
+    "report_data": "apps/mendwell-pharmacy/dataset/COVERAGE.json",
+    "window": {
+      "from": "2025-01-01",
+      "to": "2026-12-31",
+      "time_zone": "America/New_York"
+    },
+    "records": 1225,
+    "replay_steps": 476,
+    "fills": 158,
+    "notices": 472,
+    "earliest": "2025-01-01",
+    "latest": "2026-12-31",
+    "months_without_fills": [],
+    "fills_per_month": {
+      "min": 3,
+      "max": 12
+    },
+    "distinct_dates": {
+      "coverage": 260,
+      "global": 262,
+      "basis": "Counted over the records loaded into the App (dataset/full.json), which Agents and Infra read back."
+    },
+    "provenance": {
+      "real": 0,
+      "synthetic": 1225,
+      "mixed": 0
+    },
+    "gaps": [
+      {
+        "kind": "real_data_anchor",
+        "status": "stated gap, pending maintainer agreement"
+      },
+      {
+        "kind": "mail_history",
+        "status": "stated gap"
+      }
+    ],
+    "loading": {
+      "instants": [
+        "2026-01-01T00:00:00-05:00",
+        "2026-03-27T00:00:00.001-04:00",
+        "2026-11-18T12:00:00-05:00",
+        "2026-12-15T00:00:00-05:00",
+        "2027-01-01T00:00:00-05:00"
+      ],
+      "seed_ids": [
+        "mendwell-delivery-asof-20260101T050000.000Z-5f8252f98e82",
+        "mendwell-delivery-asof-20260327T040000.001Z-da95da619604",
+        "mendwell-delivery-asof-20261118T170000.000Z-bb642a6019d9",
+        "mendwell-delivery-asof-20261215T050000.000Z-27a1bdadffba",
+        "mendwell-delivery-asof-20270101T050000.000Z-e391cc6fd932"
+      ],
+      "fills_in_selection": [
+        77,
+        97,
+        150,
+        154,
+        158
+      ],
+      "fills_listed_by_agent": [
+        41,
+        55,
+        84,
+        87,
+        88
+      ],
+      "open_fills_match_core": true,
+      "monthly_read_back_matches": true
+    },
+    "commands": [
+      "node dataset/generate.cjs --check",
+      "node dataset/coverage.cjs --check --runtime ../../runtime",
+      "node dataset/as-of.cjs --at <instant> --out selection.json"
+    ],
+    "sha256": {
+      "dataset/base.json": "1ae30ba0d64def8e42034bf9ba1a9e48ded71419c9609df7357e9619c3f1228f",
+      "dataset/replay.json": "17aca07e9c7de687680b8e25680c3b1d0c814bffe50cd9a9f1130178711580a3",
+      "dataset/full.json": "44195d3f52a3a823bda918f73b16a6651c301beafbe8d0dc63b4e4eb734e7f10",
+      "dataset/COVERAGE.json": "a1515520908f3ee015fa1d19f33e592baa1f652e864b11fccd2bc576d2b3087d",
+      "dataset/COVERAGE.md": "ac2c5574659be32dfa3281fd87957a5a6ad717b7ed092036d38d8c086dc7891e",
+      "contribution/dataset.json": "32584698d8dd2043acdb9114c99d92a4335b75a1f227d9b9eb33a66b5c6a9540"
+    },
+    "tests": "tests/t32-dataset.test.cjs (28 tests, in npm test, outside tests/business.test.cjs)"
+  }
+}

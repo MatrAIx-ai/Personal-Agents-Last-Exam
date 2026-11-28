@@ -1,0 +1,302 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "mendwell-pharmacy",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "mendwell-pharmacy.household.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.grants.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.cards.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.stores.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.rx.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.rx.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.grants.change.preview",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.grants.change.confirm",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.choose_cash.preview",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.choose_cash.confirm",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.prepay.preview",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.prepay.confirm",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.cancel.preview",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.cancel.confirm",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.request",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.change_quantity",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.change_store",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.wait",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.fills.set_collector",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.plan_requests.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.plan_requests.withdraw",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.renewals.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "mendwell-pharmacy.renewals.withdraw",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "rx.received",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "renewal.replied",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "plan.decided",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "grant.changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fill.hold_placed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fill.hold_released",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "store.restocked",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fill.collection_attempted",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "user.confirmed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": false,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [],
+    "implemented_storage_adapters": [],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}

@@ -1,0 +1,325 @@
+{
+  "seed_id": "mendwell-minimal-1",
+  "account_id": "mendwell-p-2",
+  "owner_person_id": "p-2",
+  "time_zone": "America/New_York",
+  "people": [
+    {
+      "person_id": "p-1",
+      "name": "Sam Rivera",
+      "relation": "spouse",
+      "birth_date": "1984-03-12",
+      "is_minor": false,
+      "guardian_ids": [],
+      "plan_id": "plan-a",
+      "grant_set_version": 0
+    },
+    {
+      "person_id": "p-2",
+      "name": "Alex Rivera",
+      "relation": "self",
+      "birth_date": "1986-07-04",
+      "is_minor": false,
+      "guardian_ids": [],
+      "plan_id": "plan-a",
+      "grant_set_version": 0
+    },
+    {
+      "person_id": "p-3",
+      "name": "Mia Rivera",
+      "relation": "child",
+      "birth_date": "2018-09-21",
+      "is_minor": true,
+      "guardian_ids": [
+        "p-1",
+        "p-2"
+      ],
+      "plan_id": "plan-a",
+      "grant_set_version": 0
+    },
+    {
+      "person_id": "p-4",
+      "name": "Elena Ortiz",
+      "relation": "parent",
+      "birth_date": "1951-01-30",
+      "is_minor": false,
+      "guardian_ids": [],
+      "plan_id": "plan-b",
+      "grant_set_version": 1
+    }
+  ],
+  "prescribers": [
+    {
+      "prescriber_id": "dr-1",
+      "name": "Dr. Hana Brooks"
+    },
+    {
+      "prescriber_id": "dr-2",
+      "name": "Dr. Omar Lindqvist"
+    }
+  ],
+  "drugs": [
+    {
+      "drug_id": "d-atorvastatin-40",
+      "generic_name": "atorvastatin calcium",
+      "strength": "40 mg",
+      "form": "tablet",
+      "quantities": [
+        30,
+        90
+      ],
+      "facts": [
+        {
+          "text": "Keep the tablets at controlled room temperature, about 20 to 25 degrees C (68 to 77 degrees F).",
+          "source": {
+            "publisher": "DailyMed, U.S. National Library of Medicine",
+            "set_id": "4e06b20d-cc5d-46eb-991b-5972248de3af",
+            "version": 14,
+            "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4e06b20d-cc5d-46eb-991b-5972248de3af",
+            "section": "16 HOW SUPPLIED/STORAGE AND HANDLING"
+          }
+        },
+        {
+          "text": "The tablets are taken by mouth once a day, at any time of day, and can be taken with or without food.",
+          "source": {
+            "publisher": "DailyMed, U.S. National Library of Medicine",
+            "set_id": "4e06b20d-cc5d-46eb-991b-5972248de3af",
+            "version": 14,
+            "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4e06b20d-cc5d-46eb-991b-5972248de3af",
+            "section": "2 DOSAGE AND ADMINISTRATION"
+          }
+        }
+      ]
+    },
+    {
+      "drug_id": "d-amoxicillin-250-5",
+      "generic_name": "amoxicillin",
+      "strength": "250 mg/5 mL",
+      "form": "powder for oral suspension",
+      "quantities": [
+        100,
+        150
+      ],
+      "facts": [
+        {
+          "text": "Keep the unmixed powder at controlled room temperature, 20 to 25 degrees C (68 to 77 degrees F).",
+          "source": {
+            "publisher": "DailyMed, U.S. National Library of Medicine",
+            "set_id": "9ce26893-c7a1-47e9-98f9-f5d998cac418",
+            "version": 2,
+            "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9ce26893-c7a1-47e9-98f9-f5d998cac418",
+            "section": "16 HOW SUPPLIED/STORAGE AND HANDLING"
+          }
+        },
+        {
+          "text": "Shake the oral suspension well before each use.",
+          "source": {
+            "publisher": "DailyMed, U.S. National Library of Medicine",
+            "set_id": "9ce26893-c7a1-47e9-98f9-f5d998cac418",
+            "version": 2,
+            "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9ce26893-c7a1-47e9-98f9-f5d998cac418",
+            "section": "17 PATIENT COUNSELING INFORMATION"
+          }
+        }
+      ]
+    }
+  ],
+  "plans": [
+    {
+      "plan_id": "plan-a",
+      "name": "Family Drug Plan",
+      "rules": {
+        "d-atorvastatin-40": {
+          "covered": true,
+          "max_quantity": 90,
+          "prior_auth_required": false,
+          "refill_days": 25,
+          "copay_cents": 1000
+        },
+        "d-amoxicillin-250-5": {
+          "covered": true,
+          "max_quantity": 150,
+          "prior_auth_required": false,
+          "refill_days": 7,
+          "copay_cents": 500
+        }
+      }
+    },
+    {
+      "plan_id": "plan-b",
+      "name": "Senior Drug Plan",
+      "rules": {
+        "d-atorvastatin-40": {
+          "covered": true,
+          "max_quantity": 30,
+          "prior_auth_required": false,
+          "refill_days": 25,
+          "copay_cents": 1200
+        },
+        "d-amoxicillin-250-5": {
+          "covered": false,
+          "max_quantity": null,
+          "prior_auth_required": false,
+          "refill_days": 0,
+          "copay_cents": 0
+        }
+      }
+    }
+  ],
+  "cash_prices": {
+    "d-atorvastatin-40": {
+      "30": 2400,
+      "90": 6000
+    },
+    "d-amoxicillin-250-5": {
+      "100": 1500,
+      "150": 1900
+    }
+  },
+  "stores": [
+    {
+      "store_id": "st-1",
+      "name": "Mendwell Maple Avenue",
+      "address": "120 Maple Avenue",
+      "hours": [
+        {
+          "day": 1,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 2,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 3,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 4,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 5,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 6,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 0,
+          "open": "10:00",
+          "close": "18:00"
+        }
+      ],
+      "stock": {
+        "d-atorvastatin-40": true,
+        "d-amoxicillin-250-5": true
+      }
+    },
+    {
+      "store_id": "st-2",
+      "name": "Mendwell Harbor Street",
+      "address": "8 Harbor Street",
+      "hours": [
+        {
+          "day": 1,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 2,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 3,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 4,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 5,
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": 6,
+          "open": "09:00",
+          "close": "18:00"
+        },
+        {
+          "day": 0,
+          "open": "10:00",
+          "close": "18:00"
+        }
+      ],
+      "stock": {
+        "d-amoxicillin-250-5": true
+      }
+    }
+  ],
+  "cards": [
+    {
+      "card_id": "card-3",
+      "owner_id": "p-2",
+      "label": "Household card",
+      "last4": "4417",
+      "exp_month": 8,
+      "exp_year": 2028,
+      "status": "active"
+    }
+  ],
+  "prescriptions": [
+    {
+      "rx_id": "rx-1",
+      "patient_id": "p-4",
+      "prescriber_id": "dr-2",
+      "drug_id": "d-atorvastatin-40",
+      "quantity": 30,
+      "fills_authorized": 5,
+      "fills_remaining": 5,
+      "written_on": "2026-06-01",
+      "received_at": "2026-06-01T10:00:00-04:00",
+      "state": "active",
+      "superseded_by": null,
+      "superseded_at": null
+    }
+  ],
+  "fills": [],
+  "claims": [],
+  "authorizations": [],
+  "charges": [],
+  "grants": [
+    {
+      "grant_id": "g-1",
+      "grant_version": 0,
+      "patient_id": "p-4",
+      "grantor_id": "p-4",
+      "grantee_id": "p-2",
+      "scope": "refill",
+      "fill_id": null,
+      "expires_at": null,
+      "status": "active",
+      "created_at": "2026-06-02T09:00:00-04:00",
+      "revoked_at": null
+    }
+  ],
+  "plan_requests": [],
+  "renewals": [],
+  "approvals": [],
+  "notices": [],
+  "issued": {
+    "g": 1
+  }
+}
