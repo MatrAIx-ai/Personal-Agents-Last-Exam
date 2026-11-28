@@ -1,0 +1,810 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:benchline:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.allocation.changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "allocation_hours": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "shares": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "share_hours": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10000000
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "share_hours"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 200
+            },
+            "changed_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "changed_by"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "allocation_hours"
+              ]
+            },
+            {
+              "required": [
+                "shares"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.job.recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "owner_person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "config_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "partition_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "gpus": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "time_limit_hours": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 720
+            },
+            "starts_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "ends_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "end_kind": {
+              "enum": [
+                "completed",
+                "failed",
+                "timed_out"
+              ]
+            },
+            "protocol_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "error": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "job_id",
+            "owner_person_id",
+            "config_id",
+            "seed",
+            "partition_id",
+            "gpus",
+            "time_limit_hours",
+            "starts_at",
+            "ends_at",
+            "end_kind"
+          ],
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "properties": {
+                "end_kind": {
+                  "const": "completed"
+                },
+                "error": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "metrics"
+              ]
+            },
+            {
+              "properties": {
+                "end_kind": {
+                  "enum": [
+                    "failed",
+                    "timed_out"
+                  ]
+                },
+                "metrics": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.job.script_submitted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "script": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "config_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "partition_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "gpus": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "time_limit_hours": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 720
+            },
+            "protocol_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "hold": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "script",
+            "config_id",
+            "seed",
+            "partition_id",
+            "gpus",
+            "time_limit_hours"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.job.interrupted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "job_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.plan.set"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "config_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "seed": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                }
+              ]
+            },
+            "partition_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "queue_wait_minutes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 525600
+            },
+            "run_minutes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 525600
+            },
+            "outcome": {
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            },
+            "metrics": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "error": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "config_id",
+            "queue_wait_minutes",
+            "run_minutes",
+            "outcome"
+          ],
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "properties": {
+                "outcome": {
+                  "const": "completed"
+                },
+                "error": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "metrics"
+              ]
+            },
+            {
+              "properties": {
+                "outcome": {
+                  "const": "failed"
+                },
+                "metrics": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.config.registered"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "config_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "dataset_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "eval_split": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "code_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "registered_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "config_id",
+            "family",
+            "version",
+            "params",
+            "dataset_version",
+            "eval_split",
+            "code_ref",
+            "registered_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.protocol.proposed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "protocol_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "line": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "dataset_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "eval_split": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "metrics": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,39}$"
+                  },
+                  "direction": {
+                    "enum": [
+                      "higher",
+                      "lower"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "direction"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 20
+            },
+            "seeds": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "minItems": 1,
+              "maxItems": 50
+            },
+            "proposed_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "protocol_id",
+            "line",
+            "dataset_version",
+            "eval_split",
+            "metrics",
+            "seeds",
+            "proposed_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.protocol.answered"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "protocol_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "answer": {
+              "enum": [
+                "sign",
+                "decline"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "protocol_id",
+            "person_id",
+            "answer"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.protocol.withdrawn"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "protocol_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "protocol_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "benchline.result.invalidated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "invalidated_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "job_id",
+            "invalidated_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

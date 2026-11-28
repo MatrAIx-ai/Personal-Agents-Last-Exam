@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "app_id": "benchline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:benchline; author GitHub handle dipta007"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "benchline.allocation.changed",
+    "benchline.job.recorded",
+    "benchline.job.script_submitted",
+    "benchline.job.interrupted",
+    "benchline.plan.set",
+    "benchline.config.registered",
+    "benchline.protocol.proposed",
+    "benchline.protocol.answered",
+    "benchline.protocol.withdrawn",
+    "benchline.result.invalidated"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One researcher account in one project on one cluster per App instance. Labmates, the lab head and the cluster are not accounts: what they do arrives as events.",
+    "The cluster is not simulated. Benchline runs no code and has no scheduler. What a job does comes from task-supplied run plans, which no Agent operation returns.",
+    "One current allocation period. The period does not close by itself, and a new period is loaded as history with env.load_seed.",
+    "No files, logs, checkpoints, artifacts, job arrays, job dependencies, sweeps, priorities, fair-share scores or node inventory.",
+    "MCP only: no GUI and no console for the lab head.",
+    "The App has no timer. Job starts and ends, expired protocol versions and the release of notifications are computed from the supplied virtual time.",
+    "No images or attachments: resources are not used.",
+    "Email is the only notification channel. Notifications reach Mail only through the Infra-run sender and Messaging. The App itself delivers nothing."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
