@@ -1,0 +1,1239 @@
+[
+  {
+    "name": "home-repair-slots.list_slots",
+    "description": "Read future available slot estimates within the supplied scenario limits.",
+    "read_only": true,
+    "scope": "home-repair-slots.list_slots",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "estimate_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 99999999
+              }
+            },
+            "required": [
+              "id",
+              "provider_id",
+              "start",
+              "end",
+              "estimate_minor"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 30
+        },
+        "providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "from_date": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            },
+            "through_date": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            },
+            "timezone": {
+              "enum": [
+                "Asia/Shanghai"
+              ]
+            },
+            "currency": {
+              "enum": [
+                "CNY"
+              ]
+            },
+            "budget_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "from_date",
+            "through_date",
+            "timezone",
+            "currency",
+            "budget_minor"
+          ],
+          "additionalProperties": false
+        },
+        "service": {
+          "enum": [
+            "Cabinet-hinge adjustment"
+          ]
+        },
+        "reservation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "booking_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "slots",
+        "providers",
+        "constraints",
+        "service",
+        "reservation_id",
+        "booking_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.get_reservation",
+    "description": "Read local reservation and slot details.",
+    "read_only": true,
+    "scope": "home-repair-slots.get_reservation",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "reservation_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "open",
+                "invalidated",
+                "discarded",
+                "confirmed"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.get_booking",
+    "description": "Read a bound-account booking and its slot, including cancelled bookings and any recorded confirmation, reschedule and cancellation timestamps.",
+    "read_only": true,
+    "scope": "home-repair-slots.get_booking",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "cancelled"
+              ]
+            },
+            "origin": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status",
+            "origin"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "enum": [
+                  "confirm_reservation",
+                  "reschedule_booking",
+                  "cancel_booking"
+                ]
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "prior_slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              }
+            },
+            "required": [
+              "operation",
+              "object_id",
+              "slot_id",
+              "at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking",
+        "slot",
+        "history"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.select_slot",
+    "description": "Create or replace the temporary local reservation, without holding the slot.",
+    "read_only": false,
+    "scope": "home-repair-slots.select_slot",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "slot_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "open",
+                "invalidated",
+                "discarded",
+                "confirmed"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.confirm_reservation",
+    "description": "Explicitly confirm the open reservation into one synthetic booking.",
+    "read_only": false,
+    "scope": "home-repair-slots.confirm_reservation",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "reservation_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "open",
+                "invalidated",
+                "discarded",
+                "confirmed"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "cancelled"
+              ]
+            },
+            "origin": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status",
+            "origin"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "booking",
+        "slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.discard_reservation",
+    "description": "Discard the selected preview without creating a booking.",
+    "read_only": false,
+    "scope": "home-repair-slots.discard_reservation",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "reservation_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "open",
+                "invalidated",
+                "discarded",
+                "confirmed"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.reschedule_booking",
+    "description": "Atomically move the same booking to an eligible future slot.",
+    "read_only": false,
+    "scope": "home-repair-slots.reschedule_booking",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "booking_id",
+        "slot_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "cancelled"
+              ]
+            },
+            "origin": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status",
+            "origin"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking",
+        "slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "home-repair-slots.cancel_booking",
+    "description": "Cancel a future booking and release its slot.",
+    "read_only": false,
+    "scope": "home-repair-slots.cancel_booking",
+    "resource_target": "bound synthetic customer account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "booking_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "home-repair-slots"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "booking": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "cancelled"
+              ]
+            },
+            "origin": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            }
+          },
+          "required": [
+            "id",
+            "slot_id",
+            "status",
+            "origin"
+          ],
+          "additionalProperties": false
+        },
+        "slot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimate_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 99999999
+            }
+          },
+          "required": [
+            "id",
+            "provider_id",
+            "start",
+            "end",
+            "estimate_minor"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "booking",
+        "slot"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

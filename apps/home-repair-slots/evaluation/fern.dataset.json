@@ -1,0 +1,51 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "home-repair-slots-eval-fern",
+  "version": "2.0.0",
+  "description": "Original synthetic cabinet-hinge service activity; one binding and household per seed.",
+  "record_source_ids": [
+    "synthetic-repair-fern"
+  ],
+  "sources": [
+    {
+      "source_id": "synthetic-repair-fern",
+      "kind": "synthetic",
+      "description": "Deterministically authored fictional service history; no external account records.",
+      "uri": "https://github.com/2018cx/Personal-Agents-Last-Exam/blob/propose-home-repair-slots/apps/home-repair-slots/evaluation/fern.seed.json",
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": {
+        "method": "Original local synthetic generation, not external collection",
+        "collected_at": "2026-11-28T09:22:00Z"
+      },
+      "generation": {
+        "method": "deterministic_rule_based",
+        "tool": "evaluation/recount.cjs",
+        "tool_version": "2.0.0",
+        "seed": "fern",
+        "parameters": {
+          "sha256": "569ea6a697f711425e25c990cb3bea3b260467bced0eab59a074590a74ff32ef",
+          "authoritative_date_field": "history[].at",
+          "counting_zone": "Asia/Shanghai"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Canonical JSON and stable linked object IDs; count observed booking activity only, not scheduled service dates."
+  ],
+  "expected_counts": {
+    "records": 22,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Xiao Cui (@2018cx) is responsible for provenance. All data is independently authored and synthetic; no independent acceptance is asserted."
+  }
+}

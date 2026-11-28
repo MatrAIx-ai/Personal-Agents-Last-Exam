@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operation": {
+      "const": "home-repair-slots.slot_taken"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "const": "open_reservation"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "event_id",
+    "at",
+    "operation",
+    "payload"
+  ],
+  "additionalProperties": false
+}

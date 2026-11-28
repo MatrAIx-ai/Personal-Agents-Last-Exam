@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {validateSeed,handleTool,applyEvent}=require('../plugin.cjs');
+const d=structuredClone(require('../fixtures/minimal.json')),binding=require('../fixtures/binding.json'),event=require('./scenario.json');
+const ctx={binding,role:'agent',virtual_now:require('../fixtures/clock.json').initial_time};
+validateSeed(ctx,d);
+assert.deepEqual(handleTool(ctx,d,'home-repair-slots.list_slots',{}).result.slots.map(s=>s.id),['S1','S2','S4']);
+applyEvent({...ctx,role:'infra',virtual_now:event.at},d,event);
+assert.equal(d.reservations[0].status,'invalidated');
+assert.throws(()=>handleTool(ctx,d,'home-repair-slots.confirm_reservation',{reservation_id:'R0'}),{code:'slot_unavailable'});
+assert.equal(d.bookings.length,8);
+console.log('Synthetic competing event invalidates the preview; no booking was created.');
