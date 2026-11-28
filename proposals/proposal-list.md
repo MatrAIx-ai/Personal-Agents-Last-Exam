@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**228 open non-draft proposals · 1 awaiting initial review · 11 drafts.**
+**228 open non-draft proposals · 1 awaiting initial review · 12 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -153,10 +153,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**126 proposals.**
+**127 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-28 14:08:04 | [#295](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/295) · Warn the friend who relied on a "probably" before her backup closes<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/295/files) | Social &amp; communities<br>Also: Work &amp; business | Leila's "probably" to Talia became a promise once Talia cancelled Noah's drop-in. A new meeting now clashes with it, and the 48-hour booking window closes Tuesday morning, before Leila is back. | Draft | Awaiting review |  | [zinengtang](https://github.com/zinengtang) |  |
 | 2026-11-28 08:20:46 | [#294](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/294) · Shortlist apartments and book viewings from a renter’s own viewing notes<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/294/files) | Home &amp; utilities<br>Also: Travel &amp; commuting | Yara’s must-have list is incomplete. Her viewing notes rule out street-side bedrooms, her two-office week decides which commute counts, and her own rule decides when a landlord may see her documents. | Draft | Awaiting review |  | [IsThatYou](https://github.com/IsThatYou) |  |
 | 2026-11-28 08:20:43 | [#293](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/293) · Plan a ten-ticket festival pass from the viewer’s own film diary<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/293/files) | Media &amp; entertainment | Ines’s ranked watchlist holds a film her diary shows she already saw under its original title, and one shot like the two she walked out of. She books whatever is planned, and pass tickets cannot be exchanged. | Draft | Awaiting review |  | [IsThatYou](https://github.com/IsThatYou) |  |
 | 2026-11-28 08:20:40 | [#292](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/292) · Post a fantasy league's trade rulings without ruling on the commissioner's own trade<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/292/files) | Games &amp; play<br>Also: Social &amp; communities | Kofi promised his league that he never rules on his own trades. The same “post the rulings” request means two rulings and one hand-off, and the hand-off must reach whoever is co-commissioner now, not the name in his notes. | Draft | Awaiting review |  | [IsThatYou](https://github.com/IsThatYou) |  |
