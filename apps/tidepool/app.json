@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "tidepool",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:tidepool (@byshail)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "listening.record",
+    "episode.publish",
+    "catalog.update",
+    "playlist.edit",
+    "device.checkin",
+    "billing.payment_result",
+    "family.invite_response"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Metadata, listening records and account controls only: no audio playback, artwork or other media. Resources are not used.",
+    "One signed-in family member per App instance. Each member's account is a separate instance loaded with the same family seed; family state does not sync between instances, one member's writes are not visible in another member's instance, and Infra applies each event to the instances that should observe it.",
+    "Billing is a fixed monthly calendar from the billing anchor with integer-cent prices; there are no taxes, refunds, payment methods or currency conversion.",
+    "No recommendations, generated mixes, audiobooks, lyrics, live audio, podcast hosting or paid podcast subscriptions.",
+    "Search matches the start of words (case- and accent-insensitive); there is no ranking or stemming.",
+    "MCP only: no GUI and no reviewer console."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

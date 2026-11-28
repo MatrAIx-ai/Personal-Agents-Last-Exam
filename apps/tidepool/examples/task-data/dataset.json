@@ -1,0 +1,46 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "tidepool-family-listening-leila",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic music and podcast catalog (the package catalog) and a one-member account, Leila Haddad, with listening history, downloads and billing from Jan. 15 to Nov. 24, 2026, and a declined November payment. Not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All artists, albums, tracks, shows, episodes, people, devices and prices are invented; no external catalogs, recordings, show notes or listening data were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Listening sessions are expanded from hand-written weekly routines by dev/build-fixtures.cjs using fixed arithmetic (no randomness); episode progress, track play counts and auto-download/auto-delete outcomes are derived from those sessions and follow settings.",
+    "Clean versions copy their explicit track's title, artist, album and duration; track and episode sizes are computed from duration at fixed bit rates.",
+    "The second family (examples/task-data) reuses the same catalog with its own member, history and billing."
+  ],
+  "expected_counts": {
+    "records": 315,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation, name collisions with real products and reuse permissions."
+  }
+}

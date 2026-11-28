@@ -1,0 +1,241 @@
+{
+  "schema": "tidepool.v1-evidence-index",
+  "recorded_at": "2026-11-28T07:26:35Z",
+  "app_id": "tidepool",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "proposal": "proposals/environment/tidepool-audio.md",
+  "proposal_commit": "575bb90fec3e44be6a7f46ce66fe6a7577a1029f",
+  "proposal_blob_sha": "307acdf79525bccc546e772a7481c11c9301cfaa",
+  "proposal_status": "plan approved for implementation by the assigned Track reviewer (/approve-plan for this commit at 2026-11-24T07:05:26Z; the bot recorded it after a repeated command at 2026-11-24T21:56:00Z); the proposal file is unchanged since",
+  "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "app_package_commit": "e06565d86a6f55c444c748f73547c91f171f6f38",
+  "app_package_sha256": "a647a086b519aa709b5866c12636eb6997f1669ca5c3dba09598808b55a326b4",
+  "app_package_git_tree": "aaa140352eaef631293eb571da2654f30e3f0fd1",
+  "package_hash_agrees_in": [
+    "public-runtime.node22.json",
+    "public-runtime.node18.json",
+    "base-runtime.json",
+    "mcp-walkthrough.node22.json",
+    "mcp-walkthrough.node18.json",
+    "dataset-demo.node22.json",
+    "dataset-demo.node18.json"
+  ],
+  "tested_node": {
+    "18": "v18.20.8",
+    "22": "v22.23.2"
+  },
+  "tested_os": "Darwin 27.2.0 arm64 (macOS 27.2.1)",
+  "interface": {
+    "operations": 33,
+    "read": 16,
+    "write": 17,
+    "events": 7
+  },
+  "checks": {
+    "standalone_business": {
+      "node22": {
+        "tests": 36,
+        "pass": 36,
+        "fail": 0,
+        "skipped": 0
+      },
+      "node18": {
+        "tests": 36,
+        "pass": 36,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    "standalone_event_example": "examples/run.cjs passed from a copy of apps/tidepool alone, with only PATH and LANG set, on both Node versions",
+    "generators_reproduce_committed_files": "Every dev/build-*.cjs generator, including dev/build-dataset.cjs, run in a copy, left every committed file byte-identical on both Node versions",
+    "public_app_verifier": {
+      "node22": 50,
+      "node18": 50,
+      "passed": true
+    },
+    "ci_submission_verifier": {
+      "command": "node runtime/ci/verify-submissions.cjs . <out> a4bce023953061483c41de5a287ba5e43f4a5648",
+      "selection": {
+        "full": false,
+        "ids": [
+          "tidepool"
+        ]
+      },
+      "node22": "tidepool: PASS",
+      "node18": "tidepool: PASS"
+    },
+    "mcp_walkthrough": {
+      "node22": {
+        "checks": 158,
+        "calls": 304,
+        "passed": true
+      },
+      "node18": {
+        "checks": 158,
+        "calls": 304,
+        "passed": true
+      },
+      "instances": [
+        "default",
+        "priya",
+        "sam",
+        "kai",
+        "narrow",
+        "trip",
+        "leila"
+      ],
+      "trace_outcomes": {
+        "permission_denied": 6,
+        "ok": 200,
+        "ready": 7,
+        "committed": 64,
+        "duplicate_replay": 2,
+        "idempotency_conflict": 2,
+        "not_found": 2,
+        "stale_version": 1,
+        "list_version_mismatch": 1,
+        "target_not_found": 2,
+        "ambiguous_target": 1,
+        "not_collaborator": 1,
+        "already_invited": 1,
+        "already_member": 1,
+        "too_many_members": 1,
+        "no_pending_change": 2,
+        "forbidden": 4,
+        "invalid_position": 1,
+        "unavailable": 1,
+        "storage_full": 1,
+        "payment_due": 2,
+        "invalid_arguments": 1
+      }
+    },
+    "reference_suite": {
+      "node22": {
+        "stages": 22,
+        "passed": 22
+      },
+      "node18": {
+        "stages": 22,
+        "passed": 22
+      }
+    },
+    "base_runtime_verifier": {
+      "checks": 50,
+      "passed": true,
+      "node": "v22.23.2",
+      "selection": {
+        "full": false,
+        "ids": [
+          "tidepool"
+        ]
+      }
+    },
+    "evaluation_dataset": {
+      "path": "apps/tidepool/data/evaluation/seed.json",
+      "version": "1.0.0",
+      "sha256": "88a0c16c916f7c557c6bc109b2363078c662c4647a0a82e193f3555e234f22e8",
+      "sha256_matches_dataset_json": true,
+      "time_zone": "America/Los_Angeles",
+      "window": [
+        "2025-01-01",
+        "2026-12-31"
+      ],
+      "dataset_clock": "2026-11-24T19:00:00-08:00",
+      "totals": {
+        "records": 858,
+        "counted": 851,
+        "excluded": 7,
+        "invalid": 0,
+        "global_distinct_dates": 454,
+        "earliest": "2025-01-03",
+        "latest": "2026-12-28",
+        "distinct_dates_on_or_before_clock": 444,
+        "family_distinct_dates": 282,
+        "months_with_records": 24,
+        "months_with_family_records": 23,
+        "longest_gap": {
+          "days": 8,
+          "from": "2026-12-12",
+          "to": "2026-12-19"
+        },
+        "longest_family_gap_before_clock": {
+          "days": 16,
+          "from": "2025-08-04",
+          "to": "2025-08-19"
+        }
+      },
+      "real_records": 0,
+      "content": {
+        "episodes": 347,
+        "identical_episode_texts": 0,
+        "near_duplicate_pairs_at_0_8": {
+          "authored_fixture": 0,
+          "involving_generated": 0
+        },
+        "max_5gram_jaccard": 0.75,
+        "max_pair": [
+          "ep-staticsignal-053",
+          "ep-staticsignal-063"
+        ]
+      },
+      "real_mcp_demo": {
+        "node22": {
+          "checks": 97,
+          "load_request_bytes": 434421
+        },
+        "node18": {
+          "checks": 97,
+          "load_request_bytes": 434421
+        }
+      }
+    }
+  },
+  "reports": [
+    "base-runtime.json",
+    "coverage.json",
+    "dataset-demo.node18.json",
+    "dataset-demo.node22.json",
+    "mcp-walkthrough.node18.json",
+    "mcp-walkthrough.node22.json",
+    "public-runtime.node18.json",
+    "public-runtime.node22.json",
+    "reference-suite.node18.json",
+    "reference-suite.node22.json"
+  ],
+  "report_edits": "In reference-suite.node*.json, report paths inside stage commands were rewritten from a local temporary directory to .artifacts/. No other report was edited.",
+  "not_claimed": [
+    "agent or model trials (model-agent runs are deferred for v1)",
+    "GUI or reviewer console",
+    "production deployment",
+    "family state syncing across App instances",
+    "official PR CI on the implementation commit",
+    "human review of realism and invented names"
+  ],
+  "previous_submission": {
+    "head": "c79386373b851b5d6b77df194c0ca8797c11520a",
+    "app_package_commit": "7fc8f06d2d6564d5e0275dac26e0be9088f29c45",
+    "app_package_sha256": "57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202"
+  },
+  "added_scope_after_plan_approval": {
+    "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
+    "items": [
+      "evaluation dataset in apps/tidepool/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
+      "clock cutoff: tools show only records dated at or before the run clock",
+      "package size 1,704,490 bytes of tracked files (was 1,692,561)",
+      "`later_history_removed`: counts in every write receipt and the stored records as an optional activity-row field (2026-11-28 revision)",
+      "a removed member has no records dated after the removal: validateSeed rule, so an earlier-clock members.remove drops and reports the later family records (follow-up review of 2026-11-28)"
+    ]
+  },
+  "revisions": [
+    {
+      "package": "7fc8f06d2d6564d5e0275dac26e0be9088f29c45",
+      "note": "review of 2026-11-28 (packages cf8982b and 7fc8f06): later family records dropped or replaced by an early write or event are kept in the activity row and counted in the receipt (B31-B32)"
+    },
+    {
+      "package": "e06565d86a6f55c444c748f73547c91f171f6f38",
+      "note": "follow-up review of 2026-11-28 (packages c45b614 and e06565d): validateSeed rejects a removed member with a record dated after removed_at, a download still on a device then, or a collaborator place, so a members.remove at an earlier clock drops and reports the later family records (B34-B36, dataset demo last stage); tool descriptions no longer mention the clock, virtual time or simulated time (20 tools.json descriptions only); the seed and every fixture are unchanged"
+    }
+  ]
+}

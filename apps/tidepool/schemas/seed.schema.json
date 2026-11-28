@@ -1,0 +1,1464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:tidepool:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "family": {
+      "type": "object",
+      "properties": {
+        "family_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "family_id",
+        "name",
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "role": {
+            "enum": [
+              "manager",
+              "member"
+            ]
+          },
+          "age_group": {
+            "enum": [
+              "adult",
+              "teen",
+              "child"
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "removed"
+            ]
+          },
+          "explicit_filter": {
+            "type": "boolean"
+          },
+          "joined_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "removed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "member_id",
+          "person_id",
+          "display_name",
+          "role",
+          "age_group",
+          "status",
+          "explicit_filter",
+          "joined_at",
+          "removed_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50,
+      "minItems": 1
+    },
+    "invitations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "invitation_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "invited_by": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "invited_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "explicit_filter": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "accepted",
+              "declined"
+            ]
+          },
+          "responded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "invitation_id",
+          "person_id",
+          "invited_by",
+          "invited_at",
+          "explicit_filter",
+          "status",
+          "responded_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "enum": [
+              "individual",
+              "duo",
+              "family"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "max_members": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "monthly_price_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3
+          }
+        },
+        "required": [
+          "plan_id",
+          "name",
+          "max_members",
+          "monthly_price_cents",
+          "rank"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 3,
+      "minItems": 3
+    },
+    "billing": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "anchor": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "plan_id": {
+                "enum": [
+                  "individual",
+                  "duo",
+                  "family"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "set_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "change": {
+                "enum": [
+                  "start",
+                  "upgrade",
+                  "downgrade"
+                ]
+              }
+            },
+            "required": [
+              "plan_id",
+              "from",
+              "set_at",
+              "change"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500,
+          "minItems": 1
+        },
+        "adjustments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "adjustment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "invoice_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000
+              },
+              "reason": {
+                "const": "upgrade_proration"
+              },
+              "from_plan_id": {
+                "enum": [
+                  "individual",
+                  "duo",
+                  "family"
+                ]
+              },
+              "to_plan_id": {
+                "enum": [
+                  "individual",
+                  "duo",
+                  "family"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "adjustment_id",
+              "invoice_id",
+              "amount_cents",
+              "reason",
+              "from_plan_id",
+              "to_plan_id",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invoice_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outcome": {
+                "enum": [
+                  "paid",
+                  "declined"
+                ]
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000
+              }
+            },
+            "required": [
+              "invoice_id",
+              "outcome",
+              "at",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "currency",
+        "anchor",
+        "timeline",
+        "adjustments",
+        "payments"
+      ],
+      "additionalProperties": false
+    },
+    "artists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "artist_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "bio": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "artist_id",
+          "name",
+          "bio"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "albums": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "album_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "artist_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "released": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "track_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "availability": {
+            "enum": [
+              "available",
+              "removed"
+            ]
+          }
+        },
+        "required": [
+          "album_id",
+          "artist_id",
+          "title",
+          "released",
+          "track_ids",
+          "availability"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "track_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "album_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "artist_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "duration_s": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7200
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "clean_version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000000
+          },
+          "availability": {
+            "enum": [
+              "available",
+              "removed"
+            ]
+          }
+        },
+        "required": [
+          "track_id",
+          "album_id",
+          "artist_id",
+          "title",
+          "duration_s",
+          "explicit",
+          "clean_version_id",
+          "bytes",
+          "availability"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "shows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "show_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "availability": {
+            "enum": [
+              "available",
+              "removed"
+            ]
+          }
+        },
+        "required": [
+          "show_id",
+          "title",
+          "publisher",
+          "description",
+          "explicit",
+          "availability"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "episodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "episode_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "show_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration_s": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          },
+          "end_of_content_s": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "start_s": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 86400
+                }
+              },
+              "required": [
+                "title",
+                "start_s"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 40
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000000
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "availability": {
+            "enum": [
+              "available",
+              "removed"
+            ]
+          }
+        },
+        "required": [
+          "episode_id",
+          "show_id",
+          "number",
+          "title",
+          "published_at",
+          "duration_s",
+          "end_of_content_s",
+          "chapters",
+          "notes",
+          "bytes",
+          "explicit",
+          "availability"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "kind": {
+            "enum": [
+              "phone",
+              "earbuds",
+              "smart_speaker",
+              "car",
+              "tablet",
+              "computer"
+            ]
+          },
+          "storage_cap_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "auto_download": {
+            "type": "boolean"
+          },
+          "last_checkin_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registered_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "device_id",
+          "member_id",
+          "name",
+          "kind",
+          "storage_cap_bytes",
+          "auto_download",
+          "last_checkin_at",
+          "registered_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "item_type": {
+            "enum": [
+              "track",
+              "episode"
+            ]
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "start_reason": {
+            "enum": [
+              "user",
+              "autoplay",
+              "queue",
+              "voice"
+            ]
+          },
+          "speed": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 3
+          },
+          "start_position_s": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400
+          },
+          "end_position_s": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400
+          },
+          "end_reason": {
+            "enum": [
+              "completed",
+              "paused",
+              "stopped",
+              "skipped",
+              "interrupted"
+            ]
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "speaker_hint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "session_id",
+          "member_id",
+          "device_id",
+          "item_type",
+          "item_id",
+          "started_at",
+          "start_reason",
+          "speed",
+          "start_position_s",
+          "end_position_s",
+          "end_reason",
+          "ended_at",
+          "speaker_hint"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "progress": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "episode_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "state": {
+            "enum": [
+              "unplayed",
+              "in_progress",
+              "played"
+            ]
+          },
+          "position_s": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "played_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "set_by": {
+            "enum": [
+              "session",
+              "agent"
+            ]
+          },
+          "replaced": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "unplayed",
+                      "in_progress",
+                      "played"
+                    ]
+                  },
+                  "position_s": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 86400
+                  }
+                },
+                "required": [
+                  "state",
+                  "position_s"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "member_id",
+          "episode_id",
+          "state",
+          "position_s",
+          "updated_at",
+          "played_at",
+          "set_by",
+          "replaced"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "plays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "track_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "last_played_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "member_id",
+          "track_id",
+          "count",
+          "last_played_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "follows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "show_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "followed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "auto_download_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "auto_delete_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 90
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "member_id",
+          "show_id",
+          "followed_at",
+          "auto_download_count",
+          "auto_delete_days"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "upnext": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "list_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "episode_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "member_id",
+          "list_version",
+          "updated_at",
+          "episode_ids"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "downloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "download_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "item_type": {
+            "enum": [
+              "track",
+              "album",
+              "episode"
+            ]
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000000
+          },
+          "source": {
+            "enum": [
+              "manual",
+              "auto"
+            ]
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completes_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "auto_delete_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "removed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "removed_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "removed_by_agent",
+                  "cancelled",
+                  "auto_delete",
+                  "auto_download_limit",
+                  "item_removed",
+                  "member_removed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "download_id",
+          "member_id",
+          "device_id",
+          "item_type",
+          "item_id",
+          "bytes",
+          "source",
+          "requested_at",
+          "completes_at",
+          "auto_delete_at",
+          "removed_at",
+          "removed_reason"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "library": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "item_type": {
+            "enum": [
+              "track",
+              "album"
+            ]
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "member_id",
+          "item_type",
+          "item_id",
+          "saved_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "playlists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "playlist_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "owner_member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 300
+          },
+          "visibility": {
+            "enum": [
+              "private",
+              "shared",
+              "collaborative"
+            ]
+          },
+          "collaborators": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 6,
+            "uniqueItems": true
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "track_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "added_by": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "added_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "track_id",
+                "added_by",
+                "added_at"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 500
+          },
+          "track_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "origin": {
+            "enum": [
+              "seed",
+              "agent"
+            ]
+          }
+        },
+        "required": [
+          "playlist_id",
+          "owner_member_id",
+          "name",
+          "description",
+          "visibility",
+          "collaborators",
+          "tracks",
+          "track_version",
+          "created_at",
+          "updated_at",
+          "origin"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "notice_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kind": {
+            "enum": [
+              "episode_published",
+              "playlist_edited",
+              "payment_declined"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "object_type": {
+            "enum": [
+              "episode",
+              "playlist",
+              "invoice"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "event_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "required": [
+          "notice_id",
+          "member_id",
+          "created_at",
+          "kind",
+          "text",
+          "object_type",
+          "object_id",
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "enum": [
+              "agent",
+              "event"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "object_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "replaced": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "array"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "later_history_removed": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "seq",
+          "at",
+          "actor",
+          "action",
+          "object_type",
+          "object_id",
+          "member_id",
+          "replaced",
+          "request_id",
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "next_seq": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "family",
+    "members",
+    "invitations",
+    "plans",
+    "billing",
+    "artists",
+    "albums",
+    "tracks",
+    "shows",
+    "episodes",
+    "devices",
+    "sessions",
+    "progress",
+    "plays",
+    "follows",
+    "upnext",
+    "downloads",
+    "library",
+    "playlists",
+    "notifications",
+    "activity",
+    "next_seq"
+  ],
+  "additionalProperties": false
+}

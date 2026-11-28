@@ -1,0 +1,5248 @@
+{
+  "app": "tidepool",
+  "package_sha256": "a647a086b519aa709b5866c12636eb6997f1669ca5c3dba09598808b55a326b4",
+  "runtime": "1.6.0",
+  "node": "v18.20.8",
+  "passed": true,
+  "checks": [
+    "Default scenario policy exposes the 16 read tools only",
+    "Default policy denies writes",
+    "Agent cannot inject events",
+    "Agent cannot advance the clock",
+    "Task policy exposes all 33 tidepool.* tools",
+    "priya: kitchen-fieldnotes-113 (approved example) commits",
+    "sam: the same event commits on Sam's instance",
+    "Kitchen-speaker listening.record changes only Priya's progress on 113",
+    "Sam's stored progress on 113 is untouched",
+    "Sam's own account still reads 113 in progress at 600 s",
+    "Sam's history has no kitchen-speaker sessions",
+    "The event moves the clock to its time",
+    "Resending byte-identical env.apply_event arguments is a duplicate with no new version",
+    "Reusing an event ID with different content is an idempotency conflict",
+    "priya: family-car-noor-add commits",
+    "kai: family-car-noor-add commits",
+    "kitchen-fieldnotes-114 commits",
+    "members.list marks Priya as the signed-in member",
+    "Priya's history shows the two kitchen sessions tonight",
+    "The episode she stopped on her earbuds is 112 at 31:10",
+    "catalog.get_item shows 112 with chapters, its end marker and Priya's position",
+    "An unknown catalog ID returns not_found",
+    "The new Harbor Hours episode is 52 minutes",
+    "upnext.set commits list version 2",
+    "An identical retry of upnext.set is a duplicate",
+    "Reusing the request ID with another list is an idempotency conflict",
+    "A stale expected_version is rejected",
+    "A stale Up Next list version is rejected",
+    "Her phone has about 300 MB free (298 MB)",
+    "Auto-download is off for Harbor Hours on her account",
+    "Both downloads are queued with space reserved",
+    "Download completion: env.advance_time commits",
+    "Download completion: business data and activity rows are unchanged",
+    "Download completion: Core audits only the clock change",
+    "At their completion time both read as downloaded",
+    "family.get and downloads.list agree before and after completion",
+    "Played state from the kitchen sessions is left as it was",
+    "Commute reply: 112 at 31:10 first, both downloaded, runs past 40 minutes, kitchen played state untouched",
+    "Priya finishes 112 on the morning train (train-fieldnotes-112-end)",
+    "The 112 download is due for auto-delete two days after she played it",
+    "playlist.edit before \"Road trip\" exists: env.apply_event returns applied false with target_not_found",
+    "playlist.edit before \"Road trip\" exists: Core audit has a deny row with reason target_not_found",
+    "playlist.edit before \"Road trip\" exists: business data and clock are unchanged",
+    "playlist.edit before \"Road trip\" exists: env.event_status has no receipt",
+    "Agent creates the collaborative \"Road trip\" owned by Priya",
+    "The same event_id retried after the playlist exists commits",
+    "Noor's track lands at position 4 with her as author and one new version",
+    "A notice is written for Priya",
+    "The agent replaces Noor's explicit addition with its clean version in place",
+    "Kai's explicit filter is unchanged",
+    "Road-trip reply names the clean swaps, the left-out track and Noor's replaced addition",
+    "Two of Priya's playlists named \"road trip\": env.apply_event returns applied false with ambiguous_target",
+    "Two of Priya's playlists named \"road trip\": Core audit has a deny row with reason ambiguous_target",
+    "Two of Priya's playlists named \"road trip\": business data and clock are unchanged",
+    "Two of Priya's playlists named \"road trip\": env.event_status has no receipt",
+    "Noor editing Priya's private playlist: env.apply_event returns applied false with not_collaborator",
+    "Noor editing Priya's private playlist: Core audit has a deny row with reason not_collaborator",
+    "Noor editing Priya's private playlist: business data and clock are unchanged",
+    "Noor editing Priya's private playlist: env.event_status has no receipt",
+    "Priya invites Ana; the invitation holds a slot",
+    "Inviting Ana again returns already_invited",
+    "Inviting Sam returns already_member",
+    "Ana declines by event",
+    "The declined invitation frees its slot",
+    "A response with no open invitation: env.apply_event returns applied false with target_not_found",
+    "A response with no open invitation: Core audit has a deny row with reason target_not_found",
+    "A response with no open invitation: business data and clock are unchanged",
+    "A response with no open invitation: env.event_status has no receipt",
+    "Auto-delete window: env.advance_time commits",
+    "Auto-delete window: business data and activity rows are unchanged",
+    "Auto-delete window: Core audits only the clock change",
+    "Field Notes 112 (played on the train, auto-delete after 2 days) is removed; Harbor Hours 88 stays",
+    "family.get reflects the auto-delete",
+    "Ana accepts by event (approved example)",
+    "Ana is an active member",
+    "Family -> Duo is quoted as refused for five members",
+    "Family -> Duo is refused on confirm",
+    "No plan change to revoke",
+    "plan.confirm_change naming another member returns forbidden",
+    "members.remove returns the counts family.get showed beforehand (all six fields)",
+    "Noor's removal ends 2 collaborations and hides her shared playlist from the family",
+    "Her shared playlist has left Priya's view",
+    "priya: one activity row per committed write",
+    "priya: one activity row per applied event",
+    "priya: every activity row joins a Core receipt by request_id or event_id",
+    "Sam's account changing Kai's filter returns forbidden",
+    "Sam's account cannot read Priya's history",
+    "Sam follows Kettle Theory",
+    "Sam sets auto-delete, getting the replaced settings back",
+    "Sam unfollows Overtime Almanac and keeps its download",
+    "Sam saves an album",
+    "Sam unsaves a track",
+    "Sam, as owner, renames his shared playlist",
+    "sam: one activity row per committed write",
+    "sam: one activity row per applied event",
+    "sam: every activity row joins a Core receipt by request_id or event_id",
+    "Kai's search marks explicit tracks filtered",
+    "Kai's search returns each filtered track's clean version next to it",
+    "Kai's account skips the explicit track Noor added; it stays in the playlist",
+    "A collaborator changing visibility returns forbidden",
+    "Policy narrowing: filters.update for Noor is permission_denied",
+    "Policy narrowing: filters.update for Kai commits",
+    "Policy narrowing: members.remove for anyone is permission_denied",
+    "Policy narrowing: plan.confirm_change (now taking id) is permission_denied",
+    "Core audit records the policy denials with the member id",
+    "A listening.record to the end of 112 commits",
+    "112 now reads played for Priya",
+    "progress.set back to 31:10 records set_by agent and the replaced value",
+    "progress.set adds no session and its activity row keeps the replaced value",
+    "A position beyond the duration returns invalid_position and changes nothing",
+    "An unknown episode returns not_found and changes nothing",
+    "Queueing a removed episode returns unavailable and changes nothing",
+    "Two saved albums",
+    "Album alb-lowtide-1 fits",
+    "The second album before any removal returns storage_full and changes nothing",
+    "Played downloads from the two unfollowed shows",
+    "After the removals the second album downloads",
+    "Before-flight reply: removal, downloads, the day-30 check during the trip, plan stays Family with no charge for unused slots",
+    "30-day offline check: env.advance_time commits",
+    "30-day offline check: business data and activity rows are unchanged",
+    "30-day offline check: Core audits only the clock change",
+    "Past the 30-day check every phone download reads needs_check",
+    "family.get counts the needs_check downloads",
+    "Billing period end: env.advance_time commits",
+    "Billing period end: business data and activity rows are unchanged",
+    "Billing period end: Core audits only the clock change",
+    "Billing period end: family.get and downloads.list still agree",
+    "After period end with no payment event: new period, Family, invoice pending, account active",
+    "trip: one activity row per committed write",
+    "trip: one activity row per applied event",
+    "trip: every activity row joins a Core receipt by request_id or event_id",
+    "Leila's account has payment due within its grace period",
+    "An upgrade is refused while payment is due",
+    "Payment grace period end: env.advance_time commits",
+    "Payment grace period end: business data and activity rows are unchanged",
+    "Payment grace period end: Core audits only the clock change",
+    "After the grace period downloads read needs_check and family.get says grace expired",
+    "New downloads wait for payment",
+    "Payment succeeds by event",
+    "Downloads are available again",
+    "Upgrade applies at once; the charge equals the quote (221 cents prorated onto the next invoice)",
+    "Downgrade is scheduled for period end",
+    "The scheduled downgrade can be revoked",
+    "Revoking again returns no_pending_change",
+    "Choosing the plan in effect keeps it and revokes the scheduled downgrade",
+    "Choosing it again, with nothing scheduled, is refused",
+    "Period end with a downgrade: env.advance_time commits",
+    "Period end with a downgrade: business data and activity rows are unchanged",
+    "Period end with a downgrade: Core audits only the clock change",
+    "Period end with a downgrade: family.get and downloads.list still agree",
+    "After period end the downgrade is in effect and the new invoice bills Individual plus the proration",
+    "leila: one activity row per committed write",
+    "leila: one activity row per applied event",
+    "leila: every activity row joins a Core receipt by request_id or event_id",
+    "Reset returns ready",
+    "Reset restores the loaded family, history and catalog",
+    "Reset restores the loaded clock",
+    "Resetting Priya's instance leaves Sam's instance as it was"
+  ],
+  "reference_replies": {
+    "commute": "Up Next now starts with Field Notes 112 at 31:10 (10:50 left), then the new Harbor Hours episode (52:00). Both are downloaded to your phone, so they will play without signal. Together they run 62:50 at 1x, longer than your 40-minute ride, so Harbor Hours will carry over to the trip home. Note: the kitchen speaker played Field Notes 113 and 114 under your account this evening, so they show as played; I left them that way. Want me to mark them unplayed?",
+    "road_trip": "Created \"Road trip\" (owner: you; Sam, Noor and Kai can add songs). From Sam's ideas I used the clean versions of Glass Weather and Rusted Engines, kept the other three, and left out Copper Letters because it has no clean version. On 2026-11-26 Noor added \"Borrowed Signals\", which is explicit; I swapped in its clean version in the same spot. Kai's explicit filter is still on.",
+    "family_plan": "Ana is in: she accepted and is now a member, so the family uses 5 of 6 Family slots. Duo is not possible: it allows 2 members and the family has 5. Removing Noor ended 3 downloads (128 MB) and her editing access to 2 shared playlists, and her own shared playlist \"After school\" is no longer visible to the family.",
+    "kai_search": "Gutterglow Kids: 6 explicit tracks have clean versions you can play; 1 (Copper Letters) has none and stays filtered on your account.",
+    "before_flight": "Removed 15 played episodes of Overtime Almanac and Static & Signal, which you no longer follow (635 MB). Downloaded your 5 Up Next episodes and both saved albums to your phone. Your phone last checked in 24 days ago: downloads need it online by Monday, November 30 at 7:00 PM Pacific, which falls during your trip, so connect to Wi-Fi once in Lisbon. The plan stays Family ($17.99/month): the 2 unused slots carry no separate charge, and Duo allows only 2 of your 4 members."
+  },
+  "observations": {
+    "member_removal": {
+      "member_id": "mem-noor",
+      "family_get_if_removed": {
+        "downloads_removed": 3,
+        "bytes_freed": 128268000,
+        "collaborations_ended": 2,
+        "playlist_ids": [
+          "pl-family-car",
+          "pl-4"
+        ],
+        "owned_playlists_hidden": 1,
+        "owned_playlist_ids": [
+          "pl-noor-after-school"
+        ]
+      },
+      "members_remove_result": {
+        "downloads_removed": 3,
+        "bytes_freed": 128268000,
+        "collaborations_ended": 2,
+        "playlist_ids": [
+          "pl-family-car",
+          "pl-4"
+        ],
+        "owned_playlists_hidden": 1,
+        "owned_playlist_ids": [
+          "pl-noor-after-school"
+        ]
+      }
+    },
+    "priya_joins": {
+      "activity_rows": 16,
+      "agent_rows": 9,
+      "event_rows": 7
+    },
+    "sam_joins": {
+      "activity_rows": 7,
+      "agent_rows": 6,
+      "event_rows": 1
+    },
+    "trip_joins": {
+      "activity_rows": 24,
+      "agent_rows": 23,
+      "event_rows": 1
+    },
+    "billing_examples": {
+      "upgrade_quote": {
+        "from_plan_id": "individual",
+        "to_plan_id": "duo",
+        "change": "upgrade",
+        "allowed": true,
+        "blocked_by": null,
+        "effective_at": "2026-11-28T10:05:00-05:00",
+        "proration_cents": 221,
+        "members_counted": 1,
+        "new_limit": 2,
+        "replaces_scheduled_change": null,
+        "next_invoice": {
+          "invoice_id": "inv-2026-12-15",
+          "period_start": "2026-12-15T00:00:00-05:00",
+          "period_end": "2027-01-15T00:00:00-05:00",
+          "plan_id": "duo",
+          "amount_cents": 1720,
+          "lines": [
+            {
+              "kind": "plan",
+              "plan_id": "duo",
+              "amount_cents": 1499
+            },
+            {
+              "kind": "upgrade_proration",
+              "plan_id": "duo",
+              "amount_cents": 221
+            }
+          ],
+          "status": "upcoming"
+        }
+      },
+      "upgrade_receipt_version": {
+        "epoch": 2,
+        "revision": 4
+      },
+      "after_period_end": {
+        "status": "active",
+        "currency": "USD",
+        "period_start": "2026-12-15T00:00:00-05:00",
+        "period_end": "2027-01-15T00:00:00-05:00",
+        "current_invoice": {
+          "invoice_id": "inv-2026-12-15",
+          "period_start": "2026-12-15T00:00:00-05:00",
+          "period_end": "2027-01-15T00:00:00-05:00",
+          "plan_id": "individual",
+          "amount_cents": 1320,
+          "lines": [
+            {
+              "kind": "plan",
+              "plan_id": "individual",
+              "amount_cents": 1099
+            },
+            {
+              "kind": "upgrade_proration",
+              "plan_id": "duo",
+              "amount_cents": 221
+            }
+          ],
+          "status": "pending"
+        },
+        "next_invoice": {
+          "invoice_id": "inv-2027-01-15",
+          "period_start": "2027-01-15T00:00:00-05:00",
+          "period_end": "2027-02-15T00:00:00-05:00",
+          "plan_id": "individual",
+          "amount_cents": 1099,
+          "lines": [
+            {
+              "kind": "plan",
+              "plan_id": "individual",
+              "amount_cents": 1099
+            }
+          ],
+          "status": "upcoming"
+        },
+        "payment_due": null
+      }
+    },
+    "leila_joins": {
+      "activity_rows": 7,
+      "agent_rows": 6,
+      "event_rows": 1
+    },
+    "snapshot_before_reset": {
+      "account": "tidepool-priya",
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      },
+      "virtual_now": "2026-11-27T09:05:00-08:00",
+      "members": [
+        "mem-priya:active",
+        "mem-sam:active",
+        "mem-noor:removed",
+        "mem-kai:active",
+        "mem-ana:active"
+      ],
+      "playlists": 7,
+      "activity_rows": 16,
+      "receipts": 20,
+      "audit_rows": 66
+    }
+  },
+  "management_call_example": {
+    "method": "tools/call",
+    "params": {
+      "name": "env.apply_event",
+      "arguments": {
+        "expected_version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "event": {
+          "event_id": "kitchen-fieldnotes-113",
+          "at": "2026-11-24T19:42:00-08:00",
+          "operation": "listening.record",
+          "payload": {
+            "session_id": "ls-2207",
+            "member_id": "mem-priya",
+            "device_id": "dev-kitchen-speaker",
+            "item_type": "episode",
+            "item_id": "ep-fieldnotes-113",
+            "started_at": "2026-11-24T19:05:00-08:00",
+            "start_reason": "voice",
+            "speed": 1,
+            "start_position_s": 0,
+            "end_position_s": 2210,
+            "end_reason": "completed"
+          }
+        }
+      }
+    }
+  },
+  "trace_summary": {
+    "calls": 304,
+    "by_outcome": {
+      "permission_denied": 6,
+      "ok": 200,
+      "ready": 7,
+      "committed": 64,
+      "duplicate_replay": 2,
+      "idempotency_conflict": 2,
+      "not_found": 2,
+      "stale_version": 1,
+      "list_version_mismatch": 1,
+      "target_not_found": 2,
+      "ambiguous_target": 1,
+      "not_collaborator": 1,
+      "already_invited": 1,
+      "already_member": 1,
+      "too_many_members": 1,
+      "no_pending_change": 2,
+      "forbidden": 4,
+      "invalid_position": 1,
+      "unavailable": 1,
+      "storage_full": 1,
+      "payment_due": 2,
+      "invalid_arguments": 1
+    },
+    "note": "Duplicate replays are counted once as duplicate_replay; denials keep their status."
+  },
+  "trace": [
+    {
+      "seq": 1,
+      "run": "family-week",
+      "instance": "default",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#2",
+      "tool": "tidepool.library.save",
+      "request_id": "denied-save",
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 2,
+      "run": "family-week",
+      "instance": "default",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#2",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 3,
+      "run": "family-week",
+      "instance": "default",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#2",
+      "tool": "env.advance_time",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 4,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 5,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.load_seed",
+      "request_id": "load-priya",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 6,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 7,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.load_seed",
+      "request_id": "load-sam",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 8,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 9,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/infra#7",
+      "tool": "env.load_seed",
+      "request_id": "load-kai",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 10,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 11,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 12,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 13,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "kitchen-fieldnotes-113",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 14,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 15,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "kitchen-fieldnotes-113",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 16,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 17,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.progress.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 18,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.history.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 19,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 20,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "kitchen-fieldnotes-113",
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 21,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 22,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 23,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "kitchen-fieldnotes-113",
+      "status": "idempotency_conflict",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 24,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 25,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "family-car-noor-add",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 26,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 27,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "family-car-noor-add",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 28,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 29,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "kitchen-fieldnotes-114",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 30,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 31,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.advance_time",
+      "request_id": "priya-clock-2026-11-24T21:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 32,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 33,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.history.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 34,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.progress.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 35,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.catalog.get_item",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 36,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.catalog.get_item",
+      "request_id": null,
+      "event_id": null,
+      "status": "not_found",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 37,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.shows.get_episodes",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 38,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 39,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 40,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.set",
+      "request_id": "priya-upnext",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 41,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.set",
+      "request_id": "priya-upnext",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 42,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.set",
+      "request_id": "priya-upnext",
+      "event_id": null,
+      "status": "idempotency_conflict",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 43,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.set",
+      "request_id": "priya-upnext-stale",
+      "event_id": null,
+      "status": "stale_version",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 44,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 45,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.set",
+      "request_id": "priya-w1",
+      "event_id": null,
+      "status": "list_version_mismatch",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 46,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.devices.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 47,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.follows.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 48,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 49,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.add",
+      "request_id": "priya-w2",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 50,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 51,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.add",
+      "request_id": "priya-w3",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 52,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 53,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 54,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 55,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 56,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.advance_time",
+      "request_id": "priya-clock-2026-11-24T21:01:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 57,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 58,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 59,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 60,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 61,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.upnext.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 62,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.progress.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 63,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 64,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "train-fieldnotes-112-end",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 65,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 66,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 67,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 68,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "roadtrip-noor-add-1",
+      "status": "target_not_found",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 69,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 70,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.event_status",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 71,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 72,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 73,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 74,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.create",
+      "request_id": "priya-w4",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 75,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 76,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "roadtrip-noor-add-1",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 77,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 78,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.notifications.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 79,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 80,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.update_tracks",
+      "request_id": "priya-w5",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 81,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 82,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 83,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.create",
+      "request_id": "priya-w6",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 84,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 85,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 86,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "roadtrip-noor-add-2",
+      "status": "ambiguous_target",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 87,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 88,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.event_status",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 89,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 90,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 91,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "focus-noor-add",
+      "status": "not_collaborator",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 92,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 93,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.event_status",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 94,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 95,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.invite",
+      "request_id": "priya-w7",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 96,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 97,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.invite",
+      "request_id": "priya-w8",
+      "event_id": null,
+      "status": "already_invited",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 98,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 99,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.invite",
+      "request_id": "priya-w9",
+      "event_id": null,
+      "status": "already_member",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 100,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 101,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "invite-ana-decline",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 102,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 103,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 104,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 105,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "ana-no-invite",
+      "status": "target_not_found",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 106,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 107,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.event_status",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 108,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 109,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.invite",
+      "request_id": "priya-w10",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 110,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 111,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 112,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.advance_time",
+      "request_id": "priya-clock-2026-11-27T08:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 113,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 114,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 115,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 116,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 117,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 118,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "invite-ana-accept",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 119,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 120,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.plan.preview_change",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 121,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 122,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "priya-w11",
+      "event_id": null,
+      "status": "too_many_members",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 123,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 124,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.plan.revoke_change",
+      "request_id": "priya-w12",
+      "event_id": null,
+      "status": "no_pending_change",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 125,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 126,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "priya-w13",
+      "event_id": null,
+      "status": "forbidden",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 127,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 128,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.members.remove",
+      "request_id": "priya-w14",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      }
+    },
+    {
+      "seq": 129,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#4",
+      "tool": "tidepool.playlists.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      }
+    },
+    {
+      "seq": 130,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      }
+    },
+    {
+      "seq": 131,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 132,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.filters.update",
+      "request_id": "sam-w1",
+      "event_id": null,
+      "status": "forbidden",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 133,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.history.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "forbidden",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 134,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 135,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.follows.add",
+      "request_id": "sam-w2",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 136,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 137,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.follows.update_settings",
+      "request_id": "sam-w3",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 138,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 139,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.follows.remove",
+      "request_id": "sam-w4",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 140,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 141,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.library.save",
+      "request_id": "sam-w5",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 142,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 143,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.library.unsave",
+      "request_id": "sam-w6",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 144,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 145,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/agent#6",
+      "tool": "tidepool.playlists.update_settings",
+      "request_id": "sam-w7",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 146,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 147,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/agent#8",
+      "tool": "tidepool.catalog.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 148,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/agent#8",
+      "tool": "tidepool.playlists.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 149,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 150,
+      "run": "family-week",
+      "instance": "kai",
+      "account": "tidepool-kai",
+      "connection": "tidepool-kai/agent#8",
+      "tool": "tidepool.playlists.update_settings",
+      "request_id": "kai-w1",
+      "event_id": null,
+      "status": "forbidden",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 151,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 152,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.load_seed",
+      "request_id": "load-narrow",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 153,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 154,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#10",
+      "tool": "tidepool.filters.update",
+      "request_id": "narrow-w1",
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 155,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 156,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#10",
+      "tool": "tidepool.filters.update",
+      "request_id": "narrow-w2",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 157,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 158,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#10",
+      "tool": "tidepool.members.remove",
+      "request_id": "narrow-w3",
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 159,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 160,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#10",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "narrow-w4",
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 161,
+      "run": "family-week",
+      "instance": "narrow",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 162,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 163,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.load_seed",
+      "request_id": "load-trip",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 164,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 165,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "train-fieldnotes-112-end",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 166,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.progress.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 167,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 168,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 169,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.progress.set",
+      "request_id": "trip-w1",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 170,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 171,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 172,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 173,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.progress.set",
+      "request_id": "trip-w2",
+      "event_id": null,
+      "status": "invalid_position",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 174,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 175,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 176,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 177,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.progress.set",
+      "request_id": "trip-w3",
+      "event_id": null,
+      "status": "not_found",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 178,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 179,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.upnext.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 180,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 181,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 182,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.upnext.set",
+      "request_id": "trip-w4",
+      "event_id": null,
+      "status": "unavailable",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 183,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 184,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.upnext.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 185,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.library.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 186,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 187,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w5",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 188,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 189,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w6",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 190,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 191,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w7",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 192,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 193,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w8",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 194,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 195,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w9",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 196,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 197,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w10",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 198,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 199,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 200,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w11",
+      "event_id": null,
+      "status": "storage_full",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 201,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 202,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.follows.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 203,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 204,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 205,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w12",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 206,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 207,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w13",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 208,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 209,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w14",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 210,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 211,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w15",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 212,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 213,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w16",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 214,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 215,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w17",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 216,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 217,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w18",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 218,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 219,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w19",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 220,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 221,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w20",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 222,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 17
+      }
+    },
+    {
+      "seq": 223,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w21",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 224,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 18
+      }
+    },
+    {
+      "seq": 225,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w22",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      }
+    },
+    {
+      "seq": 226,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      }
+    },
+    {
+      "seq": 227,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w23",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 20
+      }
+    },
+    {
+      "seq": 228,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 20
+      }
+    },
+    {
+      "seq": 229,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w24",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 21
+      }
+    },
+    {
+      "seq": 230,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 21
+      }
+    },
+    {
+      "seq": 231,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w25",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 22
+      }
+    },
+    {
+      "seq": 232,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 22
+      }
+    },
+    {
+      "seq": 233,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.remove",
+      "request_id": "trip-w26",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 23
+      }
+    },
+    {
+      "seq": 234,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 23
+      }
+    },
+    {
+      "seq": 235,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.add",
+      "request_id": "trip-w27",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      }
+    },
+    {
+      "seq": 236,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.devices.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      }
+    },
+    {
+      "seq": 237,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      }
+    },
+    {
+      "seq": 238,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.plan.preview_change",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      }
+    },
+    {
+      "seq": 239,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      }
+    },
+    {
+      "seq": 240,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      }
+    },
+    {
+      "seq": 241,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.advance_time",
+      "request_id": "trip-clock-2026-11-30T19:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 242,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 243,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 244,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 245,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 246,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 247,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 25
+      }
+    },
+    {
+      "seq": 248,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.advance_time",
+      "request_id": "trip-clock-2026-12-03T09:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 26
+      }
+    },
+    {
+      "seq": 249,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 26
+      }
+    },
+    {
+      "seq": 250,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 26
+      }
+    },
+    {
+      "seq": 251,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 26
+      }
+    },
+    {
+      "seq": 252,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/agent#12",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 26
+      }
+    },
+    {
+      "seq": 253,
+      "run": "family-week",
+      "instance": "trip",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#11",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 26
+      }
+    },
+    {
+      "seq": 254,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 255,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.load_seed",
+      "request_id": "load-leila",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 256,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 257,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 258,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w1",
+      "event_id": null,
+      "status": "payment_due",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 259,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 260,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 261,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.advance_time",
+      "request_id": "leila-clock-2026-11-27T09:00:00-05:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 262,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 263,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 264,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 265,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 266,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 267,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 268,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.downloads.add",
+      "request_id": "leila-w2",
+      "event_id": null,
+      "status": "payment_due",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 269,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 270,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "leila-november-paid",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 271,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 272,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 273,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.advance_time",
+      "request_id": "leila-clock-2026-11-28T10:05:00-05:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 274,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.preview_change",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 275,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 276,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w3",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 277,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 278,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w4",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 279,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 280,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.revoke_change",
+      "request_id": "leila-w5",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 281,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 282,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.revoke_change",
+      "request_id": "leila-w6",
+      "event_id": null,
+      "status": "no_pending_change",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 283,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 284,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w7",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 285,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 286,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w8",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 287,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 288,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w9",
+      "event_id": null,
+      "status": "invalid_arguments",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 289,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 290,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.plan.confirm_change",
+      "request_id": "leila-w10",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 291,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 292,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 293,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 294,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 295,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.advance_time",
+      "request_id": "leila-clock-2026-12-15T09:00:00-05:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 296,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 297,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.downloads.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 298,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 299,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/agent#14",
+      "tool": "tidepool.family.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 300,
+      "run": "family-week",
+      "instance": "leila",
+      "account": "tidepool-leila",
+      "connection": "tidepool-leila/infra#13",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 301,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      }
+    },
+    {
+      "seq": 302,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.reset",
+      "request_id": null,
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 303,
+      "run": "family-week",
+      "instance": "priya",
+      "account": "tidepool-priya",
+      "connection": "tidepool-priya/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 304,
+      "run": "family-week",
+      "instance": "sam",
+      "account": "tidepool-sam",
+      "connection": "tidepool-sam/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    }
+  ]
+}

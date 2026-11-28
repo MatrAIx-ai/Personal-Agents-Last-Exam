@@ -1,0 +1,537 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:tidepool:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "listening.record"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "session_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "device_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "item_type": {
+              "enum": [
+                "track",
+                "episode"
+              ]
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "start_reason": {
+              "enum": [
+                "user",
+                "autoplay",
+                "queue",
+                "voice"
+              ]
+            },
+            "speed": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 3
+            },
+            "start_position_s": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 86400
+            },
+            "end_position_s": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 86400
+            },
+            "end_reason": {
+              "enum": [
+                "completed",
+                "paused",
+                "stopped",
+                "skipped",
+                "interrupted"
+              ]
+            },
+            "speaker_hint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "session_id",
+            "member_id",
+            "device_id",
+            "item_type",
+            "item_id",
+            "started_at",
+            "start_reason",
+            "speed",
+            "start_position_s",
+            "end_position_s",
+            "end_reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "episode.publish"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "episode_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "show_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "number": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "published_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "duration_s": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 86400
+            },
+            "end_of_content_s": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 86400
+            },
+            "chapters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "start_s": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 86400
+                  }
+                },
+                "required": [
+                  "title",
+                  "start_s"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 40
+            },
+            "notes": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000000000
+            },
+            "explicit": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "episode_id",
+            "show_id",
+            "number",
+            "title",
+            "published_at",
+            "duration_s",
+            "end_of_content_s",
+            "chapters",
+            "notes",
+            "bytes",
+            "explicit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "catalog.update"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "item_type": {
+              "enum": [
+                "track",
+                "album",
+                "show",
+                "episode"
+              ]
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "availability": {
+              "const": "removed"
+            },
+            "explicit": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "item_type",
+            "item_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "playlist.edit"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "playlist_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "author_member_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "operations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "op": {
+                        "enum": [
+                          "add",
+                          "remove",
+                          "move"
+                        ]
+                      },
+                      "track_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "position": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 500
+                      }
+                    },
+                    "required": [
+                      "op",
+                      "track_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 50,
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "playlist_id",
+                "author_member_id",
+                "operations"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "playlist_ref": {
+                  "type": "object",
+                  "properties": {
+                    "owner_member_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "owner_member_id",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                "author_member_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "operations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "op": {
+                        "enum": [
+                          "add",
+                          "remove",
+                          "move"
+                        ]
+                      },
+                      "track_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "position": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 500
+                      }
+                    },
+                    "required": [
+                      "op",
+                      "track_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 50,
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "playlist_ref",
+                "author_member_id",
+                "operations"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "device.checkin"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "device_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "device_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "billing.payment_result"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "invoice_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "outcome": {
+              "enum": [
+                "paid",
+                "declined"
+              ]
+            }
+          },
+          "required": [
+            "invoice_id",
+            "outcome"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "family.invite_response"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "invitee_person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "response": {
+              "enum": [
+                "accepted",
+                "declined"
+              ]
+            }
+          },
+          "required": [
+            "invitee_person_id",
+            "response"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
