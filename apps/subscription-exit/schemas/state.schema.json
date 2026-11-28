@@ -1,0 +1,668 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "pale.app-state.v1"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "package_version": {
+      "const": "0.1.0"
+    },
+    "core_api_version": {
+      "const": "1.2.0"
+    },
+    "app_id": {
+      "const": "subscription-exit"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[-a-zA-Z0-9_]{1,80}$"
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "profile": {
+      "type": "string"
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "virtual_now": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "binding": {
+      "type": "object",
+      "properties": {
+        "people": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "person_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "person_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "accounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "string"
+              },
+              "account_id": {
+                "type": "string"
+              },
+              "owner_person_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "app_id",
+              "account_id",
+              "owner_person_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "objects": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "people",
+        "accounts",
+        "objects"
+      ],
+      "additionalProperties": false
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "allow": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "constraints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "allow",
+          "constraints"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "initial_data": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "paid_active",
+            "cancellation_scheduled",
+            "free"
+          ]
+        },
+        "period_start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "period_end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "next_period_end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "phase": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "decision_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 128
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "saved_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "saved_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 18,
+          "minItems": 0
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "subscription_started",
+                  "period_started",
+                  "cancellation_scheduled",
+                  "cancellation_revoked",
+                  "paid_access_ended",
+                  "plan_reviewed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 96,
+          "minItems": 0
+        },
+        "previews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "cancel",
+                  "revoke"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "abandoned",
+                  "confirmed"
+                ]
+              },
+              "phase": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "decision_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 128
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "action",
+              "status",
+              "phase",
+              "decision_revision",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "minItems": 0
+        },
+        "action_receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "preview_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "cancel",
+                  "revoke"
+                ]
+              },
+              "confirmed_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "resulting_status": {
+                "type": "string",
+                "enum": [
+                  "paid_active",
+                  "cancellation_scheduled",
+                  "free"
+                ]
+              },
+              "effective_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "preview_id",
+              "action",
+              "confirmed_at",
+              "resulting_status",
+              "effective_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "account_id",
+        "status",
+        "period_start",
+        "period_end",
+        "next_period_end",
+        "phase",
+        "decision_revision",
+        "ended_at",
+        "saved",
+        "history",
+        "previews",
+        "action_receipts"
+      ],
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "paid_active",
+            "cancellation_scheduled",
+            "free"
+          ]
+        },
+        "period_start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "period_end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "next_period_end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "phase": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "decision_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 128
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "saved_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "saved_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 18,
+          "minItems": 0
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "subscription_started",
+                  "period_started",
+                  "cancellation_scheduled",
+                  "cancellation_revoked",
+                  "paid_access_ended",
+                  "plan_reviewed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 96,
+          "minItems": 0
+        },
+        "previews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "cancel",
+                  "revoke"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "abandoned",
+                  "confirmed"
+                ]
+              },
+              "phase": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "decision_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 128
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "action",
+              "status",
+              "phase",
+              "decision_revision",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "minItems": 0
+        },
+        "action_receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "preview_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "cancel",
+                  "revoke"
+                ]
+              },
+              "confirmed_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "resulting_status": {
+                "type": "string",
+                "enum": [
+                  "paid_active",
+                  "cancellation_scheduled",
+                  "free"
+                ]
+              },
+              "effective_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "preview_id",
+              "action",
+              "confirmed_at",
+              "resulting_status",
+              "effective_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "account_id",
+        "status",
+        "period_start",
+        "period_end",
+        "next_period_end",
+        "phase",
+        "decision_revision",
+        "ended_at",
+        "saved",
+        "history",
+        "previews",
+        "action_receipts"
+      ],
+      "additionalProperties": false
+    },
+    "receipts": {
+      "type": "object"
+    },
+    "audit": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "resources": {
+      "$ref": "resources.schema.json"
+    },
+    "initial_resources": {
+      "$ref": "resources.schema.json"
+    },
+    "initial_virtual_now": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "schema",
+    "schema_version",
+    "package_version",
+    "core_api_version",
+    "app_id",
+    "run_id",
+    "epoch",
+    "revision",
+    "profile",
+    "next_id",
+    "virtual_now",
+    "binding",
+    "policies",
+    "initial_data",
+    "data",
+    "receipts",
+    "audit",
+    "resources",
+    "initial_resources"
+  ],
+  "additionalProperties": false
+}

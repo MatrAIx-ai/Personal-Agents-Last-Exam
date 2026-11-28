@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict'),plugin=require('../plugin.cjs'),binding=require('../fixtures/binding.json');
+const data=structuredClone(require('../fixtures/minimal.json')),account_id=data.account_id;
+const call=(name,x={},virtual_now='2026-01-15T10:00:00Z')=>plugin.handleTool({binding,virtual_now},data,'subscription-exit.'+name,{account_id,...x}).result;
+const opened=call('prepare_cancellation');
+assert.equal(opened.entitlement.access,'paid');
+const result=call('confirm',{preview_id:opened.preview.id});
+assert.equal(result.entitlement.entitlement,'cancellation_scheduled');
+const final=call('read_status',{},data.period_end);
+assert.equal(final.entitlement.access,'free');
+assert.deepEqual(final.entitlement.saved,data.saved);
+console.log('PASS: synthetic cancellation receipt, free access at the virtual boundary, all saved entries retained.');

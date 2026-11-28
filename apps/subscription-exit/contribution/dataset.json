@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "subscription-exit-v1",
+  "version": "0.1.0",
+  "description": "Default synthetic smoke seed. Separate full-window MIT evaluation data is in evaluation/accounts-v1.json; see evaluation/COVERAGE.md.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original synthetic account and text records; no external records or media.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Manual fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Stable synthetic IDs and fixed UTC instants."
+  ],
+  "expected_counts": {
+    "records": 5,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Maintainer-side provenance/license check: original synthetic text, account records and generator only (MIT); no third-party data or media. External delivery review remains pending. Full-window cohort data and reproducible coverage: evaluation/COVERAGE.md."
+  }
+}

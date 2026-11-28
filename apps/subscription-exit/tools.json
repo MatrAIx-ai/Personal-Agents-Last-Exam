@@ -1,0 +1,1828 @@
+[
+  {
+    "name": "subscription-exit.read_plan",
+    "description": "Read the fictional plan and informational renewal amount. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": true,
+    "scope": "subscription-exit.read_plan",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "service": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "renewal_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999
+            },
+            "charge_simulated": {
+              "const": false
+            }
+          },
+          "required": [
+            "id",
+            "service",
+            "name",
+            "currency",
+            "renewal_minor",
+            "charge_simulated"
+          ],
+          "additionalProperties": false
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        },
+        "account_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "plan",
+        "entitlement",
+        "account_name"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subscription-exit.read_status",
+    "description": "Read current entitlement at Core virtual time, saved entries, seed-only history, open previews, and confirmation receipts. Live changes are tracked by receipts and projected entitlement. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": true,
+    "scope": "subscription-exit.read_status",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "subscription_started",
+                  "period_started",
+                  "cancellation_scheduled",
+                  "cancellation_revoked",
+                  "paid_access_ended",
+                  "plan_reviewed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 96,
+          "minItems": 0
+        },
+        "open_previews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "cancel",
+                  "revoke"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "abandoned",
+                  "confirmed"
+                ]
+              },
+              "phase": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "decision_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 128
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "action",
+              "status",
+              "phase",
+              "decision_revision",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "minItems": 0
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "preview_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "cancel",
+                  "revoke"
+                ]
+              },
+              "confirmed_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "resulting_status": {
+                "type": "string",
+                "enum": [
+                  "paid_active",
+                  "cancellation_scheduled",
+                  "free"
+                ]
+              },
+              "effective_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            },
+            "required": [
+              "id",
+              "preview_id",
+              "action",
+              "confirmed_at",
+              "resulting_status",
+              "effective_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "minItems": 0
+        },
+        "account_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "service": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "renewal_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999
+            },
+            "charge_simulated": {
+              "const": false
+            }
+          },
+          "required": [
+            "id",
+            "service",
+            "name",
+            "currency",
+            "renewal_minor",
+            "charge_simulated"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "entitlement",
+        "history",
+        "open_previews",
+        "receipts",
+        "account_name",
+        "plan"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subscription-exit.read_receipt",
+    "description": "Read an existing confirmation receipt. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": true,
+    "scope": "subscription-exit.read_receipt",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "receipt_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "receipt": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "preview_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "revoke"
+              ]
+            },
+            "confirmed_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "resulting_status": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "effective_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            }
+          },
+          "required": [
+            "id",
+            "preview_id",
+            "action",
+            "confirmed_at",
+            "resulting_status",
+            "effective_at"
+          ],
+          "additionalProperties": false
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "receipt",
+        "entitlement"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subscription-exit.prepare_cancellation",
+    "description": "Prepare a cancellation for the bound account before the end of its current modeled paid period, including the single renewed period. No further renewal is inferred. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": false,
+    "scope": "subscription-exit.prepare_cancellation",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "revoke"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "open",
+                "abandoned",
+                "confirmed"
+              ]
+            },
+            "phase": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 128
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            }
+          },
+          "required": [
+            "id",
+            "action",
+            "status",
+            "phase",
+            "decision_revision",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "preview",
+        "entitlement"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subscription-exit.prepare_revocation",
+    "description": "Preview reversal of a scheduled cancellation in the bound account before the end of the current modeled paid period. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": false,
+    "scope": "subscription-exit.prepare_revocation",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "revoke"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "open",
+                "abandoned",
+                "confirmed"
+              ]
+            },
+            "phase": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 128
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            }
+          },
+          "required": [
+            "id",
+            "action",
+            "status",
+            "phase",
+            "decision_revision",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "preview",
+        "entitlement"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subscription-exit.confirm",
+    "description": "Confirm an unchanged, current preview; replay by exactly the same request_id, or read the original receipt. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": false,
+    "scope": "subscription-exit.confirm",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "preview_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "receipt": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "preview_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "revoke"
+              ]
+            },
+            "confirmed_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "resulting_status": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "effective_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            }
+          },
+          "required": [
+            "id",
+            "preview_id",
+            "action",
+            "confirmed_at",
+            "resulting_status",
+            "effective_at"
+          ],
+          "additionalProperties": false
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "receipt",
+        "entitlement"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subscription-exit.abandon",
+    "description": "Abandon a preview without changing entitlement. Omit account_id to use the session-bound account; an explicit account_id must match.",
+    "read_only": false,
+    "scope": "subscription-exit.abandon",
+    "resource_target": "bound fictional account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "required": [
+        "preview_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "subscription-exit"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "revoke"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "open",
+                "abandoned",
+                "confirmed"
+              ]
+            },
+            "phase": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 128
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            }
+          },
+          "required": [
+            "id",
+            "action",
+            "status",
+            "phase",
+            "decision_revision",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "entitlement": {
+          "type": "object",
+          "properties": {
+            "access": {
+              "type": "string",
+              "enum": [
+                "paid",
+                "free"
+              ]
+            },
+            "entitlement": {
+              "type": "string",
+              "enum": [
+                "paid_active",
+                "cancellation_scheduled",
+                "free"
+              ]
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "next_period_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_end": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "renewal": {
+              "type": "string",
+              "enum": [
+                "scheduled",
+                "off",
+                "outside_scenario"
+              ]
+            },
+            "transition_consumed": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "Z$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "saved_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 18,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "access",
+            "entitlement",
+            "period_start",
+            "period_end",
+            "next_period_end",
+            "effective_end",
+            "renewal",
+            "transition_consumed",
+            "saved"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "preview",
+        "entitlement"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
