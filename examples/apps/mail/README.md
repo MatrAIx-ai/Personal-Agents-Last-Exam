@@ -63,6 +63,14 @@ From the repository root, run `npm run example:attachments` for the complete ord
 
 Only drafts accept attachment edits. Mail's receive handler imports a delivered file under a new recipient-owned ID and associates it with the received message. Senders reuse `schemas/router-attachments.schema.json` for `channel.email.attachments`; the original `channel.email` contract is still supported. The publisher adapter exports bytes through authorized `mail.attachment.get` calls before sending.
 
+## Outbound message identity and reset
+
+`src/publisher.cjs` builds each outgoing CloudEvent ID from the source Mail epoch and local message ID. `send()` obtains the epoch from the existing MCP version; callers do not supply it. This distinguishes a new message after a source-only reset even when its local ID and virtual timestamp repeat. The message's `subject` and `data.source_object.object_id` still reference the actual Mail record. The same rule applies to text and attachment messages, without changing either wire schema or the Mail MCP tools.
+
+The internal `notification()` helper requires `sourceEpoch` from that source version when called directly. Do not substitute wall-clock time or a random value on each attempt. To retry a downstream delivery, preserve the returned `message` envelope and call `router.publish` again; its event identity stays fixed, including when the transport request ID changes. Use a fresh request ID for a new send after reset. If the source resets between the local send and the confirming read, the adapter stops at `source_confirmation` with `source_lifecycle_changed` instead of publishing a replacement record.
+
+Run `node runtime/tests/mail-source-reset.cjs` from the repository root to exercise source-only reset through real MCP: both messages arrive in the unchanged receiver, retries create no additional records, and conflicting reuse of an event ID is rejected. This regression also runs in the existing `npm test` Mail-to-Mail stage.
+
 ## Interactive business Web App
 
 See [GUI startup and boundaries](gui/README.md). From the public repository root run `node runtime/web/server.cjs --app mail --run web-demo --profile sandbox`. The App owns its controls in `gui/src/app.js`; the shared Host exposes only the fixed Agent connection.
