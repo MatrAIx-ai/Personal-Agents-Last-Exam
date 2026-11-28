@@ -1,0 +1,3255 @@
+[
+  {
+    "name": "lanternbox.account.get",
+    "description": "Read the account: status (active, past_due, suspended or cancelled), the plan in effect now, paid_through, any pending downgrade or cancellation, the profile count and limit, the next charge, and the current environment time (now). Reads and writes never move the clock; only the environment does.",
+    "read_only": true,
+    "scope": "lanternbox.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account": {
+          "type": "object",
+          "properties": {
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "owner_profile_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "active",
+                "past_due",
+                "suspended",
+                "cancelled"
+              ]
+            },
+            "plan_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "paid_through": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "pending": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "downgrade",
+                        "cancel"
+                      ]
+                    },
+                    "plan_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "requested_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "plan_id",
+                    "due_at",
+                    "requested_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "profile_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "profile_limit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "suspends_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "next_charge": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "period_start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "plan_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000000
+                    }
+                  },
+                  "required": [
+                    "period_start",
+                    "plan_id",
+                    "amount_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "last_charge": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "charge_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "period_start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "period_end": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000000
+                    },
+                    "expected_amount_cents": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "plan_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "result": {
+                      "enum": [
+                        "paid",
+                        "failed"
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 60
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "charge_id",
+                    "period_start",
+                    "period_end",
+                    "amount_cents",
+                    "expected_amount_cents",
+                    "plan_id",
+                    "result",
+                    "reason",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "account_id",
+            "owner_profile_id",
+            "status",
+            "plan_id",
+            "paid_through",
+            "pending",
+            "profile_count",
+            "profile_limit",
+            "suspends_at",
+            "next_charge",
+            "last_charge"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.plans.list",
+    "description": "List the three plans and, for each, whether the account could move to it now and what blocks it (same_plan, too_many_profiles, account_inactive, pending_cancellation).",
+    "read_only": true,
+    "scope": "lanternbox.plans.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "plan_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "price_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "max_profiles": {
+                "type": "integer"
+              },
+              "quality": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "current": {
+                "type": "boolean"
+              },
+              "move": {
+                "enum": [
+                  "none",
+                  "upgrade",
+                  "downgrade"
+                ]
+              },
+              "can_move_now": {
+                "type": "boolean"
+              },
+              "blockers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                "maxItems": 5
+              },
+              "takes_effect": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "plan_id",
+              "name",
+              "price_cents",
+              "max_profiles",
+              "quality",
+              "current",
+              "move",
+              "can_move_now",
+              "blockers",
+              "takes_effect"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plans"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.billing.history",
+    "description": "List charges, oldest first, each with its period, amount, the amount expected for the plan in effect, and result.",
+    "read_only": true,
+    "scope": "lanternbox.billing.history",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "charges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "charge_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "period_start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "period_end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "expected_amount_cents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "plan_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "result": {
+                "enum": [
+                  "paid",
+                  "failed"
+                ]
+              },
+              "reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "charge_id",
+              "period_start",
+              "period_end",
+              "amount_cents",
+              "expected_amount_cents",
+              "plan_id",
+              "result",
+              "reason",
+              "at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "charges",
+        "total"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.profiles.list",
+    "description": "List the household's profiles with kind, maturity ceiling and settings. Profile IDs come from here.",
+    "read_only": true,
+    "scope": "lanternbox.profiles.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "profile_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "maturity_ceiling": {
+                "enum": [
+                  "all",
+                  "7+",
+                  "13+",
+                  "16+",
+                  "18+"
+                ]
+              },
+              "autoplay": {
+                "type": "boolean"
+              },
+              "notify_new_episodes": {
+                "type": "boolean"
+              },
+              "notify_leaving": {
+                "type": "boolean"
+              },
+              "kind": {
+                "enum": [
+                  "adult",
+                  "kids"
+                ]
+              },
+              "person_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "is_owner": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "profile_id",
+              "name",
+              "maturity_ceiling",
+              "autoplay",
+              "notify_new_episodes",
+              "notify_leaving",
+              "kind",
+              "person_id",
+              "created_at",
+              "is_owner"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "profiles"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.profiles.get",
+    "description": "Read one profile and the counts of history rows, progress rows and watchlist entries that deleting it would remove. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": true,
+    "scope": "lanternbox.profiles.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "profile_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maturity_ceiling": {
+              "enum": [
+                "all",
+                "7+",
+                "13+",
+                "16+",
+                "18+"
+              ]
+            },
+            "autoplay": {
+              "type": "boolean"
+            },
+            "notify_new_episodes": {
+              "type": "boolean"
+            },
+            "notify_leaving": {
+              "type": "boolean"
+            },
+            "kind": {
+              "enum": [
+                "adult",
+                "kids"
+              ]
+            },
+            "person_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "is_owner": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "profile_id",
+            "name",
+            "maturity_ceiling",
+            "autoplay",
+            "notify_new_episodes",
+            "notify_leaving",
+            "kind",
+            "person_id",
+            "created_at",
+            "is_owner"
+          ],
+          "additionalProperties": false
+        },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "history_rows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "progress_rows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "watchlist_entries": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "history_rows",
+            "progress_rows",
+            "watchlist_entries"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "profile",
+        "counts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.catalog.search",
+    "description": "Search titles by text, kind, genre, maturity and availability (upcoming, available, leaving_soon, expired). With id (a profile) the result leaves out every title above that profile's ceiling. Title IDs come from here.",
+    "read_only": true,
+    "scope": "lanternbox.catalog.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "kind": {
+          "enum": [
+            "film",
+            "series"
+          ]
+        },
+        "genre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "maturity": {
+          "enum": [
+            "all",
+            "7+",
+            "13+",
+            "16+",
+            "18+"
+          ]
+        },
+        "availability": {
+          "enum": [
+            "upcoming",
+            "available",
+            "leaving_soon",
+            "expired"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "titles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "film",
+                  "series"
+                ]
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "maturity": {
+                "enum": [
+                  "all",
+                  "7+",
+                  "13+",
+                  "16+",
+                  "18+"
+                ]
+              },
+              "genres": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 30
+                },
+                "maxItems": 6
+              },
+              "availability": {
+                "enum": [
+                  "upcoming",
+                  "available",
+                  "leaving_soon",
+                  "expired"
+                ]
+              },
+              "available_from": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "available_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "runtime_seconds": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 86400
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "season_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "episode_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "title_id",
+              "kind",
+              "name",
+              "maturity",
+              "genres",
+              "availability",
+              "available_from",
+              "available_until",
+              "runtime_seconds",
+              "season_count",
+              "episode_count"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "titles",
+        "total"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.titles.get",
+    "description": "Read one title with its seasons and episodes. With id (a profile) each playable carries that profile's progress and a series carries next_up, the first released episode the profile has not completed; a title above the profile's ceiling returns restricted. Playable IDs come from here; a film's playable ID is its title ID.",
+    "read_only": true,
+    "scope": "lanternbox.titles.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "title_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "title_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "film",
+                "series"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "maturity": {
+              "enum": [
+                "all",
+                "7+",
+                "13+",
+                "16+",
+                "18+"
+              ]
+            },
+            "genres": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 30
+              },
+              "maxItems": 6
+            },
+            "availability": {
+              "enum": [
+                "upcoming",
+                "available",
+                "leaving_soon",
+                "expired"
+              ]
+            },
+            "available_from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "available_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "runtime_seconds": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 60,
+                  "maximum": 86400
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "season_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "episode_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "synopsis": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "seasons": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "integer"
+                  },
+                  "episodes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "playable_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "number": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "runtime_seconds": {
+                          "type": "integer",
+                          "minimum": 60,
+                          "maximum": 86400
+                        },
+                        "released_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "released": {
+                          "type": "boolean"
+                        },
+                        "progress": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "position_seconds": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "completed": {
+                                  "type": "boolean"
+                                },
+                                "set_by": {
+                                  "enum": [
+                                    "playback",
+                                    "agent"
+                                  ]
+                                },
+                                "updated_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                }
+                              },
+                              "required": [
+                                "position_seconds",
+                                "completed",
+                                "set_by",
+                                "updated_at"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "playable_id",
+                        "number",
+                        "name",
+                        "runtime_seconds",
+                        "released_at",
+                        "released",
+                        "progress"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 60
+                  }
+                },
+                "required": [
+                  "number",
+                  "episodes"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "viewed_as": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "progress": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "position_seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "completed": {
+                      "type": "boolean"
+                    },
+                    "set_by": {
+                      "enum": [
+                        "playback",
+                        "agent"
+                      ]
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "position_seconds",
+                    "completed",
+                    "set_by",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "next_up": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "playable_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "season": {
+                      "type": "integer"
+                    },
+                    "number": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "playable_id",
+                    "season",
+                    "number",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "title_id",
+            "kind",
+            "name",
+            "maturity",
+            "genres",
+            "availability",
+            "available_from",
+            "available_until",
+            "runtime_seconds",
+            "season_count",
+            "episode_count",
+            "synopsis",
+            "seasons",
+            "viewed_as",
+            "progress",
+            "next_up"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "title"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.progress.list",
+    "description": "List one profile's progress rows, optionally only in_progress or completed. Titles above the profile's ceiling are left out. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": true,
+    "scope": "lanternbox.progress.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "in_progress",
+            "completed"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "profile_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "playable_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "playable_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "season": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "number": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "runtime_seconds": {
+                "type": "integer",
+                "minimum": 60,
+                "maximum": 86400
+              },
+              "position_seconds": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "set_by": {
+                "enum": [
+                  "playback",
+                  "agent"
+                ]
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "profile_id",
+              "title_id",
+              "title_name",
+              "playable_id",
+              "playable_name",
+              "season",
+              "number",
+              "runtime_seconds",
+              "position_seconds",
+              "completed",
+              "set_by",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "progress",
+        "total"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.history.list",
+    "description": "List one profile's viewing history, newest first. Hidden rows appear only with include_hidden. History is written only by recorded playback, never by progress.set. History row IDs come from here. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": true,
+    "scope": "lanternbox.history.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "include_hidden": {
+          "type": "boolean"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "history_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "profile_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "device_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "title_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "playable_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "playable_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "season": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "number": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "started_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "seconds_watched": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "hidden": {
+                "type": "boolean"
+              },
+              "recorded_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "history_id",
+              "profile_id",
+              "device_id",
+              "device_name",
+              "title_id",
+              "title_name",
+              "playable_id",
+              "playable_name",
+              "season",
+              "number",
+              "started_at",
+              "seconds_watched",
+              "hidden",
+              "recorded_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "history",
+        "total"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.watchlist.list",
+    "description": "List one profile's watchlist with each title's current availability. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": true,
+    "scope": "lanternbox.watchlist.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "watchlist": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "profile_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "added_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "title": {
+                "type": "object",
+                "properties": {
+                  "title_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "film",
+                      "series"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "maturity": {
+                    "enum": [
+                      "all",
+                      "7+",
+                      "13+",
+                      "16+",
+                      "18+"
+                    ]
+                  },
+                  "genres": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 30
+                    },
+                    "maxItems": 6
+                  },
+                  "availability": {
+                    "enum": [
+                      "upcoming",
+                      "available",
+                      "leaving_soon",
+                      "expired"
+                    ]
+                  },
+                  "available_from": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "available_until": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "runtime_seconds": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 60,
+                        "maximum": 86400
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "season_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "episode_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "title_id",
+                  "kind",
+                  "name",
+                  "maturity",
+                  "genres",
+                  "availability",
+                  "available_from",
+                  "available_until",
+                  "runtime_seconds",
+                  "season_count",
+                  "episode_count"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "profile_id",
+              "title_id",
+              "added_at",
+              "title"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "watchlist"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.devices.list",
+    "description": "List the account's devices with sign-in status and last use. Device IDs come from here.",
+    "read_only": true,
+    "scope": "lanternbox.devices.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "kind": {
+                "enum": [
+                  "tv",
+                  "phone",
+                  "tablet",
+                  "computer",
+                  "console",
+                  "other"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "signed_in",
+                  "signed_out"
+                ]
+              },
+              "first_seen_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "last_used_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "device_id",
+              "name",
+              "kind",
+              "status",
+              "first_seen_at",
+              "last_used_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "devices"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.notifications.list",
+    "description": "List in-App notifications about what other people or the service did, oldest first. Nothing is sent outside the App.",
+    "read_only": true,
+    "scope": "lanternbox.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "notification_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "episode.released",
+                  "title.leaving",
+                  "payment.failed",
+                  "plan.changed",
+                  "device.new"
+                ]
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "profile_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "title_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "playable_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "device_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "charge_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              }
+            },
+            "required": [
+              "notification_id",
+              "kind",
+              "at",
+              "profile_id",
+              "title_id",
+              "playable_id",
+              "device_id",
+              "charge_id",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notifications",
+        "total"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.watchlist.add",
+    "description": "Add a title to one profile's watchlist. A title above the profile's ceiling returns restricted and one that has left the catalog returns unavailable; a title that is not out yet can be listed. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": false,
+    "scope": "lanternbox.watchlist.add",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "title_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "title_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.watchlist.remove",
+    "description": "Remove a title from one profile's watchlist. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": false,
+    "scope": "lanternbox.watchlist.remove",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "title_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "title_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.progress.set",
+    "description": "Set one profile's progress on one playable: a position in seconds, completed, or back to the start (position 0). The row is marked set_by agent and no history row is written, so what was watched stays apart from what was marked. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": false,
+    "scope": "lanternbox.progress.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "playable_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "position_seconds": {
+              "type": "integer"
+            },
+            "completed": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "playable_id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "playable_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "position_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "completed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "playable_id",
+        "position_seconds",
+        "completed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.history.hide",
+    "description": "Hide or unhide one history row of a profile (hidden true or false). Progress is not affected. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": false,
+    "scope": "lanternbox.history.hide",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "history_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "history_id",
+        "hidden",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "history_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "hidden": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "history_id",
+        "hidden"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.profiles.create",
+    "description": "Create a profile. A kids profile cannot have a ceiling above 7+. Fails with limit_reached at the plan's profile limit (a pending downgrade's limit counts). Returns the new profile ID.",
+    "read_only": false,
+    "scope": "lanternbox.profiles.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maturity_ceiling": {
+              "enum": [
+                "all",
+                "7+",
+                "13+",
+                "16+",
+                "18+"
+              ]
+            },
+            "autoplay": {
+              "type": "boolean"
+            },
+            "notify_new_episodes": {
+              "type": "boolean"
+            },
+            "notify_leaving": {
+              "type": "boolean"
+            },
+            "kind": {
+              "enum": [
+                "adult",
+                "kids"
+              ]
+            },
+            "person_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "profile",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.profiles.update",
+    "description": "Change a profile's name, ceiling or settings. Lowering a ceiling deletes nothing: titles above it become invisible to the profile and return when it is raised. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": false,
+    "scope": "lanternbox.profiles.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maturity_ceiling": {
+              "enum": [
+                "all",
+                "7+",
+                "13+",
+                "16+",
+                "18+"
+              ]
+            },
+            "autoplay": {
+              "type": "boolean"
+            },
+            "notify_new_episodes": {
+              "type": "boolean"
+            },
+            "notify_leaving": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.profiles.delete",
+    "description": "Delete a profile with its progress, history and watchlist. It cannot be undone; the result says how many rows were removed. The owner profile cannot be deleted. Read lanternbox.profiles.get first for the counts. id is the profile; profile IDs come from lanternbox.profiles.list.",
+    "read_only": false,
+    "scope": "lanternbox.profiles.delete",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "removed": {
+          "type": "object",
+          "properties": {
+            "history_rows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "progress_rows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "watchlist_entries": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "history_rows",
+            "progress_rows",
+            "watchlist_entries"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "removed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.devices.sign_out",
+    "description": "Sign a device out. id is the device; device IDs come from lanternbox.devices.list.",
+    "read_only": false,
+    "scope": "lanternbox.devices.sign_out",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.plan.change",
+    "description": "Move the account to another plan. id is the plan; plan IDs come from lanternbox.plans.list. An upgrade applies at once. A downgrade is stored as pending and takes effect by time at paid_through; it is refused while the account has more profiles than the cheaper plan allows. Only one change can be pending: a second downgrade replaces the first, choosing the current plan clears it, and while a cancellation is pending the call returns invalid_state until lanternbox.plan.resume undoes it.",
+    "read_only": false,
+    "scope": "lanternbox.plan.change",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "effect": {
+          "enum": [
+            "upgraded",
+            "downgrade_pending",
+            "pending_cleared"
+          ]
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "effect",
+        "effective_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.plan.cancel",
+    "description": "Cancel the subscription. The account stays active until paid_through and then reads cancelled. A pending downgrade is replaced by the cancellation.",
+    "read_only": false,
+    "scope": "lanternbox.plan.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "ends_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "ends_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "lanternbox.plan.resume",
+    "description": "Undo a pending downgrade or cancellation while it is still pending.",
+    "read_only": false,
+    "scope": "lanternbox.plan.resume",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "lanternbox"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "cleared": {
+          "enum": [
+            "downgrade",
+            "cancel"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "cleared"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

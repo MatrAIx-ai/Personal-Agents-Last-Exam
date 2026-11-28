@@ -1,0 +1,475 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "lanternbox.playback.recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "profile_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "profile_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "device_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "playable_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "position_seconds": {
+              "type": "integer"
+            },
+            "completed": {
+              "type": "boolean"
+            },
+            "seconds_watched": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "device_id",
+            "playable_id",
+            "started_at",
+            "position_seconds",
+            "completed"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "lanternbox.catalog.title_added"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "object",
+              "properties": {
+                "title_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "kind": {
+                  "enum": [
+                    "film",
+                    "series"
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "maturity": {
+                  "enum": [
+                    "all",
+                    "7+",
+                    "13+",
+                    "16+",
+                    "18+"
+                  ]
+                },
+                "genres": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 30
+                  },
+                  "maxItems": 6,
+                  "uniqueItems": true
+                },
+                "synopsis": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 400
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "available_from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "available_until": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "runtime_seconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 60,
+                      "maximum": 86400
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "seasons": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "episodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "playable_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "number": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "runtime_seconds": {
+                              "type": "integer",
+                              "minimum": 60,
+                              "maximum": 86400
+                            },
+                            "released_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          },
+                          "required": [
+                            "playable_id",
+                            "number",
+                            "name",
+                            "runtime_seconds",
+                            "released_at"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "maxItems": 60
+                      }
+                    },
+                    "required": [
+                      "number",
+                      "episodes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 20
+                }
+              },
+              "required": [
+                "title_id",
+                "kind",
+                "name",
+                "maturity",
+                "genres",
+                "available_from"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "lanternbox.catalog.episode_released"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "title_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "season": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "episode": {
+              "type": "object",
+              "properties": {
+                "playable_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "number": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "runtime_seconds": {
+                  "type": "integer",
+                  "minimum": 60,
+                  "maximum": 86400
+                }
+              },
+              "required": [
+                "playable_id",
+                "number",
+                "name",
+                "runtime_seconds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "title_id",
+            "season",
+            "episode"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "lanternbox.catalog.leaving_set"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "title_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "available_until": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "title_id",
+            "available_until"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "lanternbox.billing.charged"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "charge_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "amount_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "result": {
+              "enum": [
+                "paid",
+                "failed"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "required": [
+            "period_start",
+            "period_end",
+            "amount_cents",
+            "result"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "lanternbox.device.signed_in"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "device_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "kind": {
+              "enum": [
+                "tv",
+                "phone",
+                "tablet",
+                "computer",
+                "console",
+                "other"
+              ]
+            }
+          },
+          "required": [
+            "device_id",
+            "name",
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

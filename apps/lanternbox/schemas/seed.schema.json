@@ -1,0 +1,847 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:lanternbox:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "account": {
+      "type": "object",
+      "properties": {
+        "owner_profile_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "paid_through": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "pending": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "downgrade",
+                    "cancel"
+                  ]
+                },
+                "plan_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "due_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "requested_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "kind",
+                "plan_id",
+                "due_at",
+                "requested_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "owner_profile_id",
+        "plan_id",
+        "paid_through",
+        "pending"
+      ],
+      "additionalProperties": false
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "price_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "max_profiles": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "quality": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "plan_id",
+          "name",
+          "price_cents",
+          "max_profiles",
+          "quality"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "maturity_ceiling": {
+            "enum": [
+              "all",
+              "7+",
+              "13+",
+              "16+",
+              "18+"
+            ]
+          },
+          "autoplay": {
+            "type": "boolean"
+          },
+          "notify_new_episodes": {
+            "type": "boolean"
+          },
+          "notify_leaving": {
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "adult",
+              "kids"
+            ]
+          },
+          "person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "profile_id",
+          "name",
+          "maturity_ceiling",
+          "autoplay",
+          "notify_new_episodes",
+          "notify_leaving",
+          "kind",
+          "person_id",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10
+    },
+    "titles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "film",
+              "series"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "maturity": {
+            "enum": [
+              "all",
+              "7+",
+              "13+",
+              "16+",
+              "18+"
+            ]
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 30
+            },
+            "maxItems": 6,
+            "uniqueItems": true
+          },
+          "synopsis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "available_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "available_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "runtime_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 60,
+                "maximum": 86400
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "episodes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "playable_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "number": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "runtime_seconds": {
+                        "type": "integer",
+                        "minimum": 60,
+                        "maximum": 86400
+                      },
+                      "released_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "playable_id",
+                      "number",
+                      "name",
+                      "runtime_seconds",
+                      "released_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 60
+                }
+              },
+              "required": [
+                "number",
+                "episodes"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "title_id",
+          "kind",
+          "name",
+          "maturity",
+          "genres",
+          "synopsis",
+          "available_from",
+          "available_until",
+          "runtime_seconds",
+          "seasons"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "progress": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "playable_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "position_seconds": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "set_by": {
+            "enum": [
+              "playback",
+              "agent"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "profile_id",
+          "playable_id",
+          "title_id",
+          "position_seconds",
+          "completed",
+          "set_by",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "history_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "profile_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "playable_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "seconds_watched": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "history_id",
+          "profile_id",
+          "device_id",
+          "playable_id",
+          "title_id",
+          "started_at",
+          "seconds_watched",
+          "hidden",
+          "recorded_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "watchlist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "profile_id",
+          "title_id",
+          "added_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "kind": {
+            "enum": [
+              "tv",
+              "phone",
+              "tablet",
+              "computer",
+              "console",
+              "other"
+            ]
+          },
+          "status": {
+            "enum": [
+              "signed_in",
+              "signed_out"
+            ]
+          },
+          "first_seen_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_used_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "device_id",
+          "name",
+          "kind",
+          "status",
+          "first_seen_at",
+          "last_used_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "charges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "charge_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "expected_amount_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "result": {
+            "enum": [
+              "paid",
+              "failed"
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "charge_id",
+          "period_start",
+          "period_end",
+          "amount_cents",
+          "expected_amount_cents",
+          "plan_id",
+          "result",
+          "reason",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "notification_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "episode.released",
+              "title.leaving",
+              "payment.failed",
+              "plan.changed",
+              "device.new"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "playable_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "charge_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "notification_id",
+          "kind",
+          "at",
+          "profile_id",
+          "title_id",
+          "playable_id",
+          "device_id",
+          "charge_id",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "enum": [
+              "agent",
+              "event"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "object_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "replaced": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "removed": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "seq",
+          "at",
+          "actor",
+          "action",
+          "object_id",
+          "profile_id",
+          "request_id",
+          "event_id",
+          "replaced",
+          "removed"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 40000
+    },
+    "counters": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "history": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "charge": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notification": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "profile",
+        "history",
+        "charge",
+        "notification"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "account_id",
+    "account",
+    "plans",
+    "profiles",
+    "titles",
+    "progress",
+    "history",
+    "watchlist",
+    "devices",
+    "charges",
+    "notifications",
+    "activity",
+    "counters"
+  ],
+  "additionalProperties": false
+}
