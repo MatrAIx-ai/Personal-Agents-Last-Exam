@@ -253,8 +253,13 @@ test('Public Agent/Infra MCP confirmation boundary with persisted readback, both
 });
 
 test('Public Agent/Infra MCP staged payslip delivery preserves represented_date and event availability', async () => {
-  const { convertFixtureToPaleSeed } = require('../scripts/export-pale-seed.cjs');
+  const { convertFixtureToPaleSeed, isStrictlyPreSession, FIRST_SESSION_AT } = require('../scripts/export-pale-seed.cjs');
   const converted = convertFixtureToPaleSeed(path.resolve(__dirname, '../fixtures/corpus.json'));
+  assert.equal(converted.data.documents.length, 158);
+  assert.equal(isStrictlyPreSession(FIRST_SESSION_AT, FIRST_SESSION_AT), false);
+  for (const doc of converted.data.documents) {
+    assert.equal(isStrictlyPreSession(doc.created_at, FIRST_SESSION_AT), true);
+  }
   const stagedPayslip = converted.staged_events.find(e => e.payload.id === 'doc_emp_payslip_2026_11');
   assert.ok(stagedPayslip, 'Expected staged Nov 28 payslip event');
 

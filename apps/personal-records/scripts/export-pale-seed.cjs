@@ -5,9 +5,14 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 
-const SESSION_CUTOFF_DAY = '2026-11-18';
+const SESSION_CUTOFF_DAY = '2026-11-17';
 const SESSION_CUTOFF_MONTH = '2026-11';
-const SYNTHETIC_INGESTION_AT = '2026-11-18T09:00:00-08:00';
+const FIRST_SESSION_AT = '2026-11-18T09:00:00-08:00';
+const SYNTHETIC_INGESTION_AT = '2026-11-18T08:59:00-08:00';
+
+function isStrictlyPreSession(timestamp, firstSessionAt = FIRST_SESSION_AT) {
+  return Date.parse(timestamp) < Date.parse(firstSessionAt);
+}
 
 function parseRepresentedDate(text) {
   const str = String(text || '');
@@ -206,7 +211,8 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
     summary: {
       scenario_id: raw.scenario_id,
       timezone: timeZone,
-      session_cutoff: SYNTHETIC_INGESTION_AT,
+      first_session_at: FIRST_SESSION_AT,
+      pre_session_availability_at: SYNTHETIC_INGESTION_AT,
       pre_session_documents: documents.length,
       staged_post_cutoff_events: stagedEvents.length,
       claims: claims.length,
@@ -244,10 +250,18 @@ if (require.main === module) {
       });
       assert.equal(loaded.result.status, 'ready');
 
+      // Verify every initially loaded record is strictly before FIRST_SESSION_AT (<, excluding equality)
+      assert.equal(isStrictlyPreSession(FIRST_SESSION_AT, FIRST_SESSION_AT), false, 'Equality must be excluded from strict pre-session filter');
+      for (const doc of loaded.state.data.documents) {
+        assert.equal(isStrictlyPreSession(doc.created_at, FIRST_SESSION_AT), true, `Document ${doc.id} is not strictly pre-session`);
+        assert.equal(isStrictlyPreSession(doc.source_reference.ingested_at, FIRST_SESSION_AT), true, `Document ${doc.id} ingested_at is not strictly pre-session`);
+      }
+
       // Verify post-cutoff completed transactions are NOT visible in pre-session snapshot
       const preSearch = rt.execute(loaded.state, 'agent', 'personal-records.search', { limit: 50 });
       const preIds = new Set(loaded.state.data.documents.map(d => d.id));
       for (const ev of converted.staged_events) {
+        assert.equal(isStrictlyPreSession(ev.at, FIRST_SESSION_AT), false, `Staged event ${ev.event_id} must not be pre-session`);
         assert.equal(preIds.has(ev.payload.id), false, `Post-cutoff record ${ev.payload.id} leaked into pre-session snapshot`);
       }
 
@@ -284,4 +298,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { convertFixtureToPaleSeed };
+module.exports = { convertFixtureToPaleSeed, isStrictlyPreSession, FIRST_SESSION_AT, SYNTHETIC_INGESTION_AT };
