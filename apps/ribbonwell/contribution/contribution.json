@@ -1,0 +1,274 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "ribbonwell",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "ribbonwell.account.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.groups.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.groups.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.lists.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.lists.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.items.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.items.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.claims.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.notifications.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.lists.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.items.add",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.items.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.items.remove",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.items.restore",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.claims.reserve",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.claims.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.claims.release",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.join",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.leave",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "ribbonwell.exchanges.draw",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "ribbonwell.item.added",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "ribbonwell.item.changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "ribbonwell.claim.recorded",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "ribbonwell.exchange.opened",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "ribbonwell.exchange.member_changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "ribbonwell.exchange.drawn",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": false,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}
