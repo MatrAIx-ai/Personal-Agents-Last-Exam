@@ -170,6 +170,19 @@ const NOV19 = '2026-11-19T10:00:00-05:00', PAID_THROUGH = '2026-12-03T00:00:00-0
     }
     check('Twenty reset cycles each restore the loaded data and clock and clear the earlier audit rows');
     check('Runs are isolated: another run still holds its own data', hash((await snap(browse)).snapshot.data) === hash(seed()));
+
+    // Records dated after the clock are delivered as events and cannot be read before their time.
+    const schedule = require('../fixtures/schedules/late-2026.json'), laterInfra = await open('infra', 'later', {initialProfile: 'sandbox'}), laterAgent = await open('agent', 'later');
+    const added = schedule.find(e => e.operation === APP + '.catalog.title_added'), charge = schedule.find(e => e.operation === APP + '.billing.charged');
+    const historyBefore = (await laterAgent.call(APP + '.history.list', {id: 'prof-sana', limit: 1})).total;
+    check('At the clock, a title the schedule adds later cannot be read or found', (await laterAgent.call(APP + '.titles.get', {title_id: added.payload.title.title_id})).status === 'not_found' &&
+      (await laterAgent.call(APP + '.catalog.search', {query: added.payload.title.name})).total === 0);
+    let appliedAll = true, atCharge = null;
+    for (const e of schedule) { appliedAll = appliedAll && (await event(e, laterInfra)).status === 'committed';
+      if (e === charge) atCharge = [(await laterAgent.call(APP + '.account.get')).account.paid_through, (await laterAgent.call(APP + '.titles.get', {title_id: added.payload.title.title_id})).status]; }
+    check('All ' + schedule.length + ' scheduled events from 19 November to 31 December 2026 apply in order', appliedAll);
+    check('Each scheduled record appears when its own event runs, not before', atCharge[0] === charge.payload.period_end && atCharge[1] === 'not_found' && (await laterAgent.call(APP + '.titles.get', {title_id: added.payload.title.title_id})).title.name === added.payload.title.name);
+    check('The schedule adds viewings dated after the clock', (await laterAgent.call(APP + '.history.list', {id: 'prof-sana', limit: 1})).total > historyBefore);
     console.log(JSON.stringify({app: APP, runtime: require(path.join(path.resolve(runtime), 'package.json')).version, node: process.version, passed: true, checks}, null, 2));
   } catch (e) { console.error(JSON.stringify({app: APP, passed: false, completed: checks.length, last: checks.at(-1), error: e.message}, null, 2)); process.exitCode = 1; }
   finally { await Promise.allSettled(clients.map(c => c.close())); fs.rmSync(stateDir, {recursive: true, force: true}); }

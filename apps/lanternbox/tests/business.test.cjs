@@ -436,7 +436,7 @@ test('T14 [W4] charges: paid, failed, past_due then suspended after 7 days, reco
   // The plan's example: the December charge fails.
   f.event(ev('ev-lb-220', '2026-12-03T04:10:00-05:00', 'billing.charged', {period_start: PAID_THROUGH, period_end: NEXT_PERIOD, amount_cents: 1599, result: 'failed', reason: 'card_declined'}));
   assert.deepEqual(f.data.charges.at(-1), {charge_id: 'chg-r1', period_start: PAID_THROUGH, period_end: NEXT_PERIOD, amount_cents: 1599, expected_amount_cents: 1599, plan_id: 'standard', result: 'failed', reason: 'card_declined', at: '2026-12-03T04:10:00-05:00'});
-  assert.deepEqual(f.data.notifications.slice(notes).map(n => [n.kind, n.charge_id, n.text]), [['payment.failed', 'chg-r1', 'A payment of 15.99 could not be taken (card_declined).']]);
+  assert.deepEqual(f.data.notifications.slice(notes).map(n => [n.kind, n.charge_id, n.text]), [['payment.failed', 'chg-r1', 'A payment of $15.99 could not be taken (card_declined).']]);
   assert.deepEqual([account(f).status, account(f).suspends_at, account(f).paid_through, account(f).last_charge.result], ['past_due', '2026-12-10T00:00:00-05:00', PAID_THROUGH, 'failed']);
   const stored = f.data;
   f.advance('2026-12-09T23:59:59-05:00'); assert.equal(account(f).status, 'past_due');
@@ -516,7 +516,7 @@ test('T15 [all] the six events: rejections, one notification per profile that qu
   f.call('watchlist.add', {id: 'prof-dele', title_id: 'ttl-paper-kites'});
   n1 = notes();
   f.event(LEAVING(later));
-  assert.deepEqual(f.data.notifications.slice(n1).map(n => [n.kind, n.profile_id, n.title_id, n.text]), [['title.leaving', 'prof-sana', 'ttl-paper-kites', 'Paper Kites leaves Lanternbox on 2026-11-30T23:59:00-05:00.']]);
+  assert.deepEqual(f.data.notifications.slice(n1).map(n => [n.kind, n.profile_id, n.title_id, n.text]), [['title.leaving', 'prof-sana', 'ttl-paper-kites', 'Paper Kites leaves Lanternbox on November 30, 2026 at 11:59 PM.']]);
   assert.deepEqual(f.data.activity.at(-1).replaced, {available_until: null});
   rejects(f, ev('ev-t15-l1', later, 'catalog.leaving_set', {title_id: 'ttl-paper-kites', available_until: later}));
   rejects(f, ev('ev-t15-l2', later, 'catalog.leaving_set', {title_id: 'ttl-nowhere', available_until: '2026-12-30T23:59:00-05:00'}));
@@ -654,6 +654,25 @@ test('fixtures: the generated history is consistent, dated from 2025 and matches
   assert.equal(require('../contribution/dataset.json').expected_counts.records, plugin.records(s).length);
   assert.equal(plugin.records(s).length, plugin.objects(s).length);
   assert.ok(JSON.stringify(s).length < 1024 * 1024, 'under 1 MB');
+});
+
+test('fixtures: the schedule after the clock applies in order, and none of its records is in the seed', () => {
+  const schedule = require('../fixtures/schedules/late-2026.json'), s = seed(), f = fixture(), clock = require('../fixtures/clock.json').initial_time;
+  assert.ok(schedule.length >= 30);
+  assert.ok(Date.parse(schedule[0].at) > Date.parse(clock) && Date.parse(schedule.at(-1).at) <= Date.parse('2026-12-31T23:59:59-05:00'));
+  assert.ok(schedule.some(e => e.at.startsWith('2026-12-31')), 'the schedule reaches 31 December');
+  for (const kind of ['playback.recorded', 'billing.charged', 'catalog.episode_released', 'catalog.title_added', 'catalog.leaving_set', 'device.signed_in']) assert.ok(schedule.some(e => e.operation === 'lanternbox.' + kind), kind);
+  const made = schedule.flatMap(e => [e.payload.title && e.payload.title.title_id, e.payload.episode && e.payload.episode.playable_id, e.payload.charge_id, e.operation.endsWith('signed_in') && e.payload.device_id]).filter(Boolean);
+  assert.equal(made.length, 7); assert.ok(made.every(id => !JSON.stringify(s).includes('"' + id + '"')));
+  let last = 0;
+  for (const e of schedule) { assert.ok(Date.parse(e.at) >= last); last = Date.parse(e.at); const rows = f.data.activity.length; f.event(e); assert.equal(f.data.activity.length, rows + 1, e.event_id); }
+  assert.ok(made.every(id => JSON.stringify(f.data).includes('"' + id + '"')));
+  assert.equal(f.data.history.length, s.history.length + schedule.filter(e => e.operation.endsWith('playback.recorded')).length);
+  assert.equal(f.data.account.paid_through, '2027-01-03T00:00:00-05:00');
+});
+
+test('fixtures: COVERAGE.md is the count of the delivered files', () => {
+  require('node:child_process').execFileSync(process.execPath, [require('node:path').resolve(__dirname, '../scripts/coverage.cjs'), '--check'], {stdio: 'pipe'});
 });
 
 test('reviewer renderer escapes untrusted content', () => {
