@@ -67,11 +67,11 @@ table.cw-table{border-collapse:collapse;width:100%;font-size:13px}
 .cw-table input[type=checkbox]{width:auto}
 .cw-badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;background:#eef1f6;color:#3b475a}
 .cw-badge.issued,.cw-badge.low_balance{background:#fff4d6;color:#7a5a00}
-.cw-badge.escalated,.cw-badge.denied,.cw-badge.noticed,.cw-badge.no{background:#ffe3d6;color:#8a3200}
-.cw-badge.collections,.cw-badge.suspended,.cw-badge.expired,.cw-badge.failed{background:#fbd5d5;color:#8a1010}
-.cw-badge.paid,.cw-badge.active,.cw-badge.granted,.cw-badge.debited,.cw-badge.yes,.cw-badge.approved{background:#dcf3e4;color:#1d6b3a}
+.cw-badge.escalated,.cw-badge.denied,.cw-badge.noticed{background:#ffe3d6;color:#8a3200}
+.cw-badge.collections,.cw-badge.suspended,.cw-badge.expired,.cw-badge.failed,.cw-badge.bad{background:#fbd5d5;color:#8a1010}
+.cw-badge.paid,.cw-badge.active,.cw-badge.granted,.cw-badge.debited,.cw-badge.good,.cw-badge.approved{background:#dcf3e4;color:#1d6b3a}
 .cw-badge.disputed,.cw-badge.submitted{background:#e1e9f7;color:#2b55a0}
-.cw-badge.dismissed,.cw-badge.ended,.cw-badge.withdrawn,.cw-badge.unmatched{background:#eceef2;color:#5b6576}
+.cw-badge.dismissed,.cw-badge.ended,.cw-badge.withdrawn,.cw-badge.unmatched,.cw-badge.neutral{background:#eceef2;color:#5b6576}
 .cw-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;align-items:end}
 .cw-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#586579}
 .cw-form .cw-wide{grid-column:1/-1}
@@ -88,17 +88,46 @@ table.cw-table{border-collapse:collapse;width:100%;font-size:13px}
 .nav-symbol img{width:16px;height:16px;display:block;image-rendering:pixelated}
 .brand-mark img{width:20px;height:20px;display:block;image-rendering:pixelated}
 .cw-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.cw-id{color:#586579;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.cw-sub{display:block;color:#586579;font-size:12px}
+.cw-confirm{border:2px solid #c0392b;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:#fff6f5}
+.cw-preview dl,.cw-confirm dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}
+.cw-preview dt,.cw-confirm dt{color:#586579}
+.cw-preview dd,.cw-confirm dd{margin:0;font-weight:600}
+.cw-why{color:#586579;font-size:12px;white-space:normal}
+/* The shared stylesheet sets these App-filled elements at 10-11px; Crossway keeps its own text at 12px or more. */
+body[data-app=crossway] .sidebar-foot strong{font-size:13px}
+body[data-app=crossway] .sidebar-foot small{font-size:12px}
+body[data-app=crossway] #status{font-size:12px}
 @media(max-width:760px){.cw-view{padding:16px}.cw-clock{margin-left:0;text-align:left}}
 `;
 
 // ---- Presentation helpers (formatting only) ------------------------------------
 
 const money = cents => (cents < 0 ? '-' : '') + '$' + (Math.abs(cents) / 100).toFixed(2);
-// Authority time exactly as the tools return it, without browser time-zone conversion.
-const stamp = s => (s ? String(s).slice(0, 16).replace('T', ' ') : 'none');
-const yesNo = v => badge(v ? 'yes' : 'no');
+// Authority time as the tools return it (an offset timestamp in US Eastern),
+// read from the string itself, so the browser's own time zone never applies.
+// Shown in a US format with the zone: "Nov 2, 2026, 9:15 AM EST".
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function day(date) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(date || ''));
+  return m ? `${MONTHS[Number(m[2]) - 1]} ${Number(m[3])}, ${m[1]}` : 'none';
+}
+function zone(offset) { return offset === '-05:00' ? 'EST' : offset === '-04:00' ? 'EDT' : offset === 'Z' ? 'UTC' : 'UTC' + offset; }
+function when(s) {
+  const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/.exec(String(s || ''));
+  if (!m) return s ? String(s) : 'none';
+  const h = Number(m[2]), hour = h % 12 || 12;
+  return `${day(m[1])}, ${hour}:${m[3]} ${h < 12 ? 'AM' : 'PM'} ${zone(m[4])}`;
+}
+const period = p => { const m = /^(\d{4})-(\d{2})$/.exec(p); return m ? `${MONTH_NAMES[Number(m[2]) - 1]} ${m[1]}` : p; };
 const human = s => String(s).replace(/_/g, ' ');
-function badge(value) { return el('span', {class: 'cw-badge ' + String(value)}, human(value)); }
+function badge(value, tone = String(value), text = human(value)) { return el('span', {class: 'cw-badge ' + tone}, text); }
+// A yes/no flag whose colour says whether the answer is good news for the holder.
+const flag = (v, {yes = 'good', no = 'bad'} = {}) => badge(v ? 'yes' : 'no', v ? yes : no);
+const idText = id => el('span', {class: 'cw-id'}, id);
+const evidenceText = e => (e.app_id === 'mail' ? `Mail message ${e.object_id} (mailbox ${e.account_id})` : `${e.app_id} record ${e.object_id} (account ${e.account_id})`);
 function stat(label, value, extra = {}) { return el('div', {class: 'cw-stat', ...extra}, el('small', {}, label), el('strong', {}, value)); }
 function table(columns, rows, {onRow, selected, id} = {}) {
   const head = el('tr', {}, ...columns.map(c => el('th', {class: c.num ? 'num' : ''}, c.label)));
@@ -142,7 +171,7 @@ async function request(url, method = 'GET', value) {
 }
 async function call(name, args = {}) {
   const r = await request('/api/call', 'POST', {name, arguments: args});
-  if (!['ok', 'committed'].includes(r.status)) throw Object.assign(Error(r.message || MESSAGES[r.status] || r.status), {code: r.status});
+  if (!['ok', 'committed'].includes(r.status)) throw Object.assign(Error(MESSAGES[r.status] || r.message || r.status), {code: r.status});
   return r;
 }
 const can = name => tools.some(t => t.name === P + name);
@@ -163,59 +192,127 @@ function setBusy(value) {
 }
 
 // A form whose submit runs one action and reports a business error in place.
-function form(fields, {submit, run, wide = []}) {
+// A new submission first removes the outcome of the previous one (a receipt
+// banner or an error), so the page only ever shows the latest outcome.
+function form(fields, {submit, run, wide = [], cancel = null}) {
   const alert = el('p', {role: 'alert', class: 'cw-alert'});
   const button = el('button', {type: 'submit', class: 'primary'}, submit);
-  const f = el('form', {class: 'cw-form'}, ...fields, el('div', {class: 'cw-row cw-wide'}, button), alert);
+  const actions = el('div', {class: 'cw-row cw-wide'}, button, cancel ? el('button', {type: 'button', 'data-action': 'cancel', onclick: cancel}, 'Cancel') : null);
+  const f = el('form', {class: 'cw-form'}, ...fields, actions, alert);
   for (const w of wide) w.classList.add('cw-wide');
   f.addEventListener('submit', async event => {
     event.preventDefault();
     if (busy) return;
-    alert.textContent = '';
-    delete alert.dataset.code;
+    clearOutcome();
     setBusy(true);
     try { await run(); } catch (e) { alert.textContent = e.message; alert.dataset.code = e.code || 'request_failed'; } finally { setBusy(false); }
   });
   return f;
 }
+// Removes the last receipt banner and every in-place error on the page.
+function clearOutcome() {
+  ui.flash = null;
+  for (const node of view.querySelectorAll('[data-outcome]')) node.remove();
+  for (const a of view.querySelectorAll('form [role=alert]')) { a.textContent = ''; delete a.dataset.code; }
+}
 const missing = view => TOOLS[view].filter(name => !tools.some(t => t.name === name));
+// Labelled facts, for previews and confirmations: never a raw key/value dump.
+const facts = pairs => el('dl', {}, ...pairs.filter(Boolean).flatMap(([k, v, key]) => [el('dt', {}, k), el('dd', key ? {'data-key': key} : {}, v)]));
+// A confirmation step shown in place of a one-click destructive action.
+function confirmStep({title, lines, confirm, keep = 'Cancel', run, slot}) {
+  const alert = el('p', {role: 'alert', class: 'cw-alert'});
+  const yes = el('button', {type: 'button', class: 'primary', 'data-action': 'confirm'}, confirm);
+  const no = el('button', {type: 'button', 'data-action': 'cancel', onclick: () => slot.replaceChildren()}, keep);
+  yes.addEventListener('click', async () => {
+    if (busy) return;
+    clearOutcome();
+    setBusy(true);
+    try { await run(); } catch (e) { alert.textContent = e.message; alert.dataset.code = e.code || 'request_failed'; } finally { setBusy(false); }
+  });
+  slot.replaceChildren(el('section', {class: 'cw-confirm', role: 'dialog', 'aria-label': title}, el('h3', {}, title), ...lines, el('div', {class: 'cw-row'}, yes, no), alert));
+  yes.focus();
+}
+// Card choices. A card that cannot be charged stays listed but is disabled,
+// with the reason in its label, so no choice on the page is certain to fail.
+function cardReason(c) {
+  if (c.expired) return `expired ${String(c.exp_month).padStart(2, '0')}/${c.exp_year}`;
+  if (!c.chargeable) return human(c.status);
+  return '';
+}
+function cardSelect(field, cards, {current = null, offerDefault = null} = {}) {
+  const s = el('select', {'data-field': field});
+  if (offerDefault) {
+    const r = cardReason(offerDefault);
+    s.append(el('option', {value: '', disabled: r ? true : null}, `Auto-replenish card (${offerDefault.label}, ${offerDefault.holder_name})${r ? ': ' + r : ''}`));
+  }
+  const firstOk = cards.find(c => !cardReason(c));
+  if (offerDefault && cardReason(offerDefault)) s.prepend(el('option', {value: 'choose', disabled: true}, 'Choose a card'));
+  for (const c of cards) {
+    const r = cardReason(c);
+    s.append(el('option', {value: c.id, disabled: r && c.id !== current ? true : null}, `${c.label}, ${c.holder_name}${r ? ' (' + r + ', cannot be charged)' : ''}`));
+  }
+  if (current) s.value = current;
+  else if (offerDefault) s.value = cardReason(offerDefault) ? 'choose' : '';
+  else if (firstOk) s.value = firstOk.id;
+  return s;
+}
+// Cancel on a preview: the preview record stays unused and expires on its own;
+// the page re-reads, so the next action uses the account's current version.
+function closePreview() { render(); }
+function requireCard(select) {
+  if (select.value === 'choose') throw Object.assign(Error('Choose a card that can be charged.'), {code: 'choose_card'});
+  return select.value ? {card_id: select.value} : {};
+}
 
 // ---- Views ----------------------------------------------------------------------
 // Each view reads what it shows, then renders. `ui` carries transient page state
-// (selection, filters, a preview being confirmed), never business records.
+// (selection, filters, a preview being confirmed, the last receipt shown),
+// never business records.
 
 const ui = {selectedNotice: null, selectedVehicle: null, disputeNotice: null, tollFilter: {}, noticeFilter: {}, flash: null};
+const NOT_PAYABLE = {
+  disputed: 'In dispute: fees and the due date are frozen until the decision.',
+  collections: 'In collections: no longer payable here.',
+  paid: 'Already paid.',
+  dismissed: 'Dismissed: nothing is due.',
+};
 
 const V = {
   async account() {
     const r = await read('account.get'), a = r.account, rule = a.replenish;
     const out = [];
-    if (a.status === 'suspended') out.push(el('div', {class: 'cw-banner', role: 'note'}, `Suspended since ${stamp(a.suspended_at)}. Tolls are billed by violation notice until a top-up succeeds.`));
+    if (a.status === 'suspended') out.push(el('div', {class: 'cw-banner', role: 'note'}, `Suspended since ${when(a.suspended_at)}. Tolls are billed by violation notice until a top-up succeeds.`));
     out.push(el('div', {class: 'cw-grid'},
       stat('Status', badge(a.status), {'data-key': 'status'}), stat('Balance', money(a.balance_cents), {'data-key': 'balance'}),
       stat('Auto-replenish', rule.enabled ? `On: ${money(rule.amount_cents)} below ${money(rule.threshold_cents)}` : 'Off', {'data-key': 'replenish'}),
       stat('Replenish card', `${rule.card.label}, ${rule.card.holder_name}`, {'data-key': 'replenish-card'}),
       stat('Active vehicles', String(a.vehicles_active)), stat('Open notices', String(a.open_notices)),
-      stat('Holder', a.holder.display_name), stat('Opened', a.opened_on)));
+      stat('Holder', a.holder.display_name), stat('Opened', day(a.opened_on))));
     out.push(el('section', {class: 'cw-panel'}, el('h3', {}, 'Cards on file'),
       table([
         {label: 'Card', key: 'label', value: c => c.label}, {label: 'Cardholder', key: 'holder', value: c => c.holder_name},
         {label: 'Expires', value: c => `${String(c.exp_month).padStart(2, '0')}/${c.exp_year}`}, {label: 'Status', value: c => badge(c.status)},
-        {label: 'Expired', key: 'expired', value: c => yesNo(c.expired)}, {label: 'Chargeable', key: 'chargeable', value: c => yesNo(c.chargeable)},
+        {label: 'Expired', key: 'expired', value: c => flag(c.expired, {yes: 'bad', no: 'neutral'})},
+        {label: 'Chargeable', key: 'chargeable', value: c => flag(c.chargeable)},
         {label: 'Auto-replenish card', value: c => (c.is_replenish_card ? 'yes' : '')},
       ], a.cards),
       el('p', {class: 'cw-note'}, 'Cards are added or removed by the account holder only; this page cannot change them.')));
     if (can('account.replenish.set')) {
       const enabled = select('enabled', [{value: 'true', label: 'On'}, {value: 'false', label: 'Off'}], String(rule.enabled));
-      const card = select('card_id', a.cards.map(c => ({value: c.id, label: `${c.label}, ${c.holder_name}`})), rule.card_id);
+      const card = cardSelect('card_id', a.cards, {current: rule.card_id});
       const amount = input('amount_cents', {type: 'number', step: '0.01', min: '0', value: dollars(rule.amount_cents)});
       const threshold = input('threshold_cents', {type: 'number', step: '0.01', min: '0', value: dollars(rule.threshold_cents)});
       out.push(el('section', {class: 'cw-panel', 'aria-label': 'Auto-replenish'}, el('h3', {}, 'Auto-replenish'),
         form([labelled('Auto-replenish', enabled), labelled('Card', card), labelled('Amount ($)', amount), labelled('Low-balance threshold ($)', threshold)], {
           submit: 'Save auto-replenish',
           run: async () => {
-            await write('account.replenish.set', {enabled: enabled.value === 'true', card_id: card.value, amount_cents: cents(amount.value), threshold_cents: cents(threshold.value)}, r.version);
-            ui.flash = done('Auto-replenish saved.');
+            // The card is sent only when it changes, so turning auto-replenish
+            // off does not re-check a card that has since expired.
+            const args = {enabled: enabled.value === 'true', amount_cents: cents(amount.value), threshold_cents: cents(threshold.value)};
+            if (card.value !== rule.card_id) args.card_id = card.value;
+            const w = await write('account.replenish.set', args, r.version);
+            const now = w.replenish;
+            flash(`Auto-replenish saved: ${now.enabled ? `on, ${money(now.amount_cents)} when the balance falls below ${money(now.threshold_cents)}, charged to ${now.card.label} (${now.card.holder_name})` : 'off'}.`);
             await render();
           },
         })));
@@ -226,8 +323,7 @@ const V = {
   async topup() {
     const r = await read('account.get'), a = r.account;
     const amount = input('amount_cents', {type: 'number', step: '0.01', min: '0', required: true, placeholder: '25.00'});
-    const card = select('card_id', [{value: '', label: `Auto-replenish card (${a.replenish.card.label}, ${a.replenish.card.holder_name})`},
-      ...a.cards.map(c => ({value: c.id, label: `${c.label}, ${c.holder_name}`}))], '');
+    const card = cardSelect('card_id', a.cards, {offerDefault: a.replenish.card});
     const slot = el('div', {});
     const out = [el('div', {class: 'cw-grid'}, stat('Balance', money(a.balance_cents), {'data-key': 'balance'}), stat('Status', badge(a.status)))];
     if (!can('account.topup.preview')) return [...out, el('p', {class: 'cw-note'}, 'This profile cannot preview a top-up.')];
@@ -235,17 +331,18 @@ const V = {
       form([labelled('Amount ($)', amount), labelled('Card', card)], {
         submit: 'Preview top-up',
         run: async () => {
-          const pv = await write('account.topup.preview', {amount_cents: cents(amount.value), ...(card.value ? {card_id: card.value} : {})}, r.version);
+          const pv = await write('account.topup.preview', {amount_cents: cents(amount.value), ...requireCard(card)}, r.version);
           const p = pv.preview;
           slot.replaceChildren(el('section', {class: 'cw-preview', 'data-preview-id': p.id}, el('h3', {}, 'Review the top-up'),
             el('p', {'data-key': 'preview-text'}, p.text),
-            el('div', {class: 'cw-grid'}, stat('Amount', money(p.amount_cents)), stat('Card', `${p.card.label}, ${p.card.holder_name}`),
-              stat('Balance now', money(p.balance_before_cents)), stat('Balance after', money(p.balance_after_cents)), stat('Preview expires', stamp(p.expires_at))),
-            can('account.topup.confirm') ? form([], {submit: 'Confirm top-up', run: async () => {
+            facts([['Amount', money(p.amount_cents)], ['Card', `${p.card.label}, ${p.card.holder_name}`, 'card'],
+              ['Balance now', money(p.balance_before_cents)], ['Balance after', money(p.balance_after_cents), 'balance-after'], ['Preview expires', when(p.expires_at), 'expires']]),
+            can('account.topup.confirm') ? form([], {submit: 'Confirm top-up', cancel: closePreview, run: async () => {
               const c = await write('account.topup.confirm', {preview_id: p.id}, pv.version);
-              ui.flash = done(`Receipt ${c.receipt.id}: ${money(c.receipt.amount_cents)} added. New balance ${money(c.account.balance_cents)}.`, c.receipt.id);
+              flash(`Receipt ${c.receipt.id}: ${money(c.receipt.amount_cents)} added from ${p.card.label}. New balance ${money(c.account.balance_cents)}.`, c.receipt.id);
               await render();
-            }}) : el('p', {class: 'cw-note'}, 'This profile can preview but not confirm a top-up.')));
+            }}) : el('div', {class: 'cw-row'}, el('p', {class: 'cw-note'}, 'This profile can preview but not confirm a top-up.'),
+              el('button', {type: 'button', 'data-action': 'cancel', onclick: closePreview}, 'Close preview'))));
         },
       })), slot);
     return out;
@@ -255,13 +352,13 @@ const V = {
     const r = await read('account.statements');
     const rows = [...r.statements].reverse();
     return [el('div', {class: 'cw-grid'}, stat('Current balance', money(r.balance_cents), {'data-key': 'balance'}), stat('Statements', String(rows.length))),
-      el('p', {class: 'cw-note'}, 'A statement is issued at 00:00 on the 1st, authority time, for the month before.'),
+      el('p', {class: 'cw-note'}, 'A statement is issued at 12:00 AM on the 1st, Eastern time, for the month before.'),
       table([
-        {label: 'Period', key: 'period', value: s => s.period}, {label: 'Issued', value: s => stamp(s.issued_at)},
+        {label: 'Period', key: 'period', value: s => period(s.period)}, {label: 'Issued', value: s => when(s.issued_at)},
         {label: 'Opening', num: true, value: s => money(s.opening_balance_cents)}, {label: 'Tolls', num: true, value: s => String(s.toll_count)},
         {label: 'Toll charges', num: true, value: s => money(s.toll_cents)}, {label: 'Top-ups', num: true, value: s => money(s.topup_cents)},
         {label: 'Auto-replenish', num: true, value: s => money(s.replenish_cents)}, {label: 'Closing', key: 'closing', num: true, value: s => money(s.closing_balance_cents)},
-        {label: 'Notices issued', num: true, value: s => String(s.notices_issued)},
+        {label: 'Notices issued', num: true, value: s => String(s.notices_issued)}, {label: 'Statement', value: s => idText(s.id)},
       ], rows)];
   },
 
@@ -271,22 +368,31 @@ const V = {
     const vehicles = vr.vehicles, transponders = tr.transponders;
     const selected = vehicles.find(v => v.id === ui.selectedVehicle) || null;
     const out = [el('section', {class: 'cw-panel'}, el('h3', {}, 'Vehicles'),
-      el('p', {class: 'cw-note'}, 'Possession runs from 00:00 on the start date through the end of the end date. Select a vehicle to end or correct it, or to move a transponder to it.'),
+      el('p', {class: 'cw-note'}, 'Possession runs from 12:00 AM on the start date through the end of the end date. Select a vehicle to end or correct it, or to move a transponder to it.'),
       table([
-        {label: 'Vehicle', value: v => v.id}, {label: 'Plate', key: 'plate', value: v => v.plate}, {label: 'Description', value: v => v.label},
-        {label: 'Class', key: 'class', value: v => String(v.class)}, {label: 'Possession', key: 'possession', value: v => `${v.possession_start} to ${v.possession_end || 'open'}`},
+        {label: 'Plate', key: 'plate', value: v => v.plate}, {label: 'Description', value: v => v.label},
+        {label: 'Class', key: 'class', value: v => String(v.class)}, {label: 'Possession', key: 'possession', value: v => `${day(v.possession_start)} to ${v.possession_end ? day(v.possession_end) : 'open'}`},
         {label: 'Temporary', value: v => (v.temporary ? `yes${v.rental_agency_name ? ', ' + v.rental_agency_name : ''}` : '')},
         {label: 'Status', key: 'status', value: v => badge(v.status)}, {label: 'Transponder', key: 'transponder', value: v => v.transponder_id || ''},
+        {label: 'Vehicle', value: v => idText(v.id)},
       ], vehicles, {selected: ui.selectedVehicle, onRow: v => { ui.selectedVehicle = v.id; render(); }}))];
     if (selected) {
       const forms = [el('h3', {}, `${selected.plate}: ${selected.label}`)];
       if (can('vehicles.end') && selected.status === 'active') {
         const end = input('end_date', {type: 'date'});
+        const confirmSlot = el('div', {});
         forms.push(form([labelled('End date (empty: today)', end)], {submit: 'End possession', run: async () => {
-          await write('vehicles.end', {vehicle_id: selected.id, ...(end.value ? {end_date: end.value} : {})}, version);
-          ui.flash = done(`Possession of ${selected.plate} ended.`);
-          await render();
-        }}));
+          const date = end.value || null;
+          confirmStep({slot: confirmSlot, title: `End possession of ${selected.plate}?`, confirm: 'End possession', keep: 'Keep the vehicle',
+            lines: [facts([['Vehicle', `${selected.plate}, ${selected.label}`], ['Possession ends', date ? day(date) : 'today (the account date)', 'end-date'],
+              ['Transponder', selected.transponder_id ? `${selected.transponder_id} will be unassigned from it` : 'none assigned']]),
+            el('p', {}, 'Tolls read after this date are no longer billed to this account. Notices already issued stay, and need a dispute. The end date can be corrected afterwards.')],
+            run: async () => {
+              const w = await write('vehicles.end', {vehicle_id: selected.id, ...(date ? {end_date: date} : {})}, version);
+              flash(`Possession of ${selected.plate} ended on ${day(w.vehicle.possession_end)}.`);
+              await render();
+            }});
+        }}), confirmSlot);
       }
       if (can('vehicles.update')) {
         const start = input('possession_start', {type: 'date', value: selected.possession_start});
@@ -297,18 +403,23 @@ const V = {
           if (start.value !== selected.possession_start) args.possession_start = start.value;
           if (endDate.value && endDate.value !== selected.possession_end) args.possession_end = endDate.value;
           if (label.value !== selected.label) args.label = label.value;
+          if (Object.keys(args).length === 1) throw Object.assign(Error('Nothing changed: edit a date or the description first.'), {code: 'no_change'});
           await write('vehicles.update', args, version);
-          ui.flash = done(`${selected.plate} updated.`);
+          flash(`${selected.plate} updated.`);
           await render();
         }}));
       }
       if (can('transponders.assign') && selected.status === 'active') {
-        const tp = select('transponder_id', transponders.map(t => ({value: t.id, label: `${t.id} (${t.serial}, class ${t.class}${t.vehicle ? ', in ' + t.vehicle.plate : ', unassigned'})`})));
-        forms.push(form([labelled('Transponder', tp)], {submit: 'Assign transponder', run: async () => {
-          await write('transponders.assign', {transponder_id: tp.value, vehicle_id: selected.id}, version);
-          ui.flash = done(`${tp.value} assigned to ${selected.plate}.`);
-          await render();
-        }}));
+        // A vehicle that already has a transponder cannot take another one.
+        if (selected.transponder_id) forms.push(el('p', {class: 'cw-note', 'data-key': 'assign-note'}, `${selected.plate} already carries ${selected.transponder_id}. To move a different transponder here, end this vehicle or move ${selected.transponder_id} to another vehicle first.`));
+        else {
+          const tp = select('transponder_id', transponders.map(t => ({value: t.id, label: `${t.id} (${t.serial}, class ${t.class}${t.vehicle ? ', now in ' + t.vehicle.plate : ', unassigned'})`})));
+          forms.push(form([labelled('Transponder', tp)], {submit: 'Assign transponder', run: async () => {
+            const w = await write('transponders.assign', {transponder_id: tp.value, vehicle_id: selected.id}, version);
+            flash(`${tp.value} assigned to ${selected.plate}; it now charges class ${w.transponder.class}.`);
+            await render();
+          }}));
+        }
       }
       if (forms.length === 1) forms.push(el('p', {class: 'cw-note'}, 'No change is available for this vehicle under the current profile.'));
       out.push(el('section', {class: 'cw-panel', 'data-selected-id': selected.id}, ...forms));
@@ -319,7 +430,7 @@ const V = {
         {label: 'Transponder', value: t => t.id}, {label: 'Serial', value: t => t.serial}, {label: 'Class charged', key: 'class', value: t => String(t.class)},
         {label: 'Vehicle', key: 'vehicle', value: t => (t.vehicle ? `${t.vehicle.plate} (${t.vehicle.label})` : 'unassigned')},
         {label: 'Vehicle class', value: t => (t.vehicle ? String(t.vehicle.class) : '')},
-        {label: 'Class matches', key: 'matches', value: t => (t.class_matches_vehicle === null ? '' : yesNo(t.class_matches_vehicle))},
+        {label: 'Class matches', key: 'matches', value: t => (t.class_matches_vehicle === null ? '' : flag(t.class_matches_vehicle))},
       ], transponders)));
     if (can('vehicles.add')) {
       const plate = input('plate', {required: true, maxlength: '10'}), cls = select('class', pol.vehicle_classes.map(c => ({value: String(c.class), label: `${c.class}: ${c.label}`})));
@@ -332,7 +443,7 @@ const V = {
           labelled('Temporary plate', temporary), labelled('Possession end (temporary only)', end), labelled('Rental agency', agency)], {submit: 'Add vehicle', run: async () => {
           await write('vehicles.add', {plate: plate.value, class: Number(cls.value), label: label.value, ...(start.value ? {possession_start: start.value} : {}),
             ...(temporary.value === 'true' ? {temporary: true} : {}), ...(end.value ? {possession_end: end.value} : {}), ...(agency.value ? {rental_agency_id: agency.value} : {})}, version);
-          ui.flash = done(`${plate.value.toUpperCase()} added.`);
+          flash(`${plate.value.toUpperCase()} added.`);
           await render();
         }})));
     }
@@ -354,11 +465,12 @@ const V = {
       }})),
     el('p', {class: 'cw-note', 'data-key': 'toll-count'}, `${r.tolls.length} of ${r.total} tolls, newest first. A transponder read debits the balance at the account rate; a plate-only read, or any read while suspended, becomes a notice at the mail rate.`),
     table([
-      {label: 'Time', key: 'time', value: t => t.local_time}, {label: 'Toll', value: t => t.id}, {label: 'Plaza', value: t => t.plaza_name},
+      {label: 'Time', key: 'time', value: t => when(t.at)}, {label: 'Plaza', value: t => t.plaza_name},
       {label: 'Read', value: t => t.read}, {label: 'Plate', key: 'plate', value: t => t.plate_seen}, {label: 'Transponder', value: t => t.transponder_id || ''},
       {label: 'Class seen', value: t => String(t.class_seen)}, {label: 'Class charged', value: t => (t.class_charged === null ? '' : String(t.class_charged))},
       {label: 'Rate', value: t => t.rate || ''}, {label: 'Amount', key: 'amount', num: true, value: t => money(t.amount_cents)},
-      {label: 'Disposition', key: 'disposition', value: t => badge(t.disposition)}, {label: 'Vehicle', value: t => t.vehicle_id || ''}, {label: 'Notice', value: t => t.notice_id || ''},
+      {label: 'Disposition', key: 'disposition', value: t => badge(t.disposition)}, {label: 'Notice', value: t => t.notice_id || ''},
+      {label: 'Toll', value: t => idText(t.id)},
     ], r.tolls)];
   },
 
@@ -373,14 +485,14 @@ const V = {
     if (ui.selectedNotice && r.notices.some(n => n.id === ui.selectedNotice)) {
       const d = await read('notices.get', {notice_id: ui.selectedNotice});
       const n = d.notice, t = d.toll;
-      out.push(el('section', {class: 'cw-panel', 'data-selected-id': n.id}, el('h3', {}, `Notice ${n.id}: plate ${n.plate}`),
+      out.push(el('section', {class: 'cw-panel', 'data-selected-id': n.id}, el('h3', {}, `Notice ${n.id}: plate ${n.plate}, ${t.plaza_name}, ${day(n.issue_date)}`),
         el('div', {class: 'cw-grid'}, stat('State', badge(n.state), {'data-key': 'state'}), stat('Amount due', money(n.amount_due_cents), {'data-key': 'amount-due'}),
-          stat('Toll', money(n.toll_cents)), stat('Late fee', money(n.late_fee_cents)), stat('Due date', n.due_date, {'data-key': 'due-date'}),
-          stat('Issued', n.issue_date), stat('Dispute window closes', n.dispute_window_closes), stat('Class charged', String(n.class_charged))),
-        el('p', {}, `Toll ${t.id} at ${t.plaza_name} on ${t.local_time}: ${t.read} read of ${t.plate_seen}, ${money(t.amount_cents)} at the ${t.rate} rate.`),
+          stat('Toll', money(n.toll_cents)), stat('Late fee', money(n.late_fee_cents)), stat('Due date', day(n.due_date), {'data-key': 'due-date'}),
+          stat('Issued', day(n.issue_date)), stat('Dispute window closes', day(n.dispute_window_closes)), stat('Class charged', String(n.class_charged))),
+        el('p', {}, `Toll ${t.id} at ${t.plaza_name} on ${when(t.at)}: ${t.read} read of ${t.plate_seen}, ${money(t.amount_cents)} at the ${t.rate} rate.`),
         d.dispute ? el('p', {}, `Dispute ${d.dispute.id}: ${human(d.dispute.reason)}, ${d.dispute.state}.`) : null,
         el('h3', {}, 'History'),
-        el('ul', {class: 'cw-list'}, ...n.history.map(h => el('li', {}, `${stamp(h.at)}: ${human(h.action)}${h.due_date ? ', due ' + h.due_date : ''}${h.late_fee_cents ? ', late fee ' + money(h.late_fee_cents) : ''}`))),
+        el('ul', {class: 'cw-list', 'data-key': 'history'}, ...n.history.map(h => el('li', {}, `${when(h.at)}: ${human(h.action)}${h.due_date ? ', due ' + day(h.due_date) : ''}${h.late_fee_cents ? ', late fee ' + money(h.late_fee_cents) : ''}`))),
         el('div', {class: 'cw-row'},
           n.payable ? el('button', {type: 'button', onclick: () => go('pay')}, 'Go to payment') : null,
           n.can_dispute ? el('button', {type: 'button', onclick: () => { ui.disputeNotice = n.id; go('disputes'); }}, 'Dispute this notice') : null)));
@@ -393,33 +505,34 @@ const V = {
     const a = ar.account, version = ar.version;
     const shown = nr.notices.filter(n => ['issued', 'escalated', 'disputed', 'collections'].includes(n.state));
     const boxes = new Map();
+    // A notice that cannot be paid has a disabled box and the reason beside it.
     const rows = table([
-      {label: 'Pay', value: n => { const b = el('input', {type: 'checkbox', 'data-field': 'notice_ids', value: n.id, 'aria-label': 'Pay ' + n.id, checked: n.payable}); boxes.set(n.id, b); return b; }},
+      {label: 'Pay', value: n => { const b = el('input', {type: 'checkbox', 'data-field': 'notice_ids', value: n.id, 'aria-label': 'Pay ' + n.id, checked: n.payable, disabled: n.payable ? null : true}); boxes.set(n.id, b); return b; }},
       ...noticeColumns().filter(c => c.label !== 'Can dispute'),
+      {label: 'Payable', key: 'why', value: n => (n.payable ? 'yes' : el('span', {class: 'cw-why'}, NOT_PAYABLE[n.state] || 'Not payable now.'))},
     ], shown);
-    const card = select('card_id', [{value: '', label: `Auto-replenish card (${a.replenish.card.label}, ${a.replenish.card.holder_name})`},
-      ...a.cards.map(c => ({value: c.id, label: `${c.label}, ${c.holder_name}`}))], '');
+    const card = cardSelect('card_id', a.cards, {offerDefault: a.replenish.card});
     const slot = el('div', {});
     const out = [el('p', {class: 'cw-note'}, 'Every payable notice is selected. Payment is final and closes the right to dispute. One ineligible notice rejects the whole payment and is named.'), rows];
     if (!can('notices.pay.preview')) return [...out, el('p', {class: 'cw-note'}, 'This profile cannot preview a payment.')];
+    if (!shown.some(n => n.payable)) return [...out, el('p', {class: 'cw-note', 'data-key': 'nothing-payable'}, 'No notice on this account can be paid now.')];
     out.push(el('section', {class: 'cw-panel'}, el('h3', {}, 'Card'),
       form([labelled('Card', card)], {submit: 'Preview payment', run: async () => {
         const ids = [...boxes].filter(([, b]) => b.checked).map(([id]) => id);
-        const pv = await write('notices.pay.preview', {notice_ids: ids, ...(card.value ? {card_id: card.value} : {})}, version);
+        if (!ids.length) throw Object.assign(Error('Select at least one notice to pay.'), {code: 'nothing_selected'});
+        const pv = await write('notices.pay.preview', {notice_ids: ids, ...requireCard(card)}, version);
         const p = pv.preview;
-        slot.replaceChildren(el('section', {class: 'cw-preview', 'data-preview-id': p.id}, el('h3', {}, 'Review the payment'),
-          table([
-            {label: 'Notice', value: l => l.notice_id}, {label: 'Plate', value: l => l.plate}, {label: 'Toll date', value: l => l.toll_date},
-            {label: 'Plaza', value: l => l.plaza_name}, {label: 'State', value: l => badge(l.state)}, {label: 'Amount', num: true, value: l => money(l.amount_cents)},
-          ], p.lines, {id: l => l.notice_id}),
-          el('div', {class: 'cw-grid'}, stat('Total', money(p.total_cents), {'data-key': 'total'}), stat('Card', `${p.card.label}`),
-            stat('Cardholder', p.card.holder_name, {'data-key': 'holder'}), stat('Preview expires', stamp(p.expires_at))),
+        slot.replaceChildren(el('section', {class: 'cw-preview', 'data-preview-id': p.id}, el('h3', {}, `Review the payment of ${p.lines.length} notice${p.lines.length === 1 ? '' : 's'}`),
+          el('ul', {class: 'cw-list', 'data-key': 'lines'}, ...p.lines.map(l => el('li', {'data-record-id': l.notice_id},
+            `${money(l.amount_cents)} for the ${l.plaza_name} toll of ${day(l.toll_date)}, plate ${l.plate} (notice ${l.notice_id}, ${human(l.state)})`))),
+          facts([['Total', money(p.total_cents), 'total'], ['Card', p.card.label], ['Cardholder', p.card.holder_name, 'holder'], ['Preview expires', when(p.expires_at), 'expires']]),
           el('p', {class: 'cw-final'}, p.final_text),
-          can('notices.pay.confirm') ? form([], {submit: 'Confirm payment', run: async () => {
+          can('notices.pay.confirm') ? form([], {submit: 'Confirm payment', cancel: closePreview, run: async () => {
             const c = await write('notices.pay.confirm', {preview_id: p.id}, pv.version);
-            ui.flash = done(`Receipt ${c.receipt.id}: ${money(c.receipt.amount_cents)} paid for ${c.receipt.notice_ids.join(', ')}.`, c.receipt.id);
+            flash(`Receipt ${c.receipt.id}: ${money(c.receipt.amount_cents)} paid for ${c.receipt.notice_ids.join(', ')} with ${p.card.label}.`, c.receipt.id);
             await render();
-          }}) : el('p', {class: 'cw-note'}, 'This profile can preview but not confirm a payment.')));
+          }}) : el('div', {class: 'cw-row'}, el('p', {class: 'cw-note'}, 'This profile can preview but not confirm a payment.'),
+            el('button', {type: 'button', 'data-action': 'cancel', onclick: closePreview}, 'Close preview'))));
       }})), slot);
     return out;
   },
@@ -430,24 +543,40 @@ const V = {
     const disputes = [];
     for (const n of nr.notices.filter(x => x.dispute_id)) disputes.push((await read('disputes.get', {dispute_id: n.dispute_id})).dispute);
     const reasonLabel = id => rr.reasons.find(x => x.reason === id)?.label || id;
+    const noticeOf = id => nr.notices.find(n => n.id === id);
+    const agencyName = id => pr.policies.rental_agencies.find(g => g.id === id)?.name || id;
+    const withdrawSlot = el('div', {});
     const out = [el('section', {class: 'cw-panel'}, el('h3', {}, 'Disputes on this account'),
       table([
-        {label: 'Dispute', value: d => d.id}, {label: 'Notice', key: 'notice', value: d => d.notice_id}, {label: 'Reason', value: d => reasonLabel(d.reason)},
-        {label: 'State', key: 'state', value: d => badge(d.state)}, {label: 'Submitted', value: d => stamp(d.submitted_at)},
-        {label: 'Closed', value: d => stamp(d.decided_at || d.withdrawn_at)},
-        {label: 'Evidence', value: d => d.evidence.map(e => `${e.app_id}/${e.account_id}/${e.object_id}`).join('; ')},
-        {label: '', value: d => (d.state === 'submitted' && can('disputes.withdraw') ? el('button', {type: 'button', onclick: async event => {
+        {label: 'Notice', key: 'notice', value: d => { const n = noticeOf(d.notice_id); return n ? `${d.notice_id}: ${n.plate}, ${day(n.toll_date)}` : d.notice_id; }},
+        {label: 'Reason', value: d => reasonLabel(d.reason)},
+        {label: 'State', key: 'state', value: d => badge(d.state)}, {label: 'Submitted', value: d => when(d.submitted_at)},
+        {label: 'Closed', value: d => (d.decided_at || d.withdrawn_at ? when(d.decided_at || d.withdrawn_at) : '')},
+        {label: 'Evidence', value: d => d.evidence.map(evidenceText).join('; ')},
+        {label: 'Dispute', value: d => idText(d.id)},
+        {label: '', value: d => (d.state === 'submitted' && can('disputes.withdraw') ? el('button', {type: 'button', 'data-action': 'withdraw', onclick: event => {
           event.stopPropagation();
-          setBusy(true);
-          try { await write('disputes.withdraw', {dispute_id: d.id}, version); ui.flash = done(`Dispute ${d.id} withdrawn.`); } catch (e) { ui.flash = failure(e); } finally { setBusy(false); }
-          await render();
+          const n = noticeOf(d.notice_id);
+          confirmStep({slot: withdrawSlot, title: `Withdraw dispute ${d.id}?`, confirm: 'Withdraw dispute', keep: 'Keep the dispute',
+            lines: [facts([['Notice', n ? `${n.id}, plate ${n.plate}, ${n.plaza_name} toll of ${day(n.toll_date)}` : d.notice_id], ['Reason', reasonLabel(d.reason)], ['Submitted', when(d.submitted_at)]]),
+              el('p', {}, 'Withdrawing is final: a notice can be disputed only once. The notice returns to its state before the dispute, with the days that remained to pay.')],
+            run: async () => {
+              const w = await write('disputes.withdraw', {dispute_id: d.id}, version);
+              flash(`Dispute ${d.id} withdrawn. Notice ${w.notice.id} is ${human(w.notice.state)} again, due ${day(w.notice.due_date)}.`);
+              await render();
+            }});
         }}, 'Withdraw') : '')},
-      ], disputes))];
+      ], disputes), withdrawSlot)];
     out.push(el('section', {class: 'cw-panel'}, el('h3', {}, 'Rules'), el('ul', {class: 'cw-list'}, ...rr.rules.map(x => el('li', {}, x)))));
     if (!can('disputes.preview')) return [...out, el('p', {class: 'cw-note'}, 'This profile cannot file a dispute.')];
     const open = nr.notices.filter(n => ['issued', 'escalated', 'disputed', 'collections', 'paid'].includes(n.state));
-    const preset = open.find(n => n.id === ui.disputeNotice) || open.find(n => n.can_dispute) || open[0];
-    const notice = select('notice_id', open.map(n => ({value: n.id, label: `${n.id}: ${n.plate}, ${n.toll_date}, ${n.state}${n.can_dispute ? '' : ' (not disputable)'}`})), preset?.id);
+    if (!open.some(n => n.can_dispute)) return [...out, el('p', {class: 'cw-note', 'data-key': 'nothing-disputable'}, 'No notice on this account can be disputed now.')];
+    const preset = open.find(n => n.id === ui.disputeNotice && n.can_dispute) || open.find(n => n.can_dispute);
+    // Notices that cannot be disputed stay listed, disabled, with the reason.
+    const why = n => (n.dispute_id ? 'already disputed' : n.state === 'paid' ? 'paid, which closes the right to dispute' : n.state === 'collections' ? 'in collections' : `the window closed ${day(n.dispute_window_closes)}`);
+    const notice = el('select', {'data-field': 'notice_id'}, ...open.map(n => el('option', {value: n.id, disabled: n.can_dispute ? null : true},
+      `${n.id}: ${n.plate}, ${day(n.toll_date)}, ${human(n.state)}${n.can_dispute ? `, window closes ${day(n.dispute_window_closes)}` : ` (not disputable: ${why(n)})`}`)));
+    notice.value = preset.id;
     const reason = select('reason', rr.reasons.map(x => ({value: x.reason, label: x.label})));
     const fields = {
       transfer_date: labelled('Transfer date', input('transfer_date', {type: 'date'})),
@@ -475,17 +604,18 @@ const V = {
           if (lines.length) args.evidence = lines.map(line => { const [app_id, account_id, object_id] = line.split('/'); return {app_id, account_id, object_id}; });
           const pv = await write('disputes.preview', args, version);
           const p = pv.preview;
+          const detail = p.transfer_date ? ['Transfer date', day(p.transfer_date)] : p.agency_id ? ['Rental agency', agencyName(p.agency_id)]
+            : p.transponder_id ? ['Transponder', p.transponder_id] : ['Explanation', p.explanation];
           slot.replaceChildren(el('section', {class: 'cw-preview', 'data-preview-id': p.id}, el('h3', {}, `Review the dispute of ${p.notice.id}`),
-            el('div', {class: 'cw-grid'}, stat('Notice', `${p.notice.id}, plate ${p.notice.plate}`), stat('Toll date', p.notice.toll_date),
-              stat('Amount', money(p.notice.amount_due_cents)), stat('Reason', reasonLabel(p.reason)), stat('Preview expires', stamp(p.expires_at))),
-            el('p', {}, p.transfer_date ? `Transfer date ${p.transfer_date}.` : p.agency_id ? `Rental agency ${p.agency_id}.` : p.transponder_id ? `Transponder ${p.transponder_id}.` : `Explanation: ${p.explanation}`),
-            el('p', {}, `Evidence: ${p.evidence.map(e => `${e.app_id}/${e.account_id}/${e.object_id}`).join('; ') || 'none'}`),
+            facts([['Notice', `${p.notice.id}, plate ${p.notice.plate}, toll of ${day(p.notice.toll_date)}`], ['Amount', money(p.notice.amount_due_cents)],
+              ['Reason', reasonLabel(p.reason)], detail, ['Evidence', p.evidence.map(evidenceText).join('; ') || 'none', 'evidence'], ['Preview expires', when(p.expires_at), 'expires']]),
             el('ul', {class: 'cw-list'}, ...p.rules.map(x => el('li', {}, x))),
-            can('disputes.confirm') ? form([], {submit: 'Submit dispute', run: async () => {
+            can('disputes.confirm') ? form([], {submit: 'Submit dispute', cancel: closePreview, run: async () => {
               const c = await write('disputes.confirm', {preview_id: p.id}, pv.version);
-              ui.flash = done(`Dispute ${c.dispute.id} submitted for ${c.notice.id}. Receipt ${c.receipt.id}.`, c.receipt.id);
+              flash(`Dispute ${c.dispute.id} submitted for ${c.notice.id}. Receipt ${c.receipt.id}.`, c.receipt.id);
               await render();
-            }}) : el('p', {class: 'cw-note'}, 'This profile can preview but not submit a dispute.')));
+            }}) : el('div', {class: 'cw-row'}, el('p', {class: 'cw-note'}, 'This profile can preview but not submit a dispute.'),
+              el('button', {type: 'button', 'data-action': 'cancel', onclick: closePreview}, 'Close preview'))));
         },
       })), slot);
     return out;
@@ -511,14 +641,19 @@ const V = {
 
 function noticeColumns() {
   return [
-    {label: 'Notice', value: n => n.id}, {label: 'Plate', key: 'plate', value: n => n.plate}, {label: 'Toll date', value: n => n.toll_date},
+    {label: 'Toll date', key: 'toll-date', value: n => day(n.toll_date)}, {label: 'Plate', key: 'plate', value: n => n.plate},
     {label: 'Plaza', value: n => n.plaza_name}, {label: 'State', key: 'state', value: n => badge(n.state)},
-    {label: 'Amount due', key: 'amount', num: true, value: n => money(n.amount_due_cents)}, {label: 'Due date', key: 'due', value: n => n.due_date},
-    {label: 'Dispute window closes', value: n => n.dispute_window_closes}, {label: 'Can dispute', value: n => yesNo(n.can_dispute)},
+    {label: 'Amount due', key: 'amount', num: true, value: n => money(n.amount_due_cents)}, {label: 'Due date', key: 'due', value: n => day(n.due_date)},
+    {label: 'Dispute window closes', value: n => day(n.dispute_window_closes)}, {label: 'Can dispute', value: n => flag(n.can_dispute, {yes: 'good', no: 'neutral'})},
+    {label: 'Notice', value: n => idText(n.id)},
   ];
 }
-function done(text, id) { return el('div', {class: 'cw-done', role: 'status', 'data-receipt-id': id || null}, text); }
-function failure(e) { return el('p', {role: 'alert', class: 'cw-alert', 'data-code': e.code || 'request_failed'}, e.message); }
+// The latest receipt for the page where the action happened. It stays on that
+// page across re-renders (selection, Refresh) until the next submission or a
+// move to another page.
+function flash(text, id) {
+  ui.flash = {view: current(), node: el('div', {class: 'cw-done', role: 'status', 'data-outcome': 'receipt', 'data-receipt-id': id || null}, text)};
+}
 
 // ---- Shell ------------------------------------------------------------------------
 
@@ -539,14 +674,18 @@ const holderNote = el('small', {}, '');
 const view = el('div', {class: 'cw-view', id: 'view'});
 const refresh = el('button', {type: 'button', onclick: () => render()}, 'Refresh');
 
+// The page named by the address. An empty address is the account overview;
+// an address naming no page is "not found", with its own title.
 function current() {
   const id = location.hash.slice(1);
-  return VIEWS.some(v => v.id === id) ? id : 'account';
+  if (!id) return 'account';
+  return VIEWS.some(v => v.id === id) ? id : 'not_found';
 }
+const NOT_FOUND = {id: 'not_found', title: 'Page not found'};
 function go(id) { if (location.hash === '#' + id) render(); else location.hash = id; }
 
 async function render() {
-  const ticket = ++renderTicket, id = current(), meta = VIEWS.find(v => v.id === id);
+  const ticket = ++renderTicket, id = current(), meta = VIEWS.find(v => v.id === id) || NOT_FOUND;
   setBusy(true);
   try {
     tools = (await request('/api/tools')).tools;
@@ -557,15 +696,21 @@ async function render() {
     if (head) {
       holder.textContent = head.holder.display_name;
       holderNote.textContent = `Account ${head.account_id}`;
-      clock.textContent = `Account time ${stamp(head.as_of)} Eastern (UTC${head.as_of.slice(19)})`;
+      clock.textContent = `Account time: ${when(head.as_of)} (US Eastern)`;
+      clock.dataset.asOf = head.as_of;
     }
-    const absent = missing(id).filter(name => !name.match(/\.(confirm|set|add|update|end|assign|withdraw|preview)$/));
-    const body = absent.length ? [el('p', {class: 'cw-alert'}, `This page needs ${absent.join(', ')}, which the current profile does not allow.`)] : await V[id]();
+    let body;
+    if (id === 'not_found') body = [el('p', {class: 'cw-alert', 'data-key': 'not-found'}, `There is no Crossway page called "${location.hash.slice(1)}".`),
+      el('div', {class: 'cw-row'}, el('button', {type: 'button', onclick: () => go('account')}, 'Go to the account overview'))];
+    else {
+      const absent = missing(id).filter(name => !name.match(/\.(confirm|set|add|update|end|assign|withdraw|preview)$/));
+      body = absent.length ? [el('p', {class: 'cw-alert'}, `This page needs ${absent.join(', ')}, which the current profile does not allow.`)] : await V[id]();
+    }
     if (ticket !== renderTicket) return;
-    const flash = ui.flash;
-    ui.flash = null;
+    // The last receipt stays on the page where it was made; another page drops it.
+    if (ui.flash && ui.flash.view !== id) ui.flash = null;
     view.dataset.view = id;
-    view.replaceChildren(...(flash ? [flash] : []), ...body.filter(Boolean));
+    view.replaceChildren(...(ui.flash ? [ui.flash.node] : []), ...body.filter(Boolean));
     status.textContent = 'Up to date';
     delete status.dataset.error;
   } catch (e) {

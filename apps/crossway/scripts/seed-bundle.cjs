@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// Builds the env.load_seed arguments for one of the three seeds: its data,
+// Builds the env.load_seed arguments for one of the four seeds: its data,
 // binding, clock and a provenance bundle. The bundle's dataset is
 // contribution/dataset.json narrowed to that seed's source, with
 // expected_counts for that seed, so Core's quality check sees the seed's own

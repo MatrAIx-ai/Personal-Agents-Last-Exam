@@ -30,6 +30,9 @@ const CASES = {
   theo: {card: 'card-theo-amex', end: ['v-0003', '2026-04-30', '2026-05-01'], update: 'v-0002', pay: ['n-0008'],
     dispute: {notice_id: 'n-0006', reason: 'sold_or_not_in_possession', transfer_date: '2026-04-30', evidence: [MAIL('mail-theo', 'm-31042')]},
     add: {plate: 'TST4300', class: 1, label: 'Test car'}, assign: {transponder_id: 'tp-0003', vehicle_id: 'v-0005'}},
+  priya: {card: 'card-priya-visa', end: ['v-0002', '2026-11-14', '2026-11-15'], update: 'v-0001', pay: ['n-0009'],
+    dispute: {notice_id: 'n-0008', reason: 'sold_or_not_in_possession', transfer_date: '2026-11-14', evidence: [MAIL('mail-priya', 'm-41206')]},
+    add: {plate: 'TST4400', class: 1, label: 'Test car'}, assign: {transponder_id: 'tp-0002', vehicle_id: 'v-0004'}},
 };
 
 async function main() {

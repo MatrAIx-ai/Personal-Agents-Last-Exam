@@ -14,7 +14,7 @@ const {sha, hash, platform, loadSeed, session, ACTIONS, SEEDS, seedFiles} = requ
 const C = require('../src/clock.cjs');
 
 const ZONES = ['America/Los_Angeles', 'Asia/Kolkata'];
-const END = {dani: '2027-02-15T09:00:00-05:00', marisol: '2026-05-20T09:00:00-04:00', theo: '2026-08-20T09:00:00-04:00'};
+const END = {dani: '2027-02-15T09:00:00-05:00', marisol: '2026-05-20T09:00:00-04:00', theo: '2026-08-20T09:00:00-04:00', priya: '2027-03-01T09:00:00-05:00'};
 
 // Clock stops strictly between two instants, so a step never lands on an event time.
 function stops(from, to, count = 3) {

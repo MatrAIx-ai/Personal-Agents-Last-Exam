@@ -136,6 +136,22 @@ const ACTIONS = {
       await s.write('vehicles.update', {vehicle_id: 'v-0005', possession_end: '2026-06-19'});
     }},
   ],
+  priya: [
+    {at: '2026-12-31T09:00:00-05:00', run: async s => {
+      await s.write('account.replenish.set', {enabled: true, card_id: 'card-priya-visa'});
+      await s.preview('account.topup', {amount_cents: 4000, card_id: 'card-priya-visa'});
+      await s.write('vehicles.end', {vehicle_id: 'v-0002', end_date: '2026-11-14'});
+      for (const id of ['n-0008', 'n-0011']) await s.preview('disputes', {notice_id: id, reason: 'sold_or_not_in_possession', transfer_date: '2026-11-14', evidence: [MAIL('mail-priya', 'm-41206')]});
+      await s.write('transponders.assign', {transponder_id: 'tp-0002', vehicle_id: 'v-0004'});
+      await s.preview('notices.pay', {notice_ids: ['n-0006', 'n-0009', 'n-0010', 'n-0012'], card_id: 'card-priya-visa'});
+    }},
+    {at: '2027-01-08T18:00:00-05:00', run: async s => {
+      // The permanent plates arrived: the temporary plate ends and the tag moves to the new plate.
+      await s.write('vehicles.end', {vehicle_id: 'v-0004', end_date: '2027-01-08'});
+      await s.write('vehicles.add', {plate: 'PRC7781', class: 1, label: '2026 Honda CR-V', possession_start: '2027-01-08'});
+      await s.write('transponders.assign', {transponder_id: 'tp-0002', vehicle_id: 'v-0005'});
+    }},
+  ],
 };
 
 // The schedule with sentinel strings in its pending payloads. `surfaces` lists

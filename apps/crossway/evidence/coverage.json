@@ -1,0 +1,1254 @@
+{
+  "report": "Crossway environment dataset coverage",
+  "scope": "Environment coverage window, all delivered seeds (fixtures/seeds/index.json)",
+  "window": {
+    "from": "2025-01-01",
+    "to": "2026-12-31",
+    "inclusive": true
+  },
+  "time_zone": "America/New_York",
+  "method": "node apps/crossway/scripts/coverage-report.cjs: each seed file as committed (the records env.load_seed loads), one record per row of the listed collections, dated by the listed field and normalized to its America/New_York calendar date; distinct dates are deduplicated per seed and across all seeds.",
+  "date_fields": [
+    {
+      "collection": "tolls",
+      "field": "tolls.at",
+      "meaning": "plaza read time"
+    },
+    {
+      "collection": "ledger",
+      "field": "ledger.at",
+      "meaning": "balance movement time (toll debit, top-up, auto-replenish)"
+    },
+    {
+      "collection": "statements",
+      "field": "statements.issued_at",
+      "meaning": "statement issue time (12:00 AM on the 1st)"
+    },
+    {
+      "collection": "notices",
+      "field": "notices.issued_at",
+      "meaning": "violation notice issue time"
+    },
+    {
+      "collection": "disputes",
+      "field": "disputes.submitted_at",
+      "meaning": "dispute submission time"
+    },
+    {
+      "collection": "dispute_decisions",
+      "field": "dispute_decisions.at",
+      "meaning": "dispute decision time"
+    },
+    {
+      "collection": "dispute_withdrawals",
+      "field": "disputes.withdrawn_at",
+      "meaning": "dispute withdrawal time"
+    },
+    {
+      "collection": "receipts",
+      "field": "receipts.created_at",
+      "meaning": "receipt time (top-up, replenish, payment, dispute)"
+    },
+    {
+      "collection": "vehicles",
+      "field": "vehicles.added_at",
+      "meaning": "vehicle added to the account"
+    }
+  ],
+  "excluded_fields": [
+    "notices.due_date",
+    "notices.dispute window (issue date + 45 days)",
+    "cards.exp_month/exp_year",
+    "vehicles.possession_end",
+    "run.previews.expires_at",
+    "notices.escalated_at and notices.collections_at (deadline effects of a notice already counted at issue)"
+  ],
+  "provenance": {
+    "kind": "synthetic",
+    "real_records": 0,
+    "real_anchor": null,
+    "generator": "apps/crossway/scripts/generate-seed.cjs (deterministic; --check reproduces every seed file byte for byte)",
+    "note": "No record is real or collected: plazas, rates, plates, people, cards and notices are fictional. The generator and story text were written with AI coding assistance; the records are its deterministic output. Human read-through: pending."
+  },
+  "totals": {
+    "records": 1473,
+    "distinct_dates_global": 436,
+    "earliest": "2025-01-06",
+    "latest": "2026-12-30",
+    "months_in_window": 24,
+    "months_with_records": 24,
+    "excluded": 0
+  },
+  "global_gaps": [],
+  "seeds": [
+    {
+      "seed_id": "dani",
+      "person": "Dani Reyes",
+      "account_id": "cw-dani",
+      "file": "apps/crossway/fixtures/minimal.json",
+      "sha256": "c686ad6af3a606c443e1e526ea384e6da53e88026a9ce949084c4f8124ba56e7",
+      "provenance": "synthetic",
+      "real_records": 0,
+      "opened_on": "2025-01-06",
+      "clock": "2026-11-02T09:00:00-05:00",
+      "records": 448,
+      "distinct_dates": 202,
+      "earliest": "2025-01-06",
+      "latest": "2026-11-01",
+      "collections": [
+        {
+          "collection": "tolls",
+          "field": "tolls.at",
+          "meaning": "plaza read time",
+          "records": 174,
+          "distinct_dates": 170
+        },
+        {
+          "collection": "ledger",
+          "field": "ledger.at",
+          "meaning": "balance movement time (toll debit, top-up, auto-replenish)",
+          "records": 185,
+          "distinct_dates": 157
+        },
+        {
+          "collection": "statements",
+          "field": "statements.issued_at",
+          "meaning": "statement issue time (12:00 AM on the 1st)",
+          "records": 22,
+          "distinct_dates": 22
+        },
+        {
+          "collection": "notices",
+          "field": "notices.issued_at",
+          "meaning": "violation notice issue time",
+          "records": 18,
+          "distinct_dates": 18
+        },
+        {
+          "collection": "disputes",
+          "field": "disputes.submitted_at",
+          "meaning": "dispute submission time",
+          "records": 2,
+          "distinct_dates": 2
+        },
+        {
+          "collection": "dispute_decisions",
+          "field": "dispute_decisions.at",
+          "meaning": "dispute decision time",
+          "records": 2,
+          "distinct_dates": 2
+        },
+        {
+          "collection": "dispute_withdrawals",
+          "field": "disputes.withdrawn_at",
+          "meaning": "dispute withdrawal time",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "collection": "receipts",
+          "field": "receipts.created_at",
+          "meaning": "receipt time (top-up, replenish, payment, dispute)",
+          "records": 40,
+          "distinct_dates": 40
+        },
+        {
+          "collection": "vehicles",
+          "field": "vehicles.added_at",
+          "meaning": "vehicle added to the account",
+          "records": 5,
+          "distinct_dates": 4
+        }
+      ],
+      "monthly": [
+        {
+          "month": "2025-01",
+          "records": 22,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2025-02",
+          "records": 18,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-03",
+          "records": 11,
+          "distinct_dates": 5
+        },
+        {
+          "month": "2025-04",
+          "records": 15,
+          "distinct_dates": 6
+        },
+        {
+          "month": "2025-05",
+          "records": 11,
+          "distinct_dates": 5
+        },
+        {
+          "month": "2025-06",
+          "records": 28,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2025-07",
+          "records": 23,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2025-08",
+          "records": 23,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2025-09",
+          "records": 19,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2025-10",
+          "records": 19,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2025-11",
+          "records": 21,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2025-12",
+          "records": 14,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2026-01",
+          "records": 16,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2026-02",
+          "records": 11,
+          "distinct_dates": 5
+        },
+        {
+          "month": "2026-03",
+          "records": 15,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2026-04",
+          "records": 26,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2026-05",
+          "records": 30,
+          "distinct_dates": 15
+        },
+        {
+          "month": "2026-06",
+          "records": 38,
+          "distinct_dates": 15
+        },
+        {
+          "month": "2026-07",
+          "records": 23,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2026-08",
+          "records": 7,
+          "distinct_dates": 4
+        },
+        {
+          "month": "2026-09",
+          "records": 31,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2026-10",
+          "records": 26,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2026-11",
+          "records": 1,
+          "distinct_dates": 1
+        },
+        {
+          "month": "2026-12",
+          "records": 0,
+          "distinct_dates": 0
+        }
+      ],
+      "gaps": [
+        {
+          "month": "2026-12",
+          "reason": "after the seed clock (2026-11-02); later activity is staged by the example schedule, not loaded history"
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "seed_id": "marisol",
+      "person": "Marisol Ortega",
+      "account_id": "cw-marisol",
+      "file": "apps/crossway/fixtures/seeds/marisol/seed.json",
+      "sha256": "c61810ca70ad439402a4f359cbbe9140731c45cbdc61a2a32078d18b100163e0",
+      "provenance": "synthetic",
+      "real_records": 0,
+      "opened_on": "2025-02-03",
+      "clock": "2026-03-09T09:00:00-04:00",
+      "records": 271,
+      "distinct_dates": 122,
+      "earliest": "2025-02-03",
+      "latest": "2026-03-03",
+      "collections": [
+        {
+          "collection": "tolls",
+          "field": "tolls.at",
+          "meaning": "plaza read time",
+          "records": 106,
+          "distinct_dates": 104
+        },
+        {
+          "collection": "ledger",
+          "field": "ledger.at",
+          "meaning": "balance movement time (toll debit, top-up, auto-replenish)",
+          "records": 111,
+          "distinct_dates": 98
+        },
+        {
+          "collection": "statements",
+          "field": "statements.issued_at",
+          "meaning": "statement issue time (12:00 AM on the 1st)",
+          "records": 13,
+          "distinct_dates": 13
+        },
+        {
+          "collection": "notices",
+          "field": "notices.issued_at",
+          "meaning": "violation notice issue time",
+          "records": 10,
+          "distinct_dates": 10
+        },
+        {
+          "collection": "disputes",
+          "field": "disputes.submitted_at",
+          "meaning": "dispute submission time",
+          "records": 3,
+          "distinct_dates": 3
+        },
+        {
+          "collection": "dispute_decisions",
+          "field": "dispute_decisions.at",
+          "meaning": "dispute decision time",
+          "records": 2,
+          "distinct_dates": 2
+        },
+        {
+          "collection": "dispute_withdrawals",
+          "field": "disputes.withdrawn_at",
+          "meaning": "dispute withdrawal time",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "collection": "receipts",
+          "field": "receipts.created_at",
+          "meaning": "receipt time (top-up, replenish, payment, dispute)",
+          "records": 22,
+          "distinct_dates": 22
+        },
+        {
+          "collection": "vehicles",
+          "field": "vehicles.added_at",
+          "meaning": "vehicle added to the account",
+          "records": 4,
+          "distinct_dates": 2
+        }
+      ],
+      "monthly": [
+        {
+          "month": "2025-01",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2025-02",
+          "records": 17,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2025-03",
+          "records": 25,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2025-04",
+          "records": 15,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2025-05",
+          "records": 21,
+          "distinct_dates": 10
+        },
+        {
+          "month": "2025-06",
+          "records": 15,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2025-07",
+          "records": 18,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-08",
+          "records": 17,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-09",
+          "records": 17,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-10",
+          "records": 25,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2025-11",
+          "records": 20,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-12",
+          "records": 25,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2026-01",
+          "records": 27,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2026-02",
+          "records": 26,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2026-03",
+          "records": 3,
+          "distinct_dates": 2
+        },
+        {
+          "month": "2026-04",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-05",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-06",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-07",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-08",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-09",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-10",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-11",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-12",
+          "records": 0,
+          "distinct_dates": 0
+        }
+      ],
+      "gaps": [
+        {
+          "month": "2025-01",
+          "reason": "before the account opened (2025-02-03)"
+        },
+        {
+          "month": "2026-04",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-05",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-06",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-07",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-08",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-09",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-10",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-11",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-12",
+          "reason": "after the seed clock (2026-03-09); later activity is staged by the example schedule, not loaded history"
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "seed_id": "theo",
+      "person": "Theo Lindqvist",
+      "account_id": "cw-theo",
+      "file": "apps/crossway/fixtures/seeds/theo/seed.json",
+      "sha256": "700500a25299295ca298336099294c3f128682af7a9a7cbaf724aad93e183238",
+      "provenance": "synthetic",
+      "real_records": 0,
+      "opened_on": "2025-05-12",
+      "clock": "2026-06-15T09:00:00-04:00",
+      "records": 337,
+      "distinct_dates": 145,
+      "earliest": "2025-05-12",
+      "latest": "2026-06-12",
+      "collections": [
+        {
+          "collection": "tolls",
+          "field": "tolls.at",
+          "meaning": "plaza read time",
+          "records": 138,
+          "distinct_dates": 127
+        },
+        {
+          "collection": "ledger",
+          "field": "ledger.at",
+          "meaning": "balance movement time (toll debit, top-up, auto-replenish)",
+          "records": 146,
+          "distinct_dates": 121
+        },
+        {
+          "collection": "statements",
+          "field": "statements.issued_at",
+          "meaning": "statement issue time (12:00 AM on the 1st)",
+          "records": 13,
+          "distinct_dates": 13
+        },
+        {
+          "collection": "notices",
+          "field": "notices.issued_at",
+          "meaning": "violation notice issue time",
+          "records": 8,
+          "distinct_dates": 8
+        },
+        {
+          "collection": "disputes",
+          "field": "disputes.submitted_at",
+          "meaning": "dispute submission time",
+          "records": 3,
+          "distinct_dates": 3
+        },
+        {
+          "collection": "dispute_decisions",
+          "field": "dispute_decisions.at",
+          "meaning": "dispute decision time",
+          "records": 2,
+          "distinct_dates": 2
+        },
+        {
+          "collection": "dispute_withdrawals",
+          "field": "disputes.withdrawn_at",
+          "meaning": "dispute withdrawal time",
+          "records": 1,
+          "distinct_dates": 1
+        },
+        {
+          "collection": "receipts",
+          "field": "receipts.created_at",
+          "meaning": "receipt time (top-up, replenish, payment, dispute)",
+          "records": 21,
+          "distinct_dates": 21
+        },
+        {
+          "collection": "vehicles",
+          "field": "vehicles.added_at",
+          "meaning": "vehicle added to the account",
+          "records": 5,
+          "distinct_dates": 3
+        }
+      ],
+      "monthly": [
+        {
+          "month": "2025-01",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2025-02",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2025-03",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2025-04",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2025-05",
+          "records": 23,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-06",
+          "records": 27,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2025-07",
+          "records": 30,
+          "distinct_dates": 14
+        },
+        {
+          "month": "2025-08",
+          "records": 25,
+          "distinct_dates": 13
+        },
+        {
+          "month": "2025-09",
+          "records": 19,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-10",
+          "records": 27,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2025-11",
+          "records": 25,
+          "distinct_dates": 10
+        },
+        {
+          "month": "2025-12",
+          "records": 17,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2026-01",
+          "records": 21,
+          "distinct_dates": 10
+        },
+        {
+          "month": "2026-02",
+          "records": 21,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2026-03",
+          "records": 31,
+          "distinct_dates": 13
+        },
+        {
+          "month": "2026-04",
+          "records": 22,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2026-05",
+          "records": 31,
+          "distinct_dates": 13
+        },
+        {
+          "month": "2026-06",
+          "records": 18,
+          "distinct_dates": 6
+        },
+        {
+          "month": "2026-07",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-08",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-09",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-10",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-11",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "month": "2026-12",
+          "records": 0,
+          "distinct_dates": 0
+        }
+      ],
+      "gaps": [
+        {
+          "month": "2025-01",
+          "reason": "before the account opened (2025-05-12)"
+        },
+        {
+          "month": "2025-02",
+          "reason": "before the account opened (2025-05-12)"
+        },
+        {
+          "month": "2025-03",
+          "reason": "before the account opened (2025-05-12)"
+        },
+        {
+          "month": "2025-04",
+          "reason": "before the account opened (2025-05-12)"
+        },
+        {
+          "month": "2026-07",
+          "reason": "after the seed clock (2026-06-15); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-08",
+          "reason": "after the seed clock (2026-06-15); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-09",
+          "reason": "after the seed clock (2026-06-15); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-10",
+          "reason": "after the seed clock (2026-06-15); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-11",
+          "reason": "after the seed clock (2026-06-15); later activity is staged by the example schedule, not loaded history"
+        },
+        {
+          "month": "2026-12",
+          "reason": "after the seed clock (2026-06-15); later activity is staged by the example schedule, not loaded history"
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "seed_id": "priya",
+      "person": "Priya Raman",
+      "account_id": "cw-priya",
+      "file": "apps/crossway/fixtures/seeds/priya/seed.json",
+      "sha256": "cade97646435c5e2298c6b13b0b3b9038963ce868d04d410dd20cb5476e89549",
+      "provenance": "synthetic",
+      "real_records": 0,
+      "opened_on": "2025-01-13",
+      "clock": "2026-12-31T09:00:00-05:00",
+      "records": 417,
+      "distinct_dates": 198,
+      "earliest": "2025-01-13",
+      "latest": "2026-12-30",
+      "collections": [
+        {
+          "collection": "tolls",
+          "field": "tolls.at",
+          "meaning": "plaza read time",
+          "records": 172,
+          "distinct_dates": 171
+        },
+        {
+          "collection": "ledger",
+          "field": "ledger.at",
+          "meaning": "balance movement time (toll debit, top-up, auto-replenish)",
+          "records": 177,
+          "distinct_dates": 162
+        },
+        {
+          "collection": "statements",
+          "field": "statements.issued_at",
+          "meaning": "statement issue time (12:00 AM on the 1st)",
+          "records": 23,
+          "distinct_dates": 23
+        },
+        {
+          "collection": "notices",
+          "field": "notices.issued_at",
+          "meaning": "violation notice issue time",
+          "records": 12,
+          "distinct_dates": 12
+        },
+        {
+          "collection": "disputes",
+          "field": "disputes.submitted_at",
+          "meaning": "dispute submission time",
+          "records": 3,
+          "distinct_dates": 3
+        },
+        {
+          "collection": "dispute_decisions",
+          "field": "dispute_decisions.at",
+          "meaning": "dispute decision time",
+          "records": 2,
+          "distinct_dates": 2
+        },
+        {
+          "collection": "dispute_withdrawals",
+          "field": "disputes.withdrawn_at",
+          "meaning": "dispute withdrawal time",
+          "records": 0,
+          "distinct_dates": 0
+        },
+        {
+          "collection": "receipts",
+          "field": "receipts.created_at",
+          "meaning": "receipt time (top-up, replenish, payment, dispute)",
+          "records": 24,
+          "distinct_dates": 24
+        },
+        {
+          "collection": "vehicles",
+          "field": "vehicles.added_at",
+          "meaning": "vehicle added to the account",
+          "records": 4,
+          "distinct_dates": 3
+        }
+      ],
+      "monthly": [
+        {
+          "month": "2025-01",
+          "records": 6,
+          "distinct_dates": 2
+        },
+        {
+          "month": "2025-02",
+          "records": 13,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2025-03",
+          "records": 28,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2025-04",
+          "records": 15,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2025-05",
+          "records": 25,
+          "distinct_dates": 12
+        },
+        {
+          "month": "2025-06",
+          "records": 7,
+          "distinct_dates": 4
+        },
+        {
+          "month": "2025-07",
+          "records": 16,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2025-08",
+          "records": 27,
+          "distinct_dates": 13
+        },
+        {
+          "month": "2025-09",
+          "records": 7,
+          "distinct_dates": 4
+        },
+        {
+          "month": "2025-10",
+          "records": 15,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2025-11",
+          "records": 19,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2025-12",
+          "records": 21,
+          "distinct_dates": 10
+        },
+        {
+          "month": "2026-01",
+          "records": 19,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2026-02",
+          "records": 25,
+          "distinct_dates": 11
+        },
+        {
+          "month": "2026-03",
+          "records": 9,
+          "distinct_dates": 5
+        },
+        {
+          "month": "2026-04",
+          "records": 19,
+          "distinct_dates": 9
+        },
+        {
+          "month": "2026-05",
+          "records": 27,
+          "distinct_dates": 13
+        },
+        {
+          "month": "2026-06",
+          "records": 17,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2026-07",
+          "records": 11,
+          "distinct_dates": 6
+        },
+        {
+          "month": "2026-08",
+          "records": 19,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2026-09",
+          "records": 15,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2026-10",
+          "records": 13,
+          "distinct_dates": 7
+        },
+        {
+          "month": "2026-11",
+          "records": 17,
+          "distinct_dates": 8
+        },
+        {
+          "month": "2026-12",
+          "records": 27,
+          "distinct_dates": 12
+        }
+      ],
+      "gaps": [],
+      "excluded": []
+    }
+  ],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "records": 28,
+      "distinct_dates": 9,
+      "by_seed": {
+        "dani": 22,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 6
+      }
+    },
+    {
+      "month": "2025-02",
+      "records": 48,
+      "distinct_dates": 14,
+      "by_seed": {
+        "dani": 18,
+        "marisol": 17,
+        "theo": 0,
+        "priya": 13
+      }
+    },
+    {
+      "month": "2025-03",
+      "records": 64,
+      "distinct_dates": 19,
+      "by_seed": {
+        "dani": 11,
+        "marisol": 25,
+        "theo": 0,
+        "priya": 28
+      }
+    },
+    {
+      "month": "2025-04",
+      "records": 45,
+      "distinct_dates": 16,
+      "by_seed": {
+        "dani": 15,
+        "marisol": 15,
+        "theo": 0,
+        "priya": 15
+      }
+    },
+    {
+      "month": "2025-05",
+      "records": 80,
+      "distinct_dates": 23,
+      "by_seed": {
+        "dani": 11,
+        "marisol": 21,
+        "theo": 23,
+        "priya": 25
+      }
+    },
+    {
+      "month": "2025-06",
+      "records": 77,
+      "distinct_dates": 23,
+      "by_seed": {
+        "dani": 28,
+        "marisol": 15,
+        "theo": 27,
+        "priya": 7
+      }
+    },
+    {
+      "month": "2025-07",
+      "records": 87,
+      "distinct_dates": 25,
+      "by_seed": {
+        "dani": 23,
+        "marisol": 18,
+        "theo": 30,
+        "priya": 16
+      }
+    },
+    {
+      "month": "2025-08",
+      "records": 92,
+      "distinct_dates": 22,
+      "by_seed": {
+        "dani": 23,
+        "marisol": 17,
+        "theo": 25,
+        "priya": 27
+      }
+    },
+    {
+      "month": "2025-09",
+      "records": 62,
+      "distinct_dates": 18,
+      "by_seed": {
+        "dani": 19,
+        "marisol": 17,
+        "theo": 19,
+        "priya": 7
+      }
+    },
+    {
+      "month": "2025-10",
+      "records": 86,
+      "distinct_dates": 23,
+      "by_seed": {
+        "dani": 19,
+        "marisol": 25,
+        "theo": 27,
+        "priya": 15
+      }
+    },
+    {
+      "month": "2025-11",
+      "records": 85,
+      "distinct_dates": 21,
+      "by_seed": {
+        "dani": 21,
+        "marisol": 20,
+        "theo": 25,
+        "priya": 19
+      }
+    },
+    {
+      "month": "2025-12",
+      "records": 77,
+      "distinct_dates": 22,
+      "by_seed": {
+        "dani": 14,
+        "marisol": 25,
+        "theo": 17,
+        "priya": 21
+      }
+    },
+    {
+      "month": "2026-01",
+      "records": 83,
+      "distinct_dates": 22,
+      "by_seed": {
+        "dani": 16,
+        "marisol": 27,
+        "theo": 21,
+        "priya": 19
+      }
+    },
+    {
+      "month": "2026-02",
+      "records": 83,
+      "distinct_dates": 22,
+      "by_seed": {
+        "dani": 11,
+        "marisol": 26,
+        "theo": 21,
+        "priya": 25
+      }
+    },
+    {
+      "month": "2026-03",
+      "records": 58,
+      "distinct_dates": 20,
+      "by_seed": {
+        "dani": 15,
+        "marisol": 3,
+        "theo": 31,
+        "priya": 9
+      }
+    },
+    {
+      "month": "2026-04",
+      "records": 67,
+      "distinct_dates": 20,
+      "by_seed": {
+        "dani": 26,
+        "marisol": 0,
+        "theo": 22,
+        "priya": 19
+      }
+    },
+    {
+      "month": "2026-05",
+      "records": 88,
+      "distinct_dates": 24,
+      "by_seed": {
+        "dani": 30,
+        "marisol": 0,
+        "theo": 31,
+        "priya": 27
+      }
+    },
+    {
+      "month": "2026-06",
+      "records": 73,
+      "distinct_dates": 17,
+      "by_seed": {
+        "dani": 38,
+        "marisol": 0,
+        "theo": 18,
+        "priya": 17
+      }
+    },
+    {
+      "month": "2026-07",
+      "records": 34,
+      "distinct_dates": 14,
+      "by_seed": {
+        "dani": 23,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 11
+      }
+    },
+    {
+      "month": "2026-08",
+      "records": 26,
+      "distinct_dates": 11,
+      "by_seed": {
+        "dani": 7,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 19
+      }
+    },
+    {
+      "month": "2026-09",
+      "records": 46,
+      "distinct_dates": 15,
+      "by_seed": {
+        "dani": 31,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 15
+      }
+    },
+    {
+      "month": "2026-10",
+      "records": 39,
+      "distinct_dates": 16,
+      "by_seed": {
+        "dani": 26,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 13
+      }
+    },
+    {
+      "month": "2026-11",
+      "records": 18,
+      "distinct_dates": 8,
+      "by_seed": {
+        "dani": 1,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 17
+      }
+    },
+    {
+      "month": "2026-12",
+      "records": 27,
+      "distinct_dates": 12,
+      "by_seed": {
+        "dani": 0,
+        "marisol": 0,
+        "theo": 0,
+        "priya": 27
+      }
+    }
+  ]
+}

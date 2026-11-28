@@ -1,5 +1,5 @@
 'use strict';
-// The three seeds against the proposal's data checks: validateSeed and the seed
+// The four seeds against the proposal's data checks: validateSeed and the seed
 // schema pass, the balance reconciles to the cent, every notice maps to one
 // toll, a plate's possession intervals do not overlap, the account shape the
 // proposal names, the SHA-256 recorded in dataset.json, and the example
@@ -21,6 +21,7 @@ const STORY = {
   dani: {owner: 'person-dani', stale: ['v-0002', 'v-0003'], temporary: 'v-0005'},
   marisol: {owner: 'person-marisol', stale: ['v-0003'], temporary: 'v-0004'},
   theo: {owner: 'person-theo', stale: ['v-0003'], temporary: 'v-0005'},
+  priya: {owner: 'person-priya', stale: ['v-0002'], temporary: 'v-0004'},
 };
 
 for (const s of SEEDS) {

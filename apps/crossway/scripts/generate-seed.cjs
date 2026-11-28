@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// Deterministic generator for the three seeds. Each opens one account and
+// Deterministic generator for the four seeds. Each opens one account and
 // replays its history through Crossway's own event and tool handlers, so every
 // balance, statement, notice and dispute in a seed was produced by the same
 // rules the App enforces. Random tolls come from a fixed-seed PRNG per seed.
@@ -9,7 +9,8 @@
 //   dani     fixtures/minimal.json (the manifest seed), opened 2025-01-06
 //   marisol  fixtures/seeds/marisol/seed.json, opened 2025-02-03
 //   theo     fixtures/seeds/theo/seed.json, opened 2025-05-12
-//   node scripts/generate-seed.cjs           writes all three
+//   priya    fixtures/seeds/priya/seed.json, opened 2025-01-13 (clock 2026-12-31)
+//   node scripts/generate-seed.cjs           writes all four
 //   node scripts/generate-seed.cjs --check   compares only
 const fs = require('node:fs');
 const path = require('node:path');
@@ -293,6 +294,96 @@ function theoRandom(rand) {
   return out;
 }
 
+// ---- Priya Raman ---------------------------------------------------------------
+// The year-end seed: history from 2025-01-13 through 2026-12-30 and the clock
+// on 2026-12-31, so the delivered data reaches the end of the coverage window.
+// Priya commutes in a Forester. She sold her old Corolla on 2026-11-14 (notice
+// of transfer in Mail m-41206) after taking its tag out, but the car is still
+// listed with tp-0002 assigned to it, and the buyer's drives come back as
+// plate-only notices. Her new CR-V arrived on a dealer temporary plate on
+// 2026-12-12 (Mail m-41257) with no tag, so its tolls are notices too.
+// Auto-replenish still runs on her Mastercard, which expired in 11/2026: one
+// December attempt has failed, and one more failure suspends the account.
+// Her brother Arjun's Discover is on file from a 2025 top-up.
+
+const P_OPENED = '2025-01-13';
+const P_SALE = '2026-11-14';
+const P_BREAK = '2026-12-19';  // last commute before the holiday break
+const P_MAIL = object_id => ({app_id: 'mail', account_id: 'mail-priya', object_id});
+
+function priyaSkeleton() {
+  return account({account_id: 'cw-priya', owner: 'person-priya', name: 'Priya Raman', opened: P_OPENED,
+    cards: [card('card-priya-visa', 'person-priya', 'Priya Raman', 'Visa', '5521', 6, 2029),
+      card('card-priya-mc', 'person-priya', 'Priya Raman', 'Mastercard', '3380', 11, 2026),
+      card('card-arjun-disc', 'person-arjun', 'Arjun Raman', 'Discover', '9046', 4, 2028)],
+    transponders: [['tp-0001', 'CW-2501-90310', 1], ['tp-0002', 'CW-2501-90311', 1]],
+    replenish: {card_id: 'card-priya-mc', amount_cents: 4000, threshold_cents: 1500}});
+}
+
+function priyaScripted() {
+  const call = (time, name, args) => ({time, kind: 'call', name, args});
+  const plate = (time, plaza, plateNo, plan, cls = 1) => ({time, kind: 'toll', read: 'plate', plaza, plate: plateNo, cls, plan});
+  const visa = 'card-priya-visa';
+  return [
+    call(at(P_OPENED, 10, 0), 'vehicles.add', {plate: 'PRM2047', class: 1, label: '2018 Subaru Forester', possession_start: P_OPENED}),
+    call(at(P_OPENED, 10, 1), 'vehicles.add', {plate: 'RMN5512', class: 1, label: '2011 Toyota Corolla', possession_start: P_OPENED}),
+    call(at(P_OPENED, 10, 2), 'transponders.assign', {transponder_id: 'tp-0001', vehicle_id: 'v-0001'}),
+    call(at(P_OPENED, 10, 3), 'transponders.assign', {transponder_id: 'tp-0002', vehicle_id: 'v-0002'}),
+    {time: at(P_OPENED, 10, 4), kind: 'topup', amount: 5000, card: 'card-priya-mc'},
+    call(at(P_OPENED, 10, 5), 'account.replenish.set', {enabled: true, card_id: 'card-priya-mc', amount_cents: 4000, threshold_cents: 1500}),
+    // The tag was on the windshield but not read; the dispute was granted.
+    plate(at('2025-03-08', 12, 41), 'pz-lantern', 'PRM2047', [
+      step(5, 20, 10, {kind: 'dispute', args: {reason: 'transponder_malfunction', transponder_id: 'tp-0001'}}),
+      step(19, 10, 0, {kind: 'decide', grant_if: [{reason: 'transponder_malfunction', evidence: []}]})]),
+    // Arjun borrowed the Forester over Memorial Day weekend and topped up with his own card.
+    {time: at('2025-05-23', 18, 20), kind: 'topup', amount: 3000, card: 'card-arjun-disc'},
+    plate(at('2025-06-21', 15, 9), 'pz-stonebridge', 'RMN5512', [step(12, 19, 15, {kind: 'pay', card: visa})]),
+    call(at('2025-08-15', 9, 0), 'vehicles.add', {plate: 'SWR3316', class: 1, label: 'Rental: 2025 Kia Carnival (SwiftRent)', temporary: true,
+      possession_start: '2025-08-15', possession_end: '2025-08-18', rental_agency_id: 'ag-swiftrent'}),
+    plate(at('2025-08-16', 11, 27), 'pz-kettle', 'SWR3316', [step(9, 20, 0, {kind: 'pay', card: visa})]),
+    // A bill that went to an old address: nobody acted on it.
+    plate(at('2025-09-27', 16, 3), 'pz-quarry', 'RMN5512', []),
+    plate(at('2026-04-11', 9, 52), 'pz-northgate', 'PRM2047', [
+      step(4, 21, 0, {kind: 'dispute', args: {reason: 'not_my_plate', explanation: 'I was at work all day; the Forester never left the garage.'}}),
+      step(22, 10, 0, {kind: 'decide', grant_if: []}),
+      step(27, 18, 40, {kind: 'pay', card: visa})]),
+    // The Corolla's last weeks with Priya: she took the tag out before listing it.
+    plate(at('2026-11-07', 13, 18), 'pz-ferry', 'RMN5512', []),
+    // Sold on 2026-11-14 (notice of transfer in Mail m-41206); still listed here.
+    plate(at('2026-11-22', 17, 36), 'pz-harbor', 'RMN5512', [
+      step(9, 20, 45, {kind: 'dispute', args: {reason: 'sold_or_not_in_possession', transfer_date: P_SALE, evidence: [P_MAIL('m-41206')]}})]),
+    plate(at('2026-12-09', 8, 14), 'pz-millrace', 'RMN5512', []),
+    // The new CR-V on a dealer temporary plate (Mail m-41257), with no tag yet.
+    call(at('2026-12-12', 14, 0), 'vehicles.add', {plate: 'TMP6120', class: 1, label: 'Temporary plate: 2026 Honda CR-V (dealer)', temporary: true,
+      possession_start: '2026-12-12', possession_end: '2027-01-10'}),
+    plate(at('2026-12-14', 7, 49), 'pz-cedar', 'TMP6120', []),
+    // An airport run in the Forester: the toll leaves the balance under the
+    // threshold, and the replenish attempt on the expired Mastercard fails.
+    {time: at('2026-12-18', 17, 5), kind: 'toll', read: 'transponder', transponder: 'tp-0001', plaza: 'pz-lantern', plate: 'PRM2047', cls: 1},
+    plate(at('2026-12-21', 10, 33), 'pz-fallow', 'TMP6120', []),
+    // Over the holidays: the Corolla's buyer again, and a CR-V errand.
+    plate(at('2026-12-27', 15, 22), 'pz-millrace', 'RMN5512', []),
+    plate(at('2026-12-30', 8, 47), 'pz-harbor', 'TMP6120', []),
+  ];
+}
+
+function priyaRandom(rand) {
+  const out = [], pick = list => list[Math.floor(rand() * list.length)];
+  const all = PLAZAS.map(p => p.id);
+  for (let d = C.addDays(P_OPENED, 1); d <= '2026-12-30'; d = C.addDays(d, 1)) {
+    const dow = new Date(`${d}T00:00:00Z`).getUTCDay();
+    if (dow >= 1 && dow <= 5 && d <= P_BREAK && rand() < 0.3) {
+      out.push({time: at(d, 7, 20 + Math.floor(rand() * 35)), kind: 'toll', read: 'transponder', transponder: 'tp-0001',
+        plaza: rand() < 0.65 ? 'pz-harbor' : 'pz-ashford', plate: 'PRM2047', cls: 1});
+    }
+    if (dow === 6 && d <= '2026-10-31' && rand() < 0.25) {
+      out.push({time: at(d, 9 + Math.floor(rand() * 8), Math.floor(rand() * 60)), kind: 'toll', read: 'transponder',
+        transponder: 'tp-0002', plaza: pick(all), plate: 'RMN5512', cls: 1});
+    }
+  }
+  return out;
+}
+
 // ---- Engine ------------------------------------------------------------------
 
 const SEEDS = {
@@ -302,6 +393,8 @@ const SEEDS = {
     opened: M_OPENED, prng: 20250203, skeleton: marisolSkeleton, scripted: marisolScripted, random: marisolRandom},
   theo: {file: 'fixtures/seeds/theo/seed.json', binding: 'fixtures/seeds/theo/binding.json', clock: 'fixtures/seeds/theo/clock.json',
     opened: T_OPENED, prng: 20250512, skeleton: theoSkeleton, scripted: theoScripted, random: theoRandom},
+  priya: {file: 'fixtures/seeds/priya/seed.json', binding: 'fixtures/seeds/priya/binding.json', clock: 'fixtures/seeds/priya/clock.json',
+    opened: P_OPENED, prng: 20250113, skeleton: priyaSkeleton, scripted: priyaScripted, random: priyaRandom},
 };
 
 const read = file => JSON.parse(fs.readFileSync(path.join(root, file), 'utf8'));

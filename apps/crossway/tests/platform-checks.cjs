@@ -149,7 +149,7 @@ async function main() {
     await infra.call('env.reset', {expected_version: (await infra.call('env.snapshot')).version, profile: 'full'});
     ok('dani: 20 reset cycles restore the loaded state hash, audit exported before each', await cycles('dani', 'card-dani-visa', baseline));
     const seedHashes = {dani: baseline};
-    for (const [id, card] of [['marisol', 'card-marisol-visa'], ['theo', 'card-theo-amex']]) {
+    for (const [id, card] of [['marisol', 'card-marisol-visa'], ['theo', 'card-theo-amex'], ['priya', 'card-priya-visa']]) {
       const {snapshot: loadedSeed} = await loadSeed(infra, id, 'full');
       seedHashes[id] = hash(loadedSeed.snapshot);
       ok(`${id}: env.load_seed loads the seed with its own provenance; its hash is the seed file's`, seedHashes[id] === sha(seedFiles(id).data));

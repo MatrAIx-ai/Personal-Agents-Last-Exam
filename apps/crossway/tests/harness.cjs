@@ -17,7 +17,7 @@ const root = path.resolve(__dirname, '..');
 const SEEDS = require('../fixtures/seeds/index.json').seeds;
 const load = file => require(path.join(root, file));
 
-// Seed, binding and clock of one indexed seed (dani, marisol or theo).
+// Seed, binding and clock of one indexed seed (dani, marisol, theo or priya).
 function seedFiles(id) {
   const s = SEEDS.find(x => x.seed_id === id);
   assert.ok(s, 'Known seed ' + id);
