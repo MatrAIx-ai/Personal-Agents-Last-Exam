@@ -242,7 +242,7 @@ function sequencesMarkdown(m) {
     const r1 = (await snap()).data.reservations.find(r => r.id === 'res-0001'), fee = (await snap()).data.payments.at(-1);
     assert.equal(r1.arrival, '2027-06-19');
     await shot('result', 'Preview change again and Confirm change.', 'The receipt stays on the re-rendered page; dates moved; $10.00 charged.',
-      changed.split('\n').slice(0, 2).join(' '), {records: {reservation: r1.id, arrival: r1.arrival, departure: r1.departure, payment: fee.id, amount_cents: fee.amount_cents, notice: (await snap()).data.notices.at(-1).id}});
+      changed.split('\n').map(x => x.trim()).filter(x => x && x !== 'Dismiss').slice(0, 3).join(' '), {records: {reservation: r1.id, arrival: r1.arrival, departure: r1.departure, payment: fee.id, amount_cents: fee.amount_cents, notice: (await snap()).data.notices.at(-1).id}});
     await shot('result', 'Scroll to History and Payments.', 'History shows the change; Payments shows the $10.00 change charge.', 'History: Changed from Site B14, Fri Jun 18 ...; Payments: Charge: change $10.00.', {focus: 'ol.sb-timeline'});
     await advance('2027-06-16T09:00:00-07:00'); await reload('reservation');
     await shot('error', 'Infra moves the clock to Wed Jun 16, 2027, inside the third refund period.', 'The change panel says changes are closed instead of offering a form that fails with outside_change_window.',
@@ -260,7 +260,7 @@ function sequencesMarkdown(m) {
     await page.locator('[data-action=cancel-preview]').click(); await page.locator('[data-action=cancel-confirm]').click(); const cancelled = await flash('success');
     const refund = (await snap()).data.payments.at(-1);
     await shot('result', 'Preview cancellation again and Confirm cancellation.', 'Cancelled; the refund receipt stays visible; the panels are gone; the refund is pending for three days.',
-      cancelled.split('\n').slice(0, 2).join(' '), {records: {reservation: 'res-0002', state: 'cancelled', refund_payment: refund.id, amount_cents: refund.amount_cents, posts_at: refund.posts_at, status: refund.status,
+      cancelled.split('\n').map(x => x.trim()).filter(x => x && x !== 'Dismiss').slice(0, 3).join(' '), {records: {reservation: 'res-0002', state: 'cancelled', refund_payment: refund.id, amount_cents: refund.amount_cents, posts_at: refund.posts_at, status: refund.status,
         mcp_cancel_again: await mcpRefusal('reservations.cancel.preview', {reservation_id: 'res-0002'})}});
     await shot('result', 'Scroll to History and Payments.', 'History "Cancelled, refund $138.00"; Payments lists the pending refund and its posting date.', 'Refund $138.00 pending, posts Sun, May 23, 2027.', {focus: 'ol.sb-timeline'});
     await reset(); await advance('2027-06-30T09:00:00-07:00'); await go('#/reservation/res-0002', 'reservation');
@@ -274,7 +274,7 @@ function sequencesMarkdown(m) {
     await page.locator('[data-action=late-arrival]').click(); await page.locator('dialog[open]').waitFor();
     await shot('intermediate', 'File late-arrival notice.', 'A confirmation dialog says what happens and that it cannot be withdrawn.', 'Dialog "File a late-arrival notice?" with Go back and File notice.');
     await page.locator('[data-dialog=confirm]').click(); const late = await flash('success');
-    await shot('result', 'File notice.', 'The site is held until 12:00 PM the next day; the receipt stays visible.', late.split('\n').slice(0, 2).join(' '),
+    await shot('result', 'File notice.', 'The site is held until 12:00 PM the next day; the receipt stays visible.', late.split('\n').map(x => x.trim()).filter(x => x && x !== 'Dismiss').slice(0, 3).join(' '),
       {records: {late_arrival: (await snap()).data.reservations.find(r => r.id === 'res-0001').late_arrival, notice: (await snap()).data.notices.at(-1).id}});
     await reset(); await advance('2027-06-18T21:30:00-07:00'); await go('#/reservation/res-0001', 'reservation');
     await shot('error', 'After a reset, Infra moves the clock to 9:30 PM on arrival day with no notice filed.', 'The stay reads No-show (computed from the clock on read); no panels; a notice is refused with notice_too_late.',

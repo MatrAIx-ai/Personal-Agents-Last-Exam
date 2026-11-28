@@ -1,0 +1,1037 @@
+{
+  "captured_by": "evidence/capture.cjs",
+  "captured_at": "2026-11-28T03:58:10.937Z",
+  "app": {
+    "id": "switchback",
+    "version": "0.1.0",
+    "commit": "5805478fafddd33183004028ec18f77ef28b440a",
+    "uncommitted_changes_outside_evidence": 0
+  },
+  "host": {
+    "runtime": "1.6.0",
+    "web_host": "runtime/web/server.cjs (public business Web Host)",
+    "runtime_web_tree": "cc48276650aae20ecb4a6277555bdd6e5e9c7b61",
+    "mail": "1.3.0"
+  },
+  "browser": "Chromium 141.0.7390.37 (Playwright, headless)",
+  "node": "v24.10.0",
+  "viewport": "1280x800",
+  "fixtures": {
+    "minimal": {
+      "file": "fixtures/minimal.json",
+      "sha256": "2d1612022bb34d9c4d4521e4d30178e5c685e6781714682c1f74120d38cfb2e4",
+      "clock": "2027-05-20T09:00:00-07:00"
+    },
+    "desert-rivers": {
+      "file": "fixtures/desert-rivers.json",
+      "sha256": "2c0895296ae64ef0c9273d423c62a29beb99650b2e4ca2ed12bee63f8ec7f8e5",
+      "clock": "2026-10-02T07:30:00-07:00"
+    }
+  },
+  "account": "sb-dana (Dana Okafor, synthetic)",
+  "sequences": [
+    {
+      "id": "s1",
+      "title": "Search, availability and site detail",
+      "workflow": "Search and availability",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s1-01-start.png",
+          "page": "#/search",
+          "title": "Find a campsite · Switchback",
+          "action": "Open Search.",
+          "expected": "Campground cards with region, site count, zone, policy and alert badge.",
+          "observed": "Three campground cards; Pine Hollow shows 1 active alert.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "action",
+          "file": "screens/s1-02-action.png",
+          "page": "#/search",
+          "title": "Find a campsite · Switchback",
+          "action": "Choose Cedar Flat, Fri Jun 18 to Sun Jun 20, 2027, no filters; Search sites.",
+          "expected": "Availability matrix equal to switchback.sites.search: every site, each night A/R/H/X/NR/P.",
+          "observed": "6 sites; B14 shows R on both nights (res-0001); the rest A.",
+          "records": {
+            "tool": "switchback.sites.search",
+            "sites": [
+              "cf-B10",
+              "cf-B12",
+              "cf-B14",
+              "cf-C03",
+              "cf-C07",
+              "cf-W02"
+            ],
+            "b14": [
+              "booked",
+              "booked"
+            ]
+          }
+        },
+        {
+          "step": 3,
+          "kind": "result",
+          "file": "screens/s1-03-result.png",
+          "page": "#/search",
+          "title": "Find a campsite · Switchback",
+          "action": "Set Electric 30 amp or more, Vehicle at least 26 ft, Only sites free every night; Search sites.",
+          "expected": "Only sites that match every filter and are free; unrecorded attributes never match.",
+          "observed": "B10, B12 remain.",
+          "records": {
+            "sites": [
+              "cf-B10",
+              "cf-B12"
+            ]
+          }
+        },
+        {
+          "step": 4,
+          "kind": "intermediate",
+          "file": "screens/s1-04-intermediate.png",
+          "page": "#/site/cf-B12/2027-06-25/2027-06-27",
+          "title": "Site B12, loop B · Switchback",
+          "action": "Open Site B12 for Fri Jun 25 to Sun Jun 27, 2027.",
+          "expected": "Attribute cards, night chips, price for the stay, an enabled Hold button.",
+          "observed": "Both nights Available; 2 nights x $42.00 = $84.00; Hold enabled.",
+          "records": {}
+        },
+        {
+          "step": 5,
+          "kind": "error",
+          "file": "screens/s1-05-error.png",
+          "page": "#/site/cf-B14/2027-06-18/2027-06-20",
+          "title": "Site B14, loop B · Switchback",
+          "action": "Open Site B14 for Jun 18 to Jun 20, 2027 (booked by res-0001).",
+          "expected": "Hold disabled with the reason instead of a button that fails with site_taken.",
+          "observed": "Both nights Reserved; \"These nights are not available (reserved). Pick other dates.\"",
+          "records": {
+            "mcp_cart_hold": "site_taken"
+          }
+        },
+        {
+          "step": 6,
+          "kind": "error",
+          "file": "screens/s1-06-error.png",
+          "page": "#/site/cf-B12/2027-05-10/2027-05-12",
+          "title": "Site B12, loop B · Switchback",
+          "action": "Open Site B12 for May 10 to May 12, 2027 (before the clock, Thu May 20, 2027).",
+          "expected": "Nights marked Already past (sites.get past: true); Hold disabled; the tool refuses with night_in_past.",
+          "observed": "Both nights Already past; Hold disabled with the reason.",
+          "records": {
+            "mcp_cart_hold": "night_in_past"
+          }
+        },
+        {
+          "step": 7,
+          "kind": "error",
+          "file": "screens/s1-07-error.png",
+          "page": "#/site/cf-B12/2027-12-01/2027-12-03",
+          "title": "Site B12, loop B · Switchback",
+          "action": "Open Site B12 for Dec 1 to Dec 3, 2027 (beyond the 180-day release).",
+          "expected": "Nights Not yet released; Hold disabled; the tool refuses with not_yet_released.",
+          "observed": "Both nights Not yet released; Hold disabled.",
+          "records": {
+            "mcp_cart_hold": "not_yet_released"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "title": "Hold, preview with saved defaults, back, confirm",
+      "workflow": "Cart hold, preview and confirm",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s2-01-start.png",
+          "page": "#/site/cf-B12/2027-06-25/2027-06-27",
+          "title": "Site B12, loop B · Switchback",
+          "action": "On Site B12 (Jun 25 to Jun 27, 2027) the nights are Available.",
+          "expected": "Hold button enabled.",
+          "observed": "Hold enabled.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "intermediate",
+          "file": "screens/s2-02-intermediate.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Hold these nights for 15 minutes.",
+          "expected": "Checkout opens with the hold receipt kept on screen and the expiry in facility time.",
+          "observed": "Flash \"Site B12 is in your cart ... until Thu, May 20, 2027, 9:15 AM (UTC-07:00)\"; form starts from saved defaults.",
+          "records": {
+            "hold": "hold-0001",
+            "expires_at": "2027-05-20T09:15:00-07:00",
+            "status": "active"
+          }
+        },
+        {
+          "step": 3,
+          "kind": "intermediate",
+          "file": "screens/s2-03-intermediate.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Preview booking with the saved defaults untouched.",
+          "expected": "Preview as sentences: occupant, party, equipment, nights, payment card with cardholder, validity, refund ladder.",
+          "observed": "Card is Visa ending 2290, cardholder Carol Okafor (the saved default); equipment Old trailer 18 ft. No warning: the routine path checks out cleanly.",
+          "records": {
+            "preview": "preview-0001",
+            "card_id": "card-carol-visa",
+            "equipment": "equip-0001"
+          }
+        },
+        {
+          "step": 4,
+          "kind": "cancel",
+          "file": "screens/s2-04-cancel.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Back to details.",
+          "expected": "Preview closes; the hold stays; nothing is booked.",
+          "observed": "Preview gone; hold still active; no reservation added.",
+          "records": {
+            "hold_status": "active"
+          }
+        },
+        {
+          "step": 5,
+          "kind": "intermediate",
+          "file": "screens/s2-05-intermediate.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Choose Visa ending 4417 (Dana Okafor) and preview again.",
+          "expected": "New preview with the chosen card and the total; Confirm and pay offered; Back available.",
+          "observed": "Preview shows Visa ending 4417, total $84.00.",
+          "records": {
+            "preview": "preview-0002",
+            "card_id": "card-dana-visa",
+            "total_cents": 8400
+          }
+        },
+        {
+          "step": 6,
+          "kind": "result",
+          "file": "screens/s2-06-result.png",
+          "page": "#/receipt/res-0028",
+          "title": "Reservation confirmed · Switchback",
+          "action": "Confirm and pay $84.00.",
+          "expected": "Receipt page with the booking receipt kept visible: reservation, stay, amount, card, payment ID.",
+          "observed": "Flash \"Booked.\" with res-0028 and pay-0032; reservations.get shows confirmed.",
+          "records": {
+            "reservation": "res-0028",
+            "payment": "pay-0032",
+            "state_via_mcp": "confirmed",
+            "card_id": "card-dana-visa"
+          }
+        },
+        {
+          "step": 7,
+          "kind": "result",
+          "file": "screens/s2-07-result.png",
+          "page": "#/receipt/res-0028",
+          "title": "Reservation confirmed · Switchback",
+          "action": "Reload the receipt page.",
+          "expected": "The booking persists (the flash is gone after a reload).",
+          "observed": "Receipt for res-0028 still shown, state Confirmed.",
+          "records": {
+            "reservation": "res-0028"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "title": "Booking error paths",
+      "workflow": "Cart hold, preview and confirm",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "error",
+          "file": "screens/s3-01-error.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Hold walk-in Site W02 (no vehicles) and preview with the saved 18 ft trailer.",
+          "expected": "equipment_exceeds_site shown next to the form; no preview created.",
+          "observed": "Inline error \"The equipment does not fit this site. Equipment is 18 ft; the site allows 0 ft.\"",
+          "records": {
+            "code": "equipment_exceeds_site",
+            "previews": 0
+          }
+        },
+        {
+          "step": 2,
+          "kind": "error",
+          "file": "screens/s3-02-error.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Choose No equipment and the expired Mastercard; preview.",
+          "expected": "The preview marks the card expired and Confirm is disabled with the reason; via MCP the confirm is payment_declined.",
+          "observed": "Confirm disabled: \"Mastercard ending 8831 ... has expired. Choose another card and preview again.\"",
+          "records": {
+            "preview": "preview-0001",
+            "mcp_confirm": "payment_declined"
+          }
+        },
+        {
+          "step": 3,
+          "kind": "error",
+          "file": "screens/s3-03-error.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Infra moves the clock 16 minutes (env.advance_time), which changes the state version; preview again from the open page.",
+          "expected": "stale_version with a Refresh control; nothing written.",
+          "observed": "Inline error \"Something changed since this page loaded ... Refresh\".",
+          "records": {
+            "code": "stale_version"
+          }
+        },
+        {
+          "step": 4,
+          "kind": "error",
+          "file": "screens/s3-04-error.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Refresh, then Preview again.",
+          "expected": "hold_expired next to the form.",
+          "observed": "Inline error \"Your hold has expired.\"",
+          "records": {
+            "code": "hold_expired"
+          }
+        },
+        {
+          "step": 5,
+          "kind": "error",
+          "file": "screens/s3-05-error.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Preview, then Infra moves the clock past the hold; Confirm and pay (after Refresh).",
+          "expected": "preview_stale under the preview; nothing booked.",
+          "observed": "Inline error \"That preview is no longer valid.\"",
+          "records": {
+            "code": "preview_stale",
+            "reservations": 27
+          }
+        },
+        {
+          "step": 6,
+          "kind": "error",
+          "file": "screens/s3-06-error.png",
+          "page": "#/site/cf-B10/2027-06-25/2027-06-26",
+          "title": "Site B10, loop B · Switchback",
+          "action": "With Site B10 open on screen, another Agent session holds the same night over MCP; then click Hold.",
+          "expected": "stale_version next to the button with a Refresh control; no second hold.",
+          "observed": "Inline error \"Something changed since this page loaded ... Refresh\".",
+          "records": {
+            "code": "stale_version",
+            "other_session_hold": "hold-0001"
+          }
+        },
+        {
+          "step": 7,
+          "kind": "result",
+          "file": "screens/s3-07-result.png",
+          "page": "#/site/cf-B10/2027-06-25/2027-06-26",
+          "title": "Site B10, loop B · Switchback",
+          "action": "Reload.",
+          "expected": "The night now reads In someone's cart and Hold is disabled with the reason.",
+          "observed": "Night state held; Hold disabled.",
+          "records": {}
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "title": "Change dates with the $10 fee",
+      "workflow": "Modify with change fee",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s4-01-start.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Open reservation res-0001 (Cedar Flat B14, Jun 18 to Jun 20, 2027).",
+          "expected": "Facts as sentences, refund ladder with the current period, change, cancel and late-arrival panels.",
+          "observed": "Current period 1: full refund; changes allowed with a $10.00 fee.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "error",
+          "file": "screens/s4-02-error.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Enter May 10 to May 12, 2027 and Preview change.",
+          "expected": "night_in_past inside the change panel; nothing held.",
+          "observed": "Inline error \"Those nights have already passed.\"",
+          "records": {
+            "code": "night_in_past"
+          }
+        },
+        {
+          "step": 3,
+          "kind": "intermediate",
+          "file": "screens/s4-03-intermediate.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Enter Jun 19 to Jun 21, 2027 and Preview change.",
+          "expected": "Change preview: new stay, price difference, $10.00 fee, charge, card, validity, \"cannot be undone\"; Discard and Confirm.",
+          "observed": "Change fee $10.00, charged now $10.00.",
+          "records": {
+            "preview": "preview-0001",
+            "hold": "hold-0001",
+            "change_fee_cents": 1000
+          }
+        },
+        {
+          "step": 4,
+          "kind": "cancel",
+          "file": "screens/s4-04-cancel.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Discard change.",
+          "expected": "Preview closes, the change hold is released (cart.release), the reservation is unchanged.",
+          "observed": "Hold hold-0001 released; res-0001 still Jun 18 to Jun 20.",
+          "records": {
+            "hold": "hold-0001",
+            "hold_status": "released"
+          }
+        },
+        {
+          "step": 5,
+          "kind": "result",
+          "file": "screens/s4-05-result.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Preview change again and Confirm change.",
+          "expected": "The receipt stays on the re-rendered page; dates moved; $10.00 charged.",
+          "observed": "Change confirmed. res-0001 is now Site B14, Sat, Jun 19 to Mon, Jun 21, 2027 (2 nights). Change fee $10.00; charged now $10.00; refunded $0.00, on Visa ending 4417. The original nights were released.",
+          "records": {
+            "reservation": "res-0001",
+            "arrival": "2027-06-19",
+            "departure": "2027-06-21",
+            "payment": "pay-0032",
+            "amount_cents": 1000,
+            "notice": "sb-notice-0001"
+          }
+        },
+        {
+          "step": 6,
+          "kind": "result",
+          "file": "screens/s4-06-result.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Scroll to History and Payments.",
+          "expected": "History shows the change; Payments shows the $10.00 change charge.",
+          "observed": "History: Changed from Site B14, Fri Jun 18 ...; Payments: Charge: change $10.00.",
+          "records": {}
+        },
+        {
+          "step": 7,
+          "kind": "error",
+          "file": "screens/s4-07-error.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Infra moves the clock to Wed Jun 16, 2027, inside the third refund period.",
+          "expected": "The change panel says changes are closed instead of offering a form that fails with outside_change_window.",
+          "observed": "\"Changes are closed for this stay ...\"",
+          "records": {
+            "mcp_modify_preview": "outside_change_window"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "title": "Cancel with the refund from the ladder",
+      "workflow": "Cancel with refund",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s5-01-start.png",
+          "page": "#/reservation/res-0002",
+          "title": "Lakeshore, Site 04 · Switchback",
+          "action": "Open reservation res-0002 (Lakeshore 04, Jul 2 to Jul 5, 2027; free until three days out, then 50%).",
+          "expected": "The refund if cancelled now and when it changes.",
+          "observed": "\"If you cancel now you get $138.00 back; this changes at Tue, Jun 29, 2027, 6:00 PM (UTC-07:00).\"",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "intermediate",
+          "file": "screens/s5-02-intermediate.png",
+          "page": "#/reservation/res-0002",
+          "title": "Lakeshore, Site 04 · Switchback",
+          "action": "Preview cancellation.",
+          "expected": "Refund amount, card, period, next change and validity as sentences; Keep and Confirm.",
+          "observed": "Refund $138.00 to Visa ending 2290; period 1 of 2.",
+          "records": {
+            "preview": "preview-0001",
+            "refund_cents": 13800
+          }
+        },
+        {
+          "step": 3,
+          "kind": "cancel",
+          "file": "screens/s5-03-cancel.png",
+          "page": "#/reservation/res-0002",
+          "title": "Lakeshore, Site 04 · Switchback",
+          "action": "Keep reservation.",
+          "expected": "Preview closes and nothing is cancelled.",
+          "observed": "res-0002 still Confirmed.",
+          "records": {
+            "state": "confirmed"
+          }
+        },
+        {
+          "step": 4,
+          "kind": "result",
+          "file": "screens/s5-04-result.png",
+          "page": "#/reservation/res-0002",
+          "title": "Lakeshore, Site 04 · Switchback",
+          "action": "Preview cancellation again and Confirm cancellation.",
+          "expected": "Cancelled; the refund receipt stays visible; the panels are gone; the refund is pending for three days.",
+          "observed": "Reservation cancelled. res-0002, Lakeshore Site 04, Fri, Jul 2 to Mon, Jul 5, 2027 is cancelled. $138.00 goes back to Visa ending 2290; refunds post three days after cancelling.",
+          "records": {
+            "reservation": "res-0002",
+            "state": "cancelled",
+            "refund_payment": "pay-0032",
+            "amount_cents": 13800,
+            "posts_at": "2027-05-23T09:00:00-07:00",
+            "status": "pending",
+            "mcp_cancel_again": "already_cancelled"
+          }
+        },
+        {
+          "step": 5,
+          "kind": "result",
+          "file": "screens/s5-05-result.png",
+          "page": "#/reservation/res-0002",
+          "title": "Lakeshore, Site 04 · Switchback",
+          "action": "Scroll to History and Payments.",
+          "expected": "History \"Cancelled, refund $138.00\"; Payments lists the pending refund and its posting date.",
+          "observed": "Refund $138.00 pending, posts Sun, May 23, 2027.",
+          "records": {}
+        },
+        {
+          "step": 6,
+          "kind": "result",
+          "file": "screens/s5-06-result.png",
+          "page": "#/reservation/res-0002",
+          "title": "Lakeshore, Site 04 · Switchback",
+          "action": "After a reset, Infra moves the clock to Wed Jun 30, 2027, past the free period.",
+          "expected": "Refund now is half the total; the ladder marks period 2.",
+          "observed": "\"If you cancel now you get $69.00 back.\"",
+          "records": {
+            "cancel_refund_now_cents": 6900
+          }
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "title": "Late-arrival notice, and a no-show without one",
+      "workflow": "Late arrival and no-show",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s6-01-start.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Infra moves the clock to Fri Jun 18, 2027, 7:00 PM, arrival day; open res-0001.",
+          "expected": "Release time 9:00 PM shown; the late-arrival panel is offered.",
+          "observed": "Released at Fri, Jun 18, 2027, 9:00 PM (UTC-07:00).",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "intermediate",
+          "file": "screens/s6-02-intermediate.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "File late-arrival notice.",
+          "expected": "A confirmation dialog says what happens and that it cannot be withdrawn.",
+          "observed": "Dialog \"File a late-arrival notice?\" with Go back and File notice.",
+          "records": {}
+        },
+        {
+          "step": 3,
+          "kind": "result",
+          "file": "screens/s6-03-result.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "File notice.",
+          "expected": "The site is held until 12:00 PM the next day; the receipt stays visible.",
+          "observed": "Late-arrival notice filed. The site is now held until Sat, Jun 19, 2027, 12:00 PM (UTC-07:00).",
+          "records": {
+            "late_arrival": true,
+            "notice": "sb-notice-0001"
+          }
+        },
+        {
+          "step": 4,
+          "kind": "error",
+          "file": "screens/s6-04-error.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "After a reset, Infra moves the clock to 9:30 PM on arrival day with no notice filed.",
+          "expected": "The stay reads No-show (computed from the clock on read); no panels; a notice is refused with notice_too_late.",
+          "observed": "No-show badge; no change, cancel or late-arrival panel.",
+          "records": {
+            "state_via_mcp": "no_show",
+            "mcp_late_arrival": "notice_too_late"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s7",
+      "title": "An alert is posted, narrowed and lifted",
+      "workflow": "Alerts",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s7-01-start.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Open res-0001 before any event.",
+          "expected": "No alert on the stay.",
+          "observed": "Confirmed, no alert.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "action",
+          "file": "screens/s7-02-action.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Infra applies switchback.alert.posted (electrical outage at B10 and B14 until Jun 20 noon); reload.",
+          "expected": "The stay is marked affected and stays Confirmed with the usual refund rules.",
+          "observed": "Alert box and \"An active alert covers this stay\"; badge Confirmed.",
+          "records": {
+            "event": "evidence-outage",
+            "affected_by_alerts": [
+              "al-0901"
+            ]
+          }
+        },
+        {
+          "step": 3,
+          "kind": "intermediate",
+          "file": "screens/s7-03-intermediate.png",
+          "page": "#/search",
+          "title": "Find a campsite · Switchback",
+          "action": "Search Cedar Flat with Electric 30 amp or more.",
+          "expected": "B10 (30 amp) is left out while its outage is active.",
+          "observed": "Electric results: cf-B12, cf-C07; no B10.",
+          "records": {
+            "sites": [
+              "cf-B12",
+              "cf-C07"
+            ]
+          }
+        },
+        {
+          "step": 4,
+          "kind": "result",
+          "file": "screens/s7-04-result.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Infra applies switchback.alert.updated (window now ends Jun 17 noon, before the stay).",
+          "expected": "The stay is no longer affected.",
+          "observed": "No alert box on res-0001.",
+          "records": {
+            "affected_by_alerts": []
+          }
+        },
+        {
+          "step": 5,
+          "kind": "result",
+          "file": "screens/s7-05-result.png",
+          "page": "#/facility/cedar-flat",
+          "title": "Cedar Flat · Switchback",
+          "action": "Infra applies switchback.alert.cancelled; open Cedar Flat.",
+          "expected": "Alert history shows it lifted with the time.",
+          "observed": "al-0901 \"Lifted Sun, May 23, 2027, 8:00 AM (UTC-07:00)\".",
+          "records": {}
+        }
+      ]
+    },
+    {
+      "id": "s8",
+      "title": "Default card, equipment and companions",
+      "workflow": "Wallet and default card",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s8-01-start.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Open Account and wallet.",
+          "expected": "Three cards with cardholder, expiry and badges; the default is Carol Okafor's Visa.",
+          "observed": "Visa ending 2290 (Carol Okafor) default; Mastercard expired.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "error",
+          "file": "screens/s8-02-error.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Another Agent session saves a companion over MCP; then Make default on Visa ending 4417.",
+          "expected": "stale_version shown under the cards with a Refresh control; the default is unchanged.",
+          "observed": "Inline error \"Something changed since this page loaded.\"",
+          "records": {
+            "code": "stale_version",
+            "default_card_id": "card-carol-visa"
+          }
+        },
+        {
+          "step": 3,
+          "kind": "result",
+          "file": "screens/s8-03-result.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Refresh and Make default again.",
+          "expected": "Default changes; the receipt stays visible.",
+          "observed": "\"Default card changed.\" Visa ending 4417 now default.",
+          "records": {
+            "wallet_list_default": "card-dana-visa"
+          }
+        },
+        {
+          "step": 4,
+          "kind": "result",
+          "file": "screens/s8-04-result.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Add equipment: New trailer, 26 ft, make default.",
+          "expected": "Saved and made default.",
+          "observed": "\"Equipment saved. New trailer, 26 ft trailer is your default equipment.\"",
+          "records": {
+            "default_equipment_id": "equip-0003"
+          }
+        },
+        {
+          "step": 5,
+          "kind": "intermediate",
+          "file": "screens/s8-05-intermediate.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Remove Pat (cousin).",
+          "expected": "A confirmation dialog first.",
+          "observed": "Dialog \"Remove Pat (cousin)?\" with Go back and Remove companion.",
+          "records": {}
+        },
+        {
+          "step": 6,
+          "kind": "result",
+          "file": "screens/s8-06-result.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Remove companion.",
+          "expected": "Removed; the receipt stays visible.",
+          "observed": "\"Companion removed.\"",
+          "records": {
+            "companions": [
+              "comp-0001",
+              "comp-0002"
+            ]
+          }
+        },
+        {
+          "step": 7,
+          "kind": "result",
+          "file": "screens/s8-07-result.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Hold Site B12 and preview with the defaults.",
+          "expected": "Checkout now starts from the new defaults.",
+          "observed": "Preview card Visa ending 4417; equipment New trailer 26 ft.",
+          "records": {
+            "preview": "preview-0001",
+            "card_id": "card-dana-visa",
+            "equipment": "equip-0003"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s9",
+      "title": "A closure cancels the stay; the notice reaches Mail",
+      "workflow": "Closure notice",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s9-01-start.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Open res-0001 (Confirmed).",
+          "expected": "Confirmed with all panels.",
+          "observed": "Confirmed.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "result",
+          "file": "screens/s9-02-result.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "Infra applies switchback.closure.ordered (examples/scenario.json: Cedar Flat closed Jun 15 to Jun 22, road washout); reload.",
+          "expected": "Cancelled by closure with a full refund; no panels to act on.",
+          "observed": "Badge \"Cancelled by closure\"; History \"Cancelled by closure cl-0031, full refund\".",
+          "records": {
+            "event": "ev-0017",
+            "reservation": "res-0001",
+            "state": "closure_cancelled",
+            "refund_payment": "pay-0032",
+            "amount_cents": 5600,
+            "notice": "sb-notice-0001",
+            "mcp_cancel_preview": "already_cancelled"
+          }
+        },
+        {
+          "step": 3,
+          "kind": "result",
+          "file": "screens/s9-03-result.png",
+          "page": "#/facility/cedar-flat",
+          "title": "Cedar Flat · Switchback",
+          "action": "Open Cedar Flat.",
+          "expected": "The closure is shown as a notice with its nights and reason.",
+          "observed": "\"Closed: road washout. Nights from Tue, Jun 15, 2027 up to Tue, Jun 22, 2027 for the whole facility.\"",
+          "records": {}
+        },
+        {
+          "step": 4,
+          "kind": "result",
+          "file": "screens/s9-04-result.png",
+          "page": "#/site/cf-B12/2027-06-18/2027-06-20",
+          "title": "Site B12, loop B · Switchback",
+          "action": "Open Site B12 for Jun 18 to Jun 20.",
+          "expected": "Closed nights; Hold disabled with the reason (site_closed is not offered as a click).",
+          "observed": "Both nights Closed; Hold disabled.",
+          "records": {}
+        },
+        {
+          "step": 5,
+          "kind": "result",
+          "file": "screens/s9-05-result.png",
+          "page": "",
+          "title": "Mail · PALE",
+          "action": "Host side: router.publish delivers the stored notice to Mail 1.3.0; open Mail's own pages and select it.",
+          "expected": "The closure notice is in Dana's inbox with the reservation, nights, refund and posting date on labelled lines.",
+          "observed": "Mail message router-9c13d2430ff8c409655ab73a0a4d0432: \"Closure: Cedar Flat stay res-0001 is cancelled with a full refund\".",
+          "records": {
+            "notice": "sb-notice-0001",
+            "router_publish_request_id": "sb-notice-0001",
+            "cloud_event_id": "sb-notice-0001",
+            "receipt_status": "committed",
+            "receipt_event_id": "router-9c13d2430ff8c409655ab73a0a4d0432",
+            "mail_get_id": "router-9c13d2430ff8c409655ab73a0a4d0432",
+            "mail_account": "mail-dana",
+            "mail_received_at": "2026-11-15T09:00:00-08:00"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "Browse and read-only profiles",
+      "workflow": "Profiles and refusals",
+      "fixture": "minimal",
+      "run": "evidence and evidence-read-only",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "error",
+          "file": "screens/s10-01-error.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Infra resets the run to the browse profile; hold and preview.",
+          "expected": "Previews work; Confirm is not offered and the page says why; a direct confirm over MCP is permission_denied.",
+          "observed": "\"Confirming is not allowed in this run's permission profile.\"",
+          "records": {
+            "profile": "browse",
+            "mcp_confirm": "permission_denied"
+          }
+        },
+        {
+          "step": 2,
+          "kind": "error",
+          "file": "screens/s10-02-error.png",
+          "page": "#/account",
+          "title": "Account and wallet · Switchback",
+          "action": "Open Account and wallet under browse.",
+          "expected": "No Make default button (wallet.set_default is outside the profile); editing equipment and companions stays available.",
+          "observed": "Cards without Make default.",
+          "records": {
+            "mcp_set_default": "permission_denied"
+          }
+        },
+        {
+          "step": 3,
+          "kind": "error",
+          "file": "screens/s10-03-error.png",
+          "page": "#/reservation/res-0001",
+          "title": "Cedar Flat, Site B14 · Switchback",
+          "action": "A fresh run with the read-only scenario profile; open res-0001.",
+          "expected": "No write controls; each panel says the action is not available in this run; a direct write request is refused by the Host.",
+          "observed": "Panels show \"... is not available in this run\"; POST /api/call cancel.preview -> 403.",
+          "records": {
+            "profile": "scenario",
+            "direct_write": {
+              "http": 403,
+              "error": "Business operation not permitted"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "Reservations list, policy page and an unknown reservation",
+      "workflow": "Reservations list and detail",
+      "fixture": "minimal",
+      "run": "evidence",
+      "profile": "browse",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s11-01-start.png",
+          "page": "#/reservations",
+          "title": "Reservations · Switchback",
+          "action": "Open Reservations.",
+          "expected": "Cards lead with campground, site and dates; the reservation ID is secondary; upcoming first.",
+          "observed": "res-0001 and res-0002 first, then past stays.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "result",
+          "file": "screens/s11-02-result.png",
+          "page": "#/policy/cedar-flat",
+          "title": "Policies for Cedar Flat · Switchback",
+          "action": "Open Policies, Cedar Flat.",
+          "expected": "Every rule switchback.policy.get returns, and the refund and change ladder in words.",
+          "observed": "Seven rules and the four-period ladder.",
+          "records": {
+            "rules": 7
+          }
+        },
+        {
+          "step": 3,
+          "kind": "error",
+          "file": "screens/s11-03-error.png",
+          "page": "#/reservation/res-9999",
+          "title": "Not found · Switchback",
+          "action": "Open #/reservation/res-9999.",
+          "expected": "A Not found page replaces the old content and the page title.",
+          "observed": "Title \"Not found · Switchback\"; error not_found.",
+          "records": {
+            "title": "Not found · Switchback"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "Booking at the desert-rivers clock (2026-10-02)",
+      "workflow": "Demo run inside 2025..2026",
+      "fixture": "desert-rivers",
+      "run": "evidence-desert",
+      "profile": "sandbox",
+      "steps": [
+        {
+          "step": 1,
+          "kind": "start",
+          "file": "screens/s12-01-start.png",
+          "page": "#/search",
+          "title": "Find a campsite · Switchback",
+          "action": "Load fixtures/desert-rivers.json at its clock (2026-10-02T07:30:00-07:00); search Agave Wash, Fri Oct 16 to Sun Oct 18, 2026.",
+          "expected": "Matrix with other bookers' weekend claims (R) among available nights.",
+          "observed": "Mixed A and R on the weekend nights.",
+          "records": {}
+        },
+        {
+          "step": 2,
+          "kind": "intermediate",
+          "file": "screens/s12-02-intermediate.png",
+          "page": "#/checkout",
+          "title": "Checkout · Switchback",
+          "action": "Hold Site A01 and preview with Visa ending 1846.",
+          "expected": "Hold and preview times in October 2026.",
+          "observed": "Preview valid until Fri, Oct 2, 2026, 7:45 AM (UTC-07:00).",
+          "records": {}
+        },
+        {
+          "step": 3,
+          "kind": "result",
+          "file": "screens/s12-03-result.png",
+          "page": "#/receipt/res-0024",
+          "title": "Reservation confirmed · Switchback",
+          "action": "Confirm and pay.",
+          "expected": "Booked at the 2026 clock; the receipt stays visible.",
+          "observed": "res-0001 booked 2026-05-09T16:19:00-07:00.",
+          "records": {
+            "reservation": "res-0001",
+            "created_at": "2026-05-09T16:19:00-07:00"
+          }
+        },
+        {
+          "step": 4,
+          "kind": "result",
+          "file": "screens/s12-04-result.png",
+          "page": "#/reservations",
+          "title": "Reservations · Switchback",
+          "action": "Open Reservations.",
+          "expected": "Upcoming October 2026 stays first, history from January 2025 below.",
+          "observed": "Upcoming stays, then 2025-2026 history.",
+          "records": {}
+        }
+      ],
+      "clock": "2026-10-02T07:30:00-07:00"
+    }
+  ],
+  "passed": true,
+  "compression": "Pillow palette quantization, 128 colours",
+  "png_count": 65,
+  "png_bytes": 2684272
+}
