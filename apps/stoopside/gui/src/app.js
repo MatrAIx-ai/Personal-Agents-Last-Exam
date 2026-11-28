@@ -204,7 +204,28 @@ function say(text, error = false) {
   status.textContent = text;
   if (error) status.dataset.error = 'true'; else delete status.dataset.error;
 }
-const errorText = e => `${e.message}${e.code ? ` (${e.code})` : ''}`;
+// Tool messages are written for agents and can name arguments; the page says
+// the same thing in its own words, with dates in the page's format.
+const digitsDate = (y, mo, d, h, mi) => new Date(Date.UTC(+y, mo - 1, +d, +h, +mi));
+function pageDates(text) {
+  return String(text)
+    .replace(/\b(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2})?([+-]\d{2}:\d{2})/g, (m, y, mo, d, h, mi, off) => {
+      const x = digitsDate(y, mo, d, h, mi);
+      return `${fDay(x)}, ${fTime(x)} ${off === zone.offset ? zone.label : 'UTC' + off}`;
+    })
+    .replace(/\b(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}) ([A-Z]{2,5}|UTC[+-]\d{2}:\d{2})/g, (m, y, mo, d, h, mi, z) => {
+      const x = digitsDate(y, mo, d, h, mi);
+      return `${fDay(x)}, ${fTime(x)} ${z}`;
+    });
+}
+const PAGE_ERROR = {
+  notify_required: () => 'Moving the date, time or venue needs a notice. Choose whether to tell the guests or the whole group.',
+  audience_required: () => 'Choose who sees this post: the whole group, the event guests or the hosts.',
+  guest_limit_exceeded: e => e.message.replace(' Pass guests to choose the count.', ' Enter a smaller number of guests to continue.')
+    .replace(/, (r-\d+) for /, ' for '),
+  claim_expired: e => e.message.replace(/ Pass rejoin_waitlist[^.]*\./, ' You can join the back of the waitlist instead.'),
+};
+const errorText = e => pageDates(PAGE_ERROR[e.code] ? PAGE_ERROR[e.code](e) : e.message || 'Something went wrong.');
 let flash = null;   // {hash, text, kind}
 const flashBox = el('div', {id: 'flash'});
 const routeHash = () => (location.hash && location.hash !== '#' ? location.hash : '#/groups');
@@ -229,6 +250,9 @@ function button(label, onclick, attrs = {}, slot = null) {
     if (busy) return;
     busy = true; b.disabled = true;
     if (slot) slot.replaceChildren();
+    // A new action starts clean: an earlier receipt or error would read as its
+    // result. Refresh only reloads the page, so the receipt stays.
+    if (flash && attrs['data-action'] !== 'refresh') { flash = null; showFlash(); }
     try { await onclick(); } catch (e) {
       say(errorText(e), true);
       if (slot) slot.replaceChildren(el('span', {'data-error-code': e.code || 'error'}, errorText(e)));
@@ -440,7 +464,7 @@ async function groupsPage(id) {
     if (can('events.preview_change') && atLeast(id, 'event_host')) actions.append(link('#/change/new/' + id, 'Create an event', {'data-link': 'new-event'}));
   }
   const detail = [el('span', {class: 'kicker'}, 'Group'), el('h2', {'data-group-name': g.id}, g.name), el('p', {class: 'st-lead'}, g.description),
-    el('div', {class: 'st-chips'}, chip(plural(g.member_count, 'member')), chip(member ? `You are ${ROLE[mine.role].toLowerCase() === 'member' ? 'a member' : 'a ' + ROLE[mine.role].toLowerCase()}` : membershipText(mine), member ? 'mine' : ''),
+    el('div', {class: 'st-chips'}, chip(plural(g.member_count, 'member')), chip(member ? `You are ${/^[aeiou]/i.test(ROLE[mine.role]) ? 'an' : 'a'} ${ROLE[mine.role].toLowerCase()}` : membershipText(mine), member ? 'mine' : ''),
       ...[g.requires_approval && 'Organizers approve new members', g.hide_from_member_list && 'Member list hidden', g.hide_rsvps && 'Guest lists hidden'].filter(Boolean).map(t => chip(t)),
       chip(`Times in ${g.time_zone} (UTC${g.utc_offset})`)),
     actions, slot,

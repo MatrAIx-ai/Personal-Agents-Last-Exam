@@ -1,7 +1,7 @@
 {
   "schema_version": "pale.dataset.v1",
   "dataset_id": "stoopside-community-groups",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Maple St. For reproducible checks; not a benchmark task. All records are synthetic: no real group, person, post or message is used, nothing was crawled or collected, and there is no real-data anchor (the approved plan has no collection, and the reviewer confirmed that synthetic data is acceptable). Coverage of 2025-01-01 to 2026-12-31 by month and source is in evidence/coverage.md (scripts/coverage-report.cjs).",
   "record_source_ids": [
     "maple-street"
@@ -10,7 +10,7 @@
     {
       "source_id": "maple-street",
       "kind": "synthetic",
-      "description": "Maple St: a school parents group, a community garden, a block association and a run club. Eastern time (UTC-05:00). The user is Dana Okafor (m-001). People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "description": "Maple St: a school parents group, a community garden, a block association and a run club. Eastern time (UTC-05:00). The user is Dana Okafor (m-001). People, groups, events (titles, venues and descriptions), sheets, key posts, background post texts, replies and Mail threads are written by hand; a fixed-seed generator draws past RSVPs, join dates, event lead times and post dates and authors at waking hours. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
       "uri": null,
       "license": "CC0-1.0",
       "usage": "permitted",
@@ -18,7 +18,7 @@
       "generation": {
         "method": "scripted",
         "tool": "apps/stoopside/scripts/generate-fixture.cjs",
-        "tool_version": "0.3.0",
+        "tool_version": "0.4.0",
         "seed": 20270301,
         "parameters": {
           "provenance": {
@@ -26,11 +26,11 @@
             "real_records": 0,
             "real_anchor": "none: no record is collected from a real website or service, and the reviewer confirmed that synthetic data needs no real anchor",
             "generation": "Deterministic Node scripts (this generator, scripts/fixture-builder.cjs and the specs in scripts/fixtures/). No language model is called when the fixtures are generated; the same scripts always produce byte-identical files (a business test fails if a committed file is out of date).",
-            "language_model_assistance": "The scripts and their hand-written text (people, display names, bios, group descriptions, event titles and venues, key posts, background post texts, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Past RSVPs, background members' join dates, background post dates and authors come from a fixed-seed generator.",
+            "language_model_assistance": "The scripts and their hand-written text (people, display names, bios, group descriptions, event titles, venues and descriptions, key posts, background post texts and replies in scripts/fixtures/text/, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Every background text and event description is used once. A fixed-seed generator draws past RSVPs, background members' join dates, event lead times and RSVP windows, background post dates and authors, with times at waking hours and minute resolution.",
             "human_review": "pending: Rohan Pandey has not yet read every member and event row (see review.status)"
           },
           "fixture": "fixtures/minimal.json",
-          "fixture_sha256": "86fe8a45b202397096e78b329ab02abde3412f4a8590795fa67525fa4a0500ce",
+          "fixture_sha256": "9b526a347f2a49c634e8a2647e377d84430b322dc201cbe2c629d31d4a089b2e",
           "binding": "fixtures/binding.json",
           "binding_sha256": "d142277ba9064803d9079347152c3d4828b99bb22adb72e4a3c57b53e7469cb8",
           "mail_seed": "fixtures/mail/maple-street.json",
@@ -43,8 +43,8 @@
             "groups": 4,
             "members": 64,
             "events": 37,
-            "rsvps": 317,
-            "posts": 123,
+            "rsvps": 307,
+            "posts": 137,
             "sheets": 6,
             "mail_threads": 23,
             "mail_messages": 33
@@ -55,7 +55,7 @@
     {
       "source_id": "riverside",
       "kind": "synthetic",
-      "description": "Riverside: a housing co-op, a kids' soccer team and a book circle. Central time (UTC-06:00). The user is Nadia Haddad (m-001). People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "description": "Riverside: a housing co-op, a kids' soccer team and a book circle. Central time (UTC-06:00). The user is Nadia Haddad (m-001). People, groups, events (titles, venues and descriptions), sheets, key posts, background post texts, replies and Mail threads are written by hand; a fixed-seed generator draws past RSVPs, join dates, event lead times and post dates and authors at waking hours. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
       "uri": null,
       "license": "CC0-1.0",
       "usage": "permitted",
@@ -63,7 +63,7 @@
       "generation": {
         "method": "scripted",
         "tool": "apps/stoopside/scripts/fixture-builder.cjs",
-        "tool_version": "0.3.0",
+        "tool_version": "0.4.0",
         "seed": 20260420,
         "parameters": {
           "provenance": {
@@ -71,11 +71,11 @@
             "real_records": 0,
             "real_anchor": "none: no record is collected from a real website or service, and the reviewer confirmed that synthetic data needs no real anchor",
             "generation": "Deterministic Node scripts (this generator, scripts/fixture-builder.cjs and the specs in scripts/fixtures/). No language model is called when the fixtures are generated; the same scripts always produce byte-identical files (a business test fails if a committed file is out of date).",
-            "language_model_assistance": "The scripts and their hand-written text (people, display names, bios, group descriptions, event titles and venues, key posts, background post texts, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Past RSVPs, background members' join dates, background post dates and authors come from a fixed-seed generator.",
+            "language_model_assistance": "The scripts and their hand-written text (people, display names, bios, group descriptions, event titles, venues and descriptions, key posts, background post texts and replies in scripts/fixtures/text/, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Every background text and event description is used once. A fixed-seed generator draws past RSVPs, background members' join dates, event lead times and RSVP windows, background post dates and authors, with times at waking hours and minute resolution.",
             "human_review": "pending: Rohan Pandey has not yet read every member and event row (see review.status)"
           },
           "fixture": "fixtures/riverside.json",
-          "fixture_sha256": "ac512d9ecbb6916f4dcb41f0c3aaff673303f5200bc1c383fe9603d825bbebf3",
+          "fixture_sha256": "a0561a05e5624db6bdb244b52a3a4ce92307cb0c37dad7d7265d37be7c404fc3",
           "binding": "fixtures/riverside.binding.json",
           "binding_sha256": "f1c499e31450bda4c44a1c7a2ba53825a256337ecc20b9a10c171ea84c657a35",
           "mail_seed": "fixtures/mail/riverside.json",
@@ -88,8 +88,8 @@
             "groups": 3,
             "members": 70,
             "events": 32,
-            "rsvps": 255,
-            "posts": 67,
+            "rsvps": 249,
+            "posts": 63,
             "sheets": 7,
             "mail_threads": 18,
             "mail_messages": 23
@@ -100,7 +100,7 @@
     {
       "source_id": "hillcrest",
       "kind": "synthetic",
-      "description": "Hillcrest: a community choir, a dog park group, a cycling club and the library friends. Pacific time (UTC-08:00). The user is Jonah Feld (m-001). People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "description": "Hillcrest: a community choir, a dog park group, a cycling club and the library friends. Pacific time (UTC-08:00). The user is Jonah Feld (m-001). People, groups, events (titles, venues and descriptions), sheets, key posts, background post texts, replies and Mail threads are written by hand; a fixed-seed generator draws past RSVPs, join dates, event lead times and post dates and authors at waking hours. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
       "uri": null,
       "license": "CC0-1.0",
       "usage": "permitted",
@@ -108,7 +108,7 @@
       "generation": {
         "method": "scripted",
         "tool": "apps/stoopside/scripts/fixture-builder.cjs",
-        "tool_version": "0.3.0",
+        "tool_version": "0.4.0",
         "seed": 20261118,
         "parameters": {
           "provenance": {
@@ -116,11 +116,11 @@
             "real_records": 0,
             "real_anchor": "none: no record is collected from a real website or service, and the reviewer confirmed that synthetic data needs no real anchor",
             "generation": "Deterministic Node scripts (this generator, scripts/fixture-builder.cjs and the specs in scripts/fixtures/). No language model is called when the fixtures are generated; the same scripts always produce byte-identical files (a business test fails if a committed file is out of date).",
-            "language_model_assistance": "The scripts and their hand-written text (people, display names, bios, group descriptions, event titles and venues, key posts, background post texts, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Past RSVPs, background members' join dates, background post dates and authors come from a fixed-seed generator.",
+            "language_model_assistance": "The scripts and their hand-written text (people, display names, bios, group descriptions, event titles, venues and descriptions, key posts, background post texts and replies in scripts/fixtures/text/, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Every background text and event description is used once. A fixed-seed generator draws past RSVPs, background members' join dates, event lead times and RSVP windows, background post dates and authors, with times at waking hours and minute resolution.",
             "human_review": "pending: Rohan Pandey has not yet read every member and event row (see review.status)"
           },
           "fixture": "fixtures/hillcrest.json",
-          "fixture_sha256": "e50e4bf93c71f5746893f655656481845f3e381b902bb7abceffc10e79462d21",
+          "fixture_sha256": "46de476b5d3bd98149dea84307c3ab55a6005023e09c1a77d2689449ae93fdc6",
           "binding": "fixtures/hillcrest.binding.json",
           "binding_sha256": "f9a2acc7e4e5816e631c9ae7d08698b2957f9e467dc16601bbb242ba9312b491",
           "mail_seed": "fixtures/mail/hillcrest.json",
@@ -133,8 +133,8 @@
             "groups": 4,
             "members": 82,
             "events": 39,
-            "rsvps": 318,
-            "posts": 125,
+            "rsvps": 298,
+            "posts": 129,
             "sheets": 7,
             "mail_threads": 19,
             "mail_messages": 21

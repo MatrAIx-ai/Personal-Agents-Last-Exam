@@ -216,13 +216,8 @@ module.exports = {
     {id: 'sw-0021', sheet_id: 's-0042', from: 29, to: 1, give_slot: 'mulch', want_slot: 'coffee', state: 'proposed',
       proposed_at: '2026-11-17T20:00:00-08:00', expires_at: '2026-11-19T20:00:00-08:00', decided_at: null},
   ],
-  texts: {
-    [H]: ['Rehearsal is in the side chapel this week.', 'Sheet music for the spring program is in the folders.', 'Please practice measures 40 to 60 at home.', 'Lost: a black folder with alto parts.', 'Sopranos, sectional at 6:30 before rehearsal.', 'Recordings from Tuesday are on the shared page.', 'Great energy at rehearsal tonight.', 'The piano was tuned on Monday.', 'Concert dress is black on black.', 'Carpool from the north end has two seats.', 'Welcome to our new tenors.', 'Thank you all for a wonderful concert.'],
-    [D]: ['The water fountain is fixed.', 'Gate latch is sticky, push hard.', 'Puddles by the benches, wear boots.', 'Bag dispenser is restocked.', 'Small dog area is closed for reseeding.', 'Found a red collar near the gate.', 'Please fill the holes your dogs dig.', 'Early morning crowd is lovely.', 'City mows on Wednesday mornings.', 'Mind the ice by the north gate.', 'New bench donated by the Mosses.', 'Happy holidays from the dog park.'],
-    [Y]: ['Sunday ride starts at 8 sharp.', 'Road work on Ridge Road, detour posted.', 'Lights on for the evening ride.', 'Flat tire clinic at the shop on Thursday.', 'Club jerseys are in.', 'Great pace line this morning.', 'Rain plan: indoor trainer session.', 'Gravel route is muddy, bring fenders.', 'Who is in for the century?', 'Lakeshore loop has new pavement.', 'Hydrate, it will be hot.', 'Season wrap party in October.'],
-    [L]: ['New picture books are on the cart.', 'Book sale donations go in the bins by the desk.', 'Teen reading club meets Thursdays.', 'Author talk sign-ups are open.', 'The returns slot is jammed, use the desk.', 'Story time moves to the big room this month.', 'Volunteers needed to sort donations.', 'Library closes early on Friday.', 'Thank you for a great book sale.', 'Summer reading logs are due.', 'Large print section has moved.', 'Happy holidays from the Friends.'],
-  },
-  replies: ['Thanks!', 'Good to know.', 'On it.', 'Thank you for the heads-up.', 'I can help.'],
+  // Background texts, replies and past-event descriptions: fixtures/text/hillcrest.json.
+  ...(({texts, replies, descriptions}) => ({texts, replies, descriptions}))(require('./text/hillcrest.json')),
   posts: [
     [D, 4, '2025-11-02T10:00:00-08:00', 'Welcome Archibald (Archie here) and his beagle, Pickle.'],
     [D, 10, '2026-05-10T09:30:00-08:00', 'Thanks to Augustus (Gus here) for the new water bowls by the gate.'],

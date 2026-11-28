@@ -16,10 +16,10 @@ Maple St is the full-window source: its history runs from January 2025 to its cl
 
 | Source | Kind | Clock | Dated records | History in window | Distinct dates | Earliest | Latest | Distinct dates in own offset | Empty months |
 | :--- | :--- | :--- | ---: | ---: | ---: | :--- | :--- | ---: | :--- |
-| maple-street | synthetic | 2027-03-01T09:00:00-05:00 | 1006 | 595 | 356 | 2025-01-06 | 2026-12-31 | 356 (`Etc/GMT+5`) | none |
-| riverside | synthetic | 2026-04-20T09:00:00-06:00 | 873 | 866 | 274 | 2025-01-07 | 2026-04-19 | 276 (`Etc/GMT+6`) | 2026-05, 2026-06, 2026-07, 2026-08, 2026-09, 2026-10, 2026-11, 2026-12 |
-| hillcrest | synthetic | 2026-11-18T09:00:00-08:00 | 1031 | 1023 | 393 | 2025-01-08 | 2026-11-17 | 395 (`Etc/GMT+8`) | 2026-12 |
-| **global (deduplicated)** | synthetic | | | | **585** | 2025-01-06 | 2026-12-31 | | none |
+| maple-street | synthetic | 2027-03-01T09:00:00-05:00 | 1026 | 594 | 358 | 2025-01-04 | 2026-12-26 | 358 (`Etc/GMT+5`) | none |
+| riverside | synthetic | 2026-04-20T09:00:00-06:00 | 891 | 884 | 276 | 2025-01-05 | 2026-04-19 | 275 (`Etc/GMT+6`) | 2026-05, 2026-06, 2026-07, 2026-08, 2026-09, 2026-10, 2026-11, 2026-12 |
+| hillcrest | synthetic | 2026-11-18T09:00:00-08:00 | 989 | 981 | 356 | 2025-01-06 | 2026-11-17 | 351 (`Etc/GMT+8`) | 2026-12 |
+| **global (deduplicated)** | synthetic | | | | **582** | 2025-01-04 | 2026-12-26 | | none |
 
 ## Distinct history dates by month
 
@@ -27,34 +27,34 @@ Scheduled event starts after a fixture's clock are shown in brackets and are not
 
 | Month | maple-street | riverside | hillcrest | global |
 | :--- | ---: | ---: | ---: | ---: |
-| 2025-01 | 20 | 17 | 20 | 25 |
-| 2025-02 | 18 | 19 | 19 | 26 |
-| 2025-03 | 23 | 15 | 20 | 30 |
-| 2025-04 | 21 | 18 | 20 | 29 |
-| 2025-05 | 22 | 22 | 21 | 31 |
-| 2025-06 | 14 | 17 | 22 | 28 |
-| 2025-07 | 8 | 13 | 17 | 26 |
-| 2025-08 | 13 | 15 | 18 | 27 |
-| 2025-09 | 18 | 21 | 22 | 29 |
-| 2025-10 | 16 | 14 | 18 | 26 |
-| 2025-11 | 8 | 17 | 17 | 27 |
-| 2025-12 | 16 | 10 | 11 | 22 |
-| 2026-01 | 9 | 20 | 10 | 25 |
-| 2026-02 | 10 | 19 | 11 | 25 |
-| 2026-03 | 20 | 22 | 16 | 29 |
-| 2026-04 | 13 | 15 [3] | 20 | 25 |
-| 2026-05 | 11 | 0 [3] | 13 | 17 |
-| 2026-06 | 17 | 0 [1] | 22 | 25 |
-| 2026-07 | 10 | 0 | 10 | 16 |
-| 2026-08 | 10 | 0 | 13 | 21 |
-| 2026-09 | 17 | 0 | 19 | 22 |
-| 2026-10 | 23 | 0 | 17 | 26 |
-| 2026-11 | 8 | 0 | 17 [3] | 17 |
-| 2026-12 | 11 | 0 | 0 [5] | 11 |
+| 2025-01 | 8 | 22 | 20 | 27 |
+| 2025-02 | 25 | 15 | 16 | 27 |
+| 2025-03 | 28 | 15 | 20 | 30 |
+| 2025-04 | 25 | 20 | 22 | 30 |
+| 2025-05 | 24 | 22 | 16 | 30 |
+| 2025-06 | 13 | 11 | 21 | 27 |
+| 2025-07 | 13 | 14 | 13 | 26 |
+| 2025-08 | 10 | 24 | 16 | 28 |
+| 2025-09 | 16 | 21 | 17 | 29 |
+| 2025-10 | 15 | 17 | 17 | 30 |
+| 2025-11 | 7 | 14 | 15 | 23 |
+| 2025-12 | 12 | 12 | 9 | 17 |
+| 2026-01 | 10 | 15 | 12 | 23 |
+| 2026-02 | 8 | 17 | 11 | 23 |
+| 2026-03 | 16 | 20 | 16 | 26 |
+| 2026-04 | 16 | 17 [3] | 20 | 26 |
+| 2026-05 | 15 | 0 [3] | 9 | 19 |
+| 2026-06 | 18 | 0 [1] | 15 | 26 |
+| 2026-07 | 12 | 0 | 11 | 20 |
+| 2026-08 | 13 | 0 | 15 | 23 |
+| 2026-09 | 14 | 0 | 12 | 19 |
+| 2026-10 | 15 | 0 | 16 | 23 |
+| 2026-11 | 13 | 0 | 17 [3] | 18 |
+| 2026-12 | 12 | 0 | 0 [5] | 12 |
 
 ## Gaps and reasons
 
-- **maple-street:** no empty month. Scheduled after the clock: 0 event starts on 0 dates in the window. Scenario: 16 staged events (0 in the window, 2027-03-01T10:00:00-05:00 to 2027-03-09T10:00:00-05:00), applied by Infra and not counted.
+- **maple-street:** no empty month. Months with fewer than 8 distinct dates: 2025-11 (7). Scheduled after the clock: 0 event starts on 0 dates in the window. Scenario: 16 staged events (0 in the window, 2027-03-01T10:00:00-05:00 to 2027-03-09T10:00:00-05:00), applied by Infra and not counted.
 - **riverside:** no history in 2026-05 to 2026-12 (8 months), because the fixture's clock is 2026-04-20 and a fixture has no history after its clock. Scheduled after the clock: 7 event starts on 7 dates in the window. Scenario: 16 staged events (16 in the window, 2026-04-20T12:00:00-06:00 to 2026-05-01T10:00:00-06:00), applied by Infra and not counted.
 - **hillcrest:** no history in 2026-12, because the fixture's clock is 2026-11-18 and a fixture has no history after its clock. Scheduled after the clock: 8 event starts on 8 dates in the window. Scenario: 17 staged events (17 in the window, 2026-11-18T12:00:00-08:00 to 2026-11-30T09:00:00-08:00), applied by Infra and not counted.
 
@@ -99,13 +99,13 @@ Scheduled event starts after a fixture's clock are shown in brackets and are not
 
 | Source | Seed | Binding | Mail seed | Scenario |
 | :--- | :--- | :--- | :--- | :--- |
-| maple-street | `fixtures/minimal.json` `86fe8a45b202` | `fixtures/binding.json` `d142277ba906` | `fixtures/mail/maple-street.json` `beaabd6d4d83` | `examples/scenarios/maple-street.json` `f849998a0f84` |
-| riverside | `fixtures/riverside.json` `ac512d9ecbb6` | `fixtures/riverside.binding.json` `f1c499e31450` | `fixtures/mail/riverside.json` `7200b636917f` | `examples/scenarios/riverside.json` `a999dcadcb73` |
-| hillcrest | `fixtures/hillcrest.json` `e50e4bf93c71` | `fixtures/hillcrest.binding.json` `f9a2acc7e4e5` | `fixtures/mail/hillcrest.json` `32ba3336b591` | `examples/scenarios/hillcrest.json` `a148a87f2b92` |
+| maple-street | `fixtures/minimal.json` `9b526a347f2a` | `fixtures/binding.json` `d142277ba906` | `fixtures/mail/maple-street.json` `beaabd6d4d83` | `examples/scenarios/maple-street.json` `f849998a0f84` |
+| riverside | `fixtures/riverside.json` `a0561a05e562` | `fixtures/riverside.binding.json` `f1c499e31450` | `fixtures/mail/riverside.json` `7200b636917f` | `examples/scenarios/riverside.json` `a999dcadcb73` |
+| hillcrest | `fixtures/hillcrest.json` `46de476b5d3b` | `fixtures/hillcrest.binding.json` `f9a2acc7e4e5` | `fixtures/mail/hillcrest.json` `32ba3336b591` | `examples/scenarios/hillcrest.json` `a148a87f2b92` |
 
 Full SHA-256 values are in `coverage.json` and `contribution/dataset.json`.
 
 ## Representative content and loading
 
 - Loading: `tests/replay-checks.cjs` loads each fixture through Infra `env.load_seed` under real Core and each companion Mail seed into Mail 1.3.0, then reads them back with `mail.get`. `tests/fixtures.test.cjs` reads every reachable object of every fixture through the Agent tools.
-- Representative records: Maple St `r-0139` (Dana's RSVP to the Pi Day bake sale, 2026-03-07, guests 1, children 2) and `p-0305`; Riverside soccer families RSVP of 2025-05-08; Hillcrest library friends RSVP of 2025-11-28. See the App README, section Data.
+- Representative records: Maple St `r-0125` (Dana's RSVP to the Pi Day bake sale, 2026-03-07, guests 1, children 2) and `p-0305`; Riverside soccer families RSVP of 2025-05-08; Hillcrest library friends RSVP of 2025-11-28. See the App README, section Data.

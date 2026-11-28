@@ -229,3 +229,22 @@ test('the committed coverage report (evidence/coverage.json and .md) matches a f
     assert.equal(ds.provenance.kind, 'synthetic');
   }
 });
+
+// ---- Realistic history (docs/submission-evidence.md section 3) ------------------
+// The generated layer must not read as templated: people act at waking hours
+// with minute resolution, events are posted at varied lead times, and no post
+// text or event description repeats.
+for (const fx of FIXTURES) {
+  test(`realistic history: ${fx.key} times, lead times and texts are not templated`, () => {
+    const d = fx.data, hour = s => Number(s.slice(11, 13)), share = (xs, p) => xs.filter(p).length / xs.length;
+    for (const [what, xs] of [['RSVPs', d.rsvps.map(r => r.created_at)], ['joins', d.memberships.map(m => m.created_at)], ['posts', d.posts.map(p => p.created_at)]]) {
+      assert.ok(share(xs, s => s.slice(14, 16) === '00') < 0.2, `${fx.key}: too many ${what} on the hour`);
+      assert.ok(share(xs, s => hour(s) < 7) < 0.03, `${fx.key}: too many ${what} between midnight and 7 am`);
+    }
+    const leads = new Set(d.events.map(e => Math.round((Date.parse(e.start) - Date.parse(e.created_at)) / 864e5)));
+    assert.ok(leads.size >= 12, `${fx.key}: only ${leads.size} distinct event lead times`);
+    assert.equal(new Set(d.events.map(e => e.description)).size, d.events.length, `${fx.key}: repeated event description`);
+    assert.equal(new Set(d.posts.map(p => p.text)).size, d.posts.length, `${fx.key}: repeated post text`);
+    assert.ok(!d.events.some(e => /All members welcome\.$/.test(e.description)), `${fx.key}: templated description`);
+  });
+}

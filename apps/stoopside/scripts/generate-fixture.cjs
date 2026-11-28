@@ -2,8 +2,11 @@
 'use strict';
 // Deterministic generator for fixtures/minimal.json and fixtures/binding.json.
 // The people, groups, upcoming events, sheets and the posts the example checks
-// rely on are written out below by hand; past RSVPs and the monthly background
-// posts are drawn from a fixed-seed generator. Every date is on or after
+// rely on are written out below by hand, and the background texts, replies and
+// past-event descriptions are in fixtures/text/maple-street.json; past RSVPs,
+// join dates, event lead times and background post dates and authors are drawn
+// from a fixed-seed generator at waking hours (fixture-builder.cjs timeKit).
+// Every date is on or after
 // 2025-01-01 and the clock starts 2027-03-01 09:00 EST.
 // Run: node scripts/generate-fixture.cjs        (writes the fixtures)
 //      node scripts/generate-fixture.cjs --check (fails on drift)
@@ -37,7 +40,7 @@ const OFF = '-05:00';
 const at = (date, time = '09:00') => `${date}T${time}:00${OFF}`;
 const ms = s => Date.parse(s);
 const iso = t => new Date(t - 5 * 3600000).toISOString().slice(0, 19) + OFF;
-const DAY = 86400000;
+const DAY = 86400000, HOUR = 3600000;
 const pad = (n, w = 4) => String(n).padStart(w, '0');
 
 // ---- People and members ------------------------------------------------------
@@ -164,16 +167,24 @@ const USER_PAST = [
   [B, '2026-06-27', 1, 2, '2026-06-14T10:20'], [B, '2027-01-23', 0, 0, '2027-01-12T21:30'],
 ];
 
-// ---- Background post texts -------------------------------------------------
-const TEXT = {
-  [P]: ['Lost and found is overflowing again. Everything unclaimed goes to donation on Friday.', 'Thanks to everyone who sent snacks for the field trip.', 'Reminder: early dismissal this Wednesday.', 'Does anyone have a spare recorder for the music unit?', 'The school garden needs watering helpers over the break.', 'Picture day forms are due Monday.', 'Carpool from Elm Ave has two open seats on Thursdays.', 'The art room is collecting egg cartons and corks.', 'Book fair volunteers: the sign-up is on the office door.', 'Our class is short two chaperones for the museum trip.', 'Please label lunch boxes, we have five identical blue ones.', 'Thank you for a great year, everyone.'],
-  [G]: ['Water is back on at the north spigot.', 'Compost bins 2 and 3 are ready to turn.', 'Someone left a trowel by plot 6.', 'The rain barrel overflowed, I moved the hose.', 'Aphids on the kale again. Soapy water works.', 'Tool shed code changes on the first of the month.', 'Free tomato cages by the gate.', 'Please close the gate, the rabbits are back.', 'The bees are out, mind the hive corner.', 'Mulch delivery is coming Saturday morning.', 'Pumpkins are going strong in plot 9.', 'Garlic is in. See you in spring.'],
-  [B]: ['Street sweeping moved to Thursday this month.', 'Package left at 14 Maple by mistake, come grab it.', 'The streetlight at the corner is out, I reported it.', 'Free bookshelf on the curb at 31 Maple.', 'Watch for the new speed bump near the school.', 'Recycling pickup is a day late this week.', 'Who has a ladder I could borrow Saturday?', 'The city tree crew is pruning the maples next week.', 'Please keep the hydrant clear when parking.', 'Snow shovels are in the shared bin by the lot.', 'Lovely block party, thank you all.', 'Leaf bags are at the corner for anyone who needs them.'],
-  [RUN]: ['Easy 5 miles Sunday at 8, meet at the boathouse.', 'Track is closed Tuesday for the school meet.', 'Ice on the north loop, take the river path.', 'Who is in for the turkey trot?', 'New route posted for the long run.', 'Lost a glove near the bridge, black with a reflective strip.', 'Great pace group this morning.', 'Hydration stop at mile 3 is back.', 'Hill repeats moved to Thursday.', 'Shoe swap at the next meetup.', 'The park opens the east gate at 6 now.', 'Welcome to the new runners this month.'],
-};
+// ---- Hand-written text -------------------------------------------------------
+// Background post texts (one per group, month of year and year covered), the
+// reply pool and the past events' descriptions live in fixtures/text/.
+const TEXT = require('./fixtures/text/maple-street.json');
 
 function build() {
   rand = rng(20270301);
+  const K = require('./fixture-builder.cjs').timeKit(() => rand(), -5 * 3600000);
+  const textUse = {};
+  let replyPool = [];
+  // Hand-written RSVP orders keep their order; the times are spread over the
+  // same span at waking hours instead of fixed steps.
+  const spreads = {};
+  const spread = (first, n, stepH) => spreads[first + '|' + n + '|' + stepH] ||= (() => {
+    const lo = ms(first), hi = lo + Math.max(1, n - 1) * stepH * HOUR;
+    return Array.from({length: n}, () => K.between(lo - 1, hi)).sort((a, b) => a - b);
+  })();
+  const replyText = () => { if (!replyPool.length) replyPool = shuffle(TEXT.replies); return replyPool.pop(); };
   const data = {account_id: 'st-dana', owner_person_id: 'person-dana-okafor', user_member_id: 'm-001', next_seq: 1,
     groups: [], members: [], memberships: [], events: [], rsvps: [], posts: [], digests: [], sheets: [], swaps: [],
     deliveries: [], previews: [], notices: []};
@@ -187,17 +198,23 @@ function build() {
   }
   const joinDay = {};
   for (const [n, everyday, display, bio, groups] of PEOPLE) {
-    const id = mid(n), first = at('2025-01-' + pad(6 + (n % 20), 2), '20:00');
+    const id = mid(n);
+    // Founders join the day the group is made; others over the first months,
+    // at waking-hours times.
+    const joins = Object.entries(groups).map(([g, role]) => {
+      let joined = role === 'organizer' ? at(GROUPS.find(x => x.id === g).created, '12:30')
+        : iso(K.awakeOn(ms(at('2025-02-01', '12:00')) + K.int(0, 119) * DAY));
+      if (n === 41) joined = at('2026-05-09', '10:00');   // Bea moved here in spring 2026
+      if (n === 27 && g === B) joined = at('2025-08-02', '11:00');
+      return [g, role, joined];
+    });
+    const firstJoin = Math.min(...joins.map(j => ms(j[2])));
     data.members.push({id, display_name: display, bio, email: everyday.toLowerCase().replace(' ', '.') + '@example.net',
-      person_id: n === 1 ? 'person-dana-okafor' : personId(everyday), created_at: first});
-    for (const [g, role] of Object.entries(groups)) {
-      // Founders join the day the group is made; others over the first months.
-      let joined = role === 'organizer' ? GROUPS.find(x => x.id === g).created + 'T12:30' : '2025-0' + (2 + (n % 4)) + '-' + pad(10 + (n % 15), 2) + 'T19:00';
-      if (n === 41) joined = '2026-05-09T10:00';   // Bea moved here in spring 2026
-      if (n === 27 && g === B) joined = '2025-08-02T11:00';
+      person_id: n === 1 ? 'person-dana-okafor' : personId(everyday), created_at: iso(K.between(firstJoin - 3 * DAY, firstJoin - HOUR))});
+    for (const [g, role, joined] of joins) {
       joinDay[g + '|' + id] = joined;
       const msRow = {id: 'ms-' + pad(data.memberships.length + 1), group_id: g, member_id: id, state: 'member',
-        role: role === 'organizer' ? 'organizer' : 'member', created_at: joined + ':00' + OFF, revisions: []};
+        role: role === 'organizer' ? 'organizer' : 'member', created_at: joined, revisions: []};
       data.memberships.push(msRow);
       fact(msRow.created_at, seq => msRow.revisions.push({seq, at: msRow.created_at, state: 'member', role: msRow.role, reason: 'joined'}));
       if (role !== 'member' && role !== 'organizer') {
@@ -242,9 +259,13 @@ function build() {
   const pastEvents = [...PAST].sort((a, b) => a[1].localeCompare(b[1]) || a[0].localeCompare(b[0]));
   for (const [g, date, start, hours, title, venue, capacity, guestLimit] of pastEvents) {
     const s = at(date, start), host = roleAt(g);
-    const e = {id: 'e-' + pad(eventNo++), group_id: g, title, description: `${title}. All members welcome.`, start: s,
-      end: iso(ms(s) + hours * 3600000), venue, capacity, guest_limit: guestLimit, rsvp_open: iso(ms(s) - 21 * DAY),
-      rsvp_close: iso(ms(s) - DAY), host_member_ids: [host], state: 'published', created_by: host, created_at: iso(ms(s) - 23 * DAY), revisions: []};
+    const mineAt = USER_PAST.find(([ug, ud]) => ug === g && ud === date);
+    const w = K.eventWindow(ms(s), capacity, mineAt && ms(at(mineAt[4].slice(0, 10), mineAt[4].slice(11))));
+    const description = TEXT.descriptions[g + '|' + date];
+    if (!description) throw new Error(`no description for ${g} ${date} ${title}`);
+    const e = {id: 'e-' + pad(eventNo++), group_id: g, title, description, start: s,
+      end: iso(ms(s) + hours * 3600000), venue, capacity, guest_limit: guestLimit, rsvp_open: iso(w.open),
+      rsvp_close: iso(w.close), host_member_ids: [host], state: 'published', created_by: host, created_at: iso(w.created), revisions: []};
     addEvent(e, e.created_at);
     const pool = members(g, e.rsvp_open).filter(m => m !== 'm-001');
     const count = Math.min(pool.length, 5 + Math.floor(rand() * 8));
@@ -255,7 +276,7 @@ function build() {
       const children = yes && g === P ? Math.floor(rand() * 3) : 0;
       if (yes && used + 1 + guests + children > capacity) continue;
       if (yes) used += 1 + guests + children;
-      const when = iso(ms(e.rsvp_open) + Math.floor(rand() * 18) * DAY + 3600000 * (8 + Math.floor(rand() * 12)));
+      const when = iso(K.answerTime(w, ms(at('2027-03-01'))));
       addRsvp(e, m, yes ? 'yes' : 'no', guests, children, when);
     }
     const mine = USER_PAST.find(([ug, ud]) => ug === g && ud === date);
@@ -284,7 +305,7 @@ function build() {
   // e-0117: full (24 places), then a waitlist of three.
   const potluck = [['m-005', 0, 0], ['m-009', 1, 0], ['m-002', 0, 2], ['m-008', 0, 0], ['m-016', 1, 0], ['m-022', 0, 0], ['m-023', 0, 2],
     ['m-027', 0, 0], ['m-029', 0, 0], ['m-035', 1, 0], ['m-038', 0, 0], ['m-039', 1, 0], ['m-045', 0, 0], ['m-047', 0, 0], ['m-051', 1, 0]];
-  potluck.forEach(([m, g, c], i) => addRsvp(e117, m, 'yes', g, c, iso(ms(at('2027-02-15', '10:00')) + i * 7 * 3600000)));
+  potluck.forEach(([m, g, c], i, all) => addRsvp(e117, m, 'yes', g, c, iso(spread(at('2027-02-15', '10:00'), all.length, 7)[i])));
   for (const m of ['m-053', 'm-056', 'm-063']) addRsvp(e117, m, 'no', 0, 0, at('2027-02-19', '12:00'));
   rsvpNo = 451;
   addRsvp(e117, 'm-001', 'waitlist', 1, 0, at('2027-02-20', '19:30'));
@@ -293,16 +314,16 @@ function build() {
   rsvpNo = 470;
   // e-0121: some families already in.
   [['m-002', 1, 2], ['m-010', 1, 1], ['m-004', 1, 2], ['m-014', 1, 1], ['m-017', 1, 3], ['m-025', 0, 2], ['m-028', 1, 2], ['m-040', 1, 1], ['m-055', 1, 2]]
-    .forEach(([m, g, c], i) => addRsvp(e121, m, 'yes', g, c, iso(ms(at('2027-02-20', '12:00')) + i * 11 * 3600000)));
-  [['m-002', 0, 0], ['m-004', 0, 0], ['m-043', 0, 0], ['m-028', 0, 0]].forEach(([m], i) => addRsvp(e125, m, 'yes', 0, 0, iso(ms(at('2027-02-25', '12:00')) + i * 9 * 3600000)));
-  [['m-005', 0, 0], ['m-035', 0, 0], ['m-029', 1, 0]].forEach(([m, g], i) => addRsvp(e127, m, 'yes', g, 0, iso(ms(at('2027-02-27', '12:00')) + i * 5 * 3600000)));
-  [['m-007', 0, 0], ['m-019', 0, 0], ['m-030', 0, 0], ['m-038', 0, 0], ['m-042', 0, 0], ['m-048', 0, 0]].forEach(([m], i) => addRsvp(e118, m, 'yes', 0, 0, iso(ms(at('2027-02-20', '10:00')) + i * 13 * 3600000)));
+    .forEach(([m, g, c], i, all) => addRsvp(e121, m, 'yes', g, c, iso(spread(at('2027-02-20', '12:00'), all.length, 11)[i])));
+  [['m-002', 0, 0], ['m-004', 0, 0], ['m-043', 0, 0], ['m-028', 0, 0]].forEach(([m], i, all) => addRsvp(e125, m, 'yes', 0, 0, iso(spread(at('2027-02-25', '12:00'), all.length, 9)[i])));
+  [['m-005', 0, 0], ['m-035', 0, 0], ['m-029', 1, 0]].forEach(([m, g], i, all) => addRsvp(e127, m, 'yes', g, 0, iso(spread(at('2027-02-27', '12:00'), all.length, 5)[i])));
+  [['m-007', 0, 0], ['m-019', 0, 0], ['m-030', 0, 0], ['m-038', 0, 0], ['m-042', 0, 0], ['m-048', 0, 0]].forEach(([m], i, all) => addRsvp(e118, m, 'yes', 0, 0, iso(spread(at('2027-02-20', '10:00'), all.length, 13)[i])));
   // e-0130: the planning meeting; Wren (m-027) has not joined it.
-  ['m-006', 'm-001', 'm-012', 'm-014', 'm-016', 'm-018'].forEach((m, i) => addRsvp(e130, m, 'yes', 0, 0, iso(ms(at('2027-02-25', '12:00')) + i * 6 * 3600000)));
+  ['m-006', 'm-001', 'm-012', 'm-014', 'm-016', 'm-018'].forEach((m, i, all) => addRsvp(e130, m, 'yes', 0, 0, iso(spread(at('2027-02-25', '12:00'), all.length, 6)[i])));
   addRsvp(e130, 'm-024', 'no', 0, 0, at('2027-02-26', '20:00'));
   // e-0140: the cleanup the user co-hosts.
   [['m-001', 1, 2], ['m-012', 0, 0], ['m-013', 0, 0], ['m-016', 1, 0], ['m-006', 0, 0], ['m-021', 0, 0], ['m-032', 1, 1], ['m-034', 0, 0],
-    ['m-047', 0, 0], ['m-054', 0, 0], ['m-064', 1, 0]].forEach(([m, g, c], i) => addRsvp(e140, m, 'yes', g, c, iso(ms(at('2027-02-20', '09:30')) + i * 8 * 3600000)));
+    ['m-047', 0, 0], ['m-054', 0, 0], ['m-064', 1, 0]].forEach(([m, g, c], i, all) => addRsvp(e140, m, 'yes', g, c, iso(spread(at('2027-02-20', '09:30'), all.length, 8)[i])));
   addRsvp(e140, 'm-036', 'no', 0, 0, at('2027-02-24', '07:50'));
 
   // ---- Sign-up sheets ---------------------------------------------------------
@@ -311,7 +332,7 @@ function build() {
     const s = {id, event_id: e.id, title, lock_at: lock, slots: slots.map(([sid, label, q, claims]) => ({id: sid, label, quantity: q, claims: []})), revisions: []};
     data.sheets.push(s);
     slots.forEach(([sid, , , claims], i) => claims.forEach((m, j) => {
-      const when = iso(ms(claimAt) + (i * 5 + j) * 3600000);
+      const when = iso(spread(claimAt, slots.reduce((a, x) => a + x[3].length, 0) + 1, 4)[slots.slice(0, i).reduce((a, x) => a + x[3].length, 0) + j]);
       fact(when, seq => { s.slots.find(x => x.id === sid).claims.push(m); s.revisions.push({seq, at: when, action: 'claim', slot_id: sid, member_id: m, reason: 'claim'}); });
     }));
     return s;
@@ -351,9 +372,12 @@ function build() {
   const background = [];
   for (const month of months) {
     for (const g of [P, G, B, RUN]) {
-      const day = pad(3 + Math.floor(rand() * 24), 2), when = at(`${month}-${day}`, pad(7 + Math.floor(rand() * 14), 2) + ':' + pad(Math.floor(rand() * 60), 2));
+      const when = iso(K.awakeOn(ms(at(`${month}-${pad(1 + Math.floor(rand() * 27), 2)}`, '12:00'))));
       const pool = members(g, when);
-      background.push([g, pick(pool), when, TEXT[g][months.indexOf(month) % 12]]);
+      const k = g + '|' + month.slice(5), n = textUse[k] = (textUse[k] || 0) + 1;
+      const text = TEXT.texts[g][month.slice(5)][n - 1];
+      if (!text) throw new Error(`no background text ${n} for ${g} in month ${month.slice(5)}`);
+      background.push([g, pick(pool), when, text]);
     }
   }
   background.sort((a, b) => ms(a[2]) - ms(b[2]) || a[0].localeCompare(b[0]));
@@ -362,7 +386,7 @@ function build() {
     const others = members(g, when).filter(m => m !== author);
     if (rand() < 0.25 && others.length) {
       const pool = others;
-      addPost(g, pick(pool), iso(ms(when) + (2 + Math.floor(rand() * 20)) * 3600000), pick(['Thanks!', 'Good to know.', 'On it.', 'Thank you for the heads-up.', 'I can help.']),
+      addPost(g, pick(pool), iso(K.between(ms(when) + 20 * 60000, ms(when) + 2 * DAY, x => x * x)), replyText(),
         {kind: 'comment', parent_id: p.id});
     }
   }
@@ -446,7 +470,7 @@ const PROVENANCE = {
   real_records: 0,
   real_anchor: 'none: no record is collected from a real website or service, and the reviewer confirmed that synthetic data needs no real anchor',
   generation: 'Deterministic Node scripts (this generator, scripts/fixture-builder.cjs and the specs in scripts/fixtures/). No language model is called when the fixtures are generated; the same scripts always produce byte-identical files (a business test fails if a committed file is out of date).',
-  language_model_assistance: 'The scripts and their hand-written text (people, display names, bios, group descriptions, event titles and venues, key posts, background post texts, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Past RSVPs, background members\' join dates, background post dates and authors come from a fixed-seed generator.',
+  language_model_assistance: 'The scripts and their hand-written text (people, display names, bios, group descriptions, event titles, venues and descriptions, key posts, background post texts and replies in scripts/fixtures/text/, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Every background text and event description is used once. A fixed-seed generator draws past RSVPs, background members\' join dates, event lead times and RSVP windows, background post dates and authors, with times at waking hours and minute resolution.',
   human_review: 'pending: Rohan Pandey has not yet read every member and event row (see review.status)',
 };
 
@@ -457,18 +481,18 @@ function dataset(all, sha, scenarioSha) {
   return {
     schema_version: 'pale.dataset.v1',
     dataset_id: 'stoopside-community-groups',
-    version: '0.3.0',
+    version: '0.4.0',
     description: 'Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Maple St. For reproducible checks; not a benchmark task. All records are synthetic: no real group, person, post or message is used, nothing was crawled or collected, and there is no real-data anchor (the approved plan has no collection, and the reviewer confirmed that synthetic data is acceptable). Coverage of 2025-01-01 to 2026-12-31 by month and source is in evidence/coverage.md (scripts/coverage-report.cjs).',
     record_source_ids: ['maple-street'],
     sources: all.map(f => ({
       source_id: f.key,
       kind: 'synthetic',
-      description: f.description + ' People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup\'s public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside\'s own rules.',
+      description: f.description + ' People, groups, events (titles, venues and descriptions), sheets, key posts, background post texts, replies and Mail threads are written by hand; a fixed-seed generator draws past RSVPs, join dates, event lead times and post dates and authors at waking hours. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup\'s public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside\'s own rules.',
       uri: null,
       license: 'CC0-1.0',
       usage: 'permitted',
       collection: null,
-      generation: {method: 'scripted', tool: f.tool, tool_version: '0.3.0', seed: f.rng_seed,
+      generation: {method: 'scripted', tool: f.tool, tool_version: '0.4.0', seed: f.rng_seed,
         parameters: {provenance: PROVENANCE, fixture: f.seed, fixture_sha256: sha(f.data), binding: f.binding, binding_sha256: sha(f.bindingData), mail_seed: f.mail,
           mail_seed_sha256: sha(f.mailSeed), scenario: f.scenario, scenario_sha256: scenarioSha(f.scenario), history_from: f.history_from, clock: f.clock,
           counts: counts(f)}},

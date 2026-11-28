@@ -197,12 +197,8 @@ module.exports = {
     {id: 'sw-0012', sheet_id: 's-0031', from: 11, to: 1, give_slot: 'carpool-2', want_slot: 'lunch', state: 'proposed',
       proposed_at: '2026-04-19T18:00:00-06:00', expires_at: '2026-04-21T18:00:00-06:00', decided_at: null},
   ],
-  texts: {
-    [C]: ['Recycling room is full again, pickup is Thursday.', 'The courtyard hose is back on.', 'Laundry room dryer 2 is out of order.', 'Package room code changes on the first.', 'Free bookshelf by the Building B door.', 'Who left a stroller in the lobby? It is by the mailboxes.', 'Board minutes are posted in the community room.', 'Snow shovels are in the bike room.', 'Window washers on Tuesday, close your blinds.', 'Courtyard tomatoes are ready, help yourselves.', 'The elevator in Building C is being serviced Friday.', 'Thank you for a lovely potluck.'],
-    [S]: ['Practice moved to field 4 this week.', 'Bring water bottles, it will be hot.', 'Lost: a blue shin guard, size small.', 'Game photos are up on the team page.', 'Rainout today, see you Saturday.', 'Uniform swap at the next practice.', 'Great game this morning, Otters!', 'Snack rota for next month is posted.', 'Cleats for sale, size 2, barely used.', 'Who can drive to the away game?', 'Indoor practice in the gym this week.', 'Thanks, coaches, for a great season.'],
-    [K]: ['Next month we are reading Piranesi.', 'Library has three copies on hold for us.', 'Spoilers allowed after page 200.', 'Tea suggestions welcome for next time.', 'Lost a bookmark at Pippa\'s, green ribbon.', 'Audiobook counts, as always.', 'Shortlist for the summer is up, vote by Friday.', 'Lovely discussion last night.', 'Anyone have a spare copy to lend?', 'We are at the courtyard tables if it is dry.', 'New members welcome, ask Pippa.', 'Reading the poems aloud next time.'],
-  },
-  replies: ['Thanks!', 'Good to know.', 'On it.', 'Thank you for the heads-up.', 'I can help.'],
+  // Background texts, replies and past-event descriptions: fixtures/text/riverside.json.
+  ...(({texts, replies, descriptions}) => ({texts, replies, descriptions}))(require('./text/riverside.json')),
   // Hand-written posts: [group, author, time, text, extra]. Names in links use first names only.
   posts: [
     [S, 4, '2025-11-09T09:00:00-06:00', 'Awards night MVP: Marguerite (Daisy on here) for running the snack table all season.'],

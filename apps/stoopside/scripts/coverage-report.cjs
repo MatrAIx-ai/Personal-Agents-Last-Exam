@@ -212,7 +212,7 @@ function markdown(r) {
   L.push('', 'Full SHA-256 values are in `coverage.json` and `contribution/dataset.json`.', '');
   L.push('## Representative content and loading', '');
   L.push('- Loading: `tests/replay-checks.cjs` loads each fixture through Infra `env.load_seed` under real Core and each companion Mail seed into Mail 1.3.0, then reads them back with `mail.get`. `tests/fixtures.test.cjs` reads every reachable object of every fixture through the Agent tools.');
-  L.push('- Representative records: Maple St `r-0139` (Dana\'s RSVP to the Pi Day bake sale, 2026-03-07, guests 1, children 2) and `p-0305`; Riverside soccer families RSVP of 2025-05-08; Hillcrest library friends RSVP of 2025-11-28. See the App README, section Data.');
+  L.push('- Representative records: Maple St `r-0125` (Dana\'s RSVP to the Pi Day bake sale, 2026-03-07, guests 1, children 2) and `p-0305`; Riverside soccer families RSVP of 2025-05-08; Hillcrest library friends RSVP of 2025-11-28. See the App README, section Data.');
   L.push('');
   return L.join('\n');
 }

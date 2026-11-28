@@ -59,7 +59,12 @@ async function main() {
     const go = async hash => { await page.evaluate(h => { location.hash = h; }, hash); await page.waitForFunction(h => location.hash === h, hash); await idle(); await page.waitForTimeout(50); await idle(); };
     const text = async sel => (await page.locator(sel).innerText());
     const flash = async pattern => { const l = page.locator('[data-flash]'); await (pattern ? l.filter({hasText: pattern}) : l).first().waitFor(); return text('[data-flash]'); };
-    const formError = async () => { await page.locator('[data-form-error] [data-error-code]').first().waitFor(); return text('[data-form-error]:not(:empty)'); };
+    // "code: page text" for the error next to a form (the code is an attribute, not shown).
+    const formError = async () => {
+      const l = page.locator('[data-form-error] [data-error-code]').first();
+      await l.waitFor();
+      return `${await l.getAttribute('data-error-code')}: ${await text('[data-form-error]:not(:empty)')}`;
+    };
     // Evidence: one viewport screenshot per step, scrolled to the element the step is about.
     const shot = async (file, step, focus) => {
       await page.screenshot({path: path.join(out, file)});
@@ -107,12 +112,16 @@ async function main() {
     const editable = await page.locator('[data-edit]').evaluateAll(n => n.map(x => x.dataset.edit));
     ok('Edit appears on no other member\'s post (the user\'s only post here is a locked announcement)', editable.every(id => posts.find(p => p.id === id).author.member_id === 'm-001'));
     await shot('02-group-home.png', 'Group home: header, hosts, upcoming event cards (date, venue, places left) and actions');
-    await page.locator('[data-section=view-as] select').selectOption('m-027');
+    // The selector lists members already on the page (hosts and post authors); take Wren if listed, else the first.
+    const listed = await page.locator('[data-section=view-as] select option').evaluateAll(n => n.map(x => x.value).filter(Boolean));
+    const viewer = listed.includes('m-027') ? 'm-027' : listed[0];
+    const viewerName = (await tool('groups.get', {group_id: 'g-block'})).hosts.concat(posts.map(p => p.author)).find(m => m.member_id === viewer).display_name;
+    await page.locator('[data-section=view-as] select').selectOption(viewer);
     await page.locator('[data-view-as-result][data-visible]').waitFor();
-    const groupView = await tool('visibility.view_as', {member_id: 'm-027', object_type: 'group', object_id: 'g-block'});
+    const groupView = await tool('visibility.view_as', {member_id: viewer, object_type: 'group', object_id: 'g-block'});
     ok('view-as on the group home shows the tool answer in the group\'s zone', await page.locator('[data-view-as-result]').getAttribute('data-visible') === String(groupView.visible) &&
       (await text('[data-view-as-result]')).includes('As of Mon, Mar 1, 2027, 9:00 AM EST'));
-    await shot('03-view-as-group.png', 'View-as on the group home: Wren Adeyemi (m-027) sees the group now; as-of time in EST', '[data-section=view-as]');
+    await shot('03-view-as-group.png', `View-as on the group home: ${viewerName} (${viewer}) sees the group now; as-of time in EST`, '[data-section=view-as]');
     await go('#/group/g-garden');
     const gardenPosts = (await tool('posts.list', {group_id: 'g-garden'})).posts;
     const deletable = await page.locator('[data-delete]').evaluateAll(n => n.map(x => x.dataset.delete));
@@ -146,10 +155,11 @@ async function main() {
     let before = digest(await data());
     await page.locator('[data-action=preview-rsvp]').click();
     const limitError = await formError();
-    ok('guest_limit_exceeded from a pre-filled count is shown next to the RSVP form and names RSVP r-0139 (review item 6)',
-      /guest_limit_exceeded/.test(limitError) && /pre-filled from your latest RSVP in this group, r-0139 for Pi Day bake sale, answered 2026-03-07 20:15 EST/.test(limitError));
+    ok('guest_limit_exceeded from a pre-filled count is shown next to the RSVP form and says where the guest came from (review item 6)',
+      /^guest_limit_exceeded: /.test(limitError) && /pre-filled from your latest RSVP in this group for Pi Day bake sale, answered Sat, Mar 7, 2026, 8:15 PM EST/.test(limitError));
+    ok('the page words the error without tool arguments, RSVP IDs or raw dates (follow-up review item 5)', !/Pass guests|r-\d{4}|\d{4}-\d{2}-\d{2}|\(guest_limit_exceeded\)/.test(limitError.replace(/^[a-z_]+: /, '')));
     ok('the failed preview wrote nothing', digest(await data()) === before);
-    await shot('06-rsvp-error-guest-limit.png', 'RSVP error path: Book fair volunteers allows 0 guests; empty counts pre-filled 1 guest from r-0139, so the preview fails with guest_limit_exceeded and says where the guest came from', '[data-form-error]:not(:empty)');
+    await shot('06-rsvp-error-guest-limit.png', 'RSVP error path: Book fair volunteers allows 0 guests; empty counts pre-filled 1 guest from the Pi Day bake sale RSVP, so the preview fails with guest_limit_exceeded and says where the guest came from', '[data-form-error]:not(:empty)');
     await go('#/event/e-0121');
     const e121 = (await tool('events.get', {event_id: 'e-0121'})).event;
     ok('the event page shows the date in the group\'s zone and the places the tool returns', (await text('#page')).includes('Sat, Mar 20, 2027, 4:00 PM to 7:00 PM EST') &&
@@ -176,6 +186,12 @@ async function main() {
     ok('the RSVP receipt stays on the page after the re-render and names the RSVP and its notice', rsvpReceipt.includes(`RSVP ${mine.id}`) && rsvpReceipt.includes(d.notices.at(-1).id) &&
       (await text('[data-my-rsvp]')).includes('You are going: just you (1 place)'));
     await shot('09-rsvp-receipt.png', `RSVP result: receipt kept on the page (RSVP ${mine.id}, notice ${d.notices.at(-1).id}); Your RSVP reads going, 1 place`);
+    // A new action starts clean: the RSVP receipt must not sit next to a new error.
+    await page.locator('[data-form=rsvp] [data-field=guests]').fill('9');
+    await page.locator('[data-action=preview-rsvp]').click();
+    const bigError = await formError();
+    ok('a new action clears the earlier receipt: previewing 9 guests after the RSVP shows only the new error (follow-up review item 4)',
+      /^guest_limit_exceeded: /.test(bigError) && await page.locator('[data-flash]').count() === 0);
     await page.reload();
     await idle();
     await page.locator('[data-my-rsvp=yes]').waitFor();
@@ -191,7 +207,9 @@ async function main() {
     await page.locator('[data-form=change] [data-field=venue]').fill('Linden Park pavilion');
     before = digest(await data());
     await page.locator('[data-action=preview-change]').click();
-    ok('moving the venue with no notify choice shows notify_required next to the form', /notify_required/.test(await formError()) && digest(await data()) === before);
+    const notifyError = await formError();
+    ok('moving the venue with no notify choice shows notify_required next to the form, in page wording', /^notify_required: /.test(notifyError) &&
+      /tell the guests or the whole group/.test(notifyError) && !/notify:/.test(notifyError) && digest(await data()) === before);
     await shot('10-change-notify-required.png', 'Event change error path: venue moved with "Nobody" selected; notify_required shown next to the form, nothing written', '[data-form-error]:not(:empty)');
     await page.locator('[data-form=change] [data-field=notify]').selectOption('guests');
     await page.locator('[data-action=preview-change]').click();
@@ -231,7 +249,9 @@ async function main() {
     await page.locator('[data-form=compose] [data-field=text]').fill('Send-off plans: potluck on the porch, May 8. Keep it quiet.');
     before = digest(await data());
     await page.locator('[data-action=preview-post]').click();
-    ok('a post with no audience shows audience_required next to the composer and writes nothing', /audience_required/.test(await formError()) && digest(await data()) === before);
+    const audienceError = await formError();
+    ok('a post with no audience shows audience_required next to the composer, in page wording, and writes nothing', /^audience_required: /.test(audienceError) &&
+      /Choose who sees this post/.test(audienceError) && !/event_guests|hosts_only/.test(audienceError) && digest(await data()) === before);
     await shot('14-post-audience-required.png', 'Post error path: no audience chosen; audience_required shown next to the composer, nothing written', '[data-form-error]:not(:empty)');
     await go('#/compose/g-block/event/e-0130');
     await page.locator('[data-form=compose] [data-field=text]').fill('Send-off plans: potluck on the porch, May 8. Keep it quiet.');

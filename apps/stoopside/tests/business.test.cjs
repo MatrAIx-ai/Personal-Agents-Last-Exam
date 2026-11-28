@@ -141,16 +141,16 @@ test('rsvps.preview pre-fills year-old counts and says where they came from; exp
 
 test('guest_limit_exceeded from a pre-filled guest count names the RSVP it came from (Maple St e-0125, review item 6)', () => {
   const f = fixture();
-  // Book fair volunteers has guest_limit 0; Dana's latest RSVP in the group (r-0139, 2026-03-07) had 1 guest.
+  // Book fair volunteers has guest_limit 0; Dana's latest RSVP in the group (r-0125, 2026-03-07) had 1 guest.
   assert.equal(f.data.events.find(e => e.id === 'e-0125').guest_limit, 0);
   let err;
   unchanged(f, () => { try { f.call('rsvps.preview', {event_id: 'e-0125', answer: 'yes'}); } catch (e) { err = e; throw e; } }, 'guest_limit_exceeded');
-  assert.match(err.message, /^Book fair volunteers allows at most 0 guests per RSVP\. The 1 guest was pre-filled from your latest RSVP in this group, r-0139 for Pi Day bake sale, answered 2026-03-07 20:15 EST \(guests 1, children 2\)\. Pass guests to choose the count\.$/);
+  assert.match(err.message, /^Book fair volunteers allows at most 0 guests per RSVP\. The 1 guest was pre-filled from your latest RSVP in this group, r-0125 for Pi Day bake sale, answered 2026-03-07 20:15 EST \(guests 1, children 2\)\. Pass guests to choose the count\.$/);
   // Only children left empty: the guest count is the user's own, so no pre-fill source is named.
   assert.throws(() => f.call('rsvps.preview', {event_id: 'e-0125', answer: 'yes', guests: 1}), e => e.code === 'guest_limit_exceeded' && !/pre-filled/.test(e.message));
   // With guests given, children still pre-fill and the preview says so.
   const p = f.call('rsvps.preview', {event_id: 'e-0125', answer: 'yes', guests: 0}).preview;
-  assert.deepEqual([p.guests, p.children, p.prefilled_from.rsvp_id], [0, 2, 'r-0139']);
+  assert.deepEqual([p.guests, p.children, p.prefilled_from.rsvp_id], [0, 2, 'r-0125']);
 });
 
 test('RSVP windows: not open yet, closed, and no on a started event', () => {
