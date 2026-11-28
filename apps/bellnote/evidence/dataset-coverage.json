@@ -1,0 +1,1061 @@
+{
+  "schema": "bellnote.dataset-coverage.v1",
+  "scope": "Environment dataset coverage of the delivered reference dataset (fixtures/reference.json), the seed app.json names; not a Task history report.",
+  "dataset": {
+    "id": "bellnote-reference",
+    "version": "1.0.0",
+    "seed_file": "fixtures/reference.json",
+    "sha256": "a2dca94213e6583d3afcfbfcb0856158f06d9986b753227de8da0ec71afb6148",
+    "records": 879,
+    "expected_records": 879
+  },
+  "time_zone": "America/Los_Angeles",
+  "window": {
+    "start": "2025-01-01",
+    "end": "2026-12-31"
+  },
+  "clock": {
+    "initial_time": "2026-11-17T07:00:00-08:00",
+    "local_date": "2026-11-17",
+    "rule": "A record counts as history when its authoritative instant is at or before the clock, or its date-only field is before the clock date. Records dated after the clock are scheduled and reported separately."
+  },
+  "provenance": {
+    "real": "none: no record is collected from a real school, family, product or website",
+    "authored": "synthetic, hand-written: the 2026-27 school year up to the clock (scripts/build-reference-fixture.cjs with withHistory false gives exactly these records)",
+    "generated": "synthetic, procedural: the family's history from 2025-01-01 to the summer of 2026 by scripts/history.cjs (mulberry32, seed 20250101, no wall clock, no Math.random)",
+    "method": "A record is \"authored\" when its collection and ID are in build({withHistory: false}), otherwise \"generated\"."
+  },
+  "totals": {
+    "records": 879,
+    "dated_records": 859,
+    "undated_records": 20,
+    "history_records_in_window": 851,
+    "scheduled_records_after_clock": 8,
+    "out_of_window_or_invalid": 0,
+    "global_distinct_dates": 213,
+    "earliest": "2025-01-02",
+    "latest": "2026-11-16",
+    "authored": 348,
+    "generated": 531
+  },
+  "sources": {
+    "schools": {
+      "records": 2,
+      "authored": 2,
+      "generated": 0,
+      "date_field": null,
+      "date_meaning": "school record (bell times, term, current calendar); no occurrence date",
+      "in_window_history": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "scheduled_after_clock": 0,
+      "excluded": 2,
+      "by_month": {}
+    },
+    "staff": {
+      "records": 4,
+      "authored": 4,
+      "generated": 0,
+      "date_field": null,
+      "date_meaning": "staff directory entry; no occurrence date",
+      "in_window_history": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "scheduled_after_clock": 0,
+      "excluded": 4,
+      "by_month": {}
+    },
+    "children": {
+      "records": 3,
+      "authored": 3,
+      "generated": 0,
+      "date_field": null,
+      "date_meaning": "current child record; no occurrence date",
+      "in_window_history": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "scheduled_after_clock": 0,
+      "excluded": 3,
+      "by_month": {}
+    },
+    "guardian_links": {
+      "records": 6,
+      "authored": 6,
+      "generated": 0,
+      "date_field": null,
+      "date_meaning": "current rights of a guardian for a child; no occurrence date",
+      "in_window_history": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "scheduled_after_clock": 0,
+      "excluded": 6,
+      "by_month": {}
+    },
+    "pickup_people": {
+      "records": 8,
+      "authored": 6,
+      "generated": 2,
+      "date_field": "created_at",
+      "date_meaning": "when the guardian added the person",
+      "in_window_history": 8,
+      "distinct_dates": 7,
+      "earliest": "2025-01-07",
+      "latest": "2026-11-16",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-01": 1,
+        "2025-08": 1,
+        "2026-09": 4,
+        "2026-11": 1,
+        "2026-10": 1
+      }
+    },
+    "restrictions": {
+      "records": 1,
+      "authored": 1,
+      "generated": 0,
+      "date_field": "recorded_at",
+      "date_meaning": "when the office put the restriction on file",
+      "in_window_history": 1,
+      "distinct_dates": 1,
+      "earliest": "2026-08-20",
+      "latest": "2026-08-20",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2026-08": 1
+      }
+    },
+    "dismissal_changes": {
+      "records": 35,
+      "authored": 5,
+      "generated": 30,
+      "date_field": "created_at",
+      "date_meaning": "when the change was recorded (the day it applies to is `date`)",
+      "in_window_history": 35,
+      "distinct_dates": 35,
+      "earliest": "2025-01-13",
+      "latest": "2026-11-16",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-01": 1,
+        "2025-02": 1,
+        "2025-04": 1,
+        "2025-05": 2,
+        "2025-09": 4,
+        "2025-10": 7,
+        "2025-11": 4,
+        "2025-12": 2,
+        "2026-02": 3,
+        "2026-03": 3,
+        "2026-04": 2,
+        "2026-10": 2,
+        "2026-11": 3
+      }
+    },
+    "attendance": {
+      "records": 147,
+      "authored": 120,
+      "generated": 27,
+      "date_field": "date",
+      "date_meaning": "the school day marked",
+      "in_window_history": 147,
+      "distinct_dates": 67,
+      "earliest": "2025-02-11",
+      "latest": "2026-11-16",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-02": 2,
+        "2025-03": 2,
+        "2025-05": 3,
+        "2025-09": 2,
+        "2025-10": 2,
+        "2025-11": 2,
+        "2025-12": 1,
+        "2026-01": 4,
+        "2026-02": 1,
+        "2026-03": 4,
+        "2026-04": 2,
+        "2026-05": 2,
+        "2026-09": 24,
+        "2026-10": 63,
+        "2026-11": 33
+      }
+    },
+    "absence_reports": {
+      "records": 20,
+      "authored": 6,
+      "generated": 14,
+      "date_field": "submitted_at",
+      "date_meaning": "when the guardian sent the report (the days it covers are `dates`)",
+      "in_window_history": 20,
+      "distinct_dates": 20,
+      "earliest": "2025-02-11",
+      "latest": "2026-11-16",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-02": 1,
+        "2025-03": 1,
+        "2025-05": 1,
+        "2025-09": 1,
+        "2025-10": 2,
+        "2025-11": 2,
+        "2025-12": 1,
+        "2026-01": 2,
+        "2026-03": 2,
+        "2026-05": 1,
+        "2026-09": 1,
+        "2026-10": 3,
+        "2026-11": 2
+      }
+    },
+    "forms": {
+      "records": 28,
+      "authored": 10,
+      "generated": 18,
+      "date_field": "published_at",
+      "date_meaning": "when the school published the form",
+      "in_window_history": 28,
+      "distinct_dates": 26,
+      "earliest": "2025-02-24",
+      "latest": "2026-11-13",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-02": 1,
+        "2025-03": 1,
+        "2025-04": 1,
+        "2025-05": 2,
+        "2025-08": 3,
+        "2025-09": 2,
+        "2025-10": 1,
+        "2025-12": 1,
+        "2026-01": 2,
+        "2026-04": 1,
+        "2026-05": 1,
+        "2026-02": 1,
+        "2026-03": 1,
+        "2026-09": 3,
+        "2026-11": 5,
+        "2026-10": 2
+      }
+    },
+    "form_responses": {
+      "records": 37,
+      "authored": 14,
+      "generated": 23,
+      "date_field": "answered_at",
+      "date_meaning": "when the guardian answered",
+      "in_window_history": 37,
+      "distinct_dates": 29,
+      "earliest": "2025-02-25",
+      "latest": "2026-11-12",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-02": 1,
+        "2025-04": 1,
+        "2025-05": 2,
+        "2025-08": 4,
+        "2025-09": 4,
+        "2025-10": 2,
+        "2025-12": 2,
+        "2026-01": 2,
+        "2026-02": 1,
+        "2026-03": 1,
+        "2026-04": 1,
+        "2026-05": 2,
+        "2026-09": 5,
+        "2026-11": 6,
+        "2026-10": 3
+      }
+    },
+    "lunch_accounts": {
+      "records": 3,
+      "authored": 3,
+      "generated": 0,
+      "date_field": null,
+      "date_meaning": "current balance and settings; the dated history is in lunch_transactions",
+      "in_window_history": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "scheduled_after_clock": 0,
+      "excluded": 3,
+      "by_month": {}
+    },
+    "lunch_transactions": {
+      "records": 276,
+      "authored": 84,
+      "generated": 192,
+      "date_field": "at",
+      "date_meaning": "when the cafeteria or the top-up recorded it",
+      "in_window_history": 276,
+      "distinct_dates": 131,
+      "earliest": "2025-01-02",
+      "latest": "2026-11-13",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-01": 11,
+        "2025-02": 8,
+        "2025-03": 7,
+        "2025-04": 8,
+        "2025-05": 12,
+        "2025-06": 6,
+        "2025-08": 7,
+        "2025-09": 14,
+        "2025-10": 17,
+        "2025-11": 9,
+        "2025-12": 9,
+        "2026-01": 17,
+        "2026-02": 12,
+        "2026-03": 16,
+        "2026-04": 12,
+        "2026-05": 19,
+        "2026-06": 8,
+        "2026-08": 3,
+        "2026-09": 18,
+        "2026-10": 42,
+        "2026-11": 21
+      }
+    },
+    "menu_days": {
+      "records": 151,
+      "authored": 40,
+      "generated": 111,
+      "date_field": "date",
+      "date_meaning": "the school day the menu is for",
+      "in_window_history": 143,
+      "distinct_dates": 93,
+      "earliest": "2025-01-10",
+      "latest": "2026-11-16",
+      "scheduled_after_clock": 8,
+      "excluded": 0,
+      "by_month": {
+        "2025-01": 4,
+        "2025-02": 5,
+        "2025-03": 4,
+        "2025-04": 4,
+        "2025-05": 6,
+        "2025-06": 2,
+        "2025-08": 2,
+        "2025-09": 9,
+        "2025-10": 10,
+        "2025-11": 6,
+        "2025-12": 7,
+        "2026-01": 11,
+        "2026-02": 8,
+        "2026-03": 10,
+        "2026-04": 9,
+        "2026-05": 11,
+        "2026-06": 3,
+        "2026-10": 10,
+        "2026-11": 22
+      }
+    },
+    "payment_methods": {
+      "records": 2,
+      "authored": 2,
+      "generated": 0,
+      "date_field": null,
+      "date_meaning": "current card record; no occurrence date",
+      "in_window_history": 0,
+      "distinct_dates": 0,
+      "earliest": null,
+      "latest": null,
+      "scheduled_after_clock": 0,
+      "excluded": 2,
+      "by_month": {}
+    },
+    "payments": {
+      "records": 34,
+      "authored": 8,
+      "generated": 26,
+      "date_field": "paid_at",
+      "date_meaning": "when the payment was made",
+      "in_window_history": 34,
+      "distinct_dates": 29,
+      "earliest": "2025-01-31",
+      "latest": "2026-11-12",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-01": 1,
+        "2025-02": 1,
+        "2025-04": 2,
+        "2025-05": 2,
+        "2025-08": 2,
+        "2025-09": 2,
+        "2025-10": 1,
+        "2025-11": 3,
+        "2026-01": 4,
+        "2026-02": 1,
+        "2026-03": 2,
+        "2026-04": 2,
+        "2026-05": 3,
+        "2026-09": 4,
+        "2026-11": 3,
+        "2026-10": 1
+      }
+    },
+    "notifications": {
+      "records": 122,
+      "authored": 34,
+      "generated": 88,
+      "date_field": "at",
+      "date_meaning": "when the account was notified",
+      "in_window_history": 122,
+      "distinct_dates": 105,
+      "earliest": "2025-01-08",
+      "latest": "2026-11-16",
+      "scheduled_after_clock": 0,
+      "excluded": 0,
+      "by_month": {
+        "2025-01": 2,
+        "2025-02": 5,
+        "2025-03": 4,
+        "2025-04": 3,
+        "2025-05": 9,
+        "2025-08": 6,
+        "2025-09": 9,
+        "2025-10": 9,
+        "2025-11": 7,
+        "2025-12": 3,
+        "2026-01": 11,
+        "2026-02": 6,
+        "2026-03": 7,
+        "2026-04": 3,
+        "2026-05": 3,
+        "2026-06": 1,
+        "2026-09": 9,
+        "2026-10": 12,
+        "2026-11": 13
+      }
+    }
+  },
+  "undated": {
+    "schools": "school record (bell times, term, current calendar); no occurrence date",
+    "staff": "staff directory entry; no occurrence date",
+    "children": "current child record; no occurrence date",
+    "guardian_links": "current rights of a guardian for a child; no occurrence date",
+    "lunch_accounts": "current balance and settings; the dated history is in lunch_transactions",
+    "payment_methods": "current card record; no occurrence date"
+  },
+  "monthly": {
+    "2025-01": {
+      "records": 20,
+      "distinct_dates": 8,
+      "authored": 0,
+      "generated": 20,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "pickup_people": 1,
+        "dismissal_changes": 1,
+        "lunch_transactions": 11,
+        "menu_days": 4,
+        "payments": 1,
+        "notifications": 2
+      }
+    },
+    "2025-02": {
+      "records": 25,
+      "distinct_dates": 8,
+      "authored": 0,
+      "generated": 25,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 1,
+        "attendance": 2,
+        "absence_reports": 1,
+        "forms": 1,
+        "form_responses": 1,
+        "lunch_transactions": 8,
+        "menu_days": 5,
+        "payments": 1,
+        "notifications": 5
+      }
+    },
+    "2025-03": {
+      "records": 19,
+      "distinct_dates": 7,
+      "authored": 0,
+      "generated": 19,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "attendance": 2,
+        "absence_reports": 1,
+        "forms": 1,
+        "lunch_transactions": 7,
+        "menu_days": 4,
+        "notifications": 4
+      }
+    },
+    "2025-04": {
+      "records": 20,
+      "distinct_dates": 7,
+      "authored": 0,
+      "generated": 20,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 1,
+        "forms": 1,
+        "form_responses": 1,
+        "lunch_transactions": 8,
+        "menu_days": 4,
+        "payments": 2,
+        "notifications": 3
+      }
+    },
+    "2025-05": {
+      "records": 39,
+      "distinct_dates": 12,
+      "authored": 0,
+      "generated": 39,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 2,
+        "attendance": 3,
+        "absence_reports": 1,
+        "forms": 2,
+        "form_responses": 2,
+        "lunch_transactions": 12,
+        "menu_days": 6,
+        "payments": 2,
+        "notifications": 9
+      }
+    },
+    "2025-06": {
+      "records": 8,
+      "distinct_dates": 3,
+      "authored": 0,
+      "generated": 8,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "lunch_transactions": 6,
+        "menu_days": 2
+      }
+    },
+    "2025-07": {
+      "records": 0,
+      "distinct_dates": 0,
+      "authored": 0,
+      "generated": 0,
+      "scheduled_after_clock": 0,
+      "by_source": {}
+    },
+    "2025-08": {
+      "records": 25,
+      "distinct_dates": 7,
+      "authored": 0,
+      "generated": 25,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "pickup_people": 1,
+        "forms": 3,
+        "form_responses": 4,
+        "lunch_transactions": 7,
+        "menu_days": 2,
+        "payments": 2,
+        "notifications": 6
+      }
+    },
+    "2025-09": {
+      "records": 47,
+      "distinct_dates": 14,
+      "authored": 0,
+      "generated": 47,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 4,
+        "attendance": 2,
+        "absence_reports": 1,
+        "forms": 2,
+        "form_responses": 4,
+        "lunch_transactions": 14,
+        "menu_days": 9,
+        "payments": 2,
+        "notifications": 9
+      }
+    },
+    "2025-10": {
+      "records": 51,
+      "distinct_dates": 15,
+      "authored": 0,
+      "generated": 51,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 7,
+        "attendance": 2,
+        "absence_reports": 2,
+        "forms": 1,
+        "form_responses": 2,
+        "lunch_transactions": 17,
+        "menu_days": 10,
+        "payments": 1,
+        "notifications": 9
+      }
+    },
+    "2025-11": {
+      "records": 33,
+      "distinct_dates": 8,
+      "authored": 0,
+      "generated": 33,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 4,
+        "attendance": 2,
+        "absence_reports": 2,
+        "lunch_transactions": 9,
+        "menu_days": 6,
+        "payments": 3,
+        "notifications": 7
+      }
+    },
+    "2025-12": {
+      "records": 26,
+      "distinct_dates": 10,
+      "authored": 0,
+      "generated": 26,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 2,
+        "attendance": 1,
+        "absence_reports": 1,
+        "forms": 1,
+        "form_responses": 2,
+        "lunch_transactions": 9,
+        "menu_days": 7,
+        "notifications": 3
+      }
+    },
+    "2026-01": {
+      "records": 53,
+      "distinct_dates": 15,
+      "authored": 0,
+      "generated": 53,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "attendance": 4,
+        "absence_reports": 2,
+        "forms": 2,
+        "form_responses": 2,
+        "lunch_transactions": 17,
+        "menu_days": 11,
+        "payments": 4,
+        "notifications": 11
+      }
+    },
+    "2026-02": {
+      "records": 33,
+      "distinct_dates": 11,
+      "authored": 0,
+      "generated": 33,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 3,
+        "attendance": 1,
+        "forms": 1,
+        "form_responses": 1,
+        "lunch_transactions": 12,
+        "menu_days": 8,
+        "payments": 1,
+        "notifications": 6
+      }
+    },
+    "2026-03": {
+      "records": 46,
+      "distinct_dates": 16,
+      "authored": 0,
+      "generated": 46,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 3,
+        "attendance": 4,
+        "absence_reports": 2,
+        "forms": 1,
+        "form_responses": 1,
+        "lunch_transactions": 16,
+        "menu_days": 10,
+        "payments": 2,
+        "notifications": 7
+      }
+    },
+    "2026-04": {
+      "records": 32,
+      "distinct_dates": 9,
+      "authored": 0,
+      "generated": 32,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "dismissal_changes": 2,
+        "attendance": 2,
+        "forms": 1,
+        "form_responses": 1,
+        "lunch_transactions": 12,
+        "menu_days": 9,
+        "payments": 2,
+        "notifications": 3
+      }
+    },
+    "2026-05": {
+      "records": 42,
+      "distinct_dates": 11,
+      "authored": 0,
+      "generated": 42,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "attendance": 2,
+        "absence_reports": 1,
+        "forms": 1,
+        "form_responses": 2,
+        "lunch_transactions": 19,
+        "menu_days": 11,
+        "payments": 3,
+        "notifications": 3
+      }
+    },
+    "2026-06": {
+      "records": 12,
+      "distinct_dates": 3,
+      "authored": 0,
+      "generated": 12,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "lunch_transactions": 8,
+        "menu_days": 3,
+        "notifications": 1
+      }
+    },
+    "2026-07": {
+      "records": 0,
+      "distinct_dates": 0,
+      "authored": 0,
+      "generated": 0,
+      "scheduled_after_clock": 0,
+      "by_source": {}
+    },
+    "2026-08": {
+      "records": 4,
+      "distinct_dates": 2,
+      "authored": 4,
+      "generated": 0,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "restrictions": 1,
+        "lunch_transactions": 3
+      }
+    },
+    "2026-09": {
+      "records": 68,
+      "distinct_dates": 14,
+      "authored": 68,
+      "generated": 0,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "pickup_people": 4,
+        "attendance": 24,
+        "absence_reports": 1,
+        "forms": 3,
+        "form_responses": 5,
+        "lunch_transactions": 18,
+        "payments": 4,
+        "notifications": 9
+      }
+    },
+    "2026-10": {
+      "records": 139,
+      "distinct_dates": 22,
+      "authored": 139,
+      "generated": 0,
+      "scheduled_after_clock": 0,
+      "by_source": {
+        "pickup_people": 1,
+        "dismissal_changes": 2,
+        "attendance": 63,
+        "absence_reports": 3,
+        "forms": 2,
+        "form_responses": 3,
+        "lunch_transactions": 42,
+        "menu_days": 10,
+        "payments": 1,
+        "notifications": 12
+      }
+    },
+    "2026-11": {
+      "records": 109,
+      "distinct_dates": 11,
+      "authored": 109,
+      "generated": 0,
+      "scheduled_after_clock": 8,
+      "by_source": {
+        "pickup_people": 1,
+        "dismissal_changes": 3,
+        "attendance": 33,
+        "absence_reports": 2,
+        "forms": 5,
+        "form_responses": 6,
+        "lunch_transactions": 21,
+        "menu_days": 22,
+        "payments": 3,
+        "notifications": 13
+      }
+    },
+    "2026-12": {
+      "records": 0,
+      "distinct_dates": 0,
+      "authored": 0,
+      "generated": 0,
+      "scheduled_after_clock": 0,
+      "by_source": {}
+    }
+  },
+  "months_with_history": [
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-08",
+    "2026-09",
+    "2026-10",
+    "2026-11"
+  ],
+  "months_without_history": [
+    "2025-07",
+    "2026-07",
+    "2026-12"
+  ],
+  "exclusions": [],
+  "scheduled_after_clock": [
+    {
+      "collection": "menu_days",
+      "id": "menu-alder-2026-11-17",
+      "field": "date",
+      "date": "2026-11-17",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-kestrel-2026-11-17",
+      "field": "date",
+      "date": "2026-11-17",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-alder-2026-11-18",
+      "field": "date",
+      "date": "2026-11-18",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-kestrel-2026-11-18",
+      "field": "date",
+      "date": "2026-11-18",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-alder-2026-11-19",
+      "field": "date",
+      "date": "2026-11-19",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-kestrel-2026-11-19",
+      "field": "date",
+      "date": "2026-11-19",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "dismissal_changes",
+      "id": "dc-0004",
+      "field": "date",
+      "date": "2026-11-20",
+      "state": "active"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-alder-2026-11-20",
+      "field": "date",
+      "date": "2026-11-20",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "menu_days",
+      "id": "menu-kestrel-2026-11-20",
+      "field": "date",
+      "date": "2026-11-20",
+      "state": "menu published for a coming school day"
+    },
+    {
+      "collection": "absence_reports",
+      "id": "rep-0006",
+      "field": "dates",
+      "date": "2026-11-23",
+      "state": "submitted"
+    },
+    {
+      "collection": "absence_reports",
+      "id": "rep-0006",
+      "field": "dates",
+      "date": "2026-11-24",
+      "state": "submitted"
+    },
+    {
+      "collection": "forms",
+      "id": "form-fluclinic",
+      "field": "due_at",
+      "date": "2026-11-24",
+      "state": "open until due"
+    },
+    {
+      "collection": "absence_reports",
+      "id": "rep-0006",
+      "field": "dates",
+      "date": "2026-11-25",
+      "state": "submitted"
+    },
+    {
+      "collection": "forms",
+      "id": "form-aquarium",
+      "field": "due_at",
+      "date": "2026-11-25",
+      "state": "open until due"
+    },
+    {
+      "collection": "schools",
+      "id": "school-alder",
+      "field": "calendar[].date",
+      "date": "2026-11-26",
+      "state": "closed"
+    },
+    {
+      "collection": "schools",
+      "id": "school-kestrel",
+      "field": "calendar[].date",
+      "date": "2026-11-26",
+      "state": "closed"
+    },
+    {
+      "collection": "schools",
+      "id": "school-alder",
+      "field": "calendar[].date",
+      "date": "2026-11-27",
+      "state": "closed"
+    },
+    {
+      "collection": "schools",
+      "id": "school-kestrel",
+      "field": "calendar[].date",
+      "date": "2026-11-27",
+      "state": "closed"
+    },
+    {
+      "collection": "forms",
+      "id": "form-k-band",
+      "field": "due_at",
+      "date": "2026-11-30",
+      "state": "open until due"
+    },
+    {
+      "collection": "forms",
+      "id": "form-fluclinic",
+      "field": "event_date",
+      "date": "2026-12-03",
+      "state": "event"
+    },
+    {
+      "collection": "schools",
+      "id": "school-kestrel",
+      "field": "calendar[].date",
+      "date": "2026-12-04",
+      "state": "early_dismissal"
+    },
+    {
+      "collection": "forms",
+      "id": "form-k-band",
+      "field": "event_date",
+      "date": "2026-12-09",
+      "state": "event"
+    },
+    {
+      "collection": "forms",
+      "id": "form-winter-concert",
+      "field": "due_at",
+      "date": "2026-12-10",
+      "state": "open until due"
+    },
+    {
+      "collection": "forms",
+      "id": "form-aquarium",
+      "field": "event_date",
+      "date": "2026-12-11",
+      "state": "event"
+    },
+    {
+      "collection": "forms",
+      "id": "form-k-physical",
+      "field": "due_at",
+      "date": "2026-12-11",
+      "state": "open until due"
+    },
+    {
+      "collection": "forms",
+      "id": "form-inhaler",
+      "field": "due_at",
+      "date": "2026-12-15",
+      "state": "open until due"
+    },
+    {
+      "collection": "forms",
+      "id": "form-winter-concert",
+      "field": "event_date",
+      "date": "2026-12-15",
+      "state": "event"
+    },
+    {
+      "collection": "schools",
+      "id": "school-alder",
+      "field": "calendar[].date",
+      "date": "2026-12-18",
+      "state": "early_dismissal"
+    }
+  ],
+  "scheduled_by_month": {
+    "2026-11": 19,
+    "2026-12": 9
+  },
+  "hashes": {
+    "fixtures/reference.json": "a2dca94213e6583d3afcfbfcb0856158f06d9986b753227de8da0ec71afb6148",
+    "fixtures/clock.json": "cf9c238c5f997bd116030fe05b1061a58695e0bb3d8e6d4065f1b0dffafe3ffc",
+    "fixtures/binding.json": "aedfc982d4bbf820c44347260206cf2bb1684c9b93c3b7fc4c553f3a7f03dadf",
+    "fixtures/minimal.json": "51faada1b02078797828193ac4d837703a9ec3b136862d6dc383285e36db58db",
+    "scripts/history.cjs": "0bc950e0cb5a47e5e639c494b37c911c9f64308e85246a691f14e6bb2bb56158",
+    "scripts/build-reference-fixture.cjs": "d5f46fe560604f742ae07f80d9b2fc80a88eca128318273d6ebfb3cbb218cb9b"
+  },
+  "reproduce": "cd apps/bellnote && node scripts/dataset-coverage.cjs --check (or --write to regenerate)"
+}

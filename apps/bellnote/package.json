@@ -1,0 +1,28 @@
+{
+  "name": "@pale/app-bellnote",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/business.test.cjs",
+    "example": "node examples/run.cjs",
+    "contracts:check": "node scripts/build-contracts.cjs --check",
+    "contracts:build": "node scripts/build-contracts.cjs",
+    "fixtures:check": "node scripts/check-fixtures.cjs",
+    "fixtures:history": "node scripts/history.cjs --check",
+    "fixtures:build": "node scripts/build-reference-fixture.cjs",
+    "coverage:check": "node scripts/dataset-coverage.cjs --check",
+    "coverage:build": "node scripts/dataset-coverage.cjs --write",
+    "coverage:retrieval": "node scripts/dataset-coverage.cjs --retrieval",
+    "mcp": "node scripts/real-mcp.cjs",
+    "mail-flow": "node scripts/mail-flow.cjs",
+    "web": "node ../../runtime/web/server.cjs --app bellnote --registry web.registry.json --run bellnote-web --profile sandbox",
+    "web:smoke": "node --test tests/web-smoke.cjs",
+    "web:browser": "node tests/web-browser.cjs",
+    "evidence:gui": "node tests/web-evidence.cjs --optimize",
+    "evidence:mail": "node scripts/mail-flow.cjs --transcript evidence"
+  }
+}

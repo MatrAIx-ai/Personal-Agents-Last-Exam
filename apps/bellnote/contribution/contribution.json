@@ -1,0 +1,297 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "bellnote",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "bellnote.children.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.schools.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.attendance.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.absences.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.forms.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.forms.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.pickup.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.lunch.account_get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.menu.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.payments.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.notifications.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.preferences.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.absences.report",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.absences.cancel",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.forms.respond",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.forms.withdraw",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.pickup.person_add",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.pickup.person_remove",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.dismissal.set",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.dismissal.cancel",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.lunch.topup",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.lunch.settings_update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "bellnote.preferences.update",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "bellnote.attendance.marked",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.absence.reviewed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.form.published",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.form.changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.form.answered",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.pickup.person_reviewed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.dismissal.recorded",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.lunch.charged",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "bellnote.school.day_changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": false,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [
+      "application/json"
+    ],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}
