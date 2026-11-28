@@ -121,6 +121,19 @@ const NOV23 = '2026-11-23T10:00:00-05:00';
     }
     check('Twenty reset cycles each restore the loaded data and clock and clear the earlier audit rows');
     check('Runs are isolated: another run still holds its own data', hash((await snap(browse)).snapshot.data) === hash(seed()));
+
+    // 8. Records dated after the clock are delivered as events and cannot be read before their time.
+    const schedule = require('../fixtures/schedules/late-2026.json'), later = await open('infra', 'later', {initialProfile: 'sandbox'}), early2 = await open('agent', 'later');
+    const firstItem = schedule.find(e => e.operation === APP + '.item.added'), lastItem = schedule.filter(e => e.operation === APP + '.item.added').at(-1);
+    const notesBefore = (await early2.call(APP + '.notifications.list', {limit: 1})).total;
+    check('At the clock, an item the schedule adds later cannot be read or found', (await early2.call(APP + '.items.get', {id: lastItem.payload.item.item_id})).status === 'not_found' &&
+      !(await early2.call(APP + '.lists.get', {id: lastItem.payload.list_id})).items.some(i => i.item_id === lastItem.payload.item.item_id));
+    let appliedAll = true, seenFirst = null;
+    for (const e of schedule) { appliedAll = appliedAll && (await event(e, later)).status === 'committed';
+      if (e === firstItem) seenFirst = [(await early2.call(APP + '.items.get', {id: firstItem.payload.item.item_id})).item.name, (await early2.call(APP + '.items.get', {id: lastItem.payload.item.item_id})).status]; }
+    check('All ' + schedule.length + ' scheduled events from 19 November to 31 December 2026 apply in order', appliedAll);
+    check('Each scheduled item appears when its own event runs, not before', seenFirst[0] === firstItem.payload.item.name && seenFirst[1] === 'not_found' && (await early2.call(APP + '.items.get', {id: lastItem.payload.item.item_id})).item.name === lastItem.payload.item.name);
+    check('The schedule adds notifications dated after the clock', (await early2.call(APP + '.notifications.list', {limit: 1})).total > notesBefore && (await snap(later)).snapshot.virtual_now >= schedule.at(-1).at.slice(0, 10));
     console.log(JSON.stringify({app: APP, runtime: require(path.join(path.resolve(runtime), 'package.json')).version, node: process.version, passed: true, checks}, null, 2));
   } catch (e) { console.error(JSON.stringify({app: APP, passed: false, completed: checks.length, error: e.message}, null, 2)); process.exitCode = 1; }
   finally { await Promise.allSettled(clients.map(c => c.close())); fs.rmSync(stateDir, {recursive: true, force: true}); }

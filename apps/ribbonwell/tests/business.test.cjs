@@ -526,6 +526,36 @@ test('fixtures: generated history is consistent, dated from 2025 and matches the
   assert.equal(plugin.records(s).length, plugin.objects(s).length);
 });
 
+test('fixtures: history covers every month of 2025 and 2026 to the clock, from the first spring on for claims and notifications', () => {
+  const s = seed(), month = r => (r.created_at || r.at).slice(0, 7), months = [];
+  for (let y = 2025; y <= 2026; y++) for (let m = 1; m <= (y === 2026 ? 11 : 12); m++) months.push(y + '-' + String(m).padStart(2, '0'));
+  for (const m of months) assert.ok(s.activity.some(r => month(r) === m) || m === '2025-01' && s.lists.some(r => month(r) === m), 'activity in ' + m);
+  for (const m of months.filter(m => m >= '2025-02')) assert.ok(s.claims.some(r => month(r) === m), 'a claim in ' + m);
+  assert.ok(months.filter(m => s.notifications.some(r => month(r) === m)).length >= 20);
+  // Each item is listed at a shop that sells that kind of thing.
+  const shops = {};
+  for (const i of s.items) if (i.store) (shops[i.name] = shops[i.name] || new Set()).add(i.store);
+  for (const [name, shop] of [['Running belt', 'Pinwheel Toyworks'], ['Leather key loop', 'Pinwheel Toyworks'], ['Flannel pillowcases', 'Mossgate Garden'], ['Pruning shears', 'Quillfeather Paper']])
+    assert.ok(!(shops[name] || new Set()).has(shop), name + ' at ' + shop);
+});
+
+test('fixtures: the schedule after the clock applies in order, and none of its records is in the seed', () => {
+  const schedule = require('../fixtures/schedules/late-2026.json'), s = seed(), f = fixture();
+  assert.ok(schedule.length >= 40);
+  assert.ok(Date.parse(schedule[0].at) > Date.parse(CLOCK) && Date.parse(schedule.at(-1).at) <= Date.parse('2026-12-31T23:59:59-05:00'));
+  assert.ok(schedule.some(e => e.at.startsWith('2026-12-3')), 'the schedule reaches the last days of December');
+  const made = schedule.flatMap(e => [e.payload.item && e.payload.item.item_id, e.payload.claim_id]).filter(Boolean);
+  assert.ok(made.length >= 30 && made.every(id => !JSON.stringify(s).includes('"' + id + '"')));
+  let last = 0;
+  for (const e of schedule) { assert.ok(Date.parse(e.at) >= last); last = Date.parse(e.at); const rows = f.data.activity.length; f.event(e); assert.equal(f.data.activity.length, rows + 1, e.event_id); }
+  assert.ok(made.every(id => JSON.stringify(f.data).includes('"' + id + '"')));
+  assert.equal(f.data.exchanges.find(x => x.exchange_id === 'exc-family-cookies').assignments.length, 6);
+});
+
+test('fixtures: COVERAGE.md is the count of the delivered files', () => {
+  require('node:child_process').execFileSync(process.execPath, [require('node:path').resolve(__dirname, '../scripts/coverage.cjs'), '--check'], {stdio: 'pipe'});
+});
+
 test('reviewer renderer escapes untrusted content', () => {
   const html = require('../gui/src/view.js').render([{item_id: 'x', name: '<img src=x onerror=alert(1)>', note: '<script>bad</script>'}]);
   assert.ok(!html.includes('<img') && !html.includes('<script>') && html.includes('&lt;'));
