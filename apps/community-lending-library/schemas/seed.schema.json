@@ -1,0 +1,406 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+    },
+    "member_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 40
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 40
+    },
+    "copies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "item_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "maintenance": {
+            "type": "boolean"
+          },
+          "accession": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          }
+        },
+        "required": [
+          "id",
+          "item_id",
+          "maintenance",
+          "accession"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 80
+    },
+    "holds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "copy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "cancelled",
+              "expired",
+              "checked_out"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "member_id",
+          "copy_id",
+          "created_at",
+          "expires_at",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 700
+    },
+    "loans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "copy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "checked_out_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "renewed": {
+            "type": "boolean"
+          },
+          "returned_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "renewed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "member_id",
+          "copy_id",
+          "checked_out_at",
+          "due_at",
+          "renewed",
+          "returned_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 700
+    },
+    "queue": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "joined_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "item_id",
+          "member_id",
+          "sequence",
+          "joined_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "operation": {
+            "enum": [
+              "checkout",
+              "return"
+            ]
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "copy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "reference_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "cancelled",
+              "rejected",
+              "accepted"
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "operation",
+          "member_id",
+          "copy_id",
+          "attempt",
+          "reference_id",
+          "requested_at",
+          "status",
+          "event_id",
+          "resolved_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 700
+    },
+    "next_sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "next_hold": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "next_loan": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "next_attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "seed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "materialized_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "queue_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,149}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "joined_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome": {
+            "enum": [
+              "promoted",
+              "left"
+            ]
+          }
+        },
+        "required": [
+          "item_id",
+          "member_id",
+          "sequence",
+          "joined_at",
+          "ended_at",
+          "outcome"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    }
+  },
+  "required": [
+    "account_id",
+    "member_id",
+    "members",
+    "items",
+    "copies",
+    "holds",
+    "loans",
+    "queue",
+    "attempts",
+    "next_sequence",
+    "next_hold",
+    "next_loan",
+    "next_attempt",
+    "seed_at",
+    "materialized_at"
+  ],
+  "additionalProperties": false
+}
