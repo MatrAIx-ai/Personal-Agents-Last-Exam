@@ -4,7 +4,7 @@ Owner: @byshail. App `tidepool` 1.0.0 under `apps/tidepool/`; public runtime 1.6
 
 - **Plan.** It implements the plan in [PR #216](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/216), `proposals/environment/tidepool-audio.md` at `575bb90fec3e44be6a7f46ce66fe6a7577a1029f`. The assigned Track reviewer approved it for implementation on 2026-11-24 with `/approve-plan` for that commit at 07:05:26Z; the bot recorded the approval after a repeated command at 21:56:00Z.
 - **Proposal file.** Unchanged since that commit (blob `307acdf79525bccc546e772a7481c11c9301cfaa`).
-- **Package.** At commit `c45b614`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`). The second, `da7f538` (package `feec7df`), added the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260. The third, `c793863` (packages `cf8982b` and `7fc8f06`), answered the implementation review of 2026-11-28 ([below](#review-of-2026-11-28)). This one (package `c45b614`) answers its follow-up review ([below](#follow-up-review-of-2026-11-28)).
+- **Package.** At commit `e06565d`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`). The second, `da7f538` (package `feec7df`), added the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260. The third, `c793863` (packages `cf8982b` and `7fc8f06`), answered the implementation review of 2026-11-28 ([below](#review-of-2026-11-28)). This one (packages `c45b614` and `e06565d`) answers its follow-up review ([below](#follow-up-review-of-2026-11-28)).
 
 This document records implementation evidence; it claims no acceptance.
 
@@ -25,7 +25,7 @@ Checked on 2026-11-28 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 | Dataset coverage | 454 distinct dates in 24 of 24 months ([coverage.json](tidepool/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](tidepool/reference-suite.node22.json), [node18](tidepool/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present. |
 | Independent base validator | Passed, 50 checks ([report](tidepool/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `tidepool` only. |
-| Package identity | `023102d909982c858b0077860801ebf4cc8c52bdc2709055c3b086841c53a8ea` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `bcf8b1f0b87cae9f684ba728aa0fa6f4965b9beb`. |
+| Package identity | `a647a086b519aa709b5866c12636eb6997f1669ca5c3dba09598808b55a326b4` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `aaa140352eaef631293eb571da2654f30e3f0fd1`. |
 | Human review | Pending | Realism of the catalog, listening history and billing, including the generated dataset; that artists, shows, people and prices are fictional. |
 
 The walkthrough's instances:
@@ -136,7 +136,7 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 | `node apps/tidepool/examples/dataset-demo.cjs` | 97 checks; one `env.load_seed` of 434,421 bytes, with `data/evaluation/dataset.json` as the bundle's `dataset` | 97 checks |
 | `node apps/tidepool/dev/build-dataset.cjs` twice | byte-identical output | — |
 
-All reports carry package sha256 `023102d909982c858b0077860801ebf4cc8c52bdc2709055c3b086841c53a8ea`.
+All reports carry package sha256 `a647a086b519aa709b5866c12636eb6997f1669ca5c3dba09598808b55a326b4`.
 
 New tests in `tests/business.test.cjs`:
 - *a seed loaded before its latest record shows only what existed at the clock* (Leila's task data on Oct. 1, 2026, then advanced to Nov. 24 with no data change; and on Feb. 1, 2026, before an album's release);
@@ -155,7 +155,7 @@ New tests in `tests/business.test.cjs`:
 - B35 *a seed's removed member has nothing dated after the removal, no download left and no collaborator place*;
 - B36 *after a removal at the clock, writes and every event type naming the member apply or are refused, and the data stays valid*.
 
-**Added scope against the approval baseline:** the dataset and its three scripts; `later_history_removed` in every write receipt (counts) and as an optional activity-row field (the stored records), from the 2026-11-28 revision; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; the rule that a removed member has no records after the removal, from the follow-up review; and a larger package: 1,704,435 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
+**Added scope against the approval baseline:** the dataset and its three scripts; `later_history_removed` in every write receipt (counts) and as an optional activity-row field (the stored records), from the 2026-11-28 revision; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; the rule that a removed member has no records after the removal, from the follow-up review; and a larger package: 1,704,490 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
 
 ### Review of 2026-11-28
 
@@ -174,7 +174,7 @@ The implementation review of `da7f538` asked for two must-fixes. Packages `cf898
 
 ### Follow-up review of 2026-11-28
 
-The follow-up review of `c793863` found both items above fixed and asked for one must-fix and one should-fix. Package `c45b614` answers them; the approved proposal file, the evaluation seed (sha256 `88a0c16c…22e8`) and every fixture are unchanged.
+The follow-up review of `c793863` found both items above fixed and asked for one must-fix and one should-fix. Packages `c45b614` and `e06565d` answer them; the approved proposal file, the evaluation seed (sha256 `88a0c16c…22e8`) and every fixture are unchanged.
 
 - **Must fix 1: a member removed at an early clock came back through their later seeded records.** With the dataset loaded at 2026-04-01, `members.remove` for Sam committed with `later_history_removed: null`, and at the dataset clock `family.get` showed Sam's three later downloads and `playlists.list` showed `pl-family-car` (created 2026-04-04) with Sam as a collaborator. The review offered two fixes; this takes the first, dropping and reporting the records.
   - `validateSeed` (`src/model.cjs`) now rejects, with `invalid_seed`, a removed member who has a record dated after `removed_at`, a download still on a device at the removal, or a collaborator place on another member's playlist. The dated records are devices, sessions, progress, play counts, follows, Up Next, downloads, library saves, notices, the member's own playlists and tracks they added.
@@ -184,7 +184,7 @@ The follow-up review of `c793863` found both items above fixed and asked for one
   - B35 checks the seed rule for each record family one second after the removal (`invalid_seed`); a record dated exactly at the removal is valid. A download whose auto-delete time had passed at the removal counts as gone.
   - The dataset demo's new last stage runs the repro through Core with the task policy: a `committed` receipt whose counts match the activity row in `env.snapshot`, then `env.advance_time` to the dataset clock, `family.get` and `playlists.list`.
   - Without the fix, B34 and B35 fail.
-- **Should fix 2: tool descriptions.** The write tools' descriptions no longer mention the loaded data or the clock; the README explains `later_history_removed`. `tools.json` changes only those 17 descriptions; no schema, error code or event changed.
+- **Should fix 2: tool descriptions.** The 17 write tools' descriptions no longer mention the loaded data or the clock; the README explains `later_history_removed`. Four descriptions that said "current virtual time" or "one simulated minute" (`family.get`, `downloads.list`, `plan.preview_change`, `downloads.add`) now say "now" and "one minute". Against `c793863`, `tools.json` changes only those 20 descriptions; no schema, error code or event changed.
 - The README's file table now calls the diagnostics adapter "IDs and counts only", as the previous revision made it.
 
 ## Plan and implementation
