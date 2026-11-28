@@ -1,26 +1,34 @@
-# transitwallet: 2025–2026 evaluation history, version 1.0.0
+# Continuous reservation-wallet histories — dataset 2.0.0
 
-Additive data/evidence delivery against `docs/submission-evidence.md` at main `6933c430942c64f94874083815829e4a4b20920a` (#260). The approved MCP-only App scope and proposal are unchanged. No GUI, live-provider integration or cross-App dependency is added. Maintainer review of this additional data milestone remains separate from the original on-time v1 delivery.
+This revision addresses the dataset review of the 1.0.0 supplement. The approved MCP-only App package and proposal remain byte-identical. The new delivery changes evaluation data, generators, verification and evidence only; independent maintainer acceptance remains pending.
 
-## Delivered records and realistic scope
+## Actual account histories and business variation
 
-24 selected assisted travel episodes across three account profiles, with 48 completed physical trip legs. Twelve cases cancel a paid early return; twelve let the unused unpaid hold lapse. Fare and cancellation-fee variations remain in the locked offers and append-only ledger.
+Nia, Sam and Jo each have one cumulative 2025–2026 account state. The wallet has exactly one initial prepayment per person; all later debits and refunds remain in order. Repeated trips use dated routes from Metro Access, Harbor Shuttle and Regional Link. Dates, weekdays, advance-booking lead times, fares, retained cancellation fees, purposes and equipment revisions vary. Service IDs use their actual history date and route; the old 2027 template IDs are absent.
 
-`data.json` contains the actual loadable business states, not date-only placeholders. Each partition is an independently loadable, source-bound workspace episode with stable qualified object IDs, an App account and a per-state SHA256. Partitions are not one shared live account timeline; loading another partition replaces that run's baseline. Select a partition for a Task or explicitly construct a compatible combined seed; do not pretend that loading the last one merges the earlier ones. History counting deduplicates calendar dates globally across all partitions. Qualify record IDs by partition when comparing accounts/episodes.
+The 72 trips include 108 completed legs and 18 failed outward departures. Outcomes include explicit assistance refusals followed by independent rebooking, provider no-shows (`assistance_missing`), new equipment after an earlier confirmation (`assistance_equipment_mismatch`), service unavailability, paid early-return cancellation, expired unpaid holds and delayed actual arrivals. Each history keeps 60 dated offers and the matching bookings, requests, journeys and complete wallet ledger. Equipment evolves from revision 1 through revision 6, and older confirmations retain their original snapshot. The failed/unusable legs remain visible; they are not rewritten into successes.
 
-The window is **2025-01-01 through 2026-12-31 inclusive**, counted in **Etc/UTC**. All **24 months** have substantive records; all actual record timestamps are in the window. Dataset load time is 2027-01-01, so future scheduled deadlines do not become historical occurrences. 48 distinct dates are represented, with 682 inactive dates listed in `coverage.json`; there is no claim of daily activity or 300-date coverage. Density follows selected research releases, trips or infrequent service incidents. Adding filler merely to reach 300 would not improve these examples.
+Dates follow the selected visits and actual reservation/provider/reconciliation events. One genuine initial prepayment funds the two-year wallet; there are no monthly balance resets. Each profile has activity in all 24 months and many days of the month. This is a complete ledger for this synthetic wallet, not a claim of every trip in the person's life.
 
-## Provenance, source versions and exclusions
+## Coverage and provenance
 
-All delivered identities, narratives, review decisions, prices, serials and histories are **original synthetic data**, created for this fictional MCP workspace. None are observed personal/provider records. Generation date is 2026-11-26; represented dates, including December 2026, are synthetic rather than facts collected on that date. No real website history was retrieved, transformed or redistributed. The November 2026 real-website anchor clause is not used to claim an observed anchor for this approved fictional App; any request to add a live-site corpus is an additional scope decision.
+The dataset is **fully synthetic**. No records are observed customer, manufacturer or transport-provider history, and no real anchor is claimed or required. People, tickets, devices, prices and providers are invented. Generation is dated 2026-11-27; represented December 2026 events are explicitly synthetic, not collected future facts. Code/data attribution: Hanson Tang (@hansontang), under the repository/App license.
 
-The deterministic generator calls the App's actual domain entrypoints for business writes/events and validates resulting states; it does not manufacture replacement Core behavior. Generation is an App-only synthesis run, **not** a model rollout or an MCP transaction transcript. `mcp-readback.json` and `base-mcp-readback.json` separately record actual public-Core loads and Agent reads of those business facts. The original App business/MCP evidence remains in `docs/validation/transitwallet-v0.1.0.md`.
+The represented window is **2025-01-01 through 2026-12-31 inclusive**, counted in **Etc/UTC**. Every account covers every month; the global count is 209 distinct dates. This corpus count is not a Task's selected pre-session history and must not be substituted for one.
 
-`data.json` pins App revision `073cdddc6c681536d8e565435fd9369a887971c6`, package SHA256 `344cb4fe76d839422996b15dfa43a46e69b1d94347da4bd91fdb01b059432263`, generator/common source hashes, and all original fixture hashes. `manifest.json` independently pins every delivered evidence file and both runtime trees after verification. To regenerate it after the two checks, set `PALE_BASE_RUNTIME_ROOT` to the exact pristine runtime used and run `node datasets/transitwallet/2025-2026/manifest.cjs`. The App package, runtime, schemas and approved proposal bytes are unchanged by this supplement. Code and invented data use the repository/App license; no third-party assets are included. Attribution: Hanson Tang (@hansontang).
+| Account | Distinct dates | Covered months | Earliest | Latest |
+| --- | ---: | ---: | --- | --- |
+| wallet-nia | 74 | 24 | 2025-01-01 | 2026-12-31 |
+| wallet-sam | 74 | 24 | 2025-01-01 | 2026-12-31 |
+| wallet-jo | 74 | 24 | 2025-01-01 | 2026-12-31 |
 
-## Reproduce generation, count and actual loading
+`coverage.json` reports 2820 object/history rows, 2988 dated facts, per-account/month/source/date distributions, inactivity dates, structural exclusions and zero unresolved date errors. Native objects, actor replies and ordered history are separately labelled sources. Multiple records or fields on one day count once globally. Scheduled deadlines and windows, generation dates and filesystem modification times are not counted as occurred activity. The report contains an explicit fully-synthetic statement.
 
-From the repository root with Node.js 18+ (built-ins only):
+Each account is directly loadable as a single seed; no concatenation of independently reset ledgers is needed. `source_catalog` qualifies source-record types and actors, and `date_fields` identifies the actual authoritative occurrence field in each collection. The App package pin is `344cb4fe76d839422996b15dfa43a46e69b1d94347da4bd91fdb01b059432263` at source revision `1cdfd4778a1249166ca1c4ba899c4b689c48dc16`. Source hashes cover this dataset's configuration/generation code and its own App inputs. `config.json` is per-dataset; another App's revision is not hard-coded into this dataset's tooling.
+
+## Reproduce, count and read back
+
+With Node.js 18+ and built-ins only, from a checkout containing the pinned App and public runtime:
 
 ```sh
 node datasets/transitwallet/2025-2026/generate.cjs
@@ -28,24 +36,36 @@ node datasets/transitwallet/2025-2026/coverage.cjs --check
 node datasets/transitwallet/2025-2026/verify.cjs
 ```
 
-For an independent, maintainer-selected pristine runtime, set `PALE_RUNTIME_ROOT` to that checkout's `runtime` directory, then run:
+The generator imports original source metadata and calls the App's actual business entrypoints/events in chronological order. It is author-side synthesis, not a replacement Core, model rollout or MCP transaction transcript. The verifier separately uses real Agent/Infra MCP processes, loads all three account histories, reads every source list and full business receipt/proof/ledger fields, compares persisted state, checks reset, and rejects corrupted history atomically. Reports are `mcp-readback.json` and `base-mcp-readback.json`. Set `PALE_RUNTIME_ROOT` to an independent pristine `runtime` directory for the latter, passing its output path as the verifier's first argument.
+
+`standalone-mcp-readback.json` repeats the checks from an isolated directory with only this App package and this dataset, using explicit `PALE_APP_ROOT` and an external pristine `PALE_RUNTIME_ROOT`. App/fixture source pins are resolved against that supplied package; no other App's private state is copied or read. `manifest.json` pins all evidence files and both runtime source trees. After checking, set `PALE_BASE_RUNTIME_ROOT` to the exact pristine runtime used and run `node datasets/transitwallet/2025-2026/manifest.cjs` to reproduce the manifest.
+
+## Obtain a Task history before its first session
+
+For a Task starting inside the coverage window, materialize a valid historical prefix by replaying only the source imports and actions preceding its first-session cutoff:
 
 ```sh
-node datasets/transitwallet/2025-2026/verify.cjs datasets/transitwallet/2025-2026/base-mcp-readback.json
+node datasets/transitwallet/2025-2026/generate.cjs --before 2026-06-15T12:00:00Z --output task-prefix.json
 ```
 
-`PALE_APP_ROOT` can point at an independently obtained exact App package. Both reports identify its hash. The verifier uses real separate Agent and Infra stdio MCP processes. For **every partition**, it loads exact data through `env.load_seed`, reads the bound account and public business tools, compares the entire persisted state and real receipt/proof/ledger fields, verifies read-only behavior, and resets to that loaded data/time baseline. It also rejects corrupted business history atomically. These tools use disposable runtime directories, not production accounts or credentials.
+The command supports cutoffs from 2026-01-01 through 2027-01-01. It leaves the committed full corpus unchanged. Source occurrence times and completed actions in the output precede the cutoff; already published future service/contract windows can remain known. Pending requests, open obligations and coherent reference/financial state are retained as they existed then. The full final snapshot is not merely filtered into orphaned rows. The verifier actually generates this prefix, loads and reads all three resulting accounts, and resets to those selected baselines.
 
-To reuse a partition directly, read its `data`, `load_at` and account binding, use the App's pinned `fixtures/binding.json`, and submit them on the Infra connection to `env.load_seed` with the currently observed `expected_version`. The Agent connection can then use `transitwallet.records.list` / `.records.get` and the App's business read tools. The Agent cannot load or reset its own seed. `verify.cjs` is the executable load/query example; observations contain actual run versions, readback hashes, representative content and business receipt IDs.
+To load one selected account, use these fields on the **Infra** connection, with `expected_version` from the current `env.snapshot`:
 
-## Counting contract and evidence index
+```javascript
+const selected = prefix.seeds.find(s => s.account_id === 'wallet-nia');
+await infra.call('env.load_seed', {
+  expected_version: observed.version,
+  data: selected.data,
+  binding: prefix.binding,
+  virtual_now: selected.load_at
+});
+```
 
-- `coverage.cjs --check` recalculates the committed report over **actual delivered data**. It normalizes occurrence timestamps to UTC before counting. Date-only input would be interpreted in the same declared UTC zone; this dataset uses explicit timestamps.
-- `date_fields` in `data.json` names the authoritative field in each source. A nested actor reply is a separately dated reply fact. Ordered business-history entries remain a separately labelled source. Counts of dated facts are not counts of unique business objects, and multiple facts/sources on one date contribute only one date to the global count.
-- Venue deadlines, service windows, offers' due dates and slot schedules are **not** counted as occurred activity. Structural objects without an occurrence date are explicitly excluded. Any missing/invalid occurrence dates are errors; outside-window dates are visible exclusions. Generation/export dates and filesystem modification times are never activity dates.
-- `coverage.json`: 1152 object/history rows; 1212 dated fact rows; 48 global distinct dates; monthly/source and complete date breakdowns, real/synthetic classification, inactivity gaps and exclusions. Missing months and unresolved date errors are both zero.
-- `mcp-readback.json`: current-public-runtime load/query/reset observations and relevant negative controls.
-- `base-mcp-readback.json`: identical checks against the independently prepared pristine runtime; compatibility evidence is separate from maintainer acceptance.
-- `manifest.json`: exact SHA256 of data, scripts, report files and runtime source trees. Verify the file hashes before reusing evidence.
+For a Task beginning after 2026, the full corpus ends before its first session: load the selected full history at 2027-01-01, then use Core's Infra-only `env.advance_time` to the declared session time before adding authorized scenario events. For earlier Tasks, use the prefix command. Recount only the actual selected context/seed before the Task cutoff, including any separately supplied personal history, rather than reporting the whole Environment corpus's total. The Agent cannot load, reset or inject its own history.
 
-These data demonstrate historical coverage and loadability. They do not establish Task difficulty, model performance, production deployment or final contribution acceptance. A Task reports only its selected history before its first-session cutoff; it cannot count future scenario events or this whole corpus automatically.
+## Approved-v1 limitations
+
+Departure events must occur exactly at the dated service's `depart_at` in approved v1. A later actual arrival is representable; a delayed departure requires a separately dated offer and a cancel/rebook workflow rather than rewriting a paid ticket. Provider no-show is represented by absent confirmed assistance and the resulting failed physical departure, with a source record explaining the outcome. No new App event or live-provider integration is claimed.
+
+Coverage and readback do not establish model difficulty, production deployment or final acceptance. The original App business/MCP evidence remains in `docs/validation/transitwallet-v0.1.0.md`. This dataset's review baseline is the #260 evidence policy at `6933c430942c64f94874083815829e4a4b20920a`; the reviewed main revision also includes unrelated Mail maintenance, with no App/Core changes needed for these data.

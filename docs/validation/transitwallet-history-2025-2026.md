@@ -1,9 +1,10 @@
-# transitwallet: historical data supplement
+# transitwallet: continuous 2025–2026 account history, dataset 2.0.0
 
-The 2025–2026 evaluation history and reproducible coverage/load/query evidence are in [the dataset evidence index](../../datasets/transitwallet/2025-2026/README.md).
+The revised [data and evidence index](../../datasets/transitwallet/2025-2026/README.md) addresses the dataset review with three directly loadable per-account timelines, business variation, explicit synthetic provenance and a replayable pre-session cutoff export.
 
-- Original on-time v1 App implementation and business/MCP evidence: [transitwallet v0.1.0](transitwallet-v0.1.0.md).
-- New policy baseline: `6933c430942c64f94874083815829e4a4b20920a` (`docs/submission-evidence.md`, #260).
-- Addition: 24 loadable episodes, 48 globally distinct dates, all 24 months represented, zero unresolved date errors.
-- No App/runtime/schema/approved-proposal changes. Approved MCP-only scope remains in force.
-- Full data are original synthetic, with future-dated synthetic records explicitly disclosed. No model difficulty or maintainer acceptance is claimed.
+- Global distinct dates: 209; all 24 months covered **per account**; zero unresolved date errors.
+- Source/App hash: `344cb4fe76d839422996b15dfa43a46e69b1d94347da4bd91fdb01b059432263`. App, Core/runtime, schemas and approved proposal are unchanged.
+- Current, independent-base and isolated package-only MCP readback reports include the three full accounts and three valid Task-prefix accounts each.
+- The reviewer independently reproduced the underlying approved App. This supplement is submitted for renewed dataset review; final maintainer acceptance and Task model qualification are not claimed.
+
+The original on-time [App v0.1.0 evidence](transitwallet-v0.1.0.md) remains available. Version 1.0.0's independent episode corpus is superseded by the continuous account histories; its totals are not the current evidence.
