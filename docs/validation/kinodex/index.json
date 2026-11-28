@@ -1,6 +1,6 @@
 {
   "schema": "kinodex.v1-evidence-index",
-  "recorded_at": "2026-11-26T20:01:30Z",
+  "recorded_at": "2026-11-28T02:06:31Z",
   "app_id": "kinodex",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,9 +10,9 @@
   "proposal_blob_sha": "7eb7aef8ce1cdad0096fa8436e6512c37b65d16c",
   "proposal_status": "plan approved for implementation by the reviewer Chenngzz (/approve-plan for this commit at 2026-11-24T07:08:04Z); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "c3031bf725feca240a4dc0dd52db4d29efe419bf",
-  "app_package_sha256": "a30577050afefa464a4044c35ff8866ab10679c176415c01c73002c9ec5e3ac8",
-  "app_package_git_tree": "65e40fba3088ebc3a7b496307bdcc48e2742d5f9",
+  "app_package_commit": "535c3645fc6f5fa131c8205b3dc41060f46ef76e",
+  "app_package_sha256": "5c5b38da3a94e877718fa0eb9afda3e8f48c7c1fe13ee022ca0ea85ce365485e",
+  "app_package_git_tree": "60c537e8c5a75ac620e8831ca309eb4c861992f2",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -36,14 +36,14 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 38,
-        "pass": 38,
+        "tests": 42,
+        "pass": 42,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 38,
-        "pass": 38,
+        "tests": 42,
+        "pass": 42,
         "fail": 0,
         "skipped": 0
       }
@@ -123,7 +123,7 @@
     "evaluation_dataset": {
       "path": "apps/kinodex/data/evaluation/seed.json",
       "version": "1.0.0",
-      "sha256": "95aa56ff242038af932c8332b9bd4a6efb866ccb8759c069f46603f2e7cbbd55",
+      "sha256": "1a008f66e076020e5cc6a9af8d02b53d776aaba0b04c930b502754e26fbafa92",
       "sha256_matches_dataset_json": true,
       "time_zone": "America/Los_Angeles",
       "window": [
@@ -132,14 +132,14 @@
       ],
       "dataset_clock": "2026-12-01T09:00:00-08:00",
       "totals": {
-        "records": 2772,
-        "counted": 1899,
-        "excluded": 873,
+        "records": 3085,
+        "counted": 1911,
+        "excluded": 1174,
         "invalid": 0,
-        "global_distinct_dates": 606,
+        "global_distinct_dates": 607,
         "earliest": "2025-01-02",
         "latest": "2026-12-30",
-        "distinct_dates_on_or_before_clock": 585,
+        "distinct_dates_on_or_before_clock": 586,
         "distinct_dates_after_clock": 21,
         "happened_distinct_dates": 459,
         "happened_longest_gap": {
@@ -222,11 +222,11 @@
       "real_mcp_demo": {
         "node22": {
           "checks": 26,
-          "load_request_bytes": 1323136
+          "load_request_bytes": 1405265
         },
         "node18": {
           "checks": 26,
-          "load_request_bytes": 1323136
+          "load_request_bytes": 1405265
         }
       }
     }
@@ -252,16 +252,22 @@
     "human review of realism and invented names"
   ],
   "previous_submission": {
-    "head": "cfb382ef4a63e9c664ba721ebe8d47046df14a4c",
-    "app_package_commit": "e2f9debc657a2554612a73f4148853aa63669e04",
-    "app_package_sha256": "8a75a977bf41e1a39113083e966cc9a61f04ae65f42d1fb37c87807ab5c474f0"
+    "head": "95f5307aebb5c3ce2e86f6c560f5eb7d6bc98d9f",
+    "app_package_commit": "c3031bf725feca240a4dc0dd52db4d29efe419bf",
+    "app_package_sha256": "a30577050afefa464a4044c35ff8866ab10679c176415c01c73002c9ec5e3ac8"
   },
   "added_scope_after_plan_approval": {
     "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
     "items": [
       "evaluation dataset in apps/kinodex/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
       "clock cutoff: tools show only records dated at or before the run clock",
-      "package size 4,594,384 bytes of tracked files (was 3,116,402)"
+      "package size 4,709,326 bytes of tracked files (was 4,594,384)"
     ]
-  }
+  },
+  "revisions": [
+    {
+      "package": "535c3645fc6f5fa131c8205b3dc41060f46ef76e",
+      "note": "review of 2026-11-28: later history replaced by an early write or event is kept in the activity row and counted in the receipt (B39-B40); titles exist from their first listing (B41); 313 US rental and purchase windows before the fixture offers, so every diary entry is watchable; current_state_valid_from in dataset.json; services.list test (B42)"
+    }
+  ]
 }

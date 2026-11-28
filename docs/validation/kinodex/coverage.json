@@ -2,8 +2,8 @@
   "scope": "Kinodex evaluation dataset as delivered in apps/kinodex/data/evaluation/seed.json (the shared catalog and Dana Marsh's account)",
   "dataset_id": "kinodex-evaluation-2025-2026",
   "dataset_version": "1.0.0",
-  "seed_sha256": "95aa56ff242038af932c8332b9bd4a6efb866ccb8759c069f46603f2e7cbbd55",
-  "seed_bytes": 1347301,
+  "seed_sha256": "1a008f66e076020e5cc6a9af8d02b53d776aaba0b04c930b502754e26fbafa92",
+  "seed_bytes": 1430080,
   "seed_sha256_matches_dataset_json": true,
   "time_zone": "America/Los_Angeles",
   "window": [
@@ -11,16 +11,17 @@
     "2026-12-31"
   ],
   "dataset_clock": "2026-12-01T09:00:00-08:00",
+  "current_state_valid_from": "2026-11-15T20:10:00Z",
   "method": "Each record is counted on the calendar date of its authoritative field in America/Los_Angeles; date-only fields (watched_on, air_date, release dates) are dates in that zone. Multiple records on one date count once in the global figure. Records outside the window are excluded with a reason; unparseable dates are listed as invalid.",
   "totals": {
-    "records": 2772,
-    "counted": 1899,
-    "excluded": 873,
+    "records": 3085,
+    "counted": 1911,
+    "excluded": 1174,
     "invalid": 0,
-    "global_distinct_dates": 606,
+    "global_distinct_dates": 607,
     "earliest": "2025-01-02",
     "latest": "2026-12-30",
-    "distinct_dates_on_or_before_clock": 585,
+    "distinct_dates_on_or_before_clock": 586,
     "distinct_dates_after_clock": 21,
     "happened_distinct_dates": 459,
     "happened_longest_gap": {
@@ -52,10 +53,16 @@
     },
     {
       "kind": "generated",
-      "records": 113
+      "records": 125
     }
   ],
   "real_records": 0,
+  "diary_watchable": {
+    "entries": 250,
+    "with_us_offer_open": 249,
+    "cinema_window_only": 1,
+    "neither": []
+  },
   "by_source": [
     {
       "source": "diary",
@@ -128,9 +135,9 @@
       "label": "Offer windows opening",
       "field": "available_from",
       "class": "scheduled",
-      "records": 1154,
-      "excluded": 76,
-      "distinct_dates": 366,
+      "records": 1166,
+      "excluded": 377,
+      "distinct_dates": 369,
       "earliest": "2025-01-02",
       "latest": "2026-12-03"
     },
@@ -227,7 +234,7 @@
       "diary": 12,
       "public_reviews": 9,
       "catalog": 2,
-      "offers": 36,
+      "offers": 37,
       "account": 3,
       "distinct_dates": 25,
       "after_clock": 0
@@ -237,7 +244,7 @@
       "diary": 12,
       "public_reviews": 10,
       "catalog": 4,
-      "offers": 35,
+      "offers": 37,
       "account": 1,
       "distinct_dates": 27,
       "after_clock": 0
@@ -257,7 +264,7 @@
       "diary": 6,
       "public_reviews": 7,
       "catalog": 11,
-      "offers": 26,
+      "offers": 30,
       "account": 3,
       "distinct_dates": 26,
       "after_clock": 0
@@ -297,9 +304,9 @@
       "diary": 7,
       "public_reviews": 10,
       "catalog": 10,
-      "offers": 31,
+      "offers": 33,
       "account": 3,
-      "distinct_dates": 26,
+      "distinct_dates": 27,
       "after_clock": 0
     },
     {
@@ -317,7 +324,7 @@
       "diary": 10,
       "public_reviews": 12,
       "catalog": 2,
-      "offers": 23,
+      "offers": 25,
       "account": 2,
       "distinct_dates": 22,
       "after_clock": 0
@@ -377,7 +384,7 @@
       "diary": 8,
       "public_reviews": 13,
       "catalog": 6,
-      "offers": 28,
+      "offers": 29,
       "account": 4,
       "distinct_dates": 27,
       "after_clock": 0
@@ -503,7 +510,7 @@
   },
   "not_counted": [
     "people, credits and services (no date fields)",
-    "guide version 1 published_at (a listing date 30 days before release, shown at any clock; the release itself is counted)",
+    "guide version 1 published_at (the title's listing date; the title is hidden before it, and its release is counted)",
     "alert trigger and correction decision times (each wrote a notice, counted under notices); correction withdrawal time",
     "offer available_until and alert expires_at (scheduled ends)"
   ],
@@ -542,6 +549,15 @@
         "of-00065",
         "of-00127",
         "of-00159"
+      ]
+    },
+    {
+      "reason": "offers: offer window that opened before 2025 (US rental and purchase history from before the window)",
+      "records": 301,
+      "examples": [
+        "of-01233",
+        "of-01234",
+        "of-01235"
       ]
     }
   ],
@@ -7530,6 +7546,2414 @@
       "provenance": "fixture, verbatim",
       "date": "2027-05-08",
       "reason": "scheduled offer window that opens after 2026-12-31"
+    },
+    {
+      "source": "offers",
+      "id": "of-01233",
+      "value": "2024-06-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01234",
+      "value": "2024-06-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01235",
+      "value": "2023-09-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01236",
+      "value": "2023-09-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01237",
+      "value": "2024-05-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01240",
+      "value": "2023-08-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01242",
+      "value": "2024-01-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01243",
+      "value": "2024-04-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01244",
+      "value": "2024-04-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01245",
+      "value": "2023-04-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01246",
+      "value": "2023-02-28T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-28",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01247",
+      "value": "2023-02-28T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-28",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01248",
+      "value": "2024-01-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01249",
+      "value": "2024-01-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01250",
+      "value": "2023-04-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01251",
+      "value": "2023-04-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01252",
+      "value": "2023-10-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01253",
+      "value": "2023-10-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01254",
+      "value": "2023-07-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01255",
+      "value": "2023-07-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01256",
+      "value": "2024-04-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01257",
+      "value": "2024-04-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01258",
+      "value": "2023-12-24T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-24",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01259",
+      "value": "2023-12-24T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-24",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01260",
+      "value": "2023-01-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01261",
+      "value": "2023-01-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01262",
+      "value": "2024-04-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01263",
+      "value": "2024-04-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01264",
+      "value": "2023-02-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01265",
+      "value": "2023-02-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01266",
+      "value": "2023-05-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01267",
+      "value": "2023-11-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01268",
+      "value": "2023-11-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01269",
+      "value": "2024-03-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01270",
+      "value": "2024-03-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01273",
+      "value": "2023-05-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01274",
+      "value": "2023-05-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01275",
+      "value": "2023-12-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01276",
+      "value": "2023-12-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01277",
+      "value": "2023-12-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01278",
+      "value": "2023-12-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01279",
+      "value": "2024-04-26T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-26",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01280",
+      "value": "2024-04-26T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-26",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01281",
+      "value": "2023-06-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01282",
+      "value": "2023-06-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01283",
+      "value": "2023-06-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01284",
+      "value": "2023-06-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01285",
+      "value": "2023-05-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01286",
+      "value": "2023-05-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01287",
+      "value": "2024-07-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01288",
+      "value": "2024-07-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01289",
+      "value": "2023-01-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01290",
+      "value": "2023-01-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01291",
+      "value": "2023-01-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01292",
+      "value": "2023-01-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01293",
+      "value": "2024-08-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01294",
+      "value": "2024-08-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01295",
+      "value": "2023-02-14T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-14",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01296",
+      "value": "2023-02-14T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-14",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01297",
+      "value": "2023-11-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01298",
+      "value": "2023-11-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01299",
+      "value": "2023-04-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01300",
+      "value": "2023-04-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01301",
+      "value": "2024-01-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01302",
+      "value": "2024-05-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01303",
+      "value": "2023-04-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01304",
+      "value": "2023-10-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01305",
+      "value": "2023-10-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01306",
+      "value": "2024-07-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01307",
+      "value": "2024-05-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01308",
+      "value": "2024-05-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01309",
+      "value": "2023-06-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01310",
+      "value": "2023-06-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01311",
+      "value": "2023-07-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01312",
+      "value": "2024-06-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01313",
+      "value": "2024-06-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01314",
+      "value": "2023-08-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01315",
+      "value": "2023-08-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01316",
+      "value": "2024-05-28T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-28",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01317",
+      "value": "2023-07-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01318",
+      "value": "2023-07-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01319",
+      "value": "2024-08-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01320",
+      "value": "2024-08-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01321",
+      "value": "2023-04-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01322",
+      "value": "2023-04-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01323",
+      "value": "2024-05-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01324",
+      "value": "2024-05-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01325",
+      "value": "2023-09-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01326",
+      "value": "2023-09-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01327",
+      "value": "2024-04-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01328",
+      "value": "2024-04-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01329",
+      "value": "2024-02-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01330",
+      "value": "2024-02-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01331",
+      "value": "2024-03-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01332",
+      "value": "2024-03-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01333",
+      "value": "2023-12-01T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-01",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01334",
+      "value": "2023-12-01T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-01",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01335",
+      "value": "2024-06-28T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-28",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01336",
+      "value": "2024-06-28T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-28",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01337",
+      "value": "2024-04-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01338",
+      "value": "2024-04-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01339",
+      "value": "2023-03-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01340",
+      "value": "2024-03-28T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-28",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01341",
+      "value": "2024-05-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01342",
+      "value": "2024-05-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01343",
+      "value": "2024-08-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01344",
+      "value": "2024-08-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01345",
+      "value": "2024-01-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01346",
+      "value": "2024-04-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01347",
+      "value": "2024-04-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01348",
+      "value": "2024-04-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01349",
+      "value": "2024-02-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01350",
+      "value": "2024-06-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01351",
+      "value": "2024-06-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01353",
+      "value": "2023-01-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01354",
+      "value": "2023-01-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01355",
+      "value": "2023-05-14T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-14",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01356",
+      "value": "2023-05-14T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-14",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01357",
+      "value": "2023-09-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01358",
+      "value": "2023-12-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01359",
+      "value": "2023-12-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01360",
+      "value": "2023-06-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01361",
+      "value": "2023-06-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01362",
+      "value": "2023-02-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01363",
+      "value": "2023-02-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01364",
+      "value": "2023-04-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01365",
+      "value": "2023-05-14T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-14",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01366",
+      "value": "2023-01-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01367",
+      "value": "2023-01-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01368",
+      "value": "2024-07-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01369",
+      "value": "2023-07-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01370",
+      "value": "2023-07-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01371",
+      "value": "2023-10-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01372",
+      "value": "2023-10-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01375",
+      "value": "2023-06-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01376",
+      "value": "2023-06-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01377",
+      "value": "2024-07-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01378",
+      "value": "2024-07-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01379",
+      "value": "2024-02-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01380",
+      "value": "2024-02-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01381",
+      "value": "2023-01-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01382",
+      "value": "2023-01-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01383",
+      "value": "2024-03-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01384",
+      "value": "2024-03-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01385",
+      "value": "2023-07-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01386",
+      "value": "2023-07-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01387",
+      "value": "2023-10-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01388",
+      "value": "2024-01-01T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-01",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01389",
+      "value": "2023-06-19T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-19",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01390",
+      "value": "2023-01-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01391",
+      "value": "2023-01-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01392",
+      "value": "2023-12-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01393",
+      "value": "2023-12-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01394",
+      "value": "2023-07-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01395",
+      "value": "2023-07-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01396",
+      "value": "2024-03-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01397",
+      "value": "2024-02-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01398",
+      "value": "2024-02-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01399",
+      "value": "2023-08-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01400",
+      "value": "2023-08-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01401",
+      "value": "2024-02-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01402",
+      "value": "2024-02-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01403",
+      "value": "2023-09-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01404",
+      "value": "2023-09-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01405",
+      "value": "2023-07-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01406",
+      "value": "2023-07-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01407",
+      "value": "2024-01-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01408",
+      "value": "2024-08-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01409",
+      "value": "2024-08-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01410",
+      "value": "2024-04-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01411",
+      "value": "2024-04-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01412",
+      "value": "2024-03-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01413",
+      "value": "2024-03-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01414",
+      "value": "2023-05-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01415",
+      "value": "2024-03-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01416",
+      "value": "2024-03-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01417",
+      "value": "2023-01-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01418",
+      "value": "2023-01-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01419",
+      "value": "2024-05-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01420",
+      "value": "2024-05-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01421",
+      "value": "2023-05-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01422",
+      "value": "2023-05-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01423",
+      "value": "2024-02-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01424",
+      "value": "2024-02-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01425",
+      "value": "2023-02-23T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-23",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01426",
+      "value": "2023-02-23T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-23",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01427",
+      "value": "2023-03-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01428",
+      "value": "2023-03-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01429",
+      "value": "2023-04-24T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-24",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01430",
+      "value": "2023-04-24T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-04-24",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01431",
+      "value": "2024-08-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01432",
+      "value": "2024-08-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01433",
+      "value": "2023-03-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01434",
+      "value": "2023-11-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01435",
+      "value": "2023-11-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01436",
+      "value": "2023-01-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01437",
+      "value": "2023-01-22T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-22",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01438",
+      "value": "2023-06-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01439",
+      "value": "2023-06-27T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-27",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01440",
+      "value": "2023-11-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01441",
+      "value": "2023-11-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01442",
+      "value": "2023-07-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01443",
+      "value": "2023-07-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01444",
+      "value": "2023-06-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01445",
+      "value": "2024-07-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01446",
+      "value": "2024-07-31T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-31",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01447",
+      "value": "2024-07-19T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-19",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01448",
+      "value": "2024-07-19T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-19",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01449",
+      "value": "2023-01-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01450",
+      "value": "2023-01-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01451",
+      "value": "2024-04-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01452",
+      "value": "2024-04-10T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-10",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01453",
+      "value": "2023-12-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01454",
+      "value": "2023-12-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01455",
+      "value": "2024-05-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01456",
+      "value": "2024-05-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01457",
+      "value": "2023-01-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01458",
+      "value": "2023-01-20T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-20",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01459",
+      "value": "2024-05-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01460",
+      "value": "2024-05-07T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-07",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01461",
+      "value": "2024-01-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01462",
+      "value": "2024-01-04T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-01-04",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01463",
+      "value": "2024-07-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01464",
+      "value": "2024-07-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01465",
+      "value": "2024-02-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01466",
+      "value": "2024-02-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01467",
+      "value": "2023-03-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01468",
+      "value": "2023-03-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01469",
+      "value": "2023-03-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01470",
+      "value": "2023-03-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01471",
+      "value": "2024-06-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01472",
+      "value": "2024-06-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-06-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01473",
+      "value": "2023-08-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01474",
+      "value": "2023-08-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01475",
+      "value": "2023-12-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01476",
+      "value": "2024-08-01T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-01",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01477",
+      "value": "2024-08-01T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-08-01",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01478",
+      "value": "2023-10-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01479",
+      "value": "2024-11-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-11-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01480",
+      "value": "2024-11-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-11-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01481",
+      "value": "2023-08-16T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-08-16",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01482",
+      "value": "2024-02-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01483",
+      "value": "2024-02-08T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-08",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01484",
+      "value": "2023-11-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01485",
+      "value": "2023-11-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01486",
+      "value": "2024-02-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01487",
+      "value": "2024-02-29T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-29",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01488",
+      "value": "2023-09-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01489",
+      "value": "2023-09-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01490",
+      "value": "2023-06-01T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-06-01",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01491",
+      "value": "2024-03-19T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-19",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01492",
+      "value": "2024-07-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01493",
+      "value": "2023-02-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01494",
+      "value": "2023-02-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01495",
+      "value": "2023-12-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01496",
+      "value": "2023-12-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01497",
+      "value": "2024-02-19T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-19",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01498",
+      "value": "2024-02-19T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-02-19",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01499",
+      "value": "2024-05-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01500",
+      "value": "2024-05-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01501",
+      "value": "2023-09-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01502",
+      "value": "2023-01-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01503",
+      "value": "2023-01-17T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-17",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01504",
+      "value": "2024-11-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-11-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01505",
+      "value": "2024-11-18T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-11-18",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01506",
+      "value": "2024-07-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01507",
+      "value": "2024-07-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01508",
+      "value": "2024-03-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01509",
+      "value": "2024-03-12T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-12",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01510",
+      "value": "2023-07-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01511",
+      "value": "2023-07-15T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-07-15",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01512",
+      "value": "2023-05-23T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-23",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01513",
+      "value": "2024-03-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01514",
+      "value": "2024-03-05T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-05",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01515",
+      "value": "2023-03-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01516",
+      "value": "2023-03-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-03-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01517",
+      "value": "2023-05-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01518",
+      "value": "2023-05-02T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-02",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01519",
+      "value": "2023-10-25T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-10-25",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01522",
+      "value": "2023-12-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-12-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01523",
+      "value": "2023-01-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01524",
+      "value": "2023-01-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-01-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01525",
+      "value": "2023-05-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01526",
+      "value": "2023-05-06T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-05-06",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01527",
+      "value": "2024-03-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01528",
+      "value": "2024-03-13T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-03-13",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01529",
+      "value": "2023-02-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01530",
+      "value": "2023-02-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-02-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01531",
+      "value": "2024-04-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01532",
+      "value": "2024-04-03T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-04-03",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01533",
+      "value": "2024-07-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01534",
+      "value": "2024-07-30T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-30",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01535",
+      "value": "2023-11-26T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-26",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01536",
+      "value": "2023-11-26T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-11-26",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01537",
+      "value": "2024-07-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01538",
+      "value": "2024-07-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01539",
+      "value": "2024-05-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01540",
+      "value": "2024-05-11T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-05-11",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01541",
+      "value": "2024-07-21T08:00:00Z",
+      "provenance": "generated",
+      "date": "2024-07-21",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01542",
+      "value": "2023-09-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
+    },
+    {
+      "source": "offers",
+      "id": "of-01543",
+      "value": "2023-09-09T08:00:00Z",
+      "provenance": "generated",
+      "date": "2023-09-09",
+      "reason": "offer window that opened before 2025 (US rental and purchase history from before the window)"
     }
   ]
 }
