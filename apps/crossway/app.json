@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "crossway",
+  "version": "0.3.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Rohan Pandey (@Rohan-Pandey1729), PR #27"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "crossway.toll.posted",
+    "crossway.card.status_changed",
+    "crossway.dispute.decided"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "pale.web: nine pages as views of gui/src/app.js with gui/index.html, served by the shared business Web Host (contribution/gui.json)",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Pages are served by the shared business Web Host, which takes a registry and a sandbox or scenario profile; web-registry.json registers Crossway alone at its seed clock.",
+    "Three seeds: fixtures/minimal.json (dani, the manifest seed) and fixtures/seeds/marisol and fixtures/seeds/theo, loaded with env.load_seed using scripts/seed-bundle.cjs.",
+    "Notices are stored as Mail channel.email messages; examples/publish-to-mail.cjs publishes them through Messaging to Mail."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

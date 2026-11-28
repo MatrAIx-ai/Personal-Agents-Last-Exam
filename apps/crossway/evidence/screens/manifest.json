@@ -1,0 +1,373 @@
+{
+  "captured_at": "2026-11-28T03:51:57.471Z",
+  "by": "node apps/crossway/tests/web-checks.cjs --evidence",
+  "app_commit": "962bdff059e18b830b7e92da19ff4b3ad69f71af",
+  "app_tree_clean": true,
+  "host": "runtime/web/server.cjs",
+  "host_revision": "bf8c174224f8549a894b25bf7722059572b761c5",
+  "runtime_version": "1.6.0",
+  "controller_sha256": "82cb9846ce29e4cef5f652d1e2c9d0da39d95dbc29cbbc8194f8b2eefec74c88",
+  "browser": "Chromium 141.0.7390.37 (Playwright 1.56.1, headless)",
+  "node": "v24.10.0",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "run_id": "web",
+  "seed": "dani (fixtures/minimal.json) at 2026-11-02T09:00:00-05:00, then marisol, theo and priya at their clocks",
+  "checks_passed": 59,
+  "shots": [
+    {
+      "file": "policies-01.png",
+      "sequence": "policies",
+      "step": 1,
+      "caption": "Rates and policies: the rules, then account and by-mail rates for each plaza and class (Crossway's own fictional rates).",
+      "seed": "dani",
+      "view": "policies",
+      "records": []
+    },
+    {
+      "file": "not-found-01.png",
+      "sequence": "not-found",
+      "step": 1,
+      "caption": "An address that names no page: \"Page not found\" in the heading and the browser title, with a way back.",
+      "seed": "dani",
+      "view": "not_found",
+      "records": []
+    },
+    {
+      "file": "topup-01.png",
+      "sequence": "topup",
+      "step": 1,
+      "caption": "Start: Dani's balance and status; the card list offers her own cards, and the expired Mastercard is disabled with its expiry.",
+      "seed": "dani",
+      "view": "topup",
+      "records": [
+        "card-dani-mc"
+      ]
+    },
+    {
+      "file": "topup-02.png",
+      "sequence": "topup",
+      "step": 2,
+      "caption": "Error path card_expired: a client that ignores the disabled option submits the expired Mastercard; the App refuses in place and nothing is stored.",
+      "seed": "dani",
+      "view": "topup",
+      "records": [
+        "card-dani-mc"
+      ]
+    },
+    {
+      "file": "topup-03.png",
+      "sequence": "topup",
+      "step": 3,
+      "caption": "Preview: $25.00 from Dani's Visa, balance before and after, preview expiry in Eastern time; Confirm or Cancel.",
+      "seed": "dani",
+      "view": "topup",
+      "records": []
+    },
+    {
+      "file": "topup-04.png",
+      "sequence": "topup",
+      "step": 4,
+      "caption": "Lost response: the confirm committed but its response was dropped; the page shows the network error in the preview and no receipt.",
+      "seed": "dani",
+      "view": "topup",
+      "records": []
+    },
+    {
+      "file": "topup-05.png",
+      "sequence": "topup",
+      "step": 5,
+      "caption": "Retry with the same request ID returns the first receipt: one charge, balance up by $25.00.",
+      "seed": "dani",
+      "view": "topup",
+      "records": [
+        "rc-0041"
+      ]
+    },
+    {
+      "file": "replenish-01.png",
+      "sequence": "replenish",
+      "step": 1,
+      "caption": "Start: auto-replenish runs on Jordan Albright's Amex; Dani's Mastercard is marked expired.",
+      "seed": "dani",
+      "view": "account",
+      "records": [
+        "card-jordan-amex",
+        "card-dani-mc"
+      ]
+    },
+    {
+      "file": "replenish-02.png",
+      "sequence": "replenish",
+      "step": 2,
+      "caption": "Saved: the receipt names the rule as stored (on, $40.00 below $15.00, Dani's Visa).",
+      "seed": "dani",
+      "view": "account",
+      "records": [
+        "card-dani-visa"
+      ]
+    },
+    {
+      "file": "replenish-03.png",
+      "sequence": "replenish",
+      "step": 3,
+      "caption": "Error path amount_out_of_range: a $500.00 amount is refused in place; the earlier \"saved\" receipt is cleared, so only the latest outcome shows.",
+      "seed": "dani",
+      "view": "account",
+      "records": []
+    },
+    {
+      "file": "end-possession-01.png",
+      "sequence": "end-possession",
+      "step": 1,
+      "caption": "Start: the sold Honda Fit HKR4471 is selected; it is still active with possession open.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": [
+        "v-0002"
+      ]
+    },
+    {
+      "file": "end-possession-02.png",
+      "sequence": "end-possession",
+      "step": 2,
+      "caption": "Error path end_in_future: Dec 1, 2026 is after the account date; refused in place, nothing stored.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": []
+    },
+    {
+      "file": "end-possession-03.png",
+      "sequence": "end-possession",
+      "step": 3,
+      "caption": "Confirmation: end possession of HKR4471 on Sep 28, 2026, with what that changes; End possession or Keep the vehicle.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": []
+    },
+    {
+      "file": "end-possession-04.png",
+      "sequence": "end-possession",
+      "step": 4,
+      "caption": "Result: the receipt and the table show HKR4471 ended, possession Jan 6, 2025 to Sep 28, 2026.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": [
+        "v-0002"
+      ]
+    },
+    {
+      "file": "transponder-01.png",
+      "sequence": "transponder",
+      "step": 1,
+      "caption": "Start: the van VNT8812 still carries tp-0001 at class 2; the page says it cannot take another tag.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": [
+        "v-0001",
+        "tp-0001"
+      ]
+    },
+    {
+      "file": "transponder-02.png",
+      "sequence": "transponder",
+      "step": 2,
+      "caption": "Action: the Kia KLM2210 is selected and tp-0001 (now in VNT8812, class 2) is chosen.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": [
+        "v-0004"
+      ]
+    },
+    {
+      "file": "transponder-03.png",
+      "sequence": "transponder",
+      "step": 3,
+      "caption": "Result: tp-0001 is in KLM2210 and charges class 1; the transponders table agrees.",
+      "seed": "dani",
+      "view": "vehicles",
+      "records": [
+        "tp-0001",
+        "v-0004"
+      ]
+    },
+    {
+      "file": "dispute-01.png",
+      "sequence": "dispute",
+      "step": 1,
+      "caption": "Start: n-0017 (HKR4471, Oct 11, 2026) chosen; reason \"sold or not in possession\", transfer date and the Mail evidence reference entered.",
+      "seed": "dani",
+      "view": "disputes",
+      "records": [
+        "n-0017"
+      ]
+    },
+    {
+      "file": "dispute-02.png",
+      "sequence": "dispute",
+      "step": 2,
+      "caption": "Preview: notice, amount, reason, transfer date Sep 28, 2026, evidence \"Mail message m-11133\", the rules; Submit or Cancel.",
+      "seed": "dani",
+      "view": "disputes",
+      "records": []
+    },
+    {
+      "file": "dispute-03.png",
+      "sequence": "dispute",
+      "step": 3,
+      "caption": "Result: dispute dp-0003 submitted for n-0017, with its receipt; the table lists it as submitted.",
+      "seed": "dani",
+      "view": "disputes",
+      "records": [
+        "dp-0003",
+        "n-0017"
+      ]
+    },
+    {
+      "file": "dispute-04.png",
+      "sequence": "dispute",
+      "step": 4,
+      "caption": "Withdraw: confirmation for dp-0004 on n-0018, saying the withdrawal is final; Withdraw dispute or Keep the dispute.",
+      "seed": "dani",
+      "view": "disputes",
+      "records": [
+        "dp-0004"
+      ]
+    },
+    {
+      "file": "dispute-05.png",
+      "sequence": "dispute",
+      "step": 5,
+      "caption": "Result: dp-0004 withdrawn; n-0018 is issued again with the days that remained.",
+      "seed": "dani",
+      "view": "disputes",
+      "records": [
+        "dp-0004",
+        "n-0018"
+      ]
+    },
+    {
+      "file": "pay-01.png",
+      "sequence": "pay",
+      "step": 1,
+      "caption": "Start: every payable notice is preselected; notices in dispute or in collections have a disabled box and the reason.",
+      "seed": "dani",
+      "view": "pay",
+      "records": [
+        "n-0012",
+        "n-0013",
+        "n-0014",
+        "n-0015",
+        "n-0016",
+        "n-0018"
+      ]
+    },
+    {
+      "file": "pay-02.png",
+      "sequence": "pay",
+      "step": 2,
+      "caption": "Error path in_collections: a client that ignores the disabled box submits n-0001; the App rejects the whole preview and names n-0001; nothing stored.",
+      "seed": "dani",
+      "view": "pay",
+      "records": [
+        "n-0001"
+      ]
+    },
+    {
+      "file": "pay-03.png",
+      "sequence": "pay",
+      "step": 3,
+      "caption": "Error path stale_version: another client changed the account after this page loaded; the preview is refused in place and nothing is stored.",
+      "seed": "dani",
+      "view": "pay",
+      "records": []
+    },
+    {
+      "file": "pay-04.png",
+      "sequence": "pay",
+      "step": 4,
+      "caption": "Preview: n-0014 and n-0016 with plaza, toll date and amount, the total, cardholder Dani Reyes and \"Payment is final and closes the right to dispute.\"",
+      "seed": "dani",
+      "view": "pay",
+      "records": [
+        "n-0014",
+        "n-0016"
+      ]
+    },
+    {
+      "file": "pay-05.png",
+      "sequence": "pay",
+      "step": 5,
+      "caption": "Result: receipt rc-0044, $42.75 for n-0014 and n-0016 on Dani's Visa; both left the payable list.",
+      "seed": "dani",
+      "view": "pay",
+      "records": [
+        "rc-0044",
+        "n-0014",
+        "n-0016"
+      ]
+    },
+    {
+      "file": "profiles-01.png",
+      "sequence": "profiles",
+      "step": 1,
+      "caption": "Profile browse: the top-up preview is allowed, the confirm control is not drawn.",
+      "seed": "dani",
+      "view": "topup",
+      "records": []
+    },
+    {
+      "file": "narrow-01.png",
+      "sequence": "narrow",
+      "step": 1,
+      "caption": "The notices page at 390px wide: the table scrolls inside its frame, the page does not.",
+      "seed": "dani",
+      "view": "notices",
+      "records": []
+    },
+    {
+      "file": "seed-marisol-01.png",
+      "sequence": "seed-marisol",
+      "step": 1,
+      "caption": "Seed marisol at its clock: account overview (status suspended, balance $3.50).",
+      "seed": "marisol",
+      "view": "account",
+      "records": []
+    },
+    {
+      "file": "seed-theo-01.png",
+      "sequence": "seed-theo",
+      "step": 1,
+      "caption": "Seed theo at its clock: account overview (status active, balance $24.00).",
+      "seed": "theo",
+      "view": "account",
+      "records": []
+    },
+    {
+      "file": "seed-priya-01.png",
+      "sequence": "seed-priya",
+      "step": 1,
+      "caption": "Seed priya at its clock: account overview (status low balance, balance $12.50).",
+      "seed": "priya",
+      "view": "account",
+      "records": []
+    },
+    {
+      "file": "seed-priya-02.png",
+      "sequence": "seed-priya",
+      "step": 2,
+      "caption": "Seed priya (clock Dec 31, 2026): 12 notices, the latest from Dec 30, 2026, in 6 states.",
+      "seed": "priya",
+      "view": "notices",
+      "records": []
+    }
+  ],
+  "compression": {
+    "by": "python3 -I apps/crossway/evidence/compress-screens.py",
+    "method": "128-colour palette PNG (Pillow median cut), optimized",
+    "bytes_before": 2951252,
+    "bytes_after": 1068594
+  }
+}

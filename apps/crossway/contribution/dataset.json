@@ -1,0 +1,249 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "crossway-minimal",
+  "version": "0.3.0",
+  "description": "Synthetic toll account histories for four people at the Crossway Toll Authority (a fictional state authority), generated for reproducible checks; not a benchmark task. All records are synthetic: none was collected from a real website, account or person, and no real anchor data is used (the reviewer confirmed synthetic data is acceptable). Together the four seeds cover 2025-01-06 through 2026-12-30 in America/New_York; evidence/coverage.md reports the month-by-month counts. The manifest seed is dani (fixtures/minimal.json); marisol, theo and priya are loaded with env.load_seed and listed in fixtures/seeds/index.json. Plazas, rates, plates, people, cards and notices are fictional. No real E-ZPass or Tolls by Mail data, rates or assets are used.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Seed dani (the manifest seed, fixtures/minimal.json). scripts/generate-seed.cjs opens Dani Reyes's account on 2025-01-06 and replays about 22 months of tolls, top-ups, auto-replenishments, notices, payments, disputes and statements through Crossway's own handlers, ending at the fixture clock (2026-11-02). Random transponder tolls and plate reads come from a fixed-seed PRNG; the current notices and vehicles are scripted. Workflow rules follow the public E-ZPass NY and Tolls by Mail sites; amounts and deadlines are Crossway's own.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/crossway/scripts/generate-seed.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20250106,
+        "parameters": {
+          "seed_id": "dani",
+          "file": "apps/crossway/fixtures/minimal.json",
+          "sha256": "c686ad6af3a606c443e1e526ea384e6da53e88026a9ce949084c4f8124ba56e7",
+          "binding": "apps/crossway/fixtures/binding.json",
+          "clock": "2026-11-02T09:00:00-05:00",
+          "schedule": "apps/crossway/examples/schedules/dani.json",
+          "opened_on": "2025-01-06",
+          "commute_probability": 0.3,
+          "weekend_trip_probability": 0.25,
+          "borrowed_car_plate_read_probability": 0.012,
+          "counts": {
+            "vehicles": 5,
+            "cards": 3,
+            "tolls": 174,
+            "plazas_with_tolls": 12,
+            "ledger_rows": 185,
+            "statements": 22,
+            "notices": 18,
+            "notice_states": [
+              "collections",
+              "dismissed",
+              "escalated",
+              "issued",
+              "paid"
+            ],
+            "records": 192,
+            "balance_cents": 1875,
+            "account_status": "active"
+          },
+          "provenance": {
+            "kind": "synthetic",
+            "real_records": 0,
+            "real_anchor": null,
+            "generated_by": "deterministic script (fixed-seed PRNG plus scripted story events), replayed through Crossway's own handlers; no model is called at generation time",
+            "language_model_assistance": "The generator script, the scripted story lines (vehicle labels, dispute explanations) and the Mail evidence messages in examples/messaging/ were written with AI coding assistance (Claude) and reviewed by the author; the generated records are the script's output, not model output.",
+            "human_read_through": "pending"
+          }
+        }
+      }
+    },
+    {
+      "source_id": "generated-marisol",
+      "kind": "synthetic",
+      "description": "Seed marisol (fixtures/seeds/marisol/seed.json), loaded with env.load_seed. Marisol Ortega's account opened 2025-02-03, replayed through Crossway's handlers to the clock 2026-03-09 09:00 Eastern. Her auto-replenish Discover expired in 01/2026, two February attempts failed and the account is suspended; her son's Malibu (BRT6618) was sold on 2026-01-20 and is still listed; a Harborline loaner (LNR4410) is on the account as a temporary plate; her sister Ana's Mastercard is on file. Notices: issued, escalated, disputed (submitted), collections, paid and dismissed.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/crossway/scripts/generate-seed.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20250203,
+        "parameters": {
+          "seed_id": "marisol",
+          "file": "apps/crossway/fixtures/seeds/marisol/seed.json",
+          "sha256": "c61810ca70ad439402a4f359cbbe9140731c45cbdc61a2a32078d18b100163e0",
+          "binding": "apps/crossway/fixtures/seeds/marisol/binding.json",
+          "clock": "2026-03-09T09:00:00-04:00",
+          "schedule": "apps/crossway/examples/schedules/marisol.json",
+          "opened_on": "2025-02-03",
+          "commute_probability": 0.3,
+          "catering_saturday_probability": 0.4,
+          "counts": {
+            "vehicles": 4,
+            "cards": 3,
+            "tolls": 106,
+            "plazas_with_tolls": 12,
+            "ledger_rows": 111,
+            "statements": 13,
+            "notices": 10,
+            "notice_states": [
+              "collections",
+              "dismissed",
+              "disputed",
+              "escalated",
+              "issued",
+              "paid"
+            ],
+            "records": 116,
+            "balance_cents": 350,
+            "account_status": "suspended"
+          },
+          "provenance": {
+            "kind": "synthetic",
+            "real_records": 0,
+            "real_anchor": null,
+            "generated_by": "deterministic script (fixed-seed PRNG plus scripted story events), replayed through Crossway's own handlers; no model is called at generation time",
+            "language_model_assistance": "The generator script, the scripted story lines (vehicle labels, dispute explanations) and the Mail evidence messages in examples/messaging/ were written with AI coding assistance (Claude) and reviewed by the author; the generated records are the script's output, not model output.",
+            "human_read_through": "pending"
+          }
+        }
+      }
+    },
+    {
+      "source_id": "generated-theo",
+      "kind": "synthetic",
+      "description": "Seed theo (fixtures/seeds/theo/seed.json), loaded with env.load_seed. Theo Lindqvist's account opened 2025-05-12, replayed to the clock 2026-06-15 09:00 Eastern. His Mazda (TLQ1185) was traded in on 2026-04-30 and is still listed, with its transponder still inside, so the next owner's reads debit his balance; auto-replenish runs on his business partner Sam's card; his own Visa expired in 03/2026; the rental plate HRB2261 appears in two non-overlapping possession intervals. Notices: issued, escalated (one after a withdrawn dispute), collections, paid and dismissed.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/crossway/scripts/generate-seed.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20250512,
+        "parameters": {
+          "seed_id": "theo",
+          "file": "apps/crossway/fixtures/seeds/theo/seed.json",
+          "sha256": "700500a25299295ca298336099294c3f128682af7a9a7cbaf724aad93e183238",
+          "binding": "apps/crossway/fixtures/seeds/theo/binding.json",
+          "clock": "2026-06-15T09:00:00-04:00",
+          "schedule": "apps/crossway/examples/schedules/theo.json",
+          "opened_on": "2025-05-12",
+          "work_trip_probability": 0.3,
+          "box_truck_probability": 0.3,
+          "mazda_sunday_probability": 0.2,
+          "next_owner_commute_probability": 0.4,
+          "counts": {
+            "vehicles": 5,
+            "cards": 3,
+            "tolls": 138,
+            "plazas_with_tolls": 12,
+            "ledger_rows": 146,
+            "statements": 13,
+            "notices": 8,
+            "notice_states": [
+              "collections",
+              "dismissed",
+              "escalated",
+              "issued",
+              "paid"
+            ],
+            "records": 146,
+            "balance_cents": 2400,
+            "account_status": "active"
+          },
+          "provenance": {
+            "kind": "synthetic",
+            "real_records": 0,
+            "real_anchor": null,
+            "generated_by": "deterministic script (fixed-seed PRNG plus scripted story events), replayed through Crossway's own handlers; no model is called at generation time",
+            "language_model_assistance": "The generator script, the scripted story lines (vehicle labels, dispute explanations) and the Mail evidence messages in examples/messaging/ were written with AI coding assistance (Claude) and reviewed by the author; the generated records are the script's output, not model output.",
+            "human_read_through": "pending"
+          }
+        }
+      }
+    },
+    {
+      "source_id": "generated-priya",
+      "kind": "synthetic",
+      "description": "Seed priya (fixtures/seeds/priya/seed.json), loaded with env.load_seed. Priya Raman's account opened 2025-01-13, replayed to the clock 2026-12-31 09:00 Eastern, so the delivered data reaches the end of the 2025-01-01 to 2026-12-31 coverage window. Her Corolla (RMN5512) was sold on 2026-11-14 with its tag removed but is still listed with tp-0002, so the buyer's drives become plate-only notices; her new CR-V is on a dealer temporary plate (TMP6120) with no tag; auto-replenish still runs on her Mastercard, which expired in 11/2026, and one December attempt failed; her brother Arjun's Discover is on file. Notices: issued, escalated, disputed (submitted), collections, paid and dismissed.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/crossway/scripts/generate-seed.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20250113,
+        "parameters": {
+          "seed_id": "priya",
+          "file": "apps/crossway/fixtures/seeds/priya/seed.json",
+          "sha256": "cade97646435c5e2298c6b13b0b3b9038963ce868d04d410dd20cb5476e89549",
+          "binding": "apps/crossway/fixtures/seeds/priya/binding.json",
+          "clock": "2026-12-31T09:00:00-05:00",
+          "schedule": "apps/crossway/examples/schedules/priya.json",
+          "opened_on": "2025-01-13",
+          "commute_probability": 0.3,
+          "corolla_saturday_probability": 0.25,
+          "counts": {
+            "vehicles": 4,
+            "cards": 3,
+            "tolls": 172,
+            "plazas_with_tolls": 12,
+            "ledger_rows": 177,
+            "statements": 23,
+            "notices": 12,
+            "notice_states": [
+              "collections",
+              "dismissed",
+              "disputed",
+              "escalated",
+              "issued",
+              "paid"
+            ],
+            "records": 184,
+            "balance_cents": 1250,
+            "account_status": "low_balance"
+          },
+          "provenance": {
+            "kind": "synthetic",
+            "real_records": 0,
+            "real_anchor": null,
+            "generated_by": "deterministic script (fixed-seed PRNG plus scripted story events), replayed through Crossway's own handlers; no model is called at generation time",
+            "language_model_assistance": "The generator script, the scripted story lines (vehicle labels, dispute explanations) and the Mail evidence messages in examples/messaging/ were written with AI coding assistance (Claude) and reviewed by the author; the generated records are the script's output, not model output.",
+            "human_read_through": "pending"
+          }
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Authority time is US Eastern (America/New_York rules computed in src/clock.cjs); amounts in cents; IDs stable across resets.",
+    "Outgoing Mail notices and spent previews from the generated history are cleared: history counts as delivered.",
+    "Each source's parameters.sha256 is the SHA-256 of that seed file as committed; tests/seeds.test.cjs checks it. expected_counts covers the manifest seed (dani) only: records() counts tolls and notices.",
+    "Provenance: every record in every seed is synthetic (kind synthetic, 0 real records). The script that generates them and the story text were written with AI coding assistance and are deterministic; rerunning scripts/generate-seed.cjs reproduces each file byte for byte (--check).",
+    "Coverage: scripts/coverage-report.cjs counts the represented dates of the loaded seeds (tolls.at, ledger.at, statements.issued_at, notices.issued_at, disputes.submitted_at and decided_at or withdrawn_at, receipts.created_at) in America/New_York over 2025-01-01..2026-12-31 and writes evidence/coverage.md and evidence/coverage.json."
+  ],
+  "expected_counts": {
+    "records": 192,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks (validateSeed, ledger reconciliation, notice-to-toll mapping, non-overlapping possession intervals, generator reproduction, date floor, SHA-256, coverage report) do not replace human review of realism and variation. The human read-through of the four seeds by the author (Rohan Pandey) is still pending; until it is done review.status stays pending. README.md (Data) describes what each seed holds."
+  }
+}
