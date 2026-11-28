@@ -1251,7 +1251,7 @@
   },
   {
     "name": "tidepool.family.get",
-    "description": "Read the family account: members (download counts are shown for your own row, and for every member when you are the plan manager, with what removing each member would end), open invitations, member slots, the plan in effect now, any scheduled plan change, and billing derived from the current virtual time (current period, the current and next invoice, and payment-due state with its 7-day grace period).",
+    "description": "Read the family account: members (download counts are shown for your own row, and for every member when you are the plan manager, with what removing each member would end), open invitations, member slots, the plan in effect now, any scheduled plan change, and billing as of now (current period, the current and next invoice, and payment-due state with its 7-day grace period).",
     "read_only": true,
     "scope": "tidepool.family.get",
     "resource_target": "bound family account",
@@ -2861,7 +2861,7 @@
   },
   {
     "name": "tidepool.downloads.list",
-    "description": "List a member's downloads with status derived from the current virtual time: queued until its completion time, then downloaded; needs_check once the device is more than 30 days past its last check-in or a declined payment is past its grace period; removed when cancelled, removed, or auto-deleted. Removed downloads are left out unless include_removed is true. Also returns storage per device. id must be the signed-in member; another member returns forbidden.",
+    "description": "List a member's downloads with each one's current status: queued until its completion time, then downloaded; needs_check once the device is more than 30 days past its last check-in or a declined payment is past its grace period; removed when cancelled, removed, or auto-deleted. Removed downloads are left out unless include_removed is true. Also returns storage per device. id must be the signed-in member; another member returns forbidden.",
     "read_only": true,
     "scope": "tidepool.downloads.list",
     "resource_target": "member named by id in the bound family account",
@@ -3702,7 +3702,7 @@
   },
   {
     "name": "tidepool.plan.preview_change",
-    "description": "Quote a plan change without applying it, computed by the same rules plan.confirm_change applies at the current virtual time: whether it is an upgrade (applies at once; the prorated price difference for the rest of the current period is added to the next invoice), a downgrade (scheduled for the end of the current period, refused if active members plus open invitations exceed the new limit) or none (the plan in effect, which revokes any scheduled change), whether it is allowed (blocked_by explains why not), and the resulting next invoice.",
+    "description": "Quote a plan change without applying it, computed by the same rules plan.confirm_change would apply now: whether it is an upgrade (applies at once; the prorated price difference for the rest of the current period is added to the next invoice), a downgrade (scheduled for the end of the current period, refused if active members plus open invitations exceed the new limit) or none (the plan in effect, which revokes any scheduled change), whether it is allowed (blocked_by explains why not), and the resulting next invoice.",
     "read_only": true,
     "scope": "tidepool.plan.preview_change",
     "resource_target": "bound family account",
@@ -4704,7 +4704,7 @@
   },
   {
     "name": "tidepool.downloads.add",
-    "description": "Download a track, album or episode to one of the member's devices. The item's bytes are reserved at once and the download completes one simulated minute later (status queued until completes_at). Exceeding the device's free Tidepool storage returns storage_full and changes nothing; a removed item returns unavailable; a device without offline storage returns unavailable; a payment past its grace period returns payment_due. An item already on the device returns the existing download with changed false. id must be the signed-in member; another member returns forbidden.",
+    "description": "Download a track, album or episode to one of the member's devices. The item's bytes are reserved at once and the download completes one minute later (status queued until completes_at). Exceeding the device's free Tidepool storage returns storage_full and changes nothing; a removed item returns unavailable; a device without offline storage returns unavailable; a payment past its grace period returns payment_due. An item already on the device returns the existing download with changed false. id must be the signed-in member; another member returns forbidden.",
     "read_only": false,
     "scope": "tidepool.downloads.add",
     "resource_target": "member named by id in the bound family account",

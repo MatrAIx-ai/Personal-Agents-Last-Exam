@@ -1122,11 +1122,12 @@ test('after a removal at the clock, writes and every event type naming the membe
   // Sam's phone still checks in; Sam's follows get no notice or auto-download; removing an item Sam had downloaded is fine.
   f.event(event('priya-phone-checkin', {}, {device_id: 'dev-sam-phone'}));
   const notices = f.data.notifications.length, downloads = f.data.downloads.length;
-  f.event(ev('catalog-remove-staticsignal-071'));
+  f.event(event('catalog-remove-staticsignal-071', {}, {item_id: 'ep-harborhours-088'}));
   f.event(ev('fieldnotes-115-publish'));
   const after = f.data;
   assert.ok(after.notifications.slice(notices).every(n => n.member_id !== 'mem-sam') && after.downloads.slice(downloads).every(d => d.member_id !== 'mem-sam'));
   assert.deepEqual(afterRemoval(after, 'mem-sam', after.members.find(m => m.member_id === 'mem-sam').removed_at), {});
+  assert.equal(after.downloads.find(d => d.download_id === 'dl-122').removed_reason, 'member_removed', 'the catalog removal leaves Sam\'s removed download as it was');
   // Invited again and accepted, Sam is reactivated.
   f.call('tidepool.members.invite', {id: 'person-sam'});
   f.event(event('invite-ana-accept', {at: '2026-11-28T09:00:00-08:00'}, {invitee_person_id: 'person-sam'}));
