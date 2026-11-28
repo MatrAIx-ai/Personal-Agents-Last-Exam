@@ -1,6 +1,6 @@
 {
   "app_id": "tidepool",
-  "package_sha256": "57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202",
+  "package_sha256": "023102d909982c858b0077860801ebf4cc8c52bdc2709055c3b086841c53a8ea",
   "node": "v22.23.2",
   "dataset": {
     "path": "apps/tidepool/data/evaluation/seed.json",
@@ -404,10 +404,29 @@
         "notifications": 14,
         "billing.payments": 8
       }
+    },
+    {
+      "label": "Early member removal",
+      "clock": "2026-04-01T12:00:00-07:00",
+      "request_id": "early-remove-sam",
+      "member_id": "mem-sam",
+      "later_history_removed": {
+        "devices": 6,
+        "sessions": 143,
+        "progress": 87,
+        "plays": 28,
+        "follows": 3,
+        "upnext": 2,
+        "downloads": 33,
+        "library": 8,
+        "playlists": 4,
+        "notifications": 14,
+        "billing.payments": 8
+      }
     }
   ],
   "checks": {
-    "count": 95,
+    "count": 97,
     "passed": [
       "The bundle carries the dataset's own dataset.json with the matching record count (826)",
       "dataset.json records the seed's sha256",
@@ -503,7 +522,9 @@
       "At 2026-04-01 the first eight album downloads commit and report no later history",
       "The ninth (alb-copperleaf-1) commits and its receipt counts the later family records it dropped (143 sessions, 4 playlists, 8 payments)",
       "Its activity row in env.snapshot holds exactly those records, each as the loaded seed stored it",
-      "An identical retry returns the stored receipt, marked duplicate, with the same counts"
+      "An identical retry returns the stored receipt, marked duplicate, with the same counts",
+      "At 2026-04-01 removing Sam commits and its receipt counts the later family records it dropped, as its activity row holds them",
+      "At the dataset clock Sam is still removed, with no downloads and no collaborator place"
     ]
   }
 }

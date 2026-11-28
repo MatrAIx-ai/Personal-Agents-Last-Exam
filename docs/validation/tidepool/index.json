@@ -1,6 +1,6 @@
 {
   "schema": "tidepool.v1-evidence-index",
-  "recorded_at": "2026-11-28T02:22:42Z",
+  "recorded_at": "2026-11-28T07:19:53Z",
   "app_id": "tidepool",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,9 +10,9 @@
   "proposal_blob_sha": "307acdf79525bccc546e772a7481c11c9301cfaa",
   "proposal_status": "plan approved for implementation by the assigned Track reviewer (/approve-plan for this commit at 2026-11-24T07:05:26Z; the bot recorded it after a repeated command at 2026-11-24T21:56:00Z); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "7fc8f06d2d6564d5e0275dac26e0be9088f29c45",
-  "app_package_sha256": "57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202",
-  "app_package_git_tree": "1473c6bd84052d8510a0a2b59c436bb5cf256814",
+  "app_package_commit": "c45b6145751df3f543d57f7f1a8c634f7e1371a5",
+  "app_package_sha256": "023102d909982c858b0077860801ebf4cc8c52bdc2709055c3b086841c53a8ea",
+  "app_package_git_tree": "bcf8b1f0b87cae9f684ba728aa0fa6f4965b9beb",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -36,14 +36,14 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 33,
-        "pass": 33,
+        "tests": 36,
+        "pass": 36,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 33,
-        "pass": 33,
+        "tests": 36,
+        "pass": 36,
         "fail": 0,
         "skipped": 0
       }
@@ -182,11 +182,11 @@
       },
       "real_mcp_demo": {
         "node22": {
-          "checks": 95,
+          "checks": 97,
           "load_request_bytes": 434421
         },
         "node18": {
-          "checks": 95,
+          "checks": 97,
           "load_request_bytes": 434421
         }
       }
@@ -214,23 +214,28 @@
     "human review of realism and invented names"
   ],
   "previous_submission": {
-    "head": "da7f5385ee1e19a5cad200ecb70b7171935229e5",
-    "app_package_commit": "feec7df6c69f4e9b201f4583c9870cb52f6fde03",
-    "app_package_sha256": "d6f7edb116e3247306a77d0c72690778a1dd906a85424a044d6b01d1f9b90ba6"
+    "head": "c79386373b851b5d6b77df194c0ca8797c11520a",
+    "app_package_commit": "7fc8f06d2d6564d5e0275dac26e0be9088f29c45",
+    "app_package_sha256": "57461ea7db8eab955d640a84cb74a95e9f6863b8ed69949dd8bc20adf9c71202"
   },
   "added_scope_after_plan_approval": {
     "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
     "items": [
       "evaluation dataset in apps/tidepool/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
       "clock cutoff: tools show only records dated at or before the run clock",
-      "package size 1,692,561 bytes of tracked files (was 1,668,941)",
-      "`later_history_removed`: counts in every write receipt and the stored records as an optional activity-row field (2026-11-28 revision)"
+      "package size 1,704,435 bytes of tracked files (was 1,692,561)",
+      "`later_history_removed`: counts in every write receipt and the stored records as an optional activity-row field (2026-11-28 revision)",
+      "a removed member has no records dated after the removal: validateSeed rule, so an earlier-clock members.remove drops and reports the later family records (follow-up review of 2026-11-28)"
     ]
   },
   "revisions": [
     {
       "package": "7fc8f06d2d6564d5e0275dac26e0be9088f29c45",
       "note": "review of 2026-11-28 (packages cf8982b and 7fc8f06): later family records dropped or replaced by an early write or event are kept in the activity row and counted in the receipt (B31-B32)"
+    },
+    {
+      "package": "c45b6145751df3f543d57f7f1a8c634f7e1371a5",
+      "note": "follow-up review of 2026-11-28 (package c45b614): validateSeed rejects a removed member with a record dated after removed_at, a download still on a device then, or a collaborator place, so a members.remove at an earlier clock drops and reports the later family records (B34-B36, dataset demo last stage); write tool descriptions no longer mention the clock (tools.json descriptions only); the seed and every fixture are unchanged"
     }
   ]
 }
