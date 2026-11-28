@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Records | PALE Intelligence Host</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <h2>Personal Records</h2>
+        <span class="badge verified">PALE Verified</span>
+      </div>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="library">
+          <span class="icon">📁</span> Document Library
+        </button>
+        <button class="nav-item" data-tab="viewer">
+          <span class="icon">📄</span> Document &amp; Passages
+        </button>
+        <button class="nav-item" data-tab="graph">
+          <span class="icon">🔗</span> Relationship Graph
+        </button>
+        <button class="nav-item" data-tab="proposals">
+          <span class="icon">🛡️</span> Review Proposals
+          <span id="proposal-count-badge" class="counter-badge">0</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <label for="caller-session-toggle">Current Actor:</label>
+        <select id="caller-session-toggle" class="session-select">
+          <option value="user" selected>User (Trusted Session)</option>
+          <option value="agent">Agent (Untrusted / Proposal Only)</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- 1. Document Library View -->
+      <section id="view-library" class="view-panel active">
+        <header class="panel-header">
+          <h1>Document Library</h1>
+          <div class="library-controls">
+            <input type="text" id="search-input" placeholder="Search content, titles, or tags (FTS5)..." />
+            <select id="category-filter">
+              <option value="">All Categories</option>
+              <option value="employment">Employment</option>
+              <option value="tax">Tax</option>
+              <option value="insurance">Insurance</option>
+              <option value="property">Property</option>
+              <option value="utilities">Utilities</option>
+              <option value="banking">Banking</option>
+              <option value="legal">Legal</option>
+            </select>
+            <select id="state-filter">
+              <option value="">All Verification States</option>
+              <option value="INFERRED">Inferred</option>
+              <option value="USER_CONFIRMED">User Confirmed</option>
+              <option value="SUPERSEDED">Superseded</option>
+            </select>
+          </div>
+        </header>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Version</th>
+                <th>State</th>
+                <th>Valid Until</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="documents-table-body">
+              <tr><td colspan="6" class="loading">Loading library records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 2. Document & Passage Viewer -->
+      <section id="view-viewer" class="view-panel">
+        <header class="panel-header">
+          <div>
+            <h1 id="viewer-title">No Document Selected</h1>
+            <p id="viewer-subtitle" class="subtitle">Select a record from the library to inspect content and citations.</p>
+          </div>
+          <div id="viewer-actions" class="viewer-actions"></div>
+        </header>
+        <div class="viewer-split">
+          <div class="text-pane">
+            <h3>Extracted Text &amp; Passage Anchors</h3>
+            <div id="document-text-container" class="document-text-content">
+              <em>Select a document to render text.</em>
+            </div>
+          </div>
+          <div class="citations-pane">
+            <h3>Verified Citations &amp; Claims</h3>
+            <div id="claims-list-container" class="claims-list">
+              <p class="empty-hint">No citations recorded for this document version.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Relationship Graph View -->
+      <section id="view-graph" class="view-panel">
+        <header class="panel-header">
+          <h1>Relationship Graph</h1>
+          <p class="subtitle">Directed semantic relationships connecting evidence packets.</p>
+        </header>
+        <div class="graph-container">
+          <div id="links-summary-list" class="links-grid">
+            <p class="loading">Loading relationship graph...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Proposal & Confirmation Modal/Panel -->
+      <section id="view-proposals" class="view-panel">
+        <header class="panel-header">
+          <h1>Agent Proposals &amp; Confirmation Review</h1>
+          <p class="subtitle">High-consequence agent actions requiring explicit human confirmation.</p>
+        </header>
+        <div id="proposals-list-container" class="proposals-container">
+          <p class="empty-hint">No pending proposals awaiting review.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

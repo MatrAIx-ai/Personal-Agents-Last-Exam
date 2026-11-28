@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "app_id": "personal-records",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Nassim (@nassimberrada)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "personal-records.upsert",
+    "personal-records.inject_document",
+    "personal-records.expiry_check",
+    "personal-records.confirm_decision"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Office (DOCX/XLSX) and EML payloads are stored as raw unparsed blobs without text extraction.",
+    "Scanned PDFs and images rely on deterministic pre-extracted fallback text rather than runtime OCR.",
+    "Peer app adapters (Mail, Files, Contacts, Calendar) are optional and simulated in standalone mode."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

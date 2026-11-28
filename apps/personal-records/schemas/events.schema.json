@@ -1,0 +1,110 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "personal-records.confirm_decision"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "proposal_id": { "type": "string", "minLength": 1 },
+            "expected_proposal_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "expected_target_version": { "type": "integer", "minimum": 1 },
+            "expected_target_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "decision": { "type": "string", "enum": ["APPROVE", "REJECT", "CANCEL"] },
+            "rejection_reason": { "type": "string" }
+          },
+          "required": [
+            "proposal_id",
+            "expected_proposal_hash",
+            "expected_target_version",
+            "expected_target_state_hash",
+            "decision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": ["event_id", "at", "operation", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "enum": [
+            "personal-records.upsert",
+            "personal-records.inject_document",
+            "personal-records.expiry_check"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "account_id": { "type": "string" },
+            "title": { "type": "string", "minLength": 1 },
+            "category": {
+              "type": "string",
+              "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"]
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "mime_type": { "type": "string" },
+            "content_bytes": { "type": "string" },
+            "raw_text": { "type": "string" },
+            "valid_until": {
+              "anyOf": [
+                { "type": "string", "format": "date-time" },
+                { "type": "null" }
+              ]
+            },
+            "threshold_days": { "type": "integer", "minimum": 0 },
+            "suppress_days": { "type": "integer", "minimum": 0 },
+            "source": { "type": "string" },
+            "source_account": { "type": "string" },
+            "message_id": { "type": "string" },
+            "asset_id": { "type": "string" },
+            "represented_date": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "anyOf": [
+                    { "type": "string" },
+                    { "type": "null" }
+                  ]
+                },
+                "precision": { "type": "string", "enum": ["day", "month", "unresolved"] },
+                "provenance": { "type": "string", "minLength": 1 }
+              },
+              "required": ["value", "precision", "provenance"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["event_id", "at", "operation", "payload"],
+      "additionalProperties": false
+    }
+  ]
+}
