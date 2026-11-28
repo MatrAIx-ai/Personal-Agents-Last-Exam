@@ -188,13 +188,16 @@ async function main() {
   // The host's relay: each committed Sent record becomes Mail's own wire message and goes through
   // Messaging. An unknown acknowledgement halts the run for reconciliation; nothing is retried.
   async function relay(a) {
-    const sent = (await a.sender.infra.call('env.snapshot')).snapshot.data.messages.filter(m => m.folder === 'sent' && !a.relayed.has(m.id));
+    const snap = await a.sender.infra.call('env.snapshot'), epoch = snap.version.epoch;
+    const sent = snap.snapshot.data.messages.filter(m => m.folder === 'sent' && !a.relayed.has(m.id));
     for (const record of sent) {
       if (a.halted) break;
-      const wire = mailPublisher.notification(record, {sourceAccount: SENDER.account_id, recipient: INBOX});
+      // Mail's builder. Since #288 it takes the source epoch from the Mail version and puts it in the event ID;
+      // the pinned runtime's builder ignores the option.
+      const wire = mailPublisher.notification(record, {sourceAccount: SENDER.account_id, sourceEpoch: epoch, recipient: INBOX});
       const request_id = a.run + '-relay-' + record.id, receipt = await a.router.call('router.publish', {request_id, message: wire});
       a.relayed.add(record.id);
-      a.deliveries.push({record, wire, request_id, receipt});
+      a.deliveries.push({record, wire, request_id, receipt, epoch});
       if (receipt.status === 'unknown' || receipt.stop_run) a.halted = true;
     }
   }
@@ -293,13 +296,15 @@ async function main() {
   }
 
   // Delivery checks against the actual inbox record, receipt and receiver event status.
+  // Mail's event ID for a Sent record: mail-<id> from the pinned runtime's builder, mail-<epoch>-<id> since #288.
+  const mailEventId = (wire, record, epoch) => (wire.id === 'mail-' + epoch + '-' + record.id ? wire.id : 'mail-' + record.id);
   async function checkDelivered(a, delivery) {
     const {record, wire, receipt} = delivery, inbox = await inboxMessages(a), received = inbox.find(m => m.id === receipt.event_id);
     const status = (await a.inbox.infra.call('env.event_status', {event_id: receipt.event_id})).receipt;
     const shown = (await a.inbox.agent.call('mail.get', {id: receipt.event_id})).message;
     equal(a.run + ': receipt names the inbox account and Mail\'s CloudEvents identity',
       [receipt.status, receipt.target, receipt.cloud_event.id, receipt.cloud_event.source, receipt.cloud_event.time],
-      ['committed', {app_id: 'mail', account_id: INBOX.account_id}, 'mail-' + record.id, 'urn:pale:app:mail:account:' + SENDER.account_id, record.sent_at]);
+      ['committed', {app_id: 'mail', account_id: INBOX.account_id}, mailEventId(wire, record, delivery.epoch), 'urn:pale:app:mail:account:' + SENDER.account_id, record.sent_at]);
     equal(a.run + ': the inbox record matches the sent record (recipient, sender, content, unread)',
       [received.to, received.from, received.subject, received.body, received.folder, received.read],
       [[USER_ADDRESS], SENDER.address, record.subject, record.body, 'inbox', false]);
@@ -380,9 +385,11 @@ async function main() {
     replies.train = {eastbound: {subject: eastMail.subject, body: eastMail.body}, westbound: null};
 
     // The wire fixture: Mail's builder applied to the committed Sent record.
-    const wire = east.deliveries[0].wire;
-    if (WRITE_WIRE) fs.writeFileSync(path.join(pkg, 'examples/mail-wire.json'), JSON.stringify(wire, null, 2) + '\n');
-    equal('The live wire message equals examples/mail-wire.json', wire, load('examples/mail-wire.json'));
+    // The fixture was built on the pinned runtime; since #288 Mail's builder adds the source epoch to the event ID,
+    // so the ID is compared without that qualifier.
+    const wire = east.deliveries[0].wire, pinnedId = w => ({...w, id: w.id.replace('mail-' + east.deliveries[0].epoch + '-', 'mail-')});
+    if (WRITE_WIRE) fs.writeFileSync(path.join(pkg, 'examples/mail-wire.json'), JSON.stringify(pinnedId(wire), null, 2) + '\n');
+    equal('The live wire message equals examples/mail-wire.json (apart from the source epoch that newer Mail builders add to the ID)', pinnedId(wire), load('examples/mail-wire.json'));
     equal('The wire names sender account, explicit recipient account, source message ID and event time',
       [wire.data.source_object.account_id, wire.data.recipient, wire.data.source_object.object_id, wire.time, wire.data.content.body.format],
       [SENDER.account_id, {kind: 'app_account_ref', app_id: 'mail', id: INBOX.account_id}, 'draft-1', T(10, '21:13'), 'text/plain']);
