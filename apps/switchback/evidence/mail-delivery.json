@@ -1,0 +1,115 @@
+{
+  "passed": true,
+  "versions": {
+    "switchback": "0.1.0",
+    "mail": "1.3.0",
+    "runtime": "1.6.0"
+  },
+  "switchback": {
+    "event": "ev-0017",
+    "reservation": "res-0001",
+    "state": "closure_cancelled",
+    "notice": "sb-notice-0001",
+    "refund": [
+      {
+        "id": "pay-0032",
+        "amount_cents": 5600,
+        "posts_at": "2027-05-24T06:00:00-07:00"
+      }
+    ]
+  },
+  "request": {
+    "request_id": "sb-notice-0001",
+    "cloud_event": {
+      "id": "sb-notice-0001",
+      "type": "org.pale.mail.notification.v1",
+      "source": "urn:pale:app:switchback:account:sb-dana",
+      "dataschema": "urn:pale:email-payload:1",
+      "recipient": {
+        "kind": "person_ref",
+        "id": "person-dana"
+      },
+      "source_object": {
+        "app_id": "switchback",
+        "account_id": "sb-dana",
+        "object_type": "reservation",
+        "object_id": "res-0001"
+      }
+    }
+  },
+  "committed": {
+    "receipt": {
+      "status": "committed",
+      "event_id": "router-9303ce1ab58bf0e462fdb5c4f46442d5",
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      },
+      "target": {
+        "app_id": "mail",
+        "account_id": "mail-dana"
+      },
+      "applied_at": "2026-11-15T09:00:00-08:00",
+      "committed_at": "present (wall time)"
+    },
+    "mail_get": {
+      "id": "router-9303ce1ab58bf0e462fdb5c4f46442d5",
+      "account_id": "mail-dana",
+      "to": [
+        "dana.okafor@example.com"
+      ],
+      "folder": "inbox",
+      "subject": "Closure: Cedar Flat stay res-0001 is cancelled with a full refund",
+      "received_at": "2026-11-15T09:00:00-08:00"
+    }
+  },
+  "retried": {
+    "receipt": {
+      "status": "committed",
+      "duplicate": true,
+      "event_id": "router-9303ce1ab58bf0e462fdb5c4f46442d5",
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      },
+      "target": {
+        "app_id": "mail",
+        "account_id": "mail-dana"
+      },
+      "applied_at": "2026-11-15T09:00:00-08:00",
+      "committed_at": "present (wall time)"
+    },
+    "mail_messages_before": 1,
+    "mail_messages_after": 1
+  },
+  "rejected": {
+    "receipt": {
+      "status": "rejected",
+      "code": "recipient_not_authorized"
+    },
+    "mail_unchanged": true,
+    "switchback_unchanged": true
+  },
+  "unknown": {
+    "receipt": {
+      "status": "unknown",
+      "code": "receiver_unconfirmed",
+      "event_id": "router-fd805439f39c01ab2b2dcbecb5023ffe",
+      "stop_run": true
+    },
+    "next_publish": {
+      "status": "halted",
+      "code": "run_halted",
+      "stop_run": true
+    },
+    "reconciliation": {
+      "mail_event_status": "committed",
+      "mail_get": {
+        "id": "router-fd805439f39c01ab2b2dcbecb5023ffe",
+        "subject": "Closure: Cedar Flat stay res-0001 is cancelled with a full refund"
+      },
+      "switchback_unchanged": true
+    }
+  },
+  "business_confirmation": "not applicable: notices go to the account holder's own Mail account (mail-dana, person-dana); no recipient or business party confirms them"
+}

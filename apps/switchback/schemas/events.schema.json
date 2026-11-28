@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Switchback scenario events",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "switchback.inventory.claimed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "site_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "nights": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "maxItems": 14
+            }
+          },
+          "required": [
+            "site_id",
+            "nights"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "switchback.alert.posted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "alert_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "fire_restriction",
+                "road_restriction",
+                "trail_restriction",
+                "water_outage",
+                "electrical_outage",
+                "smoke_advisory"
+              ]
+            },
+            "facility_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "site_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 500,
+              "uniqueItems": true
+            },
+            "from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "to": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "alert_id",
+            "kind",
+            "facility_id",
+            "site_ids",
+            "from",
+            "to",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "switchback.alert.updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "alert_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "fire_restriction",
+                "road_restriction",
+                "trail_restriction",
+                "water_outage",
+                "electrical_outage",
+                "smoke_advisory"
+              ]
+            },
+            "site_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 500,
+              "uniqueItems": true
+            },
+            "from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "to": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "alert_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "switchback.alert.cancelled"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "alert_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "alert_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "switchback.closure.ordered"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "closure_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "facility_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "site_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 500,
+              "uniqueItems": true
+            },
+            "from": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "to": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "closure_id",
+            "facility_id",
+            "site_ids",
+            "from",
+            "to",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "switchback.reservation.checked_in"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reservation_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "reservation_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

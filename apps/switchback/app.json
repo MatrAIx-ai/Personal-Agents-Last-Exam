@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "switchback",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Rohan Pandey (@Rohan-Pandey1729), PR #25"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "switchback.inventory.claimed",
+    "switchback.alert.posted",
+    "switchback.alert.updated",
+    "switchback.alert.cancelled",
+    "switchback.closure.ordered",
+    "switchback.reservation.checked_in"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "pale.web pages on the public business Web Host",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One account per instance; nights beyond the 180-day release window are unreleased, so seeded claims cover that window only.",
+    "Delivery to Mail runs through the host-side Messaging publisher in examples/publish-to-mail.cjs; Switchback does not record delivery.",
+    "Check (f), an independent reproduction, arrives in M3."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

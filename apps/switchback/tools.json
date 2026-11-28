@@ -1,0 +1,1878 @@
+[
+  {
+    "name": "switchback.facilities.search",
+    "description": "Search campground facilities by name, region or description. Lists each facility's policy and active alerts.",
+    "read_only": true,
+    "scope": "switchback.facilities.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "facilities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "facilities"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.facilities.get",
+    "description": "Get one facility with its sites, active alerts and closures.",
+    "read_only": true,
+    "scope": "switchback.facilities.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "facility_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "facility": {
+          "type": "object"
+        },
+        "sites": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "facility",
+        "sites"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.sites.search",
+    "description": "Find sites and the state of each night (unreleased, open, held, booked, closed) for a stay; each night also says whether it is already past in facility time, and a site is available only when every night is open and not past. Attribute filters are off unless given; an unknown attribute never matches a filter, and an active electrical outage removes a site from the electric filter.",
+    "read_only": true,
+    "scope": "switchback.sites.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "arrival": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "departure": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "electric_min_amps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "min_vehicle_ft": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "ada_accessible": {
+          "type": "boolean"
+        },
+        "max_walk_in_ft": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "party_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "pets": {
+          "type": "boolean"
+        },
+        "available_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "arrival",
+        "departure"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "sites": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "sites"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.sites.get",
+    "description": "Get a site's attributes: electric hookup and amperage, maximum vehicle length, ADA access, walk-in distance, occupancy and pets. Optionally the night states for a stay, each with whether that night is already past in facility time.",
+    "read_only": true,
+    "scope": "switchback.sites.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "site_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "arrival": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "departure": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "site_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "site": {
+          "type": "object"
+        },
+        "nights": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "site"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.policy.get",
+    "description": "Read the printed booking rules and each facility's refund and change ladder.",
+    "read_only": true,
+    "scope": "switchback.policy.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "policies"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.list",
+    "description": "List the account's reservations with current state, affected alerts, refund rung and release time.",
+    "read_only": true,
+    "scope": "switchback.reservations.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "confirmed",
+            "checked_in",
+            "completed",
+            "cancelled",
+            "no_show",
+            "closure_cancelled"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.get",
+    "description": "Get one reservation with its ladder, current refund, next rung change and payments.",
+    "read_only": true,
+    "scope": "switchback.reservations.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "reservation_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object"
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "payments"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.alerts.list",
+    "description": "List facility alerts, active or not.",
+    "read_only": true,
+    "scope": "switchback.alerts.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "facility_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "alerts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.account.get",
+    "description": "Read the account holder, saved equipment, saved companions, cards and defaults.",
+    "read_only": true,
+    "scope": "switchback.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.wallet.list",
+    "description": "List saved cards with holder, expiry and which one is the default.",
+    "read_only": true,
+    "scope": "switchback.wallet.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        },
+        "default_card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "cards",
+        "default_card_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.cart.hold",
+    "description": "Hold a site for a stay for 15 minutes. Errors: night_in_past, not_yet_released, site_taken, site_closed.",
+    "read_only": false,
+    "scope": "switchback.cart.hold",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "site_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "arrival": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "departure": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "site_id",
+        "arrival",
+        "departure"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.cart.release",
+    "description": "Release a cart hold.",
+    "read_only": false,
+    "scope": "switchback.cart.release",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "hold_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "hold_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "hold": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "hold"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.preview",
+    "description": "Preview a booking from a hold. Pre-fills the default saved equipment, the saved companions marked for the party and the default card unless others are given. Checks only equipment length, party size and pets. Errors: hold_expired, equipment_exceeds_site, occupancy_exceeded, pets_not_allowed.",
+    "read_only": false,
+    "scope": "switchback.reservations.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "hold_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "primary_occupant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "equipment_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "companion_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "additional_guests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "pets": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "hold_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preview": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.confirm",
+    "description": "Confirm a booking preview and charge the previewed card. Errors: preview_stale, preview_consumed, payment_declined, site_closed.",
+    "read_only": false,
+    "scope": "switchback.reservations.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "preview_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object"
+        },
+        "receipt": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation",
+        "receipt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.late_arrival",
+    "description": "File a late-arrival notice before 21:00 on arrival day; the site is then held until 12:00 the next day. Error: notice_too_late.",
+    "read_only": false,
+    "scope": "switchback.reservations.late_arrival",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "reservation_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.modify.preview",
+    "description": "Preview a date or site change in the same facility. Holds the new nights and shows the price difference, change fee and card. Errors: night_in_past, outside_change_window, site_taken, site_closed, not_yet_released, equipment_exceeds_site, occupancy_exceeded, pets_not_allowed.",
+    "read_only": false,
+    "scope": "switchback.reservations.modify.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "site_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "arrival": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "departure": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "reservation_id",
+        "arrival",
+        "departure"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preview": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.modify.confirm",
+    "description": "Confirm a change. Releases the original nights; this cannot be undone. Errors: preview_stale, preview_consumed, payment_declined, site_closed.",
+    "read_only": false,
+    "scope": "switchback.reservations.modify.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "preview_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.cancel.preview",
+    "description": "Preview a cancellation: the refund rung, refund, card and next rung change. Errors: already_cancelled, already_checked_in.",
+    "read_only": false,
+    "scope": "switchback.reservations.cancel.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "reservation_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preview": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.reservations.cancel.confirm",
+    "description": "Confirm a cancellation. The refund returns to the original card three days later. Errors: preview_stale, preview_consumed.",
+    "read_only": false,
+    "scope": "switchback.reservations.cancel.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "preview_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "reservation": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.wallet.set_default",
+    "description": "Make a saved card the default for new bookings.",
+    "read_only": false,
+    "scope": "switchback.wallet.set_default",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "card_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "default_card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "default_card_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.equipment.save",
+    "description": "Add or update saved equipment; optionally make it the default for new bookings.",
+    "read_only": false,
+    "scope": "switchback.equipment.save",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "equipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "kind": {
+          "enum": [
+            "tent",
+            "trailer",
+            "rv",
+            "van"
+          ]
+        },
+        "length_ft": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "make_default": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "label",
+        "kind",
+        "length_ft"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "equipment": {
+          "type": "object"
+        },
+        "default_equipment_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "equipment",
+        "default_equipment_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "switchback.companions.save",
+    "description": "Add, update or remove a saved companion and whether they are pre-filled in new bookings.",
+    "read_only": false,
+    "scope": "switchback.companions.save",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "companion_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "person_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "default_party": {
+          "type": "boolean"
+        },
+        "remove": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "switchback"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "companion": {
+          "type": "object"
+        },
+        "removed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "companion",
+        "removed"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

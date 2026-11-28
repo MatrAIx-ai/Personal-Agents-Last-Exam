@@ -1,0 +1,145 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "switchback-minimal",
+  "version": "0.3.0",
+  "description": "Synthetic campground, account and reservation records for reproducible checks and for the Environment dataset window 2025-01-01..2026-12-31; not a benchmark task. Three reset fixtures from one seeded generator; the manifest seed is fixtures/minimal.json. Every record is synthetic: no real facility, person, payment or Recreation.gov record is included, and no record is presented as an observed fact. Coverage by month and source: evidence/coverage.md (script scripts/coverage-report.cjs).",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Synthetic records written by fixtures/generate.cjs from a fixed seed: fixtures/minimal.json, the manifest seed (3 facilities, 12 sites, 27 reservations from 2025-01-02, 31 payments). The $10 change fee is modelled on the reference's rules page; the 15-minute hold, release schedule, refund ladders, cutoffs and alert effects are Switchback's own. Its clock (2027-05-20) lies after the coverage window, so it is the full-window source.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "fixtures/generate.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20250101,
+        "parameters": {
+          "fixture": "fixtures/minimal.json",
+          "history_from": "2025-01-01",
+          "clock": "2027-05-20T09:00:00-07:00",
+          "schedule": "fixtures/schedules/minimal.json",
+          "schedule_events": 35,
+          "sha256": "2d1612022bb34d9c4d4521e4d30178e5c685e6781714682c1f74120d38cfb2e4",
+          "quiet_month_records": [
+            "res-0023",
+            "res-0024",
+            "res-0025",
+            "res-0026",
+            "res-0027"
+          ],
+          "provenance": "synthetic",
+          "language_model_assistance": "The generator script fixtures/generate.cjs, including its fixed text (facility names, regions and descriptions, alert texts, closure reasons, companion and cardholder names), was written by the author with AI assistance (Claude through Claude Code). No language model writes records: every record is produced deterministically by that script from its fixed seed, and claim instants were drawn once from OS entropy.",
+          "coverage_report": "evidence/coverage.md"
+        }
+      }
+    },
+    {
+      "source_id": "fixture-high-country",
+      "kind": "synthetic",
+      "description": "Reset fixture fixtures/high-country.json, written by fixtures/generate.cjs: 7 fictional facilities, 308 sites, 3 policy records, 14 reservations of one account, 1237 competing claims in the 180-day released window. Loaded by Infra with env.load_seed at its own clock (2026-06-12, inside the coverage window); not the manifest seed.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "fixtures/generate.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20260612,
+        "parameters": {
+          "fixture": "fixtures/high-country.json",
+          "history_from": "2025-01-06",
+          "clock": "2026-06-12T08:00:00-06:00",
+          "schedule": "fixtures/schedules/high-country.json",
+          "schedule_events": 38,
+          "sha256": "72b70303e3d03330f3ac9a9ad4e01d06bdf0b3f9bd9027a165de971bdd2f346b",
+          "quiet_month_records": [
+            "res-0012",
+            "res-0013",
+            "res-0014"
+          ],
+          "provenance": "synthetic",
+          "language_model_assistance": "The generator script fixtures/generate.cjs, including its fixed text (facility names, regions and descriptions, alert texts, closure reasons, companion and cardholder names), was written by the author with AI assistance (Claude through Claude Code). No language model writes records: every record is produced deterministically by that script from its fixed seed, and claim instants were drawn once from OS entropy.",
+          "coverage_report": "evidence/coverage.md"
+        }
+      }
+    },
+    {
+      "source_id": "fixture-desert-rivers",
+      "kind": "synthetic",
+      "description": "Reset fixture fixtures/desert-rivers.json, written by fixtures/generate.cjs: 6 fictional facilities, 261 sites, 2 policy records, 23 reservations of one account, 1047 competing claims in the 180-day released window. Loaded by Infra with env.load_seed at its own clock (2026-10-02, inside the coverage window); not the manifest seed.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "fixtures/generate.cjs",
+        "tool_version": "0.3.0",
+        "seed": 20261002,
+        "parameters": {
+          "fixture": "fixtures/desert-rivers.json",
+          "history_from": "2025-01-03",
+          "clock": "2026-10-02T07:30:00-07:00",
+          "schedule": "fixtures/schedules/desert-rivers.json",
+          "schedule_events": 38,
+          "sha256": "2c0895296ae64ef0c9273d423c62a29beb99650b2e4ca2ed12bee63f8ec7f8e5",
+          "quiet_month_records": [
+            "res-0021",
+            "res-0022",
+            "res-0023"
+          ],
+          "provenance": "synthetic",
+          "language_model_assistance": "The generator script fixtures/generate.cjs, including its fixed text (facility names, regions and descriptions, alert texts, closure reasons, companion and cardholder names), was written by the author with AI assistance (Claude through Claude Code). No language model writes records: every record is produced deterministically by that script from its fixed seed, and claim instants were drawn once from OS entropy.",
+          "coverage_report": "evidence/coverage.md"
+        }
+      }
+    },
+    {
+      "source_id": "recgov-rules",
+      "kind": "collected",
+      "description": "Recreation.gov Reservation Rules and Policies page, read for one modelled rule: a $10 change fee for switching to dates entirely outside the original reservation. No text, data or assets were copied.",
+      "uri": "https://www.recreation.gov/rules-reservation-policies",
+      "license": "Rule reference only; nothing redistributed",
+      "usage": "permitted",
+      "collection": {
+        "method": "Read the public page in a browser-equivalent client",
+        "collected_at": "2026-11-24T06:29:30Z"
+      },
+      "generation": null
+    }
+  ],
+  "transformations": [
+    "Fixed UTC offsets per facility (-06:00, -07:00 or -08:00); amounts in cents; IDs stable across resets.",
+    "Rule modelled on the reference (source recgov-rules, accessed 2026-11-24T06:29:30Z): $10 change fee for a date or site change.",
+    "Switchback-defined rules: the 15-minute cart hold (the reference rules page does not state a hold time), the 180-day 07:00 release, the four-rung refund ladder, the 3-day/50% and week-out policy records, the 21:00 no-show release and 12:00 late-arrival release, the three-day refund posting, alert effects on stays and on the electric filter, and closures cancelling whole stays.",
+    "Seeded history starts on or after 2025-01-01; task clocks and scenario events are on or after 2026-01-01 (maintainer date rule, enforced by a test).",
+    "Each fixture has a default scenario schedule of 30-50 events in fixtures/schedules/. Claim instants were drawn once from OS entropy (crypto.randomInt) into fixtures/evaluator/*.claim-times.json and are never regenerated; no tool or page reads either directory.",
+    "Page icons are drawn from shapes by gui/icons.cjs (CC0 1.0) and embedded in gui/src/app.js; they are not catalog assets.",
+    "Quiet months: fillQuietMonths in fixtures/generate.cjs runs after each fixture is built, with its own random stream, and adds one stay of the same account (a stay in that month in season, otherwise a booking made that month for a later trip inside the 180-day release window) for each month from 2025-01 up to the fixture clock that had no dated record. Records written before this pass keep their bytes and IDs; the added ones are listed per source under generation.parameters.quiet_month_records.",
+    "Provenance: every source of kind synthetic is synthetic in full; no partition mixes real and synthetic records. The reference product (source recgov-rules) supplied one rule, not records. The generator script fixtures/generate.cjs, including its fixed text (facility names, regions and descriptions, alert texts, closure reasons, companion and cardholder names), was written by the author with AI assistance (Claude through Claude Code). No language model writes records: every record is produced deterministically by that script from its fixed seed, and claim instants were drawn once from OS entropy.",
+    "Coverage: scripts/coverage-report.cjs counts represented occurrence dates per collection in America/Phoenix for 2025-01-01..2026-12-31 and writes evidence/coverage.json and evidence/coverage.md; npm test fails if they differ from a fresh run, and tests/platform-checks.cjs checks that the counted records load through env.load_seed and are returned by the Agent tools.",
+    "expected_counts.records counts the manifest seed's facilities, sites and reservations (3 + 12 + 27)."
+  ],
+  "expected_counts": {
+    "records": 42,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Human read-through by Rohan Pandey of the records in all three fixtures (realism, variation and the fixed text written with AI assistance) is still pending; until it is recorded this stays pending. Automated checks do not replace that review or a review of reuse permissions."
+  }
+}
