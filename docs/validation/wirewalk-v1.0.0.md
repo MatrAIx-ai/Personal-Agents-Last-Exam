@@ -4,11 +4,11 @@ Owner: @byshail. App `wirewalk` 1.0.0 under `apps/wirewalk/`; public runtime 1.6
 - **Scenario dependencies:** the walkthrough alone also uses Mail 1.3.0 and Calendar 1.3.0 from the checkout.
 - **Plan:** it implements the plan in [PR #209](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/209), `proposals/environment/wirewalk.md` at `ef524fc1b1882ead45879862862b96b360ee8cfc`.
 - **Approval:** the assigned Track reviewer approved that plan for implementation on 2026-11-24: review state `APPROVED` at 01:27:28Z, and `/approve-plan` for that commit at 01:27:39Z. The proposal file is unchanged since that commit (blob `79ea5b93c3555b818290b114dd10fed3e669007f`).
-- **Commits:** the package is at commit `07303aeb2ed851b7aaaf1e1061a7b67adde9d8b7`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `3eb7219` (package `a24e611`); this revision answers the v1 review of 2026-11-26 and its follow-up (the list of dataset posts that assume the example events) with the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) and a [statement on CI](#ci-and-the-base-validator-at-the-submitted-revision).
+- **Commits:** the package is at commit `7607709451cd351e3eb356878fa6fc52c44389db`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `3eb7219` (package `a24e611`); this revision answers the v1 review of 2026-11-26 and its follow-up (the list of dataset posts that assume the example events) with the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) and a [statement on CI](#ci-and-the-base-validator-at-the-submitted-revision). `7607709` makes an agent bookmark that replaces a seeded later one report it in the receipt.
 
 This document records implementation evidence; it claims no acceptance.
 
-Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [wirewalk/index.json](wirewalk/index.json), next to the raw reports.
+Checked on 2026-11-28 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [wirewalk/index.json](wirewalk/index.json), next to the raw reports.
 
 **Automated outcome: passed.** Independent reproduction, official CI on the implementation commit and human review are still to come.
 
@@ -16,7 +16,7 @@ Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 
 | Evidence | Result | What was exercised |
 | :--- | :--- | :--- |
-| App-only business tests, package alone | 26 passed, on both Node versions | A copy of `apps/wirewalk/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness. The harness mirrors Core's event handling: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical |
+| App-only business tests, package alone | 27 passed, on both Node versions | A copy of `apps/wirewalk/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness. The harness mirrors Core's event handling: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical |
 | Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs`, `dev/build-contracts.cjs` and `dev/build-dataset.cjs`, run in a copy, leave every committed file byte-identical: fixtures, events, task data, the image, both asset catalogs, dataset counts, schemas and `tools.json`. `npm run build:mail-wire`, which rewrites `examples/mail-wire.json` from a live walkthrough run, was not part of this check. The walkthrough instead asserts that the live wire message equals the committed file (W23) |
 | Public App verifier | 40 checks passed, on both ([node22](wirewalk/public-runtime.node22.json), [node18](wirewalk/public-runtime.node18.json)) | An isolated package copy, then real MCP: discovery without Infra tools; published input and output of the 6 tools the default `scenario` profile lists; the Agent denied all seven Infra operations; history and asset loading and rejection; the declared event with retry and conflict; reset; a separate run; and a restarted process |
 | CI job, reproduced | `wirewalk: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job; it selected `wirewalk` only (`full: false`) |
@@ -25,7 +25,7 @@ Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 | Dataset coverage | 645 distinct dates in 24 of 24 months ([coverage.json](wirewalk/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](wirewalk/reference-suite.node22.json), [node18](wirewalk/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present |
 | Independent base validator | Passed, 40 checks ([report](wirewalk/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `wirewalk` only |
-| Package identity | `92d454d03bf5b7d9519b15c3279cbbd2fe24763a50f50fe5e6e39028df3f01a7` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `6349ee36b79608713af239c67ca8c64690bc71cb` |
+| Package identity | `2b1c9055850f04867a37935ce53ad50ad81c9efbe6b4ee987cbf077b5bf85b65` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `41e4c70873fb7dafb40add6434e5c47a10ad3633` |
 | Human review | Pending | Realism of the posts and threads, including the generated dataset; legibility of the rendered board image; that the accounts, people, places, agencies and companies are fictional |
 
 ## Reproduce
@@ -74,7 +74,7 @@ Each row reads: starting state → action → observed result, then a control th
 | Delayed turn and cutoff | **Delayed turn:** the agent is resumed once, at 18:10, after both 18:05 bulletins. It sends one email with the latest status and source per area: `p24`, repeated by `p26`, and `p25`. **Cutoff:** the cutoff run and its control are identical except for the user's cutoff, 8 pm against 9 pm | At 20:16 the 8 pm variant sees `p27` and sends nothing. The 9 pm control emails the Pine Hollow zone change from `p27`. So the cutoff is what suppresses the email | W67–W97 |
 | Reader operations | **Feed and search.** The feed and search sort newest publication first, with the post ID breaking ties. Search matches the start of words in post text, alt text and link cards, ignoring case and accents. **Traversal.** From a search hit, the quote's source and its later replies are one step away. A thread shows ancestors and replies; account inspection counts only public posts | Reads change nothing. An unknown post and a not-yet-public post get the same `not_found`. A query with no letters or digits, or a reversed time window, is `invalid_arguments` | B1–B3, B6, B12, B18; W2, W8 |
 | Stable paging | **Setup.** A first page of county posts after `p25` at 18:05. **Action.** `p26` arrives at the same 18:05. **Result.** The cursor's next page stays on the original set; a fresh search leads with `p26` | A lower-ID post at the same time, which would sort into the remaining pages, is kept out too. A seeded post that becomes public later is kept out. A forged count, another query or a differently refilled feed: `invalid_arguments` | B8–B11; W133 |
-| Bookmarks and isolation | **Add.** `wirewalk.bookmarks.add` returns `{post_id, bookmarked, changed}` only. **Persistence.** After Infra advances the clock, a new Agent connection lists the same bookmarks. **Isolation.** Priya never sees Dario's bookmarks, and the tools take no `account_id` argument | Byte-identical retries of an add and of a removal return the original result as a duplicate. A reused request ID is `idempotency_conflict`. A stale add and a stale removal are `stale_version` with the set unchanged. Two writes against one version: one commits, one is stale. An unknown post is `not_found`. The package's default `scenario` policy denies both writes, so a task grants them in its own policies | B13, B14; W3, W109–W123 |
+| Bookmarks and isolation | **Add.** `wirewalk.bookmarks.add` returns `{post_id, bookmarked, changed, later_history_removed}` only (the last is `null` unless it replaced a seeded later bookmark). **Persistence.** After Infra advances the clock, a new Agent connection lists the same bookmarks. **Isolation.** Priya never sees Dario's bookmarks, and the tools take no `account_id` argument | Byte-identical retries of an add and of a removal return the original result as a duplicate. A reused request ID is `idempotency_conflict`. A stale add and a stale removal are `stale_version` with the set unchanged. Two writes against one version: one commits, one is stale. An unknown post is `not_found`. The package's default `scenario` policy denies both writes, so a task grants them in its own policies | B13, B14; W3, W109–W123 |
 | Events | `post.publish` adds an original, reply, quote or repost, public from the event time. The approved example applies verbatim, and the parent's reply count and conversation include it | Each of these is `invalid_event` with state unchanged: an unknown author or referenced post; a reference to a later post or to a repost; the wrong relationship field; text on a repost; a second repost by the same account; an already-published ID. A replayed event ID leaves one reply; changed content under it is `idempotency_conflict`. The Agent cannot inject posts | B4, B5; W4, W9–W10, W124–W126 |
 | Seeds, image, reset and records | `examples/task-data` (Dario, 44 posts) equals the minimal history plus the seven example events. It is rebuilt over MCP and also loads directly with its own dataset and catalog. Reset restores the loaded history, bookmarks and clock of that instance: after the train-east reset `p19` is unavailable again | Inconsistent seeds are refused (`invalid_seed`). A seed loaded before its latest record still loads, and its later posts stay hidden. Core refuses a bundle without the image bytes, or a post naming an uncatalogued image (`invalid_bundle`), with state unchanged. The PNG's pixels equal a render of its alt-text lines | B7, B19, B20, B22; W5–W6, W28, W30–W34, W98–W102, W130–W132 |
 | Evidence join and counting | **Audit join.** Each MCP client is named after its trace connection, and Core stores that name in each audit row. Every retained audit row joins one trace row by connection, tool, request or event ID and status: 21 of 21 for train-east, 29 of 29 for Dario. **Retention.** A snapshot is kept before each reset | Successful replays add no audit row; denials are separate rows with `decision: "deny"`. A logical write is counted once however often it is replayed | W29, W127–W129, W134 |
@@ -93,13 +93,13 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 
 - **No scheduled fields.** Wirewalk has no scheduled or descriptive date fields.
 - **Bookmark visibility is new in this change.** Post and account visibility already worked this way.
-- **Agent add before a later seeded bookmark:** the agent's bookmark replaces the seeded one, leaving one record dated now.
+- **Agent add before a later seeded bookmark:** the agent's bookmark replaces the seeded one, leaving one record dated now. The write reports it: the receipt's `later_history_removed` is `{"bookmarks": 1}` and the diagnostics log keeps the stored bookmark; otherwise it is `null`. The receipt holds only the count because it goes to the Agent and the bookmark is dated after the clock.
 - **Agent remove before a later seeded bookmark:** returns `changed: false` and keeps the seeded record, which is the approved contract for a post that is not bookmarked.
 - **Events:** `post.publish` is unchanged.
 - **Schemas and error codes:** no tool schema, event schema or error code changed.
 - **Tests:** `tests/business.test.cjs` adds four tests (the fourth checks the event-dependency list):
   - an early-clock regression on `examples/task-data` (Dario at 12:00 Monday: reads hide the later reposts and bookmarks, writes on later posts return `not_found` with data unchanged, and moving the clock to 18:00 reveals them with data unchanged);
-  - an agent bookmark that replaces a later seeded bookmark;
+  - an agent bookmark that replaces a later seeded bookmark, with the receipt's count and the logged stored bookmark, and the same on the evaluation dataset (B27: a Feb. 9, 2026 post bookmarked at 16:47, bookmarked at noon), each checked against an independent before/after diff;
   - the evaluation dataset at four clocks, with its `dataset.json` counts and sha256 checked.
 
 **Dataset.** `apps/wirewalk/data/evaluation/`, dataset `wirewalk-evaluation-2025-2026` version 1.0.0.
@@ -139,12 +139,12 @@ node examples/dataset-demo.cjs      # real MCP: env.load_seed in one request, qu
 
 | Command | Node 22.23.2 | Node 18.20.8 |
 | --- | --- | --- |
-| `npm test` | 26/26 | 26/26 |
+| `npm test` | 27/27 | 27/27 |
 | `node runtime/cli.cjs verify --app apps/wirewalk` | passed, 40 checks | passed, 40 checks |
 | `npm run walkthrough` | passed, 134 checks (same checks as before this change) | passed, 134 checks |
 | `node apps/wirewalk/examples/dataset-demo.cjs` | 24 checks; load request 558,381 bytes | 24 checks; load request 558,381 bytes |
 
-All reports carry package sha256 `92d454d03bf5b7d9519b15c3279cbbd2fe24763a50f50fe5e6e39028df3f01a7`, runtime 1.6.0 and Core API 1.2.0.
+All reports carry package sha256 `2b1c9055850f04867a37935ce53ad50ad81c9efbe6b4ee987cbf077b5bf85b65`, runtime 1.6.0 and Core API 1.2.0.
 
 The demo checks:
 
@@ -155,7 +155,7 @@ The demo checks:
 - at the dataset clock the feed opens on fixture post `p18` and the latest bookmark is `p01`;
 - each `env.advance_time` changes no record.
 
-**Added scope against the approval baseline:** the dataset with its three scripts and `event-dependencies.json`, bookmark visibility by `saved_at`, and a larger package: 1,085,945 bytes of tracked files under `apps/wirewalk/`, up from 399,371, mostly `data/evaluation/seed.json`.
+**Added scope against the approval baseline:** the dataset with its three scripts and `event-dependencies.json`, bookmark visibility by `saved_at`, and a larger package: 1,090,386 bytes of tracked files under `apps/wirewalk/`, up from 399,371, mostly `data/evaluation/seed.json`.
 
 ## CI and the base validator at the submitted revision
 
