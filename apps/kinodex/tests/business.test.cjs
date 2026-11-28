@@ -190,7 +190,7 @@ test('T05 watchlist.save moves two titles to the top at watchlist version 2; sta
   assert.equal(current.watchlist_version, 1); assert.equal(current.items.length, 14);
   const rest = current.items.map(i => i.title_id).filter(id => id !== 'tt-copper-sky' && id !== 'tt-quiet-harbour');
   const saved = f.call('kinodex.watchlist.save', {title_ids: ['tt-copper-sky', 'tt-quiet-harbour', ...rest], expected_watchlist_version: 1});
-  assert.deepEqual(saved, {id: 'watchlist', watchlist_version: 2, count: 14});
+  assert.deepEqual(saved, {id: 'watchlist', watchlist_version: 2, count: 14, later_history_removed: null});
   const after = f.call('kinodex.watchlist.get');
   assert.equal(after.watchlist_version, 2);
   assert.deepEqual(after.items.map(i => i.title_id), ['tt-copper-sky', 'tt-quiet-harbour', ...rest]);
@@ -205,7 +205,7 @@ test('T05 custom lists keep their own list_version', () => {
   assert.deepEqual(f.call('kinodex.lists.list').lists.map(l => [l.list_id, l.list_version]), [['ls-01', 1], ['ls-02', 3], ['ls-03', 2]]);
   const id = f.call('kinodex.lists.create', {name: 'Trip watch', title_ids: ['tt-salt-year']}).id;
   assert.deepEqual(f.call('kinodex.lists.save', {id, patch: {title_ids: ['tt-pellmoor-junction', 'tt-salt-year']}, expected_list_version: 1}),
-    {id, list_version: 2, changed_fields: ['title_ids']});
+    {id, list_version: 2, changed_fields: ['title_ids'], later_history_removed: null});
   unchanged(f, () => f.call('kinodex.lists.save', {id, patch: {name: 'Old'}, expected_list_version: 1}), code('object_version_conflict'));
   unchanged(f, () => f.call('kinodex.lists.save', {id, patch: {name: 'Trip watch'}}), code('no_change'));
   unchanged(f, () => f.call('kinodex.lists.save', {id: 'ls-99', patch: {name: 'x'}}), code('not_found'));
@@ -797,15 +797,19 @@ test('Evaluation dataset: counts and sha256 match the file; at four clocks nothi
     const lists = call('kinodex.lists.list').lists;
     assert.equal(lists.length, shown(evalSeed.lists, 'created_at').length);
     for (const l of lists) walk(call('kinodex.lists.get', {list_id: l.list_id}), now, 'lists.get');
+    // A title exists from its first listing (guide version 1); before then it is not_found.
+    const listed = id => Date.parse(evalSeed.guides.find(g => g.title_id === id).versions[0].published_at) <= now;
     for (const t of series) {
+      if (!listed(t.title_id)) {assert.throws(() => call('kinodex.titles.get', {title_id: t.title_id}), code('not_found')); continue;}
       const view = call('kinodex.titles.get', {title_id: t.title_id}).title, seasons = shown(t.seasons, 'added_at').map(s => s.season_number);
       assert.deepEqual(view.seasons.map(s => s.season_number), seasons, t.title_id + ' seasons at ' + at);
       assert.ok(view.episodes.every(e => seasons.includes(e.season_number)));
     }
     for (const g of versioned) {
+      if (!listed(g.title_id)) {assert.throws(() => call('kinodex.guide.get', {title_id: g.title_id}), code('not_found')); continue;}
       const guide = call('kinodex.guide.get', {title_id: g.title_id}).guide;
       assert.equal(guide.current_version, Math.max(1, ...shown(g.versions, 'published_at').map(v => v.version)), g.title_id + ' guide at ' + at);
-      assert.ok(guide.versions.every(v => v.version === 1 || Date.parse(v.published_at) <= now));
+      assert.ok(guide.versions.every(v => Date.parse(v.published_at) <= now));
     }
     assert.equal(JSON.stringify(data), JSON.stringify(evalSeed), 'Reads change nothing');
   }
@@ -820,4 +824,102 @@ test('Evaluation dataset: counts and sha256 match the file; at four clocks nothi
       wrenfield: f.call('kinodex.diary.list', {title_id: 'tt-wrenfield-clock'}).entries, comets: f.call('kinodex.episodes.list', {title_id: 'tt-pocket-comets', hide_spoilers: true})};
   };
   assert.deepEqual(answers(evalSeed), answers(seed));
+});
+
+// ---- Later history removed by a change at an earlier clock ----------------------------------------
+// The #226 review's five repros on the evaluation dataset. Independent of src/rules.cjs: an account record
+// is later history at `at` when one of the times at which it happened (or changed) lies after the clock.
+// The change's activity row must hold exactly the later records it removed or altered, as they were
+// stored, and the receipt must count them by family.
+const HAPPENED = {
+  alerts: [a => a.alert_id, a => [a.created_at, a.updated_at, a.trigger && a.trigger.at]],
+  corrections: [x => x.correction_id, x => [x.submitted_at, x.updated_at, x.amended_at, x.withdrawn_at, ...x.decisions.map(d => d.decided_at)]],
+  notices: [n => n.notice_id, n => [n.at]],
+  diary: [e => e.entry_id, e => [e.logged_at, e.updated_at]],
+};
+function laterLost(before, after, at) {
+  const lost = {};
+  for (const [name, [key, times]] of Object.entries(HAPPENED)) {
+    const kept = new Set(after[name].map(x => JSON.stringify(x)));
+    const gone = before[name].filter(x => !kept.has(JSON.stringify(x)) && times(x).some(t => t && Date.parse(t) > Date.parse(at)));
+    if (gone.length) lost[name] = gone;
+  }
+  return lost;
+}
+const ids = lost => Object.fromEntries(Object.entries(lost).map(([name, list]) => [name, list.map(HAPPENED[name][0])]));
+const counts = lost => Object.keys(lost).length ? Object.fromEntries(Object.entries(lost).map(([name, list]) => [name, list.length])) : null;
+const evalData = () => ({seed: require('../data/evaluation/seed.json'), binding: require('../data/evaluation/binding.json')});
+function early(at, change) {
+  const f = fixture({...evalData(), virtual_now: at}), before = f.data, receipt = change(f), after = f.data, lost = laterLost(before, after, at);
+  assert.deepEqual(after.activity.at(-1).later_history_removed ?? {}, lost, 'the activity row keeps the later records as stored');
+  if (receipt) assert.deepEqual(receipt.later_history_removed, counts(lost), 'the receipt counts them');
+  return {lost: ids(lost), receipt, after};
+}
+
+test('writes at an earlier clock report the later alerts, corrections and notices they replace (review repros 1-4)', () => {
+  // 1. A new price rule drops the seeded rule on the same title and kind, created later (Nov. 2).
+  assert.deepEqual(early('2026-06-01T12:00:00-07:00', f => f.call('kinodex.alerts.create',
+    {kind: 'price_below', title_id: 'tt-marrow-bay', offer_type: 'rent', threshold: 2.5})).lost, {alerts: ['al-04']});
+  // 2. A new correction drops the later seeded one on the same title, field and target: the plan's pending co-03.
+  assert.deepEqual(early('2026-06-01T12:00:00-07:00', f => f.call('kinodex.corrections.submit', {title_id: 'tt-pellmoor-junction', field: 'credit',
+    target: {credit_id: 'cr-00083'}, proposed_value: {character: 'Marta Kessling'}, evidence: 'The end credits spell it Kessling.'})).lost, {corrections: ['co-03']});
+  // 3. Deleting al-13 before its Oct. 6 trigger replaces the stored triggered rule and drops its notice.
+  const deleted = early('2026-09-01T12:00:00-07:00', f => f.call('kinodex.alerts.delete', {id: 'al-13'}));
+  assert.deepEqual(deleted.lost, {alerts: ['al-13'], notices: ['nt-21']});
+  assert.equal(deleted.after.activity.at(-1).later_history_removed.alerts[0].trigger.offer.offer_id, 'of-01148');
+  // 4. Withdrawing co-02 before its July 8 decision replaces the declined correction and drops notice nt-03.
+  assert.deepEqual(early('2026-07-01T12:00:00-07:00', f => f.call('kinodex.corrections.withdraw', {id: 'co-02'})).lost,
+    {corrections: ['co-02'], notices: ['nt-03']});
+  // A write that touches no later record reports null.
+  assert.equal(early('2026-06-01T12:00:00-07:00', f => f.call('kinodex.watchlist.save',
+    {title_ids: f.call('kinodex.watchlist.get', {}).items.map(x => x.title_id).reverse(), expected_watchlist_version: f.call('kinodex.watchlist.get', {}).watchlist_version})).receipt.later_history_removed, null);
+});
+
+test('an event at an earlier clock that fires a rule early records the later trigger and notice it replaces (review repro 5)', () => {
+  const event = {event_id: 'sallowmere-brightreel-early', at: '2026-09-02T10:00:00-07:00', operation: 'offer.publish', payload: {offer_id: 'of-early-sallowmere',
+    title_id: 'tt-sallowmere', edition_id: null, service_id: 'brightreel', region: 'US', type: 'subscription', price: null, currency: null, quality: 'HD',
+    available_from: '2026-09-02T00:00:00-07:00', available_until: null}};
+  const {lost, after} = early('2026-09-01T12:00:00-07:00', f => {f.event(event); return null;});
+  assert.deepEqual(lost, {alerts: ['al-13'], notices: ['nt-21']});
+  const row = after.activity.at(-1), al13 = after.alerts.find(a => a.alert_id === 'al-13');
+  assert.deepEqual([row.event_id, al13.trigger.event_id, row.effects.notice_ids.length], ['sallowmere-brightreel-early', 'sallowmere-brightreel-early', 1]);
+  assert.equal(row.later_history_removed.alerts[0].trigger.at, '2026-10-06T08:00:00Z');
+});
+
+test('a title exists from its first listing; the watchlist and lists leave out unlisted titles and keep them when saved', () => {
+  const {seed: s} = evalData(), at = '2025-03-15T12:00:00-07:00', f = fixture({...evalData(), virtual_now: at});
+  const listedBy = (id, when) => Date.parse(s.guides.find(g => g.title_id === id).versions[0].published_at) <= Date.parse(when);
+  // tt-pellmoor-junction is first listed on 2026-04-15 (guide version 1).
+  for (const name of ['kinodex.titles.get', 'kinodex.guide.get', 'kinodex.offers.for_title']) {
+    unchanged(f, () => f.call(name, {title_id: 'tt-pellmoor-junction'}), code('not_found'));
+  }
+  const upcoming = f.call('kinodex.titles.search', {year_from: 2026, limit: 50}).titles.map(t => t.title_id);
+  assert.deepEqual(upcoming.filter(id => !listedBy(id, at)), []);
+  assert.ok(!upcoming.includes('tt-pellmoor-junction'));
+  // The watchlist is current state (not rewound) but leaves out its two titles listed later in 2025.
+  const watch = f.call('kinodex.watchlist.get').items.map(i => i.title_id);
+  assert.deepEqual(watch, s.watchlist.title_ids.filter(id => listedBy(id, at)));
+  assert.ok(!watch.includes('tt-harbor-lights') && !watch.includes('tt-sallowridge-nights'));
+  // Saving the watchlist keeps the unlisted titles after the Agent's order, so they are not dropped.
+  f.call('kinodex.watchlist.save', {title_ids: [...watch].reverse(), expected_watchlist_version: s.watchlist.version});
+  assert.deepEqual(f.data.watchlist.title_ids, [...[...watch].reverse(), ...s.watchlist.title_ids.filter(id => !listedBy(id, at))]);
+  // List ls-02 holds tt-pocket-comets, first listed on 2026-01-07; a save before then keeps it, and it shows once listed.
+  const g = fixture({...evalData(), virtual_now: '2025-12-01T12:00:00-08:00'}), l = g.call('kinodex.lists.get', {list_id: 'ls-02'}).list;
+  assert.ok(!l.items.some(i => i.title_id === 'tt-pocket-comets'));
+  g.call('kinodex.lists.save', {id: 'ls-02', patch: {title_ids: l.items.map(i => i.title_id).reverse()}, expected_list_version: l.list_version});
+  assert.ok(g.data.lists.find(x => x.list_id === 'ls-02').title_ids.includes('tt-pocket-comets'));
+  g.advance('2026-01-08T12:00:00-08:00');
+  assert.equal(g.call('kinodex.lists.get', {list_id: 'ls-02'}).list.items.at(-1).title_id, 'tt-pocket-comets');
+});
+
+test('services.list returns every service with its regions and offer types, marked subscribed from the account settings', () => {
+  const f = fixture(), first = f.call('kinodex.services.list').services;
+  assert.deepEqual(first.map(({subscribed, ...s}) => s), seed.services);
+  assert.deepEqual(first.filter(s => s.subscribed).map(s => s.service_id).sort(), [...seed.account.service_ids].sort());
+  // After Dana changes her services, the flags follow the stored settings; the catalog of services is unchanged.
+  const services = [...seed.account.service_ids.filter(id => id !== 'northcast'), 'plumvale'];
+  f.call('kinodex.services.update', {patch: {service_ids: services}, expected_settings_version: seed.account.settings_version});
+  const after = f.call('kinodex.services.list').services;
+  assert.deepEqual(after.filter(s => s.subscribed).map(s => s.service_id).sort(), [...services].sort());
+  assert.deepEqual(after.map(({subscribed, ...s}) => s), seed.services);
 });

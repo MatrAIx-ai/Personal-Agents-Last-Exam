@@ -90,7 +90,11 @@ const NOTICE = obj({notice_id: SID, at: TIME, kind: {enum: ['alert_triggered', '
   alert_id: nullable(SID), correction_id: nullable(SID), guide_version: nullable(INT(1)), event_id: SID, text: text(500)});
 const ACTIVITY = obj({seq: INT(1), at: TIME, actor: {enum: ['agent', 'event']}, action: text(60), request_id: nullable(text(200)),
   event_id: nullable(SID), object_type: {enum: ['account', 'watchlist', 'diary_entry', 'list', 'alert', 'correction', 'offer', 'title']},
-  object_id: SID, replaced: ANY, effects: obj({alert_ids: arr(SID, 500), notice_ids: arr(SID, 500)})});
+  object_id: SID, replaced: ANY, effects: obj({alert_ids: arr(SID, 500), notice_ids: arr(SID, 500)}),
+  // Stored records dated after the clock that the change removed or replaced (src/rules.cjs reportLater).
+  // Optional, so rows written before it existed stay valid.
+  later_history_removed: nullable({type: 'object', additionalProperties: {type: 'array'}})},
+  ['seq', 'at', 'actor', 'action', 'request_id', 'event_id', 'object_type', 'object_id', 'replaced', 'effects']);
 
 const seed = {
   $schema: 'https://json-schema.org/draft/2020-12/schema', $id: 'urn:pale:kinodex:seed:1',
@@ -152,10 +156,17 @@ const LIST_ITEM = obj({position: INT(1), title_id: SID, name: text(200), kind: {
 const LIMIT = max => INT(1, max);
 const HIDE = {hide_spoilers: BOOL, as_of_person: ID};
 
+// Every write receipt: null, or how many stored records dated after the clock the write removed or replaced,
+// by family. Only counts, because the receipt goes to the Agent; the records are in the activity row.
+// This happens only when a seed that runs past its clock is loaded early.
+const LATER = nullable({type: 'object', additionalProperties: INT(1)});
+const LATER_NOTE = ' later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.';
 function tool(name, description, readOnly, input, output, required = Object.keys(input)) {
   const inputSchema = readOnly ? obj(input, required)
     : obj({...input, expected_version: VERSION, request_id: ID}, [...required, 'expected_version', 'request_id']);
-  const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output});
+  const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output,
+    ...(readOnly ? {} : {later_history_removed: LATER})});
+  if (!readOnly) description += LATER_NOTE;
   return {name, description, read_only: readOnly, scope: name, resource_target: 'current account', inputSchema, outputSchema};
 }
 const DIARY_PATCH = obj({edition_id: nullable(ID), watched_on: DATE, rewatch: BOOL, watched_with: arr(ID, 20, {uniqueItems: true}),

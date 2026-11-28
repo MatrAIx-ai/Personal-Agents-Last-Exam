@@ -69,13 +69,15 @@ const currentGuide = g => g.versions[g.versions.length - 1];
 
 // ---- Clock cutoff -------------------------------------------------------------------------
 // What the account sees at the run clock. A record that happens in Kinodex exists from its own time:
-// a diary entry from logged_at, a public review from posted_at, a list or alert from created_at, a
-// correction from submitted_at, a notice from at, a season (and its episodes) from added_at, and a
-// guide version after the first from published_at. Later transitions that keep their own time are read
-// as of the clock: a rule triggered or deleted later reads active, and a correction shows only the
+// a title from its first listing (guide version 1's published_at), with its episodes, credits, guide,
+// offers and public reviews; a diary entry from logged_at, a public review from posted_at, a list or
+// alert from created_at, a correction from submitted_at, a notice from at, a season (and its episodes)
+// from added_at, and a later guide version from published_at. The watchlist and lists are not rewound:
+// they show their stored titles, less any not yet listed. Later transitions that keep their own time are
+// read as of the clock: a rule triggered or deleted later reads active, and a correction shows only the
 // decisions, amendment and withdrawal dated by then. Scheduled and descriptive dates (release and air
-// dates, offer windows, expires_at, guide version 1) are not filtered. Nothing is stored for this:
-// later records appear when the clock reaches them, and records with nothing hidden keep their identity.
+// dates, offer windows, expires_at) are not filtered. Nothing is stored for this: later records appear
+// when the clock reaches them, and records with nothing hidden keep their identity.
 const by = (nowMs, value) => instant(value) <= nowMs;
 function alertAsOf(a, nowMs) {
   if (a.status === 'triggered' && !by(nowMs, a.trigger.at)) return {...a, status: 'active', trigger: null, updated_at: a.created_at};
@@ -94,18 +96,23 @@ function correctionAsOf(co, nowMs) {
 }
 function visible(data, now) {
   const nowMs = instant(now), shown = value => by(nowMs, value), laterSeasons = new Set();
-  const titles = data.titles.map(t => {
+  const unlisted = new Set(data.guides.filter(g => !shown(g.versions[0].published_at)).map(g => g.title_id));
+  const listed = list => (unlisted.size ? list.filter(x => !unlisted.has(x.title_id)) : list);
+  const listedIds = holder => (holder.title_ids.some(id => unlisted.has(id)) ? {...holder, title_ids: holder.title_ids.filter(id => !unlisted.has(id))} : holder);
+  const titles = listed(data.titles).map(t => {
     if (t.seasons.every(s => shown(s.added_at))) return t;
     for (const s of t.seasons) if (!shown(s.added_at)) laterSeasons.add(t.title_id + ':' + s.season_number);
     return {...t, seasons: t.seasons.filter(s => shown(s.added_at))};
   });
   const firstAndShown = (v, i) => i === 0 || shown(v.published_at);
   return {...data, titles,
-    episodes: laterSeasons.size ? data.episodes.filter(e => !laterSeasons.has(e.title_id + ':' + e.season_number)) : data.episodes,
-    guides: data.guides.map(g => (g.versions.every(firstAndShown) ? g : {...g, versions: g.versions.filter(firstAndShown)})),
-    public_reviews: data.public_reviews.filter(r => shown(r.posted_at)),
+    episodes: listed(laterSeasons.size ? data.episodes.filter(e => !laterSeasons.has(e.title_id + ':' + e.season_number)) : data.episodes),
+    credits: listed(data.credits), offers: listed(data.offers),
+    guides: listed(data.guides).map(g => (g.versions.every(firstAndShown) ? g : {...g, versions: g.versions.filter(firstAndShown)})),
+    public_reviews: listed(data.public_reviews.filter(r => shown(r.posted_at))),
+    watchlist: listedIds(data.watchlist),
     diary: data.diary.filter(e => shown(e.logged_at)),
-    lists: data.lists.filter(l => shown(l.created_at)),
+    lists: data.lists.filter(l => shown(l.created_at)).map(listedIds),
     alerts: data.alerts.filter(a => shown(a.created_at)).map(a => alertAsOf(a, nowMs)),
     corrections: data.corrections.filter(co => shown(co.submitted_at)).map(co => correctionAsOf(co, nowMs)),
     notices: data.notices.filter(n => shown(n.at))};

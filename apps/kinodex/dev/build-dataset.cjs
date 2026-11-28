@@ -194,7 +194,7 @@ const serviceName = id => seed.services.find(s => s.service_id === id).name;
 function opener(t, d) {
   const options = [], since = (dateMs(d) - dateMs(usRelease(t))) / DAY, age = Number(d.slice(0, 4)) - t.year, noun = t.kind === 'film' ? 'film' : 'series';
   if (since >= 0 && since <= 13) options.push(...(t.kind === 'film'
-    ? [`Caught it on ${dayName(d)}, ${md(d)}, ${since === 0 ? 'its opening day' : 'in its first week out'}.`, `Went to a ${md(d)} screening the week it opened.`, `Saw it ${since <= 3 ? 'on opening weekend' : 'in its second week'} (${md(d)}).`]
+    ? [`Caught it on ${dayName(d)}, ${md(d)}, ${since === 0 ? 'its opening day' : 'in its first week out'}.`, `Went to ${/^[AEIOU]/.test(md(d)) ? 'an' : 'a'} ${md(d)} screening the week it opened.`, `Saw it ${since <= 3 ? 'on opening weekend' : 'in its second week'} (${md(d)}).`]
     : [`Watched the first episodes the week it premiered (${md(d)}).`, `Started it on ${md(d)}, a few days after the premiere.`]));
   const arrival = arrivedOn(t, d);
   if (arrival) {
@@ -638,6 +638,56 @@ for (let d = '2026-10-15'; d <= '2026-12-31'; d = addDays(d, int(1, 3))) {
   added.public_reviews.push('rv-' + pad(rvn, 4));
 }
 
+// ---------- 7. US rental and purchase history before the fixture's own offers ----------
+// The fixture opens no offer before 2025, and its rentals and purchases of older titles all start on
+// 2026-01-02, so many of Dana's 2025 diary entries fell on days when the title could not be watched in the
+// US at all. Each title therefore gets an earlier US rental window on one store, usually with a purchase
+// window: from its digital release (45 days after the US release) or, for older titles, a day between
+// January 2023 and August 2024. It closes when the title's first fixture rental or purchase in the US
+// opens, or, for a title with none, on a day in October or early November 2026 when the store drops it.
+// A title of the December scenario only gets a window that closes before its first fixture US offer of any
+// type. Every window closes before 2026-11-15 and the dataset clock, and ended offers are not listed by
+// default, so what the scenario and the dataset clock show is unchanged. A separate random stream, drawn
+// only here, keeps every record written above byte-identical.
+let historyState = GENERATOR_SEED + 7;
+const r7 = () => {historyState |= 0; historyState = historyState + 0x6D2B79F5 | 0; let x = Math.imul(historyState ^ historyState >>> 15, 1 | historyState);
+  x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296;};
+const int7 = (a, b) => a + Math.floor(r7() * (b - a + 1));
+const firstOpen = list => list.map(o => o.available_from).sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+let nextOffer = Math.max(...seed.offers.map(o => Number(o.offer_id.slice(3)))) + 1;
+const historyOffers = [];
+for (const t of seed.titles) {
+  const fixtureUS = seed.offers.filter(o => o.title_id === t.title_id && o.region === 'US'), digital = addDays(usRelease(t), 45);
+  const until = NAMED.includes(t.title_id) ? firstOpen(fixtureUS)
+    : firstOpen(fixtureUS.filter(o => o.type === 'rent' || o.type === 'buy')) ?? la(addDays('2026-10-01', int7(0, 40)), '23:59');
+  if (!until) continue;
+  const from = Z(digital >= '2023-01-01' ? digital : addDays('2023-01-01', int7(0, 600))); // older titles: a day from Jan. 2023 to Aug. 2024
+  if (Date.parse(from) >= Date.parse(until) || Date.parse(until) > Date.parse('2026-11-15T00:00:00Z')) continue;
+  const store = int7(0, 1) ? 'tinlark' : 'brightreel', rent = int7(399, 599) / 100, add = (type, price, quality) => {
+    const o = {offer_id: 'of-' + pad(nextOffer++, 5), title_id: t.title_id, edition_id: null, service_id: store, region: 'US', type, price,
+      currency: 'USD', quality, available_from: from, available_until: until};
+    seed.offers.push(o); historyOffers.push(o);
+  };
+  add('rent', Math.floor(rent) + 0.99, 'HD');
+  if (int7(1, 10) <= 7) add('buy', int7(12, 19) + 0.99, int7(1, 10) <= 3 ? '4K' : 'HD');
+}
+added.offers = historyOffers.map(o => o.offer_id);
+// Every diary entry is watchable on its date in the US (an offer of any type is open), or falls within 60
+// days of the US release, when it could still be in cinemas.
+const openOn = (o, d) => dateOf(o.available_from) <= d && (o.available_until === null || dateOf(o.available_until) > d);
+const unwatchable = seed.diary.filter(e => {
+  const t = titleOf.get(e.title_id), since = (dateMs(e.watched_on) - dateMs(usRelease(t))) / DAY;
+  return !(since >= 0 && since <= 60) && !seed.offers.some(o => o.title_id === e.title_id && o.region === 'US' && openOn(o, e.watched_on));
+});
+if (unwatchable.length) throw Error('Diary entries with no US offer on watched_on: ' + unwatchable.map(e => e.entry_id).join(', '));
+// No seeded rule may match a history window: price rules stay above it, and the others match subscriptions only.
+for (const a of seed.alerts) {
+  const end = a.trigger ? a.trigger.at : a.status === 'deleted' ? a.updated_at : a.expires_at;
+  const clash = historyOffers.find(o => o.title_id === a.title_id && a.kind === 'price_below' && o.type === a.offer_type && o.price < a.threshold
+    && Date.parse(o.available_from) < Date.parse(end ?? '2100-01-01T00:00:00Z') && Date.parse(o.available_until) > Date.parse(a.created_at));
+  if (clash) throw Error('History offer ' + clash.offer_id + ' would match rule ' + a.alert_id);
+}
+
 // ---------- check, write ----------
 const ctx = {app_id: 'kinodex', binding, virtual_now: CLOCK};
 if (!compile(require('../schemas/seed.schema.json'), path.join(pkg, 'schemas'))(seed)) throw Error('The dataset does not match schemas/seed.schema.json');
@@ -661,21 +711,26 @@ write('clock.json', {initial_time: CLOCK});
 write('binding.json', binding);
 write('policies.json', read('fixtures/policies.json'));
 const base = read('contribution/dataset.json');
+// Current-state objects (account settings, watchlist, lists) are stored once, as of their last change, and
+// are not rewound to an earlier clock. The dataset reads exactly as stored from the latest of those stamps.
+const VALID_FROM = [seed.account.updated_at, seed.watchlist.updated_at, ...seed.lists.map(l => l.updated_at)]
+  .sort((a, b) => Date.parse(a) - Date.parse(b)).at(-1);
 write('dataset.json', {
   ...base, dataset_id: 'kinodex-evaluation-2025-2026', version: DATASET_VERSION,
-  description: 'Synthetic evaluation catalog and one viewer account (Dana Marsh, US) covering 2025-01-01 through 2026-12-31 (America/Los_Angeles): the fixture catalog and account with one review or synopsis text per record, plus parental-guide updates, new seasons, public reviews to Dec. 30, 2026, and two years of alerts, corrections, notices and lists. Dana\'s history ends at the fixture clock (2026-12-01 09:00 -08:00). Loadable with env.load_seed at any clock in the window; Kinodex shows only the records that exist at the clock. expected_counts.records counts titles (plugin.records).',
+  description: 'Synthetic evaluation catalog and one viewer account (Dana Marsh, US) covering 2025-01-01 through 2026-12-31 (America/Los_Angeles): the fixture catalog and account with one review or synopsis text per record, plus parental-guide updates, new seasons, public reviews to Dec. 30, 2026, and two years of alerts, corrections, notices and lists. Dana\'s history ends at the fixture clock (2026-12-01 09:00 -08:00). Loadable with env.load_seed at any clock in the window; Kinodex shows only the records that exist at the clock. The account settings, watchlist and lists are current state, stored as of their last change and not rewound, so the dataset reads exactly as stored from ' + VALID_FROM + ' (generation.parameters.current_state_valid_from); a Task that starts earlier supplies its own watchlist, list and settings state. expected_counts.records counts titles (plugin.records).',
   record_source_ids: ['authored', 'generated'],
   sources: [base.sources[0], {
     source_id: 'generated', kind: 'synthetic',
     description: 'Template-generated fictional review texts, episode synopses, guide updates, seasons and account history written by dev/build-dataset.cjs from the fixture\'s titles, people and word lists. All titles, people, services and reviews are invented; nothing was collected from real websites.',
     uri: null, license: 'MIT', usage: 'permitted', collection: null,
     generation: {method: 'template', tool: 'dev/build-dataset.cjs', tool_version: DATASET_VERSION, seed: GENERATOR_SEED,
-      parameters: {window: WINDOW, time_zone: TIME_ZONE, clock: CLOCK, base: 'fixtures/minimal.json',
+      parameters: {window: WINDOW, time_zone: TIME_ZONE, clock: CLOCK, current_state_valid_from: VALID_FROM, base: 'fixtures/minimal.json',
         outputs: {'seed.json': {sha256: crypto.createHash('sha256').update(seedText).digest('hex'), bytes: Buffer.byteLength(seedText)}}}},
   }],
   transformations: [
     'Every fixture record is kept with its ID, dates, ratings and flags. Public review texts (except rv-lh-01), Dana\'s diary review texts (except her Wrenfield Clock review) and the synopses of the generated series\' episodes are rewritten, one text per record, because the fixture draws them from short phrase lists; repeated episode names within a series are renamed.',
     'Added records: guide versions, two seasons with their episodes, public reviews from 2026-10-15 to 2026-12-30, and Dana\'s alerts, corrections, notices and lists. Alert triggers, decision notices and guide versions are written as the App\'s events would write them.',
+    'Added US rental and purchase windows before the fixture\'s own offers (' + historyOffers.length + ' offers, from a separate random stream): each opens at the title\'s digital release (45 days after the US release) or, for older titles, between January 2023 and August 2024, and closes when the fixture\'s first US rental or purchase opens, or in October or early November 2026. Every diary entry is then watchable in the US on its date or falls within 60 days of the US release (checked). The windows close before the dataset clock and before any seeded rule could match them (checked).',
   ],
   expected_counts: {records: seed.titles.length, assets: 0},
 });

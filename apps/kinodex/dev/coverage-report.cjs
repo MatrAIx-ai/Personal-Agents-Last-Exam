@@ -83,7 +83,8 @@ const invalid = [], excluded = [], counted = [];
 for (const r of records) {
   const date = dateOf(r.value);
   if (!date) invalid.push(r);
-  else if (date < WINDOW[0] || date > WINDOW[1]) excluded.push({...r, date, reason: REASON[r.source] || 'outside the coverage window'});
+  else if (date < WINDOW[0] || date > WINDOW[1]) excluded.push({...r, date, reason: r.source === 'offers' && date < WINDOW[0]
+    ? 'offer window that opened before 2025 (US rental and purchase history from before the window)' : REASON[r.source] || 'outside the coverage window'});
   else counted.push({...r, date});
 }
 
@@ -152,12 +153,22 @@ for (let i = 0; i < unique.length; i++) for (let j = i + 1; j < unique.length; j
 const byField = PROSE.map(([field, list]) => ({field, texts: list.length, distinct: new Set(list.map(([, t]) => t)).size}));
 const items = seed.guides.flatMap(g => g.versions.at(-1) ? Object.values(g.versions.at(-1).categories).flatMap(c => c.items.map(i => i.text)) : []);
 
+// Every diary entry should be watchable in the US on its date: an offer of any type open that day, or a date
+// within 60 days of the US release, when the title could still be in cinemas.
+const usRelease = id => seed.titles.find(t => t.title_id === id).releases.find(r => r.region === 'US').date;
+const openOn = (o, d) => dateOf(o.available_from) <= d && (o.available_until === null || dateOf(o.available_until) > d);
+const daysSince = (d, from) => (Date.parse(d + 'T00:00:00Z') - Date.parse(from + 'T00:00:00Z')) / 86400000;
+const watch = seed.diary.map(e => ({id: e.entry_id, offer: seed.offers.some(o => o.title_id === e.title_id && o.region === 'US' && openOn(o, e.watched_on)),
+  cinema: daysSince(e.watched_on, usRelease(e.title_id)) >= 0 && daysSince(e.watched_on, usRelease(e.title_id)) <= 60}));
+const diaryWatchable = {entries: watch.length, with_us_offer_open: watch.filter(w => w.offer).length,
+  cinema_window_only: watch.filter(w => !w.offer && w.cinema).length, neither: watch.filter(w => !w.offer && !w.cinema).map(w => w.id)};
+const validFrom = dataset.sources.find(s => s.source_id === 'generated')?.generation?.parameters?.current_state_valid_from ?? null;
 const round = x => Math.round(x * 1000) / 1000;
 const report = {
   scope: 'Kinodex evaluation dataset as delivered in apps/kinodex/data/evaluation/seed.json (the shared catalog and Dana Marsh\'s account)',
   dataset_id: dataset.dataset_id, dataset_version: dataset.version, seed_sha256: sha256, seed_bytes: Buffer.byteLength(seedText),
   seed_sha256_matches_dataset_json: recorded?.sha256 === sha256,
-  time_zone: TIME_ZONE, window: WINDOW, dataset_clock: clock,
+  time_zone: TIME_ZONE, window: WINDOW, dataset_clock: clock, current_state_valid_from: validFrom,
   method: 'Each record is counted on the calendar date of its authoritative field in America/Los_Angeles; date-only fields (watched_on, air_date, release dates) are dates in that zone. Multiple records on one date count once in the global figure. Records outside the window are excluded with a reason; unparseable dates are listed as invalid.',
   totals: {records: records.length, counted: counted.length, excluded: excluded.length, invalid: invalid.length,
     global_distinct_dates: allDates.length, earliest: allDates[0], latest: allDates.at(-1),
@@ -167,11 +178,12 @@ const report = {
     longest_gap: longestGap(allDates), longest_gap_in_history_before_clock: historyGap},
   provenance: Object.entries(counted.reduce((acc, r) => ({...acc, [r.provenance]: (acc[r.provenance] || 0) + 1}), {})).map(([kind, n]) => ({kind, records: n})),
   real_records: 0,
+  diary_watchable: diaryWatchable,
   by_source: bySource, monthly,
   content: {fields: byField, identical_text_groups: identical.length, identical_texts: identical, near_duplicate_pairs_at_0_8: nearDuplicates.length,
     near_duplicates: nearDuplicates, max_5gram_jaccard: round(maxSimilarity), max_pair: maxPair,
     guide_descriptors: {item_texts: items.length, distinct: new Set(items).size, note: 'Parental-guide category summaries and item descriptors come from a fixed vocabulary shared across titles (as on real guide sites, e.g. "Mild language."); they are not checked as prose.'}},
-  not_counted: ['people, credits and services (no date fields)', 'guide version 1 published_at (a listing date 30 days before release, shown at any clock; the release itself is counted)',
+  not_counted: ['people, credits and services (no date fields)', 'guide version 1 published_at (the title\'s listing date; the title is hidden before it, and its release is counted)',
     'alert trigger and correction decision times (each wrote a notice, counted under notices); correction withdrawal time', 'offer available_until and alert expires_at (scheduled ends)'],
   excluded_by_reason: Object.entries(excluded.reduce((acc, r) => {const k = r.source + ': ' + r.reason; (acc[k] = acc[k] || []).push(r.id); return acc;}, {}))
     .map(([reason, ids]) => ({reason, records: ids.length, examples: ids.slice(0, 3)})),
@@ -184,12 +196,13 @@ const T = report.totals, C = report.content;
 const out = [];
 out.push('# Kinodex evaluation dataset coverage', '',
   `- Scope: ${report.scope}, version ${report.dataset_version}, ${report.seed_bytes} bytes, sha256 \`${sha256}\` (${report.seed_sha256_matches_dataset_json ? 'matches' : 'DOES NOT MATCH'} \`dataset.json\`).`,
-  `- Window ${WINDOW[0]} to ${WINDOW[1]}; dates counted in ${TIME_ZONE}; dataset clock ${clock}.`,
+  `- Window ${WINDOW[0]} to ${WINDOW[1]}; dates counted in ${TIME_ZONE}; dataset clock ${clock}. The account settings, watchlist and lists are current state, not rewound: they read exactly as stored from ${validFrom}.`,
   `- ${T.records} dated records; ${T.counted} counted, ${T.excluded} outside the window (reasons below), ${T.invalid} without a valid date.`,
   `- **${T.global_distinct_dates} distinct dates** (${T.earliest} to ${T.latest}) in ${T.months_with_records} of 24 months; ${T.distinct_dates_on_or_before_clock} on or before the dataset clock and ${T.distinct_dates_after_clock} after it. Longest stretch with no record: ${T.longest_gap.days} days (${T.longest_gap.from} to ${T.longest_gap.to}).`,
   `- Without the scheduled and descriptive sources (offer windows, episode air dates, release dates): ${T.happened_distinct_dates} distinct dates; longest stretch with no record: ${T.happened_longest_gap.days} days (${T.happened_longest_gap.from} to ${T.happened_longest_gap.to}).`,
   `- Dana's own history (diary and account records, ${WINDOW[0]} to the clock): ${T.history_distinct_dates} distinct dates; longest stretch without an entry: ${T.longest_gap_in_history_before_clock.days} days (${T.longest_gap_in_history_before_clock.from} to ${T.longest_gap_in_history_before_clock.to}).`,
   `- Provenance: every record is synthetic; none is real. ${report.provenance.map(p => `${p.records} ${p.kind}`).join('; ')}.`,
+  `- Diary against availability: of ${diaryWatchable.entries} diary entries, ${diaryWatchable.with_us_offer_open} fall on a day when a US offer of the title was open and ${diaryWatchable.cinema_window_only} more within 60 days of its US release; ${diaryWatchable.neither.length} fall on neither${diaryWatchable.neither.length ? ' (' + diaryWatchable.neither.join(', ') + ')' : ''}.`,
   `- Content: ${C.identical_text_groups} identical texts across ${all.length} prose texts; ${C.near_duplicate_pairs_at_0_8} pairs of different texts at word 5-gram Jaccard 0.8 or more (highest ${C.max_5gram_jaccard}). Guide descriptors are a fixed vocabulary (${C.guide_descriptors.distinct} distinct among ${C.guide_descriptors.item_texts} current items) and are not checked as prose.`, '',
   '## By source', '', row(['Source', 'Date field', 'Class', 'Counted', 'Excluded', 'Distinct dates', 'Earliest', 'Latest']), row(['---', '---', '---', '---:', '---:', '---:', '---', '---']),
   ...bySource.map(s => row([s.label, '`' + s.field + '`', s.class, s.records, s.excluded, s.distinct_dates, s.earliest, s.latest])),

@@ -4183,7 +4183,7 @@
   },
   {
     "name": "kinodex.services.update",
-    "description": "Change the account's region (US, UK or CA) and/or subscribed services (patch.region, patch.service_ids replace the stored values; an unknown service or region returns not_found). Optional expected_settings_version checks the App's settings_version (object_version_conflict if it differs). In the same write, active unexpired available_on_my_services and price_below rules that the new region or services satisfy become triggered with cause services.update, the matching offer and this request_id. This write emits no notice. A patch that changes nothing returns no_change.",
+    "description": "Change the account's region (US, UK or CA) and/or subscribed services (patch.region, patch.service_ids replace the stored values; an unknown service or region returns not_found). Optional expected_settings_version checks the App's settings_version (object_version_conflict if it differs). In the same write, active unexpired available_on_my_services and price_below rules that the new region or services satisfy become triggered with cause services.update, the matching offer and this request_id. This write emits no notice. A patch that changes nothing returns no_change. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.services.update",
     "resource_target": "current account",
@@ -4326,6 +4326,20 @@
             "additionalProperties": false
           },
           "maxItems": 500
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -4336,14 +4350,15 @@
         "settings_version",
         "region",
         "service_ids",
-        "triggered_alerts"
+        "triggered_alerts",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.watchlist.save",
-    "description": "Replace the whole ordered watchlist with title_ids. Returns the new watchlist_version. Optional expected_watchlist_version checks the App's watchlist_version (object_version_conflict if it differs). Saving the same order returns no_change.",
+    "description": "Replace the whole ordered watchlist with title_ids. Returns the new watchlist_version. Optional expected_watchlist_version checks the App's watchlist_version (object_version_conflict if it differs). Saving the same order returns no_change. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.watchlist.save",
     "resource_target": "current account",
@@ -4432,6 +4447,20 @@
         "count": {
           "type": "integer",
           "minimum": 0
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -4440,14 +4469,15 @@
         "version",
         "id",
         "watchlist_version",
-        "count"
+        "count",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.diary.log",
-    "description": "Log a viewing. Films may name an edition_id; series entries need episode_ids from that series. watched_on is a YYYY-MM-DD date that cannot be after today (the date of the virtual clock in the account's time zone) or before the title's earliest release in any region (or an episode's air date): invalid_date. rating is optional, in half stars from 0.5 to 5 (invalid_rating otherwise). watched_with lists other people's person_ids from the binding. review is optional, with contains_spoilers and visibility.",
+    "description": "Log a viewing. Films may name an edition_id; series entries need episode_ids from that series. watched_on is a YYYY-MM-DD date that cannot be after today (the date of the virtual clock in the account's time zone) or before the title's earliest release in any region (or an episode's air date): invalid_date. rating is optional, in half stars from 0.5 to 5 (invalid_rating otherwise). watched_with lists other people's person_ids from the binding. review is optional, with contains_spoilers and visibility. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.diary.log",
     "resource_target": "current account",
@@ -4720,6 +4750,20 @@
             "updated_at"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -4727,14 +4771,15 @@
         "app_id",
         "version",
         "id",
-        "entry"
+        "entry",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.diary.update",
-    "description": "Edit a diary entry: id plus patch with any of edition_id, watched_on, rewatch, watched_with, rating and review (null removes a rating or review). The same date and rating rules as kinodex.diary.log apply. A patch that changes nothing returns no_change.",
+    "description": "Edit a diary entry: id plus patch with any of edition_id, watched_on, rewatch, watched_with, rating and review (null removes a rating or review). The same date and rating rules as kinodex.diary.log apply. A patch that changes nothing returns no_change. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.diary.update",
     "resource_target": "current account",
@@ -5035,6 +5080,20 @@
             "updated_at"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -5043,14 +5102,15 @@
         "version",
         "id",
         "changed_fields",
-        "entry"
+        "entry",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.diary.delete",
-    "description": "Delete a diary entry together with its rating and review, and return what was removed.",
+    "description": "Delete a diary entry together with its rating and review, and return what was removed. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.diary.delete",
     "resource_target": "current account",
@@ -5196,6 +5256,20 @@
             "review"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -5203,14 +5277,15 @@
         "app_id",
         "version",
         "id",
-        "removed"
+        "removed",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.lists.create",
-    "description": "Create a custom list (list_version 1) with a name, optional description, visibility (default private) and ordered titles.",
+    "description": "Create a custom list (list_version 1) with a name, optional description, visibility (default private) and ordered titles. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.lists.create",
     "resource_target": "current account",
@@ -5308,6 +5383,20 @@
         "list_version": {
           "type": "integer",
           "minimum": 1
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -5315,14 +5404,15 @@
         "app_id",
         "version",
         "id",
-        "list_version"
+        "list_version",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.lists.save",
-    "description": "Change a custom list: id plus patch with any of name, description, visibility and title_ids (title_ids replaces the whole ordered set). Returns the new list_version. Optional expected_list_version checks the App's list_version (object_version_conflict if it differs). A patch that changes nothing returns no_change.",
+    "description": "Change a custom list: id plus patch with any of name, description, visibility and title_ids (title_ids replaces the whole ordered set). Returns the new list_version. Optional expected_list_version checks the App's list_version (object_version_conflict if it differs). A patch that changes nothing returns no_change. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.lists.save",
     "resource_target": "current account",
@@ -5445,6 +5535,20 @@
             "maxLength": 40
           },
           "maxItems": 4
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -5453,14 +5557,15 @@
         "version",
         "id",
         "list_version",
-        "changed_fields"
+        "changed_fields",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.lists.delete",
-    "description": "Delete a custom list.",
+    "description": "Delete a custom list. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.lists.delete",
     "resource_target": "current account",
@@ -5535,6 +5640,20 @@
         },
         "deleted": {
           "const": true
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -5542,14 +5661,15 @@
         "app_id",
         "version",
         "id",
-        "deleted"
+        "deleted",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.alerts.create",
-    "description": "Create an alert rule for a title. available_on_my_services matches a currently available subscription offer in the account's region on a subscribed service (rentals, purchases, free_with_ads, upcoming, ended and other-region offers never match). price_below needs offer_type rent or buy and a threshold; it matches an available offer of that type in the account's region priced strictly below the threshold. new_season (series only) matches a season added after the rule was created. Optional expires_at must be in the future. Errors: already_true (an offer already matches; the message names it and no rule is stored), duplicate_alert (an active rule of the same kind exists for the title), invalid_threshold. Rules are evaluated only when an Infra event changes the title's offers, title or seasons, or when kinodex.services.update changes the region or subscriptions; an upcoming offer that starts by the clock alone does not fire a rule until then.",
+    "description": "Create an alert rule for a title. available_on_my_services matches a currently available subscription offer in the account's region on a subscribed service (rentals, purchases, free_with_ads, upcoming, ended and other-region offers never match). price_below needs offer_type rent or buy and a threshold; it matches an available offer of that type in the account's region priced strictly below the threshold. new_season (series only) matches a season added after the rule was created. Optional expires_at must be in the future. Errors: already_true (an offer already matches; the message names it and no rule is stored), duplicate_alert (an active rule of the same kind exists for the title), invalid_threshold. Rules are evaluated only when an Infra event changes the title's offers, title or seasons, or when kinodex.services.update changes the region or subscriptions; an upcoming offer that starts by the clock alone does not fire a rule until then. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.alerts.create",
     "resource_target": "current account",
@@ -5926,6 +6046,20 @@
             "title_name"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -5933,14 +6067,15 @@
         "app_id",
         "version",
         "id",
-        "alert"
+        "alert",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.alerts.update",
-    "description": "Change an active, unexpired rule: id plus patch with threshold (price_below only) and/or expires_at (null clears it). A triggered, expired or deleted rule returns not_active and keeps its status and history.",
+    "description": "Change an active, unexpired rule: id plus patch with threshold (price_below only) and/or expires_at (null clears it). A triggered, expired or deleted rule returns not_active and keeps its status and history. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.alerts.update",
     "resource_target": "current account",
@@ -6318,6 +6453,20 @@
             "title_name"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -6325,14 +6474,15 @@
         "app_id",
         "version",
         "id",
-        "alert"
+        "alert",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.alerts.delete",
-    "description": "Delete an active, unexpired rule (status deleted). Triggered, expired and deleted rules return not_active.",
+    "description": "Delete an active, unexpired rule (status deleted). Triggered, expired and deleted rules return not_active. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.alerts.delete",
     "resource_target": "current account",
@@ -6688,6 +6838,20 @@
             "title_name"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -6695,14 +6859,15 @@
         "app_id",
         "version",
         "id",
-        "alert"
+        "alert",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.corrections.submit",
-    "description": "Submit a correction. A correction targets a title, a field and the specific object: runtime needs target.edition_id, release_date and certification need target.region, credit needs target.credit_id and guide_item needs target.item_id (an item in the current guide version). proposed_value is a YYYY-MM-DD date, whole minutes, a certification label for that region, a credit patch {role, character, billing_order} or a guide-item patch {text, spoiler}. The evidence note is required. Errors: no_change (equal to that object's current value), already_submitted (an open correction exists for the same title, field and target).",
+    "description": "Submit a correction. A correction targets a title, a field and the specific object: runtime needs target.edition_id, release_date and certification need target.region, credit needs target.credit_id and guide_item needs target.item_id (an item in the current guide version). proposed_value is a YYYY-MM-DD date, whole minutes, a certification label for that region, a credit patch {role, character, billing_order} or a guide-item patch {text, spoiler}. The evidence note is required. Errors: no_change (equal to that object's current value), already_submitted (an open correction exists for the same title, field and target). later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.corrections.submit",
     "resource_target": "current account",
@@ -7165,6 +7330,20 @@
             "title_name"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -7172,14 +7351,15 @@
         "app_id",
         "version",
         "id",
-        "correction"
+        "correction",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.corrections.amend",
-    "description": "Amend a correction in needs_info once (id plus patch with proposed_value and/or evidence); it returns to submitted. A submitted correction returns already_submitted; a decided or withdrawn one returns already_decided.",
+    "description": "Amend a correction in needs_info once (id plus patch with proposed_value and/or evidence); it returns to submitted. A submitted correction returns already_submitted; a decided or withdrawn one returns already_decided. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.corrections.amend",
     "resource_target": "current account",
@@ -7575,6 +7755,20 @@
             "title_name"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -7582,14 +7776,15 @@
         "app_id",
         "version",
         "id",
-        "correction"
+        "correction",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }
   },
   {
     "name": "kinodex.corrections.withdraw",
-    "description": "Withdraw an open (submitted or needs_info) correction. A decided or withdrawn correction returns already_decided.",
+    "description": "Withdraw an open (submitted or needs_info) correction. A decided or withdrawn correction returns already_decided. later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.",
     "read_only": false,
     "scope": "kinodex.corrections.withdraw",
     "resource_target": "current account",
@@ -7915,6 +8110,20 @@
             "title_name"
           ],
           "additionalProperties": false
+        },
+        "later_history_removed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -7922,7 +8131,8 @@
         "app_id",
         "version",
         "id",
-        "correction"
+        "correction",
+        "later_history_removed"
       ],
       "additionalProperties": false
     }

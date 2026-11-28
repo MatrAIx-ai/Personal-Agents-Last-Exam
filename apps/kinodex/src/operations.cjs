@@ -151,6 +151,9 @@ function objectVersion(expected, actual, label) {
   }
 }
 function titlesExist(idx, ids) {for (const id of ids) c.title(idx, id);}
+// A new watchlist or list order from the Agent, followed by the stored titles it could not see because
+// they are not listed yet at the clock (catalog.visible). They are kept, not silently dropped.
+const keepUnlisted = (idx, stored, ids) => [...ids, ...stored.filter(id => !idx.titles.has(id) && !ids.includes(id))];
 function diaryEntry(ctx, data, idx, entry) {
   checkDiaryEntry(idx, data, ctx.binding, entry, WRITE_CODES);
   const day = c.today(ctx.virtual_now, data.account.time_zone);
@@ -193,9 +196,9 @@ function write(ctx, data, name, args) {
     case 'kinodex.watchlist.save': {
       objectVersion(args.expected_watchlist_version, data.watchlist.version, 'watchlist');
       titlesExist(idx, args.title_ids);
-      if (JSON.stringify(args.title_ids) === JSON.stringify(data.watchlist.title_ids)) fail('no_change', 'The watchlist already has these titles in this order.');
+      if (JSON.stringify(args.title_ids) === JSON.stringify(view.watchlist.title_ids)) fail('no_change', 'The watchlist already has these titles in this order.');
       const before = copy(data.watchlist);
-      data.watchlist = {version: data.watchlist.version + 1, title_ids: copy(args.title_ids), updated_at: now};
+      data.watchlist = {version: data.watchlist.version + 1, title_ids: keepUnlisted(idx, data.watchlist.title_ids, args.title_ids), updated_at: now};
       r.record(ctx, data, {action: name, ...req, object_type: 'watchlist', object_id: 'watchlist', replaced: before});
       log(ctx, name, {watchlist_version: data.watchlist.version, count: args.title_ids.length});
       return {data, result: {id: 'watchlist', watchlist_version: data.watchlist.version, count: args.title_ids.length}};
@@ -249,17 +252,20 @@ function write(ctx, data, name, args) {
       titlesExist(idx, args.patch.title_ids || []);
       const changed = Object.keys(args.patch).filter(k => JSON.stringify(args.patch[k]) !== JSON.stringify(list[k]));
       if (!changed.length) fail('no_change', 'The patch matches the list as it is.');
-      const before = copy(list);
-      Object.assign(list, copy(args.patch)); list.version++; list.updated_at = now;
-      r.record(ctx, data, {action: name, ...req, object_type: 'list', object_id: list.list_id, replaced: before});
-      log(ctx, name, {list_id: list.list_id, list_version: list.version, changed_fields: changed});
-      return {data, result: {id: list.list_id, list_version: list.version, changed_fields: changed}};
+      // The checks use the list as shown; the change goes to the stored list, which keeps unlisted titles.
+      const stored = data.lists.find(l => l.list_id === list.list_id), before = copy(stored), patch = copy(args.patch);
+      if (patch.title_ids) patch.title_ids = keepUnlisted(idx, stored.title_ids, patch.title_ids);
+      Object.assign(stored, patch); stored.version++; stored.updated_at = now;
+      r.record(ctx, data, {action: name, ...req, object_type: 'list', object_id: stored.list_id, replaced: before});
+      log(ctx, name, {list_id: stored.list_id, list_version: stored.version, changed_fields: changed});
+      return {data, result: {id: stored.list_id, list_version: stored.version, changed_fields: changed}};
     }
     case 'kinodex.lists.delete': {
       const list = idx.lists.get(args.id);
       if (!list) fail('not_found', 'List ' + args.id + ' does not exist.');
+      const stored = data.lists.find(l => l.list_id === args.id);
       data.lists = data.lists.filter(l => l.list_id !== args.id);
-      r.record(ctx, data, {action: name, ...req, object_type: 'list', object_id: list.list_id, replaced: list});
+      r.record(ctx, data, {action: name, ...req, object_type: 'list', object_id: list.list_id, replaced: stored});
       log(ctx, name, {list_id: list.list_id});
       return {data, result: {id: list.list_id, deleted: true}};
     }
@@ -355,7 +361,10 @@ function write(ctx, data, name, args) {
 function handleTool(ctx, data, name, args) {
   const result = read(ctx, data, name, args);
   if (result) return {data, result};
-  return write(ctx, data, name, args);
+  const before = r.accountRecords(data), out = write(ctx, data, name, args);
+  const later = r.reportLater(ctx.virtual_now, out.data, before, out.data);
+  if (later) log(ctx, name + '.later_history_removed', later);
+  return {data: out.data, result: {...out.result, later_history_removed: later}};
 }
 
 module.exports = {handleTool};

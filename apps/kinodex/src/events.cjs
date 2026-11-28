@@ -137,7 +137,7 @@ const FIELD_LABEL = {runtime: 'runtime', release_date: 'release date', certifica
 function applyEvent(ctx, data, event) {
   const handler = {'offer.publish': offerPublish, 'offer.end': offerEnd, 'title.update': titleUpdate, 'correction.decision': correctionDecision}[event.operation];
   if (!handler) fail('invalid_event', 'Unsupported operation.');
-  const seq = r.nextSeq(data), done = handler(ctx, data, event), idx = c.index(data);
+  const before = r.accountRecords(data), seq = r.nextSeq(data), done = handler(ctx, data, event), idx = c.index(data);
   let effects = {alert_ids: [], notice_ids: []};
   if (event.operation === 'correction.decision') {
     const co = done.correction, target = Object.values(co.target)[0], t = idx.titles.get(co.title_id).name;
@@ -158,6 +158,8 @@ function applyEvent(ctx, data, event) {
   }
   r.record(ctx, data, {action: event.operation, event_id: event.event_id, object_type: SUBJECT[event.operation], object_id: done.object_id,
     replaced: done.replaced, ...effects});
+  const later = r.reportLater(event.at, data, before, data);
+  if (later) log(ctx, 'kinodex.event.later_history_removed', later);
   log(ctx, 'kinodex.event.' + event.operation, {event_id: event.event_id, object_id: done.object_id, alerts: effects.alert_ids.length, notices: effects.notice_ids.length});
   return data;
 }

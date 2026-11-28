@@ -15,7 +15,28 @@ function newId(prefix, seq, taken) {
 // time passing alone changes nothing, so neither produces a row.
 function record(ctx, data, {action, request_id = null, event_id = null, object_type, object_id, replaced = null, alert_ids = [], notice_ids = []}) {
   data.activity.push({seq: nextSeq(data), at: ctx.virtual_now, actor: event_id ? 'event' : 'agent', action, request_id, event_id,
-    object_type, object_id, replaced: copy(replaced), effects: {alert_ids, notice_ids}});
+    object_type, object_id, replaced: copy(replaced), effects: {alert_ids, notice_ids}, later_history_removed: null});
+}
+// Later history a change removed. A write or event at an earlier clock can replace stored account records
+// dated after the clock: adopt and dropLater below, also reached through evaluate. Called after every
+// write and event with the account records as stored before it (`before`), this finds each stored alert,
+// correction, notice or diary entry that the clock view hid or showed in an earlier state and that is no
+// longer stored as it was. It puts those records, as stored, in the change's activity row and returns a
+// count per family for the receipt, or null. Lists are left out: they are not rewound, and a list keeps
+// the titles that the view leaves out.
+const LATER_FAMILIES = {alerts: 'alert_id', corrections: 'correction_id', notices: 'notice_id', diary: 'entry_id'};
+const accountRecords = data => Object.fromEntries(Object.keys(LATER_FAMILIES).map(name => [name, copy(data[name])]));
+function reportLater(now, stored, before, after) {
+  const shown = c.visible({...stored, ...before}, now), records = {}, counts = {};
+  const same = (a, b) => a !== undefined && JSON.stringify(a) === JSON.stringify(b);
+  for (const [name, key] of Object.entries(LATER_FAMILIES)) {
+    const seen = new Map(shown[name].map(x => [x[key], x])), kept = new Map(after[name].map(x => [x[key], x]));
+    const lost = before[name].filter(x => !same(seen.get(x[key]), x) && !same(kept.get(x[key]), x));
+    if (lost.length) {records[name] = lost; counts[name] = lost.length;}
+  }
+  if (!Object.keys(records).length) return null;
+  after.activity[after.activity.length - 1].later_history_removed = records;
+  return counts;
 }
 function notice(ctx, data, seq, fields) {
   const notice_id = newId('notice', seq, new Set(data.notices.map(n => n.notice_id)));
@@ -82,7 +103,7 @@ function evaluate(ctx, data, which, cause) {
   for (const stored of [...data.alerts]) {
     if (c.instant(stored.created_at) > nowMs) continue;
     const asOf = c.alertAsOf(stored, nowMs);
-    if (c.alertStatus(asOf, nowMs) !== 'active' || !which(asOf)) continue;
+    if (!idx.titles.has(asOf.title_id) || c.alertStatus(asOf, nowMs) !== 'active' || !which(asOf)) continue;
     const offer = asOf.kind === 'new_season' ? null : matchOffer(idx, data, asOf, nowMs);
     const season = asOf.kind === 'new_season' ? matchSeason(idx, asOf) : null;
     if (!offer && season === null) continue;
@@ -192,5 +213,5 @@ function applyCorrection(ctx, data, idx, co) {
   return next.version;
 }
 
-module.exports = {nextSeq, newId, record, notice, adopt, dropLater, matchOffer, matchSeason, evaluate, noticeText, checkThreshold, checkAlreadyTrue,
+module.exports = {nextSeq, newId, record, accountRecords, reportLater, notice, adopt, dropLater, matchOffer, matchSeason, evaluate, noticeText, checkThreshold, checkAlreadyTrue,
   TARGET_KEY, sameTarget, isOpen, currentValue, checkProposed, sameValue, applyCorrection};
