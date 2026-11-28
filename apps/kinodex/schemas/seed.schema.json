@@ -1,0 +1,1871 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:kinodex:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "service_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "US",
+                "UK",
+                "CA"
+              ]
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "offer_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "subscription",
+                "rent",
+                "buy",
+                "free_with_ads"
+              ]
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "service_id",
+          "name",
+          "regions",
+          "offer_types"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "titles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "kind": {
+            "enum": [
+              "film",
+              "series"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 1900,
+            "maximum": 2100
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maxItems": 6
+          },
+          "synopsis": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "editions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "edition_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                "runtime_minutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                }
+              },
+              "required": [
+                "edition_id",
+                "label",
+                "runtime_minutes"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 6,
+            "minItems": 1
+          },
+          "releases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "region": {
+                  "enum": [
+                    "US",
+                    "UK",
+                    "CA"
+                  ]
+                },
+                "date": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "certification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 10
+                }
+              },
+              "required": [
+                "region",
+                "date",
+                "certification"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 3,
+            "minItems": 1
+          },
+          "seasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "season_number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "added_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "season_number",
+                "name",
+                "added_at"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "title_id",
+          "kind",
+          "name",
+          "year",
+          "genres",
+          "synopsis",
+          "editions",
+          "releases",
+          "seasons"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "episodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "episode_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "season_number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "synopsis": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "air_date": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "runtime_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "episode_id",
+          "title_id",
+          "season_number",
+          "number",
+          "name",
+          "synopsis",
+          "air_date",
+          "runtime_minutes"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "person_id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "credits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "credit_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "person_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "role": {
+            "enum": [
+              "director",
+              "writer",
+              "actor",
+              "composer",
+              "cinematographer",
+              "editor",
+              "producer"
+            ]
+          },
+          "character": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "billing_order": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "credit_id",
+          "title_id",
+          "person_id",
+          "role",
+          "character",
+          "billing_order"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "guides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "reason": {
+                  "enum": [
+                    "seed",
+                    "published_update",
+                    "correction_approved"
+                  ]
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "categories": {
+                  "type": "object",
+                  "properties": {
+                    "violence": {
+                      "type": "object",
+                      "properties": {
+                        "severity": {
+                          "enum": [
+                            "none",
+                            "mild",
+                            "moderate",
+                            "severe"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              "spoiler": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "item_id",
+                              "text",
+                              "spoiler"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
+                        }
+                      },
+                      "required": [
+                        "severity",
+                        "summary",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "language": {
+                      "type": "object",
+                      "properties": {
+                        "severity": {
+                          "enum": [
+                            "none",
+                            "mild",
+                            "moderate",
+                            "severe"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              "spoiler": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "item_id",
+                              "text",
+                              "spoiler"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
+                        }
+                      },
+                      "required": [
+                        "severity",
+                        "summary",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "sexual_content": {
+                      "type": "object",
+                      "properties": {
+                        "severity": {
+                          "enum": [
+                            "none",
+                            "mild",
+                            "moderate",
+                            "severe"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              "spoiler": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "item_id",
+                              "text",
+                              "spoiler"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
+                        }
+                      },
+                      "required": [
+                        "severity",
+                        "summary",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "frightening": {
+                      "type": "object",
+                      "properties": {
+                        "severity": {
+                          "enum": [
+                            "none",
+                            "mild",
+                            "moderate",
+                            "severe"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              "spoiler": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "item_id",
+                              "text",
+                              "spoiler"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
+                        }
+                      },
+                      "required": [
+                        "severity",
+                        "summary",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "substances": {
+                      "type": "object",
+                      "properties": {
+                        "severity": {
+                          "enum": [
+                            "none",
+                            "mild",
+                            "moderate",
+                            "severe"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              "spoiler": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "item_id",
+                              "text",
+                              "spoiler"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
+                        }
+                      },
+                      "required": [
+                        "severity",
+                        "summary",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "violence",
+                    "language",
+                    "sexual_content",
+                    "frightening",
+                    "substances"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "version",
+                "reason",
+                "published_at",
+                "categories"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "title_id",
+          "versions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "offers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "offer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "service_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "region": {
+            "enum": [
+              "US",
+              "UK",
+              "CA"
+            ]
+          },
+          "type": {
+            "enum": [
+              "subscription",
+              "rent",
+              "buy",
+              "free_with_ads"
+            ]
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "enum": [
+                  "USD",
+                  "GBP",
+                  "CAD"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quality": {
+            "enum": [
+              "SD",
+              "HD",
+              "4K"
+            ]
+          },
+          "available_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "available_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "offer_id",
+          "title_id",
+          "edition_id",
+          "service_id",
+          "region",
+          "type",
+          "price",
+          "currency",
+          "quality",
+          "available_from",
+          "available_until"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "public_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "author": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "rating": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "contains_spoilers": {
+            "type": "boolean"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "review_id",
+          "title_id",
+          "author",
+          "rating",
+          "text",
+          "contains_spoilers",
+          "posted_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "account": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "enum": [
+            "US",
+            "UK",
+            "CA"
+          ]
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "service_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "settings_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "region",
+        "time_zone",
+        "service_ids",
+        "settings_version",
+        "updated_at"
+      ],
+      "additionalProperties": false
+    },
+    "watchlist": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 500,
+          "uniqueItems": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "version",
+        "title_ids",
+        "updated_at"
+      ],
+      "additionalProperties": false
+    },
+    "diary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entry_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "episode_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "maxItems": 50,
+            "uniqueItems": true
+          },
+          "edition_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "watched_on": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "rewatch": {
+            "type": "boolean"
+          },
+          "watched_with": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 5000
+                  },
+                  "contains_spoilers": {
+                    "type": "boolean"
+                  },
+                  "visibility": {
+                    "enum": [
+                      "private",
+                      "friends",
+                      "public"
+                    ]
+                  }
+                },
+                "required": [
+                  "text",
+                  "contains_spoilers",
+                  "visibility"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "logged_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "entry_id",
+          "title_id",
+          "episode_ids",
+          "edition_id",
+          "watched_on",
+          "rewatch",
+          "watched_with",
+          "rating",
+          "review",
+          "logged_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "lists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "list_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000
+          },
+          "visibility": {
+            "enum": [
+              "private",
+              "friends",
+              "public"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "maxItems": 500,
+            "uniqueItems": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "list_id",
+          "name",
+          "description",
+          "visibility",
+          "version",
+          "title_ids",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "alert_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "kind": {
+            "enum": [
+              "available_on_my_services",
+              "price_below",
+              "new_season"
+            ]
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "offer_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "rent",
+                  "buy"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "known_seasons": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "maxItems": 100
+          },
+          "trigger": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "cause": {
+                    "enum": [
+                      "event",
+                      "services.update"
+                    ]
+                  },
+                  "event_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "operation": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "offer.publish",
+                          "offer.end",
+                          "title.update",
+                          "correction.decision"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "offer": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "offer_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "service_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "region": {
+                            "enum": [
+                              "US",
+                              "UK",
+                              "CA"
+                            ]
+                          },
+                          "type": {
+                            "enum": [
+                              "subscription",
+                              "rent",
+                              "buy",
+                              "free_with_ads"
+                            ]
+                          },
+                          "price": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "currency": {
+                            "anyOf": [
+                              {
+                                "enum": [
+                                  "USD",
+                                  "GBP",
+                                  "CAD"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "available_from": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "available_until": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "offer_id",
+                          "service_id",
+                          "region",
+                          "type",
+                          "price",
+                          "currency",
+                          "available_from",
+                          "available_until"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "season_number": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "notice_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "cause",
+                  "event_id",
+                  "operation",
+                  "request_id",
+                  "offer",
+                  "season_number",
+                  "notice_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "triggered",
+              "deleted"
+            ]
+          }
+        },
+        "required": [
+          "alert_id",
+          "kind",
+          "title_id",
+          "offer_type",
+          "threshold",
+          "expires_at",
+          "created_at",
+          "updated_at",
+          "known_seasons",
+          "trigger",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "correction_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "field": {
+            "enum": [
+              "release_date",
+              "runtime",
+              "credit",
+              "certification",
+              "guide_item"
+            ]
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "edition_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "edition_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "region": {
+                    "enum": [
+                      "US",
+                      "UK",
+                      "CA"
+                    ]
+                  }
+                },
+                "required": [
+                  "region"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "credit_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "credit_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "item_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "item_id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "proposed_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "enum": [
+                      "director",
+                      "writer",
+                      "actor",
+                      "composer",
+                      "cinematographer",
+                      "editor",
+                      "producer"
+                    ]
+                  },
+                  "character": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "billing_order": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 500
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "spoiler": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "current_value": {},
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "status": {
+            "enum": [
+              "submitted",
+              "needs_info",
+              "approved",
+              "declined",
+              "withdrawn"
+            ]
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "decision": {
+                  "enum": [
+                    "approved",
+                    "declined",
+                    "needs_info"
+                  ]
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "decided_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "event_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "decision",
+                "note",
+                "decided_at",
+                "event_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "correction_id",
+          "title_id",
+          "field",
+          "target",
+          "proposed_value",
+          "current_value",
+          "evidence",
+          "status",
+          "submitted_at",
+          "updated_at",
+          "amended_at",
+          "withdrawn_at",
+          "decisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "notice_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kind": {
+            "enum": [
+              "alert_triggered",
+              "correction_decided",
+              "guide_updated"
+            ]
+          },
+          "title_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "alert_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "correction_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "guide_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "notice_id",
+          "at",
+          "kind",
+          "title_id",
+          "alert_id",
+          "correction_id",
+          "guide_version",
+          "event_id",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "enum": [
+              "agent",
+              "event"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "object_type": {
+            "enum": [
+              "account",
+              "watchlist",
+              "diary_entry",
+              "list",
+              "alert",
+              "correction",
+              "offer",
+              "title"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "replaced": {},
+          "effects": {
+            "type": "object",
+            "properties": {
+              "alert_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "maxItems": 500
+              },
+              "notice_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "maxItems": 500
+              }
+            },
+            "required": [
+              "alert_ids",
+              "notice_ids"
+            ],
+            "additionalProperties": false
+          },
+          "later_history_removed": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "seq",
+          "at",
+          "actor",
+          "action",
+          "request_id",
+          "event_id",
+          "object_type",
+          "object_id",
+          "replaced",
+          "effects"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "services",
+    "titles",
+    "episodes",
+    "people",
+    "credits",
+    "guides",
+    "offers",
+    "public_reviews",
+    "account",
+    "watchlist",
+    "diary",
+    "lists",
+    "alerts",
+    "corrections",
+    "notices",
+    "activity"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "kinodex",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:kinodex (@byshail)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "offer.publish",
+    "offer.end",
+    "title.update",
+    "correction.decision"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "MCP only: no GUI and no reviewer console.",
+    "No posters, stills, trailers or other media; resources are not used.",
+    "No playback, purchases or subscription management: a subscription is only a record of what the person pays for elsewhere. There are no showtimes, tickets, recommendations, following, comments or box-office data.",
+    "One account per App instance. The catalog is copied into each instance, so Infra applies every catalog event to every account instance.",
+    "Approved corrections change only the submitting instance's catalog. A title.update event can carry release-date, certification and guide-version changes to other account instances, but no event sets an edition runtime or a credit, so approved runtime and credit corrections cannot be propagated to other instances in v1.",
+    "Rules are evaluated only by Infra events and kinodex.services.update. An upcoming offer that starts by the clock alone fires no alert until a task delivers it with offer.publish.",
+    "already_true names the matching offer in the error message only, because Core's error result carries a message and no structured fields.",
+    "Search matches the start of words; there is no ranking or stemming.",
+    "All titles, people, services, prices, reviews and guide text are synthetic; there is no live data."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
