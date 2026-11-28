@@ -40,16 +40,18 @@ function write(ctx, data, name, args) {
   const v = c.view(data, ctx.virtual_now), id = c.post(v, args.id).id;
   if (name === 'wirewalk.bookmarks.add') {
     const changed = !v.idx.bookmarks.has(id);
-    // A seeded bookmark saved after the clock is replaced: the reader has saved the post now.
+    // A seeded bookmark saved after the clock is replaced: the reader has saved the post now. The receipt
+    // counts it (it goes to the Agent); the diagnostics log keeps the stored bookmark.
+    const later = changed ? data.bookmarks.filter(b => b.post_id === id) : [];
     if (changed) data.bookmarks = [...data.bookmarks.filter(b => b.post_id !== id), {post_id: id, saved_at: ctx.virtual_now}];
-    log(ctx, 'wirewalk.bookmarks.add', {post_id: id, changed});
-    return {post_id: id, bookmarked: true, changed};
+    log(ctx, 'wirewalk.bookmarks.add', {post_id: id, changed, later_history_removed: later.length ? {bookmarks: later} : null});
+    return {post_id: id, bookmarked: true, changed, later_history_removed: later.length ? {bookmarks: later.length} : null};
   }
   // A bookmark saved after the clock does not exist yet: changed is false and the stored record stays.
   const changed = v.idx.bookmarks.has(id);
   if (changed) data.bookmarks = data.bookmarks.filter(b => b.post_id !== id);
-  log(ctx, 'wirewalk.bookmarks.remove', {post_id: id, changed});
-  return {post_id: id, bookmarked: false, changed};
+  log(ctx, 'wirewalk.bookmarks.remove', {post_id: id, changed, later_history_removed: null});
+  return {post_id: id, bookmarked: false, changed, later_history_removed: null};
 }
 
 function handleTool(ctx, data, name, args) {

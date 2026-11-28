@@ -242,16 +242,16 @@ test('search: word starts, accents and case ignored, alt text and link cards sea
 
 test('bookmarks: add once, remove, retry-safe results, latest write first', () => {
   const f = fixture();
-  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p05'}), {post_id: 'p05', bookmarked: true, changed: true});
-  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p05'}), {post_id: 'p05', bookmarked: true, changed: false});
+  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p05'}), {post_id: 'p05', bookmarked: true, changed: true, later_history_removed: null});
+  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p05'}), {post_id: 'p05', bookmarked: true, changed: false, later_history_removed: null});
   f.call('wirewalk.bookmarks.add', {id: 'p12'});
   const list = f.call('wirewalk.bookmarks.list', {}).bookmarks;
   assert.deepEqual(list.map(b => b.post.id), ['p12', 'p05', 'p01'], 'Same session clock: the later write comes first');
   assert.equal(list[0].saved_at, f.ctx.virtual_now);
   assert.equal(f.call('wirewalk.post.get', {id: 'p05'}).post.saved_at, f.ctx.virtual_now);
   assert.equal(f.call('wirewalk.feed.list', {}).posts.find(p => p.id === 'p05').bookmarked, true);
-  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p05'}), {post_id: 'p05', bookmarked: false, changed: true});
-  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p05'}), {post_id: 'p05', bookmarked: false, changed: false});
+  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p05'}), {post_id: 'p05', bookmarked: false, changed: true, later_history_removed: null});
+  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p05'}), {post_id: 'p05', bookmarked: false, changed: false, later_history_removed: null});
   unchanged(f, () => f.call('wirewalk.bookmarks.remove', {id: 'p999'}), UNAVAILABLE);
   unchanged(f, () => f.call('wirewalk.bookmarks.add', {id: 'p05', role: 'infra'}), /Input schema/);
   assert.deepEqual(f.data.bookmarks.map(b => b.post_id), ['p01', 'p12']);
@@ -418,7 +418,7 @@ test('a seed loaded before its latest record shows only the posts and bookmarks 
     unchanged(f, () => f.call('wirewalk.bookmarks.add', {id}), UNAVAILABLE);
     unchanged(f, () => f.call('wirewalk.bookmarks.remove', {id}), UNAVAILABLE);
   }
-  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p31'}), {post_id: 'p31', bookmarked: false, changed: false},
+  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p31'}), {post_id: 'p31', bookmarked: false, changed: false, later_history_removed: null},
     'The 17:02 bookmark does not exist yet, so there is nothing to remove');
   assert.deepEqual(f.data, before);
   // Time passing writes nothing; the later records appear because the clock reached them.
@@ -434,9 +434,10 @@ test('a seed loaded before its latest record shows only the posts and bookmarks 
 test('bookmarking before a seeded later bookmark keeps one bookmark, dated now', () => {
   // Dario's seed says he bookmarks Odile Park's thread at 17:00; at noon he has not, so the agent's add replaces it.
   const NOON = '2026-10-12T12:00:00-07:00', f = fixture({seed: darioSeed, binding: darioBinding, virtual_now: NOON});
-  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: true});
+  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: true, later_history_removed: {bookmarks: 1}});
+  assert.deepEqual(f.logs.at(-1).details.later_history_removed, {bookmarks: [{post_id: 'p29', saved_at: '2026-10-12T17:00:00-07:00'}]});
   assert.deepEqual(f.data.bookmarks.filter(b => b.post_id === 'p29'), [{post_id: 'p29', saved_at: NOON}]);
-  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: false});
+  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: false, later_history_removed: null});
   assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks.map(b => b.post.id), ['p29']);
   f.ctx.virtual_now = MONDAY;
   assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks.map(b => [b.post.id, b.saved_at]),
@@ -517,4 +518,21 @@ test('the evaluation dataset lists the posts that assume the example events, wit
   const dropAccounts = new Set(deps.storylines.flatMap(s => s.accounts));
   const trimmed = {...seed, accounts: seed.accounts.filter(a => !dropAccounts.has(a.id)), posts: seed.posts.filter(p => !listed.has(p.id))};
   plugin.validateSeed({app_id: 'wirewalk', role: 'infra', virtual_now: require('../data/evaluation/clock.json').initial_time, binding: require('../data/evaluation/binding.json')}, trimmed);
+});
+
+test('on the evaluation dataset, a bookmark at an earlier clock that replaces a seeded later one counts it in the receipt', () => {
+  // Independent of src/operations.cjs: a bookmark is later history when its saved_at lies after the clock.
+  const seed = require('../data/evaluation/seed.json'), binding = require('../data/evaluation/binding.json');
+  const run = (at, id) => {
+    const f = fixture({seed, binding, virtual_now: at}), before = f.data, receipt = f.call('wirewalk.bookmarks.add', {id}), after = f.data;
+    const kept = new Set(after.bookmarks.map(b => JSON.stringify(b)));
+    const lost = before.bookmarks.filter(b => !kept.has(JSON.stringify(b)) && Date.parse(b.saved_at) > Date.parse(at));
+    assert.deepEqual(receipt.later_history_removed, lost.length ? {bookmarks: lost.length} : null, 'the receipt counts the later bookmarks replaced');
+    assert.deepEqual(f.logs.at(-1).details.later_history_removed, lost.length ? {bookmarks: lost} : null, 'the log keeps them as stored');
+    return lost;
+  };
+  // Posted at 10:47 on Feb. 9, 2026 and bookmarked at 16:47; bookmarking it at noon replaces the later bookmark.
+  assert.deepEqual(run('2026-02-09T12:00:00-08:00', 'w260209-4'), [{post_id: 'w260209-4', saved_at: '2026-02-09T16:47:00-08:00'}]);
+  // A post never bookmarked reports null.
+  assert.deepEqual(run('2025-01-02T12:00:00-08:00', 'w250101-5'), []);
 });
