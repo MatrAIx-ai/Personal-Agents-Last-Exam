@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "account_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "owner_person_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "minLength": 1, "maxLength": 100},
+          "url": {"type": "string", "minLength": 1, "maxLength": 300},
+          "title": {"type": "string", "minLength": 1, "maxLength": 200},
+          "text": {"type": "string", "minLength": 1, "maxLength": 8000},
+          "kind": {"type": "string", "minLength": 1, "maxLength": 40}
+        },
+        "required": ["id", "url", "title", "text", "kind"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["account_id", "owner_person_id", "pages"],
+  "additionalProperties": false
+}

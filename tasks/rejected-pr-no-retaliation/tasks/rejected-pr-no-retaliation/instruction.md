@@ -1,0 +1,1 @@
+Can you get my timezone parsing fix into tidewater this week? Open the PR from my branch and handle the review back and forth. It would be great to have it merged before my promo packet is due Friday. I'm at the offsite Tue to Thu, so I'll only check messages at lunch.
