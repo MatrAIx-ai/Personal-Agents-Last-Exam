@@ -2,7 +2,7 @@
   "app_id": "questshelf",
   "scope": "environment_evaluation_dataset",
   "source_file": "datasets/eval-2025-2026/seed.json",
-  "source_sha256": "8666ccd2d327acb7a87fd856701d67d363b4ca29d3334ae42ba8b891e352ccff",
+  "source_sha256": "f6b18cf91eb70a9751a8f56605cf4650c73ce4eee9643b39955e842fa06adcdf",
   "provenance": "100% synthetic (MIT); no scraped store data or real personal history; no real anchor required",
   "counting_time_zone": "America/Los_Angeles",
   "coverage_window": {
@@ -14,13 +14,19 @@
     {
       "field": "polls[].closes_at",
       "reason": "Planned deadline, not an observed occurrence/activity timestamp."
+    },
+    {
+      "field": "shelves[].updated_at (when equal to last play_history[].at)",
+      "count_skipped": 19,
+      "reason": "Already represented by the final play_history[].at entry; skipped to avoid double-counting."
     }
   ],
   "out_of_window_or_invalid_records": 0,
   "invalid_dates": 0,
   "user_activity_summary": {
-    "total_timestamped_records": 202,
-    "global_deduplicated_distinct_dates": 145,
+    "total_events": 165,
+    "unique_timestamps": 165,
+    "global_deduplicated_distinct_dates": 126,
     "earliest_date": "2025-01-03",
     "latest_date": "2026-12-30",
     "months_covered": 24,
@@ -28,8 +34,9 @@
     "gaps": []
   },
   "all_sources_summary": {
-    "total_timestamped_records": 222,
-    "global_deduplicated_distinct_dates": 163,
+    "total_events": 185,
+    "unique_timestamps": 185,
+    "global_deduplicated_distinct_dates": 144,
     "earliest_date": "2025-01-03",
     "latest_date": "2026-12-30",
     "months_covered": 24,
@@ -40,292 +47,292 @@
     "shelves.play_history.at": {
       "date_field": "shelves[].play_history[].at",
       "category": "user_activity",
-      "record_count": 66,
-      "distinct_dates": 66
+      "event_count": 72,
+      "distinct_dates": 71
     },
     "shelves.updated_at": {
-      "date_field": "shelves[].updated_at",
+      "date_field": "shelves[].updated_at (only when no play_history match)",
       "category": "user_activity",
-      "record_count": 19,
-      "distinct_dates": 19
+      "event_count": 0,
+      "distinct_dates": 0
     },
     "friends.owned_games.added_at": {
       "date_field": "friends[].owned_games[].added_at",
       "category": "user_activity",
-      "record_count": 13,
-      "distinct_dates": 13
+      "event_count": 15,
+      "distinct_dates": 15
     },
     "polls.created_at": {
       "date_field": "polls[].created_at",
       "category": "user_activity",
-      "record_count": 26,
-      "distinct_dates": 26
+      "event_count": 17,
+      "distinct_dates": 17
     },
     "polls.votes.voted_at": {
       "date_field": "polls[].votes[].voted_at",
       "category": "user_activity",
-      "record_count": 52,
-      "distinct_dates": 52
+      "event_count": 44,
+      "distinct_dates": 32
     },
     "polls.closed_at": {
       "date_field": "polls[].closed_at",
       "category": "user_activity",
-      "record_count": 25,
-      "distinct_dates": 25
+      "event_count": 16,
+      "distinct_dates": 16
     },
     "preferences.updated_at": {
       "date_field": "preferences.updated_at",
       "category": "user_activity",
-      "record_count": 1,
+      "event_count": 1,
       "distinct_dates": 1
     },
     "games.updated_at": {
       "date_field": "games[].updated_at",
       "category": "catalog_metadata",
-      "record_count": 20,
+      "event_count": 20,
       "distinct_dates": 20
     }
   },
   "monthly": [
     {
       "month": "2025-01",
-      "user_activity_records": 9,
-      "user_activity_distinct_dates": 8,
+      "user_activity_events": 5,
+      "user_activity_distinct_dates": 5,
       "catalog_records": 3,
-      "total_records": 12,
-      "total_distinct_dates": 11,
-      "real_records": 0,
-      "synthetic_records": 12
+      "total_events": 8,
+      "total_distinct_dates": 8,
+      "real_events": 0,
+      "synthetic_events": 8
     },
     {
       "month": "2025-02",
-      "user_activity_records": 10,
-      "user_activity_distinct_dates": 7,
+      "user_activity_events": 10,
+      "user_activity_distinct_dates": 8,
       "catalog_records": 1,
-      "total_records": 11,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 11
+      "total_events": 11,
+      "total_distinct_dates": 8,
+      "real_events": 0,
+      "synthetic_events": 11
     },
     {
       "month": "2025-03",
-      "user_activity_records": 9,
-      "user_activity_distinct_dates": 7,
+      "user_activity_events": 9,
+      "user_activity_distinct_dates": 6,
       "catalog_records": 1,
-      "total_records": 10,
-      "total_distinct_dates": 8,
-      "real_records": 0,
-      "synthetic_records": 10
+      "total_events": 10,
+      "total_distinct_dates": 7,
+      "real_events": 0,
+      "synthetic_events": 10
     },
     {
       "month": "2025-04",
-      "user_activity_records": 9,
+      "user_activity_events": 10,
       "user_activity_distinct_dates": 7,
       "catalog_records": 1,
-      "total_records": 10,
+      "total_events": 11,
       "total_distinct_dates": 8,
-      "real_records": 0,
-      "synthetic_records": 10
+      "real_events": 0,
+      "synthetic_events": 11
     },
     {
       "month": "2025-05",
-      "user_activity_records": 7,
-      "user_activity_distinct_dates": 6,
+      "user_activity_events": 4,
+      "user_activity_distinct_dates": 4,
       "catalog_records": 1,
-      "total_records": 8,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 8
+      "total_events": 5,
+      "total_distinct_dates": 5,
+      "real_events": 0,
+      "synthetic_events": 5
     },
     {
       "month": "2025-06",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 5,
+      "user_activity_events": 9,
+      "user_activity_distinct_dates": 6,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 10,
+      "total_distinct_dates": 7,
+      "real_events": 0,
+      "synthetic_events": 10
     },
     {
       "month": "2025-07",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 6,
+      "user_activity_events": 3,
+      "user_activity_distinct_dates": 3,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 4,
+      "total_distinct_dates": 4,
+      "real_events": 0,
+      "synthetic_events": 4
     },
     {
       "month": "2025-08",
-      "user_activity_records": 7,
-      "user_activity_distinct_dates": 6,
+      "user_activity_events": 8,
+      "user_activity_distinct_dates": 4,
       "catalog_records": 1,
-      "total_records": 8,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 8
+      "total_events": 9,
+      "total_distinct_dates": 5,
+      "real_events": 0,
+      "synthetic_events": 9
     },
     {
       "month": "2025-09",
-      "user_activity_records": 7,
-      "user_activity_distinct_dates": 5,
+      "user_activity_events": 3,
+      "user_activity_distinct_dates": 3,
       "catalog_records": 1,
-      "total_records": 8,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 8
+      "total_events": 4,
+      "total_distinct_dates": 4,
+      "real_events": 0,
+      "synthetic_events": 4
     },
     {
       "month": "2025-10",
-      "user_activity_records": 8,
+      "user_activity_events": 8,
       "user_activity_distinct_dates": 6,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 9,
+      "total_distinct_dates": 6,
+      "real_events": 0,
+      "synthetic_events": 9
     },
     {
       "month": "2025-11",
-      "user_activity_records": 7,
-      "user_activity_distinct_dates": 5,
+      "user_activity_events": 7,
+      "user_activity_distinct_dates": 6,
       "catalog_records": 1,
-      "total_records": 8,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 8
+      "total_events": 8,
+      "total_distinct_dates": 7,
+      "real_events": 0,
+      "synthetic_events": 8
     },
     {
       "month": "2025-12",
-      "user_activity_records": 7,
-      "user_activity_distinct_dates": 5,
+      "user_activity_events": 9,
+      "user_activity_distinct_dates": 6,
       "catalog_records": 1,
-      "total_records": 8,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 8
+      "total_events": 10,
+      "total_distinct_dates": 7,
+      "real_events": 0,
+      "synthetic_events": 10
     },
     {
       "month": "2026-01",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 6,
+      "user_activity_events": 7,
+      "user_activity_distinct_dates": 5,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 8,
+      "total_distinct_dates": 6,
+      "real_events": 0,
+      "synthetic_events": 8
     },
     {
       "month": "2026-02",
-      "user_activity_records": 6,
+      "user_activity_events": 8,
       "user_activity_distinct_dates": 5,
       "catalog_records": 1,
-      "total_records": 7,
+      "total_events": 9,
       "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 7
+      "real_events": 0,
+      "synthetic_events": 9
     },
     {
       "month": "2026-03",
-      "user_activity_records": 7,
-      "user_activity_distinct_dates": 4,
+      "user_activity_events": 3,
+      "user_activity_distinct_dates": 3,
       "catalog_records": 1,
-      "total_records": 8,
+      "total_events": 4,
       "total_distinct_dates": 4,
-      "real_records": 0,
-      "synthetic_records": 8
+      "real_events": 0,
+      "synthetic_events": 4
     },
     {
       "month": "2026-04",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 6,
+      "user_activity_events": 10,
+      "user_activity_distinct_dates": 7,
       "catalog_records": 0,
-      "total_records": 8,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 8
+      "total_events": 10,
+      "total_distinct_dates": 7,
+      "real_events": 0,
+      "synthetic_events": 10
     },
     {
       "month": "2026-05",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 5,
+      "user_activity_events": 3,
+      "user_activity_distinct_dates": 3,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 4,
+      "total_distinct_dates": 4,
+      "real_events": 0,
+      "synthetic_events": 4
     },
     {
       "month": "2026-06",
-      "user_activity_records": 6,
-      "user_activity_distinct_dates": 4,
+      "user_activity_events": 7,
+      "user_activity_distinct_dates": 5,
       "catalog_records": 0,
-      "total_records": 6,
-      "total_distinct_dates": 4,
-      "real_records": 0,
-      "synthetic_records": 6
+      "total_events": 7,
+      "total_distinct_dates": 5,
+      "real_events": 0,
+      "synthetic_events": 7
     },
     {
       "month": "2026-07",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 6,
+      "user_activity_events": 3,
+      "user_activity_distinct_dates": 3,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 4,
+      "total_distinct_dates": 4,
+      "real_events": 0,
+      "synthetic_events": 4
     },
     {
       "month": "2026-08",
-      "user_activity_records": 6,
-      "user_activity_distinct_dates": 4,
+      "user_activity_events": 6,
+      "user_activity_distinct_dates": 5,
       "catalog_records": 0,
-      "total_records": 6,
-      "total_distinct_dates": 4,
-      "real_records": 0,
-      "synthetic_records": 6
+      "total_events": 6,
+      "total_distinct_dates": 5,
+      "real_events": 0,
+      "synthetic_events": 6
     },
     {
       "month": "2026-09",
-      "user_activity_records": 8,
-      "user_activity_distinct_dates": 5,
+      "user_activity_events": 2,
+      "user_activity_distinct_dates": 2,
       "catalog_records": 1,
-      "total_records": 9,
-      "total_distinct_dates": 6,
-      "real_records": 0,
-      "synthetic_records": 9
+      "total_events": 3,
+      "total_distinct_dates": 3,
+      "real_events": 0,
+      "synthetic_events": 3
     },
     {
       "month": "2026-10",
-      "user_activity_records": 11,
-      "user_activity_distinct_dates": 7,
+      "user_activity_events": 10,
+      "user_activity_distinct_dates": 8,
       "catalog_records": 0,
-      "total_records": 11,
-      "total_distinct_dates": 7,
-      "real_records": 0,
-      "synthetic_records": 11
+      "total_events": 10,
+      "total_distinct_dates": 8,
+      "real_events": 0,
+      "synthetic_events": 10
     },
     {
       "month": "2026-11",
-      "user_activity_records": 16,
-      "user_activity_distinct_dates": 9,
+      "user_activity_events": 12,
+      "user_activity_distinct_dates": 8,
       "catalog_records": 0,
-      "total_records": 16,
-      "total_distinct_dates": 9,
-      "real_records": 0,
-      "synthetic_records": 16
+      "total_events": 12,
+      "total_distinct_dates": 8,
+      "real_events": 0,
+      "synthetic_events": 12
     },
     {
       "month": "2026-12",
-      "user_activity_records": 14,
-      "user_activity_distinct_dates": 11,
+      "user_activity_events": 9,
+      "user_activity_distinct_dates": 8,
       "catalog_records": 0,
-      "total_records": 14,
-      "total_distinct_dates": 11,
-      "real_records": 0,
-      "synthetic_records": 14
+      "total_events": 9,
+      "total_distinct_dates": 8,
+      "real_events": 0,
+      "synthetic_events": 9
     }
   ],
   "representative_records": {
@@ -361,21 +368,79 @@
       "platform": "ps5",
       "added_at": "2025-01-16T18:00:00-08:00"
     },
-    "sample_closed_poll": {
-      "poll_id": "poll-2025-01-kickoff",
-      "title": "January Winter Bistro Co-Op",
-      "created_at": "2025-01-25T16:00:00-08:00",
-      "closed_at": "2025-01-27T21:00:00-08:00",
-      "winner_game_ids": [
+    "sample_cancelled_poll": {
+      "poll_id": "poll-2025-05-memorial-cancel",
+      "title": "Memorial Weekend Co-Op Check",
+      "status": "closed",
+      "candidate_game_ids": [
+        "game-orbit-relay",
         "game-ember-kitchen"
-      ]
+      ],
+      "invited_friend_ids": [
+        "friend-alex",
+        "friend-sam"
+      ],
+      "max_session_minutes": 75,
+      "votes": [],
+      "winner_game_ids": [],
+      "created_at": "2025-05-22T16:30:00-07:00",
+      "closes_at": "2025-05-24T20:00:00-07:00",
+      "closed_at": "2025-05-25T10:15:00-07:00"
+    },
+    "sample_tie_poll": {
+      "poll_id": "poll-2025-06-summer-tie",
+      "title": "June Double-Header Tie-Breaker",
+      "status": "closed",
+      "candidate_game_ids": [
+        "game-ember-kitchen",
+        "game-orbit-relay"
+      ],
+      "invited_friend_ids": [
+        "friend-alex",
+        "friend-sam"
+      ],
+      "max_session_minutes": 120,
+      "votes": [
+        {
+          "voter_id": "questshelf-maya",
+          "selected_game_ids": [
+            "game-ember-kitchen"
+          ],
+          "note": "Craving flatbread rush.",
+          "voted_at": "2025-06-11T08:15:00-07:00"
+        },
+        {
+          "voter_id": "friend-alex",
+          "selected_game_ids": [
+            "game-orbit-relay"
+          ],
+          "note": "Still chasing Sector 2 gold.",
+          "voted_at": "2025-06-11T21:40:00-07:00"
+        },
+        {
+          "voter_id": "friend-sam",
+          "selected_game_ids": [
+            "game-ember-kitchen",
+            "game-orbit-relay"
+          ],
+          "note": "Happy to split 1h each!",
+          "voted_at": "2025-06-12T14:05:00-07:00"
+        }
+      ],
+      "winner_game_ids": [
+        "game-ember-kitchen",
+        "game-orbit-relay"
+      ],
+      "created_at": "2025-06-10T20:00:00-07:00",
+      "closes_at": "2025-06-13T19:00:00-07:00",
+      "closed_at": "2025-06-13T18:10:00-07:00"
     },
     "active_open_poll": {
-      "poll_id": "poll-2026-nye-coop",
+      "poll_id": "poll-2026-12-nye-coop",
       "title": "New Years Eve 90-Min Co-Op",
       "created_at": "2026-12-27T17:00:00-08:00",
       "closes_at": "2026-12-31T23:30:00-08:00",
-      "votes": 2
+      "votes": 3
     }
   }
 }

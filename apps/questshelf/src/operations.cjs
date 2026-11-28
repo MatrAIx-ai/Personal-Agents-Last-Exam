@@ -217,13 +217,18 @@ function handleTool(ctx, data, name, args) {
     if (args.status !== 'dropped' && args.drop_reasons && args.drop_reasons.length > 0) {
       fail('invalid_arguments', 'drop_reasons may only be supplied when status is dropped.');
     }
-    if (existing && existing.status === 'completed' && args.status === 'backlog') {
+    const everCompleted = existing && (
+      existing.status === 'completed' ||
+      (Array.isArray(existing.play_history) && existing.play_history.some(h => h.status === 'completed'))
+    );
+    if (everCompleted && args.status === 'backlog') {
       fail('invalid_state', 'Cannot transition a completed game back to backlog.');
     }
     if (args.status === 'backlog' && args.rating !== undefined && args.rating !== null) {
       fail('invalid_arguments', 'Cannot set a rating on a backlog entry.');
     }
 
+    const MAX_PLAY_HISTORY = 100;
     let entry;
     if (existing) {
       existing.status = args.status;
@@ -235,6 +240,9 @@ function handleTool(ctx, data, name, args) {
       if (args.note !== undefined) existing.note = args.note;
       existing.updated_at = ctx.virtual_now;
       if (Array.isArray(existing.play_history)) {
+        if (existing.play_history.length >= MAX_PLAY_HISTORY) {
+          existing.play_history = existing.play_history.slice(-(MAX_PLAY_HISTORY - 1));
+        }
         existing.play_history.push({
           at: ctx.virtual_now,
           status: existing.status,

@@ -10,7 +10,7 @@ Multimodal cross-platform game library, negative-feedback recommender, and frien
 
 - **Smoke fixtures & full 24-month evaluation dataset:**
   - `fixtures/minimal.json` (20-game default smoke fixture) and `fixtures/seed-casual.json` (alternate user profile).
-  - `datasets/eval-2025-2026/seed.json` (100% synthetic evaluation dataset covering **2025-01-03 through 2026-12-30**, **24/24 months**, **145** deduplicated user-activity dates across 66 `play_history` shelf events, 13 friend library additions, and 26 co-op polls; **163** distinct dates including catalog metadata; regenerated deterministically by `node scripts/build-eval-dataset.cjs`).
+  - `datasets/eval-2025-2026/seed.json` (100% synthetic evaluation dataset covering **2025-01-03 through 2026-12-30**, **24/24 months**, **165** unique user-activity events across **126** deduplicated dates — 72 `play_history` shelf events aligned with co-op sessions, 15 friend library acquisitions, 17 varied non-templated co-op polls including ties, split votes, missed votes, and a 0-vote cancellation, and 1 preference update; **185** unique events / **144** distinct dates including catalog metadata; regenerated deterministically by `node scripts/build-eval-dataset.cjs`).
 - **20 illustrated 640×360 synthetic PNG gameplay & HUD preview screenshots** (`assets/`, `117.5 KiB` total decoded bytes, strictly within the `64-asset / 1 MiB` budget, regenerated deterministically by `python3 scripts/render-previews.py`):
   - Visual cues (first-person corridor/lantern/vignette/EKG horror vs. isometric tile grids, top-down stations/kitchens/greenhouses, 2D side-scroll, 3rd-person, chase-cam racing, tactical grid, deckbuilder cards, arena sports, point-and-click) are depicted purely visually with **no printed camera/genre/pt-size captions** and neutral game summaries & `alt_text`.
   - In-game HUD typography is rendered proportionally to each game's `hud_font_pt` (`round(hud_font_pt * 1.45)` px), matching `fixtures/visual-cues.eval.json` (`handheld_hud_readable === (hud_font_pt >= 14)`).
@@ -35,7 +35,10 @@ Agent access to the 20 preview PNGs via MCP `resources/list`, `resources/read` (
    - Active avoid reasons are computed dynamically as the union of `preferences.avoid_reasons` and `drop_reasons` on currently `dropped` shelves (`src/model.cjs`). Dropping a game does **not** permanently mutate `preferences.avoid_reasons`; moving the shelf back from `dropped` to `playing` or `backlog` clears its `drop_reasons` and restores the original ranking.
    - Completed games contribute positive `likedTags` **only** when `rating >= 8.0` (unrated `rating: null` completions are excluded).
    - `drop_reasons` ranking behavior: `first_person_motion_sickness` excludes `first_person`; `horror` excludes `horror`; `excessive_grind` excludes `excessive_grind`; `tiny_ui_text` excludes `tiny_ui_text` or `hud_font_pt < 12`; `too_long` excludes `playtime_hours.main > 20`; `no_offline_mode` excludes `offline_ok: false`; `other` is stored as structured user metadata without an automatic filter.
-   - Shelf transition rules: `completed` → `backlog` rejects atomically (`invalid_state`), `backlog` rejects non-null `rating` (`invalid_arguments`), and `drop_reasons` are only permitted when `status === "dropped"`.
+   - Shelf transition & `play_history` rules:
+     - `completed` → `backlog` rejects atomically (`invalid_state`). Replaying a completed game (`completed` → `playing`) is permitted, and any shelf whose `play_history` records a prior `completed` status continues to reject transitions back to `backlog` (`invalid_state`). Shelving an unfinished game (`playing` / `dropped` → `backlog`) clears `rating` and `drop_reasons`.
+     - `backlog` rejects non-null `rating` (`invalid_arguments`), and `drop_reasons` are only permitted when `status === "dropped"`.
+     - `play_history` is an optional append-only rolling log (capped at the 100 most recent entries per shelf; older entries are trimmed automatically so repeated `shelf.upsert` calls never fail schema validation). Seeds that track multi-session history (such as `datasets/eval-2025-2026/seed.json`) initialize `play_history` on their shelves, while compact smoke fixtures (`fixtures/minimal.json`, `fixtures/seed-casual.json`) omit it unless present on the entry.
 4. **Strict per-operation event payload validation:** `schemas/events.schema.json` (using `oneOf` per operation with `additionalProperties: false`) and `src/events.cjs` reject unknown/misspelled fields, out-of-range `hud_font_pt` (outside `6..36`), and invalid types atomically without mutating state or revision.
 
 ## Local Setup & Verification
@@ -70,6 +73,8 @@ npm run app:verify -- --app apps/questshelf --output .artifacts/questshelf.json
   "virtual_now": "2026-12-31T23:00:00-08:00"
 }
 ```
+
+> **Clock note:** Pass `virtual_now >= "2026-12-31T23:00:00-08:00"` when loading the full 24-month evaluation dataset so all synthetic history through `2026-12-30` precedes the virtual clock. `validateSeed` intentionally does not reject records dated after `ctx.virtual_now` because Core's `env.validate_bundle` runs without a `virtual_now` parameter; Task scenarios targeting an earlier date should load a pre-cutoff slice rather than the full 2025–2026 dataset.
 
 ## Scope & Limitations
 

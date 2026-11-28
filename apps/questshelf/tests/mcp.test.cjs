@@ -152,16 +152,16 @@ test('real MCP: Infra env.load_seed loads full 2025-2026 evaluation dataset and 
     const shelves = await agent.call('questshelf.shelf.list');
     assert.equal(shelves.shelves.length, 19);
     const totalHistory = shelves.shelves.reduce((n, s) => n + (s.play_history ? s.play_history.length : 0), 0);
-    assert.equal(totalHistory, 66);
+    assert.equal(totalHistory, 72);
 
     const friends = await agent.call('questshelf.friends.list');
     assert.equal(friends.friends.length, 3);
     assert.ok(friends.friends.every(f => f.owned_games.every(og => typeof og.added_at === 'string')));
 
     const polls = await agent.call('questshelf.poll.list');
-    assert.equal(polls.polls.length, 26);
+    assert.equal(polls.polls.length, 17);
     assert.equal(polls.polls.filter(p => p.status === 'open').length, 1);
-    assert.equal(polls.polls.filter(p => p.status === 'closed').length, 25);
+    assert.equal(polls.polls.filter(p => p.status === 'closed').length, 16);
   } finally {
     await agent.close();
     await infra.close();

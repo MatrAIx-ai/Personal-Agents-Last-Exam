@@ -254,14 +254,28 @@ test('second seed fixture (seed-casual.json) and evaluation visual-cues manifest
   assert.equal(trap.horror_visual_cues, true);
   assert.equal(trap.visual_trap, 'unlabeled_first_person_horror');
 
-  // Full 2025-2026 evaluation dataset validates cleanly and covers all 24 months
+  // Full 2025-2026 evaluation dataset validates cleanly, covers all 24 months, and maintains poll/ownership consistency
   const evalSeed = JSON.parse(fs.readFileSync(path.join(root, 'datasets/eval-2025-2026/seed.json'), 'utf8'));
   assert.equal(seedValidator(evalSeed), true);
   plugin.validateSeed({ binding }, evalSeed);
   const { computeCoverage } = require('../scripts/coverage.cjs');
   const cov = computeCoverage('datasets/eval-2025-2026/seed.json');
   assert.equal(cov.user_activity_summary.months_covered, 24);
+  assert.equal(cov.user_activity_summary.total_events, cov.user_activity_summary.unique_timestamps);
   assert.equal(cov.out_of_window_or_invalid_records, 0);
+
+  const mayaOwnedAt = new Map(evalSeed.shelves.map(s => [s.game_id, Date.parse(s.play_history[0].at)]));
+  const friendMap = new Map(evalSeed.friends.map(f => [f.friend_id, f]));
+  for (const p of evalSeed.polls) {
+    const cMs = Date.parse(p.created_at);
+    for (const cid of p.candidate_game_ids) {
+      assert.ok(mayaOwnedAt.get(cid) <= cMs, `Maya must own ${cid} before ${p.poll_id}`);
+      for (const fid of p.invited_friend_ids) {
+        const og = friendMap.get(fid).owned_games.find(x => x.game_id === cid);
+        assert.ok(og && Date.parse(og.added_at) <= cMs, `${fid} must own ${cid} before ${p.poll_id}`);
+      }
+    }
+  }
 });
 
 test('game.update_patch add_asset_id syncs game.get asset_ids, resource_uris, and plugin.assetReferences', () => {
@@ -377,4 +391,52 @@ test('recommend.rank ignores unrated completed games for liked tags, honors too_
   const filtered = app.call('questshelf.recommend.rank', { pool: 'unplayed', limit: 20 }).recommendations;
   assert.ok(filtered.every(r => r.main_hours <= 20 && r.offline_ok === true));
   assert.ok(!filtered.some(r => r.game_id === 'game-iron-sovereign' || r.game_id === 'game-orbit-relay'));
+});
+
+test('play_history enforces rolling 100-entry cap and blocks completed->playing->backlog bypass', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const plugin = require('../plugin.cjs');
+  const { compile } = require('./schema-validator.cjs');
+  const root = path.resolve(__dirname, '..');
+  const seedValidator = compile(JSON.parse(fs.readFileSync(path.join(root, 'schemas/seed.schema.json'), 'utf8')), path.join(root, 'schemas'));
+  const binding = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/binding.json'), 'utf8'));
+  let data = JSON.parse(fs.readFileSync(path.join(root, 'datasets/eval-2025-2026/seed.json'), 'utf8'));
+
+  // Completed game (game-pebble-harbor) can transition to playing for a replay,
+  // but cannot bypass into backlog because play_history records prior completion
+  const ctxReplay = { run_id: 'cap-test', app_id: 'questshelf', virtual_now: '2026-12-31T23:01:00-08:00', binding, log: () => {} };
+  let out = plugin.handleTool(ctxReplay, data, 'questshelf.shelf.upsert', {
+    game_id: 'game-pebble-harbor',
+    status: 'playing',
+    note: 'Starting replay.',
+  });
+  data = out.data;
+  assert.throws(() => plugin.handleTool(
+    { ...ctxReplay, virtual_now: '2026-12-31T23:02:00-08:00' },
+    structuredClone(data),
+    'questshelf.shelf.upsert',
+    { game_id: 'game-pebble-harbor', status: 'backlog' }
+  ), /Cannot transition a completed game back to backlog/);
+
+  // 105 consecutive shelf.upsert updates stay valid under the 100-entry rolling play_history cap
+  let hrs = 10.0;
+  for (let i = 0; i < 105; i++) {
+    hrs += 0.1;
+    const sec = String(i % 60).padStart(2, '0');
+    const min = String(Math.floor(i / 60)).padStart(2, '0');
+    const c = { ...ctxReplay, virtual_now: `2027-01-01T00:${min}:${sec}-08:00` };
+    out = plugin.handleTool(c, data, 'questshelf.shelf.upsert', {
+      game_id: 'game-moss-cartographer',
+      status: 'playing',
+      hours_logged: Math.round(hrs * 10) / 10,
+      note: `Session #${i + 1}`,
+    });
+    data = out.data;
+  }
+  const moss = data.shelves.find(s => s.game_id === 'game-moss-cartographer');
+  assert.equal(moss.play_history.length, 100);
+  assert.equal(moss.play_history[99].note, 'Session #105');
+  assert.equal(seedValidator(data), true);
+  plugin.validateSeed(ctxReplay, data);
 });
