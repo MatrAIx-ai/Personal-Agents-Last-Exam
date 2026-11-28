@@ -1,0 +1,11 @@
+'use strict';
+const assert = require('node:assert/strict');
+const { fixture } = require('../tests/harness.cjs');
+const { play } = require('../tests/walkthrough.cjs');
+const seed = require('../fixtures/minimal.json');
+const f = fixture({ seed: structuredClone(seed), now: require('../fixtures/clock.json').initial_time });
+const read = f.call('larkfield-health.claims.get', { claim_id: 'cl-1' });
+assert.equal(read.status, 'ok');
+assert.deepEqual(require('./walkthrough.json')[0].event, require('./scenario.json'));
+const out = play(f, seed);
+console.log(JSON.stringify({ read: read.claim.claim_id, steps: out.steps, wire_id: out.wire }));

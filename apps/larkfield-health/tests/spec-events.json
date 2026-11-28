@@ -1,0 +1,145 @@
+{
+  "envelopes": [
+    {
+      "event_id": "ev-1",
+      "at": "2026-12-01T09:00:00-05:00",
+      "operation": "claim.received",
+      "payload": {
+        "claim_id": "cl-7",
+        "member_id": "m-3",
+        "provider_id": "pv-2",
+        "lines": [
+          {
+            "line_id": "ln-1",
+            "service_id": "svc-knee-mri",
+            "service_date": "2026-11-24",
+            "units": 1,
+            "billed_cents": 180000,
+            "emergency": false,
+            "possible_accident": true
+          }
+        ]
+      }
+    },
+    {
+      "event_id": "ev-2",
+      "at": "2026-12-01T10:00:00-05:00",
+      "operation": "pa.submitted",
+      "payload": {
+        "pa_id": "pa-4",
+        "member_id": "m-3",
+        "provider_id": "pv-2",
+        "service_id": "svc-physical-therapy",
+        "units": 12,
+        "valid_from": "2026-12-01",
+        "valid_until": "2027-02-28"
+      }
+    },
+    {
+      "event_id": "ev-3",
+      "at": "2026-12-02T10:00:00-05:00",
+      "operation": "pa.info_requested",
+      "payload": {
+        "pa_id": "pa-4",
+        "request": "Notes from the last two visits"
+      }
+    },
+    {
+      "event_id": "ev-4",
+      "at": "2026-12-03T10:00:00-05:00",
+      "operation": "pa.info_provided",
+      "payload": {
+        "pa_id": "pa-4"
+      }
+    },
+    {
+      "event_id": "ev-5",
+      "at": "2026-12-03T15:00:00-05:00",
+      "operation": "pa.expedite_decided",
+      "payload": {
+        "pa_id": "pa-4",
+        "decision": "approved"
+      }
+    },
+    {
+      "event_id": "ev-6",
+      "at": "2026-12-04T10:00:00-05:00",
+      "operation": "pa.decided",
+      "payload": {
+        "pa_id": "pa-4",
+        "decision": "approved",
+        "units": 12,
+        "valid_from": "2026-12-01",
+        "valid_until": "2027-02-28"
+      }
+    },
+    {
+      "event_id": "ev-7",
+      "at": "2026-12-04T11:00:00-05:00",
+      "operation": "pa.withdrawn",
+      "payload": {
+        "pa_id": "pa-5"
+      }
+    },
+    {
+      "event_id": "ev-8",
+      "at": "2026-12-07T09:00:00-05:00",
+      "operation": "appeal.info_requested",
+      "payload": {
+        "appeal_id": "ap-3",
+        "request": "A letter from the treating provider"
+      }
+    },
+    {
+      "event_id": "ev-9",
+      "at": "2026-12-08T09:00:00-05:00",
+      "operation": "appeal.decided",
+      "payload": {
+        "appeal_id": "ap-3",
+        "outcome": "overturned",
+        "lines": [
+          "ln-2"
+        ]
+      }
+    },
+    {
+      "event_id": "ev-10",
+      "at": "2026-12-08T10:00:00-05:00",
+      "operation": "grant.changed",
+      "payload": {
+        "grant_id": "gr-2",
+        "member_id": "m-2",
+        "grantor_id": "m-2",
+        "grantee_id": "m-1",
+        "scope": "act",
+        "expires_at": null,
+        "status": "active"
+      }
+    },
+    {
+      "event_id": "ev-11",
+      "at": "2026-12-08T10:05:00-05:00",
+      "operation": "user.confirmed",
+      "payload": {
+        "token": "tok-7c1e",
+        "confirmed_by": "m-1"
+      }
+    }
+  ],
+  "variants": [
+    {
+      "operation": "pa.decided",
+      "payload": {
+        "pa_id": "pa-4",
+        "decision": "denied"
+      }
+    },
+    {
+      "operation": "appeal.decided",
+      "payload": {
+        "appeal_id": "ap-3",
+        "outcome": "upheld"
+      }
+    }
+  ]
+}

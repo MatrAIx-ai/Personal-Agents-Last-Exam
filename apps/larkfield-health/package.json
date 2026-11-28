@@ -1,0 +1,18 @@
+{
+  "name": "@pale/app-larkfield-health",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Larkfield Health Plan: a synthetic employer health plan member portal for one household, for PALE",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/business.test.cjs tests/t31-fixture-checks.test.cjs tests/t32-dataset.test.cjs",
+    "fixture": "node --test tests/t31-fixture-checks.test.cjs",
+    "dataset": "node --test tests/t32-dataset.test.cjs",
+    "example": "node examples/run.cjs",
+    "mcp": "node tests/mcp.integration.cjs --report ../../.artifacts/larkfield-mcp.json",
+    "mail": "node tests/mail.integration.cjs --report ../../.artifacts/larkfield-mail.json"
+  },
+  "license": "MIT"
+}
