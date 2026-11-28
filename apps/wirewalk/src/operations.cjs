@@ -41,10 +41,11 @@ function write(ctx, data, name, args) {
   if (name === 'wirewalk.bookmarks.add') {
     const changed = !v.idx.bookmarks.has(id);
     // A seeded bookmark saved after the clock is replaced: the reader has saved the post now. The receipt
-    // counts it (it goes to the Agent); the diagnostics log keeps the stored bookmark.
+    // counts it (it goes to the Agent) and the ID-only diagnostics log names the post; the stored bookmark
+    // stays in the loaded seed, which Core's snapshot keeps as initial_data.
     const later = changed ? data.bookmarks.filter(b => b.post_id === id) : [];
     if (changed) data.bookmarks = [...data.bookmarks.filter(b => b.post_id !== id), {post_id: id, saved_at: ctx.virtual_now}];
-    log(ctx, 'wirewalk.bookmarks.add', {post_id: id, changed, later_history_removed: later.length ? {bookmarks: later} : null});
+    log(ctx, 'wirewalk.bookmarks.add', {post_id: id, changed, later_history_removed: later.length ? {bookmarks: later.map(b => b.post_id)} : null});
     return {post_id: id, bookmarked: true, changed, later_history_removed: later.length ? {bookmarks: later.length} : null};
   }
   // A bookmark saved after the clock does not exist yet: changed is false and the stored record stays.

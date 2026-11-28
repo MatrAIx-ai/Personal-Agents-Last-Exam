@@ -91,6 +91,23 @@ async function main() {
     await advance(END);
     await look('End of 2026', END);
     ok('By the end of 2026 every post is visible', stages[2].visible_posts === seed.posts.length);
+
+    // An Agent bookmark at an earlier clock that replaces a seeded later one reports it (README, clock cutoff),
+    // through Core with the task policy, which allows bookmarks.add.
+    const AT = '2026-02-09T12:00:00-08:00', version = async () => (await infra.call('env.snapshot')).version;
+    await infra.call('env.load_seed', {expected_version: await version(), request_id: 'load-early-write', data: seed, binding, policies, bundle, virtual_now: AT});
+    const args = {id: 'w260209-4', expected_version: await version(), request_id: 'early-bookmark'};
+    const added = await agent.call('wirewalk.bookmarks.add', args);
+    ok('At noon on Feb. 9, 2026, bookmarking w260209-4 commits and its receipt counts the seeded 16:47 bookmark it replaced',
+      added.status === 'committed' && JSON.stringify(added.later_history_removed) === JSON.stringify({bookmarks: 1}));
+    const snap = (await infra.call('env.snapshot')).snapshot, mine = b => b.post_id === 'w260209-4';
+    ok('The stored bookmark is now dated noon, and the replaced 16:47 bookmark is still in the loaded seed (initial_data)',
+      JSON.stringify(snap.data.bookmarks.filter(mine)) === JSON.stringify([{post_id: 'w260209-4', saved_at: AT}])
+      && snap.initial_data.bookmarks.filter(mine).map(b => b.saved_at).join() === '2026-02-09T16:47:00-08:00');
+    const again = await agent.call('wirewalk.bookmarks.add', args);
+    ok('An identical retry returns the stored receipt, marked duplicate, with the same count',
+      again.duplicate === true && JSON.stringify(again.later_history_removed) === JSON.stringify(added.later_history_removed));
+    stages.push({label: 'Early write', clock: AT, request_id: args.request_id, post_id: args.id, later_history_removed: added.later_history_removed});
     return {
       app_id: 'wirewalk', package_sha256: digestTree(pkg), node: process.version,
       dataset: {path: 'apps/wirewalk/data/evaluation/seed.json', sha256: crypto.createHash('sha256').update(seedText).digest('hex'), version: dataset.version,

@@ -435,7 +435,7 @@ test('bookmarking before a seeded later bookmark keeps one bookmark, dated now',
   // Dario's seed says he bookmarks Odile Park's thread at 17:00; at noon he has not, so the agent's add replaces it.
   const NOON = '2026-10-12T12:00:00-07:00', f = fixture({seed: darioSeed, binding: darioBinding, virtual_now: NOON});
   assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: true, later_history_removed: {bookmarks: 1}});
-  assert.deepEqual(f.logs.at(-1).details.later_history_removed, {bookmarks: [{post_id: 'p29', saved_at: '2026-10-12T17:00:00-07:00'}]});
+  assert.deepEqual(f.logs.at(-1).details.later_history_removed, {bookmarks: ['p29']});
   assert.deepEqual(f.data.bookmarks.filter(b => b.post_id === 'p29'), [{post_id: 'p29', saved_at: NOON}]);
   assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: false, later_history_removed: null});
   assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks.map(b => b.post.id), ['p29']);
@@ -528,7 +528,7 @@ test('on the evaluation dataset, a bookmark at an earlier clock that replaces a 
     const kept = new Set(after.bookmarks.map(b => JSON.stringify(b)));
     const lost = before.bookmarks.filter(b => !kept.has(JSON.stringify(b)) && Date.parse(b.saved_at) > Date.parse(at));
     assert.deepEqual(receipt.later_history_removed, lost.length ? {bookmarks: lost.length} : null, 'the receipt counts the later bookmarks replaced');
-    assert.deepEqual(f.logs.at(-1).details.later_history_removed, lost.length ? {bookmarks: lost} : null, 'the log keeps them as stored');
+    assert.deepEqual(f.logs.at(-1).details.later_history_removed, lost.length ? {bookmarks: lost.map(b => b.post_id)} : null, 'the ID-only log names their posts');
     return lost;
   };
   // Posted at 10:47 on Feb. 9, 2026 and bookmarked at 16:47; bookmarking it at noon replaces the later bookmark.
