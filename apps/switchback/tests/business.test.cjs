@@ -264,6 +264,27 @@ test('nights before today, facility time, cannot be held or moved to', () => {
   unchanged(f, () => f.call('reservations.modify.preview', {reservation_id: 'res-0001', arrival: '2027-05-10', departure: '2027-05-12'}), 'night_in_past');
   const g = fixture({now: '2027-05-20T23:30:00-07:00'});  // still the 20th at the facility, already the 21st in UTC
   g.call('cart.hold', {site_id: 'cf-B10', arrival: '2027-05-20', departure: '2027-05-21'});
+  // The night states say which nights are already past, and search counts them as unavailable.
+  const n = f.call('sites.get', {site_id: 'cf-B12', arrival: '2027-05-19', departure: '2027-05-22'}).nights;
+  assert.deepEqual(n.map(x => [x.date, x.past]), [['2027-05-19', true], ['2027-05-20', false], ['2027-05-21', false]]);
+  const s = f.call('sites.search', {facility_id: 'cedar-flat', arrival: '2027-05-18', departure: '2027-05-19'}).sites;
+  assert.ok(s.length && s.every(x => x.available === false && x.nights[0].past === true));
+  assert.equal(f.call('sites.search', {facility_id: 'cedar-flat', arrival: '2027-05-18', departure: '2027-05-19', available_only: true}).sites.length, 0);
+});
+
+test('a new change preview supersedes the earlier one: its hold is released, so previewing again does not collide with it', () => {
+  const f = fixture();
+  const first = f.call('reservations.modify.preview', {reservation_id: 'res-0001', arrival: '2027-06-19', departure: '2027-06-21'}).preview;
+  const again = f.call('reservations.modify.preview', {reservation_id: 'res-0001', arrival: '2027-06-20', departure: '2027-06-22'}).preview;
+  assert.equal(f.data.holds.find(h => h.id === first.hold_id).status, 'released');
+  assert.equal(f.data.holds.find(h => h.id === again.hold_id).status, 'active');
+  unchanged(f, () => f.call('reservations.modify.confirm', {preview_id: first.id}), 'preview_stale');
+  f.call('reservations.modify.confirm', {preview_id: again.id});
+  assert.equal(f.call('reservations.get', {reservation_id: 'res-0001'}).reservation.arrival, '2027-06-20');
+  // Another reservation's change hold still blocks: only this reservation's own earlier previews are superseded.
+  const other = f.call('reservations.modify.preview', {reservation_id: 'res-0002', site_id: 'ls-01', arrival: '2027-07-02', departure: '2027-07-04'}).preview;
+  assert.ok(other.hold_id);
+  unchanged(f, () => f.call('cart.hold', {site_id: 'ls-01', arrival: '2027-07-03', departure: '2027-07-04'}), 'site_taken');
 });
 
 test('a closure also cancels a stay already in progress, with a full refund and a notice', () => {

@@ -48,8 +48,11 @@ function reservationView(data, r, now) {
   return out;
 }
 
+// Each night's state, and whether it is already before today in facility time
+// (such a night cannot be held: night_in_past).
 function nightsFor(data, s, arrival, departure, now) {
-  return nightList(arrival, departure).map(date => ({date, state: R.nightState(data, s, date, now)}));
+  const today = R.localDate(now, R.offsetOf(data, s));
+  return nightList(arrival, departure).map(date => ({date, state: R.nightState(data, s, date, now), past: date < today}));
 }
 
 function facilityView(data, f, now) {

@@ -37,8 +37,8 @@ const READS = {
       (args.party_size === undefined || s.max_occupancy >= args.party_size) &&
       (args.pets === undefined || (s.pets_allowed !== null && s.pets_allowed === args.pets));
     const sites = data.sites.filter(matches).map(s => {
-      const nights = dates.map(date => ({date, state: R.nightState(data, s, date, now)}));
-      return {...V.siteSummary(data, s, now), available: nights.every(n => n.state === 'open'), nights};
+      const nights = V.nightsFor(data, s, args.arrival, args.departure, now);
+      return {...V.siteSummary(data, s, now), available: nights.every(n => n.state === 'open' && !n.past), nights};
     });
     if (args.available_only) return {sites: sites.filter(s => s.available)};
     return {sites};
@@ -233,6 +233,9 @@ const WRITES = {
     const s = R.site(data, args.site_id || r.site_id);
     if (s.facility_id !== r.facility_id) fail('different_facility', 'A change stays within the same facility; cancel and book again instead.');
     const dates = nightList(args.arrival, args.departure);
+    // A new change preview supersedes this reservation's earlier ones: their
+    // holds are released, so previewing again does not collide with them.
+    for (const h of data.holds) if (h.purpose === 'modify' && h.reservation_id === r.id && R.holdActive(h, now)) h.status = 'released';
     R.requireOpen(data, s, dates, now, {ignoreReservation: r.id});
     checkFit(s, {equipment: r.equipment, party_size: r.party_size, pets: r.pets});
     const hold = newHold(ctx, data, {site: s, arrival: args.arrival, departure: args.departure, purpose: 'modify', reservation_id: r.id});
