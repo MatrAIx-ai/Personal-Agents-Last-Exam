@@ -1,0 +1,1929 @@
+[
+  {
+    "name": "study.list_cards",
+    "description": "Read cards and deck metadata, optionally filtered by deck. Does not reveal answer text.",
+    "read_only": true,
+    "scope": "study.list_cards",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "deck_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "deck_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "prompt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "reviewed": {
+                "type": "boolean"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "due_day": {
+                "type": "integer",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "card_version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "suspended": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "deck_id",
+              "prompt",
+              "reviewed",
+              "stage",
+              "due_day",
+              "card_version",
+              "suspended"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "decks",
+        "cards"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.get_card",
+    "description": "Read a card, including its full editable front and back.",
+    "read_only": true,
+    "scope": "study.get_card",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "card_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "card": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "deck_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "answer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "reviewed": {
+              "type": "boolean"
+            },
+            "stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "card_version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "suspended": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "deck_id",
+            "prompt",
+            "answer",
+            "reviewed",
+            "stage",
+            "due_day",
+            "card_version",
+            "suspended"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "card"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.save_card",
+    "description": "Create a text-only card or edit an existing card without deleting history.",
+    "read_only": false,
+    "scope": "study.save_card",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "deck_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "deck_id",
+        "prompt",
+        "answer",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "card": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "deck_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "answer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "reviewed": {
+              "type": "boolean"
+            },
+            "stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "card_version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "suspended": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "deck_id",
+            "prompt",
+            "answer",
+            "reviewed",
+            "stage",
+            "due_day",
+            "card_version",
+            "suspended"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "card"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.set_suspension",
+    "description": "Suspend or restore a card without altering its review history or due day.",
+    "read_only": false,
+    "scope": "study.set_suspension",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "suspended": {
+          "type": "boolean"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "card_id",
+        "suspended",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "card": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "deck_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "answer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "reviewed": {
+              "type": "boolean"
+            },
+            "stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "card_version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "suspended": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "deck_id",
+            "prompt",
+            "answer",
+            "reviewed",
+            "stage",
+            "due_day",
+            "card_version",
+            "suspended"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "card"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.get_plan",
+    "description": "Read current plan and task-triggered study notices.",
+    "read_only": true,
+    "scope": "study.get_plan",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "deck_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 1000
+            },
+            "daily_limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "new_limit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "target_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "id",
+            "deck_ids",
+            "daily_limit",
+            "new_limit",
+            "target_day",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "kind": {
+                "enum": [
+                  "target_changed",
+                  "card_corrected"
+                ]
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "day": {
+                "type": "integer",
+                "minimum": -100000,
+                "maximum": 100000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "object_id",
+              "day"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plan",
+        "notices"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.preview_plan",
+    "description": "Preview a local study plan and its next-review workload; no save.",
+    "read_only": true,
+    "scope": "study.preview_plan",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "deck_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 1000
+        },
+        "daily_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "new_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "target_day": {
+          "type": "integer",
+          "minimum": -100000,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "deck_ids",
+        "daily_limit",
+        "new_limit",
+        "target_day"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "deck_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 1000
+            },
+            "daily_limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "new_limit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "target_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "id",
+            "deck_ids",
+            "daily_limit",
+            "new_limit",
+            "target_day",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "remaining_cards": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "due_now": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "available_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 30000000
+            },
+            "missing_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "remaining_cards",
+            "due_now",
+            "available_slots",
+            "missing_slots"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plan",
+        "capacity"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.save_plan",
+    "description": "Explicitly save the given study plan and read back its projected workload.",
+    "read_only": false,
+    "scope": "study.save_plan",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "deck_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 1000
+        },
+        "daily_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "new_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "target_day": {
+          "type": "integer",
+          "minimum": -100000,
+          "maximum": 100000
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "deck_ids",
+        "daily_limit",
+        "new_limit",
+        "target_day",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "deck_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 1000
+            },
+            "daily_limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "new_limit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "target_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "id",
+            "deck_ids",
+            "daily_limit",
+            "new_limit",
+            "target_day",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "remaining_cards": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "due_now": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "available_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 30000000
+            },
+            "missing_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "remaining_cards",
+            "due_now",
+            "available_slots",
+            "missing_slots"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "plan",
+        "capacity"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.get_capacity",
+    "description": "Read the current plan capacity projection.",
+    "read_only": true,
+    "scope": "study.get_capacity",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "remaining_cards": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "due_now": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "available_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 30000000
+            },
+            "missing_slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "remaining_cards",
+            "due_now",
+            "available_slots",
+            "missing_slots"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "capacity"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.get_queue",
+    "description": "Read deterministic due then new queue and current pause cursor.",
+    "read_only": true,
+    "scope": "study.get_queue",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "day": {
+          "type": "integer",
+          "minimum": -100000,
+          "maximum": 100000
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "new_remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "deck_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "prompt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "reviewed": {
+                "type": "boolean"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "due_day": {
+                "type": "integer",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "card_version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "suspended": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "deck_id",
+              "prompt",
+              "reviewed",
+              "stage",
+              "due_day",
+              "card_version",
+              "suspended"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        },
+        "session": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "card_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "paused": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "card_id",
+                "paused"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "day",
+        "remaining",
+        "new_remaining",
+        "cards",
+        "session"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.reveal",
+    "description": "Reveal the answer for a currently eligible card.",
+    "read_only": true,
+    "scope": "study.reveal",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "card_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "card_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "review_day": {
+          "type": "integer",
+          "minimum": -100000,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "card_id",
+        "card_version",
+        "answer",
+        "review_day"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.set_session",
+    "description": "Pause or resume the cursor for a specific eligible card.",
+    "read_only": false,
+    "scope": "study.set_session",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "card_id",
+        "paused",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "session": {
+          "type": "object",
+          "properties": {
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "paused": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "card_id",
+            "paused"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "session"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.record_review",
+    "description": "Record only the learner or scenario supplied Again/Good; never infer recall from the answer.",
+    "read_only": false,
+    "scope": "study.record_review",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "card_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "review_day": {
+          "type": "integer",
+          "minimum": -100000,
+          "maximum": 100000
+        },
+        "rating": {
+          "enum": [
+            "Again",
+            "Good"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "card_id",
+        "card_version",
+        "review_day",
+        "rating",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "review": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "rating": {
+              "enum": [
+                "Again",
+                "Good"
+              ]
+            },
+            "was_new": {
+              "type": "boolean"
+            },
+            "stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "undone": {
+              "type": "boolean"
+            },
+            "previous_stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "previous_due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "previous_reviewed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "card_id",
+            "day",
+            "rating",
+            "was_new",
+            "stage",
+            "due_day",
+            "undone",
+            "previous_stage",
+            "previous_due_day",
+            "previous_reviewed"
+          ],
+          "additionalProperties": false
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "new_remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "review",
+        "remaining",
+        "new_remaining"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.get_history",
+    "description": "Read effective and undone reviews; identify the latest eligible review for undo.",
+    "read_only": true,
+    "scope": "study.get_history",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "card_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "day": {
+                "type": "integer",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "rating": {
+                "enum": [
+                  "Again",
+                  "Good"
+                ]
+              },
+              "was_new": {
+                "type": "boolean"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "due_day": {
+                "type": "integer",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "undone": {
+                "type": "boolean"
+              },
+              "previous_stage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "previous_due_day": {
+                "type": "integer",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "previous_reviewed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "card_id",
+              "day",
+              "rating",
+              "was_new",
+              "stage",
+              "due_day",
+              "undone",
+              "previous_stage",
+              "previous_due_day",
+              "previous_reviewed"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        },
+        "undoable_review_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "history",
+        "undoable_review_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "study.undo_review",
+    "description": "Reverse the latest effective review of the current study day, preserving the ledger entry.",
+    "read_only": false,
+    "scope": "study.undo_review",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "review_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "review_id",
+        "request_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "study"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "review": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "rating": {
+              "enum": [
+                "Again",
+                "Good"
+              ]
+            },
+            "was_new": {
+              "type": "boolean"
+            },
+            "stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "undone": {
+              "type": "boolean"
+            },
+            "previous_stage": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "previous_due_day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            },
+            "previous_reviewed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "card_id",
+            "day",
+            "rating",
+            "was_new",
+            "stage",
+            "due_day",
+            "undone",
+            "previous_stage",
+            "previous_due_day",
+            "previous_reviewed"
+          ],
+          "additionalProperties": false
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "new_remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "review",
+        "remaining",
+        "new_remaining"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

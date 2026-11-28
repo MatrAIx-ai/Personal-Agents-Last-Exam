@@ -1,0 +1,290 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "decks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "deck_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "answer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "reviewed": {
+            "type": "boolean"
+          },
+          "stage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "due_day": {
+            "type": "integer",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "card_version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "suspended": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "deck_id",
+          "prompt",
+          "answer",
+          "reviewed",
+          "stage",
+          "due_day",
+          "card_version",
+          "suspended"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "deck_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 1000
+        },
+        "daily_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "new_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "target_day": {
+          "type": "integer",
+          "minimum": -100000,
+          "maximum": 100000
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "id",
+        "deck_ids",
+        "daily_limit",
+        "new_limit",
+        "target_day",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "day": {
+            "type": "integer",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "rating": {
+            "enum": [
+              "Again",
+              "Good"
+            ]
+          },
+          "was_new": {
+            "type": "boolean"
+          },
+          "stage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "due_day": {
+            "type": "integer",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "undone": {
+            "type": "boolean"
+          },
+          "previous_stage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "previous_due_day": {
+            "type": "integer",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "previous_reviewed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "card_id",
+          "day",
+          "rating",
+          "was_new",
+          "stage",
+          "due_day",
+          "undone",
+          "previous_stage",
+          "previous_due_day",
+          "previous_reviewed"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "session": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "paused": {
+              "type": "boolean"
+            },
+            "day": {
+              "type": "integer",
+              "minimum": -100000,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "card_id",
+            "paused",
+            "day"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "kind": {
+            "enum": [
+              "target_changed",
+              "card_corrected"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "day": {
+            "type": "integer",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "object_id",
+          "day"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "decks",
+    "cards",
+    "plan",
+    "history",
+    "session",
+    "notices"
+  ],
+  "additionalProperties": false
+}
