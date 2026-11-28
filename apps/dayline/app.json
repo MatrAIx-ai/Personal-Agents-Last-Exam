@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "app_id": "dayline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:dayline (@byshail)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "edition.publish"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Text editions only: no images, video, audio or paywalls. No attachments or media: resources are not used.",
+    "Story groups are assigned by the fixture or edition.publish event author; there is no automatic clustering.",
+    "No live ingestion or external links; every edition is a synthetic record inside the App.",
+    "One reader account per App instance. The public catalog is copied into each instance, so Infra applies every edition.publish event to every reader instance in the run.",
+    "Search matches the start of words (case- and accent-insensitive); there is no ranking or stemming.",
+    "MCP only: no GUI and no reviewer console."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

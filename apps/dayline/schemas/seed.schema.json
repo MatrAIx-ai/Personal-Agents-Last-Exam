@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:dayline:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "outlets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "outlet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "kind": {
+            "enum": [
+              "wire",
+              "local",
+              "regional",
+              "state",
+              "national",
+              "international"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+          },
+          "geography": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "outlet_id",
+          "name",
+          "kind",
+          "language",
+          "geography",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "stories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "story_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "story_id",
+          "title",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "editions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "edition_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "story_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "outlet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "section": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "geography": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+          },
+          "headline": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "byline": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "credits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "edition_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "credit": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "edition_id",
+                "credit"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "edition_id",
+          "story_id",
+          "outlet_id",
+          "section",
+          "geography",
+          "language",
+          "headline",
+          "byline",
+          "text",
+          "credits",
+          "published_at",
+          "added_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "front_pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "front_page_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "kind": {
+            "enum": [
+              "region",
+              "section"
+            ]
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 200,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "front_page_id",
+          "title",
+          "kind",
+          "entries"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "reading_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "edition_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "read_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "edition_id",
+          "read_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "reading_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "edition_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "edition_id",
+          "saved_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "outlets",
+    "stories",
+    "editions",
+    "front_pages",
+    "reading_history",
+    "reading_list"
+  ],
+  "additionalProperties": false
+}

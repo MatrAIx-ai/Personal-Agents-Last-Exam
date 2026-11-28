@@ -1,0 +1,75 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "dayline-evaluation-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic evaluation catalog and one reader history covering 2025-01-01 through 2026-12-31 (America/Los_Angeles). Editions from six fictional outlets in English and Spanish; the 25 fixture editions, front pages and Ana Torres's fixture history are included verbatim. Loadable with env.load_seed at any clock in the window; Dayline shows only records dated at or before the clock.",
+  "record_source_ids": [
+    "authored",
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All outlets, people, places, teams and events are invented; no external articles were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Template-generated fictional editions and reading history written by dev/build-dataset.cjs. All outlets, people, places, teams, companies and events are invented; nothing was collected from real websites.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "template",
+        "tool": "dev/build-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250101,
+        "parameters": {
+          "window": [
+            "2025-01-01",
+            "2026-12-31"
+          ],
+          "time_zone": "America/Los_Angeles",
+          "clock": "2026-10-14T07:00:00-07:00",
+          "outputs": {
+            "seed.json": {
+              "bytes": 600872,
+              "sha256": "5c32c98e52358d2a88a0df2d1c2f3b23ada9d88db37f5073f617670e0b399a45"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Fixture editions, stories, front pages, reading history and reading list are copied verbatim; story groups that the fixture shares gain earlier and later editions and an earlier created_at.",
+    "Member papers republish some wire dispatches word for word, with a credit to the source edition."
+  ],
+  "expected_counts": {
+    "records": 940,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, Spanish text, variation and reuse permissions."
+  }
+}
