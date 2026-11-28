@@ -4,7 +4,7 @@ Owner: @byshail. App `wirewalk` 1.0.0 under `apps/wirewalk/`; public runtime 1.6
 - **Scenario dependencies:** the walkthrough alone also uses Mail 1.3.0 and Calendar 1.3.0 from the checkout.
 - **Plan:** it implements the plan in [PR #209](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/209), `proposals/environment/wirewalk.md` at `ef524fc1b1882ead45879862862b96b360ee8cfc`.
 - **Approval:** the assigned Track reviewer approved that plan for implementation on 2026-11-24: review state `APPROVED` at 01:27:28Z, and `/approve-plan` for that commit at 01:27:39Z. The proposal file is unchanged since that commit (blob `79ea5b93c3555b818290b114dd10fed3e669007f`).
-- **Commits:** the package is at commit `7607709451cd351e3eb356878fa6fc52c44389db`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `3eb7219` (package `a24e611`); this revision answers the v1 review of 2026-11-26 and its follow-up (the list of dataset posts that assume the example events) with the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) and a [statement on CI](#ci-and-the-base-validator-at-the-submitted-revision). `7607709` makes an agent bookmark that replaces a seeded later one report it in the receipt.
+- **Commits:** the package is at commit `be61b85`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `3eb7219` (package `a24e611`); this revision answers the v1 review of 2026-11-26 and its follow-up (the list of dataset posts that assume the example events) with the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) and a [statement on CI](#ci-and-the-base-validator-at-the-submitted-revision). `7607709` and `5197a43` make an agent bookmark that replaces a seeded later one report it in the receipt, and `be61b85` makes the walkthrough pass on current `main` as well ([CI](#ci-and-the-base-validator-at-the-submitted-revision)).
 
 This document records implementation evidence; it claims no acceptance.
 
@@ -21,11 +21,11 @@ Checked on 2026-11-28 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 | Public App verifier | 40 checks passed, on both ([node22](wirewalk/public-runtime.node22.json), [node18](wirewalk/public-runtime.node18.json)) | An isolated package copy, then real MCP: discovery without Infra tools; published input and output of the 6 tools the default `scenario` profile lists; the Agent denied all seven Infra operations; history and asset loading and rejection; the declared event with retry and conflict; reset; a separate run; and a restarted process |
 | CI job, reproduced | `wirewalk: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job; it selected `wirewalk` only (`full: false`) |
 | Real-MCP walkthrough | 134 checks passed, 572 calls traced, on both ([node22](wirewalk/mcp-walkthrough.node22.json), [node18](wirewalk/mcp-walkthrough.node18.json)) | What the verifier does not exercise for this App: the three approved requests and the delivery proof, run with real Calendar, two real Mail instances (a sending mailbox and the user's inbox) and real Messaging. Each scenario runs under its own run ID: train eastbound and westbound; train eastbound with no grant and with a lost acknowledgement; wildfire; its delayed-turn variant; its cutoff variant and control; markets with two readers; and paging. It also covers both bookmark writes, replays, `idempotency_conflict`, `stale_version`, a concurrent write, rejected events, the task data rebuilt and loaded directly, and reset of data and clock per instance. Every call is joined to run, App, account, connection, request or event ID and Core version, and the retained Core audit rows join back to it |
-| Evaluation dataset over real MCP | 24 checks passed, on both ([node22](wirewalk/dataset-demo.node22.json), [node18](wirewalk/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` and asset catalog in one `env.load_seed` request (558,381 bytes), queries it at 2025-03-15, advances the clock to the dataset clock and to 2026-12-31 with `env.advance_time`, and queries again; nothing dated after the clock is visible and no record changes |
+| Evaluation dataset over real MCP | 27 checks passed, on both ([node22](wirewalk/dataset-demo.node22.json), [node18](wirewalk/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` and asset catalog in one `env.load_seed` request (558,817 bytes), queries it at 2025-03-15, advances the clock to the dataset clock and to 2026-12-31 with `env.advance_time`, and queries again; nothing dated after the clock is visible and no record changes. A last stage reloads it at an earlier clock with the task policy and adds a bookmark through Core, checking the receipt's `later_history_removed`, the stored state and an identical retry |
 | Dataset coverage | 645 distinct dates in 24 of 24 months ([coverage.json](wirewalk/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](wirewalk/reference-suite.node22.json), [node18](wirewalk/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present |
 | Independent base validator | Passed, 40 checks ([report](wirewalk/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `wirewalk` only |
-| Package identity | `2b1c9055850f04867a37935ce53ad50ad81c9efbe6b4ee987cbf077b5bf85b65` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `41e4c70873fb7dafb40add6434e5c47a10ad3633` |
+| Package identity | `a2d7636b14b924fcfa80612613500d928a55ba84472a1577f9ccb8c4cc78a181` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `f2391c824d385dfb8d1b4824a62ff356dcb9659f` |
 | Human review | Pending | Realism of the posts and threads, including the generated dataset; legibility of the rendered board image; that the accounts, people, places, agencies and companies are fictional |
 
 ## Reproduce
@@ -93,13 +93,13 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 
 - **No scheduled fields.** Wirewalk has no scheduled or descriptive date fields.
 - **Bookmark visibility is new in this change.** Post and account visibility already worked this way.
-- **Agent add before a later seeded bookmark:** the agent's bookmark replaces the seeded one, leaving one record dated now. The write reports it: the receipt's `later_history_removed` is `{"bookmarks": 1}` and the diagnostics log keeps the stored bookmark; otherwise it is `null`. The receipt holds only the count because it goes to the Agent and the bookmark is dated after the clock.
+- **Agent add before a later seeded bookmark:** the agent's bookmark replaces the seeded one, leaving one record dated now. The write reports it: the receipt's `later_history_removed` is `{"bookmarks": 1}`, the ID-only diagnostics log names the post, and the replaced bookmark stays in the loaded seed (Core's snapshot keeps it as `initial_data`); otherwise it is `null`. The receipt holds only the count because it goes to the Agent and the bookmark is dated after the clock.
 - **Agent remove before a later seeded bookmark:** returns `changed: false` and keeps the seeded record, which is the approved contract for a post that is not bookmarked.
 - **Events:** `post.publish` is unchanged.
-- **Schemas and error codes:** no tool schema, event schema or error code changed.
+- **Schemas and error codes:** no event schema or error code changed. The 2026-11-28 revision added `later_history_removed` to the output of both bookmark tools.
 - **Tests:** `tests/business.test.cjs` adds four tests (the fourth checks the event-dependency list):
   - an early-clock regression on `examples/task-data` (Dario at 12:00 Monday: reads hide the later reposts and bookmarks, writes on later posts return `not_found` with data unchanged, and moving the clock to 18:00 reveals them with data unchanged);
-  - an agent bookmark that replaces a later seeded bookmark, with the receipt's count and the logged stored bookmark, and the same on the evaluation dataset (B27: a Feb. 9, 2026 post bookmarked at 16:47, bookmarked at noon), each checked against an independent before/after diff;
+  - an agent bookmark that replaces a later seeded bookmark, with the receipt's count and the logged post ID (Dario's seed, fixed expected values), and the same on the evaluation dataset checked against an independent before/after diff (B27: a Feb. 9, 2026 post bookmarked at 16:47, bookmarked at noon); the dataset demo's last stage runs B27's case through Core with the task policy, including an identical retry that returns the stored receipt;
   - the evaluation dataset at four clocks, with its `dataset.json` counts and sha256 checked.
 
 **Dataset.** `apps/wirewalk/data/evaluation/`, dataset `wirewalk-evaluation-2025-2026` version 1.0.0.
@@ -142,9 +142,9 @@ node examples/dataset-demo.cjs      # real MCP: env.load_seed in one request, qu
 | `npm test` | 27/27 | 27/27 |
 | `node runtime/cli.cjs verify --app apps/wirewalk` | passed, 40 checks | passed, 40 checks |
 | `npm run walkthrough` | passed, 134 checks (same checks as before this change) | passed, 134 checks |
-| `node apps/wirewalk/examples/dataset-demo.cjs` | 24 checks; load request 558,381 bytes | 24 checks; load request 558,381 bytes |
+| `node apps/wirewalk/examples/dataset-demo.cjs` | 27 checks; load request 558,817 bytes | 27 checks; load request 558,817 bytes |
 
-All reports carry package sha256 `2b1c9055850f04867a37935ce53ad50ad81c9efbe6b4ee987cbf077b5bf85b65`, runtime 1.6.0 and Core API 1.2.0.
+All reports carry package sha256 `a2d7636b14b924fcfa80612613500d928a55ba84472a1577f9ccb8c4cc78a181`, runtime 1.6.0 and Core API 1.2.0.
 
 The demo checks:
 
@@ -155,7 +155,7 @@ The demo checks:
 - at the dataset clock the feed opens on fixture post `p18` and the latest bookmark is `p01`;
 - each `env.advance_time` changes no record.
 
-**Added scope against the approval baseline:** the dataset with its three scripts and `event-dependencies.json`, bookmark visibility by `saved_at`, and a larger package: 1,090,386 bytes of tracked files under `apps/wirewalk/`, up from 399,371, mostly `data/evaluation/seed.json`.
+**Added scope against the approval baseline:** the dataset with its three scripts and `event-dependencies.json`, bookmark visibility by `saved_at`, `later_history_removed` in both bookmark receipts (2026-11-28 revision), and a larger package: 1,093,575 bytes of tracked files under `apps/wirewalk/`, up from 399,371, mostly `data/evaluation/seed.json`.
 
 ## CI and the base validator at the submitted revision
 
@@ -164,6 +164,7 @@ The v1 review asked for an independent validator or CI result at the exact submi
 - **Official PR CI: not available yet.** The fork's `App runtime validation` run for this revision has status `action_required`, waiting for a maintainer to approve it; until then GitHub reports no `public-runtime (18)`, `public-runtime (22)` or `base-runtime-compatibility` result for it. The first submission's head, `3eb7219`, changed only `docs/validation/` and got no run of that workflow; its only run is on `a24e611`, also waiting for approval.
 - **Independent base validator: available.** An unmodified `git archive` export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, ran its own `runtime/ci/verify-submissions.cjs` against this checkout and passed with 40 checks: [wirewalk/base-runtime.json](wirewalk/base-runtime.json). The command is under Reproduce.
 - **CI job command, reproduced locally:** `node runtime/ci/verify-submissions.cjs . <out> a4bce02…` printed `wirewalk: PASS` on Node 22 and 18.
+- **Current `main`.** Official CI checks the merge with `main`, and `main` gained #288, which changes Mail's `notification()` builder: it now requires the source epoch from the Mail version and puts it in the CloudEvents ID (`mail-<epoch>-<id>`). The walkthrough's relay called that builder without an epoch, so on a local merge with `main` at `25d5597` it stopped at the first delivery. `be61b85` passes the sender's epoch (the pinned builder ignores it), accepts either form of Mail's ID for the record, and compares `examples/mail-wire.json` without the epoch. On a local merge of `be61b85` with `main` at `25d5597` (Node 22.23.2): business tests 27/27, the walkthrough's 134 checks, the dataset demo's 27 checks, the public verifier's 40 checks with the same package hash, `wirewalk: PASS` from the CI job command, and the repository suite 22/22.
 
 ## Plan and implementation
 

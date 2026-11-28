@@ -1,6 +1,6 @@
 {
   "app_id": "wirewalk",
-  "package_sha256": "2b1c9055850f04867a37935ce53ad50ad81c9efbe6b4ee987cbf077b5bf85b65",
+  "package_sha256": "a2d7636b14b924fcfa80612613500d928a55ba84472a1577f9ccb8c4cc78a181",
   "node": "v22.23.2",
   "dataset": {
     "path": "apps/wirewalk/data/evaluation/seed.json",
@@ -248,10 +248,19 @@
           ]
         }
       }
+    },
+    {
+      "label": "Early write",
+      "clock": "2026-02-09T12:00:00-08:00",
+      "request_id": "early-bookmark",
+      "post_id": "w260209-4",
+      "later_history_removed": {
+        "bookmarks": 1
+      }
     }
   ],
   "checks": {
-    "count": 24,
+    "count": 27,
     "passed": [
       "env.load_seed accepts the whole dataset in one request (558817 bytes, under the 2 MiB line limit)",
       "The bundle declares as many records as the seed has posts (1864)",
@@ -276,7 +285,10 @@
       "End of 2026: the newest visible post was published before the clock",
       "End of 2026: bookmarks show only those saved at or before the clock",
       "End of 2026: the recovery center account (joined Oct. 14, 2026) is visible",
-      "By the end of 2026 every post is visible"
+      "By the end of 2026 every post is visible",
+      "At noon on Feb. 9, 2026, bookmarking w260209-4 commits and its receipt counts the seeded 16:47 bookmark it replaced",
+      "The stored bookmark is now dated noon, and the replaced 16:47 bookmark is still in the loaded seed (initial_data)",
+      "An identical retry returns the stored receipt, marked duplicate, with the same count"
     ]
   }
 }

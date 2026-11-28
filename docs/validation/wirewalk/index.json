@@ -1,6 +1,6 @@
 {
   "schema": "wirewalk.v1-evidence-index",
-  "recorded_at": "2026-11-28T02:06:31Z",
+  "recorded_at": "2026-11-28T02:22:41Z",
   "app_id": "wirewalk",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,9 +10,9 @@
   "proposal_blob_sha": "79ea5b93c3555b818290b114dd10fed3e669007f",
   "proposal_status": "plan approved for implementation by the assigned Track reviewer (review APPROVED 2026-11-24T01:27:28Z; /approve-plan for this commit 2026-11-24T01:27:39Z); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "7607709451cd351e3eb356878fa6fc52c44389db",
-  "app_package_sha256": "2b1c9055850f04867a37935ce53ad50ad81c9efbe6b4ee987cbf077b5bf85b65",
-  "app_package_git_tree": "41e4c70873fb7dafb40add6434e5c47a10ad3633",
+  "app_package_commit": "be61b8583e99b9266ce8bb481e6af5c4b71d222c",
+  "app_package_sha256": "a2d7636b14b924fcfa80612613500d928a55ba84472a1577f9ccb8c4cc78a181",
+  "app_package_git_tree": "f2391c824d385dfb8d1b4824a62ff356dcb9659f",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -190,11 +190,11 @@
       },
       "real_mcp_demo": {
         "node22": {
-          "checks": 24,
+          "checks": 27,
           "load_request_bytes": 558817
         },
         "node18": {
-          "checks": 24,
+          "checks": 27,
           "load_request_bytes": 558817
         }
       }
@@ -231,13 +231,14 @@
     "items": [
       "evaluation dataset in apps/wirewalk/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
       "clock cutoff: tools show only records dated at or before the run clock",
-      "package size 1,090,386 bytes of tracked files (was 1,085,945)"
+      "package size 1,093,575 bytes of tracked files (was 1,085,945)",
+      "`later_history_removed` in both bookmark receipts (count of seeded later bookmarks the write replaced), from the 2026-11-28 revision"
     ]
   },
   "revisions": [
     {
-      "package": "7607709451cd351e3eb356878fa6fc52c44389db",
-      "note": "a bookmark that replaces a seeded later bookmark at an earlier clock counts it in the receipt (later_history_removed); test B27"
+      "package": "be61b8583e99b9266ce8bb481e6af5c4b71d222c",
+      "note": "packages 7607709, 5197a43 and be61b85: a bookmark that replaces a seeded later bookmark at an earlier clock counts it in the receipt (later_history_removed); test B27; the walkthrough also passes on current main, whose Mail builder (#288) puts the source epoch in the event ID"
     }
   ]
 }
