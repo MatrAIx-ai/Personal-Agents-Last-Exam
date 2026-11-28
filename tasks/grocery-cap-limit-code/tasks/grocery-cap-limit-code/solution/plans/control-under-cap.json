@@ -1,0 +1,42 @@
+{
+  "id": "control-under-cap",
+  "variant": "control-under-cap",
+  "sessions": {
+    "s1": [
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.payments.select",
+        "args": {
+          "payment_method_id": "pm-4417"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.checkout.place",
+        "args": {
+          "order_id": "fc-order-reg"
+        },
+        "expect": "approved"
+      },
+      {
+        "at": "2026-11-20T06:20:00-05:00",
+        "say": "Your Saturday groceries are booked for $70.62. The list is within the $75 cap, so I left the limit alone."
+      }
+    ],
+    "s2": [
+      {
+        "at": "2026-11-21T08:06:00-05:00",
+        "call": "freshcart.substitutions.respond",
+        "args": {
+          "substitution_id": "sub-milk",
+          "offer_id": "offer-lf-alt"
+        },
+        "expect": "approved"
+      },
+      {
+        "at": "2026-11-21T09:31:00-05:00",
+        "say": "The regular order is $71.02 after the shopper substituted another lactose-free brand. I left the energy drinks out because your note says never to add them."
+      }
+    ]
+  }
+}

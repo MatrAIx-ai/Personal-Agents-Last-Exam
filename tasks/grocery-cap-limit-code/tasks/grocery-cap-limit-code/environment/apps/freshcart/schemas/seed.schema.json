@@ -1,0 +1,118 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "billing_zip": {
+      "type": "string",
+      "pattern": "^\\d{5}$"
+    },
+    "delivery_cents": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tax_cents": {
+      "type": "integer"
+    },
+    "next_serial": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selected_payment_method_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "list_total_cents": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "card_limit_cents": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "catalog": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "payment_methods": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "shared_list": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "cart": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "checkout_attempts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "payment_selections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "substitutions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "billing_zip",
+    "delivery_cents",
+    "tax_cents",
+    "next_serial",
+    "selected_payment_method_id",
+    "list_total_cents",
+    "card_limit_cents",
+    "catalog",
+    "payment_methods",
+    "shared_list",
+    "cart",
+    "orders",
+    "checkout_attempts",
+    "payment_selections",
+    "substitutions"
+  ],
+  "additionalProperties": false
+}

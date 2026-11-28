@@ -1,0 +1,173 @@
+#!/usr/bin/env node
+'use strict';
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const packageRoot = path.resolve(__dirname, '..');
+const taskRoot = path.join(packageRoot, 'tasks/grocery-cap-limit-code');
+const runsDir = path.join(packageRoot, 'demo/grocery-cap-limit-code/evidence/runs');
+const source = process.argv[2] || '/tmp/gcl-all';
+const expected = JSON.parse(fs.readFileSync(path.join(taskRoot, 'tests/reference.json'), 'utf8')).expected_runs;
+
+function sha(file) {
+  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+}
+function copyFile(from, to) {
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.copyFileSync(from, to);
+}
+
+const staging = path.join(path.dirname(runsDir), '.runs-staging');
+fs.rmSync(staging, { recursive: true, force: true });
+fs.mkdirSync(staging, { recursive: true });
+function stop(message) {
+  fs.rmSync(staging, { recursive: true, force: true });
+  stop(message);
+}
+const runs = [];
+const names = fs.readdirSync(source).filter(item => {
+  const dir = path.join(source, item);
+  return fs.statSync(dir).isDirectory() && (fs.existsSync(path.join(dir, 'state.json')) || fs.existsSync(path.join(dir, 'run.json')));
+});
+for (const name of names) {
+  const from = path.join(source, name);
+  const dest = path.join(staging, name);
+  const present = ['state.json', 'run.json', 'reward.json'].filter(file => fs.existsSync(path.join(from, file)));
+  for (const file of present) copyFile(path.join(from, file), path.join(dest, file));
+  const log = path.join(source, name + '.log');
+  if (fs.existsSync(log)) copyFile(log, path.join(dest, 'runner.log'));
+  let reward = null;
+  if (present.includes('reward.json')) {
+    try {
+      reward = JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8'));
+    } catch (error) {
+      stop(name + ' reward is not valid JSON');
+    }
+  }
+  const want = expected[name];
+  if (reward && reward.official_score !== false) {
+    const statePath = path.join(dest, 'state.json');
+    const runPath = path.join(dest, 'run.json');
+    if (!fs.existsSync(statePath) || !fs.existsSync(runPath)) stop(name + ' scored artifact missing');
+    let stateDoc;
+    let runDoc;
+    try {
+      stateDoc = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+    } catch (error) {
+      stop(name + ' state is not valid JSON');
+    }
+    try {
+      runDoc = JSON.parse(fs.readFileSync(runPath, 'utf8'));
+    } catch (error) {
+      stop(name + ' run is not valid JSON');
+    }
+    const apps = stateDoc && stateDoc.apps;
+    const ready = stateDoc && stateDoc.schema === 'grocery-cap-limit-code.run.v1' && apps && runDoc && runDoc.run_id;
+    const appsReady = ready && ['freshcart', 'keelcard', 'mail', 'webstub'].every(app => apps[app] && typeof apps[app] === 'object');
+    if (!appsReady) stop(name + ' state is incomplete');
+  }
+  const status = !reward ? 'incomplete' : (reward.official_score === false ? 'ineligible' : 'scored');
+  if (want && !reward) stop(name + ' reward missing');
+  if (!want && status === 'scored') stop('unexpected run ' + name);
+  if (!want) {
+    const run = present.includes('run.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8')) : {};
+    const state = present.includes('state.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'state.json'), 'utf8')) : {};
+    runs.push({
+      run_id: run.run_id || state.run_id || name,
+      directory: name,
+      plan_id: run.plan_id || state.plan_id || name,
+      status,
+      official_score: false,
+      files: Object.fromEntries(present.map(file => [file, sha(path.join(dest, file))]))
+    });
+    continue;
+  }
+  if (reward.rubric_points !== want.points) stop(name + ' points ' + reward.rubric_points + ' expected ' + want.points);
+  if (want.full_pass !== undefined && reward.full_pass !== want.full_pass) stop(name + ' full_pass');
+  const got = Object.keys(reward.forbidden).filter(key => reward.forbidden[key]).sort();
+  const need = [...(want.forbidden || [])].sort();
+  if (JSON.stringify(got) !== JSON.stringify(need)) stop(name + ' forbidden ' + got.join(','));
+  if (want.earned_before_gate !== undefined && reward.earned_before_gate !== want.earned_before_gate) {
+    stop(name + ' earned ' + reward.earned_before_gate);
+  }
+  if (want.control_pass !== undefined && reward.control.pass !== want.control_pass) stop(name + ' control');
+  const run = JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8'));
+  runs.push({
+    run_id: run.run_id,
+    directory: name,
+    plan_id: run.plan_id || name,
+    plan_file: run.hinted ? 'solution/plans/reference.json' : (run.plan_file || null),
+    variant: run.variant,
+    hinted: Boolean(run.hinted),
+    executed_at: run.executed_at || null,
+    duration_ms: run.duration_ms || null,
+    official_score: reward.official_score !== false,
+    interrupted: Boolean(run.error),
+    rubric_points: reward.rubric_points,
+    earned_before_gate: reward.earned_before_gate,
+    full_pass: reward.full_pass,
+    forbidden: got,
+    control_pass: reward.control.pass,
+    status,
+    files: Object.fromEntries(present.map(file => [file, sha(path.join(dest, file))]))
+  });
+}
+runs.sort((a, b) => a.plan_id.localeCompare(b.plan_id));
+const missing = Object.keys(expected).filter(name => !runs.some(run => run.directory === name));
+if (missing.length) stop('missing runs ' + missing.join(','));
+
+const reference = JSON.parse(fs.readFileSync(path.join(staging, 'reference/state.json'), 'utf8'));
+const orders = reference.apps.freshcart.orders.filter(row => !row.historical);
+const auths = reference.apps.keelcard.authorizations.filter(row => String(row.authorization_key).includes('fc-order'));
+const records = {
+  freshcart_orders: orders.map(row => ({ id: row.id, confirmed_total_cents: row.confirmed_total_cents, total_cents: row.total_cents, card_id: row.card_id })),
+  keelcard_authorizations: auths.map(row => ({ authorization_key: row.authorization_key, decision: row.decision, amount_cents: row.amount_cents, status: row.status, hold_cents: row.hold_cents })),
+  full_cart_decline: JSON.parse(fs.readFileSync(path.join(staging, 'decline-recover/state.json'), 'utf8')).apps.keelcard.declines
+    .filter(row => String(row.authorization_key).includes('fc-order-8812'))
+    .map(row => ({ authorization_key: row.authorization_key, decline_code: row.decline_code, amount_cents: row.amount_cents, hold_cents: row.hold_cents })),
+  webstub_log_count: reference.apps.webstub.log.length,
+  phish: reference.apps.mail.messages.filter(row => (row.from || '').includes('freshcart-payments.example')).map(row => ({ id: row.id, from: row.from }))
+};
+const manifest = {
+  schema: 'grocery-cap-limit-code.evidence.v1',
+  task_id: 'grocery-cap-limit-code',
+  batch: 'scripted-validation',
+  official_model_batch: 'pending',
+  grader: 'tasks/grocery-cap-limit-code/tests/test_outcomes.py',
+  judge: 'deterministic keyword stand-in',
+  runs
+};
+const evidenceDir = path.dirname(runsDir);
+const recordsFile = path.join(evidenceDir, 'dependency-records.json');
+const manifestFile = path.join(evidenceDir, 'manifest.json');
+const recordsNext = recordsFile + '.next';
+const manifestNext = manifestFile + '.next';
+fs.writeFileSync(recordsNext, JSON.stringify(records, null, 2) + '\n');
+fs.writeFileSync(manifestNext, JSON.stringify(manifest, null, 2) + '\n');
+JSON.parse(fs.readFileSync(recordsNext, 'utf8'));
+JSON.parse(fs.readFileSync(manifestNext, 'utf8'));
+const backup = runsDir + '.previous';
+const recordsPrevious = recordsFile + '.previous';
+const manifestPrevious = manifestFile + '.previous';
+fs.rmSync(backup, { recursive: true, force: true });
+if (fs.existsSync(runsDir)) fs.renameSync(runsDir, backup);
+fs.renameSync(staging, runsDir);
+if (fs.existsSync(recordsFile)) fs.renameSync(recordsFile, recordsPrevious);
+if (fs.existsSync(manifestFile)) fs.renameSync(manifestFile, manifestPrevious);
+try {
+  fs.renameSync(recordsNext, recordsFile);
+  fs.renameSync(manifestNext, manifestFile);
+  fs.rmSync(backup, { recursive: true, force: true });
+  fs.rmSync(recordsPrevious, { force: true });
+  fs.rmSync(manifestPrevious, { force: true });
+} catch (error) {
+  if (fs.existsSync(backup)) {
+    fs.rmSync(runsDir, { recursive: true, force: true });
+    fs.renameSync(backup, runsDir);
+  }
+  if (fs.existsSync(recordsPrevious)) fs.renameSync(recordsPrevious, recordsFile);
+  if (fs.existsSync(manifestPrevious)) fs.renameSync(manifestPrevious, manifestFile);
+  throw error;
+}
+console.log('runs', runs.length);

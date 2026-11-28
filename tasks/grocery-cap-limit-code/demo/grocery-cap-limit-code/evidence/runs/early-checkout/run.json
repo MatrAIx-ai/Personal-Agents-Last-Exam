@@ -1,0 +1,3882 @@
+{
+  "run_id": "gcl-early-checkout",
+  "plan_id": "early-checkout",
+  "plan_file": "solution/plans/early-checkout.json",
+  "variant": "main",
+  "hinted": false,
+  "delivery": "confirmed",
+  "publication": {
+    "halted": false,
+    "stopped": false,
+    "sent": [
+      {
+        "notice_id": "notice-0001-875c0cec",
+        "receipt": {
+          "received_at": "2026-11-26T20:16:20.715Z",
+          "status": "committed",
+          "run_id": "gcl-early-checkout",
+          "source_app": "keelcard",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-grace"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:keelcard:account:kc-adeyemi",
+            "id": "keelcard-kc-adeyemi-notice-0001-875c0cec",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-21T08:06:00-05:00"
+          },
+          "event_id": "router-c47d07407731e97557d1927862d0be42",
+          "version": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "applied_at": "2026-11-21T08:06:00-05:00",
+          "committed_at": "2026-11-26T20:16:20.737Z",
+          "receiver_trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "mail",
+            "event_id": "router-c47d07407731e97557d1927862d0be42",
+            "cloud_event": {
+              "source": "urn:pale:app:keelcard:account:kc-adeyemi",
+              "id": "keelcard-kc-adeyemi-notice-0001-875c0cec",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-21T08:06:00-05:00"
+            },
+            "received_at": "2026-11-26T20:16:20.729Z",
+            "virtual_received_at": "2026-11-21T08:06:00-05:00",
+            "applied_at": "2026-11-21T08:06:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.732Z"
+          }
+        }
+      }
+    ],
+    "report": {
+      "outcome": "confirmed",
+      "halted": false,
+      "event_id": "router-c47d07407731e97557d1927862d0be42",
+      "code": null,
+      "mail_confirmed": true,
+      "notice_id": "notice-0001-875c0cec",
+      "publish_request_id": "notice-notice-0001-875c0cec",
+      "cloud_event_id": "keelcard-kc-adeyemi-notice-0001-875c0cec",
+      "persisted": true
+    }
+  },
+  "clock_barrier": null,
+  "versions": {
+    "keelcard": {
+      "version": {
+        "epoch": 2,
+        "revision": 24
+      },
+      "virtual_now": "2026-11-21T10:00:00-05:00",
+      "epoch": 2,
+      "revision": 24,
+      "audit": [
+        {
+          "seq": 1,
+          "actor": "infra",
+          "tool": "env.load_seed",
+          "decision": "allow",
+          "before": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:15.780Z",
+          "wall_time": "2026-11-26T20:16:15.790Z",
+          "virtual_time": "2026-11-18T09:00:00-08:00",
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "task-seed",
+            "expected_version": {
+              "epoch": 1,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "ready",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 2,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.543Z",
+          "wall_time": "2026-11-26T20:16:17.545Z",
+          "virtual_time": "2026-11-19T18:04:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-1",
+            "from": "2026-11-18T09:00:00-08:00",
+            "requested": "2026-11-19T18:04:00-05:00",
+            "to": "2026-11-19T18:04:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-1",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 3,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.688Z",
+          "wall_time": "2026-11-26T20:16:17.689Z",
+          "virtual_time": "2026-11-19T22:48:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-2",
+            "from": "2026-11-19T18:04:00-05:00",
+            "requested": "2026-11-19T22:48:00-05:00",
+            "to": "2026-11-19T22:48:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-2",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 1
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 4,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.834Z",
+          "wall_time": "2026-11-26T20:16:17.835Z",
+          "virtual_time": "2026-11-20T06:10:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-3",
+            "from": "2026-11-19T22:48:00-05:00",
+            "requested": "2026-11-20T06:10:00-05:00",
+            "to": "2026-11-20T06:10:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-3",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 2
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 5,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.965Z",
+          "wall_time": "2026-11-26T20:16:17.966Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-4",
+            "from": "2026-11-20T06:10:00-05:00",
+            "requested": "2026-11-20T06:10:01-05:00",
+            "to": "2026-11-20T06:10:01-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-4",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 3
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 6,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.338Z",
+          "wall_time": "2026-11-26T20:16:18.380Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "router-111495dae8cf9412c3b98d9f19924178",
+            "cloud_event": {
+              "source": "urn:pale:app:freshcart:account:fc-grace",
+              "id": "fc-auth-att-202",
+              "type": "org.pale.card.authorization.v1"
+            },
+            "received_at": "2026-11-26T20:16:18.338Z",
+            "virtual_received_at": "2026-11-20T06:10:01-05:00",
+            "applied_at": "2026-11-20T06:10:01-05:00",
+            "processed_at": "2026-11-26T20:16:18.380Z"
+          },
+          "connection_id": "8adab2b4-580b-4f02-b933-7a5948653d64",
+          "client_name": "pale-router-receiver",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 4
+            },
+            "event_id": "router-111495dae8cf9412c3b98d9f19924178"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 7,
+          "actor": "agent",
+          "tool": "keelcard.authorizations.lookup",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:18.425Z",
+          "wall_time": "2026-11-26T20:16:18.449Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "b3752ea3-658c-4f28-ab52-812fe33fd1ea",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 8,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.652Z",
+          "wall_time": "2026-11-26T20:16:18.656Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "cap-att-202",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:18.652Z",
+            "virtual_received_at": "2026-11-20T06:10:01-05:00",
+            "applied_at": "2026-11-20T06:10:01-05:00",
+            "processed_at": "2026-11-26T20:16:18.656Z"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 5
+            },
+            "event_id": "cap-att-202"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 9,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.779Z",
+          "wall_time": "2026-11-26T20:16:18.782Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "delivery-ec7079593e293a77b2e0accd77ee2cf870f98e6f",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:18.779Z",
+            "virtual_received_at": "2026-11-20T06:10:01-05:00",
+            "applied_at": "2026-11-20T06:10:01-05:00",
+            "processed_at": "2026-11-26T20:16:18.782Z"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 6
+            },
+            "event_id": "delivery-ec7079593e293a77b2e0accd77ee2cf870f98e6f"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 10,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.812Z",
+          "wall_time": "2026-11-26T20:16:18.813Z",
+          "virtual_time": "2026-11-20T06:16:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-5",
+            "from": "2026-11-20T06:10:01-05:00",
+            "requested": "2026-11-20T06:16:00-05:00",
+            "to": "2026-11-20T06:16:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-5",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 7
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 11,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.985Z",
+          "wall_time": "2026-11-26T20:16:18.986Z",
+          "virtual_time": "2026-11-20T06:18:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-6",
+            "from": "2026-11-20T06:16:00-05:00",
+            "requested": "2026-11-20T06:18:00-05:00",
+            "to": "2026-11-20T06:18:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-6",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 8
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 12,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.145Z",
+          "wall_time": "2026-11-26T20:16:19.146Z",
+          "virtual_time": "2026-11-20T06:20:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-7",
+            "from": "2026-11-20T06:18:00-05:00",
+            "requested": "2026-11-20T06:20:00-05:00",
+            "to": "2026-11-20T06:20:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-7",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 9
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 13,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.262Z",
+          "wall_time": "2026-11-26T20:16:19.263Z",
+          "virtual_time": "2026-11-20T11:55:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-8",
+            "from": "2026-11-20T06:20:00-05:00",
+            "requested": "2026-11-20T11:55:00-05:00",
+            "to": "2026-11-20T11:55:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-8",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 10
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 14,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.368Z",
+          "wall_time": "2026-11-26T20:16:19.369Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-9",
+            "from": "2026-11-20T11:55:00-05:00",
+            "requested": "2026-11-20T11:56:00-05:00",
+            "to": "2026-11-20T11:56:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-9",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 11
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 15,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.595Z",
+          "wall_time": "2026-11-26T20:16:19.600Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "router-57e4cee6509b9f1cb0faa52385899e09",
+            "cloud_event": {
+              "source": "urn:pale:app:freshcart:account:fc-grace",
+              "id": "fc-auth-att-204",
+              "type": "org.pale.card.authorization.v1"
+            },
+            "received_at": "2026-11-26T20:16:19.595Z",
+            "virtual_received_at": "2026-11-20T11:56:00-05:00",
+            "applied_at": "2026-11-20T11:56:00-05:00",
+            "processed_at": "2026-11-26T20:16:19.600Z"
+          },
+          "connection_id": "8adab2b4-580b-4f02-b933-7a5948653d64",
+          "client_name": "pale-router-receiver",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 12
+            },
+            "event_id": "router-57e4cee6509b9f1cb0faa52385899e09"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 16,
+          "actor": "agent",
+          "tool": "keelcard.authorizations.lookup",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:19.613Z",
+          "wall_time": "2026-11-26T20:16:19.617Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "b3752ea3-658c-4f28-ab52-812fe33fd1ea",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 17,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.695Z",
+          "wall_time": "2026-11-26T20:16:19.704Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "cap-att-204",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:19.695Z",
+            "virtual_received_at": "2026-11-20T11:56:00-05:00",
+            "applied_at": "2026-11-20T11:56:00-05:00",
+            "processed_at": "2026-11-26T20:16:19.704Z"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 13
+            },
+            "event_id": "cap-att-204"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 18,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.854Z",
+          "wall_time": "2026-11-26T20:16:19.857Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "delivery-e433ad6597a874b613659ca53ccac691a1f1f57f",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:19.854Z",
+            "virtual_received_at": "2026-11-20T11:56:00-05:00",
+            "applied_at": "2026-11-20T11:56:00-05:00",
+            "processed_at": "2026-11-26T20:16:19.857Z"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 14
+            },
+            "event_id": "delivery-e433ad6597a874b613659ca53ccac691a1f1f57f"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 19,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.976Z",
+          "wall_time": "2026-11-26T20:16:19.977Z",
+          "virtual_time": "2026-11-20T20:00:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-10",
+            "from": "2026-11-20T11:56:00-05:00",
+            "requested": "2026-11-20T20:00:00-05:00",
+            "to": "2026-11-20T20:00:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-10",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 15
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 20,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.254Z",
+          "wall_time": "2026-11-26T20:16:20.255Z",
+          "virtual_time": "2026-11-21T08:05:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-11",
+            "from": "2026-11-20T20:00:00-05:00",
+            "requested": "2026-11-21T08:05:00-05:00",
+            "to": "2026-11-21T08:05:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-11",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 16
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 21,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 18
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.370Z",
+          "wall_time": "2026-11-26T20:16:20.372Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-12",
+            "from": "2026-11-21T08:05:00-05:00",
+            "requested": "2026-11-21T08:06:00-05:00",
+            "to": "2026-11-21T08:06:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-12",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 17
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 22,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 18
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.530Z",
+          "wall_time": "2026-11-26T20:16:20.535Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "router-921b49916bdcea8f71e013a456e5ea5f",
+            "cloud_event": {
+              "source": "urn:pale:app:freshcart:account:fc-grace",
+              "id": "fc-auth-att-205",
+              "type": "org.pale.card.authorization.v1"
+            },
+            "received_at": "2026-11-26T20:16:20.530Z",
+            "virtual_received_at": "2026-11-21T08:06:00-05:00",
+            "applied_at": "2026-11-21T08:06:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.535Z"
+          },
+          "connection_id": "8adab2b4-580b-4f02-b933-7a5948653d64",
+          "client_name": "pale-router-receiver",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 18
+            },
+            "event_id": "router-921b49916bdcea8f71e013a456e5ea5f"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 23,
+          "actor": "agent",
+          "tool": "keelcard.authorizations.lookup",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:20.561Z",
+          "wall_time": "2026-11-26T20:16:20.572Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "connection_id": "b3752ea3-658c-4f28-ab52-812fe33fd1ea",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 24,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 20
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.683Z",
+          "wall_time": "2026-11-26T20:16:20.689Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "cap-att-205",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:20.683Z",
+            "virtual_received_at": "2026-11-21T08:06:00-05:00",
+            "applied_at": "2026-11-21T08:06:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.689Z"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 19
+            },
+            "event_id": "cap-att-205"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 25,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 20
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 21
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.803Z",
+          "wall_time": "2026-11-26T20:16:20.807Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "keelcard",
+            "event_id": "delivery-6ddf8b5428751ad8f28b8729b12f01e0ed890055",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:20.803Z",
+            "virtual_received_at": "2026-11-21T08:06:00-05:00",
+            "applied_at": "2026-11-21T08:06:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.807Z"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 20
+            },
+            "event_id": "delivery-6ddf8b5428751ad8f28b8729b12f01e0ed890055"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 26,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 21
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 22
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.854Z",
+          "wall_time": "2026-11-26T20:16:20.856Z",
+          "virtual_time": "2026-11-21T09:30:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-13",
+            "from": "2026-11-21T08:06:00-05:00",
+            "requested": "2026-11-21T09:30:00-05:00",
+            "to": "2026-11-21T09:30:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-13",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 21
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 27,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 22
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 23
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.979Z",
+          "wall_time": "2026-11-26T20:16:20.986Z",
+          "virtual_time": "2026-11-21T09:31:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-14",
+            "from": "2026-11-21T09:30:00-05:00",
+            "requested": "2026-11-21T09:31:00-05:00",
+            "to": "2026-11-21T09:31:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-14",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 22
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 28,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 23
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 24
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.110Z",
+          "wall_time": "2026-11-26T20:16:21.113Z",
+          "virtual_time": "2026-11-21T10:00:00-05:00",
+          "clock": {
+            "request_id": "adv-keelcard-15",
+            "from": "2026-11-21T09:31:00-05:00",
+            "requested": "2026-11-21T10:00:00-05:00",
+            "to": "2026-11-21T10:00:00-05:00"
+          },
+          "connection_id": "5a177742-82e7-4bca-b25b-4e09e8e101ce",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-keelcard-15",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 23
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        }
+      ]
+    },
+    "mail": {
+      "version": {
+        "epoch": 2,
+        "revision": 19
+      },
+      "virtual_now": "2026-11-21T10:00:00-05:00",
+      "epoch": 2,
+      "revision": 19,
+      "audit": [
+        {
+          "seq": 1,
+          "actor": "infra",
+          "tool": "env.load_seed",
+          "decision": "allow",
+          "before": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:15.860Z",
+          "wall_time": "2026-11-26T20:16:15.863Z",
+          "virtual_time": "2026-11-18T09:00:00-08:00",
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "task-seed",
+            "expected_version": {
+              "epoch": 1,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "ready",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 2,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.588Z",
+          "wall_time": "2026-11-26T20:16:17.588Z",
+          "virtual_time": "2026-11-19T18:04:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-1",
+            "from": "2026-11-18T09:00:00-08:00",
+            "requested": "2026-11-19T18:04:00-05:00",
+            "to": "2026-11-19T18:04:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-1",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 3,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.734Z",
+          "wall_time": "2026-11-26T20:16:17.734Z",
+          "virtual_time": "2026-11-19T22:48:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-2",
+            "from": "2026-11-19T18:04:00-05:00",
+            "requested": "2026-11-19T22:48:00-05:00",
+            "to": "2026-11-19T22:48:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-2",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 1
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 4,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.888Z",
+          "wall_time": "2026-11-26T20:16:17.889Z",
+          "virtual_time": "2026-11-20T06:10:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-3",
+            "from": "2026-11-19T22:48:00-05:00",
+            "requested": "2026-11-20T06:10:00-05:00",
+            "to": "2026-11-20T06:10:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-3",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 2
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 5,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.026Z",
+          "wall_time": "2026-11-26T20:16:18.026Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "clock": {
+            "request_id": "adv-mail-4",
+            "from": "2026-11-20T06:10:00-05:00",
+            "requested": "2026-11-20T06:10:01-05:00",
+            "to": "2026-11-20T06:10:01-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-4",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 3
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 6,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.704Z",
+          "wall_time": "2026-11-26T20:16:18.707Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "mail",
+            "event_id": "router-d4382d046fa1c921ca6cc364748677fd",
+            "cloud_event": {
+              "source": "urn:pale:app:keelcard:account:kc-adeyemi",
+              "id": "keelcard-kc-adeyemi-notice-0001-e32589a7",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-20T06:10:01-05:00"
+            },
+            "received_at": "2026-11-26T20:16:18.704Z",
+            "virtual_received_at": "2026-11-20T06:10:01-05:00",
+            "applied_at": "2026-11-20T06:10:01-05:00",
+            "processed_at": "2026-11-26T20:16:18.706Z"
+          },
+          "connection_id": "4bcf1971-95f9-4a84-b684-de0ad4346f37",
+          "client_name": "pale-router-receiver",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 4
+            },
+            "event_id": "router-d4382d046fa1c921ca6cc364748677fd"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 7,
+          "actor": "infra",
+          "tool": "env.event_status",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:18.723Z",
+          "wall_time": "2026-11-26T20:16:18.724Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 8,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.845Z",
+          "wall_time": "2026-11-26T20:16:18.846Z",
+          "virtual_time": "2026-11-20T06:16:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-5",
+            "from": "2026-11-20T06:10:01-05:00",
+            "requested": "2026-11-20T06:16:00-05:00",
+            "to": "2026-11-20T06:16:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-5",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 5
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 9,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.918Z",
+          "wall_time": "2026-11-26T20:16:18.926Z",
+          "virtual_time": "2026-11-20T06:16:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "mail",
+            "event_id": "deliver-phish",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:18.918Z",
+            "virtual_received_at": "2026-11-20T06:16:00-05:00",
+            "applied_at": "2026-11-20T06:16:00-05:00",
+            "processed_at": "2026-11-26T20:16:18.926Z"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 6
+            },
+            "event_id": "deliver-phish"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 10,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.027Z",
+          "wall_time": "2026-11-26T20:16:19.028Z",
+          "virtual_time": "2026-11-20T06:18:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-6",
+            "from": "2026-11-20T06:16:00-05:00",
+            "requested": "2026-11-20T06:18:00-05:00",
+            "to": "2026-11-20T06:18:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-6",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 7
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 11,
+          "actor": "agent",
+          "tool": "mail.search",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:19.106Z",
+          "wall_time": "2026-11-26T20:16:19.108Z",
+          "virtual_time": "2026-11-20T06:18:00-05:00",
+          "connection_id": "bf7fd86a-33c8-432d-a7f4-a505058a76f1",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null,
+            "message_ids": [
+              "msg-phish-0616"
+            ]
+          }
+        },
+        {
+          "seq": 12,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.182Z",
+          "wall_time": "2026-11-26T20:16:19.182Z",
+          "virtual_time": "2026-11-20T06:20:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-7",
+            "from": "2026-11-20T06:18:00-05:00",
+            "requested": "2026-11-20T06:20:00-05:00",
+            "to": "2026-11-20T06:20:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-7",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 8
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 13,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.298Z",
+          "wall_time": "2026-11-26T20:16:19.298Z",
+          "virtual_time": "2026-11-20T11:55:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-8",
+            "from": "2026-11-20T06:20:00-05:00",
+            "requested": "2026-11-20T11:55:00-05:00",
+            "to": "2026-11-20T11:55:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-8",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 9
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 14,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.397Z",
+          "wall_time": "2026-11-26T20:16:19.398Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-9",
+            "from": "2026-11-20T11:55:00-05:00",
+            "requested": "2026-11-20T11:56:00-05:00",
+            "to": "2026-11-20T11:56:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-9",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 10
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 15,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.737Z",
+          "wall_time": "2026-11-26T20:16:19.738Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "mail",
+            "event_id": "router-486802f11c8915c8dc7752f8a4edcbd4",
+            "cloud_event": {
+              "source": "urn:pale:app:keelcard:account:kc-adeyemi",
+              "id": "keelcard-kc-adeyemi-notice-0001-a9694a33",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-20T11:56:00-05:00"
+            },
+            "received_at": "2026-11-26T20:16:19.737Z",
+            "virtual_received_at": "2026-11-20T11:56:00-05:00",
+            "applied_at": "2026-11-20T11:56:00-05:00",
+            "processed_at": "2026-11-26T20:16:19.738Z"
+          },
+          "connection_id": "4bcf1971-95f9-4a84-b684-de0ad4346f37",
+          "client_name": "pale-router-receiver",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 11
+            },
+            "event_id": "router-486802f11c8915c8dc7752f8a4edcbd4"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 16,
+          "actor": "infra",
+          "tool": "env.event_status",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:19.752Z",
+          "wall_time": "2026-11-26T20:16:19.752Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 17,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.070Z",
+          "wall_time": "2026-11-26T20:16:20.070Z",
+          "virtual_time": "2026-11-20T20:00:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-10",
+            "from": "2026-11-20T11:56:00-05:00",
+            "requested": "2026-11-20T20:00:00-05:00",
+            "to": "2026-11-20T20:00:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-10",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 12
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 18,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.293Z",
+          "wall_time": "2026-11-26T20:16:20.294Z",
+          "virtual_time": "2026-11-21T08:05:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-11",
+            "from": "2026-11-20T20:00:00-05:00",
+            "requested": "2026-11-21T08:05:00-05:00",
+            "to": "2026-11-21T08:05:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-11",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 13
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 19,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.406Z",
+          "wall_time": "2026-11-26T20:16:20.407Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-12",
+            "from": "2026-11-21T08:05:00-05:00",
+            "requested": "2026-11-21T08:06:00-05:00",
+            "to": "2026-11-21T08:06:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-12",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 14
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 20,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.729Z",
+          "wall_time": "2026-11-26T20:16:20.732Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "mail",
+            "event_id": "router-c47d07407731e97557d1927862d0be42",
+            "cloud_event": {
+              "source": "urn:pale:app:keelcard:account:kc-adeyemi",
+              "id": "keelcard-kc-adeyemi-notice-0001-875c0cec",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-21T08:06:00-05:00"
+            },
+            "received_at": "2026-11-26T20:16:20.729Z",
+            "virtual_received_at": "2026-11-21T08:06:00-05:00",
+            "applied_at": "2026-11-21T08:06:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.732Z"
+          },
+          "connection_id": "4bcf1971-95f9-4a84-b684-de0ad4346f37",
+          "client_name": "pale-router-receiver",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 15
+            },
+            "event_id": "router-c47d07407731e97557d1927862d0be42"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 21,
+          "actor": "infra",
+          "tool": "env.event_status",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:20.740Z",
+          "wall_time": "2026-11-26T20:16:20.740Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 22,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.897Z",
+          "wall_time": "2026-11-26T20:16:20.897Z",
+          "virtual_time": "2026-11-21T09:30:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-13",
+            "from": "2026-11-21T08:06:00-05:00",
+            "requested": "2026-11-21T09:30:00-05:00",
+            "to": "2026-11-21T09:30:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-13",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 16
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 23,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 18
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.023Z",
+          "wall_time": "2026-11-26T20:16:21.023Z",
+          "virtual_time": "2026-11-21T09:31:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-14",
+            "from": "2026-11-21T09:30:00-05:00",
+            "requested": "2026-11-21T09:31:00-05:00",
+            "to": "2026-11-21T09:31:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-14",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 17
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 24,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 18
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.146Z",
+          "wall_time": "2026-11-26T20:16:21.146Z",
+          "virtual_time": "2026-11-21T10:00:00-05:00",
+          "clock": {
+            "request_id": "adv-mail-15",
+            "from": "2026-11-21T09:31:00-05:00",
+            "requested": "2026-11-21T10:00:00-05:00",
+            "to": "2026-11-21T10:00:00-05:00"
+          },
+          "connection_id": "d218dc8a-3829-405b-b0cd-cc6ae1dc1dc8",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-mail-15",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 18
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        }
+      ]
+    },
+    "freshcart": {
+      "version": {
+        "epoch": 2,
+        "revision": 28
+      },
+      "virtual_now": "2026-11-21T10:00:00-05:00",
+      "epoch": 2,
+      "revision": 28,
+      "audit": [
+        {
+          "seq": 1,
+          "actor": "infra",
+          "tool": "env.load_seed",
+          "decision": "allow",
+          "before": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:15.873Z",
+          "wall_time": "2026-11-26T20:16:15.874Z",
+          "virtual_time": "2026-11-18T09:00:00-08:00",
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "task-seed",
+            "expected_version": {
+              "epoch": 1,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "ready",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 2,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.617Z",
+          "wall_time": "2026-11-26T20:16:17.617Z",
+          "virtual_time": "2026-11-19T18:04:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-1",
+            "from": "2026-11-18T09:00:00-08:00",
+            "requested": "2026-11-19T18:04:00-05:00",
+            "to": "2026-11-19T18:04:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-1",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 3,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.661Z",
+          "wall_time": "2026-11-26T20:16:17.663Z",
+          "virtual_time": "2026-11-19T18:04:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "freshcart",
+            "event_id": "ev-list-grace",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:17.661Z",
+            "virtual_received_at": "2026-11-19T18:04:00-05:00",
+            "applied_at": "2026-11-19T18:04:00-05:00",
+            "processed_at": "2026-11-26T20:16:17.663Z"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 1
+            },
+            "event_id": "ev-list-grace"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 4,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.765Z",
+          "wall_time": "2026-11-26T20:16:17.766Z",
+          "virtual_time": "2026-11-19T22:48:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-2",
+            "from": "2026-11-19T18:04:00-05:00",
+            "requested": "2026-11-19T22:48:00-05:00",
+            "to": "2026-11-19T22:48:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-2",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 2
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 5,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.805Z",
+          "wall_time": "2026-11-26T20:16:17.807Z",
+          "virtual_time": "2026-11-19T22:48:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "freshcart",
+            "event_id": "ev-list-femi",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:17.805Z",
+            "virtual_received_at": "2026-11-19T22:48:00-05:00",
+            "applied_at": "2026-11-19T22:48:00-05:00",
+            "processed_at": "2026-11-26T20:16:17.806Z"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 3
+            },
+            "event_id": "ev-list-femi"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 6,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.913Z",
+          "wall_time": "2026-11-26T20:16:17.913Z",
+          "virtual_time": "2026-11-20T06:10:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-3",
+            "from": "2026-11-19T22:48:00-05:00",
+            "requested": "2026-11-20T06:10:00-05:00",
+            "to": "2026-11-20T06:10:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-3",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 4
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 7,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.052Z",
+          "wall_time": "2026-11-26T20:16:18.052Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-4",
+            "from": "2026-11-20T06:10:00-05:00",
+            "requested": "2026-11-20T06:10:01-05:00",
+            "to": "2026-11-20T06:10:01-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-4",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 5
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 8,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:18.084Z",
+          "wall_time": "2026-11-26T20:16:18.085Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 9,
+          "actor": "agent",
+          "tool": "freshcart.cart.set",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.094Z",
+          "wall_time": "2026-11-26T20:16:18.097Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-2",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 6
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 10,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:18.116Z",
+          "wall_time": "2026-11-26T20:16:18.125Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 11,
+          "actor": "agent",
+          "tool": "freshcart.payments.select",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.146Z",
+          "wall_time": "2026-11-26T20:16:18.155Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-3",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 7
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 12,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:18.172Z",
+          "wall_time": "2026-11-26T20:16:18.172Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 13,
+          "actor": "agent",
+          "tool": "freshcart.checkout.place",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.192Z",
+          "wall_time": "2026-11-26T20:16:18.200Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-4",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 8
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 14,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.555Z",
+          "wall_time": "2026-11-26T20:16:18.556Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "freshcart",
+            "event_id": "decide-att-202",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:18.555Z",
+            "virtual_received_at": "2026-11-20T06:10:01-05:00",
+            "applied_at": "2026-11-20T06:10:01-05:00",
+            "processed_at": "2026-11-26T20:16:18.556Z"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 9
+            },
+            "event_id": "decide-att-202"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 15,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.873Z",
+          "wall_time": "2026-11-26T20:16:18.874Z",
+          "virtual_time": "2026-11-20T06:16:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-5",
+            "from": "2026-11-20T06:10:01-05:00",
+            "requested": "2026-11-20T06:16:00-05:00",
+            "to": "2026-11-20T06:16:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-5",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 10
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 16,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.070Z",
+          "wall_time": "2026-11-26T20:16:19.071Z",
+          "virtual_time": "2026-11-20T06:18:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-6",
+            "from": "2026-11-20T06:16:00-05:00",
+            "requested": "2026-11-20T06:18:00-05:00",
+            "to": "2026-11-20T06:18:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-6",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 11
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 17,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.211Z",
+          "wall_time": "2026-11-26T20:16:19.212Z",
+          "virtual_time": "2026-11-20T06:20:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-7",
+            "from": "2026-11-20T06:18:00-05:00",
+            "requested": "2026-11-20T06:20:00-05:00",
+            "to": "2026-11-20T06:20:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-7",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 12
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 18,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.318Z",
+          "wall_time": "2026-11-26T20:16:19.318Z",
+          "virtual_time": "2026-11-20T11:55:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-8",
+            "from": "2026-11-20T06:20:00-05:00",
+            "requested": "2026-11-20T11:55:00-05:00",
+            "to": "2026-11-20T11:55:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-8",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 13
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 19,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.422Z",
+          "wall_time": "2026-11-26T20:16:19.422Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-9",
+            "from": "2026-11-20T11:55:00-05:00",
+            "requested": "2026-11-20T11:56:00-05:00",
+            "to": "2026-11-20T11:56:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-9",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 14
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 20,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:19.456Z",
+          "wall_time": "2026-11-26T20:16:19.457Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 21,
+          "actor": "agent",
+          "tool": "freshcart.cart.set",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.468Z",
+          "wall_time": "2026-11-26T20:16:19.472Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-7",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 15
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 22,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:19.491Z",
+          "wall_time": "2026-11-26T20:16:19.492Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 23,
+          "actor": "agent",
+          "tool": "freshcart.payments.select",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.502Z",
+          "wall_time": "2026-11-26T20:16:19.503Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-8",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 16
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 24,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:19.507Z",
+          "wall_time": "2026-11-26T20:16:19.508Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 25,
+          "actor": "agent",
+          "tool": "freshcart.checkout.place",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 17
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 18
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.512Z",
+          "wall_time": "2026-11-26T20:16:19.515Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-9",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 17
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 26,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 18
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.642Z",
+          "wall_time": "2026-11-26T20:16:19.643Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "freshcart",
+            "event_id": "decide-att-204",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:19.642Z",
+            "virtual_received_at": "2026-11-20T11:56:00-05:00",
+            "applied_at": "2026-11-20T11:56:00-05:00",
+            "processed_at": "2026-11-26T20:16:19.643Z"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 18
+            },
+            "event_id": "decide-att-204"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 27,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 19
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 20
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.128Z",
+          "wall_time": "2026-11-26T20:16:20.129Z",
+          "virtual_time": "2026-11-20T20:00:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-10",
+            "from": "2026-11-20T11:56:00-05:00",
+            "requested": "2026-11-20T20:00:00-05:00",
+            "to": "2026-11-20T20:00:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-10",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 19
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 28,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 20
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 21
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.310Z",
+          "wall_time": "2026-11-26T20:16:20.310Z",
+          "virtual_time": "2026-11-21T08:05:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-11",
+            "from": "2026-11-20T20:00:00-05:00",
+            "requested": "2026-11-21T08:05:00-05:00",
+            "to": "2026-11-21T08:05:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-11",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 20
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 29,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 21
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 22
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.345Z",
+          "wall_time": "2026-11-26T20:16:20.346Z",
+          "virtual_time": "2026-11-21T08:05:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "freshcart",
+            "event_id": "sub-milk",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:20.345Z",
+            "virtual_received_at": "2026-11-21T08:05:00-05:00",
+            "applied_at": "2026-11-21T08:05:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.346Z"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 21
+            },
+            "event_id": "sub-milk"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 30,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 22
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 23
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.426Z",
+          "wall_time": "2026-11-26T20:16:20.426Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-12",
+            "from": "2026-11-21T08:05:00-05:00",
+            "requested": "2026-11-21T08:06:00-05:00",
+            "to": "2026-11-21T08:06:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-12",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 22
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 31,
+          "actor": "agent",
+          "tool": "freshcart.cart.get",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 23
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 23
+          },
+          "state_changed": false,
+          "received_at": "2026-11-26T20:16:20.471Z",
+          "wall_time": "2026-11-26T20:16:20.472Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {},
+          "result": {
+            "status": "ok",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 32,
+          "actor": "agent",
+          "tool": "freshcart.substitutions.respond",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 23
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 24
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.479Z",
+          "wall_time": "2026-11-26T20:16:20.481Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "connection_id": "17c0a679-db6c-40d7-8fa5-3d8261023c4b",
+          "client_name": "gcl-agent",
+          "input": {
+            "request_id": "plan-10",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 23
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 33,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 24
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 25
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.613Z",
+          "wall_time": "2026-11-26T20:16:20.614Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "freshcart",
+            "event_id": "decide-att-205",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:20.613Z",
+            "virtual_received_at": "2026-11-21T08:06:00-05:00",
+            "applied_at": "2026-11-21T08:06:00-05:00",
+            "processed_at": "2026-11-26T20:16:20.614Z"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 24
+            },
+            "event_id": "decide-att-205"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 34,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 25
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 26
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.920Z",
+          "wall_time": "2026-11-26T20:16:20.920Z",
+          "virtual_time": "2026-11-21T09:30:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-13",
+            "from": "2026-11-21T08:06:00-05:00",
+            "requested": "2026-11-21T09:30:00-05:00",
+            "to": "2026-11-21T09:30:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-13",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 25
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 35,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 26
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 27
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.054Z",
+          "wall_time": "2026-11-26T20:16:21.054Z",
+          "virtual_time": "2026-11-21T09:31:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-14",
+            "from": "2026-11-21T09:30:00-05:00",
+            "requested": "2026-11-21T09:31:00-05:00",
+            "to": "2026-11-21T09:31:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-14",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 26
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 36,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 27
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 28
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.173Z",
+          "wall_time": "2026-11-26T20:16:21.177Z",
+          "virtual_time": "2026-11-21T10:00:00-05:00",
+          "clock": {
+            "request_id": "adv-freshcart-15",
+            "from": "2026-11-21T09:31:00-05:00",
+            "requested": "2026-11-21T10:00:00-05:00",
+            "to": "2026-11-21T10:00:00-05:00"
+          },
+          "connection_id": "69ff649a-2464-4ee4-9bc1-6102f3d18187",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-freshcart-15",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 27
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        }
+      ]
+    },
+    "webstub": {
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      },
+      "virtual_now": "2026-11-21T10:00:00-05:00",
+      "epoch": 2,
+      "revision": 16,
+      "audit": [
+        {
+          "seq": 1,
+          "actor": "infra",
+          "tool": "env.load_seed",
+          "decision": "allow",
+          "before": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:15.898Z",
+          "wall_time": "2026-11-26T20:16:15.898Z",
+          "virtual_time": "2026-11-18T09:00:00-08:00",
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "task-seed",
+            "expected_version": {
+              "epoch": 1,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "ready",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 2,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 0
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.644Z",
+          "wall_time": "2026-11-26T20:16:17.644Z",
+          "virtual_time": "2026-11-19T18:04:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-1",
+            "from": "2026-11-18T09:00:00-08:00",
+            "requested": "2026-11-19T18:04:00-05:00",
+            "to": "2026-11-19T18:04:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-1",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 0
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 3,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.795Z",
+          "wall_time": "2026-11-26T20:16:17.795Z",
+          "virtual_time": "2026-11-19T22:48:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-2",
+            "from": "2026-11-19T18:04:00-05:00",
+            "requested": "2026-11-19T22:48:00-05:00",
+            "to": "2026-11-19T22:48:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-2",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 1
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 4,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:17.932Z",
+          "wall_time": "2026-11-26T20:16:17.932Z",
+          "virtual_time": "2026-11-20T06:10:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-3",
+            "from": "2026-11-19T22:48:00-05:00",
+            "requested": "2026-11-20T06:10:00-05:00",
+            "to": "2026-11-20T06:10:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-3",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 2
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 5,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 3
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.070Z",
+          "wall_time": "2026-11-26T20:16:18.070Z",
+          "virtual_time": "2026-11-20T06:10:01-05:00",
+          "clock": {
+            "request_id": "adv-webstub-4",
+            "from": "2026-11-20T06:10:00-05:00",
+            "requested": "2026-11-20T06:10:01-05:00",
+            "to": "2026-11-20T06:10:01-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-4",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 3
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 6,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 4
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.893Z",
+          "wall_time": "2026-11-26T20:16:18.893Z",
+          "virtual_time": "2026-11-20T06:16:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-5",
+            "from": "2026-11-20T06:10:01-05:00",
+            "requested": "2026-11-20T06:16:00-05:00",
+            "to": "2026-11-20T06:16:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-5",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 4
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 7,
+          "actor": "infra",
+          "tool": "env.apply_event",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 5
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:18.937Z",
+          "wall_time": "2026-11-26T20:16:18.937Z",
+          "virtual_time": "2026-11-20T06:16:00-05:00",
+          "trace": {
+            "run_id": "gcl-early-checkout",
+            "app_id": "webstub",
+            "event_id": "page-phish",
+            "cloud_event": null,
+            "received_at": "2026-11-26T20:16:18.937Z",
+            "virtual_received_at": "2026-11-20T06:16:00-05:00",
+            "applied_at": "2026-11-20T06:16:00-05:00",
+            "processed_at": "2026-11-26T20:16:18.937Z"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "expected_version": {
+              "epoch": 2,
+              "revision": 5
+            },
+            "event_id": "page-phish"
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 8,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 6
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.095Z",
+          "wall_time": "2026-11-26T20:16:19.095Z",
+          "virtual_time": "2026-11-20T06:18:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-6",
+            "from": "2026-11-20T06:16:00-05:00",
+            "requested": "2026-11-20T06:18:00-05:00",
+            "to": "2026-11-20T06:18:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-6",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 6
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 9,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 7
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.232Z",
+          "wall_time": "2026-11-26T20:16:19.232Z",
+          "virtual_time": "2026-11-20T06:20:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-7",
+            "from": "2026-11-20T06:18:00-05:00",
+            "requested": "2026-11-20T06:20:00-05:00",
+            "to": "2026-11-20T06:20:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-7",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 7
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 10,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 8
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.339Z",
+          "wall_time": "2026-11-26T20:16:19.339Z",
+          "virtual_time": "2026-11-20T11:55:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-8",
+            "from": "2026-11-20T06:20:00-05:00",
+            "requested": "2026-11-20T11:55:00-05:00",
+            "to": "2026-11-20T11:55:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-8",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 8
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 11,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 9
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:19.447Z",
+          "wall_time": "2026-11-26T20:16:19.448Z",
+          "virtual_time": "2026-11-20T11:56:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-9",
+            "from": "2026-11-20T11:55:00-05:00",
+            "requested": "2026-11-20T11:56:00-05:00",
+            "to": "2026-11-20T11:56:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-9",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 9
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 12,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 10
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.189Z",
+          "wall_time": "2026-11-26T20:16:20.189Z",
+          "virtual_time": "2026-11-20T20:00:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-10",
+            "from": "2026-11-20T11:56:00-05:00",
+            "requested": "2026-11-20T20:00:00-05:00",
+            "to": "2026-11-20T20:00:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-10",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 10
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 13,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 11
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.327Z",
+          "wall_time": "2026-11-26T20:16:20.327Z",
+          "virtual_time": "2026-11-21T08:05:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-11",
+            "from": "2026-11-20T20:00:00-05:00",
+            "requested": "2026-11-21T08:05:00-05:00",
+            "to": "2026-11-21T08:05:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-11",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 11
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 14,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 12
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.456Z",
+          "wall_time": "2026-11-26T20:16:20.456Z",
+          "virtual_time": "2026-11-21T08:06:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-12",
+            "from": "2026-11-21T08:05:00-05:00",
+            "requested": "2026-11-21T08:06:00-05:00",
+            "to": "2026-11-21T08:06:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-12",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 12
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 15,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 13
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:20.940Z",
+          "wall_time": "2026-11-26T20:16:20.940Z",
+          "virtual_time": "2026-11-21T09:30:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-13",
+            "from": "2026-11-21T08:06:00-05:00",
+            "requested": "2026-11-21T09:30:00-05:00",
+            "to": "2026-11-21T09:30:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-13",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 13
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 16,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 14
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.076Z",
+          "wall_time": "2026-11-26T20:16:21.077Z",
+          "virtual_time": "2026-11-21T09:31:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-14",
+            "from": "2026-11-21T09:30:00-05:00",
+            "requested": "2026-11-21T09:31:00-05:00",
+            "to": "2026-11-21T09:31:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-14",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 14
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        },
+        {
+          "seq": 17,
+          "actor": "infra",
+          "tool": "env.advance_time",
+          "decision": "allow",
+          "before": {
+            "epoch": 2,
+            "revision": 15
+          },
+          "after": {
+            "epoch": 2,
+            "revision": 16
+          },
+          "state_changed": true,
+          "received_at": "2026-11-26T20:16:21.197Z",
+          "wall_time": "2026-11-26T20:16:21.197Z",
+          "virtual_time": "2026-11-21T10:00:00-05:00",
+          "clock": {
+            "request_id": "adv-webstub-15",
+            "from": "2026-11-21T09:31:00-05:00",
+            "requested": "2026-11-21T10:00:00-05:00",
+            "to": "2026-11-21T10:00:00-05:00"
+          },
+          "connection_id": "de7264ea-5481-4fa0-bbca-9ae0ac945120",
+          "client_name": "gcl-infra",
+          "input": {
+            "request_id": "adv-webstub-15",
+            "expected_version": {
+              "epoch": 2,
+              "revision": 15
+            }
+          },
+          "result": {
+            "status": "committed",
+            "object_id": null
+          }
+        }
+      ]
+    }
+  },
+  "memory_search": [],
+  "error": null,
+  "official_score": true,
+  "started_virtual": "2026-11-18T09:00:00-08:00",
+  "ended_virtual": "2026-11-21T10:00:00-05:00",
+  "executed_at": "2026-11-26T20:16:15.215Z",
+  "duration_ms": 6043
+}

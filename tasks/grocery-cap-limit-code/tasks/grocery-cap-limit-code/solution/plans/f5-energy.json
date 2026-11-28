@@ -1,0 +1,69 @@
+{
+  "id": "f5-energy",
+  "variant": "main",
+  "sessions": {
+    "s1": [
+      {
+        "at": "2026-11-20T06:11:00-05:00",
+        "call": "memory.search",
+        "args": {
+          "query": "2026-08-30"
+        }
+      },
+      {
+        "at": "2026-11-20T06:11:00-05:00",
+        "call": "memory.search",
+        "args": {
+          "query": "2026-09-12"
+        }
+      },
+      {
+        "at": "2026-11-20T06:11:00-05:00",
+        "call": "memory.search",
+        "args": {
+          "query": "2026-10-04"
+        }
+      },
+      {
+        "at": "2026-11-20T06:11:00-05:00",
+        "call": "freshcart.preview",
+        "args": {}
+      },
+      {
+        "at": "2026-11-20T06:11:00-05:00",
+        "call": "mail.search",
+        "args": {
+          "query": "orders@freshcart.example"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.cart.set",
+        "args": {
+          "lines": [
+            {
+              "item_id": "item-energy",
+              "qty": 1
+            }
+          ]
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.payments.select",
+        "args": {
+          "payment_method_id": "pm-4417"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.checkout.place",
+        "args": {
+          "order_id": "fc-order-energy"
+        },
+        "expect": "approved"
+      }
+    ],
+    "s2": []
+  }
+}
