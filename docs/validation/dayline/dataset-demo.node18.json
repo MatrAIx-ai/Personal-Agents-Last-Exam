@@ -1,6 +1,6 @@
 {
   "app_id": "dayline",
-  "package_sha256": "b9845b9cd3b4b34b8cb2f150347e8fc5ca4f61981eb508d316c8df3b76e68c23",
+  "package_sha256": "ede25f4bb660a1d9aa819805966c633d3eb853461c02ddb998980efef4692702",
   "node": "v18.20.8",
   "dataset": {
     "path": "apps/dayline/data/evaluation/seed.json",
@@ -202,10 +202,19 @@
         "headline": "New Year's Eve fireworks over the harbor at midnight",
         "text": "Harbor City's New Year's Eve fireworks will launch from a barge at midnight. Harbor Boulevard closes to cars from 9 p.m. on Dec. 31 to 1 a.m. on Jan. 1, 2027; extra buses run until 2 a.m."
       }
+    },
+    {
+      "label": "Early write",
+      "clock": "2025-02-05T12:00:00-08:00",
+      "request_id": "early-mark-read",
+      "edition_id": "biz-20250205",
+      "later_history_removed": {
+        "reading_history": 1
+      }
     }
   ],
   "checks": {
-    "count": 20,
+    "count": 23,
     "passed": [
       "The bundle carries the dataset's own dataset.json with the matching record count",
       "env.load_seed accepts the whole dataset in one request (595557 bytes, under the 2 MiB line limit)",
@@ -226,7 +235,10 @@
       "End of 2026: search total equals the editions added by 2026-12-31T23:59:00-08:00",
       "End of 2026: the newest visible edition was added before the clock",
       "End of 2026: history shows only reads at or before the clock",
-      "By the end of 2026 every edition is visible"
+      "By the end of 2026 every edition is visible",
+      "At noon on Feb. 5, 2025, marking the business brief read commits and its receipt counts the seeded 22:58 read it replaced",
+      "The stored read is now dated noon, and the replaced 22:58 read is still in the loaded seed (initial_data)",
+      "An identical retry returns the stored receipt, marked duplicate, with the same count"
     ]
   }
 }
