@@ -158,26 +158,48 @@ function merge(stored, base, mine) {
   return out;
 }
 
+// Stored records that the view hid or showed in an earlier state, and that the data to store no longer
+// keeps as they were: the later history a change removed or replaced. Records shown exactly as stored
+// are the call's own business, reported by the tool itself. Returns null, or the IDs and the stored
+// records by family (billing lists as billing.<name>, plan decisions by set_at).
+function laterRemoved(stored, base, out) {
+  const ids = {}, records = {};
+  const note = (name, lost, key) => {if (lost.length) {ids[name] = lost.map(key); records[name] = copy(lost);}};
+  const lists = [...Object.entries(KEYS).map(([name, key]) => [name, stored[name], base[name], out[name], key]),
+    ...Object.entries(BILLING_KEYS).map(([name, key]) => ['billing.' + name, stored.billing[name], base.billing[name], out.billing[name], key])];
+  for (const [name, list, shown, kept, key] of lists) {
+    const before = new Map(shown.map(x => [key(x), x])), after = new Map(kept.map(x => [key(x), x]));
+    note(name, list.filter(x => !same(before.get(key(x)), x) && !same(after.get(key(x)), x)), key);
+  }
+  const decisions = list => new Set(list.map(e => JSON.stringify(e))), earlier = decisions(base.billing.timeline), now = decisions(out.billing.timeline);
+  note('billing.timeline', stored.billing.timeline.filter(e => !earlier.has(JSON.stringify(e)) && !now.has(JSON.stringify(e))), e => e.set_at);
+  return Object.keys(ids).length ? {ids, records} : null;
+}
+
 // Runs a write or event on the view at `now` and returns the data to store. Later records the view
 // hid stay stored. If keeping them would leave the family inconsistent with the change (storage
 // caps, member limits, one open invitation or active download per key), the later family records
 // are dropped instead: they described a future without this change. Later albums, tracks and episodes stay.
+// Whatever later history is dropped or replaced is reported: the stored records in the change's activity
+// row, and their IDs by family in `removed` (the caller logs them and puts only counts in the receipt).
 function commit(ctx, stored, now, change) {
   const {data: base, cut} = view(stored, now), mine = copy(base);
   mine[HIDDEN] = base[HIDDEN];
   const result = change(mine);
   delete mine[HIDDEN];
-  if (!cut) return {data: mine, result};
-  const merged = merge(stored, base, mine);
+  if (!cut) return {data: mine, result, removed: null};
+  let data = merge(stored, base, mine);
   try {
-    validateSeed(ctx, merged);
-    return {data: merged, result};
+    validateSeed(ctx, data);
   } catch (error) {
     if (error.code !== 'invalid_seed') throw error;
     const later = {};
     for (const name of ['albums', 'tracks', 'episodes']) later[name] = mergeList(stored[name], base[name], mine[name], KEYS[name]);
-    return {data: {...mine, ...later}, result};
+    data = {...mine, ...later};
   }
+  const lost = laterRemoved(stored, base, data);
+  if (lost) data.activity[data.activity.length - 1].later_history_removed = lost.records;
+  return {data, result, removed: lost && lost.ids};
 }
 
 module.exports = {view, commit, merge};

@@ -400,8 +400,10 @@ function handleTool(ctx, data, name, args) {
     a.activity(view, {...done.row, at: now, actor: 'agent', action: name, request_id: args.request_id});
     return done;
   });
-  log(ctx, name, {object_id: out.result.row.object_id, member_id: out.result.row.member_id});
-  return {data: out.data, result: out.result.result};
+  log(ctx, name, {object_id: out.result.row.object_id, member_id: out.result.row.member_id, later_history_removed: out.removed});
+  // The receipt goes to the Agent, so it only counts the removed later records (see src/visible.cjs).
+  const counts = out.removed && Object.fromEntries(Object.entries(out.removed).map(([family, ids]) => [family, ids.length]));
+  return {data: out.data, result: {...out.result.result, later_history_removed: counts}};
 }
 
 module.exports = {handleTool};

@@ -952,3 +952,67 @@ test('the evaluation dataset loads at any clock in its window and shows nothing 
   july.advance('2025-07-06T12:00:00-07:00');
   assert.equal(july.call('tidepool.family.get', {}).billing.payment_due, null);
 });
+
+// ---- Later history removed by a change at an earlier clock ----------------------------------------
+// Independent of src/visible.cjs: a stored record counts as later history at `at` when it records a time
+// after the clock. The change's activity row must hold exactly the later records that it removed or
+// altered, as they were stored, and the receipt must count them by family (and name none).
+const FAMILIES = {
+  members: [d => d.members, m => m.member_id], invitations: [d => d.invitations, i => i.invitation_id], devices: [d => d.devices, x => x.device_id],
+  sessions: [d => d.sessions, s => s.session_id], progress: [d => d.progress, p => p.member_id + '/' + p.episode_id],
+  plays: [d => d.plays, p => p.member_id + '/' + p.track_id], follows: [d => d.follows, x => x.member_id + '/' + x.show_id],
+  upnext: [d => d.upnext, u => u.member_id], downloads: [d => d.downloads, x => x.download_id],
+  library: [d => d.library, l => l.member_id + '/' + l.item_type + '/' + l.item_id], playlists: [d => d.playlists, p => p.playlist_id],
+  notifications: [d => d.notifications, n => n.notice_id], 'billing.adjustments': [d => d.billing.adjustments, a => a.adjustment_id],
+  'billing.payments': [d => d.billing.payments, p => p.invoice_id + '|' + p.outcome + '|' + p.at],
+};
+function laterReport(before, after, receipt, at) {
+  const t = Date.parse(at), later = x => (JSON.stringify(x).match(/"\d{4}-\d\d-\d\dT[^"]+"/g) || []).some(s => Date.parse(JSON.parse(s)) > t);
+  const expected = {}, stored = {};
+  for (const [name, [list, key]] of Object.entries(FAMILIES)) {
+    const kept = new Set(list(after).map(x => JSON.stringify(x))), gone = list(before).filter(x => !kept.has(JSON.stringify(x)) && later(x));
+    if (gone.length) {expected[name] = gone.map(key); stored[name] = gone;}
+  }
+  const counts = Object.fromEntries(Object.entries(expected).map(([family, ids]) => [family, ids.length]));
+  assert.deepEqual(receipt.later_history_removed ?? {}, counts, 'the receipt counts exactly the later records removed or changed');
+  const row = after.activity.at(-1);
+  assert.deepEqual(row.later_history_removed ?? {}, stored, 'the activity row keeps them as stored');
+  return expected;
+}
+
+test('a write at an early clock that drops later family records reports each one in its receipt and activity row', () => {
+  // The #216 review's repro: the full dataset loaded at 2026-04-01 and albums added to Priya's phone.
+  // The ninth no longer fits beside the later stored downloads, so the later family history is dropped.
+  const at = '2026-04-01T12:00:00-07:00', f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: at, logging: false});
+  const albums = evalSeed.albums.filter(a => Date.parse(a.released + 'T12:00:00Z') <= Date.parse(at)).map(a => a.album_id).slice(0, 9);
+  assert.equal(albums[8], 'alb-copperleaf-1');
+  let before, receipt;
+  for (const [i, item_id] of albums.entries()) {
+    before = f.data;
+    receipt = f.call('tidepool.downloads.add', {id: 'mem-priya', device_id: 'dev-priya-phone', item_type: 'album', item_id});
+    if (i < 8) assert.equal(receipt.later_history_removed, null, item_id + ' keeps the later records');
+  }
+  const after = f.data, lost = laterReport(before, after, receipt, at);
+  assert.deepEqual([lost.sessions.length, lost.playlists.length, lost['billing.payments'].length], [143, 4, 8]);
+  assert.deepEqual([before.sessions.length, after.sessions.length], [321, 178]);
+  // Priya's history at the dataset clock is short by exactly the reported sessions.
+  const priyaLost = after.activity.at(-1).later_history_removed.sessions.filter(s => s.member_id === 'mem-priya' && Date.parse(s.ended_at) <= Date.parse(evalClock)).length;
+  f.advance(evalClock);
+  assert.deepEqual([f.call('tidepool.history.list', {id: 'mem-priya', limit: 1}).total, priyaLost], [242 - priyaLost, 85]);
+});
+
+test('every kind of early-clock collision reports the later record it replaced, and a plain write reports nothing', () => {
+  const at = '2026-04-01T12:00:00-07:00', run = (name, args) => {
+    const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: at, logging: false}), before = f.data;
+    const receipt = f.call(name, typeof args === 'function' ? args(f) : args);
+    return {lost: laterReport(before, f.data, receipt, at), receipt};
+  };
+  // A later stored progress row, follow and Up Next list are replaced by the agent's change at the clock.
+  assert.deepEqual(run('tidepool.progress.set', {id: 'mem-priya', episode_id: 'ep-harborhours-071', state: 'played'}).lost,
+    {progress: ['mem-priya/ep-harborhours-071']});
+  assert.deepEqual(run('tidepool.follows.add', {id: 'mem-priya', show_id: 'show-fieldnotes'}).lost.follows, ['mem-priya/show-fieldnotes']);
+  const upnext = run('tidepool.upnext.set', f => ({id: 'mem-priya', episode_ids: [], expected_list_version: f.call('tidepool.upnext.get', {id: 'mem-priya'}).list_version}));
+  assert.deepEqual(upnext.lost.upnext, ['mem-priya']);
+  // A write that touches no later record keeps them all and reports null.
+  assert.equal(run('tidepool.library.save', {id: 'mem-priya', item_type: 'album', item_id: 'alb-kestrel-1'}).receipt.later_history_removed, null);
+});

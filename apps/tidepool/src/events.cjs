@@ -207,7 +207,7 @@ function applyEvent(ctx, stored, event) {
     a.activity(data, {...row, at: event.at, actor: 'event', action: event.operation, event_id: event.event_id});
     return row;
   });
-  log(ctx, 'tidepool.event_applied', {operation: event.operation, object_id: out.result.object_id});
+  log(ctx, 'tidepool.event_applied', {operation: event.operation, object_id: out.result.object_id, later_history_removed: out.removed});
   return out.data;
 }
 

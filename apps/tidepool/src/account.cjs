@@ -119,7 +119,8 @@ function newId(data, prefix, taken) {
 function activity(data, row) {
   const last = data.activity.length ? data.activity[data.activity.length - 1].seq : 0;
   data.activity.push({seq: last + 1, at: row.at, actor: row.actor, action: row.action, object_type: row.object_type, object_id: row.object_id,
-    member_id: row.member_id ?? null, replaced: row.replaced === undefined ? null : row.replaced, request_id: row.request_id ?? null, event_id: row.event_id ?? null});
+    member_id: row.member_id ?? null, replaced: row.replaced === undefined ? null : row.replaced, request_id: row.request_id ?? null, event_id: row.event_id ?? null,
+    later_history_removed: null});
 }
 function notice(data, n) {
   const id = newId(data, 'notice', x => data.notifications.some(y => y.notice_id === x));

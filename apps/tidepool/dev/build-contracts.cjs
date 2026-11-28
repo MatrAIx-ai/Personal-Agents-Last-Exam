@@ -83,8 +83,11 @@ const PLAYLIST = obj({playlist_id: ID, owner_member_id: ID, name: text(100), des
   created_at: TIME, updated_at: TIME, origin: {enum: ['seed', 'agent']}});
 const NOTICE = obj({notice_id: ID, member_id: ID, created_at: TIME, kind: {enum: ['episode_published', 'playlist_edited', 'payment_declined']},
   text: text(500), object_type: {enum: ['episode', 'playlist', 'invoice']}, object_id: ID, event_id: ID});
-const ACTIVITY = obj({seq: int(1), at: TIME, actor: {enum: ['agent', 'event']}, action: text(60), object_type: text(40), object_id: ID,
-  member_id: nullable(ID), replaced: ANY, request_id: nullable(ID), event_id: nullable(ID)});
+// later_history_removed: the stored records, by family, that a change at an earlier clock removed or replaced
+// (see src/visible.cjs). Optional, so rows written before it existed stay valid.
+const ACTIVITY_FIELDS = {seq: int(1), at: TIME, actor: {enum: ['agent', 'event']}, action: text(60), object_type: text(40), object_id: ID,
+  member_id: nullable(ID), replaced: ANY, request_id: nullable(ID), event_id: nullable(ID)};
+const ACTIVITY = obj({...ACTIVITY_FIELDS, later_history_removed: nullable({type: 'object', additionalProperties: {type: 'array'}})}, Object.keys(ACTIVITY_FIELDS));
 
 const seed = {
   $schema: 'https://json-schema.org/draft/2020-12/schema', $id: 'urn:pale:tidepool:seed:1',
@@ -184,11 +187,19 @@ const QUOTE = obj({from_plan_id: PLAN_ID, to_plan_id: PLAN_ID, change: {enum: ['
 const LIMIT = max => int(1, max);
 const MEMBER_ID = {...ID, description: 'member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member).'};
 
+// Every write receipt: null, or how many stored records dated after the clock the write removed or replaced,
+// by family. Only counts: the receipt goes to the Agent, and those records can belong to other members or
+// describe the future. Their IDs and stored values are in the activity row. This happens only when a seed
+// that runs past its clock is loaded early.
+const LATER = nullable({type: 'object', additionalProperties: int(1)});
+const LATER_NOTE = ' later_history_removed is null unless the loaded data holds records dated after the clock that this change removed or replaced; it then counts them by record family.';
 function tool(name, description, readOnly, input, output, required = Object.keys(input)) {
   const inputSchema = readOnly ? obj(input, required)
     : obj({...input, expected_version: VERSION, request_id: ID}, [...required, 'expected_version', 'request_id']);
   for (const key of ['status', 'app_id', 'version']) if (key in output) throw Error(name + ' output cannot redefine Core field ' + key);
-  const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output});
+  const outputSchema = obj({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: APP}, version: VERSION, ...output,
+    ...(readOnly ? {} : {later_history_removed: LATER})});
+  if (!readOnly) description += LATER_NOTE;
   const target = 'id' in input ? 'member named by id in the bound family account' : 'bound family account';
   return {name: APP + '.' + name, description, read_only: readOnly, scope: APP + '.' + name, resource_target: target, inputSchema, outputSchema};
 }
