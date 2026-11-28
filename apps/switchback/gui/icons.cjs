@@ -72,7 +72,7 @@ function chunk(type, data) {
   out.writeUInt32BE(data.length, 0); body.copy(out, 4); out.writeUInt32BE(crc32(body), 8 + data.length);
   return out;
 }
-function png([r, g, b], shape) {
+function pixels([r, g, b], shape) {
   const raw = Buffer.alloc(SIZE * (1 + SIZE * 4));
   for (let y = 0; y < SIZE; y++) {
     raw[y * (1 + SIZE * 4)] = 0;
@@ -83,10 +83,39 @@ function png([r, g, b], shape) {
       raw[o] = r; raw[o + 1] = g; raw[o + 2] = b; raw[o + 3] = Math.round(255 * hits / (SAMPLES * SAMPLES));
     }
   }
+  return raw;
+}
+
+function png(color, shape) {
   const header = Buffer.alloc(13);
   header.writeUInt32BE(SIZE, 0); header.writeUInt32BE(SIZE, 4); header[8] = 8; header[9] = 6;
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header),
-    chunk('IDAT', zlib.deflateSync(raw, {level: 9})), chunk('IEND', Buffer.alloc(0))]);
+    chunk('IDAT', zlib.deflateSync(pixels(color, shape), {level: 9})), chunk('IEND', Buffer.alloc(0))]);
+}
+
+// Decoded scanlines of a PNG made by png(). Compressed bytes depend on the
+// platform's zlib build, so checks compare these instead.
+function decode(buf) {
+  if (buf.subarray(0, 8).compare(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) !== 0) throw Error('not a PNG');
+  const idat = [];
+  for (let o = 8; o < buf.length;) {
+    const len = buf.readUInt32BE(o), type = buf.subarray(o + 4, o + 8).toString('latin1');
+    if (type === 'IDAT') idat.push(buf.subarray(o + 8, o + 8 + len));
+    o += 12 + len;
+  }
+  return zlib.inflateSync(Buffer.concat(idat));
+}
+
+// True when the controller embeds exactly the generated icons, compared by name and pixels.
+function matches(text) {
+  const start = text.indexOf('// ICONS:BEGIN'), end = text.indexOf('// ICONS:END');
+  if (start < 0 || end < 0) return false;
+  const found = [...text.slice(start, end).matchAll(/^ (\w+):'([A-Za-z0-9+/=]+)',$/gm)];
+  const names = Object.keys(ICONS);
+  if (found.length !== names.length || found.some(([, name], i) => name !== names[i])) return false;
+  return found.every(([, name, b64]) => {
+    try { return decode(Buffer.from(b64, 'base64')).equals(pixels(...ICONS[name])); } catch { return false; }
+  });
 }
 
 function block() {
@@ -101,11 +130,11 @@ function current() {
   return {text, start, end: end + '// ICONS:END'.length};
 }
 
-module.exports = {block, png, ICONS};
+module.exports = {block, png, pixels, decode, matches, ICONS};
 
 if (require.main === module) {
   const {text, start, end} = current(), next = text.slice(0, start) + block() + text.slice(end);
   if (process.argv.includes('--check')) {
-    if (next !== text) { console.error('gui/src/app.js icons differ from gui/icons.cjs'); process.exitCode = 1; } else console.log('Icons match.');
+    if (!matches(text)) { console.error('gui/src/app.js icons differ from gui/icons.cjs'); process.exitCode = 1; } else console.log('Icons match.');
   } else { fs.writeFileSync(controller, next); console.log(`Wrote ${Object.keys(ICONS).length} icons into gui/src/app.js`); }
 }

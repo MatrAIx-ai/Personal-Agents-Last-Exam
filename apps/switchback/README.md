@@ -113,7 +113,7 @@ The pages follow the reference product's layout where it fits the workflow (comp
 - **Missing records.** An unknown ID shows a Not found page that replaces the previous content and title.
 - **Text size.** App text is 12px or more and body text 14px; the Host's shared status line and sidebar footer are raised to 13px.
 
-The 15 icons are 24x24 PNG files drawn from simple shapes by [`gui/icons.cjs`](gui/icons.cjs), self-made and dedicated to the public domain (CC0 1.0). The GUI content policy disables SVG and the Host's image policy allows `blob:` but not `data:` URLs, so the PNG bytes are embedded in `app.js` and turned into `blob:` URLs in the browser. `node gui/icons.cjs --check` and a business test confirm the embedded bytes match the drawing code. Styles that `/shared/style.css` lacks are added as a constructed stylesheet, which the Host's style policy allows.
+The 15 icons are 24x24 PNG files drawn from simple shapes by [`gui/icons.cjs`](gui/icons.cjs), self-made and dedicated to the public domain (CC0 1.0). The GUI content policy disables SVG and the Host's image policy allows `blob:` but not `data:` URLs, so the PNG bytes are embedded in `app.js` and turned into `blob:` URLs in the browser. `node gui/icons.cjs --check` and a business test confirm that the embedded icons decode to the pixels the drawing code produces (pixels rather than compressed bytes, because zlib output differs between platforms). Styles that `/shared/style.css` lacks are added as a constructed stylesheet, which the Host's style policy allows.
 
 ### Start the pages
 

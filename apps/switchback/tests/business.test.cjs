@@ -349,7 +349,7 @@ test('the pages: one controller covers every tool, embeds its PNG icons and call
   const controller = fs.readFileSync(path.join(__dirname, '../gui/src/app.js'), 'utf8');
   for (const t of require('../tools.json')) assert.ok(controller.includes(`'${t.name}'`), 'page uses ' + t.name);
   const icons = require('../gui/icons.cjs');
-  assert.ok(controller.includes(icons.block()), 'embedded icons match gui/icons.cjs');
+  assert.ok(icons.matches(controller), 'embedded icons match gui/icons.cjs');
   for (const [, b64] of controller.matchAll(/^ \w+:'([A-Za-z0-9+/=]+)',$/gm)) assert.equal(Buffer.from(b64, 'base64').subarray(1, 4).toString(), 'PNG');
   assert.deepEqual([...new Set([...controller.matchAll(/request\('([^']+)'/g)].map(m => m[1]))].sort(), ['/api/call', '/api/tools', '/session']);
   assert.ok(!/<svg|localStorage|sessionStorage|indexedDB|innerHTML/.test(controller), 'no SVG, browser store or HTML injection');
