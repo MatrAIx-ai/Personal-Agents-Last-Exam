@@ -46,9 +46,10 @@ function read(ctx, stored, name, args) {
 }
 
 // A seeded read or save of this edition dated after the clock, which a write replaces or removes. The
-// receipt counts it (it goes to the Agent); the diagnostics log keeps the stored entry.
+// receipt counts it (it goes to the Agent) and the ID-only diagnostics log names the edition; the stored
+// entry stays in the loaded seed, which Core's snapshot keeps as initial_data.
 const later = (list, id, field, now) => list.filter(x => x.edition_id === id && c.instant(x[field]) > c.instant(now));
-const report = (name, entries) => (entries.length ? {[name]: entries} : null);
+const report = (name, entries) => (entries.length ? {[name]: entries.map(x => x.edition_id)} : null);
 const count = removed => removed && Object.fromEntries(Object.entries(removed).map(([k, v]) => [k, v.length]));
 
 function write(ctx, data, name, args) {

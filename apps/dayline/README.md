@@ -90,7 +90,7 @@ Infra applies one event type. Its payload is a complete edition plus optional `f
 - Reset restores the loaded editions, front pages, history, bookmarks and clock of that instance only.
 - `ctx.virtual_now` is the reader's "now". Agent reads and writes do not advance it; `read_at` and `saved_at` take its value.
 - **Clock cutoff.** Tools show only records dated at or before `ctx.virtual_now`: an edition from its `added_at`, a reading-history entry from its `read_at` and a bookmark from its `saved_at`. A later edition is `not_found` to every read and write, front pages and `entry_count` skip it, and a story group with no visible edition is `not_found`. Nothing is stored for this: when `env.advance_time` or an event moves the clock, the later records appear and no record changes. A seed that runs past the clock, such as the evaluation dataset, can therefore load at any point in its window. Seed validation still does not compare dates with the clock, because Core validates package fixtures when it registers them.
-- If the agent marks read or saves an edition that the seed records as read or saved later than the clock, the agent's entry replaces the later one, so each edition keeps one entry. The write reports this: its receipt's `later_history_removed` counts the replaced entries by list (`{"reading_history": 1}`), and the App's diagnostics log keeps the stored entry. It is `null` otherwise. The receipt carries only the count because it goes to the Agent and the entry is dated after the clock (test *a write at an earlier clock …*).
+- If the agent marks read or saves an edition that the seed records as read or saved later than the clock, the agent's entry replaces the later one, so each edition keeps one entry. The write reports this: its receipt's `later_history_removed` counts the replaced entries by list (`{"reading_history": 1}`), the ID-only diagnostics log names the edition, and the replaced entry stays in the loaded seed, which Core's snapshot keeps as `initial_data`. It is `null` otherwise. The receipt carries only the count because it goes to the Agent and the entry is dated after the clock (test *a write at an earlier clock …*, and the dataset demo's last stage through Core).
 - **For Task authors.** A full-dataset load at an earlier clock is meant for reading history. If the Agent will write, start at or after the dataset clock, or load only the records up to the Task's clock and stage later ones as scenario events ([submission evidence, section 4](../../docs/submission-evidence.md#4-task-history-depth)).
 - `edition.publish` positions count the front-page entries visible at the event time; entries dated later keep their place.
 - `fixtures/clock.json` sets the App-only example time (Wednesday, Oct. 14, 2026, 07:00 Pacific).
@@ -124,7 +124,7 @@ Expected answers and spoiler checks for a real task belong in that task's evalua
 node dev/build-dataset.cjs          # rebuild data/evaluation/ (byte-identical on rerun)
 node dev/coverage-report.cjs        # coverage by source and month, provenance, gaps, content checks
 node dev/coverage-report.cjs --json
-node examples/dataset-demo.cjs      # load it over real MCP and query it at three clocks
+node examples/dataset-demo.cjs      # load it over real MCP, query it at three clocks, then run an early write
 ```
 
 ## Commands

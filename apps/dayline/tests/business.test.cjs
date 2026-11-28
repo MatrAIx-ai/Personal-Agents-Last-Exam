@@ -344,7 +344,7 @@ test('the evaluation dataset loads at any clock in its window and shows nothing 
 
 // Later history replaced by a write at an earlier clock. Independent of src/operations.cjs: an entry is later
 // history when its own time lies after the clock. The receipt must count exactly the later entries the write
-// replaced or removed, and the diagnostics log must keep them as stored.
+// replaced or removed, and the ID-only diagnostics log must name their editions.
 test('a write at an earlier clock that replaces a seeded later read or save counts it in the receipt', () => {
   const seed = require('../data/evaluation/seed.json'), binding = require('../data/evaluation/binding.json');
   const run = (at, name, edition_id) => {
@@ -356,7 +356,8 @@ test('a write at an earlier clock that replaces a seeded later read or save coun
     }
     const counts = Object.keys(lost).length ? Object.fromEntries(Object.entries(lost).map(([k, v]) => [k, v.length])) : null;
     assert.deepEqual(receipt.later_history_removed, counts, 'the receipt counts the later entries replaced');
-    assert.deepEqual(f.logs.at(-1).details.later_history_removed, Object.keys(lost).length ? lost : null, 'the log keeps them as stored');
+    const named = Object.fromEntries(Object.entries(lost).map(([k, v]) => [k, v.map(x => x.edition_id)]));
+    assert.deepEqual(f.logs.at(-1).details.later_history_removed, Object.keys(lost).length ? named : null, 'the log names their editions');
     return {receipt, after, lost};
   };
   // The Feb. 5, 2025 business brief was read at 22:58; marking it read at noon replaces that later read.

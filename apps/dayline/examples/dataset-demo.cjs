@@ -85,6 +85,23 @@ async function main() {
     await advance('2026-12-31T23:59:00-08:00');
     await look('End of 2026', '2026-12-31T23:59:00-08:00');
     ok('By the end of 2026 every edition is visible', stages[2].visible_editions === seed.editions.length);
+
+    // An Agent write at an earlier clock that replaces a seeded later read reports it (README, clock cutoff),
+    // through Core with the task policy, which allows mark_read.
+    const AT = '2025-02-05T12:00:00-08:00', version = async () => (await infra.call('env.snapshot')).version;
+    await infra.call('env.load_seed', {expected_version: await version(), request_id: 'load-early-write', data: seed, binding, policies, bundle, virtual_now: AT});
+    const args = {edition_id: 'biz-20250205', expected_version: await version(), request_id: 'early-mark-read'};
+    const marked = await agent.call('dayline.history.mark_read', args);
+    ok('At noon on Feb. 5, 2025, marking the business brief read commits and its receipt counts the seeded 22:58 read it replaced',
+      marked.status === 'committed' && JSON.stringify(marked.later_history_removed) === JSON.stringify({reading_history: 1}));
+    const snap = (await infra.call('env.snapshot')).snapshot, mine = h => h.edition_id === 'biz-20250205';
+    ok('The stored read is now dated noon, and the replaced 22:58 read is still in the loaded seed (initial_data)',
+      JSON.stringify(snap.data.reading_history.filter(mine)) === JSON.stringify([{edition_id: 'biz-20250205', read_at: AT}])
+      && snap.initial_data.reading_history.filter(mine).map(h => h.read_at).join() === '2025-02-05T22:58:00-08:00');
+    const again = await agent.call('dayline.history.mark_read', args);
+    ok('An identical retry returns the stored receipt, marked duplicate, with the same count',
+      again.duplicate === true && JSON.stringify(again.later_history_removed) === JSON.stringify(marked.later_history_removed));
+    stages.push({label: 'Early write', clock: AT, request_id: args.request_id, edition_id: args.edition_id, later_history_removed: marked.later_history_removed});
     return {
       app_id: 'dayline', package_sha256: digestTree(pkg), node: process.version,
       dataset: {path: 'apps/dayline/data/evaluation/seed.json', sha256: crypto.createHash('sha256').update(seedText).digest('hex'),
