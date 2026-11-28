@@ -440,6 +440,16 @@ function buildAll() {
   });
 }
 
+// Provenance recorded for every source (docs/submission-evidence.md section 3).
+const PROVENANCE = {
+  kind: 'synthetic',
+  real_records: 0,
+  real_anchor: 'none: no record is collected from a real website or service, and the reviewer confirmed that synthetic data needs no real anchor',
+  generation: 'Deterministic Node scripts (this generator, scripts/fixture-builder.cjs and the specs in scripts/fixtures/). No language model is called when the fixtures are generated; the same scripts always produce byte-identical files (a business test fails if a committed file is out of date).',
+  language_model_assistance: 'The scripts and their hand-written text (people, display names, bios, group descriptions, event titles and venues, key posts, background post texts, Mail threads and scenario events) were written with the help of an AI coding assistant (Claude). Past RSVPs, background members\' join dates, background post dates and authors come from a fixed-seed generator.',
+  human_review: 'pending: Rohan Pandey has not yet read every member and event row (see review.status)',
+};
+
 function dataset(all, sha, scenarioSha) {
   const counts = f => ({groups: f.data.groups.length, members: f.data.members.length, events: f.data.events.length, rsvps: f.data.rsvps.length,
     posts: f.data.posts.length, sheets: f.data.sheets.length, mail_threads: new Set(f.mailSeed.messages.map(m => m.thread_id)).size,
@@ -447,8 +457,8 @@ function dataset(all, sha, scenarioSha) {
   return {
     schema_version: 'pale.dataset.v1',
     dataset_id: 'stoopside-community-groups',
-    version: '0.2.0',
-    description: 'Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Maple St. For reproducible checks; not a benchmark task. No real group, person or post.',
+    version: '0.3.0',
+    description: 'Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Maple St. For reproducible checks; not a benchmark task. All records are synthetic: no real group, person, post or message is used, nothing was crawled or collected, and there is no real-data anchor (the approved plan has no collection, and the reviewer confirmed that synthetic data is acceptable). Coverage of 2025-01-01 to 2026-12-31 by month and source is in evidence/coverage.md (scripts/coverage-report.cjs).',
     record_source_ids: ['maple-street'],
     sources: all.map(f => ({
       source_id: f.key,
@@ -458,8 +468,8 @@ function dataset(all, sha, scenarioSha) {
       license: 'CC0-1.0',
       usage: 'permitted',
       collection: null,
-      generation: {method: 'scripted', tool: f.tool, tool_version: '0.2.0', seed: f.rng_seed,
-        parameters: {fixture: f.seed, fixture_sha256: sha(f.data), binding: f.binding, binding_sha256: sha(f.bindingData), mail_seed: f.mail,
+      generation: {method: 'scripted', tool: f.tool, tool_version: '0.3.0', seed: f.rng_seed,
+        parameters: {provenance: PROVENANCE, fixture: f.seed, fixture_sha256: sha(f.data), binding: f.binding, binding_sha256: sha(f.bindingData), mail_seed: f.mail,
           mail_seed_sha256: sha(f.mailSeed), scenario: f.scenario, scenario_sha256: scenarioSha(f.scenario), history_from: f.history_from, clock: f.clock,
           counts: counts(f)}},
     })),
@@ -470,7 +480,7 @@ function dataset(all, sha, scenarioSha) {
     ],
     expected_counts: {records: all[0].data.events.length, assets: 0},
     quality_policy: {duplicate_records: 'reject', duplicate_assets: 'reject', missing_assets: 'allow_declared'},
-    review: {status: 'pending', reviewer: null, notes: 'Automated checks (scripts/check-fixtures.cjs) do not replace a human read of every member and event row.'},
+    review: {status: 'pending', reviewer: null, notes: 'Not yet hand-reviewed. The fixture text was drafted with AI assistance (see each source\'s generation.parameters.provenance); the human read-through of every member and event row by Rohan Pandey, which the approved plan promises, is still pending, as is the clean-checkout reproduction by a second person. Automated checks (scripts/check-fixtures.cjs) do not replace that read.'},
   };
 }
 

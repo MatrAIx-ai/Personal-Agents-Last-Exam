@@ -1,0 +1,578 @@
+{
+  "report": "Stoopside environment dataset coverage",
+  "scope": "Every delivered fixture in fixtures/index.json and its companion Mail seed (the records loaded with env.load_seed and Mail 1.3.0 seeding). Environment coverage window, not a Task history count.",
+  "generated_by": "apps/stoopside/scripts/coverage-report.cjs",
+  "reproduce": "cd apps/stoopside && node scripts/coverage-report.cjs --check",
+  "time_zone": "Etc/GMT+5",
+  "time_zone_note": "Etc/GMT+5 is the IANA fixed-offset zone for UTC-05:00 with no daylight-saving change, the Maple St groups' offset. Riverside (UTC-06:00) and Hillcrest (UTC-08:00) timestamps are converted to it before counting, so one global deduplicated count is possible. Each source's count in its own group offset is also given.",
+  "window": {
+    "from": "2025-01-01",
+    "to": "2026-12-31"
+  },
+  "provenance": "All records in every source are synthetic (0 real, 0 mixed). No real group, person, post or message is used, nothing was crawled, and there is no real-data anchor. The fixtures come from deterministic scripts in apps/stoopside/scripts/ (a fixed-seed generator plus hand-written specs); those scripts and their text were written with AI assistance, and no language model runs at generation time. The human read-through of every member and event row is pending. See contribution/dataset.json, generation.parameters.provenance.",
+  "authoritative_fields": [
+    {
+      "collection": "groups",
+      "field": "created_at",
+      "meaning": "group founded"
+    },
+    {
+      "collection": "members",
+      "field": "created_at",
+      "meaning": "member account created"
+    },
+    {
+      "collection": "memberships",
+      "field": "revisions[].at",
+      "meaning": "join, leave, removal or role change"
+    },
+    {
+      "collection": "events",
+      "field": "start",
+      "meaning": "event occurrence (start time)"
+    },
+    {
+      "collection": "events",
+      "field": "revisions[].at",
+      "meaning": "event posted, edited or cancelled"
+    },
+    {
+      "collection": "rsvps",
+      "field": "revisions[].at",
+      "meaning": "RSVP answered or changed"
+    },
+    {
+      "collection": "posts",
+      "field": "revisions[].at",
+      "meaning": "post, comment or announcement written, edited or deleted"
+    },
+    {
+      "collection": "swaps",
+      "field": "proposed_at",
+      "meaning": "swap proposed"
+    },
+    {
+      "collection": "swaps",
+      "field": "decided_at",
+      "meaning": "swap answered (null while pending)"
+    },
+    {
+      "collection": "deliveries",
+      "field": "at",
+      "meaning": "notification delivered to a member"
+    },
+    {
+      "collection": "mail.messages",
+      "field": "received_at",
+      "meaning": "Mail message received or sent (companion Mail seed)"
+    }
+  ],
+  "excluded_fields": [
+    {
+      "collection": "events",
+      "field": "end",
+      "reason": "end of the same occurrence as start"
+    },
+    {
+      "collection": "events",
+      "field": "rsvp_open, rsvp_close",
+      "reason": "deadlines, not occurrences"
+    },
+    {
+      "collection": "rsvps",
+      "field": "created_at, updated_at",
+      "reason": "equal to the first and last revision"
+    },
+    {
+      "collection": "rsvps",
+      "field": "waitlisted_at, offer_expires_at, reconfirm_by",
+      "reason": "queue key and deadlines"
+    },
+    {
+      "collection": "posts",
+      "field": "created_at, updated_at",
+      "reason": "equal to the first and last revision"
+    },
+    {
+      "collection": "memberships",
+      "field": "created_at",
+      "reason": "equal to the first revision"
+    },
+    {
+      "collection": "sheets",
+      "field": "lock_at",
+      "reason": "deadline; a sheet has no date of its own (its event is counted)"
+    },
+    {
+      "collection": "swaps",
+      "field": "expires_at",
+      "reason": "deadline"
+    },
+    {
+      "collection": "groups",
+      "field": "digest_through",
+      "reason": "bookkeeping time for the Monday digest"
+    },
+    {
+      "collection": "scenario events",
+      "field": "at",
+      "reason": "staged events applied by Infra after the fixture clock; reported separately, never counted as history"
+    }
+  ],
+  "counting_rules": [
+    "A timestamp counts as history when it is at or before the fixture clock. Upcoming event starts after the clock are reported as scheduled_after_clock and are not counted as history.",
+    "Dates are taken in the counting zone and kept only when they fall in the window; records outside it are counted as out of window.",
+    "A timestamp that does not parse is listed under invalid and not counted."
+  ],
+  "invalid": [],
+  "sources": [
+    {
+      "source_id": "maple-street",
+      "kind": "synthetic",
+      "files": {
+        "seed": "fixtures/minimal.json",
+        "seed_sha256": "86fe8a45b202397096e78b329ab02abde3412f4a8590795fa67525fa4a0500ce",
+        "binding": "fixtures/binding.json",
+        "binding_sha256": "d142277ba9064803d9079347152c3d4828b99bb22adb72e4a3c57b53e7469cb8",
+        "mail_seed": "fixtures/mail/maple-street.json",
+        "mail_seed_sha256": "beaabd6d4d83da84051141c9f698dc441d2c80cef9e9ec522670a68becc12fee",
+        "scenario": "examples/scenarios/maple-street.json",
+        "scenario_sha256": "f849998a0f84160e30a5642fe53ab3ff4f9be89167a49b7e001dd1e0c3c1f45f"
+      },
+      "group_offset": "-05:00",
+      "clock": "2027-03-01T09:00:00-05:00",
+      "dated_records_total": 1006,
+      "history_records_in_window": 595,
+      "history_records_out_of_window": 404,
+      "distinct_dates": 356,
+      "earliest": "2025-01-06",
+      "latest": "2026-12-31",
+      "distinct_dates_in_group_offset": {
+        "zone": "Etc/GMT+5",
+        "count": 356
+      },
+      "by_collection": {
+        "groups.created_at": {
+          "records": 4,
+          "distinct_dates": 4
+        },
+        "members.created_at": {
+          "records": 64,
+          "distinct_dates": 20
+        },
+        "memberships.revisions[].at": {
+          "records": 92,
+          "distinct_dates": 67
+        },
+        "events.start": {
+          "records": 29,
+          "distinct_dates": 29
+        },
+        "events.revisions[].at": {
+          "records": 30,
+          "distinct_dates": 30
+        },
+        "rsvps.revisions[].at": {
+          "records": 249,
+          "distinct_dates": 184
+        },
+        "posts.revisions[].at": {
+          "records": 107,
+          "distinct_dates": 93
+        },
+        "swaps.proposed_at": {
+          "records": 1,
+          "distinct_dates": 1
+        },
+        "swaps.decided_at": {
+          "records": 1,
+          "distinct_dates": 1
+        },
+        "deliveries.at": {
+          "records": 0,
+          "distinct_dates": 0
+        },
+        "mail.messages.received_at": {
+          "records": 18,
+          "distinct_dates": 17
+        }
+      },
+      "months": {
+        "2025-01": 20,
+        "2025-02": 18,
+        "2025-03": 23,
+        "2025-04": 21,
+        "2025-05": 22,
+        "2025-06": 14,
+        "2025-07": 8,
+        "2025-08": 13,
+        "2025-09": 18,
+        "2025-10": 16,
+        "2025-11": 8,
+        "2025-12": 16,
+        "2026-01": 9,
+        "2026-02": 10,
+        "2026-03": 20,
+        "2026-04": 13,
+        "2026-05": 11,
+        "2026-06": 17,
+        "2026-07": 10,
+        "2026-08": 10,
+        "2026-09": 17,
+        "2026-10": 23,
+        "2026-11": 8,
+        "2026-12": 11
+      },
+      "empty_months": [],
+      "scheduled_after_clock": {
+        "records": 0,
+        "distinct_dates": 0,
+        "months": {
+          "2025-01": 0,
+          "2025-02": 0,
+          "2025-03": 0,
+          "2025-04": 0,
+          "2025-05": 0,
+          "2025-06": 0,
+          "2025-07": 0,
+          "2025-08": 0,
+          "2025-09": 0,
+          "2025-10": 0,
+          "2025-11": 0,
+          "2025-12": 0,
+          "2026-01": 0,
+          "2026-02": 0,
+          "2026-03": 0,
+          "2026-04": 0,
+          "2026-05": 0,
+          "2026-06": 0,
+          "2026-07": 0,
+          "2026-08": 0,
+          "2026-09": 0,
+          "2026-10": 0,
+          "2026-11": 0,
+          "2026-12": 0
+        }
+      },
+      "scenario_events": {
+        "count": 16,
+        "in_window": 0,
+        "first": "2027-03-01T10:00:00-05:00",
+        "last": "2027-03-09T10:00:00-05:00"
+      }
+    },
+    {
+      "source_id": "riverside",
+      "kind": "synthetic",
+      "files": {
+        "seed": "fixtures/riverside.json",
+        "seed_sha256": "ac512d9ecbb6916f4dcb41f0c3aaff673303f5200bc1c383fe9603d825bbebf3",
+        "binding": "fixtures/riverside.binding.json",
+        "binding_sha256": "f1c499e31450bda4c44a1c7a2ba53825a256337ecc20b9a10c171ea84c657a35",
+        "mail_seed": "fixtures/mail/riverside.json",
+        "mail_seed_sha256": "7200b636917f5dead78d1dfae16baa6e7018e4a27481d0489fced184ef6d0a29",
+        "scenario": "examples/scenarios/riverside.json",
+        "scenario_sha256": "a999dcadcb739791ae5818e8c91b25e15fcca7612436154a71d5761295906ca9"
+      },
+      "group_offset": "-06:00",
+      "clock": "2026-04-20T09:00:00-06:00",
+      "dated_records_total": 873,
+      "history_records_in_window": 866,
+      "history_records_out_of_window": 0,
+      "distinct_dates": 274,
+      "earliest": "2025-01-07",
+      "latest": "2026-04-19",
+      "distinct_dates_in_group_offset": {
+        "zone": "Etc/GMT+6",
+        "count": 276
+      },
+      "by_collection": {
+        "groups.created_at": {
+          "records": 3,
+          "distinct_dates": 3
+        },
+        "members.created_at": {
+          "records": 70,
+          "distinct_dates": 6
+        },
+        "memberships.revisions[].at": {
+          "records": 93,
+          "distinct_dates": 80
+        },
+        "events.start": {
+          "records": 25,
+          "distinct_dates": 25
+        },
+        "events.revisions[].at": {
+          "records": 32,
+          "distinct_dates": 30
+        },
+        "rsvps.revisions[].at": {
+          "records": 255,
+          "distinct_dates": 156
+        },
+        "posts.revisions[].at": {
+          "records": 67,
+          "distinct_dates": 62
+        },
+        "swaps.proposed_at": {
+          "records": 2,
+          "distinct_dates": 2
+        },
+        "swaps.decided_at": {
+          "records": 1,
+          "distinct_dates": 1
+        },
+        "deliveries.at": {
+          "records": 295,
+          "distinct_dates": 13
+        },
+        "mail.messages.received_at": {
+          "records": 23,
+          "distinct_dates": 19
+        }
+      },
+      "months": {
+        "2025-01": 17,
+        "2025-02": 19,
+        "2025-03": 15,
+        "2025-04": 18,
+        "2025-05": 22,
+        "2025-06": 17,
+        "2025-07": 13,
+        "2025-08": 15,
+        "2025-09": 21,
+        "2025-10": 14,
+        "2025-11": 17,
+        "2025-12": 10,
+        "2026-01": 20,
+        "2026-02": 19,
+        "2026-03": 22,
+        "2026-04": 15,
+        "2026-05": 0,
+        "2026-06": 0,
+        "2026-07": 0,
+        "2026-08": 0,
+        "2026-09": 0,
+        "2026-10": 0,
+        "2026-11": 0,
+        "2026-12": 0
+      },
+      "empty_months": [
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08",
+        "2026-09",
+        "2026-10",
+        "2026-11",
+        "2026-12"
+      ],
+      "scheduled_after_clock": {
+        "records": 7,
+        "distinct_dates": 7,
+        "months": {
+          "2025-01": 0,
+          "2025-02": 0,
+          "2025-03": 0,
+          "2025-04": 0,
+          "2025-05": 0,
+          "2025-06": 0,
+          "2025-07": 0,
+          "2025-08": 0,
+          "2025-09": 0,
+          "2025-10": 0,
+          "2025-11": 0,
+          "2025-12": 0,
+          "2026-01": 0,
+          "2026-02": 0,
+          "2026-03": 0,
+          "2026-04": 3,
+          "2026-05": 3,
+          "2026-06": 1,
+          "2026-07": 0,
+          "2026-08": 0,
+          "2026-09": 0,
+          "2026-10": 0,
+          "2026-11": 0,
+          "2026-12": 0
+        }
+      },
+      "scenario_events": {
+        "count": 16,
+        "in_window": 16,
+        "first": "2026-04-20T12:00:00-06:00",
+        "last": "2026-05-01T10:00:00-06:00"
+      }
+    },
+    {
+      "source_id": "hillcrest",
+      "kind": "synthetic",
+      "files": {
+        "seed": "fixtures/hillcrest.json",
+        "seed_sha256": "e50e4bf93c71f5746893f655656481845f3e381b902bb7abceffc10e79462d21",
+        "binding": "fixtures/hillcrest.binding.json",
+        "binding_sha256": "f9a2acc7e4e5816e631c9ae7d08698b2957f9e467dc16601bbb242ba9312b491",
+        "mail_seed": "fixtures/mail/hillcrest.json",
+        "mail_seed_sha256": "32ba3336b591c2027ed301723ed75ddd32b15cf6cc7001806781220f5b53a25f",
+        "scenario": "examples/scenarios/hillcrest.json",
+        "scenario_sha256": "a148a87f2b926e601d40ae15f069723c6e36f7d4ec862613556ca00013b6c38a"
+      },
+      "group_offset": "-08:00",
+      "clock": "2026-11-18T09:00:00-08:00",
+      "dated_records_total": 1031,
+      "history_records_in_window": 1023,
+      "history_records_out_of_window": 0,
+      "distinct_dates": 393,
+      "earliest": "2025-01-08",
+      "latest": "2026-11-17",
+      "distinct_dates_in_group_offset": {
+        "zone": "Etc/GMT+8",
+        "count": 395
+      },
+      "by_collection": {
+        "groups.created_at": {
+          "records": 4,
+          "distinct_dates": 4
+        },
+        "members.created_at": {
+          "records": 82,
+          "distinct_dates": 7
+        },
+        "memberships.revisions[].at": {
+          "records": 106,
+          "distinct_dates": 96
+        },
+        "events.start": {
+          "records": 31,
+          "distinct_dates": 29
+        },
+        "events.revisions[].at": {
+          "records": 39,
+          "distinct_dates": 36
+        },
+        "rsvps.revisions[].at": {
+          "records": 318,
+          "distinct_dates": 209
+        },
+        "posts.revisions[].at": {
+          "records": 125,
+          "distinct_dates": 103
+        },
+        "swaps.proposed_at": {
+          "records": 2,
+          "distinct_dates": 2
+        },
+        "swaps.decided_at": {
+          "records": 1,
+          "distinct_dates": 1
+        },
+        "deliveries.at": {
+          "records": 294,
+          "distinct_dates": 11
+        },
+        "mail.messages.received_at": {
+          "records": 21,
+          "distinct_dates": 16
+        }
+      },
+      "months": {
+        "2025-01": 20,
+        "2025-02": 19,
+        "2025-03": 20,
+        "2025-04": 20,
+        "2025-05": 21,
+        "2025-06": 22,
+        "2025-07": 17,
+        "2025-08": 18,
+        "2025-09": 22,
+        "2025-10": 18,
+        "2025-11": 17,
+        "2025-12": 11,
+        "2026-01": 10,
+        "2026-02": 11,
+        "2026-03": 16,
+        "2026-04": 20,
+        "2026-05": 13,
+        "2026-06": 22,
+        "2026-07": 10,
+        "2026-08": 13,
+        "2026-09": 19,
+        "2026-10": 17,
+        "2026-11": 17,
+        "2026-12": 0
+      },
+      "empty_months": [
+        "2026-12"
+      ],
+      "scheduled_after_clock": {
+        "records": 8,
+        "distinct_dates": 8,
+        "months": {
+          "2025-01": 0,
+          "2025-02": 0,
+          "2025-03": 0,
+          "2025-04": 0,
+          "2025-05": 0,
+          "2025-06": 0,
+          "2025-07": 0,
+          "2025-08": 0,
+          "2025-09": 0,
+          "2025-10": 0,
+          "2025-11": 0,
+          "2025-12": 0,
+          "2026-01": 0,
+          "2026-02": 0,
+          "2026-03": 0,
+          "2026-04": 0,
+          "2026-05": 0,
+          "2026-06": 0,
+          "2026-07": 0,
+          "2026-08": 0,
+          "2026-09": 0,
+          "2026-10": 0,
+          "2026-11": 3,
+          "2026-12": 5
+        }
+      },
+      "scenario_events": {
+        "count": 17,
+        "in_window": 17,
+        "first": "2026-11-18T12:00:00-08:00",
+        "last": "2026-11-30T09:00:00-08:00"
+      }
+    }
+  ],
+  "global": {
+    "distinct_dates": 585,
+    "earliest": "2025-01-06",
+    "latest": "2026-12-31",
+    "months": {
+      "2025-01": 25,
+      "2025-02": 26,
+      "2025-03": 30,
+      "2025-04": 29,
+      "2025-05": 31,
+      "2025-06": 28,
+      "2025-07": 26,
+      "2025-08": 27,
+      "2025-09": 29,
+      "2025-10": 26,
+      "2025-11": 27,
+      "2025-12": 22,
+      "2026-01": 25,
+      "2026-02": 25,
+      "2026-03": 29,
+      "2026-04": 25,
+      "2026-05": 17,
+      "2026-06": 25,
+      "2026-07": 16,
+      "2026-08": 21,
+      "2026-09": 22,
+      "2026-10": 26,
+      "2026-11": 17,
+      "2026-12": 11
+    },
+    "empty_months": []
+  }
+}

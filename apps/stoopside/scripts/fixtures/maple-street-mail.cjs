@@ -1,5 +1,5 @@
 'use strict';
-// The companion Mail seed for the Maple St fixture: 17 threads in Dana's
+// The companion Mail seed for the Maple St fixture: 23 threads in Dana's
 // mailbox before 2027-03-01 09:00 EST. Senders who are members use their
 // Stoopside email; others use @example.org addresses. Five threads give the
 // name link for aliased members whose email is not in Dana's member export
@@ -18,7 +18,8 @@ module.exports = {
       {from: 33, at: '2027-02-26T19:10:00-05:00', body: 'Catherine here (Kit on Stoopside). Running Saturday? Your run club request should go through soon.'}]},
     {id: 'ms-plot-water', subject: 'Plot 10 watering', messages: [
       {from: 51, at: '2026-07-14T09:00:00-05:00', body: 'Julia (Jules on Stoopside) here. Could you water plot 10 while we are away the 20th to the 27th?'},
-      {from: 'me', to: [51], at: '2026-07-14T10:20:00-05:00', body: 'Happy to. Enjoy the trip.'}]},
+      {from: 'me', to: [51], at: '2026-07-14T10:20:00-05:00', body: 'Happy to. Enjoy the trip.'},
+      {from: 51, at: '2026-07-28T18:45:00-05:00', body: 'Back home. The tomatoes made it, thank you. Jules'}]},
     {id: 'ms-birdie-moving', subject: 'Birdie is moving', messages: [
       {from: 3, at: '2027-02-27T21:40:00-05:00', body: 'Birdie told me she is moving in May. Can we plan a send-off with the June social crew? Keep it quiet, she would hate a fuss. Sam'},
       {from: 'me', to: [3], at: '2027-02-27T22:00:00-05:00', body: 'Yes. I will tell the planning meeting guests, not the whole block.'}]},
@@ -44,5 +45,23 @@ module.exports = {
       {from: 'rooms@maple-library.example.org', at: '2026-12-10T14:00:00-05:00', body: 'Your booking of the community room on January 23, 18:00 to 21:00, is confirmed.'}]},
     {id: 'ms-fling-helpers', subject: 'Spring fling helpers', messages: [
       {from: 4, at: '2027-02-21T20:00:00-05:00', body: 'Setup crew meets at 15:00 on the 20th if you can help. Gus'}]},
+    {id: 'ms-hydrant-flush', subject: 'Hydrant flushing Thursday', messages: [
+      {from: 6, at: '2025-07-09T08:30:00-05:00', body: 'The city flushes the Maple St hydrants on Thursday morning. Tap water may run brown for an hour. Joan'},
+      {from: 'me', to: [6], at: '2025-07-10T07:50:00-05:00', body: 'Thanks for the warning. I will fill a jug tonight.'}]},
+    {id: 'ms-seed-catalog', subject: 'Seed catalog order', messages: [
+      {from: 29, at: '2026-01-12T19:00:00-05:00', body: 'The garden seed order goes in on the 20th. Want to split a packet of the striped zucchini? Libby'},
+      {from: 'me', to: [29], at: '2026-01-13T08:15:00-05:00', body: 'Yes please, put me down for half.'}]},
+    {id: 'ms-summer-reading', subject: 'Summer reading logs', messages: [
+      {from: 2, at: '2026-07-06T10:00:00-05:00', body: 'Summer reading logs are due back the first week of school. Spare copies are at the library desk. Priya'},
+      {from: 'me', to: [2], at: '2026-07-07T09:10:00-05:00', body: 'Got it, thank you. Both kids have started.'}]},
+    {id: 'ms-snow-rota', subject: 'Snow shovel rota', messages: [
+      {from: 6, at: '2026-12-02T17:00:00-05:00', body: 'The winter snow shovel rota is on the block page. You have the second week of January. Joan'},
+      {from: 'me', to: [6], at: '2026-12-03T07:40:00-05:00', body: 'Works for me.'}]},
+    {id: 'ms-winter-concert', subject: 'Winter concert coat check', messages: [
+      {from: 4, at: '2026-12-09T20:30:00-05:00', body: 'The winter concert is December 17 at 18:30 in the gym. Could you help with the coat check? Gus'},
+      {from: 'me', to: [4], at: '2026-12-11T07:30:00-05:00', body: 'Yes, I can take the first hour.'},
+      {from: 4, at: '2026-12-18T09:00:00-05:00', body: 'Thank you for last night. Not one coat went missing. Gus'}]},
+    {id: 'ms-plot-renewal', subject: 'Plot renewal', messages: [
+      {from: 5, at: '2026-12-21T12:00:00-05:00', body: 'Plot renewals for next season are due January 15. Plot 10 is yours again if you want it. Hal'}]},
   ],
 };

@@ -17,7 +17,19 @@
 //   2. committed: with the grant, the waitlist offer and then the claim receipt
 //      arrive in Mail and read back with the same text;
 //   3. retried: publishing the same CloudEvents id again is deduplicated; Mail
-//      still holds one message for it.
+//      still holds one message for it;
+//   4. unknown: Mail commits the next notice but the Router cannot record its
+//      acknowledgement, so router.publish answers status unknown and stops the
+//      run. The publisher stops publishing, does not mark the notice as
+//      delivered, and reconciles by reading Mail with mail.get. The fault is
+//      staged from outside the runtime: the Router's receipt log in its state
+//      directory is replaced by a directory, so its append fails after the
+//      receiver commit (runtime/messaging/src/router.cjs, receipt_audit_failed).
+//      Nothing under runtime/ is changed.
+//
+// Requires the repository-level examples/registry.mail.json (Mail 1.3.0 at
+// examples/apps/mail): the Router's trusted config names it, and the Mail
+// clients use it.
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -158,6 +170,42 @@ async function run() {
     assert.equal(mailbox.length, 2);
     assert.equal(newNotices(stoop).length, 0);
 
+    // 4. Unknown acknowledgement: the user RSVPs to the spring fling (explicit counts), which creates a receipt notice.
+    s = await stoopInfra.call('env.snapshot');
+    const fling = await stoopAgent.call('stoopside.rsvps.preview', {expected_version: s.version, request_id: 'fling-preview',
+      event_id: 'e-0121', answer: 'yes', guests: 0, children: 0});
+    assert.equal(fling.status, 'committed', JSON.stringify(fling));
+    const flingConfirm = await stoopAgent.call('stoopside.rsvps.confirm', {expected_version: fling.version, request_id: 'fling-confirm', preview_id: fling.preview.id});
+    assert.equal(flingConfirm.status, 'committed');
+    stoop = (await stoopInfra.call('env.snapshot')).snapshot;
+    const [flingNotice] = newNotices(stoop);
+    assert.equal(flingNotice.kind, 'rsvp_receipt');
+    await syncMail(stoop.virtual_now);
+    const log = path.join(dir, runId, 'messaging.receipts.jsonl');
+    fs.renameSync(log, log + '.saved');
+    fs.mkdirSync(log);   // staged fault: the Router's acknowledgement cannot be recorded
+    const mailBeforeUnknown = (await mailInfra.call('env.snapshot')).snapshot.data.messages.length;
+    const unknown = await publish(granted, flingNotice, 'fling-receipt-1');
+    assert.equal(unknown.status, 'unknown', JSON.stringify(unknown));
+    assert.equal(unknown.code, 'receipt_audit_failed');
+    assert.equal(unknown.stop_run, true);
+    assert.ok(unknown.event_id, 'the unknown result names the attempted receiver event');
+    fs.rmdirSync(log);
+    fs.renameSync(log + '.saved', log);   // the fault is over; the run stays stopped
+    // The run stops: the publisher does not mark the notice delivered, and the Router refuses any further publish in this run.
+    assert.ok(!published.has(flingNotice.id));
+    const afterStop = await publish(granted, flingNotice, 'fling-receipt-2');
+    assert.deepEqual([afterStop.status, afterStop.code], ['halted', 'run_halted']);
+    // Reconciliation: inspect the receiver. Mail did commit the message once; Stoopside keeps its business result and notice.
+    const reconciled = await mailAgent.call('mail.get', {id: unknown.event_id});
+    assert.equal(reconciled.status, 'ok');
+    assert.equal(reconciled.message.thread_id, flingNotice.id);
+    const mailAfterUnknown = (await mailInfra.call('env.snapshot')).snapshot.data.messages;
+    assert.equal(mailAfterUnknown.length, mailBeforeUnknown + 1);
+    assert.equal(mailAfterUnknown.filter(m => m.thread_id === flingNotice.id).length, 1);
+    const flingRsvp = (await stoopInfra.call('env.snapshot')).snapshot.data.rsvps.find(r => r.event_id === 'e-0121' && r.member_id === 'm-001');
+    assert.equal(flingRsvp.answer, 'yes');
+
     return {
       passed: true, run_id: runId,
       rejected: {status: denied.status, code: denied.code, mail_unchanged: true, stoopside_unchanged: true},
@@ -166,7 +214,11 @@ async function run() {
         {notice_id: fresh[0].id, kind: fresh[0].kind, event_id: receipt.event_id, mail_subject: receiptMail.subject, rsvp: {id: rsvp.id, answer: rsvp.answer, places: 1}},
       ],
       retried: {duplicate: retry.duplicate, event_id: retry.event_id, mail_messages_for_notice: 1},
-      mailbox_messages: mailbox.length,
+      unknown: {notice_id: flingNotice.id, kind: flingNotice.kind, status: unknown.status, code: unknown.code, stop_run: unknown.stop_run,
+        event_id: unknown.event_id, next_publish: afterStop.status + '/' + afterStop.code,
+        reconciliation: {mail_get: reconciled.status, mail_message_id: reconciled.message.id, mail_messages_for_notice: 1,
+          stoopside_rsvp: flingRsvp.id + ' ' + flingRsvp.answer, marked_delivered_by_publisher: false, run_scored: false}},
+      mailbox_messages: mailAfterUnknown.length,
     };
   } finally {
     await Promise.allSettled(clients.map(c => c.close()));
@@ -179,6 +231,6 @@ module.exports = {run};
 if (require.main === module) {
   run().then(report => {
     console.log(JSON.stringify(report, null, 2));
-    console.log('PASS: rejected without a grant, committed and read back through Mail, retry deduplicated.');
+    console.log('PASS: rejected without a grant, committed and read back through Mail, retry deduplicated, unknown acknowledgement stopped the run and was reconciled through mail.get.');
   }).catch(e => { console.error(e.stack || e.message); process.exitCode = 1; });
 }

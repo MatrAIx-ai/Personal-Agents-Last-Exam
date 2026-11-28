@@ -203,3 +203,29 @@ test('(g) no outcome is random and IDs encode no role', () => {
     assert.doesNotMatch(ids, /organizer|host|admin|owner|user|member-/i);
   }
 });
+
+// ---- Dataset coverage report ---------------------------------------------------------
+
+test('the committed coverage report (evidence/coverage.json and .md) matches a fresh run over the fixtures', () => {
+  const C = require('../scripts/coverage-report.cjs');
+  const fresh = C.build();
+  assert.equal(fs.readFileSync(path.join(__dirname, '../evidence/coverage.json'), 'utf8'), JSON.stringify(fresh, null, 2) + '\n',
+    'evidence/coverage.json is out of date: run node scripts/coverage-report.cjs');
+  assert.equal(fs.readFileSync(path.join(__dirname, '../evidence/coverage.md'), 'utf8'), C.markdown(fresh),
+    'evidence/coverage.md is out of date: run node scripts/coverage-report.cjs');
+  assert.equal(fresh.time_zone, 'Etc/GMT+5');
+  assert.equal(fresh.invalid.length, 0);
+  const maple = fresh.sources.find(s => s.source_id === 'maple-street');
+  assert.deepEqual(maple.empty_months, [], 'Maple St is the full-window source: every month of 2025 and 2026 has history');
+  assert.deepEqual(fresh.global.empty_months, []);
+  for (const s of fresh.sources) {
+    assert.equal(s.kind, 'synthetic');
+    // A source's history ends at its clock: every empty month is after it.
+    for (const m of s.empty_months) assert.ok(m > s.clock.slice(0, 7), `${s.source_id}: ${m} is empty before the clock`);
+    // The hashes are those of the files on disk, and match contribution/dataset.json.
+    const ds = require('../contribution/dataset.json').sources.find(x => x.source_id === s.source_id).generation.parameters;
+    assert.equal(s.files.seed_sha256, ds.fixture_sha256);
+    assert.equal(s.files.mail_seed_sha256, ds.mail_seed_sha256);
+    assert.equal(ds.provenance.kind, 'synthetic');
+  }
+});

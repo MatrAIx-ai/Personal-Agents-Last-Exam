@@ -107,7 +107,14 @@ function rsvpPlan(data, args, now, user) {
     if (!r || current === 'no') fail('invalid_state', 'There is no RSVP to change to no.');
     outcome = current === 'offered' ? 'decline_offer' : 'no';
   } else {
-    if (guests > e.guest_limit) fail('guest_limit_exceeded', `${e.title} allows at most ${e.guest_limit} guests per RSVP.`);
+    if (guests > e.guest_limit) {
+      // Say where a pre-filled guest count came from, as a successful preview does
+      // (Core forwards only the code and message of a failed call).
+      const source = args.guests === undefined && prefilled
+        ? ` The ${guests} ${guests === 1 ? 'guest was' : 'guests were'} pre-filled from your latest RSVP in this group, ${prefilled.rsvp_id} for ${prefilled.event_title}, answered ${label(ms(prefilled.answered_at), R.group(data, e.group_id))} (guests ${prefilled.guests}, children ${prefilled.children}). Pass guests to choose the count.`
+        : '';
+      fail('guest_limit_exceeded', `${e.title} allows at most ${e.guest_limit} guests per RSVP.${source}`);
+    }
     const need = 1 + guests + children, free = e.capacity - R.taken(data, e);
     const held = r && R.HOLDING.has(current) ? R.places(r) : 0;
     if (current === 'expired' && !args.rejoin_waitlist) {
