@@ -21,17 +21,37 @@ test('Public Agent/Infra MCP confirmation boundary with persisted readback, both
     assert.equal(initial.status, 'ok');
     assert.equal(initial.item.verification_state, 'INFERRED');
 
-    // 0. Negative: Empty or unsupported proposed_changes rejected before creating a proposal
-    const emptyProp = await agent.call('personal-records.propose_update', {
-      target_type: 'document_metadata',
-      target_id: 'doc_payslip_dec2026',
+    // 0. Negative: Empty or invalid-value proposed_changes rejected before persisting a proposal
+    const snap0 = await infra.call('env.snapshot');
+    for (const badChanges of [
+      {},
+      { title: '' },
+      { category: 'bogus_category' },
+      { tags: 'not-an-array' },
+      { verification_state: 'INVALID_STATE' }
+    ]) {
+      const badProp = await agent.call('personal-records.propose_update', {
+        target_type: 'document_metadata',
+        target_id: 'doc_payslip_dec2026',
+        expected_target_version: 1,
+        proposed_changes: badChanges,
+        rationale: 'Invalid change should fail',
+        expected_version: initial.version,
+        request_id: 'agent-prop-bad-' + JSON.stringify(badChanges)
+      });
+      assert.equal(badProp.status, 'invalid_arguments');
+    }
+    const badClaimProp = await agent.call('personal-records.propose_update', {
+      target_type: 'claim',
+      target_id: 'clm_dec_net_pay',
       expected_target_version: 1,
-      proposed_changes: {},
-      rationale: 'Empty change should fail',
+      proposed_changes: { claim_text: '   ' },
+      rationale: 'Empty claim_text should fail',
       expected_version: initial.version,
-      request_id: 'agent-prop-empty'
+      request_id: 'agent-prop-bad-claim'
     });
-    assert.equal(emptyProp.status, 'invalid_arguments');
+    assert.equal(badClaimProp.status, 'invalid_arguments');
+    assert.deepEqual((await infra.call('env.snapshot')).snapshot.data, snap0.snapshot.data);
 
     // 1. Agent proposes a document_metadata update bound to target_state_hash + version 1
     const prop = await agent.call('personal-records.propose_update', {

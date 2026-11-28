@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
-const { fail, decodeAndExtract, computeProposalHash, computeTargetStateHash } = require('./pale-model.cjs');
+const { fail, decodeAndExtract, computeProposalHash, computeTargetStateHash, validateProposedChanges } = require('./pale-model.cjs');
 
 function nextId(prefix, existing) {
   let n = existing.length + 1;
@@ -337,18 +337,7 @@ function handleTool(ctx, data, name, args) {
     }
 
     case 'personal-records.propose_update': {
-      const allowedFields = {
-        document_metadata: ['title', 'category', 'tags', 'valid_until', 'verification_state'],
-        claim: ['claim_text', 'verification_state']
-      };
-      const allowed = allowedFields[args.target_type];
-      if (!allowed) {
-        fail('invalid_arguments', `Unsupported target_type in v1: ${args.target_type}`);
-      }
-      const changeKeys = Object.keys(args.proposed_changes || {});
-      if (changeKeys.length === 0 || changeKeys.some(k => !allowed.includes(k))) {
-        fail('invalid_arguments', `proposed_changes must be a nonempty subset of [${allowed.join(', ')}] for ${args.target_type}`);
-      }
+      validateProposedChanges(args.target_type, args.proposed_changes);
 
       let targetObj = null;
       let parentDoc = null;
@@ -421,6 +410,7 @@ function handleTool(ctx, data, name, args) {
       }
 
       // Validate target, version, and editable target state fingerprint BEFORE any mutation
+      validateProposedChanges(proposal.target_type, proposal.proposed_changes);
       let targetDoc = null;
       let targetClaim = null;
       let currentTargetStateHash = null;

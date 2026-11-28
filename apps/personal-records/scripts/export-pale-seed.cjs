@@ -3,7 +3,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const assert = require('node:assert/strict');
 
+const SESSION_CUTOFF_DAY = '2026-11-18';
+const SESSION_CUTOFF_MONTH = '2026-11';
 const SYNTHETIC_INGESTION_AT = '2026-11-18T09:00:00-08:00';
 
 function parseRepresentedDate(text) {
@@ -34,11 +37,23 @@ function parseRepresentedDate(text) {
   };
 }
 
+function isPostCutoff(rep) {
+  if (rep.precision === 'day') return rep.value > SESSION_CUTOFF_DAY;
+  if (rep.precision === 'month') return rep.value > SESSION_CUTOFF_MONTH;
+  return false;
+}
+
+function availabilityTimestampFor(rep) {
+  if (!isPostCutoff(rep)) return SYNTHETIC_INGESTION_AT;
+  return rep.precision === 'day' ? `${rep.value}T09:00:00-08:00` : `${rep.value}-28T09:00:00-08:00`;
+}
+
 function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', ownerPersonId = 'person-maya', timeZone = 'America/Los_Angeles' } = {}) {
   const raw = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
   const documents = [];
   const claims = [];
   const links = [];
+  const stagedEvents = [];
 
   const inWindowByMonth = {};
   const preWindowByMonth = {};
@@ -65,10 +80,32 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
       inWindowByMonth[rep.month_key] = (inWindowByMonth[rep.month_key] || 0) + 1;
     }
 
-    // Use one unambiguous synthetic availability/ingestion timestamp strictly before
-    // the first session across all Core fields, while keeping represented_date separate.
-    const ingestedAt = SYNTHETIC_INGESTION_AT;
-    const recordTimestamp = ingestedAt;
+    const availableAt = availabilityTimestampFor(rep);
+
+    if (isPostCutoff(rep)) {
+      stagedEvents.push({
+        event_id: `evt_staged_${id}`,
+        at: availableAt,
+        operation: 'personal-records.inject_document',
+        payload: {
+          id,
+          title: item.title,
+          category: item.category || 'other',
+          tags: item.tags || [],
+          mime_type: item.mime_type || 'text/plain',
+          content_bytes: buf.toString('base64'),
+          raw_text: text,
+          valid_until: item.valid_until || null,
+          source: 'staged_corpus_availability',
+          represented_date: {
+            value: rep.value,
+            precision: rep.precision,
+            provenance: rep.provenance
+          }
+        }
+      });
+      continue;
+    }
 
     documents.push({
       id,
@@ -91,12 +128,12 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
           precision: rep.precision,
           provenance: rep.provenance
         },
-        ingested_at: ingestedAt,
+        ingested_at: availableAt,
         ingestion_provenance: 'synthetic_availability_before_session'
       },
-      created_at: recordTimestamp,
-      updated_at: recordTimestamp,
-      history: [{ at: recordTimestamp, action: 'seeded_from_corpus' }],
+      created_at: availableAt,
+      updated_at: availableAt,
+      history: [{ at: availableAt, action: 'seeded_from_corpus' }],
       versions: [
         {
           version_number: 1,
@@ -109,7 +146,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
           extraction_source: 'UTF8_TEXT',
           raw_text: text,
           extracted_fields: item.expected_fields || {},
-          created_at: recordTimestamp
+          created_at: availableAt
         }
       ]
     });
@@ -127,7 +164,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
           cited_text: span.text,
           claim_text: `${span.label}: ${span.text}`,
           verification_state: 'INFERRED',
-          created_at: recordTimestamp
+          created_at: availableAt
         });
       }
     }
@@ -147,6 +184,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
     }
   }
 
+  stagedEvents.sort((a, b) => a.at.localeCompare(b.at) || a.event_id.localeCompare(b.event_id));
   const sortMap = obj => Object.fromEntries(Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)));
 
   return {
@@ -159,6 +197,7 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
       proposals: [],
       notifications: []
     },
+    staged_events: stagedEvents,
     binding: {
       people: [{ person_id: ownerPersonId, name: 'Maya Chen' }],
       accounts: [{ app_id: 'personal-records', account_id: accountId, owner_person_id: ownerPersonId }],
@@ -167,7 +206,9 @@ function convertFixtureToPaleSeed(sourcePath, { accountId = 'records-maya', owne
     summary: {
       scenario_id: raw.scenario_id,
       timezone: timeZone,
-      documents: documents.length,
+      session_cutoff: SYNTHETIC_INGESTION_AT,
+      pre_session_documents: documents.length,
+      staged_post_cutoff_events: stagedEvents.length,
       claims: claims.length,
       links: links.length,
       date_coverage: {
@@ -201,14 +242,38 @@ if (require.main === module) {
         data: converted.data,
         binding: converted.binding
       });
-      if (loaded.result.status !== 'ready') {
-        throw new Error('env.load_seed failed: ' + JSON.stringify(loaded.result));
+      assert.equal(loaded.result.status, 'ready');
+
+      // Verify post-cutoff completed transactions are NOT visible in pre-session snapshot
+      const preSearch = rt.execute(loaded.state, 'agent', 'personal-records.search', { limit: 50 });
+      const preIds = new Set(loaded.state.data.documents.map(d => d.id));
+      for (const ev of converted.staged_events) {
+        assert.equal(preIds.has(ev.payload.id), false, `Post-cutoff record ${ev.payload.id} leaked into pre-session snapshot`);
       }
-      const queried = rt.execute(loaded.state, 'agent', 'personal-records.search', { query: 'Payslip', limit: 50 });
+
+      // Apply staged events at their simulated availability times and verify visibility
+      let state = loaded.state;
+      for (const ev of converted.staged_events) {
+        const applied = rt.execute(state, 'infra', 'env.apply_event', {
+          expected_version: rt.version(state),
+          event: ev
+        });
+        assert.equal(applied.result.status, 'committed', `Failed staged event ${ev.event_id}: ${applied.result.message}`);
+        state = applied.state;
+      }
+
+      const postPayslips = rt.execute(state, 'agent', 'personal-records.search', { query: 'Payslip', limit: 50 });
+      for (const ev of converted.staged_events) {
+        const found = rt.execute(state, 'agent', 'personal-records.get_document', { id: ev.payload.id });
+        assert.equal(found.result.status, 'ok', `Staged document ${ev.payload.id} missing after simulated availability`);
+      }
+
       console.log(JSON.stringify({
         loaded_status: loaded.result.status,
-        loaded_objects: loaded.result.loaded,
-        query_payslip_total: queried.result.total,
+        pre_session_loaded_objects: loaded.result.loaded,
+        pre_session_search_sample: preSearch.result.total,
+        post_staged_documents: state.data.documents.length,
+        post_staged_payslip_total: postPayslips.result.total,
         ...converted.summary
       }, null, 2));
     } finally {

@@ -49,6 +49,51 @@ function computeTargetStateHash(targetType, target, parentDoc) {
   return null;
 }
 
+const VALID_CATEGORIES = ['tax', 'employment', 'insurance', 'property', 'utilities', 'healthcare', 'banking', 'legal', 'other'];
+const VALID_VERIFICATION_STATES = ['INFERRED', 'USER_CONFIRMED', 'SUPERSEDED'];
+
+function validateProposedChanges(targetType, proposedChanges) {
+  const allowedFields = {
+    document_metadata: ['title', 'category', 'tags', 'valid_until', 'verification_state'],
+    claim: ['claim_text', 'verification_state']
+  };
+  const allowed = allowedFields[targetType];
+  if (!allowed) {
+    fail('invalid_arguments', `Unsupported target_type in v1: ${targetType}`);
+  }
+  if (!proposedChanges || typeof proposedChanges !== 'object' || Array.isArray(proposedChanges)) {
+    fail('invalid_arguments', 'proposed_changes must be a plain object');
+  }
+  const keys = Object.keys(proposedChanges);
+  if (keys.length === 0 || keys.some(k => !allowed.includes(k))) {
+    fail('invalid_arguments', `proposed_changes must be a nonempty subset of [${allowed.join(', ')}] for ${targetType}`);
+  }
+  if (targetType === 'document_metadata') {
+    if ('title' in proposedChanges && (typeof proposedChanges.title !== 'string' || proposedChanges.title.trim().length < 1 || proposedChanges.title.length > 240)) {
+      fail('invalid_arguments', 'title must be a nonempty string up to 240 chars');
+    }
+    if ('category' in proposedChanges && !VALID_CATEGORIES.includes(proposedChanges.category)) {
+      fail('invalid_arguments', `category must be one of [${VALID_CATEGORIES.join(', ')}]`);
+    }
+    if ('tags' in proposedChanges && (!Array.isArray(proposedChanges.tags) || proposedChanges.tags.some(t => typeof t !== 'string'))) {
+      fail('invalid_arguments', 'tags must be an array of strings');
+    }
+    if ('valid_until' in proposedChanges && proposedChanges.valid_until !== null && (typeof proposedChanges.valid_until !== 'string' || !Number.isFinite(Date.parse(proposedChanges.valid_until)))) {
+      fail('invalid_arguments', 'valid_until must be an ISO 8601 date-time string or null');
+    }
+    if ('verification_state' in proposedChanges && !VALID_VERIFICATION_STATES.includes(proposedChanges.verification_state)) {
+      fail('invalid_arguments', `verification_state must be one of [${VALID_VERIFICATION_STATES.join(', ')}]`);
+    }
+  } else if (targetType === 'claim') {
+    if ('claim_text' in proposedChanges && (typeof proposedChanges.claim_text !== 'string' || proposedChanges.claim_text.trim().length < 1)) {
+      fail('invalid_arguments', 'claim_text must be a nonempty string');
+    }
+    if ('verification_state' in proposedChanges && !VALID_VERIFICATION_STATES.includes(proposedChanges.verification_state)) {
+      fail('invalid_arguments', `verification_state must be one of [${VALID_VERIFICATION_STATES.join(', ')}]`);
+    }
+  }
+}
+
 function extractFieldsFromText(text) {
   const fields = {};
   if (!text) return fields;
@@ -145,6 +190,7 @@ module.exports = {
   sha256Hex,
   computeProposalHash,
   computeTargetStateHash,
+  validateProposedChanges,
   extractFieldsFromText,
   decodeAndExtract,
   validateSeed,
