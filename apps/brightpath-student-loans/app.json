@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "app_id": "brightpath-student-loans",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {"contact": "Repository issue / PR tagged app:brightpath-student-loans"},
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "loan.application_status_changed",
+    "loan.payment_status_changed",
+    "loan.repayment_status_changed",
+    "loan.servicer_transfer_completed"
+  ],
+  "capabilities": {"modes": ["synthetic"], "resources": false, "ui": "business web app", "real_delivery": false},
+  "limitations": [
+    "Fictional deterministic policy rules only; not legal, tax, or financial advice.",
+    "No real submissions, payments, IRS/servicer network, document content, OCR, or identity verification.",
+    "Optional Mail delivery is a separate commit with no atomic outbox; unknown acknowledgement requires reconciliation."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

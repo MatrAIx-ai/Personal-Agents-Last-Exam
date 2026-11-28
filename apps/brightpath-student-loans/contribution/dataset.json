@@ -1,0 +1,52 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "brightpath-student-loans-minimal",
+  "version": "1.0.0",
+  "description": "Deterministically generated synthetic borrower, loan, estimate, application, notice, document-metadata, and history records for Brightpath acceptance.",
+  "record_source_ids": [
+    "brightpath-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "brightpath-generator",
+      "kind": "synthetic",
+      "description": "Original fictional records generated offline; no borrower data, credentials, forms, or media were collected.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic script",
+        "tool": "scripts/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": "brightpath-v1",
+        "parameters": {
+          "loans": 8,
+          "servicers": 3,
+          "plans": 6,
+          "borrower_profiles": 4,
+          "income_snapshots": 3,
+          "applications": 5,
+          "notices": 8
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Integer cents and basis points; masked identifiers; ISO timestamps; immutable estimate and submitted snapshots."
+  ],
+  "expected_counts": {
+    "records": 50,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated invariants do not replace reviewer assessment of workflow realism or fictional policy clarity."
+  }
+}

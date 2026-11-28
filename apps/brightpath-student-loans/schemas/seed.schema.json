@@ -1,0 +1,23 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"urn:pale:brightpath-student-loans:seed:1",
+  "type":"object",
+  "properties":{
+    "account_id":{"$ref":"domain.schema.json#/$defs/id"},
+    "owner_person_id":{"$ref":"domain.schema.json#/$defs/id"},
+    "borrower":{"$ref":"domain.schema.json#/$defs/borrower"},
+    "settings":{"$ref":"domain.schema.json#/$defs/settings"},
+    "servicers":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/servicer"},"minItems":1,"maxItems":20},
+    "plans":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/plan"},"minItems":1,"maxItems":30},
+    "loans":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/loan"},"minItems":1,"maxItems":100},
+    "income_snapshots":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/incomeSnapshot"},"maxItems":100},
+    "estimates":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/estimate"},"maxItems":1000},
+    "applications":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/application"},"maxItems":1000},
+    "documents":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/document"},"maxItems":2000},
+    "notices":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/notice"},"maxItems":5000},
+    "history":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/history"},"maxItems":10000},
+    "processed_event_ids":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/id"},"uniqueItems":true,"maxItems":10000}
+  },
+  "required":["account_id","owner_person_id","borrower","settings","servicers","plans","loans","income_snapshots","estimates","applications","documents","notices","history","processed_event_ids"],
+  "additionalProperties":false
+}

@@ -1,0 +1,878 @@
+{
+  "account_id": "brightpath-maya",
+  "owner_person_id": "person-maya",
+  "borrower": {
+    "person_id": "person-maya",
+    "borrower_account_id": "brightpath-maya",
+    "display_name": "Maya Chen",
+    "annual_income_cents": 5200000,
+    "family_size": 2,
+    "filing_status": "single",
+    "irs_consent_status": "granted",
+    "recertification_due_on": "2027-02-15",
+    "masked_email": "m***@example.test",
+    "masked_payment_account": "Checking •••• 2841"
+  },
+  "settings": {
+    "mail_enabled": true,
+    "mail_account_id": "mail-maya"
+  },
+  "servicers": [
+    {
+      "id": "servicer-cascade",
+      "name": "Cascade Education Services",
+      "support_phone_masked": "***-***-0142"
+    },
+    {
+      "id": "servicer-harbor",
+      "name": "Harbor Loan Support",
+      "support_phone_masked": "***-***-0188"
+    },
+    {
+      "id": "servicer-prairie",
+      "name": "Prairie Student Accounts",
+      "support_phone_masked": "***-***-0116"
+    }
+  ],
+  "plans": [
+    {
+      "id": "plan-standard",
+      "name": "Brightpath Standard 10",
+      "kind": "fixed",
+      "term_months": 120,
+      "income_percent_bps": 0,
+      "poverty_base_cents": 0,
+      "poverty_family_increment_cents": 0,
+      "eligible_loan_types": [
+        "direct_subsidized",
+        "direct_unsubsidized",
+        "grad_plus",
+        "ffel"
+      ],
+      "earliest_disbursement_on": null,
+      "tradeoff": "Higher predictable payment and shorter fictional payoff term.",
+      "fictional_policy": true
+    },
+    {
+      "id": "plan-graduated",
+      "name": "Brightpath Graduated 10",
+      "kind": "fixed",
+      "term_months": 120,
+      "income_percent_bps": 0,
+      "poverty_base_cents": 0,
+      "poverty_family_increment_cents": 0,
+      "eligible_loan_types": [
+        "direct_subsidized",
+        "direct_unsubsidized",
+        "grad_plus",
+        "ffel"
+      ],
+      "earliest_disbursement_on": null,
+      "tradeoff": "The synthetic estimate is level for determinism; a real graduated schedule is outside v1.",
+      "fictional_policy": true
+    },
+    {
+      "id": "plan-extended",
+      "name": "Brightpath Extended 25",
+      "kind": "fixed",
+      "term_months": 300,
+      "income_percent_bps": 0,
+      "poverty_base_cents": 0,
+      "poverty_family_increment_cents": 0,
+      "eligible_loan_types": [
+        "direct_subsidized",
+        "direct_unsubsidized",
+        "grad_plus"
+      ],
+      "earliest_disbursement_on": null,
+      "tradeoff": "Lower payment can produce substantially more projected interest.",
+      "fictional_policy": true
+    },
+    {
+      "id": "plan-horizon",
+      "name": "Horizon Income 20",
+      "kind": "income_driven",
+      "term_months": 240,
+      "income_percent_bps": 1000,
+      "poverty_base_cents": 2250000,
+      "poverty_family_increment_cents": 800000,
+      "eligible_loan_types": [
+        "direct_subsidized",
+        "direct_unsubsidized",
+        "grad_plus"
+      ],
+      "earliest_disbursement_on": "2014-07-01",
+      "tradeoff": "Annual recertification is required; projected forgiveness is fictional and not guaranteed.",
+      "fictional_policy": true
+    },
+    {
+      "id": "plan-balance",
+      "name": "Balance Income 20",
+      "kind": "income_driven",
+      "term_months": 240,
+      "income_percent_bps": 1200,
+      "poverty_base_cents": 2000000,
+      "poverty_family_increment_cents": 700000,
+      "eligible_loan_types": [
+        "direct_subsidized",
+        "direct_unsubsidized",
+        "grad_plus",
+        "ffel"
+      ],
+      "earliest_disbursement_on": null,
+      "tradeoff": "Payment follows the supplied income snapshot and may change at recertification.",
+      "fictional_policy": true
+    },
+    {
+      "id": "plan-family",
+      "name": "Family Income 25",
+      "kind": "income_driven",
+      "term_months": 300,
+      "income_percent_bps": 800,
+      "poverty_base_cents": 2500000,
+      "poverty_family_increment_cents": 950000,
+      "eligible_loan_types": [
+        "direct_subsidized",
+        "direct_unsubsidized"
+      ],
+      "earliest_disbursement_on": null,
+      "tradeoff": "Longer fictional term lowers payment but can increase interest and uncertainty.",
+      "fictional_policy": true
+    }
+  ],
+  "loans": [
+    {
+      "id": "loan-1",
+      "masked_number": "****4101",
+      "loan_type": "direct_subsidized",
+      "principal_cents": 620000,
+      "accrued_interest_cents": 18000,
+      "interest_bps": 420,
+      "disbursed_on": "2018-09-01",
+      "plan_id": "plan-standard",
+      "scheduled_payment_cents": 6700,
+      "next_due_on": "2026-12-10",
+      "status": "current",
+      "qualifying_payments": 41,
+      "servicer_id": "servicer-cascade",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-2",
+      "masked_number": "****4102",
+      "loan_type": "direct_unsubsidized",
+      "principal_cents": 870000,
+      "accrued_interest_cents": 39000,
+      "interest_bps": 510,
+      "disbursed_on": "2019-01-12",
+      "plan_id": "plan-standard",
+      "scheduled_payment_cents": 9800,
+      "next_due_on": "2026-12-10",
+      "status": "current",
+      "qualifying_payments": 39,
+      "servicer_id": "servicer-cascade",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-3",
+      "masked_number": "****4103",
+      "loan_type": "ffel",
+      "principal_cents": 430000,
+      "accrued_interest_cents": 61000,
+      "interest_bps": 650,
+      "disbursed_on": "2010-08-20",
+      "plan_id": "plan-balance",
+      "scheduled_payment_cents": 4200,
+      "next_due_on": "2026-11-15",
+      "status": "delinquent",
+      "qualifying_payments": 15,
+      "servicer_id": "servicer-harbor",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-4",
+      "masked_number": "****4104",
+      "loan_type": "grad_plus",
+      "principal_cents": 1250000,
+      "accrued_interest_cents": 112000,
+      "interest_bps": 710,
+      "disbursed_on": "2020-08-25",
+      "plan_id": "plan-standard",
+      "scheduled_payment_cents": 15900,
+      "next_due_on": "2026-12-20",
+      "status": "current",
+      "qualifying_payments": 28,
+      "servicer_id": "servicer-harbor",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-5",
+      "masked_number": "****4105",
+      "loan_type": "direct_subsidized",
+      "principal_cents": 350000,
+      "accrued_interest_cents": 9000,
+      "interest_bps": 375,
+      "disbursed_on": "2016-09-02",
+      "plan_id": "plan-family",
+      "scheduled_payment_cents": 2100,
+      "next_due_on": null,
+      "status": "deferment",
+      "qualifying_payments": 52,
+      "servicer_id": "servicer-prairie",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-6",
+      "masked_number": "****4106",
+      "loan_type": "direct_unsubsidized",
+      "principal_cents": 560000,
+      "accrued_interest_cents": 24000,
+      "interest_bps": 480,
+      "disbursed_on": "2021-01-10",
+      "plan_id": "plan-horizon",
+      "scheduled_payment_cents": 3100,
+      "next_due_on": "2026-12-05",
+      "status": "current",
+      "qualifying_payments": 18,
+      "servicer_id": "servicer-prairie",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-7",
+      "masked_number": "****4107",
+      "loan_type": "grad_plus",
+      "principal_cents": 980000,
+      "accrued_interest_cents": 88000,
+      "interest_bps": 690,
+      "disbursed_on": "2013-08-28",
+      "plan_id": "plan-extended",
+      "scheduled_payment_cents": 7600,
+      "next_due_on": null,
+      "status": "forbearance",
+      "qualifying_payments": 7,
+      "servicer_id": "servicer-cascade",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "loan-8",
+      "masked_number": "****4108",
+      "loan_type": "direct_subsidized",
+      "principal_cents": 0,
+      "accrued_interest_cents": 0,
+      "interest_bps": 340,
+      "disbursed_on": "2015-09-01",
+      "plan_id": "plan-standard",
+      "scheduled_payment_cents": 0,
+      "next_due_on": null,
+      "status": "paid",
+      "qualifying_payments": 120,
+      "servicer_id": "servicer-harbor",
+      "version": 1,
+      "updated_at": "2026-11-18T09:00:00-08:00"
+    }
+  ],
+  "income_snapshots": [
+    {
+      "id": "income-2024",
+      "annual_income_cents": 4980000,
+      "family_size": 2,
+      "filing_status": "single",
+      "effective_on": "2024-12-31",
+      "source": "borrower_attested"
+    },
+    {
+      "id": "income-2025",
+      "annual_income_cents": 5200000,
+      "family_size": 2,
+      "filing_status": "single",
+      "effective_on": "2025-12-31",
+      "source": "synthetic_irs"
+    },
+    {
+      "id": "income-reduced",
+      "annual_income_cents": 3850000,
+      "family_size": 3,
+      "filing_status": "head_of_household",
+      "effective_on": "2026-10-01",
+      "source": "fixture"
+    }
+  ],
+  "estimates": [
+    {
+      "id": "estimate-seed-1",
+      "loan_ids": [
+        "loan-1",
+        "loan-2"
+      ],
+      "selected_plan_id": "plan-horizon",
+      "input_snapshot": {
+        "loan_ids": [
+          "loan-1",
+          "loan-2"
+        ],
+        "annual_income_cents": 5200000,
+        "family_size": 2,
+        "filing_status": "single",
+        "calculated_at": "2026-11-18T09:00:00-08:00",
+        "rounding": "Nearest whole cent using Math.round on positive deterministic inputs; terms use calendar months."
+      },
+      "result": {
+        "plan_id": "plan-horizon",
+        "plan_name": "Horizon Income 20",
+        "eligible": true,
+        "ineligible_reasons": [],
+        "monthly_payment_cents": 16206,
+        "total_projected_payment_cents": 3889440,
+        "projected_interest_cents": 1408200,
+        "forgiveness_estimate_cents": 0,
+        "term_months": 240,
+        "projected_end_on": "2046-11-18",
+        "tradeoff": "Annual recertification is required; projected forgiveness is fictional and not guaranteed."
+      },
+      "created_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "estimate-seed-2",
+      "loan_ids": [
+        "loan-3"
+      ],
+      "selected_plan_id": "plan-balance",
+      "input_snapshot": {
+        "loan_ids": [
+          "loan-3"
+        ],
+        "annual_income_cents": 5200000,
+        "family_size": 2,
+        "filing_status": "single",
+        "calculated_at": "2026-11-18T09:00:00-08:00",
+        "rounding": "Nearest whole cent using Math.round on positive deterministic inputs; terms use calendar months."
+      },
+      "result": {
+        "plan_id": "plan-balance",
+        "plan_name": "Balance Income 20",
+        "eligible": true,
+        "ineligible_reasons": [],
+        "monthly_payment_cents": 5575,
+        "total_projected_payment_cents": 1338000,
+        "projected_interest_cents": 559000,
+        "forgiveness_estimate_cents": 0,
+        "term_months": 240,
+        "projected_end_on": "2046-11-18",
+        "tradeoff": "Payment follows the supplied income snapshot and may change at recertification."
+      },
+      "created_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "estimate-seed-3",
+      "loan_ids": [
+        "loan-4"
+      ],
+      "selected_plan_id": "plan-standard",
+      "input_snapshot": {
+        "loan_ids": [
+          "loan-4"
+        ],
+        "annual_income_cents": 5200000,
+        "family_size": 2,
+        "filing_status": "single",
+        "calculated_at": "2026-11-18T09:00:00-08:00",
+        "rounding": "Nearest whole cent using Math.round on positive deterministic inputs; terms use calendar months."
+      },
+      "result": {
+        "plan_id": "plan-standard",
+        "plan_name": "Brightpath Standard 10",
+        "eligible": true,
+        "ineligible_reasons": [],
+        "monthly_payment_cents": 15884,
+        "total_projected_payment_cents": 1906080,
+        "projected_interest_cents": 544080,
+        "forgiveness_estimate_cents": 0,
+        "term_months": 120,
+        "projected_end_on": "2036-11-18",
+        "tradeoff": "Higher predictable payment and shorter fictional payoff term."
+      },
+      "created_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "estimate-seed-4",
+      "loan_ids": [
+        "loan-5"
+      ],
+      "selected_plan_id": "plan-family",
+      "input_snapshot": {
+        "loan_ids": [
+          "loan-5"
+        ],
+        "annual_income_cents": 5200000,
+        "family_size": 2,
+        "filing_status": "single",
+        "calculated_at": "2026-11-18T09:00:00-08:00",
+        "rounding": "Nearest whole cent using Math.round on positive deterministic inputs; terms use calendar months."
+      },
+      "result": {
+        "plan_id": "plan-family",
+        "plan_name": "Family Income 25",
+        "eligible": true,
+        "ineligible_reasons": [],
+        "monthly_payment_cents": 3592,
+        "total_projected_payment_cents": 1077600,
+        "projected_interest_cents": 328125,
+        "forgiveness_estimate_cents": 0,
+        "term_months": 300,
+        "projected_end_on": "2051-11-18",
+        "tradeoff": "Longer fictional term lowers payment but can increase interest and uncertainty."
+      },
+      "created_at": "2026-11-18T09:00:00-08:00"
+    },
+    {
+      "id": "estimate-seed-5",
+      "loan_ids": [
+        "loan-6"
+      ],
+      "selected_plan_id": "plan-horizon",
+      "input_snapshot": {
+        "loan_ids": [
+          "loan-6"
+        ],
+        "annual_income_cents": 5200000,
+        "family_size": 2,
+        "filing_status": "single",
+        "calculated_at": "2026-11-18T09:00:00-08:00",
+        "rounding": "Nearest whole cent using Math.round on positive deterministic inputs; terms use calendar months."
+      },
+      "result": {
+        "plan_id": "plan-horizon",
+        "plan_name": "Horizon Income 20",
+        "eligible": true,
+        "ineligible_reasons": [],
+        "monthly_payment_cents": 6137,
+        "total_projected_payment_cents": 1472880,
+        "projected_interest_cents": 537600,
+        "forgiveness_estimate_cents": 0,
+        "term_months": 240,
+        "projected_end_on": "2046-11-18",
+        "tradeoff": "Annual recertification is required; projected forgiveness is fictional and not guaranteed."
+      },
+      "created_at": "2026-11-18T09:00:00-08:00"
+    }
+  ],
+  "applications": [
+    {
+      "id": "application-draft",
+      "application_type": "repayment_plan",
+      "loan_ids": [
+        "loan-1",
+        "loan-2"
+      ],
+      "estimate_id": "estimate-seed-1",
+      "selected_plan_id": "plan-horizon",
+      "status": "draft",
+      "attestations": {
+        "information_accurate": true,
+        "electronic_signature": true
+      },
+      "consent_status": "granted",
+      "income_snapshot_id": "income-2025",
+      "document_ids": [],
+      "required_by": null,
+      "requested_action": null,
+      "submitted_snapshot": null,
+      "receipt_id": null,
+      "version": 1,
+      "created_at": "2026-11-17T16:00:00Z",
+      "updated_at": "2026-11-17T16:00:00Z"
+    },
+    {
+      "id": "application-processing",
+      "application_type": "annual_recertification",
+      "loan_ids": [
+        "loan-3"
+      ],
+      "estimate_id": "estimate-seed-2",
+      "selected_plan_id": "plan-balance",
+      "status": "processing",
+      "attestations": {
+        "information_accurate": true,
+        "electronic_signature": true
+      },
+      "consent_status": "declined",
+      "income_snapshot_id": "income-2025",
+      "document_ids": [
+        "document-tax-2025"
+      ],
+      "required_by": "2026-11-25T23:59:59Z",
+      "requested_action": null,
+      "submitted_snapshot": {
+        "fixture": true,
+        "submitted_at": "2026-11-10T17:00:00Z",
+        "application_id": "application-processing"
+      },
+      "receipt_id": "receipt-processing",
+      "version": 3,
+      "created_at": "2026-11-05T16:00:00Z",
+      "updated_at": "2026-11-12T16:00:00Z"
+    },
+    {
+      "id": "application-approved",
+      "application_type": "repayment_plan",
+      "loan_ids": [
+        "loan-4"
+      ],
+      "estimate_id": "estimate-seed-3",
+      "selected_plan_id": "plan-standard",
+      "status": "approved",
+      "attestations": {
+        "information_accurate": true,
+        "electronic_signature": true
+      },
+      "consent_status": "granted",
+      "income_snapshot_id": "income-2025",
+      "document_ids": [],
+      "required_by": null,
+      "requested_action": null,
+      "submitted_snapshot": {
+        "fixture": true,
+        "submitted_at": "2026-11-10T17:00:00Z",
+        "application_id": "application-approved"
+      },
+      "receipt_id": "receipt-approved",
+      "version": 4,
+      "created_at": "2026-10-01T16:00:00Z",
+      "updated_at": "2026-10-09T16:00:00Z"
+    },
+    {
+      "id": "application-denied",
+      "application_type": "repayment_plan",
+      "loan_ids": [
+        "loan-5"
+      ],
+      "estimate_id": "estimate-seed-4",
+      "selected_plan_id": "plan-family",
+      "status": "denied",
+      "attestations": {
+        "information_accurate": true,
+        "electronic_signature": true
+      },
+      "consent_status": "granted",
+      "income_snapshot_id": "income-2024",
+      "document_ids": [],
+      "required_by": null,
+      "requested_action": null,
+      "submitted_snapshot": {
+        "fixture": true,
+        "submitted_at": "2026-11-10T17:00:00Z",
+        "application_id": "application-denied"
+      },
+      "receipt_id": "receipt-denied",
+      "version": 3,
+      "created_at": "2026-09-02T16:00:00Z",
+      "updated_at": "2026-09-08T16:00:00Z"
+    },
+    {
+      "id": "application-needs-info",
+      "application_type": "annual_recertification",
+      "loan_ids": [
+        "loan-6"
+      ],
+      "estimate_id": "estimate-seed-5",
+      "selected_plan_id": "plan-horizon",
+      "status": "needs_information",
+      "attestations": {
+        "information_accurate": true,
+        "electronic_signature": true
+      },
+      "consent_status": "declined",
+      "income_snapshot_id": "income-reduced",
+      "document_ids": [],
+      "required_by": "2026-11-30T23:59:59Z",
+      "requested_action": "Add current income-document metadata by the deadline.",
+      "submitted_snapshot": {
+        "fixture": true,
+        "submitted_at": "2026-11-10T17:00:00Z",
+        "application_id": "application-needs-info"
+      },
+      "receipt_id": "receipt-needs-info",
+      "version": 3,
+      "created_at": "2026-11-01T16:00:00Z",
+      "updated_at": "2026-11-16T16:00:00Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "document-tax-2025",
+      "application_id": "application-processing",
+      "filename": "synthetic-2025-tax-return.pdf",
+      "document_type": "tax_return",
+      "tax_period": "2025",
+      "checksum_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "submitted_at": "2026-11-10T16:00:00Z",
+      "metadata_only": true
+    }
+  ],
+  "notices": [
+    {
+      "id": "notice-receipt",
+      "kind": "application_receipt",
+      "loan_id": null,
+      "application_id": "application-processing",
+      "title": "Recertification received",
+      "body": "Brightpath received the synthetic annual recertification.",
+      "next_action": "Track processing in Brightpath.",
+      "created_at": "2026-11-10T17:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-decision",
+      "kind": "application_decision",
+      "loan_id": null,
+      "application_id": "application-approved",
+      "title": "Application approved",
+      "body": "The selected fictional standard plan was approved.",
+      "next_action": "Review the updated payment schedule.",
+      "created_at": "2026-10-09T16:00:00Z",
+      "acknowledged_at": "2026-10-10T16:00:00Z",
+      "version": 2,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-missing-info",
+      "kind": "document_request",
+      "loan_id": "loan-6",
+      "application_id": "application-needs-info",
+      "title": "Income information requested",
+      "body": "Add current income-document metadata before 2026-11-30.",
+      "next_action": "Add document metadata in the application view.",
+      "created_at": "2026-11-16T16:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-payment-failed",
+      "kind": "payment_status",
+      "loan_id": "loan-3",
+      "application_id": null,
+      "title": "Payment failed",
+      "body": "A synthetic scheduled payment failed; no completed payment was recorded.",
+      "next_action": "Review the delinquent loan and contact Harbor Loan Support.",
+      "created_at": "2026-11-15T16:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-deferment",
+      "kind": "repayment_status",
+      "loan_id": "loan-5",
+      "application_id": null,
+      "title": "Deferment active",
+      "body": "Loan loan-5 is in a synthetic deferment period.",
+      "next_action": "Review the status before its next event.",
+      "created_at": "2026-10-20T16:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-transfer",
+      "kind": "servicer_transfer",
+      "loan_id": "loan-7",
+      "application_id": null,
+      "title": "Servicer transfer complete",
+      "body": "Loan loan-7 moved to Cascade Education Services.",
+      "next_action": "Review the new servicer and due-date history.",
+      "created_at": "2026-10-15T16:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-denial",
+      "kind": "application_decision",
+      "loan_id": null,
+      "application_id": "application-denied",
+      "title": "Application denied",
+      "body": "The fictional policy check did not accept this application.",
+      "next_action": "Compare other eligible plans.",
+      "created_at": "2026-09-08T16:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    },
+    {
+      "id": "notice-untrusted",
+      "kind": "general",
+      "loan_id": "loan-1",
+      "application_id": null,
+      "title": "Account message",
+      "body": "Untrusted text stays literal: <img src=x onerror=\"window.injected=true\">",
+      "next_action": "No action is required.",
+      "created_at": "2026-11-17T17:00:00Z",
+      "acknowledged_at": null,
+      "version": 1,
+      "email_status": "not_prepared",
+      "email_request_id": null,
+      "email_receipt_id": null,
+      "email_message": null,
+      "delivery_attempts": 0,
+      "reconciliation_required": false
+    }
+  ],
+  "history": [
+    {
+      "id": "history-01",
+      "at": "2026-09-01T16:00:00Z",
+      "action": "repayment_started",
+      "loan_id": "loan-1",
+      "application_id": null,
+      "servicer_id": "servicer-cascade",
+      "summary": "Synthetic repayment history loaded.",
+      "event_id": null
+    },
+    {
+      "id": "history-02",
+      "at": "2026-09-01T16:00:00Z",
+      "action": "repayment_started",
+      "loan_id": "loan-2",
+      "application_id": null,
+      "servicer_id": "servicer-cascade",
+      "summary": "Synthetic repayment history loaded.",
+      "event_id": null
+    },
+    {
+      "id": "history-03",
+      "at": "2026-11-15T16:00:00Z",
+      "action": "payment_status_changed",
+      "loan_id": "loan-3",
+      "application_id": null,
+      "servicer_id": "servicer-harbor",
+      "summary": "Synthetic payment failed; no payment completion recorded.",
+      "event_id": "fixture-payment-failed"
+    },
+    {
+      "id": "history-04",
+      "at": "2026-10-20T16:00:00Z",
+      "action": "repayment_status_changed",
+      "loan_id": "loan-5",
+      "application_id": null,
+      "servicer_id": "servicer-prairie",
+      "summary": "Synthetic deferment began.",
+      "event_id": "fixture-deferment"
+    },
+    {
+      "id": "history-05",
+      "at": "2026-10-15T16:00:00Z",
+      "action": "servicer_transfer_completed",
+      "loan_id": "loan-7",
+      "application_id": null,
+      "servicer_id": "servicer-cascade",
+      "summary": "Transferred from Prairie Student Accounts to Cascade Education Services.",
+      "event_id": "fixture-transfer"
+    },
+    {
+      "id": "history-06",
+      "at": "2026-11-17T16:00:00Z",
+      "action": "application_created",
+      "loan_id": null,
+      "application_id": "application-draft",
+      "servicer_id": null,
+      "summary": "Draft plan application created.",
+      "event_id": null
+    },
+    {
+      "id": "history-07",
+      "at": "2026-11-10T17:00:00Z",
+      "action": "application_submitted",
+      "loan_id": null,
+      "application_id": "application-processing",
+      "servicer_id": null,
+      "summary": "Annual recertification submitted.",
+      "event_id": null
+    },
+    {
+      "id": "history-08",
+      "at": "2026-11-12T16:00:00Z",
+      "action": "application_status_changed",
+      "loan_id": null,
+      "application_id": "application-processing",
+      "servicer_id": null,
+      "summary": "Application moved to processing.",
+      "event_id": "fixture-processing"
+    },
+    {
+      "id": "history-09",
+      "at": "2026-10-09T16:00:00Z",
+      "action": "application_status_changed",
+      "loan_id": null,
+      "application_id": "application-approved",
+      "servicer_id": null,
+      "summary": "Application approved.",
+      "event_id": "fixture-approved"
+    },
+    {
+      "id": "history-10",
+      "at": "2026-09-08T16:00:00Z",
+      "action": "application_status_changed",
+      "loan_id": null,
+      "application_id": "application-denied",
+      "servicer_id": null,
+      "summary": "Application denied by fictional policy.",
+      "event_id": "fixture-denied"
+    },
+    {
+      "id": "history-11",
+      "at": "2026-11-16T16:00:00Z",
+      "action": "application_status_changed",
+      "loan_id": null,
+      "application_id": "application-needs-info",
+      "servicer_id": null,
+      "summary": "Current income information requested.",
+      "event_id": "fixture-needs-info"
+    }
+  ],
+  "processed_event_ids": []
+}
