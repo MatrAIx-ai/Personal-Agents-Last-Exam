@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "refund-only-returns-v1",
+  "version": "0.1.0",
+  "description": "Independent fictional smoke fixture. See evaluation/dataset.json and coverage.json for the separate full-window synthetic evaluation package.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Independently authored synthetic records; no real product catalog, policy or customer data.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Manual fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Deterministic synthetic IDs, fixed minor-unit amounts and UTC timestamps."
+  ],
+  "expected_counts": {
+    "records": 10,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Smoke fixtures are hand-authored; the evaluation dataset is independently generated. Xiao Cui (@2018cx) is responsible for human provenance and license review; no reviewer approval is asserted."
+  }
+}

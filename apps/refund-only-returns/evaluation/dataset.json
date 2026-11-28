@@ -1,0 +1,48 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "refund-only-returns-evaluation-v2",
+  "version": "2.1.0",
+  "description": "Synthetic evaluation history materialized as of 2026-12-31T23:59:59.000Z.",
+  "record_source_ids": [
+    "synthetic-evaluation"
+  ],
+  "sources": [
+    {
+      "source_id": "synthetic-evaluation",
+      "kind": "synthetic",
+      "description": "Original fictional product names, prices, and order/request episodes. No external records or media.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic_rule_based",
+        "tool": "evaluation/recount.cjs",
+        "tool_version": "2.1.0",
+        "seed": "0x2b8d9061",
+        "parameters": {
+          "counting_zone": "UTC",
+          "return_window_days": 30,
+          "as_of": "2026-12-31T23:59:59.000Z"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Cutoff filters future orders and submissions, then projects each submitted request to the latest known status."
+  ],
+  "expected_counts": {
+    "records": 81,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Xiao Cui (@2018cx) is responsible for human provenance and license review."
+  }
+}

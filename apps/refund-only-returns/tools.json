@@ -1,0 +1,1436 @@
+[
+  {
+    "name": "refund-only-returns.lookup_order",
+    "description": "Look up a synthetic order by stable ID or order number, with or without the leading #.",
+    "read_only": true,
+    "scope": "refund-only-returns.lookup_order",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9][-A-Za-z0-9_]{0,79}|#[0-9]{5,12})$",
+          "description": "Exact stable order ID or the order number shown to the shopper; a leading # is optional for a numeric order number."
+        }
+      },
+      "required": [
+        "order_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "refund-only-returns.read_order",
+    "description": "Read a synthetic order, its policy, and requests by stable ID or order number, with or without the leading #.",
+    "read_only": true,
+    "scope": "refund-only-returns.read_order",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9][-A-Za-z0-9_]{0,79}|#[0-9]{5,12})$",
+          "description": "Exact stable order ID or the order number shown to the shopper; a leading # is optional for a numeric order number."
+        }
+      },
+      "required": [
+        "order_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        },
+        "merchant": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            }
+          },
+          "required": [
+            "id",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "summary"
+          ],
+          "additionalProperties": false
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "order_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "discarded",
+                  "confirmed",
+                  "cancelled",
+                  "dispatched"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 256
+              },
+              "submitted_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "order_id",
+              "status",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "order",
+        "merchant",
+        "policy",
+        "requests"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "refund-only-returns.read_request",
+    "description": "Read current synthetic request status",
+    "read_only": true,
+    "scope": "refund-only-returns.read_request",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "refund_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Stable refund request ID returned by the preview or order read; do not use the order ID."
+        }
+      },
+      "required": [
+        "refund_request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "order_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "discarded",
+                "confirmed",
+                "cancelled",
+                "dispatched"
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "attempt": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "order_id",
+            "status",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "request",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "refund-only-returns.prepare_preview",
+    "description": "Prepare a refund preview for a synthetic order by stable ID or order number, with or without the leading #.",
+    "read_only": false,
+    "scope": "refund-only-returns.prepare_preview",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9][-A-Za-z0-9_]{0,79}|#[0-9]{5,12})$",
+          "description": "Exact stable order ID or the order number shown to the shopper; a leading # is optional for a numeric order number."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Copy both epoch and revision from a recent read. On stale_version, read again and re-check the action before preparing a new write."
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Choose a fresh unique idempotency key for each new write. Reuse the same key and identical arguments only when retrying an unacknowledged submission."
+        }
+      },
+      "required": [
+        "order_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "order_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "discarded",
+                "confirmed",
+                "cancelled",
+                "dispatched"
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "attempt": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "order_id",
+            "status",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "request",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "refund-only-returns.discard_preview",
+    "description": "Discard an open preview",
+    "read_only": false,
+    "scope": "refund-only-returns.discard_preview",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "refund_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Stable refund request ID returned by the preview or order read; do not use the order ID."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Copy both epoch and revision from a recent read. On stale_version, read again and re-check the action before preparing a new write."
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Choose a fresh unique idempotency key for each new write. Reuse the same key and identical arguments only when retrying an unacknowledged submission."
+        }
+      },
+      "required": [
+        "refund_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "order_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "discarded",
+                "confirmed",
+                "cancelled",
+                "dispatched"
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "attempt": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "order_id",
+            "status",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "request",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "refund-only-returns.confirm_request",
+    "description": "Record synthetic request; never executes a refund",
+    "read_only": false,
+    "scope": "refund-only-returns.confirm_request",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "refund_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Stable refund request ID returned by the preview or order read; do not use the order ID."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Copy both epoch and revision from a recent read. On stale_version, read again and re-check the action before preparing a new write."
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Choose a fresh unique idempotency key for each new write. Reuse the same key and identical arguments only when retrying an unacknowledged submission."
+        }
+      },
+      "required": [
+        "refund_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "order_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "discarded",
+                "confirmed",
+                "cancelled",
+                "dispatched"
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "attempt": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "order_id",
+            "status",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "request",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "refund-only-returns.cancel_request",
+    "description": "Cancel an accepted request before dispatch",
+    "read_only": false,
+    "scope": "refund-only-returns.cancel_request",
+    "resource_target": "bound synthetic shopper account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "refund_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Stable refund request ID returned by the preview or order read; do not use the order ID."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Copy both epoch and revision from a recent read. On stale_version, read again and re-check the action before preparing a new write."
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$",
+          "description": "Choose a fresh unique idempotency key for each new write. Reuse the same key and identical arguments only when retrying an unacknowledged submission."
+        }
+      },
+      "required": [
+        "refund_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "committed"
+          ]
+        },
+        "app_id": {
+          "type": "string",
+          "enum": [
+            "refund-only-returns"
+          ]
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "order_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "discarded",
+                "confirmed",
+                "cancelled",
+                "dispatched"
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "attempt": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "order_id",
+            "status",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "item_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][-A-Za-z0-9_]{0,79}$"
+            },
+            "ordered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "return_deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "refund_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "CNY"
+              ]
+            },
+            "refundable": {
+              "type": "boolean"
+            },
+            "deadline_passed": {
+              "type": "boolean"
+            },
+            "eligibility": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "expired",
+                "ineligible",
+                "already_requested"
+              ]
+            },
+            "order_number": {
+              "type": "string",
+              "pattern": "^[0-9]{5,12}$"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "item_name",
+            "policy_id",
+            "ordered_at",
+            "return_deadline",
+            "refund_minor",
+            "currency",
+            "refundable",
+            "deadline_passed",
+            "eligibility"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "virtual_now",
+        "request",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
